@@ -50,11 +50,6 @@ module.exports.indentationFilter = [
 	'!test/automation/out/**',
 	'!test/monaco/out/**',
 	'!test/smoke/out/**',
-	'!extensions/typescript-language-features/test-workspace/**',
-	'!extensions/markdown-math/notebook-out/**',
-	'!extensions/vscode-api-tests/testWorkspace/**',
-	'!extensions/vscode-api-tests/testWorkspace2/**',
-	'!extensions/vscode-custom-editor-tests/test-workspace/**',
 	'!build/monaco/**',
 	'!build/win32/**',
 
@@ -87,10 +82,6 @@ module.exports.indentationFilter = [
 	'!**/Dockerfile.*',
 	'!**/*.Dockerfile',
 	'!**/*.dockerfile',
-	'!extensions/markdown-language-features/media/*.js',
-	'!extensions/markdown-language-features/notebook-out/*.js',
-	'!extensions/markdown-math/notebook-out/*.js',
-	'!extensions/simple-browser/media/*.js',
 ];
 
 module.exports.copyrightFilter = [
@@ -118,11 +109,6 @@ module.exports.copyrightFilter = [
 	'!resources/win32/bin/code.js',
 	'!resources/web/code-web.js',
 	'!resources/completions/**',
-	'!extensions/configuration-editing/build/inline-allOf.ts',
-	'!extensions/markdown-language-features/media/highlight.css',
-	'!extensions/markdown-math/notebook-out/**',
-	'!extensions/html-language-features/server/src/modes/typescript/*',
-	'!extensions/*/server/bin/*',
 	'!src/vs/editor/test/node/classification/typescript-test.ts',
 ];
 
@@ -151,8 +137,5 @@ module.exports.tsHygieneFilter = [
 	'!**/typings/**',
 	'!**/node_modules/**',
 	'!extensions/**/colorize-fixtures/**',
-	'!extensions/vscode-api-tests/testWorkspace/**',
-	'!extensions/vscode-api-tests/testWorkspace2/**',
 	'!extensions/**/*.test.ts',
-	'!extensions/html-language-features/server/lib/jquery.d.ts',
 ];
