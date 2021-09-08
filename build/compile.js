@@ -14,3 +14,8 @@ Execa.sync("tsc", [], {
 });
 
 console.log("Copying remaining artefacts...");
+FS.cpSync("./src/askpass-empty.sh", "./dist/askpass-empty.sh");
+FS.cpSync("./src/askpass.sh", "./dist/askpass.sh");
+
+console.log("Removing non-public files...")
+FS.rmSync("./dist/test", { recursive: true, force: true });
