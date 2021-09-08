@@ -3,5 +3,5 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-/// <reference path='../../../../src/vs/vscode.proposed.d.ts'/>
-/// <reference path="../../../types/lib.textEncoder.d.ts" />
+/// <reference path='./vscode.proposed.d.ts'/>
+/// <reference path="./lib.textEncoder.d.ts" />
