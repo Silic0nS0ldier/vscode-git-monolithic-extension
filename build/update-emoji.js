@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const fs = require('fs');
-const https = require('https');
-const path = require('path');
+// TODO Fix
+
+import FS from "node:fs";
+import HTTPS from "node:https";
+import PATH from "node:path";
 
 async function generate() {
 	/**
@@ -29,7 +30,7 @@ async function generate() {
 		 * @type {Record<string, string | string[]>}}
 		 */
 		// eslint-disable-next-line import/no-dynamic-require
-		const data = require(path.join(process.cwd(), file));
+		const data = require(PATH.join(process.cwd(), file));
 		for (const [emojis, codes] of Object.entries(data)) {
 			const emoji = emojis
 				.split('-')
@@ -44,7 +45,7 @@ async function generate() {
 			}
 		}
 
-		fs.unlink(file, () => { });
+		FS.unlink(file, () => { });
 	}
 
 	// Get gitmoji data from https://github.com/carloscuesta/gitmoji
@@ -58,7 +59,7 @@ async function generate() {
 	 * @type {({ code: string; emoji: string })[]}
 	 */
 	// eslint-disable-next-line import/no-dynamic-require
-	const gitmojis = require(path.join(process.cwd(), 'gitmojis.json')).gitmojis;
+	const gitmojis = require(PATH.join(process.cwd(), 'gitmojis.json')).gitmojis;
 	for (const emoji of gitmojis) {
 		if (emoji.code.startsWith(':') && emoji.code.endsWith(':')) {
 			emoji.code = emoji.code.substring(1, emoji.code.length - 2);
@@ -71,7 +72,7 @@ async function generate() {
 		shortcodeMap.set(emoji.code, emoji.emoji);
 	}
 
-	fs.unlink('gitmojis.json', () => { });
+	FS.unlink('gitmojis.json', () => { });
 
 	// Sort the emojis for easier diff checking
 	const list = [...shortcodeMap.entries()];
@@ -82,13 +83,13 @@ async function generate() {
 		return m;
 	}, Object.create(null));
 
-	fs.writeFileSync(path.join(process.cwd(), 'resources/emojis.json'), JSON.stringify(map), 'utf8');
+	FS.writeFileSync(PATH.join(process.cwd(), 'resources/emojis.json'), JSON.stringify(map), 'utf8');
 }
 
 function download(url, destination) {
 	return new Promise(resolve => {
-		const stream = fs.createWriteStream(destination);
-		https.get(url, rsp => {
+		const stream = FS.createWriteStream(destination);
+		HTTPS.get(url, rsp => {
 			rsp.pipe(stream);
 			stream.on('finish', () => {
 				stream.close();
