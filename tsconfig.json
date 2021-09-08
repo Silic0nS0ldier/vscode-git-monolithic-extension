@@ -33,7 +33,7 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"forceConsistentCasingInFileNames": true,
-		"outDir": "./out",
+		"outDir": "./dist",
 		"experimentalDecorators": true,
 		"typeRoots": [
 			"./node_modules/@types"

@@ -6,7 +6,7 @@
   "license": "MIT",
   "version": "1.0.0",
   "engines": {
-    "vscode": "^1.5.0"
+    "vscode": "^1.60.0"
   },
   "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
   "enableProposedApi": true,
@@ -17,12 +17,13 @@
     "*",
     "onFileSystem:git"
   ],
-  "main": "./out/main",
+  "main": "./dist/main.js",
   "icon": "resources/icons/git.png",
   "scripts": {
-    "compile": "del-cli out && tsc && cpy 'src/*.sh' out",
+    "compile": "del-cli dist && tsc && cpy 'src/*.sh' dist",
     "update-emoji": "node ./build/update-emoji.js",
-    "update-grammar": "node ./build/update-grammars.js"
+    "update-grammar": "node ./build/update-grammars.js",
+    "vsce": "vsce"
   },
   "capabilities": {
     "virtualWorkspaces": true,
@@ -2395,7 +2396,8 @@
     "@types/which": "^1.0.28",
     "cpy-cli": "^3.1.1",
     "del-cli": "^4.0.1",
-    "typescript": "^4.4.2"
+    "typescript": "^4.4.2",
+    "vsce": "^1.97.0"
   },
   "repository": {
     "type": "git",
