@@ -47,10 +47,18 @@ export class ApiRepositoryState implements RepositoryState {
 
 export class ApiRepositoryUIState implements RepositoryUIState {
 
-	get selected(): boolean { return this._sourceControl.selected; }
+	get selected(): boolean {
+		return false;
+		//return this._sourceControl.selected;
+	}
 
-	readonly onDidChange: Event<void> = mapEvent<boolean, void>(this._sourceControl.onDidChangeSelection, () => null);
+	readonly onDidChange: Event<void> = mapEvent<boolean, void>(
+		() => ({ dispose() {} }),
+		//this._sourceControl.onDidChangeSelection,
+		() => null,
+	);
 
+	// @ts-expect-error
 	constructor(private _sourceControl: SourceControl) { }
 }
 

@@ -5,7 +5,8 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import { Command, commands, Disposable, LineChange, MessageOptions, OutputChannel, Position, ProgressLocation, QuickPickItem, Range, SourceControlResourceState, TextDocumentShowOptions, TextEditor, Uri, ViewColumn, window, workspace, WorkspaceEdit, WorkspaceFolder, TimelineItem, env, Selection, TextDocumentContentProvider } from 'vscode';
+import { commands, Disposable, MessageOptions, OutputChannel, Position, ProgressLocation, QuickPickItem, Range, SourceControlResourceState, TextDocumentShowOptions, TextEditor, Uri, ViewColumn, window, workspace, WorkspaceEdit, WorkspaceFolder, Selection, TextDocumentContentProvider } from 'vscode';
+import { LineChange } from "./interface-patches/vscode";
 import TelemetryReporter from 'vscode-extension-telemetry';
 import * as nls from 'vscode-nls';
 import { Branch, ForcePushMode, GitErrorCodes, Ref, RefType, Status, CommitOptions, RemoteSourceProvider } from './api/git';
@@ -16,7 +17,7 @@ import { applyLineChanges, getModifiedRange, intersectDiffWithRange, invertLineC
 import { fromGitUri, toGitUri, isGitUri } from './uri';
 import { grep, isDescendant, pathEquals } from './util';
 import { Log, LogLevel } from './log';
-import { GitTimelineItem } from './timelineProvider';
+// import { GitTimelineItem } from './timelineProvider';
 import { ApiRepository } from './api/api1';
 import { pickRemoteSource } from './remoteSource';
 
@@ -316,11 +317,12 @@ export class CommandCenter {
 		this.disposables = Commands.map(({ commandId, key, method, options }) => {
 			const command = this.createCommand(commandId, key, method, options);
 
-			if (options.diff) {
-				return commands.registerDiffInformationCommand(commandId, command);
-			} else {
-				return commands.registerCommand(commandId, command);
-			}
+			// if (options.diff) {
+			// 	return commands.registerDiffInformationCommand(commandId, command);
+			// } else {
+			// 	return commands.registerCommand(commandId, command);
+			// }
+			return commands.registerCommand(commandId, command);
 		});
 
 		this.disposables.push(workspace.registerTextDocumentContentProvider('git-output', this.commandErrors));
@@ -2610,110 +2612,110 @@ export class CommandCenter {
 		return result && result.stash;
 	}
 
-	@command('git.timeline.openDiff', { repository: false })
-	async timelineOpenDiff(item: TimelineItem, uri: Uri | undefined, _source: string) {
-		const cmd = this.resolveTimelineOpenDiffCommand(
-			item, uri,
-			{
-				preserveFocus: true,
-				preview: true,
-				viewColumn: ViewColumn.Active
-			},
-		);
-		if (cmd === undefined) {
-			return undefined;
-		}
+	// @command('git.timeline.openDiff', { repository: false })
+	// async timelineOpenDiff(item: TimelineItem, uri: Uri | undefined, _source: string) {
+	// 	const cmd = this.resolveTimelineOpenDiffCommand(
+	// 		item, uri,
+	// 		{
+	// 			preserveFocus: true,
+	// 			preview: true,
+	// 			viewColumn: ViewColumn.Active
+	// 		},
+	// 	);
+	// 	if (cmd === undefined) {
+	// 		return undefined;
+	// 	}
 
-		return commands.executeCommand(cmd.command, ...(cmd.arguments ?? []));
-	}
+	// 	return commands.executeCommand(cmd.command, ...(cmd.arguments ?? []));
+	// }
 
-	resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
-		if (uri === undefined || uri === null || !GitTimelineItem.is(item)) {
-			return undefined;
-		}
+	// resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
+	// 	if (uri === undefined || uri === null || !GitTimelineItem.is(item)) {
+	// 		return undefined;
+	// 	}
 
-		const basename = path.basename(uri.fsPath);
+	// 	const basename = path.basename(uri.fsPath);
 
-		let title;
-		if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
-			title = localize('git.title.workingTree', '{0} (Working Tree)', basename);
-		}
-		else if (item.previousRef === 'HEAD' && item.ref === '~') {
-			title = localize('git.title.index', '{0} (Index)', basename);
-		} else {
-			title = localize('git.title.diffRefs', '{0} ({1}) ⟷ {0} ({2})', basename, item.shortPreviousRef, item.shortRef);
-		}
+	// 	let title;
+	// 	if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
+	// 		title = localize('git.title.workingTree', '{0} (Working Tree)', basename);
+	// 	}
+	// 	else if (item.previousRef === 'HEAD' && item.ref === '~') {
+	// 		title = localize('git.title.index', '{0} (Index)', basename);
+	// 	} else {
+	// 		title = localize('git.title.diffRefs', '{0} ({1}) ⟷ {0} ({2})', basename, item.shortPreviousRef, item.shortRef);
+	// 	}
 
-		return {
-			command: 'vscode.diff',
-			title: 'Open Comparison',
-			arguments: [toGitUri(uri, item.previousRef), item.ref === '' ? uri : toGitUri(uri, item.ref), title, options]
-		};
-	}
+	// 	return {
+	// 		command: 'vscode.diff',
+	// 		title: 'Open Comparison',
+	// 		arguments: [toGitUri(uri, item.previousRef), item.ref === '' ? uri : toGitUri(uri, item.ref), title, options]
+	// 	};
+	// }
 
-	@command('git.timeline.copyCommitId', { repository: false })
-	async timelineCopyCommitId(item: TimelineItem, _uri: Uri | undefined, _source: string) {
-		if (!GitTimelineItem.is(item)) {
-			return;
-		}
+	// @command('git.timeline.copyCommitId', { repository: false })
+	// async timelineCopyCommitId(item: TimelineItem, _uri: Uri | undefined, _source: string) {
+	// 	if (!GitTimelineItem.is(item)) {
+	// 		return;
+	// 	}
 
-		env.clipboard.writeText(item.ref);
-	}
+	// 	env.clipboard.writeText(item.ref);
+	// }
 
-	@command('git.timeline.copyCommitMessage', { repository: false })
-	async timelineCopyCommitMessage(item: TimelineItem, _uri: Uri | undefined, _source: string) {
-		if (!GitTimelineItem.is(item)) {
-			return;
-		}
+	// @command('git.timeline.copyCommitMessage', { repository: false })
+	// async timelineCopyCommitMessage(item: TimelineItem, _uri: Uri | undefined, _source: string) {
+	// 	if (!GitTimelineItem.is(item)) {
+	// 		return;
+	// 	}
 
-		env.clipboard.writeText(item.message);
-	}
+	// 	env.clipboard.writeText(item.message);
+	// }
 
-	private _selectedForCompare: { uri: Uri, item: GitTimelineItem } | undefined;
+	// private _selectedForCompare: { uri: Uri, item: GitTimelineItem } | undefined;
 
-	@command('git.timeline.selectForCompare', { repository: false })
-	async timelineSelectForCompare(item: TimelineItem, uri: Uri | undefined, _source: string) {
-		if (!GitTimelineItem.is(item) || !uri) {
-			return;
-		}
+	// @command('git.timeline.selectForCompare', { repository: false })
+	// async timelineSelectForCompare(item: TimelineItem, uri: Uri | undefined, _source: string) {
+	// 	if (!GitTimelineItem.is(item) || !uri) {
+	// 		return;
+	// 	}
 
-		this._selectedForCompare = { uri, item };
-		await commands.executeCommand('setContext', 'git.timeline.selectedForCompare', true);
-	}
+	// 	this._selectedForCompare = { uri, item };
+	// 	await commands.executeCommand('setContext', 'git.timeline.selectedForCompare', true);
+	// }
 
-	@command('git.timeline.compareWithSelected', { repository: false })
-	async timelineCompareWithSelected(item: TimelineItem, uri: Uri | undefined, _source: string) {
-		if (!GitTimelineItem.is(item) || !uri || !this._selectedForCompare || uri.toString() !== this._selectedForCompare.uri.toString()) {
-			return;
-		}
+	// @command('git.timeline.compareWithSelected', { repository: false })
+	// async timelineCompareWithSelected(item: TimelineItem, uri: Uri | undefined, _source: string) {
+	// 	if (!GitTimelineItem.is(item) || !uri || !this._selectedForCompare || uri.toString() !== this._selectedForCompare.uri.toString()) {
+	// 		return;
+	// 	}
 
-		const { item: selected } = this._selectedForCompare;
+	// 	const { item: selected } = this._selectedForCompare;
 
-		const basename = path.basename(uri.fsPath);
-		let leftTitle;
-		if ((selected.previousRef === 'HEAD' || selected.previousRef === '~') && selected.ref === '') {
-			leftTitle = localize('git.title.workingTree', '{0} (Working Tree)', basename);
-		}
-		else if (selected.previousRef === 'HEAD' && selected.ref === '~') {
-			leftTitle = localize('git.title.index', '{0} (Index)', basename);
-		} else {
-			leftTitle = localize('git.title.ref', '{0} ({1})', basename, selected.shortRef);
-		}
+	// 	const basename = path.basename(uri.fsPath);
+	// 	let leftTitle;
+	// 	if ((selected.previousRef === 'HEAD' || selected.previousRef === '~') && selected.ref === '') {
+	// 		leftTitle = localize('git.title.workingTree', '{0} (Working Tree)', basename);
+	// 	}
+	// 	else if (selected.previousRef === 'HEAD' && selected.ref === '~') {
+	// 		leftTitle = localize('git.title.index', '{0} (Index)', basename);
+	// 	} else {
+	// 		leftTitle = localize('git.title.ref', '{0} ({1})', basename, selected.shortRef);
+	// 	}
 
-		let rightTitle;
-		if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
-			rightTitle = localize('git.title.workingTree', '{0} (Working Tree)', basename);
-		}
-		else if (item.previousRef === 'HEAD' && item.ref === '~') {
-			rightTitle = localize('git.title.index', '{0} (Index)', basename);
-		} else {
-			rightTitle = localize('git.title.ref', '{0} ({1})', basename, item.shortRef);
-		}
+	// 	let rightTitle;
+	// 	if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
+	// 		rightTitle = localize('git.title.workingTree', '{0} (Working Tree)', basename);
+	// 	}
+	// 	else if (item.previousRef === 'HEAD' && item.ref === '~') {
+	// 		rightTitle = localize('git.title.index', '{0} (Index)', basename);
+	// 	} else {
+	// 		rightTitle = localize('git.title.ref', '{0} ({1})', basename, item.shortRef);
+	// 	}
 
 
-		const title = localize('git.title.diff', '{0} ⟷ {1}', leftTitle, rightTitle);
-		await commands.executeCommand('vscode.diff', selected.ref === '' ? uri : toGitUri(uri, selected.ref), item.ref === '' ? uri : toGitUri(uri, item.ref), title);
-	}
+	// 	const title = localize('git.title.diff', '{0} ⟷ {1}', leftTitle, rightTitle);
+	// 	await commands.executeCommand('vscode.diff', selected.ref === '' ? uri : toGitUri(uri, selected.ref), item.ref === '' ? uri : toGitUri(uri, item.ref), title);
+	// }
 
 	@command('git.rebaseAbort', { repository: true })
 	async rebaseAbort(repository: Repository): Promise<void> {

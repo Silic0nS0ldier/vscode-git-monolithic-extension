@@ -1,6 +1,6 @@
 {
-	"displayName": "Git",
-	"description": "Git SCM Integration",
+	"displayName": "Git Monolithic",
+	"description": "Git SCM Integration for Monolithic Repos",
 	"command.setLogLevel": "Set Log Level...",
 	"command.clone": "Clone",
 	"command.cloneRecursive": "Clone (Recursive)",

@@ -5,7 +5,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, OutputChannel, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox, SourceControlInputBoxValidation, SourceControlInputBoxValidationType, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands } from 'vscode';
+import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, OutputChannel, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands } from 'vscode';
+import { SourceControlInputBoxValidation, SourceControlInputBoxValidationType } from './interface-patches/vscode';
 import * as nls from 'vscode-nls';
 import { Branch, Change, ForcePushMode, GitErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, BranchQuery, FetchOptions } from './api/git';
 import { AutoFetcher } from './autofetch';
@@ -895,7 +896,7 @@ export class Repository implements Disposable {
 
 		this._sourceControl.acceptInputCommand = { command: 'git.commit', title: localize('commit', "Commit"), arguments: [this._sourceControl] };
 		this._sourceControl.quickDiffProvider = this;
-		this._sourceControl.inputBox.validateInput = this.validateInput.bind(this);
+		//this._sourceControl.inputBox.validateInput = this.validateInput.bind(this);
 		this.disposables.push(this._sourceControl);
 
 		this.updateInputBoxPlaceholder();

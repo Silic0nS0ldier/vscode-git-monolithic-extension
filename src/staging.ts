@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { TextDocument, Range, LineChange, Selection } from 'vscode';
+import { TextDocument, Range, Selection } from 'vscode';
+import { LineChange } from "./interface-patches/vscode";
 
 export function applyLineChanges(original: TextDocument, modified: TextDocument, diffs: LineChange[]): string {
 	const result: string[] = [];
