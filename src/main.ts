@@ -158,6 +158,7 @@ async function warnAboutMissingGit(): Promise<void> {
 }
 
 export async function _activate(context: ExtensionContext): Promise<GitExtensionImpl> {
+	console.warn('git ext starting');
 	const disposables: Disposable[] = [];
 	context.subscriptions.push(new Disposable(() => Disposable.from(...disposables).dispose()));
 
@@ -165,8 +166,14 @@ export async function _activate(context: ExtensionContext): Promise<GitExtension
 	commands.registerCommand('git.showOutput', () => outputChannel.show());
 	disposables.push(outputChannel);
 
-	const { name, version, aiKey } = require('../package.json') as { name: string, version: string, aiKey: string };
-	const telemetryReporter = new TelemetryReporter(name, version, aiKey);
+	// Repoter disabled, for now
+	// const { name, version, aiKey } = require('../package.json') as { name: string, version: string, aiKey: string };
+	// const telemetryReporter = new TelemetryReporter(name, version, aiKey);
+	const telemetryReporter = new Proxy<TelemetryReporter>({} as any, {
+		get() {
+			return () => {};
+		}
+	});
 	deactivateTasks.push(() => telemetryReporter.dispose());
 
 	const config = workspace.getConfiguration('git', null);
