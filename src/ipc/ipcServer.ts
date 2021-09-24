@@ -5,11 +5,11 @@
 
 import { Disposable } from 'vscode';
 import { toDisposable } from '../util.js';
-import * as path from 'path';
-import * as http from 'http';
-import * as os from 'os';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
+import * as path from 'node:path';
+import * as http from 'node:http';
+import * as os from 'node:os';
+import * as fs from 'node:fs';
+import * as crypto from 'node:crypto';
 
 function getIPCHandlePath(id: string): string {
 	if (process.platform === 'win32') {

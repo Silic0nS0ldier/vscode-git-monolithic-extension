@@ -5,7 +5,7 @@
 
 import 'mocha';
 import { GitStatusParser, parseGitCommits, parseGitmodules, parseLsTree, parseLsFiles } from '../git.js';
-import * as assert from 'assert';
+import * as assert from 'node:assert';
 import { splitInChunks } from '../util.js';
 
 suite('git', () => {

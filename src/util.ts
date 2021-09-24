@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Event, Disposable, EventEmitter } from 'vscode';
-import { dirname, sep } from 'path';
-import { Readable } from 'stream';
-import { promises as fs, createReadStream } from 'fs';
+import { dirname, sep } from 'node:path';
+import { Readable } from 'node:stream';
+import { promises as fs, createReadStream } from 'node:fs';
 import * as byline from 'byline';
 
 export function log(...args: any[]): void {

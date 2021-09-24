@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Event, EventEmitter, Uri } from 'vscode';
-import { join } from 'path';
-import * as fs from 'fs';
+import { join } from 'node:path';
+import * as fs from 'node:fs';
 import { IDisposable } from './util.js';
 
 export interface IFileWatcher extends IDisposable {

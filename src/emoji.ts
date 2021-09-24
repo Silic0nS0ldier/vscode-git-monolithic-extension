@@ -5,7 +5,7 @@
 
 import { workspace, Uri } from 'vscode';
 import { getExtensionContext } from './main.js';
-import { TextDecoder } from 'util';
+import { TextDecoder } from 'node:util';
 
 const emojiRegex = /:([-+_a-z0-9]+):/g;
 

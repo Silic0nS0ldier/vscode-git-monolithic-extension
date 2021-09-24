@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { promises as fs, exists, realpath } from 'fs';
-import * as path from 'path';
-import * as os from 'os';
-import * as cp from 'child_process';
+import { promises as fs, exists, realpath } from 'node:fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
+import * as cp from 'node:child_process';
 import * as which from 'which';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import * as iconv from 'iconv-lite-umd';
 import * as filetype from 'file-type';
 import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, readBytes, detectUnicodeEncoding, Encoding, onceEvent, splitInChunks, Limiter, Versions } from './util.js';
@@ -16,7 +16,7 @@ import { CancellationToken, Progress, Uri } from 'vscode';
 import { detectEncoding } from './encoding.js';
 import { Ref, RefType, Branch, Remote, ForcePushMode, GitErrorCodes, LogOptions, Change, Status, CommitOptions, BranchQuery } from './api/git.js';
 import * as byline from 'byline';
-import { StringDecoder } from 'string_decoder';
+import { StringDecoder } from 'node:string_decoder';
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;

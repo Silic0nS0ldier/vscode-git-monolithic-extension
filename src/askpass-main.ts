@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import * as nls from 'vscode-nls';
 import { IPCClient } from './ipc/ipcClient.js';
 

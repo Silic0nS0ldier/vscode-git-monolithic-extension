@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { window, workspace, Uri, Disposable, Event, EventEmitter, FileDecoration, FileDecorationProvider, ThemeColor } from 'vscode';
-import * as path from 'path';
+import * as path from 'node:path';
 import { Repository, GitResourceGroup } from './repository.js';
 import { Model } from './model.js';
 import { debounce } from './decorators.js';
