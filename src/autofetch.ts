@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { workspace, Disposable, EventEmitter, Memento, window, MessageItem, ConfigurationTarget, Uri, ConfigurationChangeEvent } from 'vscode';
-import { Repository, Operation } from './repository';
-import { eventToPromise, filterEvent, onceEvent } from './util';
+import { Repository, Operation } from './repository.js';
+import { eventToPromise, filterEvent, onceEvent } from './util.js';
 import * as nls from 'vscode-nls';
-import { GitErrorCodes } from './api/git';
+import { GitErrorCodes } from './api/git.js';
 
 const localize = nls.loadMessageBundle();
 

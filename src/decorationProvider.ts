@@ -5,11 +5,11 @@
 
 import { window, workspace, Uri, Disposable, Event, EventEmitter, FileDecoration, FileDecorationProvider, ThemeColor } from 'vscode';
 import * as path from 'path';
-import { Repository, GitResourceGroup } from './repository';
-import { Model } from './model';
-import { debounce } from './decorators';
-import { filterEvent, dispose, anyEvent, fireEvent, PromiseSource } from './util';
-import { GitErrorCodes, Status } from './api/git';
+import { Repository, GitResourceGroup } from './repository.js';
+import { Model } from './model.js';
+import { debounce } from './decorators.js';
+import { filterEvent, dispose, anyEvent, fireEvent, PromiseSource } from './util.js';
+import { GitErrorCodes, Status } from './api/git.js';
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
 

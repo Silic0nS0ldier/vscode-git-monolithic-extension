@@ -6,8 +6,8 @@
 import { window, InputBoxOptions, Uri, OutputChannel, Disposable, workspace } from 'vscode';
 import { IDisposable, EmptyDisposable, toDisposable } from './util';
 import * as path from 'path';
-import { IIPCHandler, IIPCServer, createIPCServer } from './ipc/ipcServer';
-import { CredentialsProvider, Credentials } from './api/git';
+import { IIPCHandler, IIPCServer, createIPCServer } from './ipc/ipcServer.js';
+import { CredentialsProvider, Credentials } from './api/git.js';
 
 export class Askpass implements IIPCHandler {
 

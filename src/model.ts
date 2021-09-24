@@ -4,19 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { workspace, WorkspaceFoldersChangeEvent, Uri, window, Event, EventEmitter, QuickPickItem, Disposable, SourceControl, SourceControlResourceGroup, TextEditor, Memento, OutputChannel, commands } from 'vscode';
-import { Repository, RepositoryState } from './repository';
-import { memoize, sequentialize, debounce } from './decorators';
-import { dispose, anyEvent, filterEvent, isDescendant, pathEquals, toDisposable, eventToPromise } from './util';
-import { Git } from './git';
+import { Repository, RepositoryState } from './repository.js';
+import { memoize, sequentialize, debounce } from './decorators.js';
+import { dispose, anyEvent, filterEvent, isDescendant, pathEquals, toDisposable, eventToPromise } from './util.js';
+import { Git } from './git.js';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as nls from 'vscode-nls';
-import { fromGitUri } from './uri';
-import { APIState as State, RemoteSourceProvider, CredentialsProvider, PushErrorHandler, PublishEvent } from './api/git';
-import { Askpass } from './askpass';
-import { IRemoteSourceProviderRegistry } from './remoteProvider';
-import { IPushErrorHandlerRegistry } from './pushError';
-import { ApiRepository } from './api/api1';
+import { fromGitUri } from './uri.js';
+import { APIState as State, RemoteSourceProvider, CredentialsProvider, PushErrorHandler, PublishEvent } from './api/git.js';
+import { Askpass } from './askpass.js';
+import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
+import { IPushErrorHandlerRegistry } from './pushError.js';
+import { ApiRepository } from './api/api1.js';
 
 const localize = nls.loadMessageBundle();
 

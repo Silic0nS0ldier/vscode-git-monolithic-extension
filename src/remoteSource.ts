@@ -5,9 +5,9 @@
 
 import { QuickPickItem, window, QuickPick } from 'vscode';
 import * as nls from 'vscode-nls';
-import { RemoteSourceProvider, RemoteSource } from './api/git';
-import { Model } from './model';
-import { throttle, debounce } from './decorators';
+import { RemoteSourceProvider, RemoteSource } from './api/git.js';
+import { Model } from './model.js';
+import { throttle, debounce } from './decorators.js';
 
 const localize = nls.loadMessageBundle();
 

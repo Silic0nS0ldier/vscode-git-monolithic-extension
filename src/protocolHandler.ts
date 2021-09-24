@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { UriHandler, Uri, window, Disposable, commands } from 'vscode';
-import { dispose } from './util';
+import { dispose } from './util.js';
 import * as querystring from 'querystring';
 
 export class GitProtocolHandler implements UriHandler {

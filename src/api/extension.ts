@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Model } from '../model';
-import { GitExtension, Repository, API } from './git';
-import { ApiRepository, ApiImpl } from './api1';
+import { Model } from '../model.js';
+import { GitExtension, Repository, API } from './git.js';
+import { ApiRepository, ApiImpl } from './api1.js';
 import { Event, EventEmitter } from 'vscode';
 
 export function deprecated(_target: any, key: string, descriptor: any): void {

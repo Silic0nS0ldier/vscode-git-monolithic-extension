@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ExtensionContext, workspace } from 'vscode';
-import { filterEvent, IDisposable } from './util';
+import { filterEvent, IDisposable } from './util.js';
 
 export class TerminalEnvironmentManager {
 

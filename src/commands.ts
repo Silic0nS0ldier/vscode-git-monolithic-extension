@@ -9,17 +9,17 @@ import { commands, Disposable, MessageOptions, OutputChannel, Position, Progress
 import { LineChange } from "./interface-patches/vscode";
 import TelemetryReporter from 'vscode-extension-telemetry';
 import * as nls from 'vscode-nls';
-import { Branch, ForcePushMode, GitErrorCodes, Ref, RefType, Status, CommitOptions, RemoteSourceProvider } from './api/git';
-import { Git, Stash } from './git';
-import { Model } from './model';
-import { Repository, Resource, ResourceGroupType } from './repository';
-import { applyLineChanges, getModifiedRange, intersectDiffWithRange, invertLineChange, toLineRanges } from './staging';
-import { fromGitUri, toGitUri, isGitUri } from './uri';
-import { grep, isDescendant, pathEquals } from './util';
-import { Log, LogLevel } from './log';
-// import { GitTimelineItem } from './timelineProvider';
-import { ApiRepository } from './api/api1';
-import { pickRemoteSource } from './remoteSource';
+import { Branch, ForcePushMode, GitErrorCodes, Ref, RefType, Status, CommitOptions, RemoteSourceProvider } from './api/git.js';
+import { Git, Stash } from './git.js';
+import { Model } from './model.js';
+import { Repository, Resource, ResourceGroupType } from './repository.js';
+import { applyLineChanges, getModifiedRange, intersectDiffWithRange, invertLineChange, toLineRanges } from './staging.js';
+import { fromGitUri, toGitUri, isGitUri } from './uri.js';
+import { grep, isDescendant, pathEquals } from './util.js';
+import { Log, LogLevel } from './log.js';
+// import { GitTimelineItem } from './timelineProvider.js';
+import { ApiRepository } from './api/api1.js';
+import { pickRemoteSource } from './remoteSource.js';
 
 const localize = nls.loadMessageBundle();
 

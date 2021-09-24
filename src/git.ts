@@ -11,10 +11,10 @@ import * as which from 'which';
 import { EventEmitter } from 'events';
 import * as iconv from 'iconv-lite-umd';
 import * as filetype from 'file-type';
-import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, readBytes, detectUnicodeEncoding, Encoding, onceEvent, splitInChunks, Limiter, Versions } from './util';
+import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, readBytes, detectUnicodeEncoding, Encoding, onceEvent, splitInChunks, Limiter, Versions } from './util.js';
 import { CancellationToken, Progress, Uri } from 'vscode';
-import { detectEncoding } from './encoding';
-import { Ref, RefType, Branch, Remote, ForcePushMode, GitErrorCodes, LogOptions, Change, Status, CommitOptions, BranchQuery } from './api/git';
+import { detectEncoding } from './encoding.js';
+import { Ref, RefType, Branch, Remote, ForcePushMode, GitErrorCodes, LogOptions, Change, Status, CommitOptions, BranchQuery } from './api/git.js';
 import * as byline from 'byline';
 import { StringDecoder } from 'string_decoder';
 

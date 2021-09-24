@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { workspace, Uri, Disposable, Event, EventEmitter, window, FileSystemProvider, FileChangeEvent, FileStat, FileType, FileChangeType, FileSystemError } from 'vscode';
-import { debounce, throttle } from './decorators';
-import { fromGitUri, toGitUri } from './uri';
-import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from './model';
-import { filterEvent, eventToPromise, isDescendant, pathEquals, EmptyDisposable } from './util';
-import { Repository } from './repository';
+import { debounce, throttle } from './decorators.js';
+import { fromGitUri, toGitUri } from './uri.js';
+import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from './model.js';
+import { filterEvent, eventToPromise, isDescendant, pathEquals, EmptyDisposable } from './util.js';
+import { Repository } from './repository.js';
 
 interface CacheRow {
 	uri: Uri;

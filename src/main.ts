@@ -7,23 +7,23 @@ import * as nls from 'vscode-nls';
 const localize = nls.loadMessageBundle();
 
 import { env, ExtensionContext, workspace, window, Disposable, commands, Uri, OutputChannel, version as vscodeVersion, WorkspaceFolder } from 'vscode';
-import { findGit, Git, IGit } from './git';
-import { Model } from './model';
-import { CommandCenter } from './commands';
-import { GitFileSystemProvider } from './fileSystemProvider';
-import { GitDecorations } from './decorationProvider';
-import { Askpass } from './askpass';
-import { toDisposable, filterEvent, eventToPromise } from './util';
+import { findGit, Git, IGit } from './git.js';
+import { Model } from './model.js';
+import { CommandCenter } from './commands.js';
+import { GitFileSystemProvider } from './fileSystemProvider.js';
+import { GitDecorations } from './decorationProvider.js';
+import { Askpass } from './askpass.js';
+import { toDisposable, filterEvent, eventToPromise } from './util.js';
 import TelemetryReporter from 'vscode-extension-telemetry';
-import { GitExtension } from './api/git';
-import { GitProtocolHandler } from './protocolHandler';
-import { GitExtensionImpl } from './api/extension';
+import { GitExtension } from './api/git.js';
+import { GitProtocolHandler } from './protocolHandler.js';
+import { GitExtensionImpl } from './api/extension.js';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-//import { GitTimelineProvider } from './timelineProvider';
-import { registerAPICommands } from './api/api1';
-import { TerminalEnvironmentManager } from './terminal';
+//import { GitTimelineProvider } from './timelineProvider.js';
+import { registerAPICommands } from './api/api1.js';
+import { TerminalEnvironmentManager } from './terminal.js';
 
 const deactivateTasks: { (): Promise<any>; }[] = [];
 

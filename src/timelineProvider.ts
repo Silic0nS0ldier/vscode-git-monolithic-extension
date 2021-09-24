@@ -5,12 +5,12 @@
 
 // import * as nls from 'vscode-nls';
 // import { CancellationToken, ConfigurationChangeEvent, Disposable, env, Event, EventEmitter, ThemeIcon, Uri, workspace } from 'vscode';
-// import { Timeline, TimelineChangeEvent, TimelineItem, TimelineOptions, TimelineProvider } from "./interface-patches/vscode";
-// import { Model } from './model';
-// import { Repository, Resource } from './repository';
-// import { debounce } from './decorators';
-// import { emojify, ensureEmojis } from './emoji';
-// import { CommandCenter } from './commands';
+// import { Timeline, TimelineChangeEvent, TimelineItem, TimelineOptions, TimelineProvider } from "./interface-patches/vscode.js";
+// import { Model } from './model.js';
+// import { Repository, Resource } from './repository.js';
+// import { debounce } from './decorators.js';
+// import { emojify, ensureEmojis } from './emoji.js';
+// import { CommandCenter } from './commands.js';
 
 // const localize = nls.loadMessageBundle();
 

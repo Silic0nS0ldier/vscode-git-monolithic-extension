@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { done } from './util';
+import { done } from './util.js';
 
 function decorate(decorator: (fn: Function, key: string) => Function): Function {
 	return (_target: any, key: string, descriptor: any) => {

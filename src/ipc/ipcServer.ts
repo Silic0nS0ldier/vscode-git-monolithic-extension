@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Disposable } from 'vscode';
-import { toDisposable } from '../util';
+import { toDisposable } from '../util.js';
 import * as path from 'path';
 import * as http from 'http';
 import * as os from 'os';

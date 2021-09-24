@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Model } from '../model';
-import { Repository as BaseRepository, Resource } from '../repository';
-import { InputBox, Git, API, Repository, Remote, RepositoryState, Branch, ForcePushMode, Ref, Submodule, Commit, Change, RepositoryUIState, Status, LogOptions, APIState, CommitOptions, RefType, RemoteSourceProvider, CredentialsProvider, BranchQuery, PushErrorHandler, PublishEvent, FetchOptions } from './git';
+import { Model } from '../model.js';
+import { Repository as BaseRepository, Resource } from '../repository.js';
+import { InputBox, Git, API, Repository, Remote, RepositoryState, Branch, ForcePushMode, Ref, Submodule, Commit, Change, RepositoryUIState, Status, LogOptions, APIState, CommitOptions, RefType, RemoteSourceProvider, CredentialsProvider, BranchQuery, PushErrorHandler, PublishEvent, FetchOptions } from './git.js';
 import { Event, SourceControlInputBox, Uri, SourceControl, Disposable, commands } from 'vscode';
-import { mapEvent } from '../util';
-import { toGitUri } from '../uri';
-import { pickRemoteSource, PickRemoteSourceOptions } from '../remoteSource';
-import { GitExtensionImpl } from './extension';
+import { mapEvent } from '../util.js';
+import { toGitUri } from '../uri.js';
+import { pickRemoteSource, PickRemoteSourceOptions } from '../remoteSource.js';
+import { GitExtensionImpl } from './extension.js';
 
 class ApiInputBox implements InputBox {
 	set value(value: string) { this._inputBox.value = value; }

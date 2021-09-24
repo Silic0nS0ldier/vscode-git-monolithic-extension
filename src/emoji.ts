@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
 import { workspace, Uri } from 'vscode';
-import { getExtensionContext } from './main';
+import { getExtensionContext } from './main.js';
 import { TextDecoder } from 'util';
 
 const emojiRegex = /:([-+_a-z0-9]+):/g;
