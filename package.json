@@ -2,13 +2,12 @@
   "name": "git-monolithic",
   "displayName": "%displayName%",
   "description": "%description%",
-  "publisher": "vscode",
+  "publisher": "silicon-soldier",
   "license": "MIT",
   "version": "0.1.0",
   "engines": {
     "vscode": "^1.60.0"
   },
-  "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
   "enableProposedApi": true,
   "categories": [
     "Other"
@@ -2399,9 +2398,5 @@
     "typescript": "^4.4.2",
     "vsce": "^1.97.0",
     "vscode-grammar-updater": "^1.0.3"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/microsoft/vscode.git"
   }
 }
