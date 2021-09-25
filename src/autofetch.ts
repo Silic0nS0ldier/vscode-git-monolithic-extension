@@ -5,11 +5,8 @@
 
 import { workspace, Disposable, EventEmitter, Memento, window, MessageItem, ConfigurationTarget, Uri, ConfigurationChangeEvent } from 'vscode';
 import { Repository, Operation } from './repository.js';
-import { eventToPromise, filterEvent, onceEvent } from './util.js';
-import * as nls from 'vscode-nls';
+import { eventToPromise, filterEvent, localize, onceEvent } from './util.js';
 import { GitErrorCodes } from './api/git.js';
-
-const localize = nls.loadMessageBundle();
 
 function isRemoteOperation(operation: Operation): boolean {
 	return operation === Operation.Pull || operation === Operation.Push || operation === Operation.Sync || operation === Operation.Fetch;

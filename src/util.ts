@@ -8,6 +8,7 @@ import { dirname, sep } from 'node:path';
 import { Readable } from 'node:stream';
 import { promises as fs, createReadStream } from 'node:fs';
 import * as byline from 'byline';
+import * as nls from 'vscode-nls';
 
 export function log(...args: any[]): void {
 	console.log.apply(console, ['git:', ...args]);
@@ -467,3 +468,5 @@ export namespace Versions {
 		return from(major, minor, patch, pre);
 	}
 }
+
+export const localize = nls.loadMessageBundle();

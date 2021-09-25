@@ -6,19 +6,16 @@
 import { workspace, WorkspaceFoldersChangeEvent, Uri, window, Event, EventEmitter, QuickPickItem, Disposable, SourceControl, SourceControlResourceGroup, TextEditor, Memento, OutputChannel, commands } from 'vscode';
 import { Repository, RepositoryState } from './repository.js';
 import { memoize, sequentialize, debounce } from './decorators.js';
-import { dispose, anyEvent, filterEvent, isDescendant, pathEquals, toDisposable, eventToPromise } from './util.js';
+import { dispose, anyEvent, filterEvent, isDescendant, pathEquals, toDisposable, eventToPromise, localize } from './util.js';
 import { Git } from './git.js';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
-import * as nls from 'vscode-nls';
 import { fromGitUri } from './uri.js';
 import { APIState as State, RemoteSourceProvider, CredentialsProvider, PushErrorHandler, PublishEvent } from './api/git.js';
 import { Askpass } from './askpass.js';
 import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
 import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
-
-const localize = nls.loadMessageBundle();
 
 class RepositoryPick implements QuickPickItem {
 	@memoize get label(): string {

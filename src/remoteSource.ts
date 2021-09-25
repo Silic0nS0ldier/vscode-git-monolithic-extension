@@ -4,12 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { QuickPickItem, window, QuickPick } from 'vscode';
-import * as nls from 'vscode-nls';
 import { RemoteSourceProvider, RemoteSource } from './api/git.js';
 import { Model } from './model.js';
 import { throttle, debounce } from './decorators.js';
-
-const localize = nls.loadMessageBundle();
+import { localize } from './util.js';
 
 async function getQuickPickResult<T extends QuickPickItem>(quickpick: QuickPick<T>): Promise<T | undefined> {
 	const result = await new Promise<T | undefined>(c => {

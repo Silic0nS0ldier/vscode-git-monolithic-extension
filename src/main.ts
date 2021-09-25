@@ -3,9 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as nls from 'vscode-nls';
-const localize = nls.loadMessageBundle();
-
 import { env, ExtensionContext, workspace, window, Disposable, commands, Uri, OutputChannel, version as vscodeVersion, WorkspaceFolder } from 'vscode';
 import { findGit, Git, IGit } from './git.js';
 import { Model } from './model.js';
@@ -13,7 +10,7 @@ import { CommandCenter } from './commands.js';
 import { GitFileSystemProvider } from './fileSystemProvider.js';
 import { GitDecorations } from './decorationProvider.js';
 import { Askpass } from './askpass.js';
-import { toDisposable, filterEvent, eventToPromise } from './util.js';
+import { toDisposable, filterEvent, eventToPromise, localize } from './util.js';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { GitExtension } from './api/git.js';
 import { GitProtocolHandler } from './protocolHandler.js';

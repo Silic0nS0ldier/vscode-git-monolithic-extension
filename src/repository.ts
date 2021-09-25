@@ -7,14 +7,13 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, OutputChannel, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands } from 'vscode';
 import { SourceControlInputBoxValidation, SourceControlInputBoxValidationType } from './interface-patches/vscode';
-import * as nls from 'vscode-nls';
 import { Branch, Change, ForcePushMode, GitErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, BranchQuery, FetchOptions } from './api/git.js';
 import { AutoFetcher } from './autofetch.js';
 import { debounce, memoize, throttle } from './decorators.js';
 import { Commit, GitError, Repository as BaseRepository, Stash, Submodule, LogFileOptions } from './git.js';
 import { StatusBarCommands } from './statusbar.js';
 import { toGitUri } from './uri.js';
-import { anyEvent, combinedDisposable, debounceEvent, dispose, EmptyDisposable, eventToPromise, filterEvent, find, IDisposable, isDescendant, onceEvent } from './util.js';
+import { anyEvent, combinedDisposable, debounceEvent, dispose, EmptyDisposable, eventToPromise, filterEvent, find, IDisposable, isDescendant, localize, onceEvent } from './util.js';
 import { IFileWatcher, watch } from './watch.js';
 import { Log, LogLevel } from './log.js';
 import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
@@ -23,7 +22,6 @@ import { ApiRepository } from './api/api1.js';
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 
-const localize = nls.loadMessageBundle();
 const iconsRootPath = path.join(path.dirname(__dirname), 'resources', 'icons');
 
 function getIconUri(iconName: string, theme: string): Uri {

@@ -3,7 +3,6 @@
 //  *  Licensed under the MIT License. See License.txt in the project root for license information.
 //  *--------------------------------------------------------------------------------------------*/
 
-// import * as nls from 'vscode-nls';
 // import { CancellationToken, ConfigurationChangeEvent, Disposable, env, Event, EventEmitter, ThemeIcon, Uri, workspace } from 'vscode';
 // import { Timeline, TimelineChangeEvent, TimelineItem, TimelineOptions, TimelineProvider } from "./interface-patches/vscode.js";
 // import { Model } from './model.js';
@@ -11,8 +10,7 @@
 // import { debounce } from './decorators.js';
 // import { emojify, ensureEmojis } from './emoji.js';
 // import { CommandCenter } from './commands.js';
-
-// const localize = nls.loadMessageBundle();
+// import { localize } from "./util.js";
 
 // export class GitTimelineItem extends TimelineItem {
 // 	static is(item: TimelineItem): item is GitTimelineItem {

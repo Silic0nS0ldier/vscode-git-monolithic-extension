@@ -5,12 +5,9 @@
 
 import { Disposable, Command, EventEmitter, Event, workspace, Uri } from 'vscode';
 import { Repository, Operation } from './repository.js';
-import { anyEvent, dispose, filterEvent } from './util.js';
-import * as nls from 'vscode-nls';
+import { anyEvent, dispose, filterEvent, localize } from './util.js';
 import { Branch, RemoteSourceProvider } from './api/git.js';
 import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
-
-const localize = nls.loadMessageBundle();
 
 class CheckoutStatusBar {
 
