@@ -184,7 +184,7 @@ export function registerCommands(
 		stageAllUntracked.createCommand(),
 		stageAll.createCommand(),
 		stageChange.createCommand(stageChangesFn),
-		stageSelectedRanges.createCommand(stageChangesFn, outputChannel),
+		stageSelectedRanges.createCommand(stageChangesFn),
 		stage.createCommand(getSCMResource, outputChannel, runByRepository, stageDeletionConflict),
 		stashApplyLatest.createCommand(),
 		stashApply.createCommand(pickStash),
