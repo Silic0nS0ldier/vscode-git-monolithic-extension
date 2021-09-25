@@ -1,0 +1,224 @@
+{
+	"$schema": "https://json.schemastore.org/package",
+	"contributes": {
+		"commands": [
+			{
+				"command": "git.timeline.openDiff",
+				"title": "%command.timelineOpenDiff%",
+				"icon": "$(compare-changes)",
+				"category": "Git"
+			},
+			{
+				"command": "git.timeline.copyCommitId",
+				"title": "%command.timelineCopyCommitId%",
+				"category": "Git"
+			},
+			{
+				"command": "git.timeline.copyCommitMessage",
+				"title": "%command.timelineCopyCommitMessage%",
+				"category": "Git"
+			},
+			{
+				"command": "git.timeline.selectForCompare",
+				"title": "%command.timelineSelectForCompare%",
+				"category": "Git"
+			},
+			{
+				"command": "git.timeline.compareWithSelected",
+				"title": "%command.timelineCompareWithSelected%",
+				"category": "Git"
+			},
+			{
+				"command": "git.unstageSelectedRanges",
+				"title": "%command.unstageSelectedRanges%",
+				"category": "Git"
+			},
+			{
+				"command": "git.stageSelectedRanges",
+				"title": "%command.stageSelectedRanges%",
+				"category": "Git"
+			},
+			{
+				"command": "git.stageChange",
+				"title": "%command.stageChange%",
+				"category": "Git",
+				"icon": "$(add)"
+			},
+			{
+				"command": "git.revertSelectedRanges",
+				"title": "%command.revertSelectedRanges%",
+				"category": "Git"
+			},
+			{
+				"command": "git.revertChange",
+				"title": "%command.revertChange%",
+				"category": "Git",
+				"icon": "$(discard)"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "git.unstageSelectedRanges",
+				"key": "ctrl+k ctrl+n",
+				"mac": "cmd+k cmd+n",
+				"when": "isInDiffEditor"
+			},
+			{
+				"command": "git.stageSelectedRanges",
+				"key": "ctrl+k ctrl+alt+s",
+				"mac": "cmd+k cmd+alt+s",
+				"when": "isInDiffEditor"
+			},
+			{
+				"command": "git.revertSelectedRanges",
+				"key": "ctrl+k ctrl+r",
+				"mac": "cmd+k cmd+r",
+				"when": "isInDiffEditor"
+			}
+		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "git.timeline.openDiff",
+					"when": "false"
+				},
+				{
+					"command": "git.timeline.copyCommitId",
+					"when": "false"
+				},
+				{
+					"command": "git.timeline.copyCommitMessage",
+					"when": "false"
+				},
+				{
+					"command": "git.timeline.selectForCompare",
+					"when": "false"
+				},
+				{
+					"command": "git.timeline.compareWithSelected",
+					"when": "false"
+				},
+				{
+					"command": "git.unstageSelectedRanges",
+					"when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+				},
+				{
+					"command": "git.stageSelectedRanges",
+					"when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+				},
+				{
+					"command": "git.stageChange",
+					"when": "false"
+				},
+				{
+					"command": "git.revertSelectedRanges",
+					"when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+				},
+				{
+					"command": "git.revertChange",
+					"when": "false"
+				}
+			],
+			"editor/title": [
+				{
+					"command": "git.unstageSelectedRanges",
+					"group": "2_git@2",
+					"when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+				},
+				{
+					"command": "git.stageSelectedRanges",
+					"group": "2_git@1",
+					"when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+				},
+				{
+					"command": "git.revertSelectedRanges",
+					"group": "2_git@3",
+					"when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "git.unstageSelectedRanges",
+					"group": "2_git@2",
+					"when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+				},
+				{
+					"command": "git.stageSelectedRanges",
+					"group": "2_git@1",
+					"when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+				},
+				{
+					"command": "git.revertSelectedRanges",
+					"group": "2_git@3",
+					"when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+				}
+			],
+			"timeline/item/context": [
+				{
+					"command": "git.timeline.openDiff",
+					"group": "1_actions",
+					"when": "config.git.enabled && !git.missing && timelineItem =~ /git:file\\b/ && !listMultiSelection"
+				},
+				{
+					"command": "git.timeline.compareWithSelected",
+					"group": "3_compare@1",
+					"when": "config.git.enabled && !git.missing && git.timeline.selectedForCompare && timelineItem =~ /git:file\\b/ && !listMultiSelection"
+				},
+				{
+					"command": "git.timeline.selectForCompare",
+					"group": "3_compare@2",
+					"when": "config.git.enabled && !git.missing && timelineItem =~ /git:file\\b/ && !listMultiSelection"
+				},
+				{
+					"command": "git.timeline.copyCommitId",
+					"group": "5_copy@1",
+					"when": "config.git.enabled && !git.missing && timelineItem =~ /git:file:commit\\b/ && !listMultiSelection"
+				},
+				{
+					"command": "git.timeline.copyCommitMessage",
+					"group": "5_copy@2",
+					"when": "config.git.enabled && !git.missing && timelineItem =~ /git:file:commit\\b/ && !listMultiSelection"
+				}
+			],
+			"scm/change/title": [
+				{
+					"command": "git.stageChange",
+					"when": "config.git.enabled && !git.missing && originalResourceScheme == git"
+				},
+				{
+					"command": "git.revertChange",
+					"when": "config.git.enabled && !git.missing && originalResourceScheme == git"
+				}
+			]
+		},
+		"submenus": [],
+		"configuration": {
+			"properties": {
+				"git.timeline.date": {
+					"enum": [
+						"committed",
+						"authored"
+					],
+					"enumDescriptions": [
+						"%config.timeline.date.committed%",
+						"%config.timeline.date.authored%"
+					],
+					"default": "committed",
+					"description": "%config.timeline.date%",
+					"scope": "window"
+				},
+				"git.timeline.showAuthor": {
+					"type": "boolean",
+					"default": true,
+					"description": "%config.timeline.showAuthor%",
+					"scope": "window"
+				}
+			}
+		},
+		"colors": {},
+		"languages": [],
+		"grammars": [],
+		"configurationDefaults": {},
+		"viewsWelcome": []
+	}
+}

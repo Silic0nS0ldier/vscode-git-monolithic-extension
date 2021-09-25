@@ -1,0 +1,16 @@
+{
+	"command.timelineOpenDiff": "Open Changes",
+	"command.timelineCopyCommitId": "Copy Commit ID",
+	"command.timelineCopyCommitMessage": "Copy Commit Message",
+	"command.timelineSelectForCompare": "Select for Compare",
+	"command.timelineCompareWithSelected": "Compare with Selected",
+	"config.timeline.showAuthor": "Controls whether to show the commit author in the Timeline view.",
+	"config.timeline.date": "Controls which date to use for items in the Timeline view.",
+	"config.timeline.date.committed": "Use the committed date",
+	"config.timeline.date.authored": "Use the authored date",
+	"command.unstageSelectedRanges": "Unstage Selected Ranges",
+	"command.stageSelectedRanges": "Stage Selected Ranges",
+	"command.stageChange": "Stage Change",
+	"command.revertSelectedRanges": "Revert Selected Ranges",
+	"command.revertChange": "Revert Change"
+}
