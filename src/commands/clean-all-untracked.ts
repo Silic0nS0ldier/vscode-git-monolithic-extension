@@ -23,7 +23,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.cleanAllUntracked',
-		key: cleanAllUntracked.name,
 		method: cleanAllUntracked,
 		options: {
 			repository: true,

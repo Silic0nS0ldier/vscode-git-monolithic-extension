@@ -43,7 +43,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.deleteBranch',
-		key: deleteBranch.name,
 		method: deleteBranch,
 		options: {
 			repository: true,

@@ -18,7 +18,6 @@
 
 // 	return {
 // 		commandId: 'git.timeline.selectForCompare',
-// 		key: selectForCompare.name,
 // 		method: selectForCompare,
 // 		options: {
 // 			repository: false,

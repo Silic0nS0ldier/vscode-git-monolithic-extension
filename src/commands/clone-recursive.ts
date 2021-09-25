@@ -9,7 +9,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.cloneRecursive',
-		key: cloneRecursive.name,
 		method: cloneRecursive,
 		options: {},
 	};

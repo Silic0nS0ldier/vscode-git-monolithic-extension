@@ -20,7 +20,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.cherryPick',
-		key: cherryPick.name,
 		method: cherryPick,
 		options: {
 			repository: true,

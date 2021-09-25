@@ -10,7 +10,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitEmpty',
-		key: commitEmpty.name,
 		method: commitEmpty,
 		options: {
 			repository: true,

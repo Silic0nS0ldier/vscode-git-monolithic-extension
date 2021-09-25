@@ -75,7 +75,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.openFile',
-		key: openFile.name,
 		method: openFile,
 		options: {},
 	};

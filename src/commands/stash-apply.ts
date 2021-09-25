@@ -19,7 +19,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.stashApply',
-		key: stashApply.name,
 		method: stashApply,
 		options: {
 			repository: true,

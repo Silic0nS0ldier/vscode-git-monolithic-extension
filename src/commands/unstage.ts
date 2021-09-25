@@ -32,7 +32,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.unstage',
-		key: unstage.name,
 		method: unstage,
 		options: {},
 	};

@@ -86,7 +86,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.publish',
-		key: publish.name,
 		method: publish,
 		options: {
 			repository: true,

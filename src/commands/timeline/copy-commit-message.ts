@@ -13,7 +13,6 @@
 
 // 	return {
 // 		commandId: 'git.timeline.copyCommitMessage',
-// 		key: copyCommitMessage.name,
 // 		method: copyCommitMessage,
 // 		options: {
 // 			repository: false,

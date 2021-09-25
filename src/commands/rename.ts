@@ -28,7 +28,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.rename',
-		key: rename.name,
 		method: rename,
 		options: {
 			repository: true,

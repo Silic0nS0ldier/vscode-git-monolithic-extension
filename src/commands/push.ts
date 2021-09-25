@@ -10,7 +10,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.push',
-		key: push.name,
 		method: push,
 		options: {
 			repository: true,

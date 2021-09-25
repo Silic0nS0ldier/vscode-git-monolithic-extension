@@ -8,7 +8,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.unstageAll',
-		key: unstageAll.name,
 		method: unstageAll,
 		options: {
 			repository: true,

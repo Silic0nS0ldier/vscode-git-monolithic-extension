@@ -52,7 +52,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.unstageSelectedRanges',
-		key: unstageSelectedRanges.name,
 		method: unstageSelectedRanges,
 		options: {
 			diff: true,

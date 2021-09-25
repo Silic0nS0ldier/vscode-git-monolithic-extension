@@ -21,7 +21,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.stashPopLatest',
-		key: stashPopLatest.name,
 		method: stashPopLatest,
 		options: {
 			repository: true,

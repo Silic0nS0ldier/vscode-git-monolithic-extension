@@ -26,7 +26,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.deleteTag',
-		key: deleteTag.name,
 		method: deleteTag,
 		options: {
 			repository: true,

@@ -17,7 +17,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.openResource',
-		key: openResource.name,
 		method: openResource,
 		options: {},
 	};

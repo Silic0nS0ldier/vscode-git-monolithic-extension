@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.close',
-		key: close.name,
 		method: close,
 		options: {
 			repository: true,

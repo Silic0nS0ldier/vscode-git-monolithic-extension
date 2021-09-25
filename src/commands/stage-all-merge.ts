@@ -45,7 +45,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.stageAllMerge',
-		key: stageAllMerge.name,
 		method: stageAllMerge,
 		options: {
 			repository: true,

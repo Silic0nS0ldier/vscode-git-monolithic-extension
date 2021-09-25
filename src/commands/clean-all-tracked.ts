@@ -18,7 +18,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.cleanAllTracked',
-		key: cleanAllTracked.name,
 		method: cleanAllTracked,
 		options: {
 			repository: true,

@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitStagedAmendNoVerify',
-		key: commitStagedAmendNoVerify.name,
 		method: commitStagedAmendNoVerify,
 		options: {
 			repository: true,

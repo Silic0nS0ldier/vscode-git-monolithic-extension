@@ -70,7 +70,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.clean',
-		key: clean.name,
 		method: clean,
 		options: {},
 	};

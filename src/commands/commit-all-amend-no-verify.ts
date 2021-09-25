@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitAllAmendNoVerify',
-		key: commitAllAmendNoVerify.name,
 		method: commitAllAmendNoVerify,
 		options: {
 			repository: true,

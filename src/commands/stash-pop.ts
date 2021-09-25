@@ -19,7 +19,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.stashPop',
-		key: stashPop.name,
 		method: stashPop,
 		options: {
 			repository: true,

@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitAllSigned',
-		key: commitAllSigned.name,
 		method: commitAllSigned,
 		options: {
 			repository: true,

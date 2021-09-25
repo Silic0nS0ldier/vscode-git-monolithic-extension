@@ -9,7 +9,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.clone',
-		key: clone.name,
 		method: clone,
 		options: {},
 	};

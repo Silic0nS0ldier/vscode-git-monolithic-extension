@@ -32,7 +32,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.ignore',
-		key: ignore.name,
 		method: ignore,
 		options: {},
 	};

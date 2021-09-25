@@ -18,7 +18,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.syncRebase',
-		key: syncRebase.name,
 		method: syncRebase,
 		options: {
 			repository: true,

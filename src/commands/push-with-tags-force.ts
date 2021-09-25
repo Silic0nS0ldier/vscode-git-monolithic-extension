@@ -10,7 +10,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.pushWithTagsForce',
-		key: pushWithTagsForce.name,
 		method: pushWithTagsForce,
 		options: {
 			repository: true,

@@ -37,7 +37,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.setLogLevel',
-		key: setLogLevel.name,
 		method: setLogLevel,
 		options: {},
 	};

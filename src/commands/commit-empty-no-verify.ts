@@ -10,7 +10,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitEmptyNoVerify',
-		key: commitEmptyNoVerify.name,
 		method: commitEmptyNoVerify,
 		options: {
 			repository: true,

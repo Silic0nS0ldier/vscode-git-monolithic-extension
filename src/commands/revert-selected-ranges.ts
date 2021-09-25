@@ -31,7 +31,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.revertSelectedRanges',
-		key: revertSelectedRanges.name,
 		method: revertSelectedRanges,
 		options: {
 			diff: true,

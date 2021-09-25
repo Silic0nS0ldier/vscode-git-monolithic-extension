@@ -13,7 +13,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.stageAllUntracked',
-		key: stageAllUntracked.name,
 		method: stageAllUntracked,
 		options: {
 			repository: true,

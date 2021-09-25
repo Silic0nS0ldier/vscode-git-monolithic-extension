@@ -10,7 +10,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.pushForce',
-		key: pushForce.name,
 		method: pushForce,
 		options: {
 			repository: true,

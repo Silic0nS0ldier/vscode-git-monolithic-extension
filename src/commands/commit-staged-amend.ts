@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitStagedAmend',
-		key: commitStagedAmend.name,
 		method: commitStagedAmend,
 		options: {
 			repository: true,

@@ -17,7 +17,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.pullRebase',
-		key: pullRebase.name,
 		method: pullRebase,
 		options: {
 			repository: true,

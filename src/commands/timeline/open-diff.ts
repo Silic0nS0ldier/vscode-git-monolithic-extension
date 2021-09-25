@@ -22,7 +22,6 @@
 
 // 	return {
 // 		commandId: 'git.timeline.openDiff',
-// 		key: openDiff.name,
 // 		method: openDiff,
 // 		options: {
 // 			repository: false,

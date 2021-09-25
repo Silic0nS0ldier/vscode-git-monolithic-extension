@@ -29,7 +29,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.openRepository',
-		key: openRepository.name,
 		method: openRepository,
 		options: {
 			repository: false,

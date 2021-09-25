@@ -72,7 +72,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.stage',
-		key: stage.name,
 		method: stage,
 		options: {},
 	};

@@ -41,7 +41,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.openHEADFile',
-		key: openHEADFile.name,
 		method: openHEADFile,
 		options: {},
 	};

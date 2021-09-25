@@ -15,7 +15,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.fetch',
-		key: fetch.name,
 		method: fetch,
 		options: {
 			repository: true,

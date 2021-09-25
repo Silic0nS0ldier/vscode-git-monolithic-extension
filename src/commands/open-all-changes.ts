@@ -23,7 +23,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.openAllChanges',
-		key: openAllChanges.name,
 		method: openAllChanges,
 		options: {
 			repository: true,

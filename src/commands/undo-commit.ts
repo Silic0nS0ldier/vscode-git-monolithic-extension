@@ -37,7 +37,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.undoCommit',
-		key: undoCommit.name,
 		method: undoCommit,
 		options: {
 			repository: true,

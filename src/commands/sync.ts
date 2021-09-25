@@ -25,7 +25,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.sync',
-		key: sync.name,
 		method: sync,
 		options: {
 			repository: true,

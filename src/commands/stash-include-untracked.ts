@@ -10,7 +10,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.stashIncludeUntracked',
-		key: stashIncludeUntracked.name,
 		method: stashIncludeUntracked,
 		options: {
 			repository: true,

@@ -38,7 +38,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.openChange',
-		key: openChange.name,
 		method: openChange,
 		options: {},
 	};

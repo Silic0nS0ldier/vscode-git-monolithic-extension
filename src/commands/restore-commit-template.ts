@@ -8,7 +8,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.restoreCommitTemplate',
-		key: restoreCommitTemplate.name,
 		method: restoreCommitTemplate,
 		options: {
 			repository: true,

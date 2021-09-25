@@ -30,7 +30,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.stashDrop',
-		key: stashDrop.name,
 		method: stashDrop,
 		options: {
 			repository: true,

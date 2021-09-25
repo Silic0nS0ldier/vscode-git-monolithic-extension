@@ -17,7 +17,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.pull',
-		key: pull.name,
 		method: pull,
 		options: {
 			repository: true,

@@ -45,7 +45,6 @@
 
 // 	return {
 // 		commandId: 'git.timeline.compareWithSelected',
-// 		key: compareWithSelected.name,
 // 		method: compareWithSelected,
 // 		options: {
 // 			repository: false,

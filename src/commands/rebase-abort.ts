@@ -14,7 +14,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.rebaseAbort',
-		key: rebaseAbort.name,
 		method: rebaseAbort,
 		options: {
 			repository: true,

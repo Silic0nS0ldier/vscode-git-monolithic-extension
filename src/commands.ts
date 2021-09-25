@@ -5,7 +5,7 @@
 
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { commands, Disposable, MessageOptions, OutputChannel, Position, ProgressLocation, QuickPickItem, Range, TextEditor, Uri, window, workspace, WorkspaceEdit, TextDocumentContentProvider } from 'vscode';
+import { commands, Disposable, OutputChannel, Position, ProgressLocation, QuickPickItem, Range, TextEditor, Uri, window, workspace, WorkspaceEdit, TextDocumentContentProvider } from 'vscode';
 import { LineChange } from "./interface-patches/vscode";
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { ForcePushMode, GitErrorCodes, Ref, RefType, Status, CommitOptions } from './api/git.js';
@@ -17,13 +17,14 @@ import { fromGitUri, toGitUri, isGitUri } from './uri.js';
 import { grep, isDescendant, localize, pathEquals } from './util.js';
 // import { GitTimelineItem } from './timelineProvider.js';
 import { pickRemoteSource } from './remoteSource.js';
-import { registerCommands } from './commands/mod';
-import { syncCmdImpl } from './commands/sync';
-import { cleanAllCmdImpl } from './commands/clean-all';
-import { stashCmdImpl } from './commands/stash';
-import { stashPopLatestCmdImpl } from './commands/stash-pop-latest';
-import { addRemoteCmdImpl } from './commands/add-remote';
-import { publishCmdImpl } from './commands/publish';
+import { registerCommands } from './commands/_mod.js';
+import { syncCmdImpl } from './commands/sync.js';
+import { cleanAllCmdImpl } from './commands/clean-all.js';
+import { stashCmdImpl } from './commands/stash.js';
+import { stashPopLatestCmdImpl } from './commands/stash-pop-latest.js';
+import { addRemoteCmdImpl } from './commands/add-remote.js';
+import { publishCmdImpl } from './commands/publish.js';
+import { createCommand } from './commands/_create.js';
 
 class CheckoutItem implements QuickPickItem {
 
@@ -156,14 +157,13 @@ export class AddRemoteItem implements QuickPickItem {
 	}
 }
 
-interface ScmCommandOptions {
+export interface ScmCommandOptions {
 	repository?: boolean;
 	diff?: boolean;
 }
 
 export interface ScmCommand {
 	commandId: string;
-	key: string;
 	method: Function;
 	options: ScmCommandOptions;
 }
@@ -276,7 +276,7 @@ export interface PushOptions {
 	}
 }
 
-class CommandErrorOutputTextDocumentContentProvider implements TextDocumentContentProvider {
+export class CommandErrorOutputTextDocumentContentProvider implements TextDocumentContentProvider {
 
 	private items = new Map<string, string>();
 
@@ -327,8 +327,16 @@ export class CommandCenter {
 			this._sync.bind(this),
 			this._stageChanges.bind(this),
 		);
-		this.disposables = cmds.map(({ commandId, key, method, options }) => {
-			const command = this.createCommand(commandId, key, method, options);
+		this.disposables = cmds.map(({ commandId, method, options }) => {
+			const command = createCommand(
+				this.model,
+				this.telemetryReporter,
+				this.outputChannel,
+				this.commandErrors,
+				commandId,
+				method,
+				options,
+			);
 
 			// if (options.diff) {
 			// 	return commands.registerDiffInformationCommand(commandId, command);
@@ -1188,150 +1196,6 @@ export class CommandCenter {
 	// }
 
 	// private _selectedForCompare: { uri: Uri, item: GitTimelineItem } | undefined;
-
-	private createCommand(id: string, key: string, method: Function, options: ScmCommandOptions): (...args: any[]) => any {
-		const result = (...args: any[]) => {
-			let result: Promise<any>;
-
-			if (!options.repository) {
-				result = Promise.resolve(method.apply(this, args));
-			} else {
-				// try to guess the repository based on the first argument
-				const repository = this.model.getRepository(args[0]);
-				let repositoryPromise: Promise<Repository | undefined>;
-
-				if (repository) {
-					repositoryPromise = Promise.resolve(repository);
-				} else if (this.model.repositories.length === 1) {
-					repositoryPromise = Promise.resolve(this.model.repositories[0]);
-				} else {
-					repositoryPromise = this.model.pickRepository();
-				}
-
-				result = repositoryPromise.then(repository => {
-					if (!repository) {
-						return Promise.resolve();
-					}
-
-					return Promise.resolve(method.apply(this, [repository, ...args.slice(1)]));
-				});
-			}
-
-			/* __GDPR__
-				"git.command" : {
-					"command" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-				}
-			*/
-			this.telemetryReporter.sendTelemetryEvent('git.command', { command: id });
-
-			return result.catch(async err => {
-				const options: MessageOptions = {
-					modal: true
-				};
-
-				let message: string;
-				let type: 'error' | 'warning' = 'error';
-
-				const choices = new Map<string, () => void>();
-				const openOutputChannelChoice = localize('open git log', "Open Git Log");
-				const outputChannel = this.outputChannel as OutputChannel;
-				choices.set(openOutputChannelChoice, () => outputChannel.show());
-
-				const showCommandOutputChoice = localize('show command output', "Show Command Output");
-				if (err.stderr) {
-					choices.set(showCommandOutputChoice, async () => {
-						const timestamp = new Date().getTime();
-						const uri = Uri.parse(`git-output:/git-error-${timestamp}`);
-
-						let command = 'git';
-
-						if (err.gitArgs) {
-							command = `${command} ${err.gitArgs.join(' ')}`;
-						} else if (err.gitCommand) {
-							command = `${command} ${err.gitCommand}`;
-						}
-
-						this.commandErrors.set(uri, `> ${command}\n${err.stderr}`);
-
-						try {
-							const doc = await workspace.openTextDocument(uri);
-							await window.showTextDocument(doc);
-						} finally {
-							this.commandErrors.delete(uri);
-						}
-					});
-				}
-
-				switch (err.gitErrorCode) {
-					case GitErrorCodes.DirtyWorkTree:
-						message = localize('clean repo', "Please clean your repository working tree before checkout.");
-						break;
-					case GitErrorCodes.PushRejected:
-						message = localize('cant push', "Can't push refs to remote. Try running 'Pull' first to integrate your changes.");
-						break;
-					case GitErrorCodes.Conflict:
-						message = localize('merge conflicts', "There are merge conflicts. Resolve them before committing.");
-						type = 'warning';
-						options.modal = false;
-						break;
-					case GitErrorCodes.StashConflict:
-						message = localize('stash merge conflicts', "There were merge conflicts while applying the stash.");
-						type = 'warning';
-						options.modal = false;
-						break;
-					case GitErrorCodes.AuthenticationFailed:
-						const regex = /Authentication failed for '(.*)'/i;
-						const match = regex.exec(err.stderr || String(err));
-
-						message = match
-							? localize('auth failed specific', "Failed to authenticate to git remote:\n\n{0}", match[1])
-							: localize('auth failed', "Failed to authenticate to git remote.");
-						break;
-					case GitErrorCodes.NoUserNameConfigured:
-					case GitErrorCodes.NoUserEmailConfigured:
-						message = localize('missing user info', "Make sure you configure your 'user.name' and 'user.email' in git.");
-						choices.set(localize('learn more', "Learn More"), () => commands.executeCommand('vscode.open', Uri.parse('https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup')));
-						break;
-					default:
-						const hint = (err.stderr || err.message || String(err))
-							.replace(/^error: /mi, '')
-							.replace(/^> husky.*$/mi, '')
-							.split(/[\r\n]/)
-							.filter((line: string) => !!line)
-						[0];
-
-						message = hint
-							? localize('git error details', "Git: {0}", hint)
-							: localize('git error', "Git error");
-
-						break;
-				}
-
-				if (!message) {
-					console.error(err);
-					return;
-				}
-
-				const allChoices = Array.from(choices.keys());
-				const result = type === 'error'
-					? await window.showErrorMessage(message, options, ...allChoices)
-					: await window.showWarningMessage(message, options, ...allChoices);
-
-				if (result) {
-					const resultFn = choices.get(result);
-
-					if (resultFn) {
-						resultFn();
-					}
-				}
-			});
-		};
-
-		// patch this object, so people can call methods directly
-		(this as any)[key] = result;
-
-		return result;
-	}
 
 	private getSCMResource(uri?: Uri): Resource | undefined {
 		uri = uri ? uri : (window.activeTextEditor && window.activeTextEditor.document.uri);

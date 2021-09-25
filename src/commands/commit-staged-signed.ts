@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitStagedSigned',
-		key: commitStagedSigned.name,
 		method: commitStagedSigned,
 		options: {
 			repository: true,

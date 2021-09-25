@@ -33,7 +33,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.renameBranch',
-		key: renameBranch.name,
 		method: renameBranch,
 		options: {
 			repository: true,

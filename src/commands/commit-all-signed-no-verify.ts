@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitAllSignedNoVerify',
-		key: commitAllSignedNoVerify.name,
 		method: commitAllSignedNoVerify,
 		options: {
 			repository: true,

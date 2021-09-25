@@ -16,7 +16,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.stageAll',
-		key: stageAll.name,
 		method: stageAll,
 		options: {
 			repository: true,

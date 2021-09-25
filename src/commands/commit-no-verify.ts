@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commitNoVerify',
-		key: commitNoVerify.name,
 		method: commitNoVerify,
 		options: {
 			repository: true,

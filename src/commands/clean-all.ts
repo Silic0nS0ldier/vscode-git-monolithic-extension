@@ -66,7 +66,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.cleanAll',
-		key: cleanAll.name,
 		method: cleanAll,
 		options: {
 			repository: true,

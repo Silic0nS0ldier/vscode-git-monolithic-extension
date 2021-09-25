@@ -10,7 +10,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.checkoutDetached',
-		key: checkoutDetached.name,
 		method: checkoutDetached,
 		options: {
 			repository: true,

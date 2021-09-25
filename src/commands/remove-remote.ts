@@ -26,7 +26,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.removeRemote',
-		key: removeRemote.name,
 		method: removeRemote,
 		options: {
 			repository: true,

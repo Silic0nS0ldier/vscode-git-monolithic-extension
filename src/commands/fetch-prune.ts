@@ -15,7 +15,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.fetchPrune',
-		key: fetchPrune.name,
 		method: fetchPrune,
 		options: {
 			repository: true,

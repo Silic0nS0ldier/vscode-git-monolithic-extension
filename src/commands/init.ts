@@ -104,7 +104,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.init',
-		key: init.name,
 		method: init,
 		options: {},
 	};

@@ -17,7 +17,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.pushTo',
-		key: pushTo.name,
 		method: pushTo,
 		options: {
 			repository: true,

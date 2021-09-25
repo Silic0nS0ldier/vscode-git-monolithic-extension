@@ -18,7 +18,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.pushToForce',
-		key: pushToForce.name,
 		method: pushToForce,
 		options: {
 			repository: true,

@@ -27,7 +27,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.createTag',
-		key: createTag.name,
 		method: createTag,
 		options: {
 			repository: true,

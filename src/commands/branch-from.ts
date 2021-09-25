@@ -10,7 +10,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.branchFrom',
-		key: branchFrom.name,
 		method: branchFrom,
 		options: {
 			repository: true,

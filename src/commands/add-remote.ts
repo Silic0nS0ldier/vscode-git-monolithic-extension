@@ -53,7 +53,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.addRemote',
-		key: addRemote.name,
 		method: addRemote,
 		options: {
 			repository: true,

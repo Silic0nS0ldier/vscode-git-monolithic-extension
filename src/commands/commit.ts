@@ -11,7 +11,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.commit',
-		key: commit.name,
 		method: commit,
 		options: {
 			repository: true,

@@ -16,7 +16,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.revealInExplorer',
-		key: revealInExplorer.name,
 		method: revealInExplorer,
 		options: {},
 	};

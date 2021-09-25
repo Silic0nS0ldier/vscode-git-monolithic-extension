@@ -31,7 +31,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.merge',
-		key: merge.name,
 		method: merge,
 		options: {
 			repository: true,

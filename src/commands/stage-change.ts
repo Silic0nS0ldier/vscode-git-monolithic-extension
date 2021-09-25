@@ -24,7 +24,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.stageChange',
-		key: stageChange.name,
 		method: stageChange,
 		options: {},
 	};

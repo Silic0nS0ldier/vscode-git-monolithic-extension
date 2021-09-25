@@ -8,7 +8,6 @@ export function createCommand(): ScmCommand {
 
 	return {
 		commandId: 'git.refresh',
-		key: refresh.name,
 		method: refresh,
 		options: {
 			repository: true,

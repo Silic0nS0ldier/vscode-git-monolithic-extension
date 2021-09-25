@@ -24,7 +24,6 @@ export function createCommand(
 
 	return {
 		commandId: 'git.revertChange',
-		key: revertChange.name,
 		method: revertChange,
 		options: {},
 	};
