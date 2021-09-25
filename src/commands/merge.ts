@@ -1,8 +1,20 @@
-import { window, workspace } from "vscode";
-import { Branch, RefType } from "../api/git.js";
-import { MergeItem, ScmCommand } from "../commands.js";
+import { QuickPickItem, window, workspace } from "vscode";
+import { Branch, Ref, RefType } from "../api/git.js";
+import { ScmCommand } from "../commands.js";
 import { Repository } from "../repository.js";
 import { localize } from "../util.js";
+
+class MergeItem implements QuickPickItem {
+
+	get label(): string { return this.ref.name || ''; }
+	get description(): string { return this.ref.name || ''; }
+
+	constructor(protected ref: Ref) { }
+
+	async run(repository: Repository): Promise<void> {
+		await repository.merge(this.ref.name! || this.ref.commit!);
+	}
+}
 
 export function createCommand(): ScmCommand {
 	async function merge(repository: Repository): Promise<void> {

@@ -13,7 +13,6 @@ import { Model } from './model.js';
 import { Repository, Resource, ResourceGroupType } from './repository.js';
 import { fromGitUri, isGitUri } from './uri.js';
 import { grep, isDescendant, localize, pathEquals } from './util.js';
-// import { GitTimelineItem } from './timelineProvider.js';
 import { pickRemoteSource } from './remoteSource.js';
 import { registerCommands } from './commands/_mod.js';
 import { syncCmdImpl } from './commands/sync.js';
@@ -71,49 +70,6 @@ class CheckoutRemoteHeadItem extends CheckoutItem {
 	}
 }
 
-export class BranchDeleteItem implements QuickPickItem {
-
-	private get shortCommit(): string { return (this.ref.commit || '').substr(0, 8); }
-	get branchName(): string | undefined { return this.ref.name; }
-	get label(): string { return this.branchName || ''; }
-	get description(): string { return this.shortCommit; }
-
-	constructor(private ref: Ref) { }
-
-	async run(repository: Repository, force?: boolean): Promise<void> {
-		if (!this.branchName) {
-			return;
-		}
-		await repository.deleteBranch(this.branchName, force);
-	}
-}
-
-export class MergeItem implements QuickPickItem {
-
-	get label(): string { return this.ref.name || ''; }
-	get description(): string { return this.ref.name || ''; }
-
-	constructor(protected ref: Ref) { }
-
-	async run(repository: Repository): Promise<void> {
-		await repository.merge(this.ref.name! || this.ref.commit!);
-	}
-}
-
-export class RebaseItem implements QuickPickItem {
-
-	get label(): string { return this.ref.name || ''; }
-	description: string = '';
-
-	constructor(readonly ref: Ref) { }
-
-	async run(repository: Repository): Promise<void> {
-		if (this.ref?.name) {
-			await repository.rebase(this.ref.name);
-		}
-	}
-}
-
 class CreateBranchItem implements QuickPickItem {
 	get label(): string { return '$(plus) ' + localize('create branch', 'Create new branch...'); }
 	get description(): string { return ''; }
@@ -165,15 +121,6 @@ export interface ScmCommand {
 	method: Function;
 	options: ScmCommandOptions;
 }
-
-// const ImageMimetypes = [
-// 	'image/png',
-// 	'image/gif',
-// 	'image/jpeg',
-// 	'image/webp',
-// 	'image/tiff',
-// 	'image/bmp'
-// ];
 
 export async function categorizeResourceByResolution(resources: Resource[]): Promise<{ merge: Resource[], resolved: Resource[], unresolved: Resource[], deletionConflicts: Resource[] }> {
 	const selection = resources.filter(s => s instanceof Resource) as Resource[];

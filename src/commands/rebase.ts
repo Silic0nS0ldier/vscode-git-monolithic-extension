@@ -1,8 +1,22 @@
-import { window, workspace } from "vscode";
-import { RefType } from "../api/git.js";
-import { RebaseItem, ScmCommand } from "../commands.js";
+import { QuickPickItem, window, workspace } from "vscode";
+import { Ref, RefType } from "../api/git.js";
+import { ScmCommand } from "../commands.js";
 import { Repository } from "../repository.js";
 import { localize } from "../util.js";
+
+class RebaseItem implements QuickPickItem {
+
+	get label(): string { return this.ref.name || ''; }
+	description: string = '';
+
+	constructor(readonly ref: Ref) { }
+
+	async run(repository: Repository): Promise<void> {
+		if (this.ref?.name) {
+			await repository.rebase(this.ref.name);
+		}
+	}
+}
 
 export function createCommand(): ScmCommand {
 	async function rebase(repository: Repository): Promise<void> {

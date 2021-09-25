@@ -1,8 +1,25 @@
-import { window } from "vscode";
-import { GitErrorCodes, RefType } from "../api/git.js";
-import { BranchDeleteItem, ScmCommand } from "../commands.js";
+import { QuickPickItem, window } from "vscode";
+import { GitErrorCodes, Ref, RefType } from "../api/git.js";
+import { ScmCommand } from "../commands.js";
 import { Repository } from "../repository.js";
 import { localize } from "../util.js";
+
+class BranchDeleteItem implements QuickPickItem {
+
+	private get shortCommit(): string { return (this.ref.commit || '').substr(0, 8); }
+	get branchName(): string | undefined { return this.ref.name; }
+	get label(): string { return this.branchName || ''; }
+	get description(): string { return this.shortCommit; }
+
+	constructor(private ref: Ref) { }
+
+	async run(repository: Repository, force?: boolean): Promise<void> {
+		if (!this.branchName) {
+			return;
+		}
+		await repository.deleteBranch(this.branchName, force);
+	}
+}
 
 export function createCommand(): ScmCommand {
 	async function deleteBranch(repository: Repository, name: string, force?: boolean): Promise<void> {
