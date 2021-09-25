@@ -6,7 +6,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, OutputChannel, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands } from 'vscode';
-import { SourceControlInputBoxValidation, SourceControlInputBoxValidationType } from './interface-patches/vscode';
 import { Branch, Change, ForcePushMode, GitErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, BranchQuery, FetchOptions } from './api/git.js';
 import { AutoFetcher } from './autofetch.js';
 import { debounce, memoize, throttle } from './decorators.js';
@@ -972,70 +971,70 @@ export class Repository implements Disposable {
 		this.setCountBadge();
 	}
 
-	validateInput(text: string, position: number): SourceControlInputBoxValidation | undefined {
-		if (this.rebaseCommit) {
-			if (this.rebaseCommit.message !== text) {
-				return {
-					message: localize('commit in rebase', "It's not possible to change the commit message in the middle of a rebase. Please complete the rebase operation and use interactive rebase instead."),
-					type: SourceControlInputBoxValidationType.Warning
-				};
-			}
-		}
+	// validateInput(text: string, position: number): SourceControlInputBoxValidation | undefined {
+	// 	if (this.rebaseCommit) {
+	// 		if (this.rebaseCommit.message !== text) {
+	// 			return {
+	// 				message: localize('commit in rebase', "It's not possible to change the commit message in the middle of a rebase. Please complete the rebase operation and use interactive rebase instead."),
+	// 				type: SourceControlInputBoxValidationType.Warning
+	// 			};
+	// 		}
+	// 	}
 
-		const config = workspace.getConfiguration('git');
-		const setting = config.get<'always' | 'warn' | 'off'>('inputValidation');
+	// 	const config = workspace.getConfiguration('git');
+	// 	const setting = config.get<'always' | 'warn' | 'off'>('inputValidation');
 
-		if (setting === 'off') {
-			return;
-		}
+	// 	if (setting === 'off') {
+	// 		return;
+	// 	}
 
-		if (/^\s+$/.test(text)) {
-			return {
-				message: localize('commitMessageWhitespacesOnlyWarning', "Current commit message only contains whitespace characters"),
-				type: SourceControlInputBoxValidationType.Warning
-			};
-		}
+	// 	if (/^\s+$/.test(text)) {
+	// 		return {
+	// 			message: localize('commitMessageWhitespacesOnlyWarning', "Current commit message only contains whitespace characters"),
+	// 			type: SourceControlInputBoxValidationType.Warning
+	// 		};
+	// 	}
 
-		let lineNumber = 0;
-		let start = 0, end;
-		let match: RegExpExecArray | null;
-		const regex = /\r?\n/g;
+	// 	let lineNumber = 0;
+	// 	let start = 0, end;
+	// 	let match: RegExpExecArray | null;
+	// 	const regex = /\r?\n/g;
 
-		while ((match = regex.exec(text)) && position > match.index) {
-			start = match.index + match[0].length;
-			lineNumber++;
-		}
+	// 	while ((match = regex.exec(text)) && position > match.index) {
+	// 		start = match.index + match[0].length;
+	// 		lineNumber++;
+	// 	}
 
-		end = match ? match.index : text.length;
+	// 	end = match ? match.index : text.length;
 
-		const line = text.substring(start, end);
+	// 	const line = text.substring(start, end);
 
-		let threshold = config.get<number>('inputValidationLength', 50);
+	// 	let threshold = config.get<number>('inputValidationLength', 50);
 
-		if (lineNumber === 0) {
-			const inputValidationSubjectLength = config.get<number | null>('inputValidationSubjectLength', null);
+	// 	if (lineNumber === 0) {
+	// 		const inputValidationSubjectLength = config.get<number | null>('inputValidationSubjectLength', null);
 
-			if (inputValidationSubjectLength !== null) {
-				threshold = inputValidationSubjectLength;
-			}
-		}
+	// 		if (inputValidationSubjectLength !== null) {
+	// 			threshold = inputValidationSubjectLength;
+	// 		}
+	// 	}
 
-		if (line.length <= threshold) {
-			if (setting !== 'always') {
-				return;
-			}
+	// 	if (line.length <= threshold) {
+	// 		if (setting !== 'always') {
+	// 			return;
+	// 		}
 
-			return {
-				message: localize('commitMessageCountdown', "{0} characters left in current line", threshold - line.length),
-				type: SourceControlInputBoxValidationType.Information
-			};
-		} else {
-			return {
-				message: localize('commitMessageWarning', "{0} characters over {1} in current line", line.length - threshold, threshold),
-				type: SourceControlInputBoxValidationType.Warning
-			};
-		}
-	}
+	// 		return {
+	// 			message: localize('commitMessageCountdown', "{0} characters left in current line", threshold - line.length),
+	// 			type: SourceControlInputBoxValidationType.Information
+	// 		};
+	// 	} else {
+	// 		return {
+	// 			message: localize('commitMessageWarning', "{0} characters over {1} in current line", line.length - threshold, threshold),
+	// 			type: SourceControlInputBoxValidationType.Warning
+	// 		};
+	// 	}
+	// }
 
 	provideOriginalResource(uri: Uri): Uri | undefined {
 		if (uri.scheme !== 'file') {

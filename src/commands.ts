@@ -5,15 +5,13 @@
 
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { commands, Disposable, OutputChannel, Position, ProgressLocation, QuickPickItem, Range, TextEditor, Uri, window, workspace, WorkspaceEdit, TextDocumentContentProvider } from 'vscode';
-import { LineChange } from "./interface-patches/vscode";
+import { commands, Disposable, OutputChannel, ProgressLocation, QuickPickItem, Uri, window, workspace, TextDocumentContentProvider } from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { ForcePushMode, GitErrorCodes, Ref, RefType, Status, CommitOptions } from './api/git.js';
 import { Git, Stash } from './git.js';
 import { Model } from './model.js';
 import { Repository, Resource, ResourceGroupType } from './repository.js';
-import { applyLineChanges } from './staging.js';
-import { fromGitUri, toGitUri, isGitUri } from './uri.js';
+import { fromGitUri, isGitUri } from './uri.js';
 import { grep, isDescendant, localize, pathEquals } from './util.js';
 // import { GitTimelineItem } from './timelineProvider.js';
 import { pickRemoteSource } from './remoteSource.js';
@@ -319,13 +317,11 @@ export class CommandCenter {
 			this.git,
 			this._push.bind(this),
 			this.promptForBranchName.bind(this),
-			this._revertChanges.bind(this),
 			this.outputChannel,
 			this._stageDeletionConflict.bind(this),
 			this.pickStash.bind(this),
 			this._stash.bind(this),
 			this._sync.bind(this),
-			this._stageChanges.bind(this),
 		);
 		this.disposables = cmds.map(({ commandId, method, options }) => {
 			const command = createCommand(
@@ -516,48 +512,48 @@ export class CommandCenter {
 		}
 	}
 
-	private async _stageChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
-		const modifiedDocument = textEditor.document;
-		const modifiedUri = modifiedDocument.uri;
+	// private async _stageChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
+	// 	const modifiedDocument = textEditor.document;
+	// 	const modifiedUri = modifiedDocument.uri;
 
-		if (modifiedUri.scheme !== 'file') {
-			return;
-		}
+	// 	if (modifiedUri.scheme !== 'file') {
+	// 		return;
+	// 	}
 
-		const originalUri = toGitUri(modifiedUri, '~');
-		const originalDocument = await workspace.openTextDocument(originalUri);
-		const result = applyLineChanges(originalDocument, modifiedDocument, changes);
+	// 	const originalUri = toGitUri(modifiedUri, '~');
+	// 	const originalDocument = await workspace.openTextDocument(originalUri);
+	// 	const result = applyLineChanges(originalDocument, modifiedDocument, changes);
 
-		await this.runByRepository(
-			[modifiedUri],
-			async (repository, resources) => {
-				for (const resource of resources) {
-					await repository.stage(resource, result);
-				}
-			});
-	}
+	// 	await this.runByRepository(
+	// 		[modifiedUri],
+	// 		async (repository, resources) => {
+	// 			for (const resource of resources) {
+	// 				await repository.stage(resource, result);
+	// 			}
+	// 		});
+	// }
 
-	private async _revertChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
-		const modifiedDocument = textEditor.document;
-		const modifiedUri = modifiedDocument.uri;
+	// private async _revertChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
+	// 	const modifiedDocument = textEditor.document;
+	// 	const modifiedUri = modifiedDocument.uri;
 
-		if (modifiedUri.scheme !== 'file') {
-			return;
-		}
+	// 	if (modifiedUri.scheme !== 'file') {
+	// 		return;
+	// 	}
 
-		const originalUri = toGitUri(modifiedUri, '~');
-		const originalDocument = await workspace.openTextDocument(originalUri);
-		const visibleRangesBeforeRevert = textEditor.visibleRanges;
-		const result = applyLineChanges(originalDocument, modifiedDocument, changes);
+	// 	const originalUri = toGitUri(modifiedUri, '~');
+	// 	const originalDocument = await workspace.openTextDocument(originalUri);
+	// 	const visibleRangesBeforeRevert = textEditor.visibleRanges;
+	// 	const result = applyLineChanges(originalDocument, modifiedDocument, changes);
 
-		const edit = new WorkspaceEdit();
-		edit.replace(modifiedUri, new Range(new Position(0, 0), modifiedDocument.lineAt(modifiedDocument.lineCount - 1).range.end), result);
-		workspace.applyEdit(edit);
+	// 	const edit = new WorkspaceEdit();
+	// 	edit.replace(modifiedUri, new Range(new Position(0, 0), modifiedDocument.lineAt(modifiedDocument.lineCount - 1).range.end), result);
+	// 	workspace.applyEdit(edit);
 
-		await modifiedDocument.save();
+	// 	await modifiedDocument.save();
 
-		textEditor.revealRange(visibleRangesBeforeRevert[0]);
-	}
+	// 	textEditor.revealRange(visibleRangesBeforeRevert[0]);
+	// }
 
 	private async _cleanTrackedChanges(repository: Repository, resources: Resource[]): Promise<void> {
 		const message = resources.length === 1

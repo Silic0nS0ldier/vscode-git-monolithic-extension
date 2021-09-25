@@ -1,8 +1,7 @@
-import { OutputChannel, TextEditor, Uri } from "vscode";
+import { OutputChannel, Uri } from "vscode";
 import { CommitOptions } from "../api/git";
 import { PushOptions, RunByRepository, ScmCommand } from "../commands";
 import { Git, Stash } from "../git.js";
-import { LineChange } from "../interface-patches/vscode";
 import { Model } from "../model";
 import { Repository, Resource } from "../repository.js";
 
@@ -69,15 +68,15 @@ import * as renameBranch from "./rename-branch.js";
 import * as rename from "./rename.js";
 import * as restoreCommitTemplate from "./restore-commit-template.js";
 import * as revealInExplorer from "./reveal-in-explorer.js";
-import * as revertChange from "./revert-change.js";
-import * as revertSelectedRanges from "./revert-selected-ranges.js";
+// import * as revertChange from "./revert-change.js";
+// import * as revertSelectedRanges from "./revert-selected-ranges.js";
 import * as setLogLevel from "./set-log-level.js";
 import * as stageAllMerge from "./stage-all-merge.js";
 import * as stageAllTracked from "./stage-all-tracked.js";
 import * as stageAllUntracked from "./stage-all-untracked.js";
 import * as stageAll from "./stage-all.js";
-import * as stageChange from "./stage-change.js";
-import * as stageSelectedRanges from "./stage-selected-ranges.js";
+// import * as stageChange from "./stage-change.js";
+// import * as stageSelectedRanges from "./stage-selected-ranges.js";
 import * as stage from "./stage.js";
 import * as stashApplyLatest from "./stash-apply-latest.js";
 import * as stashApply from "./stash-apply.js";
@@ -90,7 +89,7 @@ import * as syncRebase from "./sync-rebase.js";
 import * as sync from "./sync.js";
 import * as undoCommit from "./undo-commit.js";
 import * as unstageAll from "./unstage-all.js";
-import * as unstageSelectedRanges from "./unstage-seleted-ranges.js";
+// import * as unstageSelectedRanges from "./unstage-seleted-ranges.js";
 import * as unstage from "./unstage.js";
 
 export function registerCommands(
@@ -108,13 +107,11 @@ export function registerCommands(
 	git: Git,
 	pushFn: (repository: Repository, pushOptions: PushOptions) => Promise<void>,
 	promptForBranchName: (defaultName?: string, initialValue?: string) => Promise<string>,
-	revertChanges: (textEditor: TextEditor, changes: LineChange[]) => Promise<void>,
 	outputChannel: OutputChannel,
 	stageDeletionConflict: (repository: Repository, uri: Uri) => Promise<void>,
 	pickStash: (repository: Repository, placeHolder: string) => Promise<Stash | undefined>,
 	stashFn: (repository: Repository, includeUntracked?: boolean) => Promise<void>,
 	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,
-	stageChangesFn: (textEditor: TextEditor, changes: LineChange[]) => Promise<void>,
 ) {
 	const commands: ScmCommand[] = [
 		branchFrom.createCommand(branchFn),
@@ -176,15 +173,11 @@ export function registerCommands(
 		rename.createCommand(),
 		restoreCommitTemplate.createCommand(),
 		revealInExplorer.createCommand(),
-		revertChange.createCommand(revertChanges),
-		revertSelectedRanges.createCommand(revertChanges),
 		setLogLevel.createCommand(outputChannel),
 		stageAllMerge.createCommand(stageDeletionConflict),
 		stageAllTracked.createCommand(),
 		stageAllUntracked.createCommand(),
 		stageAll.createCommand(),
-		stageChange.createCommand(stageChangesFn),
-		stageSelectedRanges.createCommand(stageChangesFn),
 		stage.createCommand(getSCMResource, outputChannel, runByRepository, stageDeletionConflict),
 		stashApplyLatest.createCommand(),
 		stashApply.createCommand(pickStash),
@@ -195,7 +188,6 @@ export function registerCommands(
 		stash.createCommand(stashFn),
 		syncRebase.createCommand(syncFn),
 		sync.createCommand(syncFn),
-		unstageSelectedRanges.createCommand(runByRepository),
 		unstage.createCommand(getSCMResource, runByRepository),
 	];
 
