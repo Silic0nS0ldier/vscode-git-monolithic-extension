@@ -14,14 +14,14 @@ import { Repository, Resource, ResourceGroupType } from './repository.js';
 import { fromGitUri, isGitUri } from './uri.js';
 import { grep, isDescendant, localize, pathEquals } from './util.js';
 import { pickRemoteSource } from './remoteSource.js';
-import { registerCommands } from './commands/_mod.js';
-import { syncCmdImpl } from './commands/sync.js';
-import { cleanAllCmdImpl } from './commands/clean-all.js';
-import { stashCmdImpl } from './commands/stash.js';
-import { stashPopLatestCmdImpl } from './commands/stash-pop-latest.js';
-import { addRemoteCmdImpl } from './commands/add-remote.js';
-import { publishCmdImpl } from './commands/publish.js';
-import { createCommand } from './commands/_create.js';
+import { registerCommands } from './commands/register.js';
+import { syncCmdImpl } from './commands/implementations/sync.js';
+import { cleanAllCmdImpl } from './commands/implementations/clean-all.js';
+import { stashCmdImpl } from './commands/implementations/stash.js';
+import { stashPopLatestCmdImpl } from './commands/implementations/stash-pop-latest.js';
+import { addRemoteCmdImpl } from './commands/implementations/add-remote.js';
+import { publishCmdImpl } from './commands/implementations/publish.js';
+import { createCommand } from './commands/create.js';
 
 class CheckoutItem implements QuickPickItem {
 
