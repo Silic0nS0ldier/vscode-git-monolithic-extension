@@ -2198,5 +2198,9 @@
 		"typescript": "^4.4.2",
 		"vsce": "^1.97.0",
 		"vscode-grammar-updater": "^1.0.3"
-	}
+	},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Silic0nS0ldier/vscode-git-monolithic-extension"
+  }
 }
