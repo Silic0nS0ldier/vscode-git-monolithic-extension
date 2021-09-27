@@ -1,8 +1,8 @@
 import { window } from "vscode";
-import { RefType } from "../api/git.js";
-import { ScmCommand, TagItem } from "../commands.js";
-import { Repository } from "../repository.js";
-import { localize } from "../util.js";
+import { RefType } from "../../api/git.js";
+import { ScmCommand, TagItem } from "../../commands.js";
+import { Repository } from "../../repository.js";
+import { localize } from "../../util.js";
 
 export function createCommand(): ScmCommand {
 	async function deleteTag(repository: Repository): Promise<void> {

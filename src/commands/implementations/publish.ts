@@ -1,10 +1,10 @@
 import { window } from "vscode";
-import { ApiRepository } from "../api/api1.js";
-import { RemoteSourceProvider } from "../api/git.js";
-import { AddRemoteItem, ScmCommand } from "../commands.js";
-import { Model } from "../model.js";
-import { Repository } from "../repository.js";
-import { localize } from "../util.js";
+import { ApiRepository } from "../../api/api1.js";
+import { RemoteSourceProvider } from "../../api/git.js";
+import { AddRemoteItem, ScmCommand } from "../../commands.js";
+import { Model } from "../../model.js";
+import { Repository } from "../../repository.js";
+import { localize } from "../../util.js";
 
 export async function publishCmdImpl(
 	model: Model,

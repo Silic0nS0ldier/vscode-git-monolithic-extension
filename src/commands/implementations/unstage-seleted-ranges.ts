@@ -1,7 +1,7 @@
 // import { window, workspace } from "vscode";
-// import { RunByRepository, ScmCommand } from "../commands.js";
-// import { applyLineChanges, intersectDiffWithRange, invertLineChange, toLineRanges } from "../staging.js";
-// import { fromGitUri, isGitUri, toGitUri } from "../uri.js";
+// import { RunByRepository, ScmCommand } from "../../commands.js";
+// import { applyLineChanges, intersectDiffWithRange, invertLineChange, toLineRanges } from "../../staging.js";
+// import { fromGitUri, isGitUri, toGitUri } from "../../uri.js";
 
 // export function createCommand(
 // 	runByRepository: RunByRepository<void>,

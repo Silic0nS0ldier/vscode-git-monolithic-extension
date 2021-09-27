@@ -1,6 +1,6 @@
 // import { TextEditor, window } from "vscode";
-// import { ScmCommand } from "../commands.js";
-// import { getModifiedRange } from "../staging.js";
+// import { ScmCommand } from "../../commands.js";
+// import { getModifiedRange } from "../../staging.js";
 
 // export function createCommand(
 // 	revertChanges: (textEditor: TextEditor, changes: LineChange[]) => Promise<void>,

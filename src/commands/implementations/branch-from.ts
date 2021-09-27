@@ -1,5 +1,5 @@
-import { ScmCommand } from "../commands.js";
-import { Repository } from "../repository.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository } from "../../repository.js";
 
 export function createCommand(
 	branchFn: (repository: Repository, defaultName?: string, from?: boolean) => Promise<void>,

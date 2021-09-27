@@ -1,5 +1,5 @@
-import { ScmCommand } from "../commands.js";
-import { Repository } from "../repository.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository } from "../../repository.js";
 
 export function createCommand(
 	checkoutFn: (repository: Repository, opts?: { detached?: boolean, treeish?: string }) => Promise<boolean>

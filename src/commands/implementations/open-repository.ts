@@ -1,8 +1,8 @@
 import { Uri, window } from "vscode";
 import * as os from 'node:os';
-import { ScmCommand } from "../commands.js";
-import { Model } from "../model.js";
-import { localize } from "../util.js";
+import { ScmCommand } from "../../commands.js";
+import { Model } from "../../model.js";
+import { localize } from "../../util.js";
 
 export function createCommand(
 	model: Model,

@@ -1,8 +1,8 @@
 import { window } from "vscode";
-import { GitErrorCodes } from "../api/git.js";
-import { ScmCommand } from "../commands.js";
-import { Repository } from "../repository.js";
-import { localize } from "../util.js";
+import { GitErrorCodes } from "../../api/git.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository } from "../../repository.js";
+import { localize } from "../../util.js";
 
 export function createCommand(
 	promptForBranchName: (defaultName?: string, initialValue?: string) => Promise<string>,

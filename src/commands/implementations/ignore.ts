@@ -1,6 +1,6 @@
 import { SourceControlResourceState, Uri } from "vscode";
-import { RunByRepository, ScmCommand } from "../commands.js";
-import { Resource } from "../repository.js";
+import { RunByRepository, ScmCommand } from "../../commands.js";
+import { Resource } from "../../repository.js";
 
 export function createCommand(
 	runByRepository: RunByRepository<void>,

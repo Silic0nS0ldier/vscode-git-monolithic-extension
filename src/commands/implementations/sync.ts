@@ -1,5 +1,5 @@
-import { ScmCommand } from "../commands.js";
-import { Repository } from "../repository.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository } from "../../repository.js";
 
 export async function syncCmdImpl(
 	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,

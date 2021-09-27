@@ -1,5 +1,5 @@
-import { ScmCommand } from "../commands.js";
-import { Repository } from "../repository.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository } from "../../repository.js";
 
 export function createCommand(
 	stashFn: (repository: Repository, includeUntracked?: boolean) => Promise<void>,

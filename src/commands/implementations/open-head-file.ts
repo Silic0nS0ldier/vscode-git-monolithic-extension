@@ -1,8 +1,8 @@
 import { commands, TextDocumentShowOptions, Uri, window } from "vscode";
 import * as path from "node:path";
-import { ScmCommand } from "../commands.js";
-import { Resource } from "../repository.js";
-import { localize } from "../util.js";
+import { ScmCommand } from "../../commands.js";
+import { Resource } from "../../repository.js";
+import { localize } from "../../util.js";
 
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,

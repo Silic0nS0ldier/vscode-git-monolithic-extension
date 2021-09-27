@@ -1,5 +1,5 @@
 // import { Selection, TextEditor, Uri, window } from "vscode";
-// import { ScmCommand } from "../commands.js";
+// import { ScmCommand } from "../../commands.js";
 
 // export function createCommand(
 // 	revertChanges: (textEditor: TextEditor, changes: LineChange[]) => Promise<void>,

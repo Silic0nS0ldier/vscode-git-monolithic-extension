@@ -1,6 +1,6 @@
 import { Uri, workspace } from "vscode";
-import { ScmCommand } from "../commands.js";
-import { Repository } from "../repository.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository } from "../../repository.js";
 
 export function createCommand(): ScmCommand {
 	async function stageAll(repository: Repository): Promise<void> {

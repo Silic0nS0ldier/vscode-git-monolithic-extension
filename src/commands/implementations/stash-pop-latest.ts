@@ -1,7 +1,7 @@
 import { window } from "vscode";
-import { ScmCommand } from "../commands.js";
-import { Repository } from "../repository.js";
-import { localize } from "../util.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository } from "../../repository.js";
+import { localize } from "../../util.js";
 
 export async function stashPopLatestCmdImpl(repository: Repository): Promise<void>  {
 	const stashes = await repository.getStashes();

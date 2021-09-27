@@ -1,7 +1,7 @@
 import { Uri, window } from "vscode";
 import * as path from "node:path";
-import { ScmCommand } from "../commands.js";
-import { Repository } from "../repository.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository } from "../../repository.js";
 
 export function createCommand(): ScmCommand {
 	async function rename(repository: Repository, fromUri: Uri | undefined): Promise<void> {

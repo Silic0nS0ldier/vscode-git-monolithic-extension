@@ -1,6 +1,6 @@
 // import { commands, Uri } from "vscode";
-// import { ScmCommand } from "../../commands.js";
-// import { GitTimelineItem } from '../../timelineProvider.js';
+// import { ScmCommand } from "../../../../commands.js";
+// import { GitTimelineItem } from '../../../../timelineProvider.js';
 
 // export function createCommand(
 // 	_: {

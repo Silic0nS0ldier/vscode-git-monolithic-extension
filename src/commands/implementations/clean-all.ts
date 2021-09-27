@@ -1,9 +1,9 @@
 import { window } from "vscode";
 import * as path from "node:path";
-import { Status } from "../api/git.js";
-import { ScmCommand } from "../commands.js";
-import { Repository, Resource } from "../repository.js";
-import { localize } from "../util.js";
+import { Status } from "../../api/git.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository, Resource } from "../../repository.js";
+import { localize } from "../../util.js";
 
 export async function cleanAllCmdImpl(
 	cleanTrackedChanges: (repository: Repository, resources: Resource[]) => Promise<void>,

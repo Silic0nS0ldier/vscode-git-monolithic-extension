@@ -1,7 +1,7 @@
 import { OutputChannel, window } from "vscode";
-import { ScmCommand } from "../commands.js";
-import { Log, LogLevel } from "../log.js";
-import { localize } from "../util.js";
+import { ScmCommand } from "../../commands.js";
+import { Log, LogLevel } from "../../log.js";
+import { localize } from "../../util.js";
 
 export function createCommand(
 	outputChannel: OutputChannel,

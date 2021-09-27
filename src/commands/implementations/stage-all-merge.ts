@@ -1,8 +1,8 @@
 import { Uri, window } from "vscode";
 import * as path from "node:path";
-import { categorizeResourceByResolution, ScmCommand } from "../commands.js";
-import { Repository, Resource } from "../repository.js";
-import { localize } from "../util.js";
+import { categorizeResourceByResolution, ScmCommand } from "../../commands.js";
+import { Repository, Resource } from "../../repository.js";
+import { localize } from "../../util.js";
 
 export function createCommand(
 	stageDeletionConflict: (repository: Repository, uri: Uri) => Promise<void>,

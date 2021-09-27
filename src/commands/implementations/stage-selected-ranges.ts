@@ -1,6 +1,6 @@
 // import { TextEditor, window } from "vscode";
-// import { ScmCommand } from "../commands.js";
-// import { intersectDiffWithRange, toLineRanges } from "../staging.js";
+// import { ScmCommand } from "../../commands.js";
+// import { intersectDiffWithRange, toLineRanges } from "../../staging.js";
 
 // export function createCommand(
 // 	stageChanges: (textEditor: TextEditor, changes: LineChange[]) => Promise<void>,

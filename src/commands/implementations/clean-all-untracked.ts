@@ -1,6 +1,6 @@
-import { Status } from "../api/git.js";
-import { ScmCommand } from "../commands.js";
-import { Repository, Resource } from "../repository.js";
+import { Status } from "../../api/git.js";
+import { ScmCommand } from "../../commands.js";
+import { Repository, Resource } from "../../repository.js";
 
 export function createCommand(
 	cleanUntrackedChange: (repository: Repository, resource: Resource) => Promise<void>,

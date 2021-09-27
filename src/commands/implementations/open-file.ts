@@ -1,8 +1,8 @@
 import { commands, SourceControlResourceState, TextDocumentShowOptions, Uri, ViewColumn, window, workspace } from "vscode";
-import { Status } from "../api/git.js";
-import { ScmCommand } from "../commands.js";
-import { Resource } from "../repository.js";
-import { fromGitUri, isGitUri } from "../uri.js";
+import { Status } from "../../api/git.js";
+import { ScmCommand } from "../../commands.js";
+import { Resource } from "../../repository.js";
+import { fromGitUri, isGitUri } from "../../uri.js";
 
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,

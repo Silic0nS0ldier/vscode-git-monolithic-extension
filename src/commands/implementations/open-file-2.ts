@@ -1,6 +1,6 @@
 import { SourceControlResourceState, Uri } from "vscode";
-import { ScmCommand } from "../commands.js";
-import { Resource } from "../repository.js";
+import { ScmCommand } from "../../commands.js";
+import { Resource } from "../../repository.js";
 
 export function createCommand(
 	openFile: (arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]) => Promise<void>,

@@ -1,9 +1,9 @@
 import { SourceControlResourceState, Uri, window } from "vscode";
 import * as path from "node:path";
-import { Status } from "../api/git.js";
-import { RunByRepository, ScmCommand } from "../commands.js";
-import { Resource, ResourceGroupType } from "../repository.js";
-import { localize } from "../util.js";
+import { Status } from "../../api/git.js";
+import { RunByRepository, ScmCommand } from "../../commands.js";
+import { Resource, ResourceGroupType } from "../../repository.js";
+import { localize } from "../../util.js";
 
 export function createCommand(
 	runByRepository: RunByRepository<void>,

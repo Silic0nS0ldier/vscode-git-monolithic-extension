@@ -1,5 +1,5 @@
 // import { Command, commands, TextDocumentShowOptions, Uri, ViewColumn } from "vscode";
-// import { ScmCommand } from "../../commands.js";
+// import { ScmCommand } from "../../../../commands.js";
 
 // export function createCommand(
 // 	resolveTimelineOpenDiffCommand: (item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions) => Command | undefined
