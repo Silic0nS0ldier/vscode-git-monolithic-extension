@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.5",
+    "execa": "^5.1.1",
+    "globby": "^12.0.2",
+    "rollup": "^2.57.0",
+    "vsce": "^1.100.0",
+    "vscode-grammar-updater": "^1.0.3"
+  }
+}

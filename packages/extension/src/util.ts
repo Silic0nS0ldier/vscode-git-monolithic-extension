@@ -201,7 +201,7 @@ export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
 export async function grep(filename: string, pattern: RegExp): Promise<boolean> {
 	return new Promise<boolean>((c, e) => {
 		const fileStream = createReadStream(filename, { encoding: 'utf8' });
-		const stream = byline(fileStream);
+		const stream = byline.createStream(fileStream);
 		stream.on('data', (line: string) => {
 			if (pattern.test(line)) {
 				fileStream.close();

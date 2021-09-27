@@ -22,7 +22,8 @@
 			"ES2020.Symbol.WellKnown",
 			"ES2020.Intl"
 		],
-		"module": "commonjs",
+		"module": "ES2020",
+		"moduleResolution": "node",
 		"strict": true,
 		"exactOptionalPropertyTypes": false,
 		"useUnknownInCatchVariables": false,
@@ -40,7 +41,6 @@
 		]
 	},
 	"include": [
-		"src/**/*",
-		"tests/src/git.test.ts"
+		"src/**/*"
 	]
 }
