@@ -38,7 +38,10 @@ async function main() {
 
 	console.log("Bundling...");
 	const bundle = await rollup({
-		input: [Path.join(extPkg, "dist/main.js")],
+		input: [
+			Path.join(extPkg, "dist/main.js"),
+			Path.join(extPkg, "dist/askpass-main.js"),
+		],
 		plugins: [
 			cjs(),
 			nodeResolve(),
@@ -49,7 +52,7 @@ async function main() {
 	});
 	await bundle.write({
 		format: "cjs",
-		file: Path.join(stgPkg, "src/main.js"),
+		dir: Path.join(stgPkg, "src"),
 
 	});
 	await bundle.close();
