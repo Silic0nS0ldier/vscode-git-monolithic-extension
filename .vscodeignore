@@ -1,6 +1,8 @@
 src/**
-**/test/**
+tests/**
 tsconfig.json
 build/**
 yarn.lock
 .gitignore
+package.nls.json
+package.nls.json-off.json

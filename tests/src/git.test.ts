@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import 'mocha';
-import { GitStatusParser, parseGitCommits, parseGitmodules, parseLsTree, parseLsFiles } from '../git.js';
+import { GitStatusParser, parseGitCommits, parseGitmodules, parseLsTree, parseLsFiles } from '../../src/git.js';
 import * as assert from 'node:assert';
-import { splitInChunks } from '../util.js';
+import { splitInChunks } from '../../src/util.js';
 
 suite('git', () => {
 	suite('GitStatusParser', () => {

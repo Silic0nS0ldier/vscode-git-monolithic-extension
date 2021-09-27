@@ -25,6 +25,3 @@ for (const jsFile of jsFiles) {
 	content = content.replace(/node:/g, '');
 	FS.writeFileSync(jsFile, content, { encoding: 'utf-8' });
 }
-
-console.log("Removing non-public files...")
-FS.rmSync("./dist/test", { recursive: true, force: true });

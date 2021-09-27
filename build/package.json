@@ -1,3 +1,9 @@
 {
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "cpy-cli": "^3.1.1",
+		"del-cli": "^4.0.1",
+    "execa": "^5.1.1",
+		"globby": "^12.0.2"
+  }
 }
