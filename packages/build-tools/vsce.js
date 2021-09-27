@@ -3,6 +3,11 @@ import * as Path from "node:path";
 import Execa from "execa";
 
 async function main() {
+	console.log("Building extension first");
+	await import ("./build.js");
+
+	console.log("Running VSCE...");
+
 	const thsPkg = Path.dirname(URL.fileURLToPath(import.meta.url));
 	const stgPkg = Path.resolve(thsPkg, "../staging-area/");
 

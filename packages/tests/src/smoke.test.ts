@@ -9,8 +9,8 @@ import { workspace, commands, window, Uri, WorkspaceEdit, Range, TextDocument, e
 import * as cp from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { GitExtension, API, Repository, Status } from '../api/git.js';
-import { eventToPromise } from '../util.js';
+import { GitExtension, API, Repository, Status } from 'extension/dist/api/git.js';
+import { eventToPromise } from 'extension/dist/util.js';
 
 suite('git smoke test', function () {
 	const cwd = fs.realpathSync(workspace.workspaceFolders![0].uri.fsPath);

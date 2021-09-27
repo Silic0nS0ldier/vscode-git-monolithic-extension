@@ -22,7 +22,7 @@ async function main() {
 	console.log("Compiling...");
 	Execa.sync("tsc", [], {
 		preferLocal: true,
-		localDir: URL.fileURLToPath(import.meta.url),
+		localDir: thsPkg,
 		buffer: false,
 		stdio: "inherit",
 		cwd: extPkg,
@@ -66,4 +66,4 @@ async function main() {
 	FS.cpSync(Path.join(extPkg, "cgmanifest.json"), Path.join(stgPkg, "cgmanifest.json"), { recursive: true });
 }
 
-main();
+export const running = main();

@@ -1,6 +1,7 @@
 {
   "private": true,
 	"scripts": {
+    "test": "node ./packages/build-tools/test.js",
 		"build": "node ./packages/build-tools/build.js",
 		"update-emoji": "node ./packages/build-tools/update-emoji.js",
 		"update-grammar": "node ./packages/build-tools/update-grammars.js",
