@@ -872,19 +872,9 @@ export class Repository implements Disposable {
 		const onWorkspaceRepositoryFileChange = filterEvent(onWorkspaceFileChange, uri => isDescendant(repository.root, uri.fsPath));
 		const onWorkspaceWorkingTreeFileChange = filterEvent(onWorkspaceRepositoryFileChange, uri => !/\/\.git($|\/)/.test(uri.path));
 
-		let onDotGitFileChange: Event<Uri>;
-
-		try {
-			const dotGitFileWatcher = new DotGitWatcher(this, outputChannel);
-			onDotGitFileChange = dotGitFileWatcher.event;
-			this.disposables.push(dotGitFileWatcher);
-		} catch (err) {
-			if (Log.logLevel <= LogLevel.Error) {
-				outputChannel.appendLine(`Failed to watch '${this.dotGit}', reverting to legacy API file watched. Some events might be lost.\n${err.stack || err}`);
-			}
-
-			onDotGitFileChange = filterEvent(onWorkspaceRepositoryFileChange, uri => /\/\.git($|\/)/.test(uri.path));
-		}
+		const dotGitFileWatcher = new DotGitWatcher(this, outputChannel);
+		this.disposables.push(dotGitFileWatcher);
+		const onDotGitFileChange = dotGitFileWatcher.event;
 
 		// FS changes should trigger `git status`:
 		// 	- any change inside the repository working tree
@@ -1094,6 +1084,7 @@ export class Repository implements Disposable {
 		return this.run(Operation.LogFile, () => this.repository.logFile(uri, options));
 	}
 
+	// TODO This should fire on first hit, then again on leading edge if there is another call
 	@throttle
 	async status(): Promise<void> {
 		await this.run(Operation.Status);
@@ -2020,6 +2011,7 @@ export class Repository implements Disposable {
 		this.updateWhenIdleAndWait();
 	}
 
+	// TODO This should fire on first hit, then again on leading edge if there is another call
 	@throttle
 	private async updateWhenIdleAndWait(): Promise<void> {
 		await this.whenIdleAndFocused();

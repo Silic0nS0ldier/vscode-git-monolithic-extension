@@ -19,6 +19,7 @@ import { StringDecoder } from 'node:string_decoder';
 import { getGitErrorCode } from './git/error.js';
 import { cpErrorHandler, GitError } from './git/error.js'
 import { getStatus } from './git/status.js';
+import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from './git/diff.js';
 
 export { findGit, IGit } from './git/find.js';
 export { IGitErrorData } from './git/error.js'
@@ -144,7 +145,7 @@ export interface IGitOptions {
 
 // https://github.com/microsoft/vscode/issues/89373
 // https://github.com/git-for-windows/git/issues/2478
-function sanitizePath(path: string): string {
+export function sanitizePath(path: string): string {
 	return path.replace(/^([a-z]):\\/i, (_, letter) => `${letter.toUpperCase()}:\\`);
 }
 
@@ -875,52 +876,54 @@ export class Repository {
 	diffWithHEAD(path: string): Promise<string>;
 	diffWithHEAD(path?: string | undefined): Promise<string | Change[]>;
 	async diffWithHEAD(path?: string | undefined): Promise<string | Change[]> {
-		if (!path) {
-			return await this.diffFiles(false);
-		}
-
-		const args = ['diff', '--', sanitizePath(path)];
-		const result = await this.exec(args);
-		return result.stdout;
+		return diffWithHEAD(
+			{
+				exec: this.exec.bind(this),
+				repositoryRoot: this.repositoryRoot,
+			},
+			path,
+		);
 	}
 
 	diffWith(ref: string): Promise<Change[]>;
 	diffWith(ref: string, path: string): Promise<string>;
 	diffWith(ref: string, path?: string | undefined): Promise<string | Change[]>;
 	async diffWith(ref: string, path?: string): Promise<string | Change[]> {
-		if (!path) {
-			return await this.diffFiles(false, ref);
-		}
-
-		const args = ['diff', ref, '--', sanitizePath(path)];
-		const result = await this.exec(args);
-		return result.stdout;
+		return diffWith(
+			{
+				exec: this.exec.bind(this),
+				repositoryRoot: this.repositoryRoot,
+			},
+			ref,
+			path,
+		);
 	}
 
 	diffIndexWithHEAD(): Promise<Change[]>;
 	diffIndexWithHEAD(path: string): Promise<string>;
 	diffIndexWithHEAD(path?: string | undefined): Promise<string | Change[]>;
 	async diffIndexWithHEAD(path?: string): Promise<string | Change[]> {
-		if (!path) {
-			return await this.diffFiles(true);
-		}
-
-		const args = ['diff', '--cached', '--', sanitizePath(path)];
-		const result = await this.exec(args);
-		return result.stdout;
+		return diffIndexWithHEAD(
+			{
+				exec: this.exec.bind(this),
+				repositoryRoot: this.repositoryRoot,
+			},
+			path,
+		);
 	}
 
 	diffIndexWith(ref: string): Promise<Change[]>;
 	diffIndexWith(ref: string, path: string): Promise<string>;
 	diffIndexWith(ref: string, path?: string | undefined): Promise<string | Change[]>;
 	async diffIndexWith(ref: string, path?: string): Promise<string | Change[]> {
-		if (!path) {
-			return await this.diffFiles(true, ref);
-		}
-
-		const args = ['diff', '--cached', ref, '--', sanitizePath(path)];
-		const result = await this.exec(args);
-		return result.stdout;
+		return diffIndexWith(
+			{
+				exec: this.exec.bind(this),
+				repositoryRoot: this.repositoryRoot,
+			},
+			ref,
+			path,
+		);
 	}
 
 	async diffBlobs(object1: string, object2: string): Promise<string> {
@@ -929,100 +932,19 @@ export class Repository {
 		return result.stdout;
 	}
 
-	diffBetween(ref1: string, ref2: string): Promise<Change[]>;
+	diffBetween(ref1: string, ref2: string, path?: undefined): Promise<Change[]>;
 	diffBetween(ref1: string, ref2: string, path: string): Promise<string>;
 	diffBetween(ref1: string, ref2: string, path?: string | undefined): Promise<string | Change[]>;
 	async diffBetween(ref1: string, ref2: string, path?: string): Promise<string | Change[]> {
-		const range = `${ref1}...${ref2}`;
-		if (!path) {
-			return await this.diffFiles(false, range);
-		}
-
-		const args = ['diff', range, '--', sanitizePath(path)];
-		const result = await this.exec(args);
-
-		return result.stdout.trim();
-	}
-
-	private async diffFiles(cached: boolean, ref?: string): Promise<Change[]> {
-		const args = ['diff', '--name-status', '-z', '--diff-filter=ADMR'];
-		if (cached) {
-			args.push('--cached');
-		}
-
-		if (ref) {
-			args.push(ref);
-		}
-
-		const gitResult = await this.exec(args);
-		if (gitResult.exitCode) {
-			return [];
-		}
-
-		const entries = gitResult.stdout.split('\x00');
-		let index = 0;
-		const result: Change[] = [];
-
-		entriesLoop:
-		while (index < entries.length - 1) {
-			const change = entries[index++];
-			const resourcePath = entries[index++];
-			if (!change || !resourcePath) {
-				break;
-			}
-
-			const originalUri = Uri.file(path.isAbsolute(resourcePath) ? resourcePath : path.join(this.repositoryRoot, resourcePath));
-			let status: Status = Status.UNTRACKED;
-
-			// Copy or Rename status comes with a number, e.g. 'R100'. We don't need the number, so we use only first character of the status.
-			switch (change[0]) {
-				case 'M':
-					status = Status.MODIFIED;
-					break;
-
-				case 'A':
-					status = Status.INDEX_ADDED;
-					break;
-
-				case 'D':
-					status = Status.DELETED;
-					break;
-
-				// Rename contains two paths, the second one is what the file is renamed/copied to.
-				case 'R':
-					if (index >= entries.length) {
-						break;
-					}
-
-					const newPath = entries[index++];
-					if (!newPath) {
-						break;
-					}
-
-					const uri = Uri.file(path.isAbsolute(newPath) ? newPath : path.join(this.repositoryRoot, newPath));
-					result.push({
-						uri,
-						renameUri: uri,
-						originalUri,
-						status: Status.INDEX_RENAMED
-					});
-
-					continue;
-
-				default:
-					// Unknown status
-					break entriesLoop;
-			}
-
-			result.push({
-				status,
-				originalUri,
-				uri: originalUri,
-				renameUri: originalUri,
-			});
-		}
-
-		return result;
+		return diffBetween(
+			{
+				exec: this.exec.bind(this),
+				repositoryRoot: this.repositoryRoot,
+			},
+			ref1,
+			ref2,
+			path,
+		);
 	}
 
 	async getMergeBase(ref1: string, ref2: string): Promise<string> {
@@ -1605,7 +1527,7 @@ export class Repository {
 	}
 
 	getStatus(opts?: { limit?: number, ignoreSubmodules?: boolean }): Promise<{ status: IFileStatus[]; didHitLimit: boolean; }> {
-		return getStatus(this.stream, opts);
+		return getStatus(this.stream.bind(this), opts);
 	}
 
 	async getHEAD(): Promise<Ref> {
