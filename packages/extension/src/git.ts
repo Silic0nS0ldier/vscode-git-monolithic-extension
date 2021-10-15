@@ -7,7 +7,6 @@ import { promises as fs, exists, realpath } from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import * as cp from 'node:child_process';
-import * as which from 'which';
 import { EventEmitter } from 'node:events';
 import * as iconv from 'iconv-lite-umd';
 import * as filetype from 'file-type';
@@ -17,15 +16,17 @@ import { detectEncoding } from './encoding.js';
 import { Ref, RefType, Branch, Remote, ForcePushMode, GitErrorCodes, LogOptions, Change, Status, CommitOptions, BranchQuery } from './api/git.js';
 import * as byline from 'byline';
 import { StringDecoder } from 'node:string_decoder';
+import { getGitErrorCode } from './git/error.js';
+import { cpErrorHandler, GitError } from './git/error.js'
+import { getStatus } from './git/status.js';
+
+export { findGit, IGit } from './git/find.js';
+export { IGitErrorData } from './git/error.js'
+export { cpErrorHandler, GitError }
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
 const isWindows = process.platform === 'win32';
-
-export interface IGit {
-	path: string;
-	version: string;
-}
 
 export interface IFileStatus {
 	x: string;
@@ -58,134 +59,10 @@ export interface LogFileOptions {
 	readonly reverse?: boolean;
 	readonly sortByAuthorDate?: boolean;
 }
-
-function parseVersion(raw: string): string {
-	return raw.replace(/^git version /, '');
-}
-
-function findSpecificGit(path: string, onValidate: (path: string) => boolean): Promise<IGit> {
-	return new Promise<IGit>((c, e) => {
-		if (!onValidate(path)) {
-			return e('git not found');
-		}
-
-		const buffers: Buffer[] = [];
-		const child = cp.spawn(path, ['--version']);
-		child.stdout.on('data', (b: Buffer) => buffers.push(b));
-		child.on('error', cpErrorHandler(e));
-		child.on('exit', code => code ? e(new Error('Not found')) : c({ path, version: parseVersion(Buffer.concat(buffers).toString('utf8').trim()) }));
-	});
-}
-
-function findGitDarwin(onValidate: (path: string) => boolean): Promise<IGit> {
-	return new Promise<IGit>((c, e) => {
-		cp.exec('which git', (err, gitPathBuffer) => {
-			if (err) {
-				return e('git not found');
-			}
-
-			const path = gitPathBuffer.toString().replace(/^\s+|\s+$/g, '');
-
-			function getVersion(path: string) {
-				if (!onValidate(path)) {
-					return e('git not found');
-				}
-
-				// make sure git executes
-				cp.exec('git --version', (err, stdout) => {
-
-					if (err) {
-						return e('git not found');
-					}
-
-					return c({ path, version: parseVersion(stdout.trim()) });
-				});
-			}
-
-			if (path !== '/usr/bin/git') {
-				return getVersion(path);
-			}
-
-			// must check if XCode is installed
-			cp.exec('xcode-select -p', (err: any) => {
-				if (err && err.code === 2) {
-					// git is not installed, and launching /usr/bin/git
-					// will prompt the user to install it
-
-					return e('git not found');
-				}
-
-				getVersion(path);
-			});
-		});
-	});
-}
-
-function findSystemGitWin32(base: string, onValidate: (path: string) => boolean): Promise<IGit> {
-	if (!base) {
-		return Promise.reject<IGit>('Not found');
-	}
-
-	return findSpecificGit(path.join(base, 'Git', 'cmd', 'git.exe'), onValidate);
-}
-
-/**
- * Throws if git not found on path.
- * @todo Confirm behaviour
- */
-async function findGitWin32InPath(onValidate: (path: string) => boolean): Promise<IGit> {
-	const gitPath = await which('git.exe');
-	return findSpecificGit(gitPath, onValidate);
-}
-
-function findGitWin32(onValidate: (path: string) => boolean): Promise<IGit> {
-	return findSystemGitWin32(process.env['ProgramW6432'] as string, onValidate)
-		.then(undefined, () => findSystemGitWin32(process.env['ProgramFiles(x86)'] as string, onValidate))
-		.then(undefined, () => findSystemGitWin32(process.env['ProgramFiles'] as string, onValidate))
-		.then(undefined, () => findSystemGitWin32(path.join(process.env['LocalAppData'] as string, 'Programs'), onValidate))
-		.then(undefined, () => findGitWin32InPath(onValidate));
-}
-
-export async function findGit(hints: string[], onValidate: (path: string) => boolean): Promise<IGit> {
-	for (const hint of hints) {
-		try {
-			return await findSpecificGit(hint, onValidate);
-		} catch {
-			// noop
-		}
-	}
-
-	try {
-		switch (process.platform) {
-			case 'darwin': return await findGitDarwin(onValidate);
-			case 'win32': return await findGitWin32(onValidate);
-			default: return await findSpecificGit('git', onValidate);
-		}
-	} catch {
-		// noop
-	}
-
-	throw new Error('Git installation not found.');
-}
-
 export interface IExecutionResult<T extends string | Buffer> {
 	exitCode: number;
 	stdout: T;
 	stderr: string;
-}
-
-function cpErrorHandler(cb: (reason?: any) => void): (reason?: any) => void {
-	return err => {
-		if (/ENOENT/.test(err.message)) {
-			err = new GitError({
-				error: err,
-				message: 'Failed to execute git (ENOENT)',
-				gitErrorCode: GitErrorCodes.NotAGitRepository
-			});
-		}
-
-		cb(err);
-	};
 }
 
 export interface SpawnOptions extends cp.SpawnOptions {
@@ -258,98 +135,11 @@ async function exec(child: cp.ChildProcess, cancellationToken?: CancellationToke
 	}
 }
 
-export interface IGitErrorData {
-	error?: Error;
-	message?: string;
-	stdout?: string;
-	stderr?: string;
-	exitCode?: number;
-	gitErrorCode?: string;
-	gitCommand?: string;
-	gitArgs?: string[];
-}
-
-export class GitError {
-
-	error?: Error;
-	message: string;
-	stdout?: string;
-	stderr?: string;
-	exitCode?: number;
-	gitErrorCode?: string;
-	gitCommand?: string;
-	gitArgs?: string[];
-
-	constructor(data: IGitErrorData) {
-		if (data.error) {
-			this.error = data.error;
-			this.message = data.error.message;
-		} else {
-			this.error = undefined;
-			this.message = '';
-		}
-
-		this.message = this.message || data.message || 'Git error';
-		this.stdout = data.stdout;
-		this.stderr = data.stderr;
-		this.exitCode = data.exitCode;
-		this.gitErrorCode = data.gitErrorCode;
-		this.gitCommand = data.gitCommand;
-		this.gitArgs = data.gitArgs;
-	}
-
-	toString(): string {
-		let result = this.message + ' ' + JSON.stringify({
-			exitCode: this.exitCode,
-			gitErrorCode: this.gitErrorCode,
-			gitCommand: this.gitCommand,
-			stdout: this.stdout,
-			stderr: this.stderr
-		}, null, 2);
-
-		if (this.error) {
-			result += (<any>this.error).stack;
-		}
-
-		return result;
-	}
-}
-
 export interface IGitOptions {
 	gitPath: string;
 	userAgent: string;
 	version: string;
 	env?: any;
-}
-
-function getGitErrorCode(stderr: string): string | undefined {
-	if (/Another git process seems to be running in this repository|If no other git process is currently running/.test(stderr)) {
-		return GitErrorCodes.RepositoryIsLocked;
-	} else if (/Authentication failed/i.test(stderr)) {
-		return GitErrorCodes.AuthenticationFailed;
-	} else if (/Not a git repository/i.test(stderr)) {
-		return GitErrorCodes.NotAGitRepository;
-	} else if (/bad config file/.test(stderr)) {
-		return GitErrorCodes.BadConfigFile;
-	} else if (/cannot make pipe for command substitution|cannot create standard input pipe/.test(stderr)) {
-		return GitErrorCodes.CantCreatePipe;
-	} else if (/Repository not found/.test(stderr)) {
-		return GitErrorCodes.RepositoryNotFound;
-	} else if (/unable to access/.test(stderr)) {
-		return GitErrorCodes.CantAccessRemote;
-	} else if (/branch '.+' is not fully merged/.test(stderr)) {
-		return GitErrorCodes.BranchNotFullyMerged;
-	} else if (/Couldn\'t find remote ref/.test(stderr)) {
-		return GitErrorCodes.NoRemoteReference;
-	} else if (/A branch named '.+' already exists/.test(stderr)) {
-		return GitErrorCodes.BranchAlreadyExists;
-	} else if (/'.+' is not a valid branch name/.test(stderr)) {
-		return GitErrorCodes.InvalidBranchName;
-	} else if (/Please,? commit your changes or stash them/.test(stderr)) {
-		return GitErrorCodes.DirtyWorkTree;
-	}
-
-	return undefined;
 }
 
 // https://github.com/microsoft/vscode/issues/89373
@@ -1815,56 +1605,7 @@ export class Repository {
 	}
 
 	getStatus(opts?: { limit?: number, ignoreSubmodules?: boolean }): Promise<{ status: IFileStatus[]; didHitLimit: boolean; }> {
-		return new Promise<{ status: IFileStatus[]; didHitLimit: boolean; }>((c, e) => {
-			const parser = new GitStatusParser();
-			const env = { GIT_OPTIONAL_LOCKS: '0' };
-			const args = ['status', '-z', '-u'];
-
-			if (opts?.ignoreSubmodules) {
-				args.push('--ignore-submodules');
-			}
-
-			const child = this.stream(args, { env });
-
-			const onExit = (exitCode: number) => {
-				if (exitCode !== 0) {
-					const stderr = stderrData.join('');
-					return e(new GitError({
-						message: 'Failed to execute git',
-						stderr,
-						exitCode,
-						gitErrorCode: getGitErrorCode(stderr),
-						gitCommand: 'status',
-						gitArgs: args
-					}));
-				}
-
-				c({ status: parser.status, didHitLimit: false });
-			};
-
-			const limit = opts?.limit ?? 5000;
-			const onStdoutData = (raw: string) => {
-				parser.update(raw);
-
-				if (parser.status.length > limit) {
-					child.removeListener('exit', onExit);
-					child.stdout!.removeListener('data', onStdoutData);
-					child.kill();
-
-					c({ status: parser.status.slice(0, limit), didHitLimit: true });
-				}
-			};
-
-			child.stdout!.setEncoding('utf8');
-			child.stdout!.on('data', onStdoutData);
-
-			const stderrData: string[] = [];
-			child.stderr!.setEncoding('utf8');
-			child.stderr!.on('data', raw => stderrData.push(raw as string));
-
-			child.on('error', cpErrorHandler(e));
-			child.on('exit', onExit);
-		});
+		return getStatus(this.stream, opts);
 	}
 
 	async getHEAD(): Promise<Ref> {
