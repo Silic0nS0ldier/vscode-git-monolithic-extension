@@ -7,14 +7,15 @@
 				"file-type": "^16.5.3",
 				"iconv-lite-umd": "0.6.8",
 				"jschardet": "3.0.0",
-				"vscode-extension-telemetry": "0.3.2",
+				"vscode-extension-telemetry": "0.4.2",
 				"vscode-nls": "^5.0.0",
-				"which": "^2.0.2"
+				"which": "^2.0.2",
+        "watcher": "^1.2.0"
 		},
 		"devDependencies": {
 				"@types/byline": "4.2.31",
 				"@types/node": "^14.17.19",
-				"@types/vscode": "^1.60.0",
+				"@types/vscode": "^1.61.0",
 				"@types/which": "^2.0.1"
 		}
 }

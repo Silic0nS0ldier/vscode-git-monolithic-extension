@@ -4,7 +4,8 @@ import Execa from "execa";
 
 async function main() {
 	console.log("Building extension first");
-	await import ("./build.js");
+	const build = await import ("./build.js");
+	await build.running;
 
 	console.log("Running VSCE...");
 
