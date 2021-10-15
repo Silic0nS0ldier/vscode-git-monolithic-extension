@@ -537,14 +537,23 @@ class DotGitWatcher implements IFileWatcher {
 		private repository: Repository,
 		private outputChannel: OutputChannel
 	) {
-		const rootWatcher = watch(repository.dotGit);
+		// Watch specific files for meaningful git events
+		// This is a lot more efficient then watching everything, and avoids workarounds for aids like watchman as an fsmonitor
+		const rootWatcher = watch([
+			// Where we are
+			path.join(repository.dotGit, 'HEAD'),
+			// What we are tracking
+			path.join(repository.dotGit, 'index'),
+			// Graph of what we know
+			path.join(repository.dotGit, 'refs'),
+			// Current commit message
+			path.join(repository.dotGit, 'COMMIT_EDITMSG'),
+			// How we do things
+			path.join(repository.dotGit, 'config'),
+		]);
 		this.disposables.push(rootWatcher);
 
-		// People might be using the watchman fsmonitor hook (https://git-scm.com/docs/githooks#_fsmonitor_watchman)
-		// on large repos. Watchman creates a cookie file inside the git directory whenever a query is run (https://facebook.github.io/watchman/docs/cookies.html)
-		// We need to ignore it to avoid an infinite loop of git operation -> watchman cookie -> git operation
-		const filteredRootWatcher = filterEvent(rootWatcher.event, uri => !/\/\.git(\/index\.lock)?$/.test(uri.path) && !/\/\.watchman-cookie.*/.test(uri.path));
-		this.event = anyEvent(filteredRootWatcher, this.emitter.event);
+		this.event = anyEvent(rootWatcher.event, this.emitter.event);
 
 		repository.onDidRunGitStatus(this.updateTransientWatchers, this, this.disposables);
 		this.updateTransientWatchers();
@@ -563,7 +572,7 @@ class DotGitWatcher implements IFileWatcher {
 		const upstreamPath = path.join(this.repository.dotGit, 'refs', 'remotes', remote, name);
 
 		try {
-			const upstreamWatcher = watch(upstreamPath);
+			const upstreamWatcher = watch([upstreamPath]);
 			this.transientDisposables.push(upstreamWatcher);
 			upstreamWatcher.event(this.emitter.fire, this.emitter, this.transientDisposables);
 		} catch (err) {
