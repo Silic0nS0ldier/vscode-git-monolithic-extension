@@ -95,10 +95,6 @@ export class ApiRepository implements Repository {
 		return this._repository.getObjectDetails(treeish, path);
 	}
 
-	detectObjectType(object: string): Promise<{ mimetype: string, encoding?: string }> {
-		return this._repository.detectObjectType(object);
-	}
-
 	buffer(ref: string, filePath: string): Promise<Buffer> {
 		return this._repository.buffer(ref, filePath);
 	}

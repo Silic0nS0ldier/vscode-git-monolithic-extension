@@ -9,8 +9,7 @@ import * as os from 'node:os';
 import * as cp from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import * as iconv from 'iconv-lite-umd';
-import * as filetype from 'file-type';
-import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, readBytes, detectUnicodeEncoding, Encoding, onceEvent, splitInChunks, Limiter, Versions } from './util.js';
+import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, onceEvent, splitInChunks, Limiter, Versions } from './util.js';
 import { CancellationToken, Progress, Uri } from 'vscode';
 import { detectEncoding } from './encoding.js';
 import { Ref, RefType, Branch, Remote, ForcePushMode, GitErrorCodes, LogOptions, Change, CommitOptions, BranchQuery } from './api/git.js';
@@ -728,46 +727,6 @@ export class Repository {
 		}
 
 		return element.file;
-	}
-
-	async detectObjectType(object: string): Promise<{ mimetype: string, encoding?: string }> {
-		const child = await this.stream(['show', '--textconv', object]);
-		const buffer = await readBytes(child.stdout!, 4100);
-
-		try {
-			child.kill();
-		} catch (err) {
-			// noop
-		}
-
-		const encoding = detectUnicodeEncoding(buffer);
-		let isText = true;
-
-		if (encoding !== Encoding.UTF16be && encoding !== Encoding.UTF16le) {
-			for (let i = 0; i < buffer.length; i++) {
-				if (buffer.readInt8(i) === 0) {
-					isText = false;
-					break;
-				}
-			}
-		}
-
-		if (!isText) {
-			const result = await filetype.fromBuffer(buffer);
-
-			if (!result) {
-				return { mimetype: 'application/octet-stream' };
-			} else {
-				return { mimetype: result.mime };
-			}
-		}
-
-		if (encoding) {
-			return { mimetype: 'text/plain', encoding };
-		} else {
-			// TODO@JOAO: read the setting OUTSIDE!
-			return { mimetype: 'text/plain' };
-		}
 	}
 
 	async apply(patch: string, reverse?: boolean): Promise<void> {

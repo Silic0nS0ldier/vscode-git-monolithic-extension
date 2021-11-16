@@ -1549,10 +1549,6 @@ export class Repository implements Disposable {
 		return this.run(Operation.GetObjectDetails, () => this.repository.getObjectDetails(ref, filePath));
 	}
 
-	detectObjectType(object: string): Promise<{ mimetype: string, encoding?: string; }> {
-		return this.run(Operation.Show, () => this.repository.detectObjectType(object));
-	}
-
 	async apply(patch: string, reverse?: boolean): Promise<void> {
 		return await this.run(Operation.Apply, () => this.repository.apply(patch, reverse));
 	}
