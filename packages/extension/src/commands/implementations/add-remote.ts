@@ -1,5 +1,5 @@
 import { window } from "vscode";
-import { sanitizeRemoteName, ScmCommand } from "../../commands.js";
+import { ScmCommand } from "../../commands.js";
 import { Model } from "../../model.js";
 import { pickRemoteSource } from "../../remoteSource.js";
 import { Repository } from "../../repository.js";
@@ -60,3 +60,7 @@ export function createCommand(
 	};
 }
 
+export function sanitizeRemoteName(name: string) {
+	name = name.trim();
+	return name && name.replace(/^\.|\/\.|\.\.|~|\^|:|\/$|\.lock$|\.lock\/|\\|\*|\s|^\s*$|\.$|\[|\]$/g, '-');
+}
