@@ -22,6 +22,7 @@ import { stashPopLatestCmdImpl } from './commands/implementations/stash-pop-late
 import { addRemoteCmdImpl } from './commands/implementations/add-remote.js';
 import { publishCmdImpl } from './commands/implementations/publish.js';
 import { createCommand } from './commands/create.js';
+import { PushType } from './commands/implementations/push/helpers.js';
 
 class CheckoutItem implements QuickPickItem {
 
@@ -182,13 +183,6 @@ export class TagItem implements QuickPickItem {
 	get label(): string { return this.ref.name ?? ''; }
 	get description(): string { return this.ref.commit?.substr(0, 8) ?? ''; }
 	constructor(readonly ref: Ref) { }
-}
-
-export enum PushType {
-	Push,
-	PushTo,
-	PushFollowTags,
-	PushTags
 }
 
 export interface PushOptions {
