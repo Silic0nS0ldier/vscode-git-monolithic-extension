@@ -270,6 +270,9 @@ export interface API {
 	registerPushErrorHandler(handler: PushErrorHandler): Disposable;
 }
 
+/**
+ * Public API of extension.
+ */
 export interface GitExtension {
 
 	readonly enabled: boolean;
