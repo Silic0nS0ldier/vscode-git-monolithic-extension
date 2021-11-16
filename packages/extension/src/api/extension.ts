@@ -4,21 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Model } from '../model.js';
-import { GitExtension, Repository, API } from './git.js';
-import { ApiRepository, ApiImpl } from './api1.js';
+import { GitExtension, API } from './git.js';
+import { ApiImpl } from './api1.js';
 import { Event, EventEmitter } from 'vscode';
-
-export function deprecated(_target: any, key: string, descriptor: any): void {
-	if (typeof descriptor.value !== 'function') {
-		throw new Error('not supported');
-	}
-
-	const fn = descriptor.value;
-	descriptor.value = function () {
-		console.warn(`Git extension API method '${key}' is deprecated.`);
-		return fn.apply(this, arguments);
-	};
-}
 
 export class GitExtensionImpl implements GitExtension {
 
@@ -51,24 +39,6 @@ export class GitExtensionImpl implements GitExtension {
 			this.enabled = true;
 			this._model = model;
 		}
-	}
-
-	@deprecated
-	async getGitPath(): Promise<string> {
-		if (!this._model) {
-			throw new Error('Git model not found');
-		}
-
-		return this._model.git.path;
-	}
-
-	@deprecated
-	async getRepositories(): Promise<Repository[]> {
-		if (!this._model) {
-			throw new Error('Git model not found');
-		}
-
-		return this._model.repositories.map(repository => new ApiRepository(repository));
 	}
 
 	getAPI(version: number): API {
