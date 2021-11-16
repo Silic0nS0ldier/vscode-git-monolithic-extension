@@ -4,7 +4,7 @@
 	"description": "%description%",
 	"publisher": "silicon-soldier",
 	"license": "MIT",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"engines": {
 		"vscode": "^1.60.0"
 	},
@@ -13,8 +13,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"*",
-		"onFileSystem:git"
+		"onStartupFinished"
 	],
 	"main": "./src/main.js",
 	"icon": "resources/icons/git.png",
