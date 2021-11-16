@@ -42,16 +42,3 @@ function _memoize(fn: Function, key: string): Function {
 }
 
 export const memoize = decorate(_memoize);
-
-function _sequentialize(fn: Function, key: string): Function {
-	const currentKey = `__$sequence$${key}`;
-
-	return function (this: any, ...args: any[]) {
-		const currentPromise = this[currentKey] as Promise<any> || Promise.resolve(null);
-		const run = async () => await fn.apply(this, args);
-		this[currentKey] = currentPromise.then(run, run);
-		return this[currentKey];
-	};
-}
-
-export const sequentialize = decorate(_sequentialize);

@@ -5,7 +5,7 @@
 
 import { workspace, WorkspaceFoldersChangeEvent, Uri, window, Event, EventEmitter, QuickPickItem, Disposable, SourceControl, SourceControlResourceGroup, TextEditor, Memento, OutputChannel, commands } from 'vscode';
 import { Repository, RepositoryState } from './repository.js';
-import { memoize, sequentialize } from './decorators.js';
+import { memoize } from './decorators.js';
 import { dispose, anyEvent, filterEvent, isDescendant, pathEquals, toDisposable, eventToPromise, localize } from './util.js';
 import { Git } from './git.js';
 import * as path from 'node:path';
@@ -17,6 +17,7 @@ import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
 import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
 import debounce from 'just-debounce';
+import throat from 'throat';
 
 class RepositoryPick implements QuickPickItem {
 	@memoize get label(): string {
@@ -251,8 +252,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 		}));
 	}
 
-	@sequentialize
-	async openRepository(repoPath: string): Promise<void> {
+	openRepository = throat(1, async (repoPath: string) => {
 		if (this.getRepository(repoPath)) {
 			return;
 		}
@@ -302,7 +302,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 			// noop
 			this.outputChannel.appendLine(`Opening repository for path='${repoPath}' failed; ex=${ex}`);
 		}
-	}
+	})
 
 	private shouldRepositoryBeIgnored(repositoryRoot: string): boolean {
 		const config = workspace.getConfiguration('git');
