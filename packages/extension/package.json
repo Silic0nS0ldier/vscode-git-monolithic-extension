@@ -10,6 +10,7 @@
 				"vscode-extension-telemetry": "0.4.2",
 				"vscode-nls": "^5.0.0",
 				"which": "^2.0.2",
+        "just-debounce": "^1.1.0",
         "watcher": "^1.2.0"
 		},
 		"devDependencies": {

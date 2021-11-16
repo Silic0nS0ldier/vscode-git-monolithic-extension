@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { workspace, Uri, Disposable, Event, EventEmitter, window, FileSystemProvider, FileChangeEvent, FileStat, FileType, FileChangeType, FileSystemError } from 'vscode';
-import { debounce, throttle } from './decorators.js';
+import { throttle } from './decorators.js';
 import { fromGitUri, toGitUri } from './uri.js';
 import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from './model.js';
 import { filterEvent, eventToPromise, isDescendant, pathEquals, EmptyDisposable } from './util.js';
 import { Repository } from './repository.js';
+import debounce from "just-debounce";
 
 interface CacheRow {
 	uri: Uri;
@@ -75,10 +76,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 		this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri: gitUri }]);
 	}
 
-	@debounce(1100)
-	private eventuallyFireChangeEvents(): void {
-		this.fireChangeEvents();
-	}
+	private eventuallyFireChangeEvents = debounce(this.fireChangeEvents, 1100);
 
 	@throttle
 	private async fireChangeEvents(): Promise<void> {

@@ -5,7 +5,7 @@
 
 import { workspace, WorkspaceFoldersChangeEvent, Uri, window, Event, EventEmitter, QuickPickItem, Disposable, SourceControl, SourceControlResourceGroup, TextEditor, Memento, OutputChannel, commands } from 'vscode';
 import { Repository, RepositoryState } from './repository.js';
-import { memoize, sequentialize, debounce } from './decorators.js';
+import { memoize, sequentialize } from './decorators.js';
 import { dispose, anyEvent, filterEvent, isDescendant, pathEquals, toDisposable, eventToPromise, localize } from './util.js';
 import { Git } from './git.js';
 import * as path from 'node:path';
@@ -16,6 +16,7 @@ import { Askpass } from './askpass.js';
 import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
 import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
+import debounce from 'just-debounce';
 
 class RepositoryPick implements QuickPickItem {
 	@memoize get label(): string {
@@ -180,14 +181,13 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 		this.eventuallyScanPossibleGitRepositories();
 	}
 
-	@debounce(500)
-	private eventuallyScanPossibleGitRepositories(): void {
+	private eventuallyScanPossibleGitRepositories = debounce(() => {
 		for (const path of this.possibleGitRepositoryPaths) {
 			this.openRepository(path);
 		}
 
 		this.possibleGitRepositoryPaths.clear();
-	}
+	}, 500)
 
 	private async onDidChangeWorkspaceFolders({ added, removed }: WorkspaceFoldersChangeEvent): Promise<void> {
 		const possibleRepositoryFolders = added

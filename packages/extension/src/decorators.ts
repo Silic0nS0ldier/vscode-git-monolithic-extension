@@ -88,14 +88,3 @@ function _sequentialize(fn: Function, key: string): Function {
 }
 
 export const sequentialize = decorate(_sequentialize);
-
-export function debounce(delay: number): Function {
-	return decorate((fn, key) => {
-		const timerKey = `$debounce$${key}`;
-
-		return function (this: any, ...args: any[]) {
-			clearTimeout(this[timerKey]);
-			this[timerKey] = setTimeout(() => fn.apply(this, args), delay);
-		};
-	});
-}

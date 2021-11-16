@@ -7,9 +7,9 @@ import { window, workspace, Uri, Disposable, Event, EventEmitter, FileDecoration
 import * as path from 'node:path';
 import { Repository, GitResourceGroup } from './repository.js';
 import { Model } from './model.js';
-import { debounce } from './decorators.js';
 import { filterEvent, dispose, anyEvent, fireEvent, PromiseSource } from './util.js';
 import { GitErrorCodes, Status } from './api/git.js';
+import debounce from 'just-debounce';
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
 
@@ -54,8 +54,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
 		return await promiseSource.promise;
 	}
 
-	@debounce(500)
-	private checkIgnoreSoon(): void {
+	private checkIgnoreSoon = debounce(() => {
 		const queue = new Map(this.queue.entries());
 		this.queue.clear();
 
@@ -76,7 +75,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
 				}
 			});
 		}
-	}
+	}, 500)
 
 	dispose(): void {
 		this.disposables.forEach(d => d.dispose());

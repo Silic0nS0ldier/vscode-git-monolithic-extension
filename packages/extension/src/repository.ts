@@ -8,7 +8,7 @@ import * as path from 'node:path';
 import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, OutputChannel, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands } from 'vscode';
 import { Branch, Change, ForcePushMode, GitErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, BranchQuery, FetchOptions } from './api/git.js';
 import { AutoFetcher } from './autofetch.js';
-import { debounce, memoize, throttle } from './decorators.js';
+import { memoize, throttle } from './decorators.js';
 import { Commit, Repository as BaseRepository, Stash, Submodule, LogFileOptions } from './git.js';
 import { StatusBarCommands } from './statusbar.js';
 import { toGitUri } from './uri.js';
@@ -19,6 +19,7 @@ import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
 import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
 import { GitError } from './git/error.js';
+import debounce from 'just-debounce';
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 
@@ -2011,10 +2012,7 @@ export class Repository implements Disposable {
 		this.eventuallyUpdateWhenIdleAndWait();
 	}
 
-	@debounce(1000)
-	private eventuallyUpdateWhenIdleAndWait(): void {
-		this.updateWhenIdleAndWait();
-	}
+	private eventuallyUpdateWhenIdleAndWait = debounce(this.updateWhenIdleAndWait, 1000);
 
 	// TODO This should fire on first hit, then again on leading edge if there is another call
 	@throttle
