@@ -539,18 +539,22 @@ class DotGitWatcher implements IFileWatcher {
 	) {
 		// Watch specific files for meaningful git events
 		// This is a lot more efficient then watching everything, and avoids workarounds for aids like watchman as an fsmonitor
-		const rootWatcher = watch([
-			// Where we are
-			path.join(repository.dotGit, 'HEAD'),
-			// What we are tracking
-			path.join(repository.dotGit, 'index'),
-			// Graph of what we know
-			path.join(repository.dotGit, 'refs'),
-			// Current commit message
-			path.join(repository.dotGit, 'COMMIT_EDITMSG'),
-			// How we do things
-			path.join(repository.dotGit, 'config'),
-		]);
+		const rootWatcher = watch(
+			[
+				// Where we are
+				path.join(repository.dotGit, 'HEAD'),
+				// What we are tracking
+				path.join(repository.dotGit, 'index'),
+				// Graph of what we know
+				path.join(repository.dotGit, 'refs'),
+				// Current commit message
+				path.join(repository.dotGit, 'COMMIT_EDITMSG'),
+				// How we do things
+				path.join(repository.dotGit, 'config'),
+			],
+			// Don't propagate events if index being modified
+			[path.join(repository.dotGit, 'index.lock')],
+		);
 		this.disposables.push(rootWatcher);
 
 		this.event = anyEvent(rootWatcher.event, this.emitter.event);
@@ -572,7 +576,7 @@ class DotGitWatcher implements IFileWatcher {
 		const upstreamPath = path.join(this.repository.dotGit, 'refs', 'remotes', remote, name);
 
 		try {
-			const upstreamWatcher = watch([upstreamPath]);
+			const upstreamWatcher = watch([upstreamPath], []);
 			this.transientDisposables.push(upstreamWatcher);
 			upstreamWatcher.event(this.emitter.fire, this.emitter, this.transientDisposables);
 		} catch (err) {
