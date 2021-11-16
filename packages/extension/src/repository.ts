@@ -8,7 +8,6 @@ import * as path from 'node:path';
 import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, OutputChannel, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands } from 'vscode';
 import { Branch, Change, ForcePushMode, GitErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, BranchQuery, FetchOptions } from './api/git.js';
 import { AutoFetcher } from './autofetch.js';
-import { memoize } from './decorators.js';
 import { Commit, Repository as BaseRepository, Stash, Submodule, LogFileOptions } from './git.js';
 import { StatusBarCommands } from './statusbar.js';
 import { toGitUri } from './uri.js';
@@ -21,6 +20,7 @@ import { ApiRepository } from './api/api1.js';
 import { GitError } from './git/error.js';
 import debounce from 'just-debounce';
 import throat from 'throat';
+import onetime from 'onetime';
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 
@@ -67,31 +67,31 @@ export class Resource implements SourceControlResourceState {
 		}
 	}
 
-	@memoize
 	get resourceUri(): Uri {
+		return this.___resourceUri();
+	}
+
+	private ___resourceUri = onetime(() => {
 		if (this.renameResourceUri && (this._type === Status.MODIFIED || this._type === Status.DELETED || this._type === Status.INDEX_RENAMED || this._type === Status.INDEX_COPIED)) {
 			return this.renameResourceUri;
 		}
 
 		return this._resourceUri;
-	}
+	})
 
 	get leftUri(): Uri | undefined {
-		return this.resources[0];
+		return this._resources()[0];
 	}
 
 	get rightUri(): Uri | undefined {
-		return this.resources[1];
+		return this._resources()[1];
 	}
 
 	get command(): Command {
 		return this._commandResolver.resolveDefaultCommand(this);
 	}
 
-	@memoize
-	private get resources(): [Uri | undefined, Uri | undefined] {
-		return this._commandResolver.getResources(this);
-	}
+	private _resources = onetime((): [Uri | undefined, Uri | undefined] => this._commandResolver.getResources(this))
 
 	get resourceGroupType(): ResourceGroupType { return this._resourceGroupType; }
 	get type(): Status { return this._type; }
@@ -161,20 +161,19 @@ export class Resource implements SourceControlResourceState {
 		}
 	}
 
-	@memoize
-	private get faded(): boolean {
+	private _faded = onetime(() => {
 		// TODO@joao
 		return false;
 		// const workspaceRootPath = this.workspaceRoot.fsPath;
 		// return this.resourceUri.fsPath.substr(0, workspaceRootPath.length) !== workspaceRootPath;
-	}
+	})
 
 	get decorations(): SourceControlResourceDecorations {
 		const light = this._useIcons ? { iconPath: this.getIconPath('light') } : undefined;
 		const dark = this._useIcons ? { iconPath: this.getIconPath('dark') } : undefined;
 		const tooltip = this.tooltip;
 		const strikeThrough = this.strikeThrough;
-		const faded = this.faded;
+		const faded = this._faded();
 		return { strikeThrough, faded, tooltip, light, dark };
 	}
 
@@ -752,10 +751,11 @@ export class Repository implements Disposable {
 	private _onDidRunOperation = new EventEmitter<OperationResult>();
 	readonly onDidRunOperation: Event<OperationResult> = this._onDidRunOperation.event;
 
-	@memoize
 	get onDidChangeOperations(): Event<void> {
-		return anyEvent(this.onRunOperation as Event<any>, this.onDidRunOperation as Event<any>);
+		return this._onDidChangeOperations();
 	}
+
+	private _onDidChangeOperations = onetime(() => anyEvent(this.onRunOperation as Event<any>, this.onDidRunOperation as Event<any>))
 
 	private _sourceControl: SourceControl;
 	get sourceControl(): SourceControl { return this._sourceControl; }

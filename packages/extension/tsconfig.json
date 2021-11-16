@@ -40,7 +40,8 @@
 		"typeRoots": [
 			"./node_modules/@types"
 		],
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"useDefineForClassFields": true
 	},
 	"include": [
 		"src/**/*"

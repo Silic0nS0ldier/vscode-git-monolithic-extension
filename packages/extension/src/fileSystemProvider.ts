@@ -130,7 +130,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 	}
 
 	async stat(uri: Uri): Promise<FileStat> {
-		await this.model.isInitialized;
+		await this.model.isInitialized();
 
 		const { submoduleOf, path, ref } = fromGitUri(uri);
 		const repository = submoduleOf ? this.model.getRepository(submoduleOf) : this.model.getRepository(uri);
@@ -157,7 +157,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 	}
 
 	async readFile(uri: Uri): Promise<Uint8Array> {
-		await this.model.isInitialized;
+		await this.model.isInitialized();
 
 		const { path, ref, submoduleOf } = fromGitUri(uri);
 
