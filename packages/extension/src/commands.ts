@@ -20,7 +20,7 @@ import { cleanAllCmdImpl } from './commands/implementations/clean-all.js';
 import { stashCmdImpl } from './commands/implementations/stash.js';
 import { stashPopLatestCmdImpl } from './commands/implementations/stash-pop-latest.js';
 import { addRemoteCmdImpl } from './commands/implementations/add-remote.js';
-import { publishCmdImpl } from './commands/implementations/publish.js';
+import { AddRemoteItem, publishCmdImpl } from './commands/implementations/publish.js';
 import { createCommand } from './commands/create.js';
 import { PushType } from './commands/implementations/push/helpers.js';
 
@@ -96,20 +96,6 @@ class HEADItem implements QuickPickItem {
 	get label(): string { return 'HEAD'; }
 	get description(): string { return (this.repository.HEAD && this.repository.HEAD.commit || '').substr(0, 8); }
 	get alwaysShow(): boolean { return true; }
-}
-
-export class AddRemoteItem implements QuickPickItem {
-
-	constructor(private addRemote: (repository: Repository) => Promise<string|void>) { }
-
-	get label(): string { return '$(plus) ' + localize('add remote', 'Add a new remote...'); }
-	get description(): string { return ''; }
-
-	get alwaysShow(): boolean { return true; }
-
-	async run(repository: Repository): Promise<void> {
-		await this.addRemote(repository);
-	}
 }
 
 export interface ScmCommandOptions {
