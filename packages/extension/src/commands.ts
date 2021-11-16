@@ -10,9 +10,9 @@ import TelemetryReporter from 'vscode-extension-telemetry';
 import { ForcePushMode, GitErrorCodes, Ref, RefType, Status, CommitOptions } from './api/git.js';
 import { Git, Stash } from './git.js';
 import { Model } from './model.js';
-import { Repository, Resource, ResourceGroupType } from './repository.js';
+import { Repository, Resource } from './repository.js';
 import { fromGitUri, isGitUri } from './uri.js';
-import { grep, isDescendant, localize, pathEquals } from './util.js';
+import { isDescendant, localize, pathEquals } from './util.js';
 import { pickRemoteSource } from './remoteSource.js';
 import { registerCommands } from './commands/register.js';
 import { syncCmdImpl } from './commands/implementations/sync.js';
@@ -120,24 +120,6 @@ export interface ScmCommand {
 	commandId: string;
 	method: Function;
 	options: ScmCommandOptions;
-}
-
-export async function categorizeResourceByResolution(resources: Resource[]): Promise<{ merge: Resource[], resolved: Resource[], unresolved: Resource[], deletionConflicts: Resource[] }> {
-	const selection = resources.filter(s => s instanceof Resource) as Resource[];
-	const merge = selection.filter(s => s.resourceGroupType === ResourceGroupType.Merge);
-	const isBothAddedOrModified = (s: Resource) => s.type === Status.BOTH_MODIFIED || s.type === Status.BOTH_ADDED;
-	const isAnyDeleted = (s: Resource) => s.type === Status.DELETED_BY_THEM || s.type === Status.DELETED_BY_US;
-	const possibleUnresolved = merge.filter(isBothAddedOrModified);
-	const promises = possibleUnresolved.map(s => grep(s.resourceUri.fsPath, /^<{7}|^={7}|^>{7}/));
-	const unresolvedBothModified = await Promise.all<boolean>(promises);
-	const resolved = possibleUnresolved.filter((_s, i) => !unresolvedBothModified[i]);
-	const deletionConflicts = merge.filter(s => isAnyDeleted(s));
-	const unresolved = [
-		...merge.filter(s => !isBothAddedOrModified(s) && !isAnyDeleted(s)),
-		...possibleUnresolved.filter((_s, i) => unresolvedBothModified[i])
-	];
-
-	return { merge, resolved, unresolved, deletionConflicts };
 }
 
 function createCheckoutItems(repository: Repository): CheckoutItem[] {

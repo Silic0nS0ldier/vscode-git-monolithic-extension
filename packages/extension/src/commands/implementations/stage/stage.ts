@@ -1,8 +1,9 @@
 import { OutputChannel, SourceControlResourceState, Uri, window } from "vscode";
 import * as path from 'node:path';
-import { categorizeResourceByResolution, RunByRepository, ScmCommand } from "../../commands.js";
-import { Repository, Resource, ResourceGroupType } from "../../repository.js";
-import { localize } from "../../util.js";
+import type { RunByRepository, ScmCommand } from "../../../commands.js";
+import { Repository, Resource, ResourceGroupType } from "../../../repository.js";
+import { localize } from "../../../util.js";
+import { categorizeResourceByResolution } from "./helpers.js";
 
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,
