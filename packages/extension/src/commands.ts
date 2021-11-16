@@ -174,12 +174,6 @@ function getCheckoutProcessor(type: string): CheckoutProcessor | undefined {
 	return undefined;
 }
 
-export class TagItem implements QuickPickItem {
-	get label(): string { return this.ref.name ?? ''; }
-	get description(): string { return this.ref.commit?.substr(0, 8) ?? ''; }
-	constructor(readonly ref: Ref) { }
-}
-
 export interface PushOptions {
 	pushType: PushType;
 	forcePush?: boolean;

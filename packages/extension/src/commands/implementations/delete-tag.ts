@@ -1,6 +1,6 @@
-import { window } from "vscode";
-import { RefType } from "../../api/git.js";
-import { ScmCommand, TagItem } from "../../commands.js";
+import { QuickPickItem, window } from "vscode";
+import { Ref, RefType } from "../../api/git.js";
+import { ScmCommand } from "../../commands.js";
 import { Repository } from "../../repository.js";
 import { localize } from "../../util.js";
 
@@ -33,3 +33,9 @@ export function createCommand(): ScmCommand {
 	};
 }
 
+
+class TagItem implements QuickPickItem {
+	get label(): string { return this.ref.name ?? ''; }
+	get description(): string { return this.ref.commit?.substr(0, 8) ?? ''; }
+	constructor(readonly ref: Ref) { }
+}
