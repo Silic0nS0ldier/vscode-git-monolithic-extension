@@ -20,6 +20,7 @@ import { getGitErrorCode } from './git/error.js';
 import { cpErrorHandler, GitError } from './git/error.js'
 import { getStatus } from './git/status.js';
 import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from './git/diff.js';
+import { sanitizePath } from './git/helpers.js';
 
 export { findGit, IGit } from './git/find.js';
 
@@ -139,12 +140,6 @@ export interface IGitOptions {
 	userAgent: string;
 	version: string;
 	env?: any;
-}
-
-// https://github.com/microsoft/vscode/issues/89373
-// https://github.com/git-for-windows/git/issues/2478
-export function sanitizePath(path: string): string {
-	return path.replace(/^([a-z]):\\/i, (_, letter) => `${letter.toUpperCase()}:\\`);
 }
 
 const COMMIT_FORMAT = '%H%n%aN%n%aE%n%at%n%ct%n%P%n%B';

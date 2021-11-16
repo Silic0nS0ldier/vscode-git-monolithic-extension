@@ -1,7 +1,8 @@
 import * as path from "node:path";
 import { Uri } from "vscode";
 import { Change, Status } from "../api/git.js";
-import { IExecutionResult, sanitizePath, SpawnOptions } from "../git.js";
+import { IExecutionResult, SpawnOptions } from "../git.js";
+import { sanitizePath } from "./helpers.js";
 
 type Exec = (args: string[], options?: SpawnOptions) => Promise<IExecutionResult<string>>;
 
