@@ -22,8 +22,6 @@ import { getStatus } from './git/status.js';
 import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from './git/diff.js';
 
 export { findGit, IGit } from './git/find.js';
-export { IGitErrorData } from './git/error.js'
-export { cpErrorHandler, GitError }
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
@@ -400,72 +398,6 @@ export interface Commit {
 	authorName?: string;
 	authorEmail?: string;
 	commitDate?: Date;
-}
-
-export class GitStatusParser {
-
-	private lastRaw = '';
-	private result: IFileStatus[] = [];
-
-	get status(): IFileStatus[] {
-		return this.result;
-	}
-
-	update(raw: string): void {
-		let i = 0;
-		let nextI: number | undefined;
-
-		raw = this.lastRaw + raw;
-
-		while ((nextI = this.parseEntry(raw, i)) !== undefined) {
-			i = nextI;
-		}
-
-		this.lastRaw = raw.substr(i);
-	}
-
-	private parseEntry(raw: string, i: number): number | undefined {
-		if (i + 4 >= raw.length) {
-			return;
-		}
-
-		let lastIndex: number;
-		const entry: IFileStatus = {
-			x: raw.charAt(i++),
-			y: raw.charAt(i++),
-			rename: undefined,
-			path: ''
-		};
-
-		// space
-		i++;
-
-		if (entry.x === 'R' || entry.x === 'C') {
-			lastIndex = raw.indexOf('\0', i);
-
-			if (lastIndex === -1) {
-				return;
-			}
-
-			entry.rename = raw.substring(i, lastIndex);
-			i = lastIndex + 1;
-		}
-
-		lastIndex = raw.indexOf('\0', i);
-
-		if (lastIndex === -1) {
-			return;
-		}
-
-		entry.path = raw.substring(i, lastIndex);
-
-		// If path ends with slash, it must be a nested git repo
-		if (entry.path[entry.path.length - 1] !== '/') {
-			this.result.push(entry);
-		}
-
-		return lastIndex + 1;
-	}
 }
 
 export interface Submodule {

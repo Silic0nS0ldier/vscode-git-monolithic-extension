@@ -9,7 +9,7 @@ import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, O
 import { Branch, Change, ForcePushMode, GitErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, BranchQuery, FetchOptions } from './api/git.js';
 import { AutoFetcher } from './autofetch.js';
 import { debounce, memoize, throttle } from './decorators.js';
-import { Commit, GitError, Repository as BaseRepository, Stash, Submodule, LogFileOptions } from './git.js';
+import { Commit, Repository as BaseRepository, Stash, Submodule, LogFileOptions } from './git.js';
 import { StatusBarCommands } from './statusbar.js';
 import { toGitUri } from './uri.js';
 import { anyEvent, combinedDisposable, debounceEvent, dispose, EmptyDisposable, eventToPromise, filterEvent, find, IDisposable, isDescendant, localize, onceEvent } from './util.js';
@@ -18,6 +18,7 @@ import { Log, LogLevel } from './log.js';
 import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
 import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
+import { GitError } from './git/error.js';
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 

@@ -1,6 +1,6 @@
 import * as cp from "node:child_process";
-import { GitError, GitStatusParser, IFileStatus, SpawnOptions } from "../git.js";
-import { cpErrorHandler, getGitErrorCode } from "./error.js";
+import { IFileStatus, SpawnOptions } from "../git.js";
+import { cpErrorHandler, getGitErrorCode, GitError } from "./error.js";
 
 export async function getStatus(
 	stream: (args: string[], options?: SpawnOptions) => cp.ChildProcess,
@@ -58,4 +58,70 @@ export async function getStatus(
 		};
 		child.stdout?.on('data', onStdoutData);
 	});
+}
+
+class GitStatusParser {
+
+	private lastRaw = '';
+	private result: IFileStatus[] = [];
+
+	get status(): IFileStatus[] {
+		return this.result;
+	}
+
+	update(raw: string): void {
+		let i = 0;
+		let nextI: number | undefined;
+
+		raw = this.lastRaw + raw;
+
+		while ((nextI = this.parseEntry(raw, i)) !== undefined) {
+			i = nextI;
+		}
+
+		this.lastRaw = raw.substr(i);
+	}
+
+	private parseEntry(raw: string, i: number): number | undefined {
+		if (i + 4 >= raw.length) {
+			return;
+		}
+
+		let lastIndex: number;
+		const entry: IFileStatus = {
+			x: raw.charAt(i++),
+			y: raw.charAt(i++),
+			rename: undefined,
+			path: ''
+		};
+
+		// space
+		i++;
+
+		if (entry.x === 'R' || entry.x === 'C') {
+			lastIndex = raw.indexOf('\0', i);
+
+			if (lastIndex === -1) {
+				return;
+			}
+
+			entry.rename = raw.substring(i, lastIndex);
+			i = lastIndex + 1;
+		}
+
+		lastIndex = raw.indexOf('\0', i);
+
+		if (lastIndex === -1) {
+			return;
+		}
+
+		entry.path = raw.substring(i, lastIndex);
+
+		// If path ends with slash, it must be a nested git repo
+		if (entry.path[entry.path.length - 1] !== '/') {
+			this.result.push(entry);
+		}
+
+		return lastIndex + 1;
+	}
 }
