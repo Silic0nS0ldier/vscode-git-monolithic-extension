@@ -8,7 +8,7 @@ import * as path from 'node:path';
 import { CancellationToken, Command, Disposable, Event, EventEmitter, Memento, OutputChannel, ProgressLocation, ProgressOptions, scm, SourceControl, SourceControlInputBox, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, ThemeColor, Uri, window, workspace, WorkspaceEdit, FileDecoration, commands } from 'vscode';
 import { Branch, Change, ForcePushMode, GitErrorCodes, LogOptions, Ref, RefType, Remote, Status, CommitOptions, BranchQuery, FetchOptions } from './api/git.js';
 import { AutoFetcher } from './autofetch.js';
-import { memoize, throttle } from './decorators.js';
+import { memoize } from './decorators.js';
 import { Commit, Repository as BaseRepository, Stash, Submodule, LogFileOptions } from './git.js';
 import { StatusBarCommands } from './statusbar.js';
 import { toGitUri } from './uri.js';
@@ -20,6 +20,7 @@ import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
 import { GitError } from './git/error.js';
 import debounce from 'just-debounce';
+import throat from 'throat';
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 
@@ -1091,10 +1092,7 @@ export class Repository implements Disposable {
 	}
 
 	// TODO This should fire on first hit, then again on leading edge if there is another call
-	@throttle
-	async status(): Promise<void> {
-		await this.run(Operation.Status);
-	}
+	status = throat(1, async () => { await this.run(Operation.Status); })
 
 	diff(cached?: boolean): Promise<string> {
 		return this.run(Operation.Diff, () => this.repository.diff(cached));
@@ -1320,20 +1318,11 @@ export class Repository implements Disposable {
 		await this.run(Operation.Remote, () => this.repository.renameRemote(name, newName));
 	}
 
-	@throttle
-	async fetchDefault(options: { silent?: boolean; } = {}): Promise<void> {
-		await this._fetch({ silent: options.silent });
-	}
+	fetchDefault = throat(1, (options: { silent?: boolean; } = {}) => this._fetch({ silent: options.silent }))
 
-	@throttle
-	async fetchPrune(): Promise<void> {
-		await this._fetch({ prune: true });
-	}
+	fetchPrune = throat(1, () => this._fetch({ prune: true }))
 
-	@throttle
-	async fetchAll(): Promise<void> {
-		await this._fetch({ all: true });
-	}
+	fetchAll = throat(1, () => this._fetch({ all: true }))
 
 	async fetch(options: FetchOptions): Promise<void> {
 		await this._fetch(options);
@@ -1349,8 +1338,7 @@ export class Repository implements Disposable {
 		await this.run(Operation.Fetch, async () => this.repository.fetch(options));
 	}
 
-	@throttle
-	async pullWithRebase(head: Branch | undefined): Promise<void> {
+	pullWithRebase = throat(1, (head: Branch | undefined) => {
 		let remote: string | undefined;
 		let branch: string | undefined;
 
@@ -1360,10 +1348,9 @@ export class Repository implements Disposable {
 		}
 
 		return this.pullFrom(true, remote, branch);
-	}
+	})
 
-	@throttle
-	async pull(head?: Branch, unshallow?: boolean): Promise<void> {
+	pull = throat(1, (head?: Branch, unshallow?: boolean) => {
 		let remote: string | undefined;
 		let branch: string | undefined;
 
@@ -1373,7 +1360,7 @@ export class Repository implements Disposable {
 		}
 
 		return this.pullFrom(false, remote, branch, unshallow);
-	}
+	})
 
 	async pullFrom(rebase?: boolean, remote?: string, branch?: string, unshallow?: boolean): Promise<void> {
 		await this.run(Operation.Pull, async () => {
@@ -1394,8 +1381,7 @@ export class Repository implements Disposable {
 		});
 	}
 
-	@throttle
-	async push(head: Branch, forcePushMode?: ForcePushMode): Promise<void> {
+	push = throat(1, async (head: Branch, forcePushMode?: ForcePushMode) => {
 		let remote: string | undefined;
 		let branch: string | undefined;
 
@@ -1405,7 +1391,7 @@ export class Repository implements Disposable {
 		}
 
 		await this.run(Operation.Push, () => this._push(remote, branch, undefined, undefined, forcePushMode));
-	}
+	})
 
 	async pushTo(remote?: string, name?: string, setUpstream: boolean = false, forcePushMode?: ForcePushMode): Promise<void> {
 		await this.run(Operation.Push, () => this._push(remote, name, setUpstream, undefined, forcePushMode));
@@ -1423,15 +1409,9 @@ export class Repository implements Disposable {
 		return await this.run(Operation.Blame, () => this.repository.blame(path));
 	}
 
-	@throttle
-	sync(head: Branch): Promise<void> {
-		return this._sync(head, false);
-	}
+	sync = throat(1, (head: Branch) => this._sync(head, false))
 
-	@throttle
-	async syncRebase(head: Branch): Promise<void> {
-		return this._sync(head, true);
-	}
+	syncRebase = throat(1, (head: Branch) => this._sync(head, true))
 
 	private async _sync(head: Branch, rebase: boolean): Promise<void> {
 		let remoteName: string | undefined;
@@ -1792,8 +1772,7 @@ export class Repository implements Disposable {
 		return folderPaths.filter(p => !ignored.has(p));
 	}
 
-	@throttle
-	private async updateModelState(): Promise<void> {
+	updateModelState = throat(1, async () => {
 		const scopedConfig = workspace.getConfiguration('git', Uri.file(this.repository.root));
 		const ignoreSubmodules = scopedConfig.get<boolean>('ignoreSubmodules');
 
@@ -1928,7 +1907,7 @@ export class Repository implements Disposable {
 		this._onDidChangeStatus.fire();
 
 		this._sourceControl.commitTemplate = await this.getInputTemplate();
-	}
+	})
 
 	private setCountBadge(): void {
 		const config = workspace.getConfiguration('git', Uri.file(this.repository.root));
@@ -2012,15 +1991,14 @@ export class Repository implements Disposable {
 		this.eventuallyUpdateWhenIdleAndWait();
 	}
 
-	private eventuallyUpdateWhenIdleAndWait = debounce(this.updateWhenIdleAndWait, 1000);
-
 	// TODO This should fire on first hit, then again on leading edge if there is another call
-	@throttle
-	private async updateWhenIdleAndWait(): Promise<void> {
+	updateWhenIdleAndWait = throat(1, async () => {
 		await this.whenIdleAndFocused();
 		await this.status();
 		await timeout(5000);
-	}
+	})
+
+	private eventuallyUpdateWhenIdleAndWait = debounce(this.updateWhenIdleAndWait, 1000);
 
 	async whenIdleAndFocused(): Promise<void> {
 		while (true) {

@@ -11,6 +11,7 @@
 				"vscode-nls": "^5.0.0",
 				"which": "^2.0.2",
         "just-debounce": "^1.1.0",
+        "throat": "^6.0.1",
         "watcher": "^1.2.0"
 		},
 		"devDependencies": {

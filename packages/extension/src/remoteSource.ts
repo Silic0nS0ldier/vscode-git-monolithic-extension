@@ -6,9 +6,9 @@
 import { QuickPickItem, window, QuickPick } from 'vscode';
 import { RemoteSourceProvider, RemoteSource } from './api/git.js';
 import { Model } from './model.js';
-import { throttle } from './decorators.js';
 import { localize } from './util.js';
 import debounce from 'just-debounce';
+import throat from 'throat';
 
 async function getQuickPickResult<T extends QuickPickItem>(quickpick: QuickPick<T>): Promise<T | undefined> {
 	const result = await new Promise<T | undefined>(c => {
@@ -37,10 +37,7 @@ class RemoteSourceProviderQuickPick {
 		}
 	}
 
-	private onDidChangeValue = debounce(this.query, 300)
-
-	@throttle
-	private async query(): Promise<void> {
+	private query = throat(1, async () => {
 		this.quickpick.busy = true;
 
 		try {
@@ -65,7 +62,9 @@ class RemoteSourceProviderQuickPick {
 		} finally {
 			this.quickpick.busy = false;
 		}
-	}
+	})
+
+	private onDidChangeValue = debounce(this.query, 300)
 
 	async pick(): Promise<RemoteSource | undefined> {
 		this.query();

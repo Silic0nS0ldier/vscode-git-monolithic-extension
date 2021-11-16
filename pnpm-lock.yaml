@@ -36,6 +36,7 @@ importers:
       iconv-lite-umd: 0.6.8
       jschardet: 3.0.0
       just-debounce: ^1.1.0
+      throat: ^6.0.1
       vscode-extension-telemetry: 0.4.2
       vscode-nls: ^5.0.0
       watcher: ^1.2.0
@@ -46,6 +47,7 @@ importers:
       iconv-lite-umd: 0.6.8
       jschardet: 3.0.0
       just-debounce: 1.1.0
+      throat: 6.0.1
       vscode-extension-telemetry: 0.4.2
       vscode-nls: 5.0.0
       watcher: 1.2.0
@@ -1316,6 +1318,10 @@ packages:
     dependencies:
       has-flag: 4.0.0
     dev: true
+
+  /throat/6.0.1:
+    resolution: {integrity: sha512-8hmiGIJMDlwjg7dlJ4yKGLK8EsYqKgPWbG3b4wjJddKNwc7N7Dpn08Df4szr/sZdMVeOstrdYSsqzX6BYbcB+w==}
+    dev: false
 
   /tiny-readdir/1.5.0:
     resolution: {integrity: sha512-Nep9qu34bOZApNkEnJu4V1WcgxW1kCGlYN8SYwMzZfqpv6f2E1n5vPHLczJqy2vOQ1rQG/m9fI3DQbIFXAQNGw==}

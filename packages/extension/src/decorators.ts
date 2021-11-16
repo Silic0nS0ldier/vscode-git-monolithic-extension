@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { done } from './util.js';
-
 function decorate(decorator: (fn: Function, key: string) => Function): Function {
 	return (_target: any, key: string, descriptor: any) => {
 		let fnKey: string | null = null;
@@ -44,37 +42,6 @@ function _memoize(fn: Function, key: string): Function {
 }
 
 export const memoize = decorate(_memoize);
-
-function _throttle<T>(fn: Function, key: string): Function {
-	const currentKey = `$throttle$current$${key}`;
-	const nextKey = `$throttle$next$${key}`;
-
-	const trigger = function (this: any, ...args: any[]) {
-		if (this[nextKey]) {
-			return this[nextKey];
-		}
-
-		if (this[currentKey]) {
-			this[nextKey] = done(this[currentKey]).then(() => {
-				this[nextKey] = undefined;
-				return trigger.apply(this, args);
-			});
-
-			return this[nextKey];
-		}
-
-		this[currentKey] = fn.apply(this, args) as Promise<T>;
-
-		const clear = () => this[currentKey] = undefined;
-		done(this[currentKey]).then(clear, clear);
-
-		return this[currentKey];
-	};
-
-	return trigger;
-}
-
-export const throttle = decorate(_throttle);
 
 function _sequentialize(fn: Function, key: string): Function {
 	const currentKey = `__$sequence$${key}`;
