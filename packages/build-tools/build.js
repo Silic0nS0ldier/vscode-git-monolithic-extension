@@ -11,6 +11,7 @@ async function main() {
 	const thsPkg = Path.dirname(URL.fileURLToPath(import.meta.url));
 	const extPkg = Path.resolve(thsPkg, "../extension/");
 	const stgPkg = Path.resolve(thsPkg, "../staging-area/");
+	const repoRoot = Path.resolve(thsPkg, "../..");
 
 	console.log("Cleaning...");
 	const isIgnoredExtPkg = isGitIgnoredSync({ cwd: stgPkg });
@@ -64,6 +65,7 @@ async function main() {
 	FS.cpSync(Path.join(extPkg, "resources"), Path.join(stgPkg, "resources"), { recursive: true });
 	FS.cpSync(Path.join(extPkg, "syntaxes"), Path.join(stgPkg, "syntaxes"), { recursive: true });
 	FS.cpSync(Path.join(extPkg, "cgmanifest.json"), Path.join(stgPkg, "cgmanifest.json"), { recursive: true });
+	FS.cpSync(Path.join(repoRoot, "LICENSE.txt"), Path.join(stgPkg, "LICENSE.txt"), { recursive: true });
 }
 
 export const running = main();
