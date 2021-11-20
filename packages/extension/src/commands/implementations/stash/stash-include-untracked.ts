@@ -1,11 +1,10 @@
 import { ScmCommand } from "../../../commands.js";
 import { Repository } from "../../../repository.js";
+import { createStash } from "./helpers.js";
 
-export function createCommand(
-	stashFn: (repository: Repository, includeUntracked?: boolean) => Promise<void>,
-): ScmCommand {
+export function createCommand(): ScmCommand {
 	async function stashIncludeUntracked(repository: Repository): Promise<void> {
-		await stashFn(repository, true);
+		await createStash(repository, true);
 	};
 
 	return {

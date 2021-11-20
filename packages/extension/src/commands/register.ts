@@ -112,7 +112,6 @@ export function registerCommands(
 	outputChannel: OutputChannel,
 	stageDeletionConflict: (repository: Repository, uri: Uri) => Promise<void>,
 	pickStash: (repository: Repository, placeHolder: string) => Promise<Stash | undefined>,
-	stashFn: (repository: Repository, includeUntracked?: boolean) => Promise<void>,
 	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,
 ) {
 	const commands: ScmCommand[] = [
@@ -185,10 +184,10 @@ export function registerCommands(
 		stashApplyLatest.createCommand(),
 		stashApply.createCommand(pickStash),
 		stashDrop.createCommand(pickStash),
-		stashIncludeUntracked.createCommand(stashFn),
+		stashIncludeUntracked.createCommand(),
 		stashPopLatest.createCommand(),
 		stashPop.createCommand(pickStash),
-		stash.createCommand(stashFn),
+		stash.createCommand(),
 		syncRebase.createCommand(syncFn),
 		sync.createCommand(syncFn),
 		unstage.createCommand(getSCMResource, runByRepository),
