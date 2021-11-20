@@ -1,4 +1,4 @@
-import { ScmCommand } from "../../commands.js";
+import { ScmCommand } from "../../../commands.js";
 
 export function createCommand(
 	cloneRepository: (url?: string, parentPath?: string, options?: { recursive?: boolean }) => Promise<void>,
