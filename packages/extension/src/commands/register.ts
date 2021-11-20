@@ -18,21 +18,22 @@ import * as clean from "./implementations/clean.js";
 import * as cloneRecursive from "./implementations/clone-recursive.js";
 import * as clone from "./implementations/clone.js";
 import * as close from "./implementations/close.js";
-import * as commitAllAmendNoVerify from "./implementations/commit-all-amend-no-verify.js";
-import * as commitAllAmend from "./implementations/commit-all-amend.js";
-import * as commitAllNoVerify from "./implementations/commit-all-no-verify.js";
-import * as commitAllSignedNoVerify from "./implementations/commit-all-signed-no-verify.js";
-import * as commitAllSigned from "./implementations/commit-all-signed.js";
-import * as commitAll from "./implementations/commit-all.js";
-import * as commitEmptyNoVerify from "./implementations/commit-empty-no-verify.js";
-import * as commitEmpty from "./implementations/commit-empty.js";
-import * as commitStagedAmendNoVerify from "./implementations/commit-staged-amend-no-verify.js";
-import * as commitStagedAmend from "./implementations/commit-staged-amend.js";
-import * as commitStagedNoVerify from "./implementations/commit-staged-no-verify.js";
-import * as commitStagedSignedNoVerify from "./implementations/commit-staged-signed-no-verify.js";
-import * as commitStagedSigned from "./implementations/commit-staged-signed.js";
-import * as commitStaged from "./implementations/commit-staged.js";
-import * as commit from "./implementations/commit.js";
+import * as commitAllAmendNoVerify from "./implementations/commit/commit-all-amend-no-verify.js";
+import * as commitAllAmend from "./implementations/commit/commit-all-amend.js";
+import * as commitAllNoVerify from "./implementations/commit/commit-all-no-verify.js";
+import * as commitAllSignedNoVerify from "./implementations/commit/commit-all-signed-no-verify.js";
+import * as commitAllSigned from "./implementations/commit/commit-all-signed.js";
+import * as commitAll from "./implementations/commit/commit-all.js";
+import * as commitEmptyNoVerify from "./implementations/commit/commit-empty-no-verify.js";
+import * as commitEmpty from "./implementations/commit/commit-empty.js";
+import * as commitNoVerify from "./implementations/commit/commit-no-verify";
+import * as commitStagedAmendNoVerify from "./implementations/commit/commit-staged-amend-no-verify.js";
+import * as commitStagedAmend from "./implementations/commit/commit-staged-amend.js";
+import * as commitStagedNoVerify from "./implementations/commit/commit-staged-no-verify.js";
+import * as commitStagedSignedNoVerify from "./implementations/commit/commit-staged-signed-no-verify.js";
+import * as commitStagedSigned from "./implementations/commit/commit-staged-signed.js";
+import * as commitStaged from "./implementations/commit/commit-staged.js";
+import * as commit from "./implementations/commit/commit.js";
 import * as createTag from "./implementations/create-tag.js";
 import * as deleteBranch from "./implementations/delete-branch.js";
 import * as deleteTag from "./implementations/delete-tag.js";
@@ -135,6 +136,7 @@ export function registerCommands(
 		commitAll.createCommand(commitWithAnyInput),
 		commitEmptyNoVerify.createCommand(commitEmptyFn),
 		commitEmpty.createCommand(commitEmptyFn),
+		commitNoVerify.createCommand(commitWithAnyInput),
 		commitStagedAmendNoVerify.createCommand(commitWithAnyInput),
 		commitStagedAmend.createCommand(commitWithAnyInput),
 		commitStagedNoVerify.createCommand(commitWithAnyInput),

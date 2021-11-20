@@ -1,5 +1,5 @@
-import { ScmCommand } from "../../commands.js";
-import { Repository } from "../../repository.js";
+import { ScmCommand } from "../../../commands.js";
+import { Repository } from "../../../repository.js";
 
 export function createCommand(
 	commitEmptyFn: (repository: Repository, noVerify?: boolean) => Promise<void>,
