@@ -73,7 +73,6 @@ export class CommandCenter {
 			this._checkout.bind(this),
 			this._cleanTrackedChanges.bind(this),
 			this._cleanUntrackedChange.bind(this),
-			this._cleanUntrackedChanges.bind(this),
 			createRunByRepository(this.model),
 			createGetSCMResource(this.outputChannel, this.model),
 			this.cloneRepository.bind(this),
@@ -343,18 +342,6 @@ export class CommandCenter {
 		}
 
 		await repository.clean([resource.resourceUri]);
-	}
-
-	private async _cleanUntrackedChanges(repository: Repository, resources: Resource[]): Promise<void> {
-		const message = localize('confirm delete multiple', "Are you sure you want to DELETE {0} files?\nThis is IRREVERSIBLE!\nThese files will be FOREVER LOST if you proceed.", resources.length);
-		const yes = localize('delete files', "Delete Files");
-		const pick = await window.showWarningMessage(message, { modal: true }, yes);
-
-		if (pick !== yes) {
-			return;
-		}
-
-		await repository.clean(resources.map(r => r.resourceUri));
 	}
 
 	private async smartCommit(
@@ -635,7 +622,6 @@ export class CommandCenter {
 					await cleanAllCmdImpl(
 						this._cleanTrackedChanges.bind(this),
 						this._cleanUntrackedChange.bind(this),
-						this._cleanUntrackedChanges.bind(this),
 						repository,
 					);
 					await item.run(repository, opts);
