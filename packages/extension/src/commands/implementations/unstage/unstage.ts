@@ -4,7 +4,7 @@ import { Resource, ResourceGroupType } from "../../../repository.js";
 
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,
-	runByRepository: RunByRepository<void>,
+	runByRepository: RunByRepository,
 ): ScmCommand {
 	async function unstage(...resourceStates: SourceControlResourceState[]): Promise<void> {
 		resourceStates = resourceStates.filter(s => !!s);

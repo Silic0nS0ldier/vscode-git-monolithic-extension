@@ -6,7 +6,7 @@ import { Resource, ResourceGroupType } from "../../../repository.js";
 import { localize } from "../../../util.js";
 
 export function createCommand(
-	runByRepository: RunByRepository<void>,
+	runByRepository: RunByRepository,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 ): ScmCommand {
 	async function clean(...resourceStates: SourceControlResourceState[]): Promise<void> {

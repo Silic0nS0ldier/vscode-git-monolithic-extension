@@ -3,7 +3,7 @@ import { RunByRepository, ScmCommand } from "../../commands.js";
 import { Resource } from "../../repository.js";
 
 export function createCommand(
-	runByRepository: RunByRepository<void>,
+	runByRepository: RunByRepository,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 ): ScmCommand {
 	async function ignore(...resourceStates: SourceControlResourceState[]): Promise<void> {

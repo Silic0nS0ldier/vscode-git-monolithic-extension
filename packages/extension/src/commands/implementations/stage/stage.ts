@@ -8,7 +8,7 @@ import { categorizeResourceByResolution } from "./helpers.js";
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 	outputChannel: OutputChannel,
-	runByRepository: RunByRepository<void>,
+	runByRepository: RunByRepository,
 	stageDeletionConflict: (repository: Repository, uri: Uri) => Promise<void>,
 ): ScmCommand {
 	async function stage(...resourceStates: SourceControlResourceState[]): Promise<void> {

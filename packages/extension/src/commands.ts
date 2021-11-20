@@ -26,6 +26,7 @@ import { PushOptions, PushType } from './commands/implementations/push/helpers.j
 import { CheckoutDetachedItem, CheckoutItem } from './commands/implementations/checkout/quick-pick.js';
 import { createCheckoutItems } from './commands/implementations/checkout/helpers.js';
 import { CreateBranchFromItem, CreateBranchItem, HEADItem } from './commands/implementations/branch/quick-pick.js';
+import AggregateError from 'aggregate-error';
 
 export interface ScmCommandOptions {
 	repository?: boolean;
@@ -73,7 +74,7 @@ export class CommandCenter {
 			this._cleanTrackedChanges.bind(this),
 			this._cleanUntrackedChange.bind(this),
 			this._cleanUntrackedChanges.bind(this),
-			this.runByRepository.bind(this),
+			createRunByRepository(this.model),
 			this.getSCMResource.bind(this),
 			this.cloneRepository.bind(this),
 			this.commitWithAnyInput.bind(this),
@@ -989,12 +990,18 @@ export class CommandCenter {
 		return undefined;
 	}
 
-	private async runByRepository<T>(arg: Uri | Uri[], fn: (repository: Repository, resources: any) => Promise<T>): Promise<T[]> {
+	dispose(): void {
+		this.disposables.forEach(d => d.dispose());
+	}
+}
+
+function createRunByRepository(model: Model): RunByRepository {
+	return async function runByRepository(arg: Uri | Uri[], fn: (repository: Repository, resources: any) => Promise<void>): Promise<void> {
 		const resources = arg instanceof Uri ? [arg] : arg;
 		const isSingleResource = arg instanceof Uri;
 
 		const groups = resources.reduce((result, resource) => {
-			let repository = this.model.getRepository(resource);
+			let repository = model.getRepository(resource);
 
 			if (!repository) {
 				console.warn('Could not find git repository for ', resource);
@@ -1003,7 +1010,7 @@ export class CommandCenter {
 
 			// Could it be a submodule?
 			if (pathEquals(resource.fsPath, repository.root)) {
-				repository = this.model.getRepositoryForSubmodule(resource) || repository;
+				repository = model.getRepositoryForSubmodule(resource) || repository;
 			}
 
 			const tuple = result.filter(p => p.repository === repository)[0];
@@ -1020,12 +1027,19 @@ export class CommandCenter {
 		const promises = groups
 			.map(({ repository, resources }) => fn(repository as Repository, isSingleResource ? resources[0] : resources));
 
-		return Promise.all(promises);
-	}
+		const results = await Promise.allSettled(promises);
 
-	dispose(): void {
-		this.disposables.forEach(d => d.dispose());
-	}
+		const errors: unknown[] = [];
+		for (const result of results) {
+			if (result.status === "rejected") {
+				errors.push(result.reason);
+			}
+		}
+
+		if (errors.length > 0) {
+			throw new AggregateError(errors as any);
+		}
+	};
 }
 
-export type RunByRepository<T> = (resources: Uri[], fn: (repository: Repository, resources: Uri[]) => Promise<T>) => Promise<T[]>;
+export type RunByRepository = (resources: Uri[], fn: (repository: Repository, resources: Uri[]) => Promise<void>) => Promise<void>;

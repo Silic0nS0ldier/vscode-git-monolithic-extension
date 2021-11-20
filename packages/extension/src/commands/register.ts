@@ -101,7 +101,7 @@ export function registerCommands(
 	cleanTrackedChanges: (repository: Repository, resources: Resource[]) => Promise<void>,
 	cleanUntrackedChange: (repository: Repository, resource: Resource) => Promise<void>,
 	cleanUntrackedChanges: (repository: Repository, resources: Resource[]) => Promise<void>,
-	runByRepository: RunByRepository<void>,
+	runByRepository: RunByRepository,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 	cloneRepository: (url?: string, parentPath?: string, options?: { recursive?: boolean }) => Promise<void>,
 	commitWithAnyInput: (repository: Repository, opts?: CommitOptions) => Promise<void>,
