@@ -1,8 +1,8 @@
 import { QuickPickItem, window } from "vscode";
-import { GitErrorCodes, Ref, RefType } from "../../api/git.js";
-import { ScmCommand } from "../../commands.js";
-import { Repository } from "../../repository.js";
-import { localize } from "../../util.js";
+import { GitErrorCodes, Ref, RefType } from "../../../api/git.js";
+import { ScmCommand } from "../../../commands.js";
+import { Repository } from "../../../repository.js";
+import { localize } from "../../../util.js";
 
 class BranchDeleteItem implements QuickPickItem {
 

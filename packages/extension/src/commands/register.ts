@@ -6,8 +6,8 @@ import { Model } from "../model";
 import { Repository, Resource } from "../repository.js";
 
 import * as addRemote from "./implementations/add-remote.js";
-import * as branchFrom from "./implementations/branch-from.js";
-import * as branch from "./implementations/branch.js";
+import * as branchFrom from "./implementations/branch/branch-from.js";
+import * as branch from "./implementations/branch/branch.js";
 import * as checkoutDetached from "./implementations/checkout/checkout-detached.js";
 import * as checkout from "./implementations/checkout/checkout.js";
 import * as cherryPick from "./implementations/cherry-pick.js";
@@ -35,7 +35,7 @@ import * as commitStagedSigned from "./implementations/commit/commit-staged-sign
 import * as commitStaged from "./implementations/commit/commit-staged.js";
 import * as commit from "./implementations/commit/commit.js";
 import * as createTag from "./implementations/create-tag.js";
-import * as deleteBranch from "./implementations/delete-branch.js";
+import * as deleteBranch from "./implementations/branch/delete-branch.js";
 import * as deleteTag from "./implementations/delete-tag.js";
 import * as fetchAll from "./implementations/fetch/fetch-all.js";
 import * as fetchPrune from "./implementations/fetch/fetch-prune.js";
@@ -66,7 +66,7 @@ import * as rebaseAbort from "./implementations/rebase-abort.js";
 import * as rebase from "./implementations/rebase.js";
 import * as refresh from "./implementations/refresh.js";
 import * as removeRemote from "./implementations/remove-remote.js";
-import * as renameBranch from "./implementations/rename-branch.js";
+import * as renameBranch from "./implementations/branch/rename-branch.js";
 import * as rename from "./implementations/rename.js";
 import * as restoreCommitTemplate from "./implementations/restore-commit-template.js";
 import * as revealInExplorer from "./implementations/reveal-in-explorer.js";
