@@ -25,27 +25,7 @@ import { createCommand } from './commands/create.js';
 import { PushOptions, PushType } from './commands/implementations/push/helpers.js';
 import { CheckoutDetachedItem, CheckoutItem } from './commands/implementations/checkout/quick-pick.js';
 import { createCheckoutItems } from './commands/implementations/checkout/helpers.js';
-
-class CreateBranchItem implements QuickPickItem {
-	get label(): string { return '$(plus) ' + localize('create branch', 'Create new branch...'); }
-	get description(): string { return ''; }
-	get alwaysShow(): boolean { return true; }
-}
-
-class CreateBranchFromItem implements QuickPickItem {
-	get label(): string { return '$(plus) ' + localize('create branch from', 'Create new branch from...'); }
-	get description(): string { return ''; }
-	get alwaysShow(): boolean { return true; }
-}
-
-class HEADItem implements QuickPickItem {
-
-	constructor(private repository: Repository) { }
-
-	get label(): string { return 'HEAD'; }
-	get description(): string { return (this.repository.HEAD && this.repository.HEAD.commit || '').substr(0, 8); }
-	get alwaysShow(): boolean { return true; }
-}
+import { CreateBranchFromItem, CreateBranchItem, HEADItem } from './commands/implementations/branch/quick-pick.js';
 
 export interface ScmCommandOptions {
 	repository?: boolean;
