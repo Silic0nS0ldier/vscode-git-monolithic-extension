@@ -2,6 +2,7 @@ import { SourceControlResourceState, Uri } from "vscode";
 import { ScmCommand } from "../../commands.js";
 import { Resource } from "../../repository.js";
 
+// TODO Merge with `openFile`, since they are identical
 export function createCommand(
 	openFile: (arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]) => Promise<void>,
 ): ScmCommand {

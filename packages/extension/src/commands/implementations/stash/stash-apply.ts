@@ -1,7 +1,7 @@
-import { ScmCommand } from "../../commands.js";
-import { Stash } from "../../git.js";
-import { Repository } from "../../repository.js";
-import { localize } from "../../util.js";
+import { ScmCommand } from "../../../commands.js";
+import { Stash } from "../../../git.js";
+import { Repository } from "../../../repository.js";
+import { localize } from "../../../util.js";
 
 export function createCommand(
 	pickStash: (repository: Repository, placeHolder: string) => Promise<Stash | undefined>,
