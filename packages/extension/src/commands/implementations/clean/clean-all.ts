@@ -2,14 +2,11 @@ import { window } from "vscode";
 import * as path from "node:path";
 import { Status } from "../../../api/git.js";
 import { ScmCommand } from "../../../commands.js";
-import { Repository, Resource } from "../../../repository.js";
+import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
-import { cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
+import { cleanTrackedChanges, cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
 
-export async function cleanAllCmdImpl(
-	cleanTrackedChanges: (repository: Repository, resources: Resource[]) => Promise<void>,
-	repository: Repository,
-): Promise<void> {
+export async function cleanAll(repository: Repository): Promise<void> {
 	let resources = repository.workingTreeGroup.resourceStates;
 
 		if (resources.length === 0) {
@@ -49,16 +46,7 @@ export async function cleanAllCmdImpl(
 		}
 }
 
-export function createCommand(
-	cleanTrackedChanges: (repository: Repository, resources: Resource[]) => Promise<void>,
-): ScmCommand {
-	async function cleanAll(repository: Repository): Promise<void> {
-		await cleanAllCmdImpl(
-			cleanTrackedChanges,
-			repository,
-		)
-	};
-
+export function createCommand(): ScmCommand {
 	return {
 		commandId: 'git.cleanAll',
 		method: cleanAll,

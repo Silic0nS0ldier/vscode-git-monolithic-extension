@@ -26,3 +26,19 @@ export async function cleanUntrackedChange(repository: Repository, resource: Res
 
 	await repository.clean([resource.resourceUri]);
 }
+
+export async function cleanTrackedChanges(repository: Repository, resources: Resource[]): Promise<void> {
+	const message = resources.length === 1
+		? localize('confirm discard all single', "Are you sure you want to discard changes in {0}?", path.basename(resources[0].resourceUri.fsPath))
+		: localize('confirm discard all', "Are you sure you want to discard ALL changes in {0} files?\nThis is IRREVERSIBLE!\nYour current working set will be FOREVER LOST if you proceed.", resources.length);
+	const yes = resources.length === 1
+		? localize('discardAll multiple', "Discard 1 File")
+		: localize('discardAll', "Discard All {0} Files", resources.length);
+	const pick = await window.showWarningMessage(message, { modal: true }, yes);
+
+	if (pick !== yes) {
+		return;
+	}
+
+	await repository.clean(resources.map(r => r.resourceUri));
+}

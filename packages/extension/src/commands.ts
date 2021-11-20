@@ -16,7 +16,7 @@ import { isDescendant, localize, pathEquals } from './util.js';
 import { pickRemoteSource } from './remoteSource.js';
 import { registerCommands } from './commands/register.js';
 import { syncCmdImpl } from './commands/implementations/sync/sync.js';
-import { cleanAllCmdImpl } from './commands/implementations/clean/clean-all.js';
+import { cleanAll } from './commands/implementations/clean/clean-all.js';
 import { stashPopLatestCmdImpl } from './commands/implementations/stash/stash-pop-latest.js';
 import { addRemoteCmdImpl } from './commands/implementations/remote/add-remote.js';
 import { AddRemoteItem, publishCmdImpl } from './commands/implementations/publish.js';
@@ -71,7 +71,6 @@ export class CommandCenter {
 		const cmds = registerCommands(
 			this.model,
 			this._checkout.bind(this),
-			this._cleanTrackedChanges.bind(this),
 			createRunByRepository(this.model),
 			createGetSCMResource(this.outputChannel, this.model),
 			this.cloneRepository.bind(this),
@@ -314,22 +313,6 @@ export class CommandCenter {
 
 	// 	textEditor.revealRange(visibleRangesBeforeRevert[0]);
 	// }
-
-	private async _cleanTrackedChanges(repository: Repository, resources: Resource[]): Promise<void> {
-		const message = resources.length === 1
-			? localize('confirm discard all single', "Are you sure you want to discard changes in {0}?", path.basename(resources[0].resourceUri.fsPath))
-			: localize('confirm discard all', "Are you sure you want to discard ALL changes in {0} files?\nThis is IRREVERSIBLE!\nYour current working set will be FOREVER LOST if you proceed.", resources.length);
-		const yes = resources.length === 1
-			? localize('discardAll multiple', "Discard 1 File")
-			: localize('discardAll', "Discard All {0} Files", resources.length);
-		const pick = await window.showWarningMessage(message, { modal: true }, yes);
-
-		if (pick !== yes) {
-			return;
-		}
-
-		await repository.clean(resources.map(r => r.resourceUri));
-	}
 
 	private async smartCommit(
 		repository: Repository,
@@ -606,8 +589,7 @@ export class CommandCenter {
 				const choice = await window.showWarningMessage(localize('local changes', "Your local changes would be overwritten by checkout."), { modal: true }, force, stash);
 
 				if (choice === force) {
-					await cleanAllCmdImpl(
-						this._cleanTrackedChanges.bind(this),
+					await cleanAll(
 						repository,
 					);
 					await item.run(repository, opts);
