@@ -1,6 +1,6 @@
 import { SourceControlResourceState, Uri } from "vscode";
-import { RunByRepository, ScmCommand } from "../../commands.js";
-import { Resource, ResourceGroupType } from "../../repository.js";
+import { RunByRepository, ScmCommand } from "../../../commands.js";
+import { Resource, ResourceGroupType } from "../../../repository.js";
 
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,
