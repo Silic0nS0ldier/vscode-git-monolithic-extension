@@ -75,7 +75,7 @@ export class CommandCenter {
 			this._cleanUntrackedChange.bind(this),
 			this._cleanUntrackedChanges.bind(this),
 			createRunByRepository(this.model),
-			this.getSCMResource.bind(this),
+			createGetSCMResource(this.outputChannel, this.model),
 			this.cloneRepository.bind(this),
 			this.commitWithAnyInput.bind(this),
 			this._commitEmpty.bind(this),
@@ -958,13 +958,19 @@ export class CommandCenter {
 
 	// private _selectedForCompare: { uri: Uri, item: GitTimelineItem } | undefined;
 
-	private getSCMResource(uri?: Uri): Resource | undefined {
+	dispose(): void {
+		this.disposables.forEach(d => d.dispose());
+	}
+}
+
+function createGetSCMResource(outputChannel: OutputChannel, model: Model): (uri?: Uri) => Resource | undefined {
+	return function getSCMResource(uri) {
 		uri = uri ? uri : (window.activeTextEditor && window.activeTextEditor.document.uri);
 
-		this.outputChannel.appendLine(`git.getSCMResource.uri ${uri && uri.toString()}`);
+		outputChannel.appendLine(`git.getSCMResource.uri ${uri && uri.toString()}`);
 
-		for (const r of this.model.repositories.map(r => r.root)) {
-			this.outputChannel.appendLine(`repo root ${r}`);
+		for (const r of model.repositories.map(r => r.root)) {
+			outputChannel.appendLine(`repo root ${r}`);
 		}
 
 		if (!uri) {
@@ -978,7 +984,7 @@ export class CommandCenter {
 
 		if (uri.scheme === 'file') {
 			const uriString = uri.toString();
-			const repository = this.model.getRepository(uri);
+			const repository = model.getRepository(uri);
 
 			if (!repository) {
 				return undefined;
@@ -988,17 +994,11 @@ export class CommandCenter {
 				|| repository.indexGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString)[0];
 		}
 		return undefined;
-	}
-
-	dispose(): void {
-		this.disposables.forEach(d => d.dispose());
-	}
+	};
 }
 
 function createRunByRepository(model: Model): RunByRepository {
-	return async function runByRepository(arg: Uri | Uri[], fn: (repository: Repository, resources: any) => Promise<void>): Promise<void> {
-		const resources = arg instanceof Uri ? [arg] : arg;
-		const isSingleResource = arg instanceof Uri;
+	return async function runByRepository(resources, fn): Promise<void> {
 
 		const groups = resources.reduce((result, resource) => {
 			let repository = model.getRepository(resource);
@@ -1025,7 +1025,7 @@ function createRunByRepository(model: Model): RunByRepository {
 		}, [] as { repository: Repository, resources: Uri[] }[]);
 
 		const promises = groups
-			.map(({ repository, resources }) => fn(repository as Repository, isSingleResource ? resources[0] : resources));
+			.map(({ repository, resources }) => fn(repository as Repository, resources));
 
 		const results = await Promise.allSettled(promises);
 
