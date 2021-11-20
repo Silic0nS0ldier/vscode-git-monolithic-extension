@@ -84,7 +84,7 @@ export class CommandCenter {
 			this.promptForBranchName.bind(this),
 			this.outputChannel,
 			this._stageDeletionConflict.bind(this),
-			this.pickStash.bind(this),
+			pickStash,
 			this._stash.bind(this),
 			this._sync.bind(this),
 		);
@@ -919,19 +919,6 @@ export class CommandCenter {
 		await repository.createStash(message, includeUntracked);
 	}
 
-	private async pickStash(repository: Repository, placeHolder: string): Promise<Stash | undefined> {
-		const stashes = await repository.getStashes();
-
-		if (stashes.length === 0) {
-			window.showInformationMessage(localize('no stashes', "There are no stashes in the repository."));
-			return;
-		}
-
-		const picks = stashes.map(stash => ({ label: `#${stash.index}:  ${stash.description}`, description: '', details: '', stash }));
-		const result = await window.showQuickPick(picks, { placeHolder });
-		return result && result.stash;
-	}
-
 	// resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
 	// 	if (uri === undefined || uri === null || !GitTimelineItem.is(item)) {
 	// 		return undefined;
@@ -961,6 +948,19 @@ export class CommandCenter {
 	dispose(): void {
 		this.disposables.forEach(d => d.dispose());
 	}
+}
+
+async function pickStash(repository: Repository, placeHolder: string): Promise<Stash | undefined> {
+	const stashes = await repository.getStashes();
+
+	if (stashes.length === 0) {
+		window.showInformationMessage(localize('no stashes', "There are no stashes in the repository."));
+		return;
+	}
+
+	const picks = stashes.map(stash => ({ label: `#${stash.index}:  ${stash.description}`, description: '', details: '', stash }));
+	const result = await window.showQuickPick(picks, { placeHolder });
+	return result && result.stash;
 }
 
 function createGetSCMResource(outputChannel: OutputChannel, model: Model): (uri?: Uri) => Resource | undefined {
