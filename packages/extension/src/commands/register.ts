@@ -96,7 +96,6 @@ import * as unstage from "./implementations/unstage/unstage.js";
 
 export function registerCommands(
 	model: Model,
-	branchFn: (repository: Repository, defaultName?: string, from?: boolean) => Promise<void>,
 	checkoutFn: (repository: Repository, opts?: { detached?: boolean, treeish?: string }) => Promise<boolean>,
 	cleanTrackedChanges: (repository: Repository, resources: Resource[]) => Promise<void>,
 	cleanUntrackedChange: (repository: Repository, resource: Resource) => Promise<void>,
@@ -113,8 +112,8 @@ export function registerCommands(
 	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,
 ) {
 	const commands: ScmCommand[] = [
-		branchFrom.createCommand(branchFn),
-		branch.createCommand(branchFn),
+		branchFrom.createCommand(),
+		branch.createCommand(),
 		checkoutDetached.createCommand(checkoutFn),
 		checkout.createCommand(checkoutFn),
 		cherryPick.createCommand(),

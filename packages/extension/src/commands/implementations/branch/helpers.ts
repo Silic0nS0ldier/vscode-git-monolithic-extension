@@ -1,5 +1,8 @@
 import { window, workspace } from "vscode";
+import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
+import { createCheckoutItems } from "../checkout/helpers.js";
+import { HEADItem } from "./quick-pick.js";
 
 export async function promptForBranchName(defaultName?: string, initialValue?: string): Promise<string> {
 	const config = workspace.getConfiguration('git');
@@ -25,4 +28,28 @@ export async function promptForBranchName(defaultName?: string, initialValue?: s
 	});
 
 	return sanitize(rawBranchName || '');
+}
+
+export async function branch(repository: Repository, defaultName?: string, from = false): Promise<void> {
+	const branchName = await promptForBranchName(defaultName);
+
+	if (!branchName) {
+		return;
+	}
+
+	let target = 'HEAD';
+
+	if (from) {
+		const picks = [new HEADItem(repository), ...createCheckoutItems(repository)];
+		const placeHolder = localize('select a ref to create a new branch from', 'Select a ref to create the \'{0}\' branch from', branchName);
+		const choice = await window.showQuickPick(picks, { placeHolder });
+
+		if (!choice) {
+			return;
+		}
+
+		target = choice.label;
+	}
+
+	await repository.branch(branchName, true, target);
 }

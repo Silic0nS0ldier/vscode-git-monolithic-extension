@@ -24,10 +24,10 @@ import { createCommand } from './commands/create.js';
 import { PushOptions, PushType } from './commands/implementations/push/helpers.js';
 import { CheckoutDetachedItem, CheckoutItem } from './commands/implementations/checkout/quick-pick.js';
 import { createCheckoutItems } from './commands/implementations/checkout/helpers.js';
-import { CreateBranchFromItem, CreateBranchItem, HEADItem } from './commands/implementations/branch/quick-pick.js';
+import { CreateBranchFromItem, CreateBranchItem } from './commands/implementations/branch/quick-pick.js';
 import AggregateError from 'aggregate-error';
 import { createStash } from './commands/implementations/stash/helpers.js';
-import { promptForBranchName } from './commands/implementations/branch/helpers.js';
+import { branch } from './commands/implementations/branch/helpers.js';
 
 export interface ScmCommandOptions {
 	repository?: boolean;
@@ -70,7 +70,6 @@ export class CommandCenter {
 	) {
 		const cmds = registerCommands(
 			this.model,
-			this._branch.bind(this),
 			this._checkout.bind(this),
 			this._cleanTrackedChanges.bind(this),
 			this._cleanUntrackedChange.bind(this),
@@ -613,9 +612,9 @@ export class CommandCenter {
 		}
 
 		if (choice === createBranch) {
-			await this._branch(repository, quickpick.value);
+			await branch(repository, quickpick.value);
 		} else if (choice === createBranchFrom) {
-			await this._branch(repository, quickpick.value, true);
+			await branch(repository, quickpick.value, true);
 		} else if (choice === checkoutDetached) {
 			return this._checkout(repository, { detached: true });
 		} else {
@@ -649,30 +648,6 @@ export class CommandCenter {
 		}
 
 		return true;
-	}
-
-	private async _branch(repository: Repository, defaultName?: string, from = false): Promise<void> {
-		const branchName = await promptForBranchName(defaultName);
-
-		if (!branchName) {
-			return;
-		}
-
-		let target = 'HEAD';
-
-		if (from) {
-			const picks = [new HEADItem(repository), ...createCheckoutItems(repository)];
-			const placeHolder = localize('select a ref to create a new branch from', 'Select a ref to create the \'{0}\' branch from', branchName);
-			const choice = await window.showQuickPick(picks, { placeHolder });
-
-			if (!choice) {
-				return;
-			}
-
-			target = choice.label;
-		}
-
-		await repository.branch(branchName, true, target);
 	}
 
 	private async _sync(repository: Repository, rebase: boolean): Promise<void> {
