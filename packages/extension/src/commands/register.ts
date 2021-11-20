@@ -1,6 +1,6 @@
 import { OutputChannel, Uri } from "vscode";
 import { CommitOptions } from "../api/git";
-import { PushOptions, RunByRepository, ScmCommand } from "../commands";
+import { RunByRepository, ScmCommand } from "../commands";
 import { Git, Stash } from "../git.js";
 import { Model } from "../model";
 import { Repository, Resource } from "../repository.js";
@@ -53,6 +53,7 @@ import * as publish from "./implementations/publish.js";
 import * as pullFrom from "./implementations/pull-from";
 import * as pullRebase from "./implementations/pull-rebase.js";
 import * as pull from "./implementations/pull.js";
+import { PushOptions } from "./implementations/push/helpers";
 import * as pushForce from "./implementations/push/push-force.js";
 import * as pushTags from "./implementations/push/push-tags.js";
 import * as pushToForce from "./implementations/push/push-to-force.js";

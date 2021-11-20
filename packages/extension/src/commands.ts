@@ -22,7 +22,7 @@ import { stashPopLatestCmdImpl } from './commands/implementations/stash-pop-late
 import { addRemoteCmdImpl } from './commands/implementations/add-remote.js';
 import { AddRemoteItem, publishCmdImpl } from './commands/implementations/publish.js';
 import { createCommand } from './commands/create.js';
-import { PushType } from './commands/implementations/push/helpers.js';
+import { PushOptions, PushType } from './commands/implementations/push/helpers.js';
 
 class CheckoutItem implements QuickPickItem {
 
@@ -158,18 +158,6 @@ function getCheckoutProcessor(type: string): CheckoutProcessor | undefined {
 	}
 
 	return undefined;
-}
-
-export interface PushOptions {
-	pushType: PushType;
-	forcePush?: boolean;
-	silent?: boolean;
-
-	pushTo?: {
-		remote?: string;
-		refspec?: string;
-		setUpstream?: boolean;
-	}
 }
 
 export class CommandErrorOutputTextDocumentContentProvider implements TextDocumentContentProvider {

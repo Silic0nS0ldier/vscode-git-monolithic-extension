@@ -1,6 +1,6 @@
-import { PushOptions, ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../../commands.js";
 import { Repository } from "../../../repository.js";
-import { PushType } from "./helpers.js";
+import { PushOptions, PushType } from "./helpers.js";
 
 export function createCommand(
 	pushFn: (repository: Repository, pushOptions: PushOptions) => Promise<void>,
