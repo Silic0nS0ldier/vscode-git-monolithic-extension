@@ -5,7 +5,7 @@
 
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { commands, Disposable, OutputChannel, ProgressLocation, QuickPickItem, Uri, window, workspace, TextDocumentContentProvider } from 'vscode';
+import { commands, Disposable, OutputChannel, ProgressLocation, Uri, window, workspace, TextDocumentContentProvider } from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { ForcePushMode, GitErrorCodes, Status, CommitOptions } from './api/git.js';
 import { Git } from './git.js';
@@ -16,18 +16,11 @@ import { isDescendant, localize, pathEquals } from './util.js';
 import { pickRemoteSource } from './remoteSource.js';
 import { registerCommands } from './commands/register.js';
 import { syncCmdImpl } from './commands/implementations/sync/sync.js';
-import { cleanAll } from './commands/implementations/clean/clean-all.js';
-import { stashPopLatestCmdImpl } from './commands/implementations/stash/stash-pop-latest.js';
 import { addRemoteCmdImpl } from './commands/implementations/remote/add-remote.js';
 import { AddRemoteItem, publishCmdImpl } from './commands/implementations/publish.js';
 import { createCommand } from './commands/create.js';
 import { PushOptions, PushType } from './commands/implementations/push/helpers.js';
-import { CheckoutDetachedItem, CheckoutItem } from './commands/implementations/checkout/quick-pick.js';
-import { createCheckoutItems } from './commands/implementations/checkout/helpers.js';
-import { CreateBranchFromItem, CreateBranchItem } from './commands/implementations/branch/quick-pick.js';
 import AggregateError from 'aggregate-error';
-import { createStash } from './commands/implementations/stash/helpers.js';
-import { branch } from './commands/implementations/branch/helpers.js';
 
 export interface ScmCommandOptions {
 	repository?: boolean;
@@ -70,7 +63,6 @@ export class CommandCenter {
 	) {
 		const cmds = registerCommands(
 			this.model,
-			this._checkout.bind(this),
 			createRunByRepository(this.model),
 			createGetSCMResource(this.outputChannel, this.model),
 			this.cloneRepository.bind(this),
@@ -534,74 +526,6 @@ export class CommandCenter {
 		}
 
 		await this.commitWithAnyInput(repository, { empty: true, noVerify });
-	}
-
-	private async _checkout(repository: Repository, opts?: { detached?: boolean, treeish?: string }): Promise<boolean> {
-		if (typeof opts?.treeish === 'string') {
-			await repository.checkout(opts?.treeish, opts);
-			return true;
-		}
-
-		const createBranch = new CreateBranchItem();
-		const createBranchFrom = new CreateBranchFromItem();
-		const checkoutDetached = new CheckoutDetachedItem();
-		const picks: QuickPickItem[] = [];
-
-		if (!opts?.detached) {
-			picks.push(createBranch, createBranchFrom, checkoutDetached);
-		}
-
-		picks.push(...createCheckoutItems(repository));
-
-		const quickpick = window.createQuickPick();
-		quickpick.items = picks;
-		quickpick.placeholder = opts?.detached
-			? localize('select a ref to checkout detached', 'Select a ref to checkout in detached mode')
-			: localize('select a ref to checkout', 'Select a ref to checkout');
-
-		quickpick.show();
-
-		const choice = await new Promise<QuickPickItem | undefined>(c => quickpick.onDidAccept(() => c(quickpick.activeItems[0])));
-		quickpick.hide();
-
-		if (!choice) {
-			return false;
-		}
-
-		if (choice === createBranch) {
-			await branch(repository, quickpick.value);
-		} else if (choice === createBranchFrom) {
-			await branch(repository, quickpick.value, true);
-		} else if (choice === checkoutDetached) {
-			return this._checkout(repository, { detached: true });
-		} else {
-			const item = choice as CheckoutItem;
-
-			try {
-				await item.run(repository, opts);
-			} catch (err) {
-				if (err.gitErrorCode !== GitErrorCodes.DirtyWorkTree) {
-					throw err;
-				}
-
-				const force = localize('force', "Force Checkout");
-				const stash = localize('stashcheckout', "Stash & Checkout");
-				const choice = await window.showWarningMessage(localize('local changes', "Your local changes would be overwritten by checkout."), { modal: true }, force, stash);
-
-				if (choice === force) {
-					await cleanAll(
-						repository,
-					);
-					await item.run(repository, opts);
-				} else if (choice === stash) {
-					await createStash(repository);
-					await item.run(repository, opts);
-					await stashPopLatestCmdImpl(repository);
-				}
-			}
-		}
-
-		return true;
 	}
 
 	private async _sync(repository: Repository, rebase: boolean): Promise<void> {

@@ -1,11 +1,10 @@
 import { ScmCommand } from "../../../commands.js";
 import { Repository } from "../../../repository.js";
+import { checkout } from "./checkout.js";
 
-export function createCommand(
-	checkoutFn: (repository: Repository, opts?: { detached?: boolean, treeish?: string }) => Promise<boolean>,
-): ScmCommand {
+export function createCommand(): ScmCommand {
 	async function checkoutDetached(repository: Repository, treeish?: string): Promise<boolean> {
-		return checkoutFn(repository, { detached: true, treeish });
+		return checkout(repository, { detached: true, treeish });
 	};
 
 	return {

@@ -96,7 +96,6 @@ import * as unstage from "./implementations/unstage/unstage.js";
 
 export function registerCommands(
 	model: Model,
-	checkoutFn: (repository: Repository, opts?: { detached?: boolean, treeish?: string }) => Promise<boolean>,
 	runByRepository: RunByRepository,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 	cloneRepository: (url?: string, parentPath?: string, options?: { recursive?: boolean }) => Promise<void>,
@@ -111,8 +110,8 @@ export function registerCommands(
 	const commands: ScmCommand[] = [
 		branchFrom.createCommand(),
 		branch.createCommand(),
-		checkoutDetached.createCommand(checkoutFn),
-		checkout.createCommand(checkoutFn),
+		checkoutDetached.createCommand(),
+		checkout.createCommand(),
 		cherryPick.createCommand(),
 		cleanAllTracked.createCommand(),
 		cleanAllUntracked.createCommand(),
