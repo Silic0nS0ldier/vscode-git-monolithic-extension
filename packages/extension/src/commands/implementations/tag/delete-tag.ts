@@ -1,8 +1,8 @@
 import { QuickPickItem, window } from "vscode";
-import { Ref, RefType } from "../../api/git.js";
-import { ScmCommand } from "../../commands.js";
-import { Repository } from "../../repository.js";
-import { localize } from "../../util.js";
+import { Ref, RefType } from "../../../api/git.js";
+import { ScmCommand } from "../../../commands.js";
+import { Repository } from "../../../repository.js";
+import { localize } from "../../../util.js";
 
 export function createCommand(): ScmCommand {
 	async function deleteTag(repository: Repository): Promise<void> {

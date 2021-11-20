@@ -34,9 +34,9 @@ import * as commitStagedSignedNoVerify from "./implementations/commit/commit-sta
 import * as commitStagedSigned from "./implementations/commit/commit-staged-signed.js";
 import * as commitStaged from "./implementations/commit/commit-staged.js";
 import * as commit from "./implementations/commit/commit.js";
-import * as createTag from "./implementations/create-tag.js";
+import * as createTag from "./implementations/tag/create-tag.js";
 import * as deleteBranch from "./implementations/branch/delete-branch.js";
-import * as deleteTag from "./implementations/delete-tag.js";
+import * as deleteTag from "./implementations/tag/delete-tag.js";
 import * as fetchAll from "./implementations/fetch/fetch-all.js";
 import * as fetchPrune from "./implementations/fetch/fetch-prune.js";
 import * as fetch from "./implementations/fetch/fetch.js";
