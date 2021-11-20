@@ -16,7 +16,7 @@ import { isDescendant, localize, pathEquals } from './util.js';
 import { pickRemoteSource } from './remoteSource.js';
 import { registerCommands } from './commands/register.js';
 import { syncCmdImpl } from './commands/implementations/sync.js';
-import { cleanAllCmdImpl } from './commands/implementations/clean-all.js';
+import { cleanAllCmdImpl } from './commands/implementations/clean/clean-all.js';
 import { stashCmdImpl } from './commands/implementations/stash.js';
 import { stashPopLatestCmdImpl } from './commands/implementations/stash-pop-latest.js';
 import { addRemoteCmdImpl } from './commands/implementations/add-remote.js';
