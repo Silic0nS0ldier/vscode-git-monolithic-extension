@@ -1,6 +1,6 @@
 import { SourceControlResourceState, Uri } from "vscode";
-import { ScmCommand } from "../../commands.js";
-import { Resource } from "../../repository.js";
+import { ScmCommand } from "../../../../commands.js";
+import { Resource } from "../../../../repository.js";
 
 // TODO Merge with `openFile`, since they are identical
 export function createCommand(

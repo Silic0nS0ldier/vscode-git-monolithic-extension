@@ -1,7 +1,7 @@
 import { commands } from "vscode";
-import { Status } from "../../api/git.js";
-import { ScmCommand } from "../../commands.js";
-import { Repository } from "../../repository.js";
+import { Status } from "../../../../api/git.js";
+import { ScmCommand } from "../../../../commands.js";
+import { Repository } from "../../../../repository.js";
 
 export function createCommand(): ScmCommand {
 	async function openAllChanges(repository: Repository): Promise<void> {
