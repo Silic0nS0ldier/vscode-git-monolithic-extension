@@ -7,7 +7,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { commands, Disposable, OutputChannel, ProgressLocation, QuickPickItem, Uri, window, workspace, TextDocumentContentProvider } from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
-import { ForcePushMode, GitErrorCodes, Ref, RefType, Status, CommitOptions } from './api/git.js';
+import { ForcePushMode, GitErrorCodes, Status, CommitOptions } from './api/git.js';
 import { Git, Stash } from './git.js';
 import { Model } from './model.js';
 import { Repository, Resource } from './repository.js';
@@ -23,53 +23,8 @@ import { addRemoteCmdImpl } from './commands/implementations/add-remote.js';
 import { AddRemoteItem, publishCmdImpl } from './commands/implementations/publish.js';
 import { createCommand } from './commands/create.js';
 import { PushOptions, PushType } from './commands/implementations/push/helpers.js';
-
-class CheckoutItem implements QuickPickItem {
-
-	protected get shortCommit(): string { return (this.ref.commit || '').substr(0, 8); }
-	get label(): string { return this.ref.name || this.shortCommit; }
-	get description(): string { return this.shortCommit; }
-
-	constructor(protected ref: Ref) { }
-
-	async run(repository: Repository, opts?: { detached?: boolean }): Promise<void> {
-		const ref = this.ref.name;
-
-		if (!ref) {
-			return;
-		}
-
-		await repository.checkout(ref, opts);
-	}
-}
-
-class CheckoutTagItem extends CheckoutItem {
-
-	override get description(): string {
-		return localize('tag at', "Tag at {0}", this.shortCommit);
-	}
-}
-
-class CheckoutRemoteHeadItem extends CheckoutItem {
-
-	override get description(): string {
-		return localize('remote branch at', "Remote branch at {0}", this.shortCommit);
-	}
-
-	override async run(repository: Repository, opts?: { detached?: boolean }): Promise<void> {
-		if (!this.ref.name) {
-			return;
-		}
-
-		const branches = await repository.findTrackingBranches(this.ref.name);
-
-		if (branches.length > 0) {
-			await repository.checkout(branches[0].name!, opts);
-		} else {
-			await repository.checkoutTracking(this.ref.name, opts);
-		}
-	}
-}
+import { CheckoutDetachedItem, CheckoutItem } from './commands/implementations/checkout/quick-pick.js';
+import { createCheckoutItems } from './commands/implementations/checkout/helpers.js';
 
 class CreateBranchItem implements QuickPickItem {
 	get label(): string { return '$(plus) ' + localize('create branch', 'Create new branch...'); }
@@ -79,12 +34,6 @@ class CreateBranchItem implements QuickPickItem {
 
 class CreateBranchFromItem implements QuickPickItem {
 	get label(): string { return '$(plus) ' + localize('create branch from', 'Create new branch from...'); }
-	get description(): string { return ''; }
-	get alwaysShow(): boolean { return true; }
-}
-
-class CheckoutDetachedItem implements QuickPickItem {
-	get label(): string { return '$(debug-disconnect) ' + localize('checkout detached', 'Checkout detached...'); }
 	get description(): string { return ''; }
 	get alwaysShow(): boolean { return true; }
 }
@@ -107,57 +56,6 @@ export interface ScmCommand {
 	commandId: string;
 	method: Function;
 	options: ScmCommandOptions;
-}
-
-function createCheckoutItems(repository: Repository): CheckoutItem[] {
-	const config = workspace.getConfiguration('git');
-	const checkoutTypeConfig = config.get<string | string[]>('checkoutType');
-	let checkoutTypes: string[];
-
-	if (checkoutTypeConfig === 'all' || !checkoutTypeConfig || checkoutTypeConfig.length === 0) {
-		checkoutTypes = ['local', 'remote', 'tags'];
-	} else if (typeof checkoutTypeConfig === 'string') {
-		checkoutTypes = [checkoutTypeConfig];
-	} else {
-		checkoutTypes = checkoutTypeConfig;
-	}
-
-	const processors = checkoutTypes.map(getCheckoutProcessor)
-		.filter(p => !!p) as CheckoutProcessor[];
-
-	for (const ref of repository.refs) {
-		for (const processor of processors) {
-			processor.onRef(ref);
-		}
-	}
-
-	return processors.reduce<CheckoutItem[]>((r, p) => r.concat(...p.items), []);
-}
-
-class CheckoutProcessor {
-
-	private refs: Ref[] = [];
-	get items(): CheckoutItem[] { return this.refs.map(r => new this.ctor(r)); }
-	constructor(private type: RefType, private ctor: { new(ref: Ref): CheckoutItem }) { }
-
-	onRef(ref: Ref): void {
-		if (ref.type === this.type) {
-			this.refs.push(ref);
-		}
-	}
-}
-
-function getCheckoutProcessor(type: string): CheckoutProcessor | undefined {
-	switch (type) {
-		case 'local':
-			return new CheckoutProcessor(RefType.Head, CheckoutItem);
-		case 'remote':
-			return new CheckoutProcessor(RefType.RemoteHead, CheckoutRemoteHeadItem);
-		case 'tags':
-			return new CheckoutProcessor(RefType.Tag, CheckoutTagItem);
-	}
-
-	return undefined;
 }
 
 export class CommandErrorOutputTextDocumentContentProvider implements TextDocumentContentProvider {
