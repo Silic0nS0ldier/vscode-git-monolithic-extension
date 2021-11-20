@@ -1,10 +1,10 @@
 import { window } from "vscode";
-import { ScmCommand } from "../../commands.js";
-import { Repository } from "../../repository.js";
-import { localize } from "../../util.js";
+import { ScmCommand } from "../../../commands.js";
+import { Repository } from "../../../repository.js";
+import { localize } from "../../../util.js";
 
 export function createCommand(): ScmCommand {
-	async function pull(repository: Repository): Promise<void> {
+	async function pullRebase(repository: Repository): Promise<void> {
 		const remotes = repository.remotes;
 
 		if (remotes.length === 0) {
@@ -12,12 +12,12 @@ export function createCommand(): ScmCommand {
 			return;
 		}
 
-		await repository.pull(repository.HEAD);
+		await repository.pullWithRebase(repository.HEAD);
 	};
 
 	return {
-		commandId: 'git.pull',
-		method: pull,
+		commandId: 'git.pullRebase',
+		method: pullRebase,
 		options: {
 			repository: true,
 		},

@@ -1,7 +1,7 @@
 import { window } from "vscode";
-import { ScmCommand } from "../../commands.js";
-import { Repository } from "../../repository.js";
-import { localize } from "../../util.js";
+import { ScmCommand } from "../../../commands.js";
+import { Repository } from "../../../repository.js";
+import { localize } from "../../../util.js";
 
 export function createCommand(): ScmCommand {
 	async function pullFrom(repository: Repository): Promise<void> {
