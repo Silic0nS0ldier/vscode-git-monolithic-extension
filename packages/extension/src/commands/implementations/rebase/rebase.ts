@@ -1,8 +1,8 @@
 import { QuickPickItem, window, workspace } from "vscode";
-import { Ref, RefType } from "../../api/git.js";
-import { ScmCommand } from "../../commands.js";
-import { Repository } from "../../repository.js";
-import { localize } from "../../util.js";
+import { Ref, RefType } from "../../../api/git.js";
+import { ScmCommand } from "../../../commands.js";
+import { Repository } from "../../../repository.js";
+import { localize } from "../../../util.js";
 
 class RebaseItem implements QuickPickItem {
 
