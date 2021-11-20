@@ -19,7 +19,7 @@ import { syncCmdImpl } from './commands/implementations/sync.js';
 import { cleanAllCmdImpl } from './commands/implementations/clean/clean-all.js';
 import { stashCmdImpl } from './commands/implementations/stash/stash.js';
 import { stashPopLatestCmdImpl } from './commands/implementations/stash/stash-pop-latest.js';
-import { addRemoteCmdImpl } from './commands/implementations/add-remote.js';
+import { addRemoteCmdImpl } from './commands/implementations/remote/add-remote.js';
 import { AddRemoteItem, publishCmdImpl } from './commands/implementations/publish.js';
 import { createCommand } from './commands/create.js';
 import { PushOptions, PushType } from './commands/implementations/push/helpers.js';

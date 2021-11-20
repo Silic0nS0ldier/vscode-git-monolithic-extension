@@ -1,9 +1,9 @@
 import { window } from "vscode";
-import { ScmCommand } from "../../commands.js";
-import { Model } from "../../model.js";
-import { pickRemoteSource } from "../../remoteSource.js";
-import { Repository } from "../../repository.js";
-import { localize } from "../../util.js";
+import { ScmCommand } from "../../../commands.js";
+import { Model } from "../../../model.js";
+import { pickRemoteSource } from "../../../remoteSource.js";
+import { Repository } from "../../../repository.js";
+import { localize } from "../../../util.js";
 
 export async function addRemoteCmdImpl(
 	model: Model,

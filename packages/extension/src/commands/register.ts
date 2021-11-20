@@ -5,7 +5,7 @@ import { Git, Stash } from "../git.js";
 import { Model } from "../model";
 import { Repository, Resource } from "../repository.js";
 
-import * as addRemote from "./implementations/add-remote.js";
+import * as addRemote from "./implementations/remote/add-remote.js";
 import * as branchFrom from "./implementations/branch/branch-from.js";
 import * as branch from "./implementations/branch/branch.js";
 import * as checkoutDetached from "./implementations/checkout/checkout-detached.js";
@@ -65,7 +65,7 @@ import * as push from "./implementations/push/push.js";
 import * as rebaseAbort from "./implementations/rebase-abort.js";
 import * as rebase from "./implementations/rebase.js";
 import * as refresh from "./implementations/refresh.js";
-import * as removeRemote from "./implementations/remove-remote.js";
+import * as removeRemote from "./implementations/remote/remove-remote.js";
 import * as renameBranch from "./implementations/branch/rename-branch.js";
 import * as rename from "./implementations/rename.js";
 import * as restoreCommitTemplate from "./implementations/restore-commit-template.js";
