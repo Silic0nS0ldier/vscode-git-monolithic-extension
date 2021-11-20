@@ -4,11 +4,10 @@ import { Status } from "../../../api/git.js";
 import { ScmCommand } from "../../../commands.js";
 import { Repository, Resource } from "../../../repository.js";
 import { localize } from "../../../util.js";
-import { cleanUntrackedChanges } from "./helpers.js";
+import { cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
 
 export async function cleanAllCmdImpl(
 	cleanTrackedChanges: (repository: Repository, resources: Resource[]) => Promise<void>,
-	cleanUntrackedChange: (repository: Repository, resource: Resource) => Promise<void>,
 	repository: Repository,
 ): Promise<void> {
 	let resources = repository.workingTreeGroup.resourceStates;
@@ -52,12 +51,10 @@ export async function cleanAllCmdImpl(
 
 export function createCommand(
 	cleanTrackedChanges: (repository: Repository, resources: Resource[]) => Promise<void>,
-	cleanUntrackedChange: (repository: Repository, resource: Resource) => Promise<void>,
 ): ScmCommand {
 	async function cleanAll(repository: Repository): Promise<void> {
 		await cleanAllCmdImpl(
 			cleanTrackedChanges,
-			cleanUntrackedChange,
 			repository,
 		)
 	};
