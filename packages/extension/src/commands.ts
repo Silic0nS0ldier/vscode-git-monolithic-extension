@@ -27,6 +27,7 @@ import { createCheckoutItems } from './commands/implementations/checkout/helpers
 import { CreateBranchFromItem, CreateBranchItem, HEADItem } from './commands/implementations/branch/quick-pick.js';
 import AggregateError from 'aggregate-error';
 import { createStash } from './commands/implementations/stash/helpers.js';
+import { promptForBranchName } from './commands/implementations/branch/helpers.js';
 
 export interface ScmCommandOptions {
 	repository?: boolean;
@@ -81,7 +82,6 @@ export class CommandCenter {
 			this._commitEmpty.bind(this),
 			this.git,
 			this._push.bind(this),
-			this.promptForBranchName.bind(this),
 			this.outputChannel,
 			this._stageDeletionConflict.bind(this),
 			this._sync.bind(this),
@@ -651,34 +651,8 @@ export class CommandCenter {
 		return true;
 	}
 
-	private async promptForBranchName(defaultName?: string, initialValue?: string): Promise<string> {
-		const config = workspace.getConfiguration('git');
-		const branchWhitespaceChar = config.get<string>('branchWhitespaceChar')!;
-		const branchValidationRegex = config.get<string>('branchValidationRegex')!;
-		const sanitize = (name: string) => name ?
-			name.trim().replace(/^-+/, '').replace(/^\.|\/\.|\.\.|~|\^|:|\/$|\.lock$|\.lock\/|\\|\*|\s|^\s*$|\.$|\[|\]$/g, branchWhitespaceChar)
-			: name;
-
-		const rawBranchName = defaultName || await window.showInputBox({
-			placeHolder: localize('branch name', "Branch name"),
-			prompt: localize('provide branch name', "Please provide a new branch name"),
-			value: initialValue,
-			ignoreFocusOut: true,
-			validateInput: (name: string) => {
-				const validateName = new RegExp(branchValidationRegex);
-				if (validateName.test(sanitize(name))) {
-					return null;
-				}
-
-				return localize('branch name format invalid', "Branch name needs to match regex: {0}", branchValidationRegex);
-			}
-		});
-
-		return sanitize(rawBranchName || '');
-	}
-
 	private async _branch(repository: Repository, defaultName?: string, from = false): Promise<void> {
-		const branchName = await this.promptForBranchName(defaultName);
+		const branchName = await promptForBranchName(defaultName);
 
 		if (!branchName) {
 			return;

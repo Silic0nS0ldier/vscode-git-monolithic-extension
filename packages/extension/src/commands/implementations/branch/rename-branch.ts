@@ -3,10 +3,9 @@ import { GitErrorCodes } from "../../../api/git.js";
 import { ScmCommand } from "../../../commands.js";
 import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
+import { promptForBranchName } from "./helpers.js";
 
-export function createCommand(
-	promptForBranchName: (defaultName?: string, initialValue?: string) => Promise<string>,
-): ScmCommand {
+export function createCommand(): ScmCommand {
 	async function renameBranch(repository: Repository): Promise<void> {
 		const currentBranchName = repository.HEAD && repository.HEAD.name;
 		const branchName = await promptForBranchName(undefined, currentBranchName);
