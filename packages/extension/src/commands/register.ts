@@ -1,7 +1,7 @@
 import { OutputChannel, Uri } from "vscode";
 import { CommitOptions } from "../api/git";
 import { RunByRepository, ScmCommand } from "../commands";
-import { Git, Stash } from "../git.js";
+import { Git } from "../git.js";
 import { Model } from "../model";
 import { Repository, Resource } from "../repository.js";
 
@@ -111,7 +111,6 @@ export function registerCommands(
 	promptForBranchName: (defaultName?: string, initialValue?: string) => Promise<string>,
 	outputChannel: OutputChannel,
 	stageDeletionConflict: (repository: Repository, uri: Uri) => Promise<void>,
-	pickStash: (repository: Repository, placeHolder: string) => Promise<Stash | undefined>,
 	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,
 ) {
 	const commands: ScmCommand[] = [
@@ -182,11 +181,11 @@ export function registerCommands(
 		stageAll.createCommand(),
 		stage.createCommand(getSCMResource, outputChannel, runByRepository, stageDeletionConflict),
 		stashApplyLatest.createCommand(),
-		stashApply.createCommand(pickStash),
-		stashDrop.createCommand(pickStash),
+		stashApply.createCommand(),
+		stashDrop.createCommand(),
 		stashIncludeUntracked.createCommand(),
 		stashPopLatest.createCommand(),
-		stashPop.createCommand(pickStash),
+		stashPop.createCommand(),
 		stash.createCommand(),
 		syncRebase.createCommand(syncFn),
 		sync.createCommand(syncFn),

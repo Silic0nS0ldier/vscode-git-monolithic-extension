@@ -1,5 +1,6 @@
 import * as path from "node:path";
 import { Uri, window, workspace } from "vscode";
+import { Stash } from "../../../git.js";
 import { Repository } from "../../../repository.js";
 import { isDescendant, localize, pathEquals } from "../../../util.js";
 
@@ -58,4 +59,17 @@ export async function createStash(repository: Repository, includeUntracked = fal
 	}
 
 	await repository.createStash(message, includeUntracked);
+}
+
+export async function pickStash(repository: Repository, placeHolder: string): Promise<Stash | undefined> {
+	const stashes = await repository.getStashes();
+
+	if (stashes.length === 0) {
+		window.showInformationMessage(localize('no stashes', "There are no stashes in the repository."));
+		return;
+	}
+
+	const picks = stashes.map(stash => ({ label: `#${stash.index}:  ${stash.description}`, description: '', details: '', stash }));
+	const result = await window.showQuickPick(picks, { placeHolder });
+	return result && result.stash;
 }

@@ -8,7 +8,7 @@ import * as path from 'node:path';
 import { commands, Disposable, OutputChannel, ProgressLocation, QuickPickItem, Uri, window, workspace, TextDocumentContentProvider } from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { ForcePushMode, GitErrorCodes, Status, CommitOptions } from './api/git.js';
-import { Git, Stash } from './git.js';
+import { Git } from './git.js';
 import { Model } from './model.js';
 import { Repository, Resource } from './repository.js';
 import { fromGitUri, isGitUri } from './uri.js';
@@ -84,7 +84,6 @@ export class CommandCenter {
 			this.promptForBranchName.bind(this),
 			this.outputChannel,
 			this._stageDeletionConflict.bind(this),
-			pickStash,
 			this._sync.bind(this),
 		);
 		this.disposables = cmds.map(({ commandId, method, options }) => {
@@ -890,19 +889,6 @@ export class CommandCenter {
 	dispose(): void {
 		this.disposables.forEach(d => d.dispose());
 	}
-}
-
-async function pickStash(repository: Repository, placeHolder: string): Promise<Stash | undefined> {
-	const stashes = await repository.getStashes();
-
-	if (stashes.length === 0) {
-		window.showInformationMessage(localize('no stashes', "There are no stashes in the repository."));
-		return;
-	}
-
-	const picks = stashes.map(stash => ({ label: `#${stash.index}:  ${stash.description}`, description: '', details: '', stash }));
-	const result = await window.showQuickPick(picks, { placeHolder });
-	return result && result.stash;
 }
 
 function createGetSCMResource(outputChannel: OutputChannel, model: Model): (uri?: Uri) => Resource | undefined {
