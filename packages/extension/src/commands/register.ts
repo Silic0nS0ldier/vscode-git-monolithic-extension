@@ -87,8 +87,8 @@ import * as stashIncludeUntracked from "./implementations/stash/stash-include-un
 import * as stashPopLatest from "./implementations/stash/stash-pop-latest.js";
 import * as stashPop from "./implementations/stash/stash-pop.js";
 import * as stash from "./implementations/stash/stash.js";
-import * as syncRebase from "./implementations/sync-rebase.js";
-import * as sync from "./implementations/sync.js";
+import * as syncRebase from "./implementations/sync/sync-rebase.js";
+import * as sync from "./implementations/sync/sync.js";
 import * as undoCommit from "./implementations/undo-commit.js";
 import * as unstageAll from "./implementations/unstage-all.js";
 // import * as unstageSelectedRanges from "./implementations/unstage-seleted-ranges.js";

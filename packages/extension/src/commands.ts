@@ -15,7 +15,7 @@ import { fromGitUri, isGitUri } from './uri.js';
 import { isDescendant, localize, pathEquals } from './util.js';
 import { pickRemoteSource } from './remoteSource.js';
 import { registerCommands } from './commands/register.js';
-import { syncCmdImpl } from './commands/implementations/sync.js';
+import { syncCmdImpl } from './commands/implementations/sync/sync.js';
 import { cleanAllCmdImpl } from './commands/implementations/clean/clean-all.js';
 import { stashCmdImpl } from './commands/implementations/stash/stash.js';
 import { stashPopLatestCmdImpl } from './commands/implementations/stash/stash-pop-latest.js';
