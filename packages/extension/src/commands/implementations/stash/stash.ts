@@ -1,5 +1,5 @@
 
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Repository } from "../../../repository.js";
 import { createStash } from "./helpers.js";
 

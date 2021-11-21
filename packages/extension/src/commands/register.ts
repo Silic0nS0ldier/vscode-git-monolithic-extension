@@ -1,5 +1,5 @@
 import { OutputChannel } from "vscode";
-import { ScmCommand } from "../commands";
+import { ScmCommand } from "./helpers.js";
 import { Git } from "../git.js";
 import { Model } from "../model";
 

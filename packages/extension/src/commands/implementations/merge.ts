@@ -1,6 +1,6 @@
 import { QuickPickItem, window, workspace } from "vscode";
 import { Branch, Ref, RefType } from "../../api/git.js";
-import { ScmCommand } from "../../commands.js";
+import { ScmCommand } from "../helpers.js";
 import { Repository } from "../../repository.js";
 import { localize } from "../../util.js";
 

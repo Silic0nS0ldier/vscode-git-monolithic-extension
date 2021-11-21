@@ -1,6 +1,6 @@
 import { Uri, window } from "vscode";
 import * as os from 'node:os';
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Model } from "../../../model.js";
 import { localize } from "../../../util.js";
 

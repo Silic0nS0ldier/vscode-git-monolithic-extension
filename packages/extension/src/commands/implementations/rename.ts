@@ -1,6 +1,6 @@
 import { Uri, window } from "vscode";
 import * as path from "node:path";
-import { ScmCommand } from "../../commands.js";
+import { ScmCommand } from "../helpers.js";
 import { Repository } from "../../repository.js";
 
 export function createCommand(): ScmCommand {

@@ -1,4 +1,4 @@
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Model } from "../../../model.js";
 import { Resource } from "../../../repository.js";
 

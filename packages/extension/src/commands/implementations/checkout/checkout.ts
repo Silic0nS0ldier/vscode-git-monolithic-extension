@@ -7,7 +7,7 @@ import { cleanAll } from "../clean/clean-all.js";
 import { createStash } from "../stash/helpers.js";
 import { stashPopLatest } from "../stash/stash-pop-latest.js";
 import { CheckoutDetachedItem, CheckoutItem } from "./quick-pick.js";
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Repository } from "../../../repository.js";
 import { createCheckoutItems } from "./helpers.js";
 

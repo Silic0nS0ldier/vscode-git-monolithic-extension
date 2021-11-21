@@ -1,5 +1,5 @@
 // import { Selection, TextEditor, Uri, window } from "vscode";
-// import { ScmCommand } from "../../commands.js";
+// import { ScmCommand } from "../helpers.js";
 
 // export function createCommand(
 // 	stageChanges: (textEditor: TextEditor, changes: LineChange[]) => Promise<void>,

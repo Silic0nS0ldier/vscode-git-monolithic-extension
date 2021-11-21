@@ -1,5 +1,5 @@
 import { window } from "vscode";
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Model } from "../../../model.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import { Repository } from "../../../repository.js";

@@ -1,5 +1,5 @@
 import { Status } from "../../../api/git.js";
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Repository } from "../../../repository.js";
 
 export function createCommand(): ScmCommand {

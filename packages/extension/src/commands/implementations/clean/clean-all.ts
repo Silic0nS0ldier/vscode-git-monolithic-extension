@@ -1,7 +1,7 @@
 import { window } from "vscode";
 import * as path from "node:path";
 import { Status } from "../../../api/git.js";
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
 import { cleanTrackedChanges, cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";

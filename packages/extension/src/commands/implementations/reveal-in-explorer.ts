@@ -1,5 +1,5 @@
 import { commands, SourceControlResourceState, Uri } from "vscode";
-import { ScmCommand } from "../../commands.js";
+import { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
 	async function revealInExplorer(resourceState: SourceControlResourceState): Promise<void> {

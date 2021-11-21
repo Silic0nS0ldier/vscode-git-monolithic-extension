@@ -1,6 +1,6 @@
 // import { commands, Uri } from "vscode";
 // import * as path from "node:path";
-// import { ScmCommand } from "../../../../commands.js";
+// import { ScmCommand } from "../../../helpers.js";
 // import { GitTimelineItem } from '../../../../timelineProvider.js';
 // import { toGitUri } from "../../../../uri.js";
 // import { localize } from "../../../../util.js";

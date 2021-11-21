@@ -1,5 +1,5 @@
 import { window } from "vscode";
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
 

@@ -1,4 +1,4 @@
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
 import { push, PushType } from "./helpers.js";

@@ -1,5 +1,5 @@
 import TelemetryReporter from "vscode-extension-telemetry";
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Git } from "../../../git.js";
 import { Model } from "../../../model.js";
 import { cloneRepository } from "./helpers.js";

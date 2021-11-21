@@ -1,7 +1,7 @@
 import { OutputChannel, SourceControlResourceState, Uri, window } from "vscode";
 import * as path from "node:path";
 import { Status } from "../../../api/git.js";
-import { ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../helpers.js";
 import { Resource, ResourceGroupType } from "../../../repository.js";
 import { localize } from "../../../util.js";
 import { Model } from "../../../model.js";

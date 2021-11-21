@@ -10,18 +10,6 @@ import { Model } from './model.js';
 import { registerCommands } from './commands/register.js';
 import { createCommand } from './commands/create.js';
 
-
-export interface ScmCommandOptions {
-	repository?: boolean;
-	diff?: boolean;
-}
-
-export interface ScmCommand {
-	commandId: string;
-	method: Function;
-	options: ScmCommandOptions;
-}
-
 export class CommandErrorOutputTextDocumentContentProvider implements TextDocumentContentProvider {
 
 	private items = new Map<string, string>();

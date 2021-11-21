@@ -86,3 +86,14 @@ export function getSCMResource(
 	}
 	return undefined;
 }
+
+export interface ScmCommandOptions {
+	repository?: boolean;
+	diff?: boolean;
+}
+
+export interface ScmCommand {
+	commandId: string;
+	method: Function;
+	options: ScmCommandOptions;
+}
