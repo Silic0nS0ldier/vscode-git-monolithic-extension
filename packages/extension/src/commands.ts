@@ -67,7 +67,7 @@ export class CommandCenter {
 			createGetSCMResource(this.outputChannel, this.model),
 			this.cloneRepository.bind(this),
 			(repository: Repository, opts?: CommitOptions) => commitWithAnyInput(repository, this.model, opts),
-			this._commitEmpty.bind(this),
+			(repository: Repository, noVerify?: boolean) => commitEmpty(repository, this.model, noVerify),
 			this.git,
 			(repository: Repository, pushOptions: PushOptions) => push(repository, pushOptions, this.model),
 			this.outputChannel,
@@ -306,27 +306,6 @@ export class CommandCenter {
 	// 	textEditor.revealRange(visibleRangesBeforeRevert[0]);
 	// }
 
-	private async _commitEmpty(repository: Repository, noVerify?: boolean): Promise<void> {
-		const root = Uri.file(repository.root);
-		const config = workspace.getConfiguration('git', root);
-		const shouldPrompt = config.get<boolean>('confirmEmptyCommits') === true;
-
-		if (shouldPrompt) {
-			const message = localize('confirm emtpy commit', "Are you sure you want to create an empty commit?");
-			const yes = localize('yes', "Yes");
-			const neverAgain = localize('yes never again', "Yes, Don't Show Again");
-			const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
-
-			if (pick === neverAgain) {
-				await config.update('confirmEmptyCommits', false, true);
-			} else if (pick !== yes) {
-				return;
-			}
-		}
-
-		await commitWithAnyInput(repository, this.model, { empty: true, noVerify });
-	}
-
 	// resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
 	// 	if (uri === undefined || uri === null || !GitTimelineItem.is(item)) {
 	// 		return undefined;
@@ -356,6 +335,32 @@ export class CommandCenter {
 	dispose(): void {
 		this.disposables.forEach(d => d.dispose());
 	}
+}
+
+// TODO Figure out how to move this into a different file (commands/commit most likely)
+async function commitEmpty(
+	repository: Repository,
+	model: Model,
+	noVerify?: boolean,
+): Promise<void> {
+	const root = Uri.file(repository.root);
+	const config = workspace.getConfiguration('git', root);
+	const shouldPrompt = config.get<boolean>('confirmEmptyCommits') === true;
+
+	if (shouldPrompt) {
+		const message = localize('confirm emtpy commit', "Are you sure you want to create an empty commit?");
+		const yes = localize('yes', "Yes");
+		const neverAgain = localize('yes never again', "Yes, Don't Show Again");
+		const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
+
+		if (pick === neverAgain) {
+			await config.update('confirmEmptyCommits', false, true);
+		} else if (pick !== yes) {
+			return;
+		}
+	}
+
+	await commitWithAnyInput(repository, model, { empty: true, noVerify });
 }
 
 // TODO Figure out how to move this into a different file (commands/commit most likely)
