@@ -72,7 +72,7 @@ export class CommandCenter {
 			(repository: Repository, pushOptions: PushOptions) => push(repository, pushOptions, this.model),
 			this.outputChannel,
 			this._stageDeletionConflict.bind(this),
-			this._sync.bind(this),
+			(repository: Repository, rebase: boolean) => sync(repository, rebase, this.model),
 		);
 		this.disposables = cmds.map(({ commandId, method, options }) => {
 			const command = createCommand(
@@ -461,7 +461,10 @@ export class CommandCenter {
 				await push(repository, { pushType: PushType.Push, silent: true }, this.model);
 				break;
 			case 'sync':
-				await syncCmdImpl(this._sync.bind(this), repository);
+				await syncCmdImpl(
+					(repository: Repository, rebase: boolean) => sync(repository, rebase, this.model),
+					repository,
+				);
 				break;
 		}
 
@@ -528,54 +531,6 @@ export class CommandCenter {
 		await this.commitWithAnyInput(repository, { empty: true, noVerify });
 	}
 
-	private async _sync(repository: Repository, rebase: boolean): Promise<void> {
-		const HEAD = repository.HEAD;
-
-		if (!HEAD) {
-			return;
-		} else if (!HEAD.upstream) {
-			const branchName = HEAD.name;
-			const message = localize('confirm publish branch', "The branch '{0}' has no upstream branch. Would you like to publish this branch?", branchName);
-			const yes = localize('ok', "OK");
-			const pick = await window.showWarningMessage(message, { modal: true }, yes);
-
-			if (pick === yes) {
-				await publishCmdImpl(
-					this.model,
-					addRemoteCmdImpl.bind(null, this.model),
-					repository,
-				);
-			}
-			return;
-		}
-
-		const remoteName = HEAD.remote || HEAD.upstream.remote;
-		const remote = repository.remotes.find(r => r.name === remoteName);
-		const isReadonly = remote && remote.isReadOnly;
-
-		const config = workspace.getConfiguration('git');
-		const shouldPrompt = !isReadonly && config.get<boolean>('confirmSync') === true;
-
-		if (shouldPrompt) {
-			const message = localize('sync is unpredictable', "This action will push and pull commits to and from '{0}/{1}'.", HEAD.upstream.remote, HEAD.upstream.name);
-			const yes = localize('ok', "OK");
-			const neverAgain = localize('never again', "OK, Don't Show Again");
-			const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
-
-			if (pick === neverAgain) {
-				await config.update('confirmSync', false, true);
-			} else if (pick !== yes) {
-				return;
-			}
-		}
-
-		if (rebase) {
-			await repository.syncRebase(HEAD);
-		} else {
-			await repository.sync(HEAD);
-		}
-	}
-
 	// resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
 	// 	if (uri === undefined || uri === null || !GitTimelineItem.is(item)) {
 	// 		return undefined;
@@ -604,6 +559,59 @@ export class CommandCenter {
 
 	dispose(): void {
 		this.disposables.forEach(d => d.dispose());
+	}
+}
+
+// TODO Figure out how to move this into a different file (commands/sync most likely)
+async function sync(
+	repository: Repository,
+	rebase: boolean,
+	model: Model,
+): Promise<void> {
+	const HEAD = repository.HEAD;
+
+	if (!HEAD) {
+		return;
+	} else if (!HEAD.upstream) {
+		const branchName = HEAD.name;
+		const message = localize('confirm publish branch', "The branch '{0}' has no upstream branch. Would you like to publish this branch?", branchName);
+		const yes = localize('ok', "OK");
+		const pick = await window.showWarningMessage(message, { modal: true }, yes);
+
+		if (pick === yes) {
+			await publishCmdImpl(
+				model,
+				addRemoteCmdImpl.bind(null, model),
+				repository,
+			);
+		}
+		return;
+	}
+
+	const remoteName = HEAD.remote || HEAD.upstream.remote;
+	const remote = repository.remotes.find(r => r.name === remoteName);
+	const isReadonly = remote && remote.isReadOnly;
+
+	const config = workspace.getConfiguration('git');
+	const shouldPrompt = !isReadonly && config.get<boolean>('confirmSync') === true;
+
+	if (shouldPrompt) {
+		const message = localize('sync is unpredictable', "This action will push and pull commits to and from '{0}/{1}'.", HEAD.upstream.remote, HEAD.upstream.name);
+		const yes = localize('ok', "OK");
+		const neverAgain = localize('never again', "OK, Don't Show Again");
+		const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
+
+		if (pick === neverAgain) {
+			await config.update('confirmSync', false, true);
+		} else if (pick !== yes) {
+			return;
+		}
+	}
+
+	if (rebase) {
+		await repository.syncRebase(HEAD);
+	} else {
+		await repository.sync(HEAD);
 	}
 }
 
