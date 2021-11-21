@@ -1,14 +1,16 @@
 import { OutputChannel, SourceControlResourceState, Uri, window } from "vscode";
 import * as path from 'node:path';
-import type { RunByRepository, ScmCommand } from "../../../commands.js";
+import type { ScmCommand } from "../../../commands.js";
 import { Resource, ResourceGroupType } from "../../../repository.js";
 import { localize } from "../../../util.js";
 import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";
+import { Model } from "../../../model.js";
+import { runByRepository } from "../../helpers.js";
 
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 	outputChannel: OutputChannel,
-	runByRepository: RunByRepository,
+	model: Model,
 ): ScmCommand {
 	async function stage(...resourceStates: SourceControlResourceState[]): Promise<void> {
 		outputChannel.appendLine(`git.stage ${resourceStates.length}`);
@@ -44,7 +46,7 @@ export function createCommand(
 		}
 
 		try {
-			await runByRepository(deletionConflicts.map(r => r.resourceUri), async (repository, resources) => {
+			await runByRepository(model, deletionConflicts.map(r => r.resourceUri), async (repository, resources) => {
 				for (const resource of resources) {
 					await stageDeletionConflict(repository, resource);
 				}
@@ -67,7 +69,7 @@ export function createCommand(
 		}
 
 		const resources = scmResources.map(r => r.resourceUri);
-		await runByRepository(resources, async (repository, resources) => repository.add(resources));
+		await runByRepository(model, resources, async (repository, resources) => repository.add(resources));
 	};
 
 	return {

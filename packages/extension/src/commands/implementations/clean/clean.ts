@@ -1,12 +1,14 @@
 import { SourceControlResourceState, Uri, window } from "vscode";
 import * as path from "node:path";
 import { Status } from "../../../api/git.js";
-import { RunByRepository, ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../../commands.js";
 import { Resource, ResourceGroupType } from "../../../repository.js";
 import { localize } from "../../../util.js";
+import { Model } from "../../../model.js";
+import { runByRepository } from "../../helpers.js";
 
 export function createCommand(
-	runByRepository: RunByRepository,
+	model: Model,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 ): ScmCommand {
 	async function clean(...resourceStates: SourceControlResourceState[]): Promise<void> {
@@ -65,7 +67,7 @@ export function createCommand(
 		}
 
 		const resources = scmResources.map(r => r.resourceUri);
-		await runByRepository(resources, async (repository, resources) => repository.clean(resources));
+		await runByRepository(model, resources, async (repository, resources) => repository.clean(resources));
 	};
 
 	return {

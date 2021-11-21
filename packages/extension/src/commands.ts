@@ -7,12 +7,11 @@ import { commands, Disposable, OutputChannel, Uri, window, workspace, TextDocume
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { Git } from './git.js';
 import { Model } from './model.js';
-import { Repository, Resource } from './repository.js';
+import { Resource } from './repository.js';
 import { fromGitUri, isGitUri } from './uri.js';
-import { pathEquals } from './util.js';
 import { registerCommands } from './commands/register.js';
 import { createCommand } from './commands/create.js';
-import AggregateError from 'aggregate-error';
+
 
 export interface ScmCommandOptions {
 	repository?: boolean;
@@ -50,7 +49,6 @@ export function createCommands(
 ): Disposable {
 	const cmds = registerCommands(
 		model,
-		createRunByRepository(model),
 		createGetSCMResource(outputChannel, model),
 		git,
 		outputChannel,
@@ -116,50 +114,3 @@ function createGetSCMResource(outputChannel: OutputChannel, model: Model): (uri?
 		return undefined;
 	};
 }
-
-function createRunByRepository(model: Model): RunByRepository {
-	return async function runByRepository(resources, fn): Promise<void> {
-
-		const groups = resources.reduce((result, resource) => {
-			let repository = model.getRepository(resource);
-
-			if (!repository) {
-				console.warn('Could not find git repository for ', resource);
-				return result;
-			}
-
-			// Could it be a submodule?
-			if (pathEquals(resource.fsPath, repository.root)) {
-				repository = model.getRepositoryForSubmodule(resource) || repository;
-			}
-
-			const tuple = result.filter(p => p.repository === repository)[0];
-
-			if (tuple) {
-				tuple.resources.push(resource);
-			} else {
-				result.push({ repository, resources: [resource] });
-			}
-
-			return result;
-		}, [] as { repository: Repository, resources: Uri[] }[]);
-
-		const promises = groups
-			.map(({ repository, resources }) => fn(repository as Repository, resources));
-
-		const results = await Promise.allSettled(promises);
-
-		const errors: unknown[] = [];
-		for (const result of results) {
-			if (result.status === "rejected") {
-				errors.push(result.reason);
-			}
-		}
-
-		if (errors.length > 0) {
-			throw new AggregateError(errors as any);
-		}
-	};
-}
-
-export type RunByRepository = (resources: Uri[], fn: (repository: Repository, resources: Uri[]) => Promise<void>) => Promise<void>;

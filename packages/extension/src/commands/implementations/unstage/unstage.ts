@@ -1,10 +1,12 @@
 import { SourceControlResourceState, Uri } from "vscode";
-import { RunByRepository, ScmCommand } from "../../../commands.js";
+import { ScmCommand } from "../../../commands.js";
+import { Model } from "../../../model.js";
 import { Resource, ResourceGroupType } from "../../../repository.js";
+import { runByRepository } from "../../helpers.js";
 
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,
-	runByRepository: RunByRepository,
+	model: Model,
 ): ScmCommand {
 	async function unstage(...resourceStates: SourceControlResourceState[]): Promise<void> {
 		resourceStates = resourceStates.filter(s => !!s);
@@ -27,7 +29,7 @@ export function createCommand(
 		}
 
 		const resources = scmResources.map(r => r.resourceUri);
-		await runByRepository(resources, async (repository, resources) => repository.revert(resources));
+		await runByRepository(model, resources, async (repository, resources) => repository.revert(resources));
 	};
 
 	return {

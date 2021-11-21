@@ -1,9 +1,11 @@
 import { SourceControlResourceState, Uri } from "vscode";
-import { RunByRepository, ScmCommand } from "../../commands.js";
+import { ScmCommand } from "../../commands.js";
+import { Model } from "../../model.js";
 import { Resource } from "../../repository.js";
+import { runByRepository } from "../helpers.js";
 
 export function createCommand(
-	runByRepository: RunByRepository,
+	model: Model,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 ): ScmCommand {
 	async function ignore(...resourceStates: SourceControlResourceState[]): Promise<void> {
@@ -27,7 +29,7 @@ export function createCommand(
 			return;
 		}
 
-		await runByRepository(resources, async (repository, resources) => repository.ignore(resources));
+		await runByRepository(model, resources, async (repository, resources) => repository.ignore(resources));
 	};
 
 	return {

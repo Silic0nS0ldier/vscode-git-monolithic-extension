@@ -1,5 +1,5 @@
 import { OutputChannel, Uri } from "vscode";
-import { RunByRepository, ScmCommand } from "../commands";
+import { ScmCommand } from "../commands";
 import { Git } from "../git.js";
 import { Model } from "../model";
 import { Resource } from "../repository.js";
@@ -95,7 +95,6 @@ import TelemetryReporter from "vscode-extension-telemetry";
 
 export function registerCommands(
 	model: Model,
-	runByRepository: RunByRepository,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 	git: Git,
 	outputChannel: OutputChannel,
@@ -108,7 +107,7 @@ export function registerCommands(
 		checkout.createCommand(),
 		checkoutDetached.createCommand(),
 		cherryPick.createCommand(),
-		clean.createCommand(runByRepository, getSCMResource),
+		clean.createCommand(model, getSCMResource),
 		cleanAll.createCommand(),
 		cleanAllTracked.createCommand(),
 		cleanAllUntracked.createCommand(),
@@ -137,7 +136,7 @@ export function registerCommands(
 		fetch.createCommand(),
 		fetchAll.createCommand(),
 		fetchPrune.createCommand(),
-		ignore.createCommand(runByRepository, getSCMResource),
+		ignore.createCommand(model, getSCMResource),
 		init.createCommand(git, model),
 		merge.createCommand(),
 		openAllChanges.createCommand(),
@@ -167,7 +166,7 @@ export function registerCommands(
 		restoreCommitTemplate.createCommand(),
 		revealInExplorer.createCommand(),
 		setLogLevel.createCommand(outputChannel),
-		stage.createCommand(getSCMResource, outputChannel, runByRepository),
+		stage.createCommand(getSCMResource, outputChannel, model),
 		stageAll.createCommand(),
 		stageAllMerge.createCommand(),
 		stageAllTracked.createCommand(),
@@ -182,7 +181,7 @@ export function registerCommands(
 		sync.createCommand(model),
 		syncRebase.createCommand(model),
 		undoCommit.createCommand(),
-		unstage.createCommand(getSCMResource, runByRepository),
+		unstage.createCommand(getSCMResource, model),
 		unstageAll.createCommand(),
 	];
 }
