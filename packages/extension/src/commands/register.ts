@@ -2,7 +2,7 @@ import { OutputChannel, Uri } from "vscode";
 import { RunByRepository, ScmCommand } from "../commands";
 import { Git } from "../git.js";
 import { Model } from "../model";
-import { Repository, Resource } from "../repository.js";
+import { Resource } from "../repository.js";
 
 import * as addRemote from "./implementations/remote/add-remote.js";
 import * as branchFrom from "./implementations/branch/branch-from.js";
@@ -97,7 +97,6 @@ export function registerCommands(
 	model: Model,
 	runByRepository: RunByRepository,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
-	commitEmptyFn: (repository: Repository, noVerify?: boolean) => Promise<void>,
 	git: Git,
 	outputChannel: OutputChannel,
 	telemetryReporter: TelemetryReporter,
@@ -121,8 +120,8 @@ export function registerCommands(
 		commitAllSignedNoVerify.createCommand(model),
 		commitAllSigned.createCommand(model),
 		commitAll.createCommand(model),
-		commitEmptyNoVerify.createCommand(commitEmptyFn),
-		commitEmpty.createCommand(commitEmptyFn),
+		commitEmptyNoVerify.createCommand(model),
+		commitEmpty.createCommand(model),
 		commitNoVerify.createCommand(model),
 		commitStagedAmendNoVerify.createCommand(model),
 		commitStagedAmend.createCommand(model),

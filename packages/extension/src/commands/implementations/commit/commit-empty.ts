@@ -1,16 +1,16 @@
 import { ScmCommand } from "../../../commands.js";
+import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
+import { commitEmpty } from "./helpers.js";
 
-export function createCommand(
-	commitEmptyFn: (repository: Repository, noVerify?: boolean) => Promise<void>,
-): ScmCommand {
-	async function commitEmpty(repository: Repository): Promise<void> {
-		await commitEmptyFn(repository);
+export function createCommand(model: Model): ScmCommand {
+	async function commitEmptyFn(repository: Repository): Promise<void> {
+		await commitEmpty(repository, model);
 	};
 
 	return {
 		commandId: 'git.commitEmpty',
-		method: commitEmpty,
+		method: commitEmptyFn,
 		options: {
 			repository: true,
 		},

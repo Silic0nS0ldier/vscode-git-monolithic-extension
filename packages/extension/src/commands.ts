@@ -9,11 +9,10 @@ import { Git } from './git.js';
 import { Model } from './model.js';
 import { Repository, Resource } from './repository.js';
 import { fromGitUri, isGitUri } from './uri.js';
-import { localize, pathEquals } from './util.js';
+import { pathEquals } from './util.js';
 import { registerCommands } from './commands/register.js';
 import { createCommand } from './commands/create.js';
 import AggregateError from 'aggregate-error';
-import { commitWithAnyInput } from './commands/implementations/commit/helpers.js';
 
 export interface ScmCommandOptions {
 	repository?: boolean;
@@ -53,7 +52,6 @@ export function createCommands(
 		model,
 		createRunByRepository(model),
 		createGetSCMResource(outputChannel, model),
-		(repository: Repository, noVerify?: boolean) => commitEmpty(repository, model, noVerify),
 		git,
 		outputChannel,
 		telemetryReporter,
@@ -83,32 +81,6 @@ export function createCommands(
 	disposables.push(workspace.registerTextDocumentContentProvider('git-output', commandErrors));
 
 	return Disposable.from(...disposables);
-}
-
-// TODO Figure out how to move this into a different file (commands/commit most likely)
-async function commitEmpty(
-	repository: Repository,
-	model: Model,
-	noVerify?: boolean,
-): Promise<void> {
-	const root = Uri.file(repository.root);
-	const config = workspace.getConfiguration('git', root);
-	const shouldPrompt = config.get<boolean>('confirmEmptyCommits') === true;
-
-	if (shouldPrompt) {
-		const message = localize('confirm emtpy commit', "Are you sure you want to create an empty commit?");
-		const yes = localize('yes', "Yes");
-		const neverAgain = localize('yes never again', "Yes, Don't Show Again");
-		const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
-
-		if (pick === neverAgain) {
-			await config.update('confirmEmptyCommits', false, true);
-		} else if (pick !== yes) {
-			return;
-		}
-	}
-
-	await commitWithAnyInput(repository, model, { empty: true, noVerify });
 }
 
 function createGetSCMResource(outputChannel: OutputChannel, model: Model): (uri?: Uri) => Resource | undefined {

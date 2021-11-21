@@ -215,3 +215,28 @@ export async function commitWithAnyInput(
 		repository.inputBox.value = await repository.getInputTemplate();
 	}
 }
+
+export async function commitEmpty(
+	repository: Repository,
+	model: Model,
+	noVerify?: boolean,
+): Promise<void> {
+	const root = Uri.file(repository.root);
+	const config = workspace.getConfiguration('git', root);
+	const shouldPrompt = config.get<boolean>('confirmEmptyCommits') === true;
+
+	if (shouldPrompt) {
+		const message = localize('confirm emtpy commit', "Are you sure you want to create an empty commit?");
+		const yes = localize('yes', "Yes");
+		const neverAgain = localize('yes never again', "Yes, Don't Show Again");
+		const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
+
+		if (pick === neverAgain) {
+			await config.update('confirmEmptyCommits', false, true);
+		} else if (pick !== yes) {
+			return;
+		}
+	}
+
+	await commitWithAnyInput(repository, model, { empty: true, noVerify });
+}

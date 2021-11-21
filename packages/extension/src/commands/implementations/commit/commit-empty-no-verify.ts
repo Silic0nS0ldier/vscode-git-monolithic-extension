@@ -1,11 +1,11 @@
 import { ScmCommand } from "../../../commands.js";
+import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
+import { commitEmpty } from "./helpers.js";
 
-export function createCommand(
-	commitEmptyFn: (repository: Repository, noVerify?: boolean) => Promise<void>,
-): ScmCommand {
+export function createCommand(model: Model): ScmCommand {
 	async function commitEmptyNoVerify(repository: Repository): Promise<void> {
-		await commitEmptyFn(repository, true);
+		await commitEmpty(repository, model, true);
 	};
 
 	return {
