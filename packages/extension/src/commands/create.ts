@@ -6,6 +6,7 @@ import { Model } from "../model.js";
 import { Repository } from "../repository.js";
 import { localize } from "../util.js";
 
+// TODO Remove argument injection logic, it complicates code and hides potential errors
 export function createCommand(
 	model: Model,
 	telemetryReporter: TelemetryReporter,

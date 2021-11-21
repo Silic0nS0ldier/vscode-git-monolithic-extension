@@ -1,12 +1,11 @@
 import { ScmCommand } from "../../../commands.js";
+import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
-import { PushOptions, PushType } from "./helpers.js";
+import { push, PushType } from "./helpers.js";
 
-export function createCommand(
-	pushFn: (repository: Repository, pushOptions: PushOptions) => Promise<void>,
-): ScmCommand {
+export function createCommand(model: Model): ScmCommand {
 	async function pushWithTags(repository: Repository): Promise<void> {
-		await pushFn(repository, { pushType: PushType.PushFollowTags });
+		await push(repository, { pushType: PushType.PushFollowTags }, model);
 	};
 
 	return {

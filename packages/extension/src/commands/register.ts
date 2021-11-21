@@ -54,7 +54,6 @@ import * as publish from "./implementations/publish.js";
 import * as pullFrom from "./implementations/pull/pull-from";
 import * as pullRebase from "./implementations/pull/pull-rebase.js";
 import * as pull from "./implementations/pull/pull.js";
-import { PushOptions } from "./implementations/push/helpers";
 import * as pushForce from "./implementations/push/push-force.js";
 import * as pushTags from "./implementations/push/push-tags.js";
 import * as pushToForce from "./implementations/push/push-to-force.js";
@@ -102,7 +101,6 @@ export function registerCommands(
 	commitWithAnyInput: (repository: Repository, opts?: CommitOptions) => Promise<void>,
 	commitEmptyFn: (repository: Repository, noVerify?: boolean) => Promise<void>,
 	git: Git,
-	pushFn: (repository: Repository, pushOptions: PushOptions) => Promise<void>,
 	outputChannel: OutputChannel,
 	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,
 ) {
@@ -152,13 +150,13 @@ export function registerCommands(
 		pullFrom.createCommand(),
 		pullRebase.createCommand(),
 		pull.createCommand(),
-		pushForce.createCommand(pushFn),
-		pushTags.createCommand(pushFn),
-		pushToForce.createCommand(pushFn),
-		pushTo.createCommand(pushFn),
-		pushWithTagsForce.createCommand(pushFn),
-		pushWithTags.createCommand(pushFn),
-		push.createCommand(pushFn),
+		pushForce.createCommand(model),
+		pushTags.createCommand(model),
+		pushToForce.createCommand(model),
+		pushTo.createCommand(model),
+		pushWithTagsForce.createCommand(model),
+		pushWithTags.createCommand(model),
+		push.createCommand(model),
 		rebaseAbort.createCommand(),
 		rebase.createCommand(),
 		refresh.createCommand(),
@@ -184,7 +182,6 @@ export function registerCommands(
 		sync.createCommand(syncFn),
 		unstage.createCommand(getSCMResource, runByRepository),
 	];
-
 
 	const openFileCmd = openFile.createCommand(getSCMResource);
 	commands.push(

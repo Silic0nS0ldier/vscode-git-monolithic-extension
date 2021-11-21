@@ -7,7 +7,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { commands, Disposable, OutputChannel, ProgressLocation, Uri, window, workspace, TextDocumentContentProvider } from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
-import { ForcePushMode, GitErrorCodes, Status, CommitOptions } from './api/git.js';
+import { Status, CommitOptions } from './api/git.js';
 import { Git } from './git.js';
 import { Model } from './model.js';
 import { Repository, Resource } from './repository.js';
@@ -17,9 +17,9 @@ import { pickRemoteSource } from './remoteSource.js';
 import { registerCommands } from './commands/register.js';
 import { syncCmdImpl } from './commands/implementations/sync/sync.js';
 import { addRemoteCmdImpl } from './commands/implementations/remote/add-remote.js';
-import { AddRemoteItem, publishCmdImpl } from './commands/implementations/publish.js';
+import { publishCmdImpl } from './commands/implementations/publish.js';
 import { createCommand } from './commands/create.js';
-import { PushOptions, PushType } from './commands/implementations/push/helpers.js';
+import { push, PushType } from './commands/implementations/push/helpers.js';
 import AggregateError from 'aggregate-error';
 
 export interface ScmCommandOptions {
@@ -64,7 +64,6 @@ export function createCommands(
 		(repository: Repository, opts?: CommitOptions) => commitWithAnyInput(repository, model, opts),
 		(repository: Repository, noVerify?: boolean) => commitEmpty(repository, model, noVerify),
 		git,
-		(repository: Repository, pushOptions: PushOptions) => push(repository, pushOptions, model),
 		outputChannel,
 		(repository: Repository, rebase: boolean) => sync(repository, rebase, model),
 	);
@@ -522,118 +521,6 @@ async function sync(
 		await repository.syncRebase(HEAD);
 	} else {
 		await repository.sync(HEAD);
-	}
-}
-
-// TODO Figure out how this can be moved into a different file (commands/push most likely)
-async function push(repository: Repository, pushOptions: PushOptions, model: Model) {
-	const remotes = repository.remotes;
-
-	if (remotes.length === 0) {
-		if (pushOptions.silent) {
-			return;
-		}
-
-		const addRemote = localize('addremote', 'Add Remote');
-		const result = await window.showWarningMessage(localize('no remotes to push', "Your repository has no remotes configured to push to."), addRemote);
-
-		if (result === addRemote) {
-			await addRemoteCmdImpl(model, repository);
-		}
-
-		return;
-	}
-
-	const config = workspace.getConfiguration('git', Uri.file(repository.root));
-	let forcePushMode: ForcePushMode | undefined = undefined;
-
-	if (pushOptions.forcePush) {
-		if (!config.get<boolean>('allowForcePush')) {
-			await window.showErrorMessage(localize('force push not allowed', "Force push is not allowed, please enable it with the 'git.allowForcePush' setting."));
-			return;
-		}
-
-		forcePushMode = config.get<boolean>('useForcePushWithLease') === true ? ForcePushMode.ForceWithLease : ForcePushMode.Force;
-
-		if (config.get<boolean>('confirmForcePush')) {
-			const message = localize('confirm force push', "You are about to force push your changes, this can be destructive and could inadvertently overwrite changes made by others.\n\nAre you sure to continue?");
-			const yes = localize('ok', "OK");
-			const neverAgain = localize('never ask again', "OK, Don't Ask Again");
-			const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
-
-			if (pick === neverAgain) {
-				config.update('confirmForcePush', false, true);
-			} else if (pick !== yes) {
-				return;
-			}
-		}
-	}
-
-	if (pushOptions.pushType === PushType.PushFollowTags) {
-		await repository.pushFollowTags(undefined, forcePushMode);
-		return;
-	}
-
-	if (pushOptions.pushType === PushType.PushTags) {
-		await repository.pushTags(undefined, forcePushMode);
-	}
-
-	if (!repository.HEAD || !repository.HEAD.name) {
-		if (!pushOptions.silent) {
-			window.showWarningMessage(localize('nobranch', "Please check out a branch to push to a remote."));
-		}
-		return;
-	}
-
-	if (pushOptions.pushType === PushType.Push) {
-		try {
-			await repository.push(repository.HEAD, forcePushMode);
-		} catch (err) {
-			if (err.gitErrorCode !== GitErrorCodes.NoUpstreamBranch) {
-				throw err;
-			}
-
-			if (pushOptions.silent) {
-				return;
-			}
-
-			const branchName = repository.HEAD.name;
-			const message = localize('confirm publish branch', "The branch '{0}' has no upstream branch. Would you like to publish this branch?", branchName);
-			const yes = localize('ok', "OK");
-			const pick = await window.showWarningMessage(message, { modal: true }, yes);
-
-			if (pick === yes) {
-				await publishCmdImpl(
-					model,
-					addRemoteCmdImpl.bind(null, model),
-					repository,
-				);
-			}
-		}
-	} else {
-		const branchName = repository.HEAD.name;
-		if (!pushOptions.pushTo?.remote) {
-			const addRemote = new AddRemoteItem(addRemoteCmdImpl.bind(null, model));
-			const picks = [...remotes.filter(r => r.pushUrl !== undefined).map(r => ({ label: r.name, description: r.pushUrl })), addRemote];
-			const placeHolder = localize('pick remote', "Pick a remote to publish the branch '{0}' to:", branchName);
-			const choice = await window.showQuickPick(picks, { placeHolder });
-
-			if (!choice) {
-				return;
-			}
-
-			if (choice === addRemote) {
-				const newRemote = await addRemoteCmdImpl(model, repository);
-
-				if (newRemote) {
-					await repository.pushTo(newRemote, branchName, undefined, forcePushMode);
-				}
-			} else {
-				await repository.pushTo(choice.label, branchName, undefined, forcePushMode);
-			}
-		} else {
-			await repository.pushTo(pushOptions.pushTo.remote, pushOptions.pushTo.refspec || branchName, pushOptions.pushTo.setUpstream, forcePushMode);
-		}
 	}
 }
 
