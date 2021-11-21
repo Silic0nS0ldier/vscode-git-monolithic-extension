@@ -16,8 +16,6 @@ import { isDescendant, localize, pathEquals } from './util.js';
 import { pickRemoteSource } from './remoteSource.js';
 import { registerCommands } from './commands/register.js';
 import { syncCmdImpl } from './commands/implementations/sync/sync.js';
-import { addRemoteCmdImpl } from './commands/implementations/remote/add-remote.js';
-import { publishCmdImpl } from './commands/implementations/publish.js';
 import { createCommand } from './commands/create.js';
 import { push, PushType } from './commands/implementations/push/helpers.js';
 import AggregateError from 'aggregate-error';
@@ -65,7 +63,6 @@ export function createCommands(
 		(repository: Repository, noVerify?: boolean) => commitEmpty(repository, model, noVerify),
 		git,
 		outputChannel,
-		(repository: Repository, rebase: boolean) => sync(repository, rebase, model),
 	);
 
 	const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
@@ -462,66 +459,13 @@ async function smartCommit(
 			break;
 		case 'sync':
 			await syncCmdImpl(
-				(repository: Repository, rebase: boolean) => sync(repository, rebase, model),
 				repository,
+				model,
 			);
 			break;
 	}
 
 	return true;
-}
-
-// TODO Figure out how to move this into a different file (commands/sync most likely)
-async function sync(
-	repository: Repository,
-	rebase: boolean,
-	model: Model,
-): Promise<void> {
-	const HEAD = repository.HEAD;
-
-	if (!HEAD) {
-		return;
-	} else if (!HEAD.upstream) {
-		const branchName = HEAD.name;
-		const message = localize('confirm publish branch', "The branch '{0}' has no upstream branch. Would you like to publish this branch?", branchName);
-		const yes = localize('ok', "OK");
-		const pick = await window.showWarningMessage(message, { modal: true }, yes);
-
-		if (pick === yes) {
-			await publishCmdImpl(
-				model,
-				addRemoteCmdImpl.bind(null, model),
-				repository,
-			);
-		}
-		return;
-	}
-
-	const remoteName = HEAD.remote || HEAD.upstream.remote;
-	const remote = repository.remotes.find(r => r.name === remoteName);
-	const isReadonly = remote && remote.isReadOnly;
-
-	const config = workspace.getConfiguration('git');
-	const shouldPrompt = !isReadonly && config.get<boolean>('confirmSync') === true;
-
-	if (shouldPrompt) {
-		const message = localize('sync is unpredictable', "This action will push and pull commits to and from '{0}/{1}'.", HEAD.upstream.remote, HEAD.upstream.name);
-		const yes = localize('ok', "OK");
-		const neverAgain = localize('never again', "OK, Don't Show Again");
-		const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
-
-		if (pick === neverAgain) {
-			await config.update('confirmSync', false, true);
-		} else if (pick !== yes) {
-			return;
-		}
-	}
-
-	if (rebase) {
-		await repository.syncRebase(HEAD);
-	} else {
-		await repository.sync(HEAD);
-	}
 }
 
 function createGetSCMResource(outputChannel: OutputChannel, model: Model): (uri?: Uri) => Resource | undefined {

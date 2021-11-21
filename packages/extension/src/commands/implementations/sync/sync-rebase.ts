@@ -1,12 +1,12 @@
 import { ScmCommand } from "../../../commands.js";
+import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
+import { sync } from "./helper.js";
 
-export function createCommand(
-	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,
-): ScmCommand {
+export function createCommand(model: Model): ScmCommand {
 	async function syncRebase(repository: Repository): Promise<void> {
 		try {
-			await syncFn(repository, true);
+			await sync(repository, true, model);
 		} catch (err) {
 			if (/Cancelled/i.test(err && (err.message || err.stderr || ''))) {
 				return;

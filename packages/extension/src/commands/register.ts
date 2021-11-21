@@ -102,7 +102,6 @@ export function registerCommands(
 	commitEmptyFn: (repository: Repository, noVerify?: boolean) => Promise<void>,
 	git: Git,
 	outputChannel: OutputChannel,
-	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,
 ) {
 	const commands: ScmCommand[] = [
 		branchFrom.createCommand(),
@@ -178,8 +177,8 @@ export function registerCommands(
 		stashPopLatest.createCommand(),
 		stashPop.createCommand(),
 		stash.createCommand(),
-		syncRebase.createCommand(syncFn),
-		sync.createCommand(syncFn),
+		syncRebase.createCommand(model),
+		sync.createCommand(model),
 		unstage.createCommand(getSCMResource, runByRepository),
 	];
 
