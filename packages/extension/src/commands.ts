@@ -50,54 +50,49 @@ export class CommandErrorOutputTextDocumentContentProvider implements TextDocume
 	}
 }
 
-export class CommandCenter {
+export function createCommands(
+	git: Git,
+	model: Model,
+	outputChannel: OutputChannel,
+	telemetryReporter: TelemetryReporter
+): Disposable {
+	const cmds = registerCommands(
+		model,
+		createRunByRepository(model),
+		createGetSCMResource(outputChannel, model),
+		(url?: string, parentPath?: string, options: { recursive?: boolean } = {}) => cloneRepository(model, telemetryReporter, git, url, parentPath, options),
+		(repository: Repository, opts?: CommitOptions) => commitWithAnyInput(repository, model, opts),
+		(repository: Repository, noVerify?: boolean) => commitEmpty(repository, model, noVerify),
+		git,
+		(repository: Repository, pushOptions: PushOptions) => push(repository, pushOptions, model),
+		outputChannel,
+		(repository: Repository, rebase: boolean) => sync(repository, rebase, model),
+	);
 
-	private disposables: Disposable[];
-	private commandErrors = new CommandErrorOutputTextDocumentContentProvider();
+	const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
 
-	constructor(
-		private git: Git,
-		private model: Model,
-		private outputChannel: OutputChannel,
-		private telemetryReporter: TelemetryReporter
-	) {
-		const cmds = registerCommands(
-			this.model,
-			createRunByRepository(this.model),
-			createGetSCMResource(this.outputChannel, this.model),
-			(url?: string, parentPath?: string, options: { recursive?: boolean } = {}) => cloneRepository(this.model, this.telemetryReporter, this.git, url, parentPath, options),
-			(repository: Repository, opts?: CommitOptions) => commitWithAnyInput(repository, this.model, opts),
-			(repository: Repository, noVerify?: boolean) => commitEmpty(repository, this.model, noVerify),
-			this.git,
-			(repository: Repository, pushOptions: PushOptions) => push(repository, pushOptions, this.model),
-			this.outputChannel,
-			(repository: Repository, rebase: boolean) => sync(repository, rebase, this.model),
+	const disposables = cmds.map(({ commandId, method, options }) => {
+		const command = createCommand(
+			model,
+			telemetryReporter,
+			outputChannel,
+			commandErrors,
+			commandId,
+			method,
+			options,
 		);
-		this.disposables = cmds.map(({ commandId, method, options }) => {
-			const command = createCommand(
-				this.model,
-				this.telemetryReporter,
-				this.outputChannel,
-				this.commandErrors,
-				commandId,
-				method,
-				options,
-			);
 
-			// if (options.diff) {
-			// 	return commands.registerDiffInformationCommand(commandId, command);
-			// } else {
-			// 	return commands.registerCommand(commandId, command);
-			// }
-			return commands.registerCommand(commandId, command);
-		});
+		// if (options.diff) {
+		// 	return commands.registerDiffInformationCommand(commandId, command);
+		// } else {
+		// 	return commands.registerCommand(commandId, command);
+		// }
+		return commands.registerCommand(commandId, command);
+	});
 
-		this.disposables.push(workspace.registerTextDocumentContentProvider('git-output', this.commandErrors));
-	}
+	disposables.push(workspace.registerTextDocumentContentProvider('git-output', commandErrors));
 
-	dispose(): void {
-		this.disposables.forEach(d => d.dispose());
-	}
+	return Disposable.from(...disposables);
 }
 
 // TODO Figure out how to move this into a different file (commands/clone most likely)
