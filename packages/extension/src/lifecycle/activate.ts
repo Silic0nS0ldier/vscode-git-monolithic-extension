@@ -4,7 +4,7 @@ import { GitProtocolHandler } from '../protocolHandler.js';
 import { GitExtensionImpl } from '../api/extension.js';
 import { findGit, Git, IGit } from '../git.js';
 import { Model } from '../model.js';
-import { createCommands } from '../commands.js';
+import { registerCommands } from "../commands/register.js";
 import { GitFileSystemProvider } from '../fileSystemProvider.js';
 import { GitDecorations } from '../decorationProvider.js';
 import { Askpass } from '../askpass.js';
@@ -133,7 +133,7 @@ async function createModel(context: ExtensionContext, outputChannel: OutputChann
 	git.onOutput.addListener('log', onOutput);
 	disposables.push(toDisposable(() => git.onOutput.removeListener('log', onOutput)));
 
-	const disposeCommands = createCommands(git, model, outputChannel, telemetryReporter);
+	const disposeCommands = registerCommands(model, git, outputChannel, telemetryReporter);
 	disposables.push(
 		disposeCommands,
 		// TODO This is a really funky pattern that relies on side effects

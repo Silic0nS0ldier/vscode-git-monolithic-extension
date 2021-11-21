@@ -1,5 +1,5 @@
-import { OutputChannel } from "vscode";
-import { ScmCommand } from "./helpers.js";
+import { commands, Disposable, OutputChannel, workspace } from "vscode";
+import { CommandErrorOutputTextDocumentContentProvider, ScmCommand } from "./helpers.js";
 import { Git } from "../git.js";
 import { Model } from "../model";
 
@@ -91,14 +91,15 @@ import * as unstageAll from "./implementations/unstage/unstage-all.js";
 // import * as unstageSelectedRanges from "./implementations/unstage-seleted-ranges.js";
 import * as unstage from "./implementations/unstage/unstage.js";
 import TelemetryReporter from "vscode-extension-telemetry";
+import { createCommand } from "./create.js";
 
 export function registerCommands(
 	model: Model,
 	git: Git,
 	outputChannel: OutputChannel,
 	telemetryReporter: TelemetryReporter,
-): ScmCommand[] {
-	return [
+): Disposable {
+	const cmds: ScmCommand[] = [
 		addRemote.createCommand(model),
 		branch.createCommand(),
 		branchFrom.createCommand(),
@@ -182,4 +183,29 @@ export function registerCommands(
 		unstage.createCommand(outputChannel, model),
 		unstageAll.createCommand(),
 	];
+
+	const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
+
+	const disposables = cmds.map(({ commandId, method, options }) => {
+		const command = createCommand(
+			model,
+			telemetryReporter,
+			outputChannel,
+			commandErrors,
+			commandId,
+			method,
+			options,
+		);
+
+		// if (options.diff) {
+		// 	return commands.registerDiffInformationCommand(commandId, command);
+		// } else {
+		// 	return commands.registerCommand(commandId, command);
+		// }
+		return commands.registerCommand(commandId, command);
+	});
+
+	disposables.push(workspace.registerTextDocumentContentProvider('git-output', commandErrors));
+
+	return Disposable.from(...disposables);
 }
