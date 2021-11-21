@@ -1,15 +1,14 @@
 import { OutputChannel, SourceControlResourceState, Uri, window } from "vscode";
 import * as path from 'node:path';
 import type { RunByRepository, ScmCommand } from "../../../commands.js";
-import { Repository, Resource, ResourceGroupType } from "../../../repository.js";
+import { Resource, ResourceGroupType } from "../../../repository.js";
 import { localize } from "../../../util.js";
-import { categorizeResourceByResolution } from "./helpers.js";
+import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";
 
 export function createCommand(
 	getSCMResource: (uri?: Uri) => Resource | undefined,
 	outputChannel: OutputChannel,
 	runByRepository: RunByRepository,
-	stageDeletionConflict: (repository: Repository, uri: Uri) => Promise<void>,
 ): ScmCommand {
 	async function stage(...resourceStates: SourceControlResourceState[]): Promise<void> {
 		outputChannel.appendLine(`git.stage ${resourceStates.length}`);

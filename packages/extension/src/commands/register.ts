@@ -104,7 +104,6 @@ export function registerCommands(
 	git: Git,
 	pushFn: (repository: Repository, pushOptions: PushOptions) => Promise<void>,
 	outputChannel: OutputChannel,
-	stageDeletionConflict: (repository: Repository, uri: Uri) => Promise<void>,
 	syncFn: (repository: Repository, rebase: boolean) => Promise<void>,
 ) {
 	const commands: ScmCommand[] = [
@@ -169,11 +168,11 @@ export function registerCommands(
 		restoreCommitTemplate.createCommand(),
 		revealInExplorer.createCommand(),
 		setLogLevel.createCommand(outputChannel),
-		stageAllMerge.createCommand(stageDeletionConflict),
+		stageAllMerge.createCommand(),
 		stageAllTracked.createCommand(),
 		stageAllUntracked.createCommand(),
 		stageAll.createCommand(),
-		stage.createCommand(getSCMResource, outputChannel, runByRepository, stageDeletionConflict),
+		stage.createCommand(getSCMResource, outputChannel, runByRepository),
 		stashApplyLatest.createCommand(),
 		stashApply.createCommand(),
 		stashDrop.createCommand(),
