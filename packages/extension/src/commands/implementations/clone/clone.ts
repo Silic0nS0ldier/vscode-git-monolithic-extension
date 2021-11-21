@@ -1,10 +1,12 @@
+import TelemetryReporter from "vscode-extension-telemetry";
 import { ScmCommand } from "../../../commands.js";
+import { Git } from "../../../git.js";
+import { Model } from "../../../model.js";
+import { cloneRepository } from "./helpers.js";
 
-export function createCommand(
-	cloneRepository: (url?: string, parentPath?: string, options?: { recursive?: boolean }) => Promise<void>,
-): ScmCommand {
+export function createCommand(model: Model, telemetryReporter: TelemetryReporter, git: Git): ScmCommand {
 	async function clone(url?: string, parentPath?: string): Promise<void> {
-		await cloneRepository(url, parentPath);
+		await cloneRepository(model, telemetryReporter, git, url, parentPath);
 	};
 
 	return {

@@ -92,16 +92,17 @@ import * as undoCommit from "./implementations/undo-commit.js";
 import * as unstageAll from "./implementations/unstage/unstage-all.js";
 // import * as unstageSelectedRanges from "./implementations/unstage-seleted-ranges.js";
 import * as unstage from "./implementations/unstage/unstage.js";
+import TelemetryReporter from "vscode-extension-telemetry";
 
 export function registerCommands(
 	model: Model,
 	runByRepository: RunByRepository,
 	getSCMResource: (uri?: Uri) => Resource | undefined,
-	cloneRepository: (url?: string, parentPath?: string, options?: { recursive?: boolean }) => Promise<void>,
 	commitWithAnyInput: (repository: Repository, opts?: CommitOptions) => Promise<void>,
 	commitEmptyFn: (repository: Repository, noVerify?: boolean) => Promise<void>,
 	git: Git,
 	outputChannel: OutputChannel,
+	telemetryReporter: TelemetryReporter,
 ) {
 	const commands: ScmCommand[] = [
 		branchFrom.createCommand(),
@@ -113,8 +114,8 @@ export function registerCommands(
 		cleanAllUntracked.createCommand(),
 		cleanAll.createCommand(),
 		clean.createCommand(runByRepository, getSCMResource),
-		cloneRecursive.createCommand(cloneRepository),
-		clone.createCommand(cloneRepository),
+		cloneRecursive.createCommand(model, telemetryReporter, git),
+		clone.createCommand(model, telemetryReporter, git),
 		close.createCommand(model),
 		commitAllAmendNoVerify.createCommand(commitWithAnyInput),
 		commitAllAmend.createCommand(commitWithAnyInput),
