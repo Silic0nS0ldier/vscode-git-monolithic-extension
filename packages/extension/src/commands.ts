@@ -5,7 +5,6 @@
 
 import { commands, Disposable, OutputChannel, Uri, window, workspace, TextDocumentContentProvider } from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
-import { CommitOptions } from './api/git.js';
 import { Git } from './git.js';
 import { Model } from './model.js';
 import { Repository, Resource } from './repository.js';
@@ -14,7 +13,7 @@ import { localize, pathEquals } from './util.js';
 import { registerCommands } from './commands/register.js';
 import { createCommand } from './commands/create.js';
 import AggregateError from 'aggregate-error';
-import { smartCommit } from './commands/implementations/commit/helpers.js';
+import { commitWithAnyInput } from './commands/implementations/commit/helpers.js';
 
 export interface ScmCommandOptions {
 	repository?: boolean;
@@ -54,7 +53,6 @@ export function createCommands(
 		model,
 		createRunByRepository(model),
 		createGetSCMResource(outputChannel, model),
-		(repository: Repository, opts?: CommitOptions) => commitWithAnyInput(repository, model, opts),
 		(repository: Repository, noVerify?: boolean) => commitEmpty(repository, model, noVerify),
 		git,
 		outputChannel,
@@ -111,50 +109,6 @@ async function commitEmpty(
 	}
 
 	await commitWithAnyInput(repository, model, { empty: true, noVerify });
-}
-
-// TODO Figure out how to move this into a different file (commands/commit most likely)
-async function commitWithAnyInput(
-	repository: Repository,
-	model: Model,
-	opts?: CommitOptions,
-): Promise<void> {
-	const message = repository.inputBox.value;
-	const getCommitMessage = async () => {
-		let _message: string | undefined = message;
-
-		if (!_message) {
-			let value: string | undefined = undefined;
-
-			if (opts && opts.amend && repository.HEAD && repository.HEAD.commit) {
-				return undefined;
-			}
-
-			const branchName = repository.headShortName;
-			let placeHolder: string;
-
-			if (branchName) {
-				placeHolder = localize('commitMessageWithHeadLabel2', "Message (commit on '{0}')", branchName);
-			} else {
-				placeHolder = localize('commit message', "Commit message");
-			}
-
-			_message = await window.showInputBox({
-				value,
-				placeHolder,
-				prompt: localize('provide commit message', "Please provide a commit message"),
-				ignoreFocusOut: true
-			});
-		}
-
-		return _message;
-	};
-
-	const didCommit = await smartCommit(repository, getCommitMessage, model, opts);
-
-	if (message && didCommit) {
-		repository.inputBox.value = await repository.getInputTemplate();
-	}
 }
 
 function createGetSCMResource(outputChannel: OutputChannel, model: Model): (uri?: Uri) => Resource | undefined {

@@ -1,12 +1,11 @@
-import { CommitOptions } from "../../../api/git.js";
 import { ScmCommand } from "../../../commands.js";
+import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
+import { commitWithAnyInput } from "./helpers.js";
 
-export function createCommand(
-	commitWithAnyInput: (repository: Repository, opts?: CommitOptions) => Promise<void>
-): ScmCommand {
+export function createCommand(model: Model): ScmCommand {
 	async function commitStagedSigned(repository: Repository): Promise<void> {
-		await commitWithAnyInput(repository, { all: false, signoff: true });
+		await commitWithAnyInput(repository, model, { all: false, signoff: true });
 	};
 
 	return {

@@ -7,7 +7,7 @@ import { isDescendant, localize, pathEquals } from "../../../util.js";
 import { push, PushType } from "../push/helpers.js";
 import { syncCmdImpl } from "../sync/sync.js";
 
-export async function smartCommit(
+async function smartCommit(
 	repository: Repository,
 	getCommitMessage: () => Promise<string | undefined>,
 	model: Model,
@@ -171,4 +171,47 @@ export async function smartCommit(
 	}
 
 	return true;
+}
+
+export async function commitWithAnyInput(
+	repository: Repository,
+	model: Model,
+	opts?: CommitOptions,
+): Promise<void> {
+	const message = repository.inputBox.value;
+	const getCommitMessage = async () => {
+		let _message: string | undefined = message;
+
+		if (!_message) {
+			let value: string | undefined = undefined;
+
+			if (opts && opts.amend && repository.HEAD && repository.HEAD.commit) {
+				return undefined;
+			}
+
+			const branchName = repository.headShortName;
+			let placeHolder: string;
+
+			if (branchName) {
+				placeHolder = localize('commitMessageWithHeadLabel2', "Message (commit on '{0}')", branchName);
+			} else {
+				placeHolder = localize('commit message', "Commit message");
+			}
+
+			_message = await window.showInputBox({
+				value,
+				placeHolder,
+				prompt: localize('provide commit message', "Please provide a commit message"),
+				ignoreFocusOut: true
+			});
+		}
+
+		return _message;
+	};
+
+	const didCommit = await smartCommit(repository, getCommitMessage, model, opts);
+
+	if (message && didCommit) {
+		repository.inputBox.value = await repository.getInputTemplate();
+	}
 }
