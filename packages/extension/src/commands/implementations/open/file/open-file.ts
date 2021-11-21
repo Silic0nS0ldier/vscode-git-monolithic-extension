@@ -1,11 +1,14 @@
-import { commands, SourceControlResourceState, TextDocumentShowOptions, Uri, ViewColumn, window, workspace } from "vscode";
+import { commands, OutputChannel, SourceControlResourceState, TextDocumentShowOptions, Uri, ViewColumn, window, workspace } from "vscode";
 import { Status } from "../../../../api/git.js";
 import { ScmCommand } from "../../../../commands.js";
+import { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository.js";
 import { fromGitUri, isGitUri } from "../../../../uri.js";
+import { getSCMResource } from "../../../helpers.js";
 
 export async function openFile(
-	getSCMResource: (uri?: Uri) => Resource | undefined,
+	model: Model,
+	outputChannel: OutputChannel,
 	arg?: Resource | Uri,
 	...resourceStates: SourceControlResourceState[]
 ): Promise<void> {
@@ -24,7 +27,7 @@ export async function openFile(
 
 		if (!(resource instanceof Resource)) {
 			// can happen when called from a keybinding
-			resource = getSCMResource();
+			resource = getSCMResource(model, outputChannel);
 		}
 
 		if (resource) {
@@ -74,11 +77,9 @@ export async function openFile(
 	}
 }
 
-export function createCommand(
-	getSCMResource: (uri?: Uri) => Resource | undefined,
-): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
 	async function openFileFn(arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]): Promise<void> {
-		await openFile(getSCMResource, arg, ...resourceStates);
+		await openFile(model, outputChannel, arg, ...resourceStates);
 	};
 
 	return {

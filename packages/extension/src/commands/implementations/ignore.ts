@@ -1,18 +1,15 @@
-import { SourceControlResourceState, Uri } from "vscode";
+import { OutputChannel, SourceControlResourceState, Uri } from "vscode";
 import { ScmCommand } from "../../commands.js";
 import { Model } from "../../model.js";
 import { Resource } from "../../repository.js";
-import { runByRepository } from "../helpers.js";
+import { getSCMResource, runByRepository } from "../helpers.js";
 
-export function createCommand(
-	model: Model,
-	getSCMResource: (uri?: Uri) => Resource | undefined,
-): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
 	async function ignore(...resourceStates: SourceControlResourceState[]): Promise<void> {
 		resourceStates = resourceStates.filter(s => !!s);
 
 		if (resourceStates.length === 0 || (resourceStates[0] && !(resourceStates[0].resourceUri instanceof Uri))) {
-			const resource = getSCMResource();
+			const resource = getSCMResource(model, outputChannel);
 
 			if (!resource) {
 				return;

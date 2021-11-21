@@ -1,7 +1,8 @@
 import AggregateError from 'aggregate-error';
-import { Uri } from 'vscode';
+import { OutputChannel, Uri, window } from 'vscode';
 import { Model } from '../model.js';
-import { Repository } from '../repository.js';
+import { Repository, Resource } from '../repository.js';
+import { fromGitUri, isGitUri } from '../uri.js';
 import { pathEquals } from '../util.js';
 
 export async function runByRepository(
@@ -48,4 +49,40 @@ export async function runByRepository(
 	if (errors.length > 0) {
 		throw new AggregateError(errors as any);
 	}
+}
+
+export function getSCMResource(
+	model: Model,
+	outputChannel: OutputChannel,
+	uri?: Uri,
+): Resource | undefined {
+	uri = uri ? uri : (window.activeTextEditor && window.activeTextEditor.document.uri);
+
+	outputChannel.appendLine(`git.getSCMResource.uri ${uri && uri.toString()}`);
+
+	for (const r of model.repositories.map(r => r.root)) {
+		outputChannel.appendLine(`repo root ${r}`);
+	}
+
+	if (!uri) {
+		return undefined;
+	}
+
+	if (isGitUri(uri)) {
+		const { path } = fromGitUri(uri);
+		uri = Uri.file(path);
+	}
+
+	if (uri.scheme === 'file') {
+		const uriString = uri.toString();
+		const repository = model.getRepository(uri);
+
+		if (!repository) {
+			return undefined;
+		}
+
+		return repository.workingTreeGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString)[0]
+			|| repository.indexGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString)[0];
+	}
+	return undefined;
 }

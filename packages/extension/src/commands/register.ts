@@ -1,8 +1,7 @@
-import { OutputChannel, Uri } from "vscode";
+import { OutputChannel } from "vscode";
 import { ScmCommand } from "../commands";
 import { Git } from "../git.js";
 import { Model } from "../model";
-import { Resource } from "../repository.js";
 
 import * as addRemote from "./implementations/remote/add-remote.js";
 import * as branchFrom from "./implementations/branch/branch-from.js";
@@ -95,7 +94,6 @@ import TelemetryReporter from "vscode-extension-telemetry";
 
 export function registerCommands(
 	model: Model,
-	getSCMResource: (uri?: Uri) => Resource | undefined,
 	git: Git,
 	outputChannel: OutputChannel,
 	telemetryReporter: TelemetryReporter,
@@ -107,7 +105,7 @@ export function registerCommands(
 		checkout.createCommand(),
 		checkoutDetached.createCommand(),
 		cherryPick.createCommand(),
-		clean.createCommand(model, getSCMResource),
+		clean.createCommand(model, outputChannel),
 		cleanAll.createCommand(),
 		cleanAllTracked.createCommand(),
 		cleanAllUntracked.createCommand(),
@@ -136,14 +134,14 @@ export function registerCommands(
 		fetch.createCommand(),
 		fetchAll.createCommand(),
 		fetchPrune.createCommand(),
-		ignore.createCommand(model, getSCMResource),
+		ignore.createCommand(model, outputChannel),
 		init.createCommand(git, model),
 		merge.createCommand(),
 		openAllChanges.createCommand(),
-		openChange.createCommand(getSCMResource),
-		openFile.createCommand(getSCMResource),
-		openFile2.createCommand(getSCMResource),
-		openHeadFile.createCommand(getSCMResource),
+		openChange.createCommand(model, outputChannel),
+		openFile.createCommand(model, outputChannel),
+		openFile2.createCommand(model, outputChannel),
+		openHeadFile.createCommand(model, outputChannel),
 		openRepository.createCommand(model),
 		openResource.createCommand(model),
 		publish.createCommand(model),
@@ -166,7 +164,7 @@ export function registerCommands(
 		restoreCommitTemplate.createCommand(),
 		revealInExplorer.createCommand(),
 		setLogLevel.createCommand(outputChannel),
-		stage.createCommand(getSCMResource, outputChannel, model),
+		stage.createCommand(outputChannel, model),
 		stageAll.createCommand(),
 		stageAllMerge.createCommand(),
 		stageAllTracked.createCommand(),
@@ -181,7 +179,7 @@ export function registerCommands(
 		sync.createCommand(model),
 		syncRebase.createCommand(model),
 		undoCommit.createCommand(),
-		unstage.createCommand(getSCMResource, model),
+		unstage.createCommand(outputChannel, model),
 		unstageAll.createCommand(),
 	];
 }

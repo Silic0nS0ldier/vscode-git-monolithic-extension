@@ -3,12 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, Disposable, OutputChannel, Uri, window, workspace, TextDocumentContentProvider } from 'vscode';
+import { commands, Disposable, OutputChannel, Uri, workspace, TextDocumentContentProvider } from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { Git } from './git.js';
 import { Model } from './model.js';
-import { Resource } from './repository.js';
-import { fromGitUri, isGitUri } from './uri.js';
 import { registerCommands } from './commands/register.js';
 import { createCommand } from './commands/create.js';
 
@@ -49,7 +47,6 @@ export function createCommands(
 ): Disposable {
 	const cmds = registerCommands(
 		model,
-		createGetSCMResource(outputChannel, model),
 		git,
 		outputChannel,
 		telemetryReporter,
@@ -79,38 +76,4 @@ export function createCommands(
 	disposables.push(workspace.registerTextDocumentContentProvider('git-output', commandErrors));
 
 	return Disposable.from(...disposables);
-}
-
-function createGetSCMResource(outputChannel: OutputChannel, model: Model): (uri?: Uri) => Resource | undefined {
-	return function getSCMResource(uri) {
-		uri = uri ? uri : (window.activeTextEditor && window.activeTextEditor.document.uri);
-
-		outputChannel.appendLine(`git.getSCMResource.uri ${uri && uri.toString()}`);
-
-		for (const r of model.repositories.map(r => r.root)) {
-			outputChannel.appendLine(`repo root ${r}`);
-		}
-
-		if (!uri) {
-			return undefined;
-		}
-
-		if (isGitUri(uri)) {
-			const { path } = fromGitUri(uri);
-			uri = Uri.file(path);
-		}
-
-		if (uri.scheme === 'file') {
-			const uriString = uri.toString();
-			const repository = model.getRepository(uri);
-
-			if (!repository) {
-				return undefined;
-			}
-
-			return repository.workingTreeGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString)[0]
-				|| repository.indexGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString)[0];
-		}
-		return undefined;
-	};
 }

@@ -5,10 +5,9 @@ import { Resource, ResourceGroupType } from "../../../repository.js";
 import { localize } from "../../../util.js";
 import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";
 import { Model } from "../../../model.js";
-import { runByRepository } from "../../helpers.js";
+import { getSCMResource, runByRepository } from "../../helpers.js";
 
 export function createCommand(
-	getSCMResource: (uri?: Uri) => Resource | undefined,
 	outputChannel: OutputChannel,
 	model: Model,
 ): ScmCommand {
@@ -18,7 +17,7 @@ export function createCommand(
 		resourceStates = resourceStates.filter(s => !!s);
 
 		if (resourceStates.length === 0 || (resourceStates[0] && !(resourceStates[0].resourceUri instanceof Uri))) {
-			const resource = getSCMResource();
+			const resource = getSCMResource(model, outputChannel);
 
 			outputChannel.appendLine(`git.stage.getSCMResource ${resource ? resource.resourceUri.toString() : null}`);
 
