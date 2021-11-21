@@ -1,5 +1,5 @@
 import AggregateError from 'aggregate-error';
-import { OutputChannel, Uri, window } from 'vscode';
+import { OutputChannel, TextDocumentContentProvider, Uri, window } from 'vscode';
 import { Model } from '../model.js';
 import { Repository, Resource } from '../repository.js';
 import { fromGitUri, isGitUri } from '../uri.js';
@@ -96,4 +96,21 @@ export interface ScmCommand {
 	commandId: string;
 	method: Function;
 	options: ScmCommandOptions;
+}
+
+export class CommandErrorOutputTextDocumentContentProvider implements TextDocumentContentProvider {
+
+	private items = new Map<string, string>();
+
+	set(uri: Uri, contents: string): void {
+		this.items.set(uri.path, contents);
+	}
+
+	delete(uri: Uri): void {
+		this.items.delete(uri.path);
+	}
+
+	provideTextDocumentContent(uri: Uri): string | undefined {
+		return this.items.get(uri.path);
+	}
 }

@@ -3,29 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, Disposable, OutputChannel, Uri, workspace, TextDocumentContentProvider } from 'vscode';
+import { commands, Disposable, OutputChannel, workspace } from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { Git } from './git.js';
 import { Model } from './model.js';
 import { registerCommands } from './commands/register.js';
 import { createCommand } from './commands/create.js';
-
-export class CommandErrorOutputTextDocumentContentProvider implements TextDocumentContentProvider {
-
-	private items = new Map<string, string>();
-
-	set(uri: Uri, contents: string): void {
-		this.items.set(uri.path, contents);
-	}
-
-	delete(uri: Uri): void {
-		this.items.delete(uri.path);
-	}
-
-	provideTextDocumentContent(uri: Uri): string | undefined {
-		return this.items.get(uri.path);
-	}
-}
+import { CommandErrorOutputTextDocumentContentProvider } from './commands/helpers.js';
 
 export function createCommands(
 	git: Git,
