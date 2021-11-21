@@ -66,7 +66,7 @@ export class CommandCenter {
 			createRunByRepository(this.model),
 			createGetSCMResource(this.outputChannel, this.model),
 			this.cloneRepository.bind(this),
-			this.commitWithAnyInput.bind(this),
+			(repository: Repository, opts?: CommitOptions) => commitWithAnyInput(repository, this.model, opts),
 			this._commitEmpty.bind(this),
 			this.git,
 			(repository: Repository, pushOptions: PushOptions) => push(repository, pushOptions, this.model),
@@ -306,45 +306,6 @@ export class CommandCenter {
 	// 	textEditor.revealRange(visibleRangesBeforeRevert[0]);
 	// }
 
-	private async commitWithAnyInput(repository: Repository, opts?: CommitOptions): Promise<void> {
-		const message = repository.inputBox.value;
-		const getCommitMessage = async () => {
-			let _message: string | undefined = message;
-
-			if (!_message) {
-				let value: string | undefined = undefined;
-
-				if (opts && opts.amend && repository.HEAD && repository.HEAD.commit) {
-					return undefined;
-				}
-
-				const branchName = repository.headShortName;
-				let placeHolder: string;
-
-				if (branchName) {
-					placeHolder = localize('commitMessageWithHeadLabel2', "Message (commit on '{0}')", branchName);
-				} else {
-					placeHolder = localize('commit message', "Commit message");
-				}
-
-				_message = await window.showInputBox({
-					value,
-					placeHolder,
-					prompt: localize('provide commit message', "Please provide a commit message"),
-					ignoreFocusOut: true
-				});
-			}
-
-			return _message;
-		};
-
-		const didCommit = await smartCommit(repository, getCommitMessage, this.model, opts);
-
-		if (message && didCommit) {
-			repository.inputBox.value = await repository.getInputTemplate();
-		}
-	}
-
 	private async _commitEmpty(repository: Repository, noVerify?: boolean): Promise<void> {
 		const root = Uri.file(repository.root);
 		const config = workspace.getConfiguration('git', root);
@@ -363,7 +324,7 @@ export class CommandCenter {
 			}
 		}
 
-		await this.commitWithAnyInput(repository, { empty: true, noVerify });
+		await commitWithAnyInput(repository, this.model, { empty: true, noVerify });
 	}
 
 	// resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
@@ -397,6 +358,51 @@ export class CommandCenter {
 	}
 }
 
+// TODO Figure out how to move this into a different file (commands/commit most likely)
+async function commitWithAnyInput(
+	repository: Repository,
+	model: Model,
+	opts?: CommitOptions,
+): Promise<void> {
+	const message = repository.inputBox.value;
+	const getCommitMessage = async () => {
+		let _message: string | undefined = message;
+
+		if (!_message) {
+			let value: string | undefined = undefined;
+
+			if (opts && opts.amend && repository.HEAD && repository.HEAD.commit) {
+				return undefined;
+			}
+
+			const branchName = repository.headShortName;
+			let placeHolder: string;
+
+			if (branchName) {
+				placeHolder = localize('commitMessageWithHeadLabel2', "Message (commit on '{0}')", branchName);
+			} else {
+				placeHolder = localize('commit message', "Commit message");
+			}
+
+			_message = await window.showInputBox({
+				value,
+				placeHolder,
+				prompt: localize('provide commit message', "Please provide a commit message"),
+				ignoreFocusOut: true
+			});
+		}
+
+		return _message;
+	};
+
+	const didCommit = await smartCommit(repository, getCommitMessage, model, opts);
+
+	if (message && didCommit) {
+		repository.inputBox.value = await repository.getInputTemplate();
+	}
+}
+
+// TODO Figure out how to move this into a different file (commands/commit most likely)
 async function smartCommit(
 	repository: Repository,
 	getCommitMessage: () => Promise<string | undefined>,
