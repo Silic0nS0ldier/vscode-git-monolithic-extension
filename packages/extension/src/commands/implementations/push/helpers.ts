@@ -3,8 +3,9 @@ import { ForcePushMode, GitErrorCodes } from '../../../api/git.js';
 import { Model } from '../../../model.js';
 import { Repository } from '../../../repository.js';
 import { localize } from '../../../util.js';
-import { AddRemoteItem, publishCmdImpl } from '../../implementations/publish.js';
-import { addRemoteCmdImpl } from '../remote/add-remote.js';
+import { publish } from '../publish/publish.js';
+import { AddRemoteItem } from '../publish/quick-pick.js';
+import { addRemote as addRemoteFn } from '../remote/add-remote.js';
 
 export enum PushType {
 	Push,
@@ -37,7 +38,7 @@ export async function push(repository: Repository, pushOptions: PushOptions, mod
 		const result = await window.showWarningMessage(localize('no remotes to push', "Your repository has no remotes configured to push to."), addRemote);
 
 		if (result === addRemote) {
-			await addRemoteCmdImpl(model, repository);
+			await addRemoteFn(model, repository);
 		}
 
 		return;
@@ -102,9 +103,9 @@ export async function push(repository: Repository, pushOptions: PushOptions, mod
 			const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
 			if (pick === yes) {
-				await publishCmdImpl(
+				await publish(
 					model,
-					addRemoteCmdImpl.bind(null, model),
+					addRemoteFn.bind(null, model),
 					repository,
 				);
 			}
@@ -112,7 +113,7 @@ export async function push(repository: Repository, pushOptions: PushOptions, mod
 	} else {
 		const branchName = repository.HEAD.name;
 		if (!pushOptions.pushTo?.remote) {
-			const addRemote = new AddRemoteItem(addRemoteCmdImpl.bind(null, model));
+			const addRemote = new AddRemoteItem(addRemoteFn.bind(null, model));
 			const picks = [...remotes.filter(r => r.pushUrl !== undefined).map(r => ({ label: r.name, description: r.pushUrl })), addRemote];
 			const placeHolder = localize('pick remote', "Pick a remote to publish the branch '{0}' to:", branchName);
 			const choice = await window.showQuickPick(picks, { placeHolder });
@@ -122,7 +123,7 @@ export async function push(repository: Repository, pushOptions: PushOptions, mod
 			}
 
 			if (choice === addRemote) {
-				const newRemote = await addRemoteCmdImpl(model, repository);
+				const newRemote = await addRemoteFn(model, repository);
 
 				if (newRemote) {
 					await repository.pushTo(newRemote, branchName, undefined, forcePushMode);

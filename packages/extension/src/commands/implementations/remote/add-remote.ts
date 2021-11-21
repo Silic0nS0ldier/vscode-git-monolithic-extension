@@ -5,7 +5,7 @@ import { pickRemoteSource } from "../../../remoteSource.js";
 import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
 
-export async function addRemoteCmdImpl(
+export async function addRemote(
 	model: Model,
 	repository: Repository,
 ): Promise<string|void> {
@@ -47,13 +47,13 @@ export async function addRemoteCmdImpl(
 export function createCommand(
 	model: Model,
 ): ScmCommand {
-	async function addRemote(repository: Repository): Promise<string|void> {
-		await addRemoteCmdImpl(model, repository);
+	async function addRemoteFn(repository: Repository): Promise<string|void> {
+		await addRemote(model, repository);
 	};
 
 	return {
 		commandId: 'git.addRemote',
-		method: addRemote,
+		method: addRemoteFn,
 		options: {
 			repository: true,
 		},

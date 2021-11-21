@@ -1,12 +1,13 @@
-import { QuickPickItem, window } from "vscode";
-import { ApiRepository } from "../../api/api1.js";
-import { RemoteSourceProvider } from "../../api/git.js";
-import { ScmCommand } from "../../commands.js";
-import { Model } from "../../model.js";
-import { Repository } from "../../repository.js";
-import { localize } from "../../util.js";
+import { window } from "vscode";
+import { ApiRepository } from "../../../api/api1.js";
+import { RemoteSourceProvider } from "../../../api/git.js";
+import { ScmCommand } from "../../../commands.js";
+import { Model } from "../../../model.js";
+import { Repository } from "../../../repository.js";
+import { localize } from "../../../util.js";
+import { AddRemoteItem } from "./quick-pick.js";
 
-export async function publishCmdImpl(
+export async function publish(
 	model: Model,
 	addRemoteFn: (repository: Repository) => Promise<string|void>,
 	repository: Repository,
@@ -80,29 +81,15 @@ export function createCommand(
 	model: Model,
 	addRemoteFn: (repository: Repository) => Promise<string|void>,
 ): ScmCommand {
-	async function publish(repository: Repository): Promise<void> {
-		await publishCmdImpl(model, addRemoteFn, repository);
+	async function publishFn(repository: Repository): Promise<void> {
+		await publish(model, addRemoteFn, repository);
 	};
 
 	return {
 		commandId: 'git.publish',
-		method: publish,
+		method: publishFn,
 		options: {
 			repository: true,
 		},
 	};
-}
-
-export class AddRemoteItem implements QuickPickItem {
-
-	constructor(private addRemote: (repository: Repository) => Promise<string|void>) { }
-
-	get label(): string { return '$(plus) ' + localize('add remote', 'Add a new remote...'); }
-	get description(): string { return ''; }
-
-	get alwaysShow(): boolean { return true; }
-
-	async run(repository: Repository): Promise<void> {
-		await this.addRemote(repository);
-	}
 }

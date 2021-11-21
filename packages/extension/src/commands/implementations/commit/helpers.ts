@@ -5,7 +5,7 @@ import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
 import { isDescendant, localize, pathEquals } from "../../../util.js";
 import { push, PushType } from "../push/helpers.js";
-import { syncCmdImpl } from "../sync/sync.js";
+import { sync } from "../sync/sync.js";
 
 async function smartCommit(
 	repository: Repository,
@@ -163,7 +163,7 @@ async function smartCommit(
 			await push(repository, { pushType: PushType.Push, silent: true }, model);
 			break;
 		case 'sync':
-			await syncCmdImpl(
+			await sync(
 				repository,
 				model,
 			);

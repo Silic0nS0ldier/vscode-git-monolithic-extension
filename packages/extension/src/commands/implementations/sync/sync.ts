@@ -3,7 +3,7 @@ import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
 import { sync as syncFn } from "./helper.js";
 
-export async function syncCmdImpl(repository: Repository, model: Model): Promise<void> {
+export async function sync(repository: Repository, model: Model): Promise<void> {
 	try {
 		await syncFn(repository, false, model);
 	} catch (err) {
@@ -16,13 +16,13 @@ export async function syncCmdImpl(repository: Repository, model: Model): Promise
 }
 
 export function createCommand(model: Model): ScmCommand {
-	async function sync(repository: Repository): Promise<void> {
-		await syncCmdImpl(repository, model);
+	async function syncFn(repository: Repository): Promise<void> {
+		await sync(repository, model);
 	};
 
 	return {
 		commandId: 'git.sync',
-		method: sync,
+		method: syncFn,
 		options: {
 			repository: true,
 		},

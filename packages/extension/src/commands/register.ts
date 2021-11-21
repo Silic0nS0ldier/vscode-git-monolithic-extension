@@ -49,7 +49,7 @@ import * as openFile from "./implementations/open/file/open-file.js";
 import * as openHeadFile from "./implementations/open/file/open-head-file.js";
 import * as openRepository from "./implementations/open/open-repository.js";
 import * as openResource from "./implementations/open/open-resource.js";
-import * as publish from "./implementations/publish.js";
+import * as publish from "./implementations/publish/publish.js";
 import * as pullFrom from "./implementations/pull/pull-from";
 import * as pullRebase from "./implementations/pull/pull-rebase.js";
 import * as pull from "./implementations/pull/pull.js";

@@ -2,8 +2,8 @@ import { window, workspace } from "vscode";
 import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
-import { publishCmdImpl } from "../publish.js";
-import { addRemoteCmdImpl } from "../remote/add-remote.js";
+import { publish } from "../publish/publish.js";
+import { addRemote } from "../remote/add-remote.js";
 
 export async function sync(
 	repository: Repository,
@@ -21,9 +21,9 @@ export async function sync(
 		const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
 		if (pick === yes) {
-			await publishCmdImpl(
+			await publish(
 				model,
-				addRemoteCmdImpl.bind(null, model),
+				addRemote.bind(null, model),
 				repository,
 			);
 		}
