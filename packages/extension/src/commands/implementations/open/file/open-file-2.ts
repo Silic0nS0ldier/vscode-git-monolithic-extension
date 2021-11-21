@@ -1,13 +1,12 @@
 import { SourceControlResourceState, Uri } from "vscode";
 import { ScmCommand } from "../../../../commands.js";
 import { Resource } from "../../../../repository.js";
+import { openFile } from "./open-file.js";
 
 // TODO Merge with `openFile`, since they are identical
-export function createCommand(
-	openFile: (arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]) => Promise<void>,
-): ScmCommand {
+export function createCommand(getSCMResource: (uri?: Uri) => Resource | undefined): ScmCommand {
 	async function openFile2(arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]): Promise<void> {
-		await openFile(arg, ...resourceStates);
+		await openFile(getSCMResource, arg, ...resourceStates);
 	};
 
 	return {

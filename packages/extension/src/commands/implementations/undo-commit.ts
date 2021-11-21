@@ -3,9 +3,7 @@ import { ScmCommand } from "../../commands.js";
 import { Repository } from "../../repository.js";
 import { localize } from "../../util.js";
 
-export function createCommand(
-	unstageAll: (repository: Repository) => Promise<void>,
-): ScmCommand {
+export function createCommand(): ScmCommand {
 	async function undoCommit(repository: Repository): Promise<void> {
 		const HEAD = repository.HEAD;
 
@@ -29,7 +27,7 @@ export function createCommand(
 			await repository.reset('HEAD~');
 		} else {
 			await repository.deleteRef('HEAD');
-			await unstageAll(repository);
+			await repository.revert([]);
 		}
 
 		repository.inputBox.value = commit.message;

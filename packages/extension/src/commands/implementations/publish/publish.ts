@@ -6,12 +6,9 @@ import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
 import { AddRemoteItem } from "./quick-pick.js";
+import { addRemote as addRemoteFn } from "../remote/add-remote.js";
 
-export async function publish(
-	model: Model,
-	addRemoteFn: (repository: Repository) => Promise<string|void>,
-	repository: Repository,
-) {
+export async function publish(model: Model,repository: Repository) {
 	const branchName = repository.HEAD && repository.HEAD.name || '';
 	const remotes = repository.remotes;
 
@@ -53,7 +50,7 @@ export async function publish(
 		return;
 	}
 
-	const addRemote = new AddRemoteItem(addRemoteFn);
+	const addRemote = new AddRemoteItem((repository => addRemoteFn(model, repository)));
 	const picks = [...repository.remotes.map(r => ({ label: r.name, description: r.pushUrl })), addRemote];
 	const placeHolder = localize('pick remote', "Pick a remote to publish the branch '{0}' to:", branchName);
 	const choice = await window.showQuickPick(picks, { placeHolder });
@@ -63,7 +60,7 @@ export async function publish(
 	}
 
 	if (choice === addRemote) {
-		const newRemote = await addRemoteFn(repository);
+		const newRemote = await addRemoteFn(model, repository);
 
 		if (newRemote) {
 			await repository.pushTo(newRemote, branchName, true);
@@ -77,12 +74,9 @@ export async function publish(
 	}
 }
 
-export function createCommand(
-	model: Model,
-	addRemoteFn: (repository: Repository) => Promise<string|void>,
-): ScmCommand {
+export function createCommand(model: Model): ScmCommand {
 	async function publishFn(repository: Repository): Promise<void> {
-		await publish(model, addRemoteFn, repository);
+		await publish(model, repository);
 	};
 
 	return {

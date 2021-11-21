@@ -105,7 +105,6 @@ export async function push(repository: Repository, pushOptions: PushOptions, mod
 			if (pick === yes) {
 				await publish(
 					model,
-					addRemoteFn.bind(null, model),
 					repository,
 				);
 			}

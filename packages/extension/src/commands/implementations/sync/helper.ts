@@ -3,7 +3,6 @@ import { Model } from "../../../model.js";
 import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
 import { publish } from "../publish/publish.js";
-import { addRemote } from "../remote/add-remote.js";
 
 export async function sync(
 	repository: Repository,
@@ -23,7 +22,6 @@ export async function sync(
 		if (pick === yes) {
 			await publish(
 				model,
-				addRemote.bind(null, model),
 				repository,
 			);
 		}
