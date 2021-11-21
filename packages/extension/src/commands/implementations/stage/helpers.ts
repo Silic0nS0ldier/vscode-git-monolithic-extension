@@ -56,3 +56,72 @@ export async function stageDeletionConflict(repository: Repository, uri: Uri): P
 		}
 	}
 }
+
+// private async _stageChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
+// 	const modifiedDocument = textEditor.document;
+// 	const modifiedUri = modifiedDocument.uri;
+
+// 	if (modifiedUri.scheme !== 'file') {
+// 		return;
+// 	}
+
+// 	const originalUri = toGitUri(modifiedUri, '~');
+// 	const originalDocument = await workspace.openTextDocument(originalUri);
+// 	const result = applyLineChanges(originalDocument, modifiedDocument, changes);
+
+// 	await this.runByRepository(
+// 		[modifiedUri],
+// 		async (repository, resources) => {
+// 			for (const resource of resources) {
+// 				await repository.stage(resource, result);
+// 			}
+// 		});
+// }
+
+// private async _revertChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
+// 	const modifiedDocument = textEditor.document;
+// 	const modifiedUri = modifiedDocument.uri;
+
+// 	if (modifiedUri.scheme !== 'file') {
+// 		return;
+// 	}
+
+// 	const originalUri = toGitUri(modifiedUri, '~');
+// 	const originalDocument = await workspace.openTextDocument(originalUri);
+// 	const visibleRangesBeforeRevert = textEditor.visibleRanges;
+// 	const result = applyLineChanges(originalDocument, modifiedDocument, changes);
+
+// 	const edit = new WorkspaceEdit();
+// 	edit.replace(modifiedUri, new Range(new Position(0, 0), modifiedDocument.lineAt(modifiedDocument.lineCount - 1).range.end), result);
+// 	workspace.applyEdit(edit);
+
+// 	await modifiedDocument.save();
+
+// 	textEditor.revealRange(visibleRangesBeforeRevert[0]);
+// }
+
+// resolveTimelineOpenDiffCommand(item: TimelineItem, uri: Uri | undefined, options?: TextDocumentShowOptions): Command | undefined {
+// 	if (uri === undefined || uri === null || !GitTimelineItem.is(item)) {
+// 		return undefined;
+// 	}
+
+// 	const basename = path.basename(uri.fsPath);
+
+// 	let title;
+// 	if ((item.previousRef === 'HEAD' || item.previousRef === '~') && item.ref === '') {
+// 		title = localize('git.title.workingTree', '{0} (Working Tree)', basename);
+// 	}
+// 	else if (item.previousRef === 'HEAD' && item.ref === '~') {
+// 		title = localize('git.title.index', '{0} (Index)', basename);
+// 	} else {
+// 		title = localize('git.title.diffRefs', '{0} ({1}) ⟷ {0} ({2})', basename, item.shortPreviousRef, item.shortRef);
+// 	}
+
+// 	return {
+// 		command: 'vscode.diff',
+// 		title: 'Open Comparison',
+// 		arguments: [toGitUri(uri, item.previousRef), item.ref === '' ? uri : toGitUri(uri, item.ref), title, options]
+// 	};
+// }
+
+// private _selectedForCompare: { uri: Uri, item: GitTimelineItem } | undefined;
