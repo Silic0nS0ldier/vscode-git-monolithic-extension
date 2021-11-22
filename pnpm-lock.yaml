@@ -33,6 +33,7 @@ importers:
       '@types/which': ^2.0.1
       aggregate-error: ^4.0.0
       byline: ^4.2.2
+      git: workspace:*
       iconv-lite-umd: 0.6.8
       jschardet: 3.0.0
       just-debounce: ^1.1.0
@@ -45,6 +46,7 @@ importers:
     dependencies:
       aggregate-error: 4.0.0
       byline: 4.2.2
+      git: link:../git
       iconv-lite-umd: 0.6.8
       jschardet: 3.0.0
       just-debounce: 1.1.0
@@ -59,6 +61,15 @@ importers:
       '@types/node': 14.17.19
       '@types/vscode': 1.61.0
       '@types/which': 2.0.1
+
+  packages/git:
+    specifiers:
+      '@types/node': ^14.0.0
+      get-stream: ^6.0.1
+    dependencies:
+      get-stream: 6.0.1
+    devDependencies:
+      '@types/node': 14.17.19
 
   packages/staging-area:
     specifiers: {}

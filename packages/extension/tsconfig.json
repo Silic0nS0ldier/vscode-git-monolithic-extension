@@ -37,9 +37,6 @@
 		"outDir": "./dist",
 		"experimentalDecorators": true,
 		"declaration": false,
-		"typeRoots": [
-			"./node_modules/@types"
-		],
 		"skipLibCheck": true,
 		"useDefineForClassFields": true
 	},
