@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import * as FS from "fs";
+import which from "which";
 import { readToString } from "./cli-helpers.js";
 import { CancelledError, ERROR_GENERIC, ERROR_GIT_NOT_FOUND, ERROR_NON_ZERO_EXIT, ERROR_TIMEOUT, GenericError, GitNotFoundError, NonZeroExitError, TimeoutError } from "./errors.js";
 import { err, isErr, ok, Result, unwrap } from "./func-result.js";
@@ -46,13 +47,23 @@ export type PersistentCLIContext = {
 	readonly timeout: number,
 };
 
+type Environment = {
+	path: string,
+	pathExt: string,
+}
+
 /**
  * Creates git context from environment (e.g. `PATH`).
  */
-export async function fromEnvironment(cliContext: PersistentCLIContext): Promise<Result<GitContext, ContextCreationErrors>> {
-	// TODO
-	console.log(cliContext);
-	throw '';
+export async function fromEnvironment(env: Environment, cliContext: PersistentCLIContext): Promise<Result<GitContext, ContextCreationErrors>> {
+	try {
+		// TODO Fix types in DT so we can use nothrow
+		const gitPath = await which('git', { path: env.path, pathExt: env.pathExt });
+		return await fromPath(gitPath, cliContext);
+	}
+	catch {
+		return err({ type: ERROR_GIT_NOT_FOUND });
+	}
 }
 
 /**

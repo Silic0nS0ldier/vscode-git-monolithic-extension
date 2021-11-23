@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import * as cp from 'node:child_process';
-import * as which from 'which';
+import which from 'which';
 import { cpErrorHandler } from "./error.js";
 
 export interface IGit {
