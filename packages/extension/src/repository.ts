@@ -1694,7 +1694,7 @@ export class Repository implements Disposable {
 		this._onRunOperation.fire(operation);
 
 		try {
-			const result = await this.retryRun(operation, runOperation);
+			const result = await retryRun(operation, runOperation);
 
 			if (!isReadOnly(operation)) {
 				await this.updateModelState();
@@ -1712,29 +1712,6 @@ export class Repository implements Disposable {
 		} finally {
 			this._operations.end(operation);
 			this._onDidRunOperation.fire({ operation, error });
-		}
-	}
-
-	private async retryRun<T>(operation: Operation, runOperation: () => Promise<T> = () => Promise.resolve<any>(null)): Promise<T> {
-		let attempt = 0;
-
-		while (true) {
-			try {
-				attempt++;
-				return await runOperation();
-			} catch (err) {
-				const shouldRetry = attempt <= 10 && (
-					(err.gitErrorCode === GitErrorCodes.RepositoryIsLocked)
-					|| ((operation === Operation.Pull || operation === Operation.Sync || operation === Operation.Fetch) && (err.gitErrorCode === GitErrorCodes.CantLockRef || err.gitErrorCode === GitErrorCodes.CantRebaseMultipleBranches))
-				);
-
-				if (shouldRetry) {
-					// quatratic backoff
-					await timeout(Math.pow(attempt, 2) * 50);
-				} else {
-					throw err;
-				}
-			}
 		}
 	}
 
@@ -2073,5 +2050,28 @@ export class Repository implements Disposable {
 
 	dispose(): void {
 		this.disposables = dispose(this.disposables);
+	}
+}
+
+async function retryRun<T>(operation: Operation, runOperation: () => Promise<T> = () => Promise.resolve<any>(null)): Promise<T> {
+	let attempt = 0;
+
+	while (true) {
+		try {
+			attempt++;
+			return await runOperation();
+		} catch (err) {
+			const shouldRetry = attempt <= 10 && (
+				(err.gitErrorCode === GitErrorCodes.RepositoryIsLocked)
+				|| ((operation === Operation.Pull || operation === Operation.Sync || operation === Operation.Fetch) && (err.gitErrorCode === GitErrorCodes.CantLockRef || err.gitErrorCode === GitErrorCodes.CantRebaseMultipleBranches))
+			);
+
+			if (shouldRetry) {
+				// quatratic backoff
+				await timeout(Math.pow(attempt, 2) * 50);
+			} else {
+				throw err;
+			}
+		}
 	}
 }
