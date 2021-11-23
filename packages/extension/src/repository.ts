@@ -23,6 +23,7 @@ import throat from 'throat';
 import onetime from 'onetime';
 // @ts-ignore
 import { parseIgnoreCheck } from "git/repository/ignore/check/parser";
+import { getResources, resolveChangeCommand, resolveDefaultCommand, resolveFileCommand } from './repository/resource-command-resolver.js';
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 
@@ -90,10 +91,10 @@ export class Resource implements SourceControlResourceState {
 	}
 
 	get command(): Command {
-		return this._commandResolver.resolveDefaultCommand(this);
+		return resolveDefaultCommand(this, this._repository);
 	}
 
-	private _resources = onetime((): [Uri | undefined, Uri | undefined] => this._commandResolver.getResources(this))
+	private _resources = onetime((): [Uri | undefined, Uri | undefined] => getResources(this, this._repository))
 
 	get resourceGroupType(): ResourceGroupType { return this._resourceGroupType; }
 	get type(): Status { return this._type; }
@@ -274,7 +275,7 @@ export class Resource implements SourceControlResourceState {
 	}
 
 	constructor(
-		private _commandResolver: ResourceCommandResolver,
+		private _repository: Repository,
 		private _resourceGroupType: ResourceGroupType,
 		private _resourceUri: Uri,
 		private _type: Status,
@@ -288,12 +289,12 @@ export class Resource implements SourceControlResourceState {
 	}
 
 	async openFile(): Promise<void> {
-		const command = this._commandResolver.resolveFileCommand(this);
+		const command = resolveFileCommand(this);
 		await commands.executeCommand<void>(command.command, ...(command.arguments || []));
 	}
 
 	async openChange(): Promise<void> {
-		const command = this._commandResolver.resolveChangeCommand(this);
+		const command = resolveChangeCommand(this);
 		await commands.executeCommand<void>(command.command, ...(command.arguments || []));
 	}
 }
@@ -597,142 +598,6 @@ class DotGitWatcher implements IFileWatcher {
 	}
 }
 
-class ResourceCommandResolver {
-
-	constructor(private repository: Repository) { }
-
-	resolveDefaultCommand(resource: Resource): Command {
-		const config = workspace.getConfiguration('git', Uri.file(this.repository.root));
-		const openDiffOnClick = config.get<boolean>('openDiffOnClick', true);
-		return openDiffOnClick ? this.resolveChangeCommand(resource) : this.resolveFileCommand(resource);
-	}
-
-	resolveFileCommand(resource: Resource): Command {
-		return {
-			command: 'vscode.open',
-			title: localize('open', "Open"),
-			arguments: [resource.resourceUri]
-		};
-	}
-
-	resolveChangeCommand(resource: Resource): Command {
-		const title = this.getTitle(resource);
-
-		if (!resource.leftUri) {
-			return {
-				command: 'vscode.open',
-				title: localize('open', "Open"),
-				arguments: [resource.rightUri, { override: resource.type === Status.BOTH_MODIFIED ? false : undefined }, title]
-			};
-		} else {
-			return {
-				command: 'vscode.diff',
-				title: localize('open', "Open"),
-				arguments: [resource.leftUri, resource.rightUri, title]
-			};
-		}
-	}
-
-	getResources(resource: Resource): [Uri | undefined, Uri | undefined] {
-		for (const submodule of this.repository.submodules) {
-			if (path.join(this.repository.root, submodule.path) === resource.resourceUri.fsPath) {
-				return [undefined, toGitUri(resource.resourceUri, resource.resourceGroupType === ResourceGroupType.Index ? 'index' : 'wt', { submoduleOf: this.repository.root })];
-			}
-		}
-
-		return [this.getLeftResource(resource), this.getRightResource(resource)];
-	}
-
-	private getLeftResource(resource: Resource): Uri | undefined {
-		switch (resource.type) {
-			case Status.INDEX_MODIFIED:
-			case Status.INDEX_RENAMED:
-			case Status.INDEX_ADDED:
-				return toGitUri(resource.original, 'HEAD');
-
-			case Status.MODIFIED:
-			case Status.UNTRACKED:
-				return toGitUri(resource.resourceUri, '~');
-
-			case Status.DELETED_BY_US:
-			case Status.DELETED_BY_THEM:
-				return toGitUri(resource.resourceUri, '~1');
-		}
-		return undefined;
-	}
-
-	private getRightResource(resource: Resource): Uri | undefined {
-		switch (resource.type) {
-			case Status.INDEX_MODIFIED:
-			case Status.INDEX_ADDED:
-			case Status.INDEX_COPIED:
-			case Status.INDEX_RENAMED:
-				return toGitUri(resource.resourceUri, '');
-
-			case Status.INDEX_DELETED:
-			case Status.DELETED:
-				return toGitUri(resource.resourceUri, 'HEAD');
-
-			case Status.DELETED_BY_US:
-				return toGitUri(resource.resourceUri, '~3');
-
-			case Status.DELETED_BY_THEM:
-				return toGitUri(resource.resourceUri, '~2');
-
-			case Status.MODIFIED:
-			case Status.UNTRACKED:
-			case Status.IGNORED:
-			case Status.INTENT_TO_ADD:
-				const uriString = resource.resourceUri.toString();
-				const [indexStatus] = this.repository.indexGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString);
-
-				if (indexStatus && indexStatus.renameResourceUri) {
-					return indexStatus.renameResourceUri;
-				}
-
-				return resource.resourceUri;
-
-			case Status.BOTH_ADDED:
-			case Status.BOTH_MODIFIED:
-				return resource.resourceUri;
-		}
-
-		return undefined;
-	}
-
-	private getTitle(resource: Resource): string {
-		const basename = path.basename(resource.resourceUri.fsPath);
-
-		switch (resource.type) {
-			case Status.INDEX_MODIFIED:
-			case Status.INDEX_RENAMED:
-			case Status.INDEX_ADDED:
-				return localize('git.title.index', '{0} (Index)', basename);
-
-			case Status.MODIFIED:
-			case Status.BOTH_ADDED:
-			case Status.BOTH_MODIFIED:
-				return localize('git.title.workingTree', '{0} (Working Tree)', basename);
-
-			case Status.INDEX_DELETED:
-			case Status.DELETED:
-				return localize('git.title.deleted', '{0} (Deleted)', basename);
-
-			case Status.DELETED_BY_US:
-				return localize('git.title.theirs', '{0} (Theirs)', basename);
-
-			case Status.DELETED_BY_THEM:
-				return localize('git.title.ours', '{0} (Ours)', basename);
-
-			case Status.UNTRACKED:
-				return localize('git.title.untracked', '{0} (Untracked)', basename);
-
-			default:
-				return '';
-		}
-	}
-}
-
 // TODO This has WAY TO MUCH responsibility
 // Parts should be shaved off into independent functions.
 export class Repository implements Disposable {
@@ -866,7 +731,6 @@ export class Repository implements Disposable {
 	private isRepositoryHuge = false;
 	private didWarnAboutLimit = false;
 
-	private resourceCommandResolver = new ResourceCommandResolver(this);
 	private disposables: Disposable[] = [];
 
 	constructor(
@@ -1818,36 +1682,36 @@ export class Repository implements Disposable {
 
 			switch (raw.x + raw.y) {
 				case '??': switch (untrackedChanges) {
-					case 'mixed': return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.UNTRACKED, useIcons));
-					case 'separate': return untracked.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Untracked, uri, Status.UNTRACKED, useIcons));
+					case 'mixed': return workingTree.push(new Resource(this, ResourceGroupType.WorkingTree, uri, Status.UNTRACKED, useIcons));
+					case 'separate': return untracked.push(new Resource(this, ResourceGroupType.Untracked, uri, Status.UNTRACKED, useIcons));
 					default: return undefined;
 				}
 				case '!!': switch (untrackedChanges) {
-					case 'mixed': return workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.IGNORED, useIcons));
-					case 'separate': return untracked.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Untracked, uri, Status.IGNORED, useIcons));
+					case 'mixed': return workingTree.push(new Resource(this, ResourceGroupType.WorkingTree, uri, Status.IGNORED, useIcons));
+					case 'separate': return untracked.push(new Resource(this, ResourceGroupType.Untracked, uri, Status.IGNORED, useIcons));
 					default: return undefined;
 				}
-				case 'DD': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_DELETED, useIcons));
-				case 'AU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.ADDED_BY_US, useIcons));
-				case 'UD': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.DELETED_BY_THEM, useIcons));
-				case 'UA': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.ADDED_BY_THEM, useIcons));
-				case 'DU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.DELETED_BY_US, useIcons));
-				case 'AA': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_ADDED, useIcons));
-				case 'UU': return merge.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Merge, uri, Status.BOTH_MODIFIED, useIcons));
+				case 'DD': return merge.push(new Resource(this, ResourceGroupType.Merge, uri, Status.BOTH_DELETED, useIcons));
+				case 'AU': return merge.push(new Resource(this, ResourceGroupType.Merge, uri, Status.ADDED_BY_US, useIcons));
+				case 'UD': return merge.push(new Resource(this, ResourceGroupType.Merge, uri, Status.DELETED_BY_THEM, useIcons));
+				case 'UA': return merge.push(new Resource(this, ResourceGroupType.Merge, uri, Status.ADDED_BY_THEM, useIcons));
+				case 'DU': return merge.push(new Resource(this, ResourceGroupType.Merge, uri, Status.DELETED_BY_US, useIcons));
+				case 'AA': return merge.push(new Resource(this, ResourceGroupType.Merge, uri, Status.BOTH_ADDED, useIcons));
+				case 'UU': return merge.push(new Resource(this, ResourceGroupType.Merge, uri, Status.BOTH_MODIFIED, useIcons));
 			}
 
 			switch (raw.x) {
-				case 'M': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_MODIFIED, useIcons)); break;
-				case 'A': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_ADDED, useIcons)); break;
-				case 'D': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_DELETED, useIcons)); break;
-				case 'R': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_RENAMED, useIcons, renameUri)); break;
-				case 'C': index.push(new Resource(this.resourceCommandResolver, ResourceGroupType.Index, uri, Status.INDEX_COPIED, useIcons, renameUri)); break;
+				case 'M': index.push(new Resource(this, ResourceGroupType.Index, uri, Status.INDEX_MODIFIED, useIcons)); break;
+				case 'A': index.push(new Resource(this, ResourceGroupType.Index, uri, Status.INDEX_ADDED, useIcons)); break;
+				case 'D': index.push(new Resource(this, ResourceGroupType.Index, uri, Status.INDEX_DELETED, useIcons)); break;
+				case 'R': index.push(new Resource(this, ResourceGroupType.Index, uri, Status.INDEX_RENAMED, useIcons, renameUri)); break;
+				case 'C': index.push(new Resource(this, ResourceGroupType.Index, uri, Status.INDEX_COPIED, useIcons, renameUri)); break;
 			}
 
 			switch (raw.y) {
-				case 'M': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.MODIFIED, useIcons, renameUri)); break;
-				case 'D': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.DELETED, useIcons, renameUri)); break;
-				case 'A': workingTree.push(new Resource(this.resourceCommandResolver, ResourceGroupType.WorkingTree, uri, Status.INTENT_TO_ADD, useIcons, renameUri)); break;
+				case 'M': workingTree.push(new Resource(this, ResourceGroupType.WorkingTree, uri, Status.MODIFIED, useIcons, renameUri)); break;
+				case 'D': workingTree.push(new Resource(this, ResourceGroupType.WorkingTree, uri, Status.DELETED, useIcons, renameUri)); break;
+				case 'A': workingTree.push(new Resource(this, ResourceGroupType.WorkingTree, uri, Status.INTENT_TO_ADD, useIcons, renameUri)); break;
 			}
 
 			return undefined;
