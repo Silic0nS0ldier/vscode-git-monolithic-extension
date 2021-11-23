@@ -21,6 +21,8 @@ import { GitError } from './git/error.js';
 import debounce from 'just-debounce';
 import throat from 'throat';
 import onetime from 'onetime';
+// @ts-ignore
+import { parseIgnoreCheck } from "git/repository/ignore/check/parser";
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 
@@ -731,6 +733,8 @@ class ResourceCommandResolver {
 	}
 }
 
+// TODO This has WAY TO MUCH responsibility
+// Parts should be shaved off into independent functions.
 export class Repository implements Disposable {
 
 	private _onDidChangeRepository = new EventEmitter<Uri>();
@@ -964,6 +968,7 @@ export class Repository implements Disposable {
 			}
 		}, null, this.disposables);
 
+		// TODO Yikes! `this` refers to a class under construction
 		const statusBar = new StatusBarCommands(this, remoteSourceProviderRegistry);
 		this.disposables.push(statusBar);
 		statusBar.onDidChange(() => this._sourceControl.statusBarCommands = statusBar.commands, null, this.disposables);
@@ -1625,7 +1630,7 @@ export class Repository implements Disposable {
 						// nothing ignored
 						resolve(new Set<string>());
 					} else if (exitCode === 0) {
-						resolve(new Set<string>(this.parseIgnoreCheck(data)));
+						resolve(new Set<string>(parseIgnoreCheck(data)));
 					} else {
 						if (/ is in submodule /.test(stderr)) {
 							reject(new GitError({ stdout: data, stderr, exitCode, gitErrorCode: GitErrorCodes.IsInSubmodule }));
@@ -1651,23 +1656,6 @@ export class Repository implements Disposable {
 				child.on('exit', onExit);
 			});
 		});
-	}
-
-	// Parses output of `git check-ignore -v -z` and returns only those paths
-	// that are actually ignored by git.
-	// Matches to a negative pattern (starting with '!') are filtered out.
-	// See also https://git-scm.com/docs/git-check-ignore#_output.
-	private parseIgnoreCheck(raw: string): string[] {
-		const ignored = [];
-		const elements = raw.split('\0');
-		for (let i = 0; i < elements.length; i += 4) {
-			const pattern = elements[i + 2];
-			const path = elements[i + 3];
-			if (pattern && !pattern.startsWith('!')) {
-				ignored.push(path);
-			}
-		}
-		return ignored;
 	}
 
 	private async _push(remote?: string, refspec?: string, setUpstream: boolean = false, followTags = false, forcePushMode?: ForcePushMode, tags = false): Promise<void> {
