@@ -27,7 +27,7 @@ export function watch(locations: string[], locks: string[]): IFileWatcher {
 			renameDetection: false,
 		},
 		(et, path) => {
-			if (locks.every(fs.existsSync)) {
+			if (locks.some(fs.existsSync)) {
 				// Lock exists, don't propagate changes
 				return;
 			}

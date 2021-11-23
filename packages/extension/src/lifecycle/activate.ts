@@ -1,5 +1,5 @@
 import { GitExtension } from "../api/git.js";
-import { TerminalEnvironmentManager } from '../terminal.js';
+import { registerTerminalEnvironmentManager } from '../terminal.js';
 import { GitProtocolHandler } from '../protocolHandler.js';
 import { GitExtensionImpl } from '../api/extension.js';
 import { findGit, Git, IGit } from '../git.js';
@@ -101,8 +101,7 @@ async function createModel(context: ExtensionContext, outputChannel: OutputChann
 	disposables.push(askpass);
 
 	const environment = askpass.getEnv();
-	const terminalEnvironmentManager = new TerminalEnvironmentManager(context, environment);
-	disposables.push(terminalEnvironmentManager);
+	disposables.push(registerTerminalEnvironmentManager(context, environment));
 
 
 	const git = new Git({
