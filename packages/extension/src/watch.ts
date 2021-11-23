@@ -3,22 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event, EventEmitter, Uri } from "vscode";
+import { EventEmitter, Uri } from "vscode";
 import Watcher from "watcher";
 import { TargetEvent } from "watcher/dist/enums.js"
-import { IDisposable } from "./util.js";
 import * as fs from 'node:fs';
-
-export interface IFileWatcher extends IDisposable {
-	readonly event: Event<Uri>;
-}
 
 /**
  * Creates an optimised watcher.
  * @param location
  * @returns
  */
-export function watch(locations: string[], locks: string[]): IFileWatcher {
+export function watch(locations: string[], locks: string[]) {
 	const onDotGitFileChangeEmitter = new EventEmitter<Uri>();
 	const dotGitWatcher = new Watcher(
 		[...locations, ...locks],
@@ -42,11 +37,11 @@ export function watch(locations: string[], locks: string[]): IFileWatcher {
 	// TODO Use unified logger
 	dotGitWatcher.on('error', err => console.error(err));
 
-	return new class implements IFileWatcher {
-		event = onDotGitFileChangeEmitter.event;
+	return {
+		event: onDotGitFileChangeEmitter.event,
 		dispose() {
 			onDotGitFileChangeEmitter.dispose();
 			dotGitWatcher.close();
-		}
+		},
 	};
 }

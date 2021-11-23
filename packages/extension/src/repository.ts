@@ -12,7 +12,6 @@ import { Commit, Repository as BaseRepository, Stash, Submodule, LogFileOptions 
 import { StatusBarCommands } from './statusbar.js';
 import { toGitUri } from './uri.js';
 import { anyEvent, combinedDisposable, debounceEvent, dispose, EmptyDisposable, eventToPromise, filterEvent, find, IDisposable, isDescendant, localize, onceEvent } from './util.js';
-import { IFileWatcher, watch } from './watch.js';
 import { Log, LogLevel } from './log.js';
 import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
 import { IPushErrorHandlerRegistry } from './pushError.js';
@@ -24,6 +23,7 @@ import onetime from 'onetime';
 // @ts-ignore
 import { parseIgnoreCheck } from "git/repository/ignore/check/parser";
 import { getResources, resolveChangeCommand, resolveDefaultCommand, resolveFileCommand } from './repository/resource-command-resolver.js';
+import { createDotGitWatcher } from './repository/dot-git-watcher.js';
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 
@@ -530,74 +530,6 @@ class FileEventLogger {
 	}
 }
 
-class DotGitWatcher implements IFileWatcher {
-
-	readonly event: Event<Uri>;
-
-	private emitter = new EventEmitter<Uri>();
-	private transientDisposables: IDisposable[] = [];
-	private disposables: IDisposable[] = [];
-
-	constructor(
-		private repository: Repository,
-		private outputChannel: OutputChannel
-	) {
-		// Watch specific files for meaningful git events
-		// This is a lot more efficient then watching everything, and avoids workarounds for aids like watchman as an fsmonitor
-		const rootWatcher = watch(
-			[
-				// Where we are
-				path.join(repository.dotGit, 'HEAD'),
-				// What we are tracking
-				path.join(repository.dotGit, 'index'),
-				// Graph of what we know
-				path.join(repository.dotGit, 'refs'),
-				// Current commit message
-				path.join(repository.dotGit, 'COMMIT_EDITMSG'),
-				// How we do things
-				path.join(repository.dotGit, 'config'),
-			],
-			// Don't propagate events if index being modified
-			[path.join(repository.dotGit, 'index.lock')],
-		);
-		this.disposables.push(rootWatcher);
-
-		this.event = anyEvent(rootWatcher.event, this.emitter.event);
-
-		repository.onDidRunGitStatus(this.updateTransientWatchers, this, this.disposables);
-		this.updateTransientWatchers();
-	}
-
-	private updateTransientWatchers() {
-		this.transientDisposables = dispose(this.transientDisposables);
-
-		if (!this.repository.HEAD || !this.repository.HEAD.upstream) {
-			return;
-		}
-
-		this.transientDisposables = dispose(this.transientDisposables);
-
-		const { name, remote } = this.repository.HEAD.upstream;
-		const upstreamPath = path.join(this.repository.dotGit, 'refs', 'remotes', remote, name);
-
-		try {
-			const upstreamWatcher = watch([upstreamPath], []);
-			this.transientDisposables.push(upstreamWatcher);
-			upstreamWatcher.event(this.emitter.fire, this.emitter, this.transientDisposables);
-		} catch (err) {
-			if (Log.logLevel <= LogLevel.Error) {
-				this.outputChannel.appendLine(`Warning: Failed to watch ref '${upstreamPath}', is most likely packed.`);
-			}
-		}
-	}
-
-	dispose() {
-		this.emitter.dispose();
-		this.transientDisposables = dispose(this.transientDisposables);
-		this.disposables = dispose(this.disposables);
-	}
-}
-
 // TODO This has WAY TO MUCH responsibility
 // Parts should be shaved off into independent functions.
 export class Repository implements Disposable {
@@ -747,7 +679,7 @@ export class Repository implements Disposable {
 		const onWorkspaceRepositoryFileChange = filterEvent(onWorkspaceFileChange, uri => isDescendant(repository.root, uri.fsPath));
 		const onWorkspaceWorkingTreeFileChange = filterEvent(onWorkspaceRepositoryFileChange, uri => !/\/\.git($|\/)/.test(uri.path));
 
-		const dotGitFileWatcher = new DotGitWatcher(this, outputChannel);
+		const dotGitFileWatcher = createDotGitWatcher(this, outputChannel);
 		this.disposables.push(dotGitFileWatcher);
 		const onDotGitFileChange = dotGitFileWatcher.event;
 
