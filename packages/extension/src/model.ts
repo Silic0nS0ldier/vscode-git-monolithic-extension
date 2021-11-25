@@ -15,9 +15,9 @@ import { Askpass } from './askpass.js';
 import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
 import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
-import debounce from 'just-debounce';
-import throat from 'throat';
 import onetime from 'onetime';
+import { debounce } from './package-patches/just-debounce.js';
+import { throat } from './package-patches/throat.js';
 
 class RepositoryPick implements QuickPickItem {
 	get label(): string {

@@ -11,7 +11,7 @@
     "just-debounce": "^1.1.0",
     "onetime": "^5.1.2",
     "throat": "^6.0.1",
-    "vscode-extension-telemetry": "0.4.2",
+    "vscode-extension-telemetry": "0.4.3",
     "vscode-nls": "^5.0.0",
     "watcher": "^1.2.0",
     "which": "^2.0.2"

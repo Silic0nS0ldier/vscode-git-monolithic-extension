@@ -1,7 +1,7 @@
 import * as FS from "node:fs";
 import * as URL from "node:url";
 import * as Path from "node:path";
-import Execa from "execa";
+import { execaSync } from "execa";
 import { globbySync, isGitIgnoredSync } from "globby";
 import { rollup } from "rollup";
 import cjs from "@rollup/plugin-commonjs";
@@ -67,7 +67,7 @@ function cleanDist(packagePath) {
 
 function compile(pkgPath, buildToolsPkgPath) {
 	console.log(`  ${pkgPath}`);
-	Execa.sync("tsc", [], {
+	execaSync("tsc", [], {
 		preferLocal: true,
 		localDir: buildToolsPkgPath,
 		buffer: false,

@@ -6,9 +6,9 @@
 import { QuickPickItem, window, QuickPick } from 'vscode';
 import { RemoteSourceProvider, RemoteSource } from './api/git.js';
 import { Model } from './model.js';
+import { debounce } from './package-patches/just-debounce.js';
+import { throat } from './package-patches/throat.js';
 import { localize } from './util.js';
-import debounce from 'just-debounce';
-import throat from 'throat';
 
 async function getQuickPickResult<T extends QuickPickItem>(quickpick: QuickPick<T>): Promise<T | undefined> {
 	const result = await new Promise<T | undefined>(c => {

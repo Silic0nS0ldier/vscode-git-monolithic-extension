@@ -1,7 +1,7 @@
 import * as FS from "node:fs";
 import * as URL from "node:url";
 import * as Path from "node:path";
-import Execa from "execa";
+import { execaSync } from "execa";
 import { globbySync } from "globby";
 
 async function main() {
@@ -18,7 +18,7 @@ async function main() {
 	FS.rmSync(Path.join(tstPkg, "dist"), { recursive: true, force: true });
 
 	console.log("Compiling...");
-	Execa.sync("tsc", [], {
+	execaSync("tsc", [], {
 		preferLocal: true,
 		localDir: thsPkg,
 		buffer: false,

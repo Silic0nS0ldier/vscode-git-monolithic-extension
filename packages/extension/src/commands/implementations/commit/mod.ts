@@ -8,7 +8,7 @@ import * as commitAllSigned from "./commit-all-signed.js";
 import * as commitAll from "./commit-all.js";
 import * as commitEmptyNoVerify from "./commit-empty-no-verify.js";
 import * as commitEmpty from "./commit-empty.js";
-import * as commitNoVerify from "./commit-no-verify";
+import * as commitNoVerify from "./commit-no-verify.js";
 import * as commitStagedAmendNoVerify from "./commit-staged-amend-no-verify.js";
 import * as commitStagedAmend from "./commit-staged-amend.js";
 import * as commitStagedNoVerify from "./commit-staged-no-verify.js";

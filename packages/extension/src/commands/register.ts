@@ -2,7 +2,6 @@ import { commands, Disposable, OutputChannel, workspace } from "vscode";
 import { CommandErrorOutputTextDocumentContentProvider, ScmCommand } from "./helpers.js";
 import { Git } from "../git.js";
 import { Model } from "../model.js";
-import TelemetryReporter from "vscode-extension-telemetry";
 import { createCommand } from "./create.js";
 
 import * as branch from "./implementations/branch/mod.js";
@@ -34,6 +33,7 @@ import * as sync from "./implementations/sync/mod.js";
 import * as tag from "./implementations/tag/mod.js";
 import * as undoCommit from "./implementations/undo-commit.js";
 import * as unstage from "./implementations/unstage/mod.js";
+import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 
 export function registerCommands(
 	model: Model,

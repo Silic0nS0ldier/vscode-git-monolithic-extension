@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { Disposable, Event, EventEmitter, OutputChannel, Uri } from 'vscode';
-import { Log, LogLevel } from '../log';
-import { Repository } from '../repository';
+import { Log, LogLevel } from '../log.js';
+import { Repository } from '../repository.js';
 import { anyEvent } from '../util.js';
 import { watch } from '../watch.js';
 

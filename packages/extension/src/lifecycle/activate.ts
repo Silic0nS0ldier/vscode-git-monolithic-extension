@@ -9,13 +9,13 @@ import { GitFileSystemProvider } from '../fileSystemProvider.js';
 import { GitDecorations } from '../decorationProvider.js';
 import { Askpass } from '../askpass.js';
 import { toDisposable, filterEvent, eventToPromise, localize } from '../util.js';
-import TelemetryReporter from 'vscode-extension-telemetry';
 import { env, ExtensionContext, workspace, window, Disposable, commands, Uri, OutputChannel, version as vscodeVersion, WorkspaceFolder } from 'vscode';
 import { registerAPICommands } from '../api/api1.js';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import { deactivateTasks } from "./deactivate.js";
+import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 
 export async function activate(context: ExtensionContext): Promise<GitExtension> {
 	console.warn('git ext starting');

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { window, InputBoxOptions, Uri, OutputChannel, Disposable, workspace } from 'vscode';
-import { IDisposable, EmptyDisposable, toDisposable } from './util';
+import { IDisposable, EmptyDisposable, toDisposable } from './util.js';
 import * as path from 'node:path';
 import { IIPCHandler, IIPCServer, createIPCServer } from './ipc/ipcServer.js';
 import { CredentialsProvider, Credentials } from './api/git.js';

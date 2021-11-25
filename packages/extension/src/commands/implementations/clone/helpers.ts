@@ -1,8 +1,8 @@
 import * as os from "node:os";
 import { commands, ProgressLocation, Uri, window, workspace } from "vscode";
-import TelemetryReporter from "vscode-extension-telemetry";
 import { Git } from "../../../git.js";
 import { Model } from "../../../model.js";
+import { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import { localize } from "../../../util.js";
 

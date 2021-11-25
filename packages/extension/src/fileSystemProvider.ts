@@ -8,8 +8,8 @@ import { fromGitUri, toGitUri } from './uri.js';
 import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from './model.js';
 import { filterEvent, eventToPromise, isDescendant, pathEquals, EmptyDisposable } from './util.js';
 import { Repository } from './repository.js';
-import debounce from "just-debounce";
-import throat from "throat";
+import { debounce } from './package-patches/just-debounce.js';
+import { throat } from './package-patches/throat.js';
 
 interface CacheRow {
 	uri: Uri;

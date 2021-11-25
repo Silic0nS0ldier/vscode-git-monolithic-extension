@@ -1,7 +1,7 @@
 import { CLI, CLIErrors } from "./context.js";
 import { ERROR_GENERIC, GenericError } from "./errors.js";
 import { err, isErr, ok, Result, unwrap } from "./func-result.js";
-import * as getStream from "get-stream";
+import getStream from "get-stream";
 import { PassThrough } from "stream";
 
 export type ReadToContext = {

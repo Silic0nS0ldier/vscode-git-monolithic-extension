@@ -17,13 +17,12 @@ import { IRemoteSourceProviderRegistry } from './remoteProvider.js';
 import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
 import { GitError } from './git/error.js';
-import debounce from 'just-debounce';
-import throat from 'throat';
 import onetime from 'onetime';
-// @ts-ignore
 import { parseIgnoreCheck } from "git/repository/ignore/check/parser";
 import { getResources, resolveChangeCommand, resolveDefaultCommand, resolveFileCommand } from './repository/resource-command-resolver.js';
 import { createDotGitWatcher } from './repository/dot-git-watcher.js';
+import { throat } from './package-patches/throat.js';
+import { debounce } from './package-patches/just-debounce.js';
 
 const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
 
