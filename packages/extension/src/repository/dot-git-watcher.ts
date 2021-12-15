@@ -21,7 +21,7 @@ function updateTransientWatchers(
 	const upstreamPath = path.join(repository.dotGit, 'refs', 'remotes', remote, name);
 
 	try {
-		const upstreamWatcher = watch([upstreamPath], []);
+		const upstreamWatcher = watch([upstreamPath], [], outputChannel);
 		disposables.push(upstreamWatcher);
 		upstreamWatcher.event(emitter.fire, emitter, disposables);
 	} catch (err) {
@@ -56,6 +56,7 @@ export function createDotGitWatcher(
 		],
 		// Don't propagate events if index being modified
 		[path.join(repository.dotGit, 'index.lock')],
+		outputChannel,
 	);
 
 	let transientDisposable: Disposable = updateTransientWatchers(repository, emitter, outputChannel);;
