@@ -8,7 +8,7 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 import * as cp from 'node:child_process';
 import { EventEmitter } from 'node:events';
-import * as iconv from 'iconv-lite-umd';
+import * as iconv from '@vscode/iconv-lite-umd';
 import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, onceEvent, splitInChunks, Limiter, Versions } from './util.js';
 import { CancellationToken, Progress, Uri } from 'vscode';
 import { detectEncoding } from './encoding.js';

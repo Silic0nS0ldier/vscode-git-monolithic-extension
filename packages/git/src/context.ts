@@ -1,8 +1,9 @@
 import { spawn } from "child_process";
 import * as FS from "fs";
 import which from "which";
+import type NAC from "node-abort-controller";
 import { readToString } from "./cli-helpers.js";
-import { CancelledError, ERROR_GENERIC, ERROR_GIT_NOT_FOUND, ERROR_NON_ZERO_EXIT, ERROR_TIMEOUT, GenericError, GitNotFoundError, NonZeroExitError, TimeoutError } from "./errors.js";
+import { CancelledError, ERROR_CANCELLED, ERROR_GENERIC, ERROR_GIT_NOT_FOUND, ERROR_NON_ZERO_EXIT, ERROR_TIMEOUT, GenericError, GitNotFoundError, NonZeroExitError, TimeoutError } from "./errors.js";
 import { err, isErr, ok, Result, unwrap } from "./func-result.js";
 
 export type CLIContext = {
@@ -13,6 +14,8 @@ export type CLIContext = {
 	readonly env?: { readonly [x: string]: string|undefined },
 	readonly cwd: string,
 	readonly timeout?: number,
+	/** @todo Use native types once VSCode at NodeJS 15. */
+	readonly signal?: NAC.AbortSignal,
 };
 
 export type CLIErrors =
@@ -76,8 +79,8 @@ export async function fromPath(gitPath: string, cliContext: PersistentCLIContext
 		const versionResult = await readToString({ cli, cwd: process.cwd() }, ['--version']);
 
 		if (isErr(versionResult)) {
-			// TODO
-			throw '';
+			// TODO Make more specific
+			return err({ type: ERROR_GIT_NOT_FOUND });
 		}
 
 		return ok({
@@ -89,6 +92,11 @@ export async function fromPath(gitPath: string, cliContext: PersistentCLIContext
 	return err({ type: ERROR_GIT_NOT_FOUND });
 }
 
+type CLIResult = Result<
+	{ code: number|null, signal: NodeJS.Signals|null },
+	TimeoutError|GenericError<Error>|CancelledError
+>;
+
 /**
  * Creates a wrapper around the git CLI.
  * @todo Confirm child process errors are handled
@@ -99,6 +107,7 @@ function createCLI(executablePath: string, persistentContext: PersistentCLIConte
 	return async function cli(context, args) {
 		// Compose environment variables
 		const env = {
+			// TODO Remove this, it makes testing impossible
 			...process.env,
 			...persistentContext.env,
 			...context.env ?? {},
@@ -114,24 +123,37 @@ function createCLI(executablePath: string, persistentContext: PersistentCLIConte
 			cp.stderr.pipe(context.stderr);
 		}
 
-		const onTimeout = new Promise<TimeoutError>(resolve => {
-			setTimeout(
-				() => resolve({ type: ERROR_TIMEOUT }),
+		const onTimeout = new Promise<CLIResult>(resolve =>
+			void setTimeout(
+				() => resolve(err({ type: ERROR_TIMEOUT })),
 				context.timeout ?? persistentContext.timeout,
-			);
-		});
-		const onExit = new Promise<GenericError<Error>|{ code: number|null, signal: NodeJS.Signals|null }>(resolve => {
-			cp.once('error', (error) => resolve({ type: ERROR_GENERIC, cause: error }));
-			cp.once('exit', (code, signal) => resolve({ code, signal }));
-		});
+			),
+		);
+		const onAbort = new Promise<CLIResult>(resolve =>
+			void context.signal?.onabort?.(() => void resolve(err({ type: ERROR_CANCELLED }))),
+		);
+		const onError = new Promise<CLIResult>(resolve =>
+			void cp.once('error', (error) => resolve(err({ type: ERROR_GENERIC, cause: error }))),
+		);
+		const onExit = new Promise<CLIResult>(resolve =>
+			void cp.once('exit', (code, signal) => resolve(ok({ code, signal }))),
+		);
 
-		const result = await Promise.race([onTimeout, onExit]);
+		const result = await Promise.race([onTimeout, onError, onExit, onAbort]);
 
-		if ('type' in result) {
-			// TODO Handle generic error where cause is missing git
-			return err(result);
+		if (isErr(result)) {
+			// End process
+			if (cp.connected) {
+				// TODO monitor for errors killing
+				cp.kill();
+			}
+			// TODO Refine generic error into something more specific
+			return result;
 		}
-		else if (result.code !== 0) {
+
+		const okResult = unwrap(result);
+
+		if (okResult.code !== 0) {
 			return err({ type: ERROR_NON_ZERO_EXIT });
 		}
 

@@ -1,27 +1,15 @@
-# Git
+# Monolithic Git Interop
 
-This is a WIP package which aims to provide an efficient, scalable, and correct interface over the Git CLI.
+An interop for JS to enable scalable Git interactions. This relies on the Git CLI.
 
-Current optimisation focus: Untracked file discovery
+## Usage
 
-```sh
-# Porcelain stablises API surface (and is versioned)
--z --porcelain
-# Reduces number of locks during git operations by avoiding index modifications where possible
-# May cause duplicated work
-GIT_OPTIONAL_LOCKS=0
-# tells git to not prompt if there are problems
-GIT_TERMINAL_PROMPT=0
-# update-index, sets the index version
-# v4 applies compression, which improves load time
---index-version <n>
+TODO
 
-# Split Index, designed fir very large indexes
+## API
 
-# Untracked cache, allows untracked optimisations by checking parent dir which on supported OS will update parent dir
-git update-index --test-untracked-cache
-git config --global core.untrackedCache true
+TODO
 
-# untracked cache and index format v4
-git config feature.manyFiles true
-```
+## Origins
+
+This package was created to power git interactions within the Monolithic Git extension for VSCode.

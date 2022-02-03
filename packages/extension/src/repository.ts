@@ -18,7 +18,7 @@ import { IPushErrorHandlerRegistry } from './pushError.js';
 import { ApiRepository } from './api/api1.js';
 import { GitError } from './git/error.js';
 import onetime from 'onetime';
-import { parseIgnoreCheck } from "git/repository/ignore/check/parser";
+import { parseIgnoreCheck } from "monolithic-git-interop/repository/ignore/check/parser";
 import { getResources, resolveChangeCommand, resolveDefaultCommand, resolveFileCommand } from './repository/resource-command-resolver.js';
 import { createDotGitWatcher } from './repository/dot-git-watcher.js';
 import { throat } from './package-patches/throat.js';

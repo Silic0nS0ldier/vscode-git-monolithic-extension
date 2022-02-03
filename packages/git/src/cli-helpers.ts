@@ -1,8 +1,9 @@
 import { CLI, CLIErrors } from "./context.js";
 import { ERROR_GENERIC, GenericError } from "./errors.js";
-import { err, isErr, ok, Result, unwrap } from "./func-result.js";
+import { err, ok, Result } from "./func-result.js";
 import getStream from "get-stream";
 import { PassThrough } from "stream";
+import NAC from "node-abort-controller";
 
 export type ReadToContext = {
 	cli: CLI,
@@ -14,25 +15,27 @@ export type ReadToErrors =
 
 /**
  * Helper which reads CLI output (stdout) and returns the resulting string.
- * Has guards to prevent excessive RAM usage.
- * @todo Limit buffering, end spawned process if too much data
+ * Will abort if output exceeds 1024KB.
  * @param context
  * @param args
  */
 export async function readToString(context: ReadToContext, args: string[]): Promise<Result<string, ReadToErrors>> {
-	// Run
-	// TODO Stream limit?
 	const stdout = new PassThrough();
-	const result = await context.cli({ cwd: context.cwd, stdout }, args);
-	if (isErr(result)) {
-		return err({ type: ERROR_GENERIC, cause: unwrap(result) });
-	}
+	const abortController = new NAC.AbortController();
 
 	// Read response
 	try {
-		return ok(await getStream(stdout, { encoding: 'utf-8', maxBuffer: 1024 }));
+		const cliAction = context.cli({ cwd: context.cwd, stdout, signal: abortController.signal }, args);
+		// Throws one max buffer hit
+		const streamReader = getStream(stdout, { encoding: 'utf-8', maxBuffer: 1024 });
+
+		const [result] = await Promise.all([streamReader, cliAction]);
+
+		return ok(result);
 	}
 	catch (e) {
+		// TODO Provide specific error if max buffer hit
+		abortController.abort();
 		return err({ type: ERROR_GENERIC, cause: e });
 	}
 }

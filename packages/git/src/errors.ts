@@ -1,6 +1,7 @@
 type Error<TSymbol, TCause> = {
 	readonly type: TSymbol,
-} & (TCause extends undefined ? { readonly cause?: TCause } : { readonly cause: TCause })
+	readonly cause?: TCause
+};
 
 export const ERROR_GIT_NOT_FOUND = Symbol('GIT_NOT_FOUND');
 export type GitNotFoundError<TCause = undefined> = Error<typeof ERROR_GIT_NOT_FOUND, TCause>;

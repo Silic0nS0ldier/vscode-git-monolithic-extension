@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"target": "es2020",
 		"lib": [
+			"DOM",
 			"ES2016",
 			"ES2017.Object",
 			"ES2017.String",
