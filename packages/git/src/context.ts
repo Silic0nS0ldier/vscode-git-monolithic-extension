@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import * as FS from "fs";
 import type NAC from "node-abort-controller";
 import which from "which";
-import { readToString } from "./cli-helpers.js";
+import { readToString } from "./cli-helpers/read-to-string.js";
 import {
     CancelledError,
     ERROR_CANCELLED,

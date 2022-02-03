@@ -1,16 +1,18 @@
-import getStream from "get-stream";
+import getStream, { MaxBufferError } from "get-stream";
 import NAC from "node-abort-controller";
 import { PassThrough } from "stream";
 import { CLI, CLIErrors } from "../context.js";
-import { ERROR_GENERIC, GenericError } from "../errors.js";
-import { err, ok, Result } from "../func-result.js";
+import { BufferOverflowError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, GenericError } from "../errors.js";
+import { err, isErr, ok, Result, unwrap } from "../func-result.js";
 
 export type ReadToContext = {
     cli: CLI;
     cwd: string;
 };
 
-export type ReadToErrors = GenericError<CLIErrors | unknown>;
+export type ReadToErrors =
+    | GenericError<CLIErrors | unknown>
+    | BufferOverflowError<MaxBufferError>;
 
 /**
  * Helper which reads CLI output (stdout) and returns the resulting string.
@@ -28,11 +30,19 @@ export async function readToString(context: ReadToContext, args: string[]): Prom
         // Throws on max buffer hit
         const streamReader = getStream(stdout, { encoding: "utf-8", maxBuffer: 1024 });
 
-        const [result] = await Promise.all([streamReader, cliAction]);
+        const [streamResult, cliResult] = await Promise.all([streamReader, cliAction]);
 
-        return ok(result);
+        if (isErr(cliResult)) {
+            throw unwrap(cliResult);
+        }
+
+        return ok(streamResult);
     } catch (e) {
-        // TODO Provide specific error if max buffer hit
+        if (e instanceof MaxBufferError) {
+            abortController.abort();
+            // @ts-expect-error
+            return err({ type: ERROR_BUFFER_OVERFLOW, cause: e });
+        }
         abortController.abort();
         return err({ type: ERROR_GENERIC, cause: e });
     }

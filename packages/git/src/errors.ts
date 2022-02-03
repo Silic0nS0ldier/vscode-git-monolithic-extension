@@ -17,3 +17,6 @@ export type NonZeroExitError<TCause = undefined> = Error<typeof ERROR_NON_ZERO_E
 
 export const ERROR_GENERIC = Symbol("ERROR_GENERIC");
 export type GenericError<TCause = undefined> = Error<typeof ERROR_GENERIC, TCause>;
+
+export const ERROR_BUFFER_OVERFLOW = Symbol("ERROR_BUFFER_OVERFLOW");
+export type BufferOverflowError<TCause = undefined> = Error<typeof ERROR_GENERIC, TCause>;
