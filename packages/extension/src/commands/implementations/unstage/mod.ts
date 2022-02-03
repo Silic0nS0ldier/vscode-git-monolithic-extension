@@ -6,8 +6,8 @@ import * as unstageAll from "./unstage-all.js";
 import * as unstage from "./unstage.js";
 
 export function createCommands(model: Model, outputChannel: OutputChannel): ScmCommand[] {
-	return [
-		unstage.createCommand(outputChannel, model),
-		unstageAll.createCommand(),
-	]
+    return [
+        unstage.createCommand(outputChannel, model),
+        unstageAll.createCommand(),
+    ];
 }

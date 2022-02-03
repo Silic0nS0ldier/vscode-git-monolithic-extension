@@ -1,24 +1,24 @@
 {
-  "private": true,
-  "name": "monolithic-git-interop",
-  "description": "An interop for JS to enable scalable Git interactions.",
-  "version": "0.0.0",
-  "type": "module",
-  "types": "./dist/main.d.ts",
-  "exports": {
-    "./repository/ignore/check/parser": {
-      "import": "./dist/repository/ignore/check/parser.js",
-      "types": "./dist/repository/ignore/check/parser.d.ts"
+    "private": true,
+    "name": "monolithic-git-interop",
+    "description": "An interop for JS to enable scalable Git interactions.",
+    "version": "0.0.0",
+    "type": "module",
+    "types": "./dist/main.d.ts",
+    "exports": {
+        "./repository/ignore/check/parser": {
+            "import": "./dist/repository/ignore/check/parser.js",
+            "types": "./dist/repository/ignore/check/parser.d.ts"
+        }
+    },
+    "devDependencies": {
+        "@types/node": "^14.0.0",
+        "@types/which": "^2.0.1",
+        "ava": "^4.0.1"
+    },
+    "dependencies": {
+        "get-stream": "^6.0.1",
+        "node-abort-controller": "^3.0.1",
+        "which": "^2.0.2"
     }
-  },
-  "devDependencies": {
-    "@types/node": "^14.0.0",
-    "@types/which": "^2.0.1",
-    "ava": "^4.0.1"
-  },
-  "dependencies": {
-    "get-stream": "^6.0.1",
-    "node-abort-controller": "^3.0.1",
-    "which": "^2.0.2"
-  }
 }

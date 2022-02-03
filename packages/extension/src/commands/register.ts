@@ -1,9 +1,10 @@
 import { commands, Disposable, OutputChannel, workspace } from "vscode";
-import { CommandErrorOutputTextDocumentContentProvider, ScmCommand } from "./helpers.js";
 import { Git } from "../git.js";
 import { Model } from "../model.js";
 import { createCommand } from "./create.js";
+import { CommandErrorOutputTextDocumentContentProvider, ScmCommand } from "./helpers.js";
 
+import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import * as branch from "./implementations/branch/mod.js";
 import * as checkout from "./implementations/checkout/mod.js";
 import * as cherryPick from "./implementations/cherry-pick.js";
@@ -33,68 +34,67 @@ import * as sync from "./implementations/sync/mod.js";
 import * as tag from "./implementations/tag/mod.js";
 import * as undoCommit from "./implementations/undo-commit.js";
 import * as unstage from "./implementations/unstage/mod.js";
-import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 
 export function registerCommands(
-	model: Model,
-	git: Git,
-	outputChannel: OutputChannel,
-	telemetryReporter: TelemetryReporter,
+    model: Model,
+    git: Git,
+    outputChannel: OutputChannel,
+    telemetryReporter: TelemetryReporter,
 ): Disposable {
-	const cmds: ScmCommand[] = [
-		...branch.createCommands(),
-		...checkout.createCommands(),
-		cherryPick.createCommand(),
-		...clean.createCommands(model, outputChannel),
-		...clone.createCommands(model, telemetryReporter, git),
-		close.createCommand(model),
-		...commit.createCommands(model),
-		...fetch.createCommands(),
-		ignore.createCommand(model, outputChannel),
-		init.createCommand(git, model),
-		merge.createCommand(),
-		...open.createCommands(model, outputChannel),
-		publish.createCommand(model),
-		...pull.createCommands(),
-		...push.createCommands(model),
-		...rebase.createCommands(),
-		refresh.createCommand(),
-		...remote.createCommands(model),
-		rename.createCommand(),
-		...revert.createCommands(),
-		restoreCommitTemplate.createCommand(),
-		revealInExplorer.createCommand(),
-		setLogLevel.createCommand(outputChannel),
-		...stage.createCommands(model, outputChannel),
-		...stash.createCommands(),
-		...sync.createCommands(model),
-		...tag.createCommands(),
-		undoCommit.createCommand(),
-		...unstage.createCommands(model, outputChannel),
-	];
+    const cmds: ScmCommand[] = [
+        ...branch.createCommands(),
+        ...checkout.createCommands(),
+        cherryPick.createCommand(),
+        ...clean.createCommands(model, outputChannel),
+        ...clone.createCommands(model, telemetryReporter, git),
+        close.createCommand(model),
+        ...commit.createCommands(model),
+        ...fetch.createCommands(),
+        ignore.createCommand(model, outputChannel),
+        init.createCommand(git, model),
+        merge.createCommand(),
+        ...open.createCommands(model, outputChannel),
+        publish.createCommand(model),
+        ...pull.createCommands(),
+        ...push.createCommands(model),
+        ...rebase.createCommands(),
+        refresh.createCommand(),
+        ...remote.createCommands(model),
+        rename.createCommand(),
+        ...revert.createCommands(),
+        restoreCommitTemplate.createCommand(),
+        revealInExplorer.createCommand(),
+        setLogLevel.createCommand(outputChannel),
+        ...stage.createCommands(model, outputChannel),
+        ...stash.createCommands(),
+        ...sync.createCommands(model),
+        ...tag.createCommands(),
+        undoCommit.createCommand(),
+        ...unstage.createCommands(model, outputChannel),
+    ];
 
-	const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
+    const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
 
-	const disposables = cmds.map(({ commandId, method, options }) => {
-		const command = createCommand(
-			model,
-			telemetryReporter,
-			outputChannel,
-			commandErrors,
-			commandId,
-			method,
-			options,
-		);
+    const disposables = cmds.map(({ commandId, method, options }) => {
+        const command = createCommand(
+            model,
+            telemetryReporter,
+            outputChannel,
+            commandErrors,
+            commandId,
+            method,
+            options,
+        );
 
-		// if (options.diff) {
-		// 	return commands.registerDiffInformationCommand(commandId, command);
-		// } else {
-		// 	return commands.registerCommand(commandId, command);
-		// }
-		return commands.registerCommand(commandId, command);
-	});
+        // if (options.diff) {
+        // 	return commands.registerDiffInformationCommand(commandId, command);
+        // } else {
+        // 	return commands.registerCommand(commandId, command);
+        // }
+        return commands.registerCommand(commandId, command);
+    });
 
-	disposables.push(workspace.registerTextDocumentContentProvider('git-output', commandErrors));
+    disposables.push(workspace.registerTextDocumentContentProvider("git-output", commandErrors));
 
-	return Disposable.from(...disposables);
+    return Disposable.from(...disposables);
 }

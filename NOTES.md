@@ -1,4 +1,3 @@
-
 only run status commands during idle
 abort existing command if high rate of change detected
 

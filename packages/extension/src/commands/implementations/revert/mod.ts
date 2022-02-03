@@ -3,5 +3,5 @@ import { ScmCommand } from "../../helpers.js";
 // import * as revertSelectedRanges from "./revert-selected-ranges.js";
 
 export function createCommands(): ScmCommand[] {
-	return []
+    return [];
 }

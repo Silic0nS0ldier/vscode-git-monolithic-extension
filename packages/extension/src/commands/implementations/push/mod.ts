@@ -9,13 +9,13 @@ import * as pushWithTags from "./push-with-tags.js";
 import * as push from "./push.js";
 
 export function createCommands(model: Model): ScmCommand[] {
-	return [
-		push.createCommand(model),
-		pushForce.createCommand(model),
-		pushTags.createCommand(model),
-		pushTo.createCommand(model),
-		pushToForce.createCommand(model),
-		pushWithTags.createCommand(model),
-		pushWithTagsForce.createCommand(model),
-	]
+    return [
+        push.createCommand(model),
+        pushForce.createCommand(model),
+        pushTags.createCommand(model),
+        pushTo.createCommand(model),
+        pushToForce.createCommand(model),
+        pushWithTags.createCommand(model),
+        pushWithTagsForce.createCommand(model),
+    ];
 }

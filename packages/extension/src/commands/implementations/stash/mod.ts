@@ -8,13 +8,13 @@ import * as stashPop from "./stash-pop.js";
 import * as stash from "./stash.js";
 
 export function createCommands(): ScmCommand[] {
-	return [
-		stash.createCommand(),
-		stashApply.createCommand(),
-		stashApplyLatest.createCommand(),
-		stashDrop.createCommand(),
-		stashIncludeUntracked.createCommand(),
-		stashPop.createCommand(),
-		stashPopLatest.createCommand(),
-	]
+    return [
+        stash.createCommand(),
+        stashApply.createCommand(),
+        stashApplyLatest.createCommand(),
+        stashDrop.createCommand(),
+        stashIncludeUntracked.createCommand(),
+        stashPop.createCommand(),
+        stashPopLatest.createCommand(),
+    ];
 }

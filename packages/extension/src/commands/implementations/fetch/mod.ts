@@ -4,9 +4,9 @@ import * as fetchPrune from "./fetch-prune.js";
 import * as fetch from "./fetch.js";
 
 export function createCommands(): ScmCommand[] {
-	return [
-		fetch.createCommand(),
-		fetchAll.createCommand(),
-		fetchPrune.createCommand(),
-	]
+    return [
+        fetch.createCommand(),
+        fetchAll.createCommand(),
+        fetchPrune.createCommand(),
+    ];
 }

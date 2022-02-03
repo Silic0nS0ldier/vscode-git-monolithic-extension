@@ -1,22 +1,21 @@
 import { Status } from "../../../api/git.js";
-import { ScmCommand } from "../../helpers.js";
 import { Repository } from "../../../repository.js";
+import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
-	async function stageAllTracked(repository: Repository): Promise<void> {
-		const resources = repository.workingTreeGroup.resourceStates
-			.filter(r => r.type !== Status.UNTRACKED && r.type !== Status.IGNORED);
-		const uris = resources.map(r => r.resourceUri);
+    async function stageAllTracked(repository: Repository): Promise<void> {
+        const resources = repository.workingTreeGroup.resourceStates
+            .filter(r => r.type !== Status.UNTRACKED && r.type !== Status.IGNORED);
+        const uris = resources.map(r => r.resourceUri);
 
-		await repository.add(uris);
-	};
+        await repository.add(uris);
+    }
 
-	return {
-		commandId: 'git.stageAllTracked',
-		method: stageAllTracked,
-		options: {
-			repository: true,
-		},
-	};
+    return {
+        commandId: "git.stageAllTracked",
+        method: stageAllTracked,
+        options: {
+            repository: true,
+        },
+    };
 }
-

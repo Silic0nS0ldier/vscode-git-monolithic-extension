@@ -38,7 +38,6 @@
 // 			rightTitle = localize('git.title.ref', '{0} ({1})', basename, item.shortRef);
 // 		}
 
-
 // 		const title = localize('git.title.diff', '{0} ⟷ {1}', leftTitle, rightTitle);
 // 		await commands.executeCommand('vscode.diff', selected.ref === '' ? uri : toGitUri(uri, selected.ref), item.ref === '' ? uri : toGitUri(uri, item.ref), title);
 // 	};

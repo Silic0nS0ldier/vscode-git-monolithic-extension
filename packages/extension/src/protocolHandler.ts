@@ -3,35 +3,35 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { UriHandler, Uri, window, Disposable, commands } from 'vscode';
-import { dispose } from './util.js';
-import * as querystring from 'node:querystring';
+import * as querystring from "node:querystring";
+import { commands, Disposable, Uri, UriHandler, window } from "vscode";
+import { dispose } from "./util.js";
 
 export class GitProtocolHandler implements UriHandler {
+    private disposables: Disposable[] = [];
 
-	private disposables: Disposable[] = [];
+    constructor() {
+        this.disposables.push(window.registerUriHandler(this));
+    }
 
-	constructor() {
-		this.disposables.push(window.registerUriHandler(this));
-	}
+    handleUri(uri: Uri): void {
+        switch (uri.path) {
+            case "/clone":
+                this.clone(uri);
+        }
+    }
 
-	handleUri(uri: Uri): void {
-		switch (uri.path) {
-			case '/clone': this.clone(uri);
-		}
-	}
+    private clone(uri: Uri): void {
+        const data = querystring.parse(uri.query);
 
-	private clone(uri: Uri): void {
-		const data = querystring.parse(uri.query);
+        if (!data.url) {
+            console.warn("Failed to open URI:", uri);
+        }
 
-		if (!data.url) {
-			console.warn('Failed to open URI:', uri);
-		}
+        commands.executeCommand("git.clone", data.url);
+    }
 
-		commands.executeCommand('git.clone', data.url);
-	}
-
-	dispose(): void {
-		this.disposables = dispose(this.disposables);
-	}
+    dispose(): void {
+        this.disposables = dispose(this.disposables);
+    }
 }

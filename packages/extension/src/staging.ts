@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { TextDocument, Range, Selection } from 'vscode';
+import { Range, Selection, TextDocument } from "vscode";
 
 // export function applyLineChanges(original: TextDocument, modified: TextDocument, diffs: LineChange[]): string {
 // 	const result: string[] = [];
@@ -50,38 +50,38 @@ import { TextDocument, Range, Selection } from 'vscode';
 // }
 
 export function toLineRanges(selections: Selection[], textDocument: TextDocument): Range[] {
-	const lineRanges = selections.map(s => {
-		const startLine = textDocument.lineAt(s.start.line);
-		const endLine = textDocument.lineAt(s.end.line);
-		return new Range(startLine.range.start, endLine.range.end);
-	});
+    const lineRanges = selections.map(s => {
+        const startLine = textDocument.lineAt(s.start.line);
+        const endLine = textDocument.lineAt(s.end.line);
+        return new Range(startLine.range.start, endLine.range.end);
+    });
 
-	lineRanges.sort((a, b) => a.start.line - b.start.line);
+    lineRanges.sort((a, b) => a.start.line - b.start.line);
 
-	const result = lineRanges.reduce((result, l) => {
-		if (result.length === 0) {
-			result.push(l);
-			return result;
-		}
+    const result = lineRanges.reduce((result, l) => {
+        if (result.length === 0) {
+            result.push(l);
+            return result;
+        }
 
-		const [last, ...rest] = result;
-		const intersection = l.intersection(last);
+        const [last, ...rest] = result;
+        const intersection = l.intersection(last);
 
-		if (intersection) {
-			return [intersection, ...rest];
-		}
+        if (intersection) {
+            return [intersection, ...rest];
+        }
 
-		if (l.start.line === last.end.line + 1) {
-			const merge = new Range(last.start, l.end);
-			return [merge, ...rest];
-		}
+        if (l.start.line === last.end.line + 1) {
+            const merge = new Range(last.start, l.end);
+            return [merge, ...rest];
+        }
 
-		return [l, ...result];
-	}, [] as Range[]);
+        return [l, ...result];
+    }, [] as Range[]);
 
-	result.reverse();
+    result.reverse();
 
-	return result;
+    return result;
 }
 
 // export function getModifiedRange(textDocument: TextDocument, diff: LineChange): Range {

@@ -1,24 +1,23 @@
-import { ScmCommand } from "../../helpers.js";
 import { Model } from "../../../model.js";
 import { Resource } from "../../../repository.js";
+import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(
-	model: Model,
+    model: Model,
 ): ScmCommand {
-	async function openResource(resource: Resource): Promise<void> {
-		const repository = model.getRepository(resource.resourceUri);
+    async function openResource(resource: Resource): Promise<void> {
+        const repository = model.getRepository(resource.resourceUri);
 
-		if (!repository) {
-			return;
-		}
+        if (!repository) {
+            return;
+        }
 
-		await resource.open();
-	};
+        await resource.open();
+    }
 
-	return {
-		commandId: 'git.openResource',
-		method: openResource,
-		options: {},
-	};
+    return {
+        commandId: "git.openResource",
+        method: openResource,
+        options: {},
+    };
 }
-

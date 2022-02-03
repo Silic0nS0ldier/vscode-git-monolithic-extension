@@ -7,10 +7,10 @@ import * as cleanAll from "./clean-all.js";
 import * as clean from "./clean.js";
 
 export function createCommands(model: Model, outputChannel: OutputChannel): ScmCommand[] {
-	return [
-		clean.createCommand(model, outputChannel),
-		cleanAll.createCommand(),
-		cleanAllTracked.createCommand(),
-		cleanAllUntracked.createCommand(),
-	]
+    return [
+        clean.createCommand(model, outputChannel),
+        cleanAll.createCommand(),
+        cleanAllTracked.createCommand(),
+        cleanAllUntracked.createCommand(),
+    ];
 }

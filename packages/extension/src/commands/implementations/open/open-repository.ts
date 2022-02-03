@@ -1,38 +1,37 @@
+import * as os from "node:os";
 import { Uri, window } from "vscode";
-import * as os from 'node:os';
-import { ScmCommand } from "../../helpers.js";
 import { Model } from "../../../model.js";
 import { localize } from "../../../util.js";
+import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(
-	model: Model,
+    model: Model,
 ): ScmCommand {
-	async function openRepository(path?: string): Promise<void> {
-		if (!path) {
-			const result = await window.showOpenDialog({
-				canSelectFiles: false,
-				canSelectFolders: true,
-				canSelectMany: false,
-				defaultUri: Uri.file(os.homedir()),
-				openLabel: localize('open repo', "Open Repository")
-			});
+    async function openRepository(path?: string): Promise<void> {
+        if (!path) {
+            const result = await window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                defaultUri: Uri.file(os.homedir()),
+                openLabel: localize("open repo", "Open Repository"),
+            });
 
-			if (!result || result.length === 0) {
-				return;
-			}
+            if (!result || result.length === 0) {
+                return;
+            }
 
-			path = result[0].fsPath;
-		}
+            path = result[0].fsPath;
+        }
 
-		await model.openRepository(path);
-	};
+        await model.openRepository(path);
+    }
 
-	return {
-		commandId: 'git.openRepository',
-		method: openRepository,
-		options: {
-			repository: false,
-		},
-	};
+    return {
+        commandId: "git.openRepository",
+        method: openRepository,
+        options: {
+            repository: false,
+        },
+    };
 }
-

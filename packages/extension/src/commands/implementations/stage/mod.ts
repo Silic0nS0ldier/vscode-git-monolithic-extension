@@ -10,11 +10,11 @@ import * as stageAll from "./stage-all.js";
 import * as stage from "./stage.js";
 
 export function createCommands(model: Model, outputChannel: OutputChannel): ScmCommand[] {
-	return [
-		stage.createCommand(outputChannel, model),
-		stageAll.createCommand(),
-		stageAllMerge.createCommand(),
-		stageAllTracked.createCommand(),
-		stageAllUntracked.createCommand(),
-	]
+    return [
+        stage.createCommand(outputChannel, model),
+        stageAll.createCommand(),
+        stageAllMerge.createCommand(),
+        stageAllTracked.createCommand(),
+        stageAllUntracked.createCommand(),
+    ];
 }

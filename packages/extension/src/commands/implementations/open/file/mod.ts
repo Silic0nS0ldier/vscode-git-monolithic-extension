@@ -6,9 +6,9 @@ import * as openFile from "./open-file.js";
 import * as openHeadFile from "./open-head-file.js";
 
 export function createCommands(model: Model, outputChannel: OutputChannel): ScmCommand[] {
-	return [
-		openFile.createCommand(model, outputChannel),
-		openFile2.createCommand(model, outputChannel),
-		openHeadFile.createCommand(model, outputChannel),
-	]
+    return [
+        openFile.createCommand(model, outputChannel),
+        openFile2.createCommand(model, outputChannel),
+        openHeadFile.createCommand(model, outputChannel),
+    ];
 }

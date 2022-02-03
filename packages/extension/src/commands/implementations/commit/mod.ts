@@ -18,22 +18,22 @@ import * as commitStaged from "./commit-staged.js";
 import * as commit from "./commit.js";
 
 export function createCommands(model: Model): ScmCommand[] {
-	return [
-		commit.createCommand(model),
-		commitAll.createCommand(model),
-		commitAllAmend.createCommand(model),
-		commitAllAmendNoVerify.createCommand(model),
-		commitAllNoVerify.createCommand(model),
-		commitAllSigned.createCommand(model),
-		commitAllSignedNoVerify.createCommand(model),
-		commitEmpty.createCommand(model),
-		commitEmptyNoVerify.createCommand(model),
-		commitNoVerify.createCommand(model),
-		commitStaged.createCommand(model),
-		commitStagedAmend.createCommand(model),
-		commitStagedAmendNoVerify.createCommand(model),
-		commitStagedNoVerify.createCommand(model),
-		commitStagedSigned.createCommand(model),
-		commitStagedSignedNoVerify.createCommand(model),
-	];
+    return [
+        commit.createCommand(model),
+        commitAll.createCommand(model),
+        commitAllAmend.createCommand(model),
+        commitAllAmendNoVerify.createCommand(model),
+        commitAllNoVerify.createCommand(model),
+        commitAllSigned.createCommand(model),
+        commitAllSignedNoVerify.createCommand(model),
+        commitEmpty.createCommand(model),
+        commitEmptyNoVerify.createCommand(model),
+        commitNoVerify.createCommand(model),
+        commitStaged.createCommand(model),
+        commitStagedAmend.createCommand(model),
+        commitStagedAmendNoVerify.createCommand(model),
+        commitStagedNoVerify.createCommand(model),
+        commitStagedSigned.createCommand(model),
+        commitStagedSignedNoVerify.createCommand(model),
+    ];
 }

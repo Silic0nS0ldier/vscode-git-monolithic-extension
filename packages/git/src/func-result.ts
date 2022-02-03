@@ -21,8 +21,8 @@ export function isErr<TOk, TErr>(value: Result<TOk, TErr>): value is Err<TErr> {
     return !value[0];
 }
 
-export function unwrap<TErr>(value: Err<TErr>): TErr
-export function unwrap<TOk>(value: Ok<TOk>): TOk
+export function unwrap<TErr>(value: Err<TErr>): TErr;
+export function unwrap<TOk>(value: Ok<TOk>): TOk;
 export function unwrap<TOk, TErr>(value: Result<TOk, TErr>): TOk | TErr {
     return value[1];
 }
