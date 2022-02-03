@@ -1,8 +1,8 @@
 // @ts-expect-error
 import test from "ava";
 import intoStream from "into-stream";
-import { ERROR_BUFFER_OVERFLOW, ERROR_GENERIC } from "../errors.js";
-import { err, isErr, isOk, ok, unwrap } from "../func-result.js";
+import { ERROR_BUFFER_OVERFLOW, ERROR_GENERIC } from "../../errors.js";
+import { err, isErr, isOk, ok, unwrap } from "../../func-result.js";
 import { readToString } from "./read-to-string.js";
 
 // @ts-ignore
