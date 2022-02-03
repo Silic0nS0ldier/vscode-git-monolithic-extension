@@ -1,6 +1,6 @@
-import { CLI, CLIErrors } from "./context.js";
-import { ERROR_GENERIC, GenericError } from "./errors.js";
-import { err, ok, Result } from "./func-result.js";
+import { CLI, CLIErrors } from "../context.js";
+import { ERROR_GENERIC, GenericError } from "../errors.js";
+import { err, ok, Result } from "../func-result.js";
 import getStream from "get-stream";
 import { PassThrough } from "stream";
 import NAC from "node-abort-controller";
