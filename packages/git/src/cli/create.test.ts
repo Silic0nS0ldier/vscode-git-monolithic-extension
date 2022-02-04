@@ -53,7 +53,7 @@ test("Aborted before", async t => {
     const spawn = createSpawn("exit");
     const cli = create(
         "/git",
-        { env: {}, timeout: 1 },
+        { env: {}, timeout: 250 },
         { child_process: { spawn }, process: { env: {} } },
     );
     const abortController = new NAC.AbortController();
@@ -65,7 +65,30 @@ test("Aborted before", async t => {
     }
 });
 
-test.todo("Aborted during");
+// @ts-ignore
+test("Aborted during", async t => {
+    const spawn = createSpawn("exit", { delay: 250 });
+    const cli = create(
+        "/git",
+        { env: {}, timeout: 250 },
+        { child_process: { spawn }, process: { env: {} } },
+    );
+    // TODO This could be better validated by checking what the value of `aborted` was when accessed
+    const abortController = new NAC.AbortController();
+    const pendingRes = cli({ cwd: "/", signal: abortController.signal }, ["foobar"]);
+    const pendingAbort = new Promise<void>(resolve => {
+        setTimeout(() => {
+            abortController.abort();
+            resolve();
+        }, 5);
+    });
+    const [res] = await Promise.all([pendingRes, pendingAbort]);
+    t.true(isErr(res));
+    if (isErr(res)) {
+        t.is(unwrap(res).type, ERROR_CANCELLED);
+    }
+});
+
 test.todo("Non-zero exit");
 test.todo("stderr");
 test.todo("stdout");

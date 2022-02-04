@@ -18,7 +18,7 @@ import { isOk, unwrap } from "monolithic-git-interop/util/result";
 const res = await fromEnvironment(process.env, {
     env: undefined,
     // in milliseconds
-    timeout: Infinity,
+    timeout: 30_000,
 }, createServices());
 if (isOk(res)) {
     const context = unwrap(res);

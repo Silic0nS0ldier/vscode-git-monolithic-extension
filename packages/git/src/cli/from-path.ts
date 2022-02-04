@@ -36,7 +36,7 @@ export async function fromPath(
 
         return ok({
             cli,
-            version: unwrap(versionResult).replace(/^git version /, ""),
+            version: unwrap(versionResult).replace(/^git version /, "").trim(),
         });
     }
 

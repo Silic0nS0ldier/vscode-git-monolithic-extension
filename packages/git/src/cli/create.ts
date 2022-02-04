@@ -52,6 +52,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
             cp.stderr.pipe(context.stderr);
         }
 
+        // TODO Clear timeout, handle Infinity (timeout will trigger immediately)
         const onTimeout = new Promise<CLIResult>(resolve =>
             void setTimeout(
                 () => resolve(err({ type: ERROR_TIMEOUT })),
@@ -73,7 +74,8 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
             void cp.once("exit", (code, signal) => resolve(ok({ code, signal })))
         );
 
-        const result = await Promise.race([onTimeout, onError, onExit, onAbort]);
+        // NOTE onExit must come last, tests rely on this (they are time optimised)
+        const result = await Promise.race([onTimeout, onError, onAbort, onExit]);
 
         if (isErr(result)) {
             // End process
