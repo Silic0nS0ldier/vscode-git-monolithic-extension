@@ -9,6 +9,26 @@
         "./repository/ignore/check/parser": {
             "import": "./dist/repository/ignore/check/parser.js",
             "types": "./dist/repository/ignore/check/parser.d.ts"
+        },
+        "./cli": {
+            "import": "./dist/cli/mod.js",
+            "types": "./dist/cli/mod.d.ts"
+        },
+        "./cli/helpers/read-to-string": {
+            "import": "./dist/cli/helpers/read-to-string.js",
+            "types": "./dist/cli/helpers/read-to-string.d.ts"
+        },
+        "./services": {
+            "import": "./dist/services/mod.js",
+            "types": "./dist/services/mod.d.ts"
+        },
+        "./services/nodejs": {
+            "import": "./dist/services/nodejs.js",
+            "types": "./dist/services/nodejs.d.ts"
+        },
+        "./util/result": {
+            "import": "./dist/func-result.js",
+            "types": "./dist/func-result.d.ts"
         }
     },
     "devDependencies": {
