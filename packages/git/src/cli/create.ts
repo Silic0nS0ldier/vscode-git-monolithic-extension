@@ -1,4 +1,4 @@
-import { Readable } from "stream";
+import type { Readable } from "stream";
 import { ERROR_CANCELLED, ERROR_GENERIC, ERROR_NON_ZERO_EXIT, ERROR_TIMEOUT } from "../errors.js";
 import { err, isErr, ok, unwrap } from "../func-result.js";
 import { CLI, CLIResult, PersistentCLIContext } from "./context.js";
@@ -52,6 +52,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
             cp.stderr.pipe(context.stderr);
         }
 
+        // TODO Ensure all promises resolve so that everything can be GCed
         // TODO Clear timeout, handle Infinity (timeout will trigger immediately)
         const onTimeout = new Promise<CLIResult>(resolve =>
             void setTimeout(
@@ -74,7 +75,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
             void cp.once("exit", (code, signal) => resolve(ok({ code, signal })))
         );
 
-        // NOTE onExit must come last, tests rely on this (they are time optimised)
+        // NOTE onExit must come last, unit tests rely on this (they are time optimised)
         const result = await Promise.race([onTimeout, onError, onAbort, onExit]);
 
         if (isErr(result)) {

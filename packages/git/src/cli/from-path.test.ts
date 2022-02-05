@@ -1,8 +1,9 @@
 // @ts-expect-error
 import test from "ava";
+import { ERROR_GIT_NOT_FOUND } from "../errors.js";
 import { isErr, isOk, unwrap } from "../func-result.js";
-import { fromPath } from "./from-path.js";
 import { createSpawn } from "./create.stub.js";
+import { fromPath } from "./from-path.js";
 
 // @ts-ignore
 test("Basic case", async t => {
@@ -20,7 +21,7 @@ test("Basic case", async t => {
 });
 
 // @ts-ignore
-test.skip("No git", async t => {
+test.only("No git", async t => {
     const spawn = createSpawn("error");
     const res = await fromPath(
         "/git",
@@ -29,6 +30,6 @@ test.skip("No git", async t => {
     );
     t.true(isErr(res));
     if (isErr(res)) {
-        t.log(unwrap(res));
+        t.is(unwrap(res).type, ERROR_GIT_NOT_FOUND);
     }
 });

@@ -30,7 +30,7 @@ export async function fromPath(
         const versionResult = await readToString({ cli, cwd: process.cwd() }, ["--version"]);
 
         if (isErr(versionResult)) {
-            // TODO Make more specific
+            // TODO Make more specific, or more generic (this is an issue getting the version)
             return err({ type: ERROR_GIT_NOT_FOUND });
         }
 
