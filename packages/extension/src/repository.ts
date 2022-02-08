@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { parseIgnoreCheck } from "monolithic-git-interop/repository/ignore/check/parser";
+import { parseIgnoreCheck } from "monolithic-git-interop/api/repository/ignore/check/parser";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import onetime from "onetime";

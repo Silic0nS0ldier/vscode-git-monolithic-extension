@@ -1,8 +1,8 @@
+import { version } from "../api/version/mod.js";
 import { ERROR_GIT_NOT_FOUND } from "../errors.js";
 import { err, isErr, ok, Result, unwrap } from "../func-result.js";
 import { ContextCreationErrors, GitContext, PersistentCLIContext } from "./context.js";
 import { create, SpawnFn } from "./create.js";
-import { readToString } from "./helpers/read-to-string.js";
 
 export type FromPathServices = {
     fs: {
@@ -27,7 +27,7 @@ export async function fromPath(
 ): Promise<Result<GitContext, ContextCreationErrors>> {
     if (services.fs.exists(gitPath)) {
         const cli = create(gitPath, cliContext, services);
-        const versionResult = await readToString({ cli, cwd: process.cwd() }, ["--version"]);
+        const versionResult = await version({ cli, version: 'PENDING' });
 
         if (isErr(versionResult)) {
             // TODO Make more specific, or more generic (this is an issue getting the version)
@@ -36,7 +36,7 @@ export async function fromPath(
 
         return ok({
             cli,
-            version: unwrap(versionResult).replace(/^git version /, "").trim(),
+            version: unwrap(versionResult),
         });
     }
 

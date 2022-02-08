@@ -21,3 +21,6 @@ git config feature.manyFiles true
 ```
 
 A number of API surface changes are locked behind https://github.com/microsoft/vscode/pull/137241
+
+Its much faster to fetch a specific branch e.g. git fetch origin green
+should make it easy to do this (in API and eventually in VSCode)
