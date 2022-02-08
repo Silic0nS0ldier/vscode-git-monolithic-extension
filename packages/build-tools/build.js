@@ -38,7 +38,15 @@ async function main() {
         ],
         plugins: [
             cjs(),
-            nodeResolve(),
+            nodeResolve({
+                exportConditions: ['default', 'module', 'import', 'node'],
+                // moduleDirectories: [
+                //     Path.join(extensionPkg, 'node_modules'),
+                //     Path.join(repoRoot, 'node_modules'),
+                // ],
+                jail: repoRoot,
+                preferBuiltins: true,
+            }),
         ],
         external: [
             "vscode",

@@ -1,63 +1,46 @@
 import * as cp from "node:child_process";
 import * as path from "node:path";
 import which from "which";
-import { cpErrorHandler } from "./error.js";
+import { fromPath } from "monolithic-git-interop/cli";
+import { createServices } from "monolithic-git-interop/services/nodejs";
+import { isErr, unwrap } from "monolithic-git-interop/util/result";
 
 export interface IGit {
     path: string;
     version: string;
 }
 
-function parseVersion(raw: string): string {
-    return raw.replace(/^git version /, "");
+async function findSpecificGit(gitPath: string, onValidate: (path: string) => boolean): Promise<IGit> {
+    if (!onValidate(gitPath)) {
+        throw new Error("git not found");
+    }
+
+    const contextResult = await fromPath(gitPath, {
+        env: process.env,
+        timeout: 30_000,
+    }, createServices());
+
+    if (isErr(contextResult)) {
+        throw contextResult;
+    }
+
+    return {
+        path: gitPath,
+        version: unwrap(contextResult).version,
+    };
 }
 
-function findSpecificGit(path: string, onValidate: (path: string) => boolean): Promise<IGit> {
-    return new Promise<IGit>((c, e) => {
-        if (!onValidate(path)) {
-            return e("git not found");
-        }
-
-        const buffers: Buffer[] = [];
-        const child = cp.spawn(path, ["--version"]);
-        child.stdout.on("data", (b: Buffer) => buffers.push(b));
-        child.on("error", cpErrorHandler(e));
-        child.on(
-            "exit",
-            code =>
-                code
-                    ? e(new Error("Not found"))
-                    : c({ path, version: parseVersion(Buffer.concat(buffers).toString("utf8").trim()) }),
-        );
-    });
-}
-
-function findGitDarwin(onValidate: (path: string) => boolean): Promise<IGit> {
-    return new Promise<IGit>((c, e) => {
+async function findGitDarwin(onValidate: (path: string) => boolean): Promise<IGit> {
+    const gitPath = await new Promise<string>((c, e) => {
         cp.exec("which git", (err, gitPathBuffer) => {
             if (err) {
                 return e("git not found");
             }
 
-            const path = gitPathBuffer.toString().replace(/^\s+|\s+$/g, "");
+            const gitPath = gitPathBuffer.toString().replace(/^\s+|\s+$/g, "");
 
-            function getVersion(path: string) {
-                if (!onValidate(path)) {
-                    return e("git not found");
-                }
-
-                // make sure git executes
-                cp.exec("git --version", (err, stdout) => {
-                    if (err) {
-                        return e("git not found");
-                    }
-
-                    return c({ path, version: parseVersion(stdout.trim()) });
-                });
-            }
-
-            if (path !== "/usr/bin/git") {
-                return getVersion(path);
+            if (gitPath !== "/usr/bin/git") {
+                c(gitPath);
             }
 
             // must check if XCode is installed
@@ -69,10 +52,12 @@ function findGitDarwin(onValidate: (path: string) => boolean): Promise<IGit> {
                     return e("git not found");
                 }
 
-                getVersion(path);
+                c(gitPath);
             });
         });
     });
+
+    return findSpecificGit(gitPath, onValidate);
 }
 
 function findSystemGitWin32(base: string, onValidate: (path: string) => boolean): Promise<IGit> {
