@@ -89,9 +89,9 @@ export interface IExecutionResult<T extends string | Buffer> {
 export interface SpawnOptions extends cp.SpawnOptions {
     input?: string;
     encoding?: string;
-    log?: boolean;
     cancellationToken?: CancellationToken;
     onSpawn?: (childProcess: cp.ChildProcess) => void;
+    log_mode?: 'stream'|'buffer';
 }
 
 async function exec(child: cp.ChildProcess, cancellationToken?: CancellationToken): Promise<IExecutionResult<Buffer>> {
@@ -267,7 +267,7 @@ export class Git {
     }
 
     async getRepositoryRoot(repositoryPath: string): Promise<string> {
-        const result = await this.exec(repositoryPath, ["rev-parse", "--show-toplevel"], { log: false });
+        const result = await this.exec(repositoryPath, ["rev-parse", "--show-toplevel"]);
 
         // Keep trailing spaces which are part of the directory name
         const repoPath = path.normalize(result.stdout.trimLeft().replace(/[\r\n]+$/, ""));
@@ -320,20 +320,20 @@ export class Git {
     }
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
-        options = assign({ cwd }, options || {});
-        return await this._exec(args, options);
+        options = { cwd, ...options };
+        return await this._exec(args, { ...options, log_mode: 'buffer' });
     }
 
     async exec2(args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
-        return await this._exec(args, options);
+        return await this._exec(args, { ...options, log_mode: 'buffer' });
     }
 
     stream(cwd: string, args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        options = assign({ cwd }, options || {});
-        return this.spawn(args, options);
+        options = { cwd, ...options };
+        return this.spawn(args, { ...options, log_mode: 'stream' });
     }
 
-    private async _exec(args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
+    private async _exec(args: string[], options: SpawnOptions): Promise<IExecutionResult<string>> {
         const child = this.spawn(args, options);
 
         if (options.onSpawn) {
@@ -346,9 +346,10 @@ export class Git {
 
         const bufferResult = await exec(child, options.cancellationToken);
 
-        if (options.log !== false && bufferResult.stderr.length > 0) {
-            this.log(`${bufferResult.stderr}\n`);
+        if (bufferResult.stderr.length > 0) {
+            this.log(`PID_${child.pid} [${options.log_mode}] < ${JSON.stringify(bufferResult.stderr)}\n`);
         }
+        this.log(`PID_${child.pid} [${options.log_mode}] < ${JSON.stringify(bufferResult.stdout.toString("utf-8"))}\n`);
 
         let encoding = options.encoding || "utf8";
         encoding = iconv.encodingExists(encoding) ? encoding : "utf8";
@@ -381,10 +382,6 @@ export class Git {
             throw new Error("git could not be found in the system.");
         }
 
-        if (!options) {
-            options = {};
-        }
-
         if (!options.stdio && !options.input) {
             options.stdio = ["ignore", null, null]; // Unless provided, ignore stdin and leave default streams for stdout and stderr
         }
@@ -400,11 +397,15 @@ export class Git {
             options.cwd = sanitizePath(options.cwd);
         }
 
-        if (options.log !== false) {
-            this.log(`> git ${args.join(" ")}\n`);
+        const cmd = `git ${args.join(" ")}`;
+        try {
+            const child = cp.spawn(this.path, args, options);
+            this.log(`PID_${child.pid} [${options.log_mode}] > ${cmd}\n`);
+            return child;
+        } catch (e) {
+            this.log(`LAUNCH_FAILED > ${cmd}`);
+            throw e;
         }
-
-        return cp.spawn(this.path, args, options);
     }
 
     private log(output: string): void {
