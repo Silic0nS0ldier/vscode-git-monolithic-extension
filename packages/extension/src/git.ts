@@ -91,7 +91,7 @@ export interface SpawnOptions extends cp.SpawnOptions {
     encoding?: string;
     cancellationToken?: CancellationToken;
     onSpawn?: (childProcess: cp.ChildProcess) => void;
-    log_mode?: 'stream'|'buffer';
+    log_mode?: "stream" | "buffer";
 }
 
 async function exec(child: cp.ChildProcess, cancellationToken?: CancellationToken): Promise<IExecutionResult<Buffer>> {
@@ -321,16 +321,16 @@ export class Git {
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
         options = { cwd, ...options };
-        return await this._exec(args, { ...options, log_mode: 'buffer' });
+        return await this._exec(args, { ...options, log_mode: "buffer" });
     }
 
     async exec2(args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
-        return await this._exec(args, { ...options, log_mode: 'buffer' });
+        return await this._exec(args, { ...options, log_mode: "buffer" });
     }
 
     stream(cwd: string, args: string[], options: SpawnOptions = {}): cp.ChildProcess {
         options = { cwd, ...options };
-        return this.spawn(args, { ...options, log_mode: 'stream' });
+        return this.spawn(args, { ...options, log_mode: "stream" });
     }
 
     private async _exec(args: string[], options: SpawnOptions): Promise<IExecutionResult<string>> {

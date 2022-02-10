@@ -103,7 +103,6 @@ async function createModel(
         pathHints = pathHints.filter(p => path.isAbsolute(p));
     }
 
-    outputChannel.appendLine("Starting search for git binary.");
     const info = await findGit(pathHints);
     outputChannel.appendLine(localize("using git", "Using git {0} from {1}", info.version, info.path));
 
@@ -121,15 +120,6 @@ async function createModel(
         version: info.version,
         env: environment,
     });
-    const model = new Model(git, askpass, context.globalState, outputChannel);
-    disposables.push(model);
-
-    const onRepository = () =>
-        commands.executeCommand("setContext", "gitOpenRepositoryCount", `${model.repositories.length}`);
-    model.onDidOpenRepository(onRepository, null, disposables);
-    model.onDidCloseRepository(onRepository, null, disposables);
-    onRepository();
-
     const onOutput = (str: string) => {
         const lines = str.split(/\r?\n/mg);
 
@@ -140,6 +130,16 @@ async function createModel(
         outputChannel.appendLine(lines.join("\n"));
     };
     git.onOutput.addListener("log", onOutput);
+
+    const model = new Model(git, askpass, context.globalState, outputChannel);
+    disposables.push(model);
+
+    const onRepository = () =>
+        commands.executeCommand("setContext", "gitOpenRepositoryCount", `${model.repositories.length}`);
+    model.onDidOpenRepository(onRepository, null, disposables);
+    model.onDidCloseRepository(onRepository, null, disposables);
+    onRepository();
+
     disposables.push(toDisposable(() => git.onOutput.removeListener("log", onOutput)));
 
     const disposeCommands = registerCommands(model, git, outputChannel, telemetryReporter);
