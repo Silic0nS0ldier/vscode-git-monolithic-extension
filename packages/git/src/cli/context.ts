@@ -34,6 +34,11 @@ export type GitContext = {
      * Parts of the API surface may use this to modify the interaction with git.
      */
     readonly version: string;
+    /**
+     * Absolute path to git binary.
+     * @deprecated
+     */
+    readonly path: string;
 };
 
 export type ContextCreationErrors =

@@ -17,5 +17,8 @@ export function createServices(): AllServices {
         shell: {
             which,
         },
+        os: {
+            platform: process.platform,
+        },
     };
 }

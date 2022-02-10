@@ -1,8 +1,20 @@
 import { version } from "../api/version/mod.js";
-import { ERROR_GIT_NOT_FOUND } from "../errors.js";
+import {
+    ERROR_GIT_NOT_FOUND,
+    ERROR_GIT_UNUSABLE,
+    GitNotFoundError,
+    GitUnusableError,
+    TimeoutError,
+} from "../errors.js";
 import { err, isErr, ok, Result, unwrap } from "../func-result.js";
-import { ContextCreationErrors, GitContext, PersistentCLIContext } from "./context.js";
+import { GitContext, PersistentCLIContext } from "./context.js";
 import { create, SpawnFn } from "./create.js";
+import { readToString } from "./helpers/read-to-string.js";
+
+export type FromPathErrors =
+    | GitNotFoundError
+    | TimeoutError
+    | GitUnusableError<unknown>;
 
 export type FromPathServices = {
     fs: {
@@ -14,6 +26,9 @@ export type FromPathServices = {
     process: {
         env: NodeJS.ProcessEnv;
     };
+    os: {
+        platform: "darwin" | "win32" | string;
+    };
 };
 
 /**
@@ -24,21 +39,56 @@ export async function fromPath(
     gitPath: string,
     cliContext: PersistentCLIContext,
     services: FromPathServices,
-): Promise<Result<GitContext, ContextCreationErrors>> {
+): Promise<Result<GitContext, FromPathErrors>> {
     if (services.fs.exists(gitPath)) {
+        if (await isGitExotic(gitPath, services)) {
+            return err({ type: ERROR_GIT_UNUSABLE, cause: "Marked exotic" });
+        }
+
         const cli = create(gitPath, cliContext, services);
-        const versionResult = await version({ cli, version: 'PENDING' });
+        const versionResult = await version({ cli, version: "PENDING", path: gitPath });
 
         if (isErr(versionResult)) {
-            // TODO Make more specific, or more generic (this is an issue getting the version)
-            return err({ type: ERROR_GIT_NOT_FOUND });
+            return err({ type: ERROR_GIT_UNUSABLE, cause: unwrap(versionResult) });
         }
 
         return ok({
             cli,
             version: unwrap(versionResult),
+            path: gitPath,
         });
     }
 
     return err({ type: ERROR_GIT_NOT_FOUND });
+}
+
+export const darwinBuiltinGitPath = "/usr/bin/git";
+
+type IsGitExoticServices = {
+    child_process: {
+        spawn: SpawnFn;
+    };
+    process: {
+        env: NodeJS.ProcessEnv;
+    };
+    os: {
+        platform: "darwin" | "win32" | string;
+    };
+};
+
+/**
+ * Checks git path for any exotic behaviours that will make it unsuitable for use.
+ */
+async function isGitExotic(path: string, services: IsGitExoticServices): Promise<boolean> {
+    if (services.os.platform === "darwin") {
+        if (path === darwinBuiltinGitPath) {
+            // MacOS by default (dated 2022-02-10) provides git via XCode
+            // However if XCode/XCode Command Line Tools are not installed, its just an alias for he installer
+            const cli = create("xcode-select", { env: {}, timeout: 5_000 }, services);
+            const result = await readToString({ cli, cwd: "/" }, ["-p"]);
+            return isErr(result);
+        }
+    }
+
+    return false;
 }

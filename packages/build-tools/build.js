@@ -39,7 +39,7 @@ async function main() {
         plugins: [
             cjs(),
             nodeResolve({
-                exportConditions: ['default', 'module', 'import', 'node'],
+                exportConditions: ["default", "module", "import", "node"],
                 // moduleDirectories: [
                 //     Path.join(extensionPkg, 'node_modules'),
                 //     Path.join(repoRoot, 'node_modules'),
