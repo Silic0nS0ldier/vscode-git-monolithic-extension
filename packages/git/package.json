@@ -18,6 +18,10 @@
             "import": "./dist/api/rev-parse/git-dir.js",
             "types": "./dist/api/rev-parse/git-dir.d.ts"
         },
+        "./api/rev-parse/head": {
+            "import": "./dist/api/rev-parse/head.js",
+            "types": "./dist/api/rev-parse/head.d.ts"
+        },
         "./api/rev-parse/show-toplevel": {
             "import": "./dist/api/rev-parse/show-toplevel.js",
             "types": "./dist/api/rev-parse/show-toplevel.d.ts"

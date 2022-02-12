@@ -6,6 +6,7 @@
 import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
+import { head } from "monolithic-git-interop/api/rev-parse/head";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
 import { GitContext } from "monolithic-git-interop/cli";
 import { AllServices } from "monolithic-git-interop/services";
@@ -181,7 +182,7 @@ export class Git {
     readonly path: string;
     readonly userAgent: string;
     readonly version: string;
-    private readonly context: GitContext;
+    readonly _context: GitContext;
     private readonly services: AllServices;
     private env: any;
 
@@ -194,7 +195,7 @@ export class Git {
         this.path = options.gitPath;
         this.version = options.version;
         this.userAgent = options.userAgent;
-        this.context = options.context;
+        this._context = options.context;
         this.services = createServices();
         this.env = options.env || {};
     }
@@ -277,7 +278,7 @@ export class Git {
     }
 
     async getRepositoryRoot(repositoryPath: string): Promise<string> {
-        const result = await showToplevel(this.context, repositoryPath, this.services);
+        const result = await showToplevel(this._context, repositoryPath, this.services);
 
         if (isOk(result)) {
             return unwrap(result);
@@ -287,7 +288,7 @@ export class Git {
     }
 
     async getRepositoryDotGit(repositoryPath: string): Promise<string> {
-        const result = await gitDir(this.context, repositoryPath);
+        const result = await gitDir(this._context, repositoryPath);
 
         if (isOk(result)) {
             return unwrap(result);
@@ -606,7 +607,7 @@ export class Repository {
 
         return lines.map(entry => {
             const equalsIndex = entry.indexOf("=");
-            return { key: entry.substr(0, equalsIndex), value: entry.substr(equalsIndex + 1) };
+            return { key: entry.substring(0, equalsIndex), value: entry.substring(equalsIndex + 1) };
         });
     }
 
@@ -1470,13 +1471,17 @@ export class Repository {
 
             return { name: result.stdout.trim(), commit: undefined, type: RefType.Head };
         } catch (err) {
-            const result = await this.exec(["rev-parse", "HEAD"]);
+            const result = await head(this._git._context, this.repositoryRoot);
 
-            if (!result.stdout) {
-                throw new Error("Error parsing HEAD");
+            if (isOk(result)) {
+                const commitMaybe = unwrap(result);
+                if (commitMaybe === undefined) {
+                    throw new Error("Error parsing HEAD");
+                }
+                return { name: undefined, commit: commitMaybe, type: RefType.Head };
             }
 
-            return { name: undefined, commit: result.stdout.trim(), type: RefType.Head };
+            throw unwrap(result);
         }
     }
 
