@@ -5,6 +5,7 @@
 
 import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
+import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
 import { GitContext } from "monolithic-git-interop/cli";
 import { AllServices } from "monolithic-git-interop/services";
@@ -286,14 +287,13 @@ export class Git {
     }
 
     async getRepositoryDotGit(repositoryPath: string): Promise<string> {
-        const result = await this.exec(repositoryPath, ["rev-parse", "--git-dir"]);
-        let dotGitPath = result.stdout.trim();
+        const result = await gitDir(this.context, repositoryPath);
 
-        if (!path.isAbsolute(dotGitPath)) {
-            dotGitPath = path.join(repositoryPath, dotGitPath);
+        if (isOk(result)) {
+            return unwrap(result);
         }
 
-        return path.normalize(dotGitPath);
+        throw unwrap(result);
     }
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
