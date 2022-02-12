@@ -5,6 +5,7 @@
 
 import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
+import { init } from "monolithic-git-interop/api/repository/init";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { head } from "monolithic-git-interop/api/rev-parse/head";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
@@ -209,8 +210,13 @@ export class Git {
     }
 
     async init(repository: string): Promise<void> {
-        await this.exec(repository, ["init"]);
-        return;
+        const result = await init(this._context, repository);
+
+        if (isOk(result)) {
+            return;
+        }
+
+        throw unwrap(result);
     }
 
     async clone(url: string, options: ICloneOptions, cancellationToken?: CancellationToken): Promise<string> {

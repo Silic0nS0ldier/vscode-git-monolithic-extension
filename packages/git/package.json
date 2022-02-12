@@ -10,6 +10,10 @@
             "import": "./dist/api/repository/ignore/check/parser.js",
             "types": "./dist/api/repository/ignore/check/parser.d.ts"
         },
+        "./api/repository/init": {
+            "import": "./dist/api/repository/init/mod.js",
+            "types": "./dist/api/repository/init/mod.d.ts"
+        },
         "./api/version": {
             "import": "./dist/api/version/mod.js",
             "types": "./dist/api/version/mod.d.ts"
