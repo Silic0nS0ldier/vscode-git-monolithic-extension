@@ -40,7 +40,7 @@
         }
     },
     "devDependencies": {
-        "@types/node": "^14.0.0",
+        "@types/node": "^14.18.11",
         "@types/which": "^2.0.1",
         "ava": "^4.0.1",
         "into-stream": "^7.0.0"

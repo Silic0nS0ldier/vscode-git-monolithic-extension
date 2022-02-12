@@ -6,9 +6,9 @@
         "@rollup/plugin-node-resolve": "^13.1.3",
         "execa": "^6.0.0",
         "globby": "^13.1.1",
-        "rollup": "^2.67.0",
-        "vsce": "^2.6.0",
-        "vscode-grammar-updater": "^1.0.3",
-        "typescript": "https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz"
+        "rollup": "^2.67.2",
+        "typescript": "https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz",
+        "vsce": "^2.6.7",
+        "vscode-grammar-updater": "^1.0.3"
     }
 }

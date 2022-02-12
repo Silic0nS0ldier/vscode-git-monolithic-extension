@@ -9,8 +9,8 @@
         "vscode:prepublish": "node ./packages/build-tools/build.js"
     },
     "dependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.4.0",
-        "@typescript-eslint/parser": "^5.4.0",
-        "eslint": "^8.3.0"
+        "@typescript-eslint/eslint-plugin": "^5.11.0",
+        "@typescript-eslint/parser": "^5.11.0",
+        "eslint": "^8.9.0"
     }
 }
