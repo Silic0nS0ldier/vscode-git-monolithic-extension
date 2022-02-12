@@ -1,5 +1,6 @@
 import { version } from "../api/version/mod.js";
 import {
+    createError,
     ERROR_GIT_NOT_FOUND,
     ERROR_GIT_UNUSABLE,
     GitNotFoundError,
@@ -7,6 +8,7 @@ import {
     TimeoutError,
 } from "../errors.js";
 import { err, isErr, ok, Result, unwrap } from "../func-result.js";
+import { isMacOS } from "../helpers/platform-matchers.js";
 import { GitContext, PersistentCLIContext } from "./context.js";
 import { create, SpawnFn } from "./create.js";
 import { readToString } from "./helpers/read-to-string.js";
@@ -14,7 +16,7 @@ import { readToString } from "./helpers/read-to-string.js";
 export type FromPathErrors =
     | GitNotFoundError
     | TimeoutError
-    | GitUnusableError<unknown>;
+    | GitUnusableError;
 
 export type FromPathServices = {
     fs: {
@@ -27,7 +29,7 @@ export type FromPathServices = {
         env: NodeJS.ProcessEnv;
     };
     os: {
-        platform: "darwin" | "win32" | string;
+        platform: string;
     };
 };
 
@@ -42,14 +44,14 @@ export async function fromPath(
 ): Promise<Result<GitContext, FromPathErrors>> {
     if (services.fs.exists(gitPath)) {
         if (await isGitExotic(gitPath, services)) {
-            return err({ type: ERROR_GIT_UNUSABLE, cause: "Marked exotic" });
+            return err(createError(ERROR_GIT_UNUSABLE, "Marked exotic"));
         }
 
         const cli = create(gitPath, cliContext, services);
         const versionResult = await version({ cli, version: "PENDING", path: gitPath });
 
         if (isErr(versionResult)) {
-            return err({ type: ERROR_GIT_UNUSABLE, cause: unwrap(versionResult) });
+            return err(createError(ERROR_GIT_UNUSABLE, unwrap(versionResult)));
         }
 
         return ok({
@@ -59,7 +61,7 @@ export async function fromPath(
         });
     }
 
-    return err({ type: ERROR_GIT_NOT_FOUND });
+    return err(createError(ERROR_GIT_NOT_FOUND));
 }
 
 export const darwinBuiltinGitPath = "/usr/bin/git";
@@ -72,7 +74,7 @@ type IsGitExoticServices = {
         env: NodeJS.ProcessEnv;
     };
     os: {
-        platform: "darwin" | "win32" | string;
+        platform: string;
     };
 };
 
@@ -80,7 +82,7 @@ type IsGitExoticServices = {
  * Checks git path for any exotic behaviours that will make it unsuitable for use.
  */
 async function isGitExotic(path: string, services: IsGitExoticServices): Promise<boolean> {
-    if (services.os.platform === "darwin") {
+    if (isMacOS(services.os.platform)) {
         if (path === darwinBuiltinGitPath) {
             // MacOS by default (dated 2022-02-10) provides git via XCode
             // However if XCode/XCode Command Line Tools are not installed, its just an alias for he installer

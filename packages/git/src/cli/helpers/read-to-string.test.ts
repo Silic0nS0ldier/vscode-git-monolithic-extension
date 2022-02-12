@@ -1,7 +1,7 @@
 // @ts-expect-error
 import test from "ava";
 import intoStream from "into-stream";
-import { ERROR_BUFFER_OVERFLOW, ERROR_GENERIC } from "../../errors.js";
+import { createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC } from "../../errors.js";
 import { err, isErr, isOk, ok, unwrap } from "../../func-result.js";
 import { readToString } from "./read-to-string.js";
 
@@ -46,7 +46,7 @@ test("Generic error", async t => {
             if (context.stdout) {
                 intoStream("foobar").pipe(context.stdout);
             }
-            return err({ type: ERROR_GENERIC });
+            return err(createError(ERROR_GENERIC));
         },
         cwd: "/",
     }, []);

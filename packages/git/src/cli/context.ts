@@ -19,7 +19,7 @@ export type CLIErrors =
     | TimeoutError
     | CancelledError
     | NonZeroExitError
-    | GenericError<Error>;
+    | GenericError;
 export type CLI = (context: CLIContext, args: string[]) => Promise<Result<void, CLIErrors>>;
 
 /**
@@ -53,5 +53,5 @@ export type PersistentCLIContext = {
 
 export type CLIResult = Result<
     { code: number | null; signal: NodeJS.Signals | null },
-    TimeoutError | GenericError<Error> | CancelledError
+    TimeoutError | GenericError | CancelledError
 >;

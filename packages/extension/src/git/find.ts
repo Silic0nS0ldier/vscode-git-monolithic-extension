@@ -1,4 +1,4 @@
-import { fromEnvironment, fromPath } from "monolithic-git-interop/cli";
+import { fromEnvironment, fromPath, GitContext } from "monolithic-git-interop/cli";
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
@@ -6,6 +6,7 @@ import * as path from "node:path";
 export interface IGit {
     path: string;
     version: string;
+    context: GitContext;
 }
 
 export async function findGit(hints: string[]): Promise<IGit> {
@@ -18,6 +19,7 @@ export async function findGit(hints: string[]): Promise<IGit> {
             return {
                 path: context.path,
                 version: context.version,
+                context,
             };
         }
     }
@@ -29,6 +31,7 @@ export async function findGit(hints: string[]): Promise<IGit> {
         return {
             path: context.path,
             version: context.version,
+            context,
         };
     }
 

@@ -118,6 +118,7 @@ async function createModel(
             (os as any).version?.() ?? os.type()
         } ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
         version: info.version,
+        context: info.context,
         env: environment,
     });
     const onOutput = (str: string) => {

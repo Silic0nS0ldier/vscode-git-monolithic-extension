@@ -1,9 +1,9 @@
 import getStream, { MaxBufferError } from "get-stream";
 import NAC from "node-abort-controller";
 import { PassThrough } from "stream";
-import { BufferOverflowError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, GenericError } from "../../errors.js";
+import { BufferOverflowError, createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, GenericError } from "../../errors.js";
 import { err, isErr, ok, Result, unwrap } from "../../func-result.js";
-import { CLI, CLIErrors } from "../context.js";
+import { CLI } from "../context.js";
 
 export type ReadToContext = {
     cli: CLI;
@@ -11,8 +11,8 @@ export type ReadToContext = {
 };
 
 export type ReadToErrors =
-    | GenericError<CLIErrors | unknown>
-    | BufferOverflowError<MaxBufferError>;
+    | GenericError
+    | BufferOverflowError;
 
 /**
  * Helper which reads CLI output (stdout) and returns the resulting string.
@@ -38,12 +38,10 @@ export async function readToString(context: ReadToContext, args: string[]): Prom
 
         return ok(streamResult);
     } catch (e) {
-        if (e instanceof MaxBufferError) {
-            abortController.abort();
-            // @ts-expect-error
-            return err({ type: ERROR_BUFFER_OVERFLOW, cause: e });
-        }
         abortController.abort();
-        return err({ type: ERROR_GENERIC, cause: e });
+        if (e instanceof MaxBufferError) {
+            return err(createError(ERROR_BUFFER_OVERFLOW, e));
+        }
+        return err(createError(ERROR_GENERIC, e));
     }
 }

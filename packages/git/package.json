@@ -14,6 +14,10 @@
             "import": "./dist/api/version/mod.js",
             "types": "./dist/api/version/mod.d.ts"
         },
+        "./api/rev-parse/show-toplevel": {
+            "import": "./dist/api/rev-parse/show-toplevel.js",
+            "types": "./dist/api/rev-parse/show-toplevel.d.ts"
+        },
         "./cli": {
             "import": "./dist/cli/mod.js",
             "types": "./dist/cli/mod.d.ts"
@@ -42,8 +46,10 @@
         "into-stream": "^7.0.0"
     },
     "dependencies": {
+        "@types/semver": "^7.3.9",
         "get-stream": "^6.0.1",
         "node-abort-controller": "^3.0.1",
+        "semver": "^7.3.5",
         "which": "^2.0.2"
     }
 }

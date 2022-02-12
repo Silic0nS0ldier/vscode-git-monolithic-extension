@@ -32,6 +32,7 @@ import {
 } from "./api/git.js";
 import { Askpass } from "./askpass.js";
 import { Git } from "./git.js";
+import { prettyPrint } from "./logging/pretty-print.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
@@ -338,7 +339,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
                 return;
             }
 
-            if (this.shouldRepositoryBeIgnored(rawRoot)) {
+            if (shouldRepositoryBeIgnored(rawRoot)) {
                 return;
             }
 
@@ -355,30 +356,11 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             await repository.status();
         } catch (ex) {
             // noop
-            this.outputChannel.appendLine(`Opening repository for path='${repoPath}' failed; ex=${ex}`);
+            this.outputChannel.appendLine(
+                `Opening repository for path='${repoPath}' failed; ex=${await prettyPrint(ex)}`,
+            );
         }
     });
-
-    private shouldRepositoryBeIgnored(repositoryRoot: string): boolean {
-        const config = workspace.getConfiguration("git");
-        const ignoredRepos = config.get<string[]>("ignoredRepositories") || [];
-
-        for (const ignoredRepo of ignoredRepos) {
-            if (path.isAbsolute(ignoredRepo)) {
-                if (pathEquals(ignoredRepo, repositoryRoot)) {
-                    return true;
-                }
-            } else {
-                for (const folder of workspace.workspaceFolders || []) {
-                    if (pathEquals(path.join(folder.uri.fsPath, ignoredRepo), repositoryRoot)) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
 
     private open(repository: Repository): void {
         this.outputChannel.appendLine(`Open repository: ${repository.root}`);
@@ -603,4 +585,25 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         this.possibleGitRepositoryPaths.clear();
         this.disposables = dispose(this.disposables);
     }
+}
+
+function shouldRepositoryBeIgnored(repositoryRoot: string): boolean {
+    const config = workspace.getConfiguration("git");
+    const ignoredRepos = config.get<string[]>("ignoredRepositories") || [];
+
+    for (const ignoredRepo of ignoredRepos) {
+        if (path.isAbsolute(ignoredRepo)) {
+            if (pathEquals(ignoredRepo, repositoryRoot)) {
+                return true;
+            }
+        } else {
+            for (const folder of workspace.workspaceFolders || []) {
+                if (pathEquals(path.join(folder.uri.fsPath, ignoredRepo), repositoryRoot)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }

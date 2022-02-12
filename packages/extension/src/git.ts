@@ -5,9 +5,14 @@
 
 import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
+import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
+import { GitContext } from "monolithic-git-interop/cli";
+import { AllServices } from "monolithic-git-interop/services";
+import { createServices } from "monolithic-git-interop/services/nodejs";
+import { isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
-import { exists, promises as fs, realpath } from "node:fs";
+import { exists, promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { StringDecoder } from "node:string_decoder";
@@ -47,7 +52,6 @@ export { findGit, IGit } from "./git/find.js";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
-const isWindows = process.platform === "win32";
 
 export interface IFileStatus {
     x: string;
@@ -160,6 +164,7 @@ export interface IGitOptions {
     gitPath: string;
     userAgent: string;
     version: string;
+    context: GitContext;
     env?: any;
 }
 
@@ -175,6 +180,8 @@ export class Git {
     readonly path: string;
     readonly userAgent: string;
     readonly version: string;
+    private readonly context: GitContext;
+    private readonly services: AllServices;
     private env: any;
 
     private _onOutput = new EventEmitter();
@@ -186,6 +193,8 @@ export class Git {
         this.path = options.gitPath;
         this.version = options.version;
         this.userAgent = options.userAgent;
+        this.context = options.context;
+        this.services = createServices();
         this.env = options.env || {};
     }
 
@@ -267,45 +276,13 @@ export class Git {
     }
 
     async getRepositoryRoot(repositoryPath: string): Promise<string> {
-        const result = await this.exec(repositoryPath, ["rev-parse", "--show-toplevel"]);
+        const result = await showToplevel(this.context, repositoryPath, this.services);
 
-        // Keep trailing spaces which are part of the directory name
-        const repoPath = path.normalize(result.stdout.trimLeft().replace(/[\r\n]+$/, ""));
-
-        if (isWindows) {
-            // On Git 2.25+ if you call `rev-parse --show-toplevel` on a mapped drive, instead of getting the mapped drive path back, you get the UNC path for the mapped drive.
-            // So we will try to normalize it back to the mapped drive path, if possible
-            const repoUri = Uri.file(repoPath);
-            const pathUri = Uri.file(repositoryPath);
-            if (repoUri.authority.length !== 0 && pathUri.authority.length === 0) {
-                let match = /(?<=^\/?)([a-zA-Z])(?=:\/)/.exec(pathUri.path);
-                if (match !== null) {
-                    const [, letter] = match;
-
-                    try {
-                        const networkPath = await new Promise<string | undefined>(resolve =>
-                            realpath.native(
-                                `${letter}:\\`,
-                                { encoding: "utf8" },
-                                (err, resolvedPath) => resolve(err !== null ? undefined : resolvedPath),
-                            )
-                        );
-                        if (networkPath !== undefined) {
-                            return path.normalize(
-                                repoUri.fsPath.replace(
-                                    networkPath,
-                                    `${letter.toLowerCase()}:${networkPath.endsWith("\\") ? "\\" : ""}`,
-                                ),
-                            );
-                        }
-                    } catch {}
-                }
-
-                return path.normalize(pathUri.fsPath);
-            }
+        if (isOk(result)) {
+            return unwrap(result);
         }
 
-        return repoPath;
+        throw unwrap(result);
     }
 
     async getRepositoryDotGit(repositoryPath: string): Promise<string> {
@@ -347,9 +324,13 @@ export class Git {
         const bufferResult = await exec(child, options.cancellationToken);
 
         if (bufferResult.stderr.length > 0) {
-            this.log(`PID_${child.pid} [${options.log_mode}] < ${JSON.stringify(bufferResult.stderr)}\n`);
+            this.log(`PID_${child.pid} [${options.log_mode}] < [ERR] ${JSON.stringify(bufferResult.stderr)}\n`);
         }
-        this.log(`PID_${child.pid} [${options.log_mode}] < ${JSON.stringify(bufferResult.stdout.toString("utf-8"))}\n`);
+        let out = JSON.stringify(bufferResult.stdout.toString("utf-8"));
+        if (out.length > 150) {
+            out = out.slice(0, 150) + `" (${out.length - 150} chars hidden)`;
+        }
+        this.log(`PID_${child.pid} [${options.log_mode}] < ${out}\n`);
 
         let encoding = options.encoding || "utf8";
         encoding = iconv.encodingExists(encoding) ? encoding : "utf8";
@@ -1703,17 +1684,12 @@ export class Repository {
         return refs.filter(value => (value.type !== RefType.Tag) && (query.remote || !value.remote));
     }
 
-    // TODO: Support core.commentChar
-    stripCommitMessageComments(message: string): string {
-        return message.replace(/^\s*#.*$\n?/gm, "").trim();
-    }
-
     async getSquashMessage(): Promise<string | undefined> {
         const squashMsgPath = path.join(this.repositoryRoot, ".git", "SQUASH_MSG");
 
         try {
             const raw = await fs.readFile(squashMsgPath, "utf8");
-            return this.stripCommitMessageComments(raw);
+            return stripCommitMessageComments(raw);
         } catch {
             return undefined;
         }
@@ -1724,7 +1700,7 @@ export class Repository {
 
         try {
             const raw = await fs.readFile(mergeMsgPath, "utf8");
-            return this.stripCommitMessageComments(raw);
+            return stripCommitMessageComments(raw);
         } catch {
             return undefined;
         }
@@ -1748,7 +1724,7 @@ export class Repository {
             }
 
             const raw = await fs.readFile(templatePath, "utf8");
-            return this.stripCommitMessageComments(raw);
+            return stripCommitMessageComments(raw);
         } catch (err) {
             return "";
         }
@@ -1785,4 +1761,9 @@ export class Repository {
             throw err;
         }
     }
+}
+
+// TODO: Support core.commentChar
+function stripCommitMessageComments(message: string): string {
+    return message.replace(/^\s*#.*$\n?/gm, "").trim();
 }

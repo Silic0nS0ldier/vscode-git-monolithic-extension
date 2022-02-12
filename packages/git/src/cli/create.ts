@@ -1,6 +1,13 @@
 import type { Readable } from "stream";
-import { ERROR_CANCELLED, ERROR_GENERIC, ERROR_NON_ZERO_EXIT, ERROR_TIMEOUT } from "../errors.js";
-import { err, isErr, ok, unwrap } from "../func-result.js";
+import {
+    createError,
+    ERROR_CANCELLED,
+    ERROR_GENERIC,
+    ERROR_NON_ZERO_EXIT,
+    ERROR_TIMEOUT,
+    GenericError,
+} from "../errors.js";
+import { err, isErr, ok, Result, unwrap } from "../func-result.js";
 import { CLI, CLIResult, PersistentCLIContext } from "./context.js";
 
 export type ChildProcess = {
@@ -43,7 +50,26 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         };
         const cwd = context.cwd;
 
-        const cp = services.child_process.spawn(executablePath, args, { env, cwd, stdio: "pipe" });
+        const cmdContext = {
+            executablePath,
+            args,
+            env,
+            cwd,
+        };
+
+        const cpRes: Result<ChildProcess, GenericError> = (() => {
+            try {
+                return ok(services.child_process.spawn(executablePath, args, { env, cwd, stdio: "pipe" }));
+            } catch (error) {
+                return err(createError(ERROR_GENERIC, { cmdContext, error }));
+            }
+        })();
+
+        if (isErr(cpRes)) {
+            return cpRes;
+        }
+
+        const cp = unwrap(cpRes);
 
         if (context.stdout) {
             cp.stdout.pipe(context.stdout);
@@ -56,20 +82,20 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         // TODO Clear timeout, handle Infinity (timeout will trigger immediately)
         const onTimeout = new Promise<CLIResult>(resolve =>
             void setTimeout(
-                () => resolve(err({ type: ERROR_TIMEOUT })),
+                () => resolve(err(createError(ERROR_TIMEOUT, cmdContext))),
                 context.timeout ?? persistentContext.timeout,
             )
         );
         const onAbort = new Promise<CLIResult>(resolve => {
             if (context.signal) {
                 if (context.signal.aborted) {
-                    return resolve(err({ type: ERROR_CANCELLED }));
+                    return resolve(err(createError(ERROR_CANCELLED, cmdContext)));
                 }
-                context.signal.onabort = () => void resolve(err({ type: ERROR_CANCELLED }));
+                context.signal.onabort = () => void resolve(err(createError(ERROR_CANCELLED, cmdContext)));
             }
         });
         const onError = new Promise<CLIResult>(resolve =>
-            void cp.once("error", (error) => resolve(err({ type: ERROR_GENERIC, cause: error })))
+            void cp.once("error", (error) => resolve(err(createError(ERROR_GENERIC, { cmdContext, error }))))
         );
         const onExit = new Promise<CLIResult>(resolve =>
             void cp.once("exit", (code, signal) => resolve(ok({ code, signal })))
@@ -88,10 +114,10 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
             return result;
         }
 
-        const okResult = unwrap(result);
+        const exitstate = unwrap(result);
 
-        if (okResult.code !== 0) {
-            return err({ type: ERROR_NON_ZERO_EXIT });
+        if (exitstate.code !== 0) {
+            return err(createError(ERROR_NON_ZERO_EXIT, { cmdContext, exitstate }));
         }
 
         return ok(undefined);

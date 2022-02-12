@@ -14,6 +14,6 @@ export type AllServices = {
         env: NodeJS.ProcessEnv;
     };
     os: {
-        platform: "darwin" | "win32" | string;
+        platform: string;
     };
 };
