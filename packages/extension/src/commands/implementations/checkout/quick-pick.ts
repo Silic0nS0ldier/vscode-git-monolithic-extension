@@ -54,13 +54,12 @@ export class CheckoutRemoteHeadItem extends CheckoutItem {
 }
 
 export class CheckoutDetachedItem implements QuickPickItem {
-    get label(): string {
-        return "$(debug-disconnect) " + localize("checkout detached", "Checkout detached...");
+    constructor() {
+        this.label = "$(debug-disconnect) " + localize("checkout detached", "Checkout detached...");
+        this.description = "";
+        this.alwaysShow = true;
     }
-    get description(): string {
-        return "";
-    }
-    get alwaysShow(): boolean {
-        return true;
-    }
+    label: string;
+    description: string;
+    alwaysShow: boolean;
 }

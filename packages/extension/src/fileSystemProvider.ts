@@ -71,6 +71,8 @@ export class GitFileSystemProvider implements FileSystemProvider {
         );
 
         setInterval(() => this.cleanup(), FIVE_MINUTES);
+
+        this.watch = () => EmptyDisposable;
     }
 
     private onDidChangeRepository({ repository }: ModelChangeEvent): void {
@@ -137,9 +139,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
         this.cache = cache;
     }
 
-    watch(): Disposable {
-        return EmptyDisposable;
-    }
+    watch: () => Disposable;
 
     async stat(uri: Uri): Promise<FileStat> {
         await this.model.isInitialized();
@@ -160,10 +160,12 @@ export class GitFileSystemProvider implements FileSystemProvider {
         return { type: FileType.File, size: size, mtime: this.mtime, ctime: 0 };
     }
 
+    // eslint-disable-next-line class-methods-use-this
     readDirectory(): Thenable<[string, FileType][]> {
         throw new Error("Method not implemented.");
     }
 
+    // eslint-disable-next-line class-methods-use-this
     createDirectory(): void {
         throw new Error("Method not implemented.");
     }
@@ -207,14 +209,17 @@ export class GitFileSystemProvider implements FileSystemProvider {
         }
     }
 
+    // eslint-disable-next-line class-methods-use-this
     writeFile(): void {
         throw new Error("Method not implemented.");
     }
 
+    // eslint-disable-next-line class-methods-use-this
     delete(): void {
         throw new Error("Method not implemented.");
     }
 
+    // eslint-disable-next-line class-methods-use-this
     rename(): void {
         throw new Error("Method not implemented.");
     }

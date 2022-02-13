@@ -13,9 +13,6 @@ import {
     workspace,
     WorkspaceFolder,
 } from "vscode";
-import { registerAPICommands } from "../api/api1.js";
-import { GitExtensionImpl } from "../api/extension.js";
-import { GitExtension } from "../api/git.js";
 import { Askpass } from "../askpass.js";
 import { registerCommands } from "../commands/register.js";
 import { GitDecorations } from "../decorationProvider.js";
@@ -28,7 +25,7 @@ import { registerTerminalEnvironmentManager } from "../terminal.js";
 import { eventToPromise, filterEvent, localize, toDisposable } from "../util.js";
 import { deactivateTasks } from "./deactivate.js";
 
-export async function activate(context: ExtensionContext): Promise<GitExtension> {
+export async function activate(context: ExtensionContext): Promise<void> {
     console.warn("git ext starting");
     const disposables: Disposable[] = [];
     context.subscriptions.push(new Disposable(() => Disposable.from(...disposables).dispose()));
@@ -56,20 +53,14 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
             onConfigChange,
             () => workspace.getConfiguration("git", null).get<boolean>("enabled") === true,
         );
-        const result = new GitExtensionImpl();
 
         eventToPromise(onEnabled).then(async () =>
-            result.model = await createModel(context, outputChannel, telemetryReporter, disposables)
+            await createModel(context, outputChannel, telemetryReporter, disposables)
         );
-        context.subscriptions.push(registerAPICommands(result));
-        return result;
     }
 
     try {
-        const model = await createModel(context, outputChannel, telemetryReporter, disposables);
-        const result = new GitExtensionImpl(model);
-        context.subscriptions.push(registerAPICommands(result));
-        return result;
+        await createModel(context, outputChannel, telemetryReporter, disposables);
     } catch (err) {
         if (!/Git installation not found/.test(err.message || "")) {
             throw err;
@@ -80,10 +71,6 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
 
         commands.executeCommand("setContext", "git.missing", true);
         warnAboutMissingGit();
-
-        const result = new GitExtensionImpl();
-        context.subscriptions.push(registerAPICommands(result));
-        return result;
     }
 }
 

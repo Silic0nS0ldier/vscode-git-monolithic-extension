@@ -3,33 +3,21 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, Disposable, Event, SourceControl, SourceControlInputBox, Uri } from "vscode";
-import { Model } from "../model.js";
-import { pickRemoteSource, PickRemoteSourceOptions } from "../remoteSource.js";
+import { Event, SourceControl, SourceControlInputBox, Uri } from "vscode";
 import { Repository as BaseRepository, Resource } from "../repository.js";
-import { toGitUri } from "../uri.js";
 import { mapEvent } from "../util.js";
-import { GitExtensionImpl } from "./extension.js";
 import {
-    API,
-    APIState,
     Branch,
     BranchQuery,
     Change,
     Commit,
     CommitOptions,
-    CredentialsProvider,
     FetchOptions,
     ForcePushMode,
-    Git,
     InputBox,
     LogOptions,
-    PublishEvent,
-    PushErrorHandler,
     Ref,
-    RefType,
     Remote,
-    RemoteSourceProvider,
     Repository,
     RepositoryState,
     RepositoryUIState,
@@ -97,11 +85,6 @@ export class ApiRepositoryState implements RepositoryState {
 }
 
 export class ApiRepositoryUIState implements RepositoryUIState {
-    get selected(): boolean {
-        return false;
-        // return this._sourceControl.selected;
-    }
-
     readonly onDidChange: Event<void> = mapEvent<boolean, void>(
         () => ({ dispose() {} }),
         // this._sourceControl.onDidChangeSelection,
@@ -278,178 +261,4 @@ export class ApiRepository implements Repository {
     commit(message: string, opts?: CommitOptions): Promise<void> {
         return this._repository.commit(message, opts);
     }
-}
-
-export class ApiGit implements Git {
-    get path(): string {
-        return this._model.git.path;
-    }
-
-    constructor(private _model: Model) {}
-}
-
-export class ApiImpl implements API {
-    readonly git = new ApiGit(this._model);
-
-    get state(): APIState {
-        return this._model.state;
-    }
-
-    get onDidChangeState(): Event<APIState> {
-        return this._model.onDidChangeState;
-    }
-
-    get onDidPublish(): Event<PublishEvent> {
-        return this._model.onDidPublish;
-    }
-
-    get onDidOpenRepository(): Event<Repository> {
-        return mapEvent(this._model.onDidOpenRepository, r => new ApiRepository(r));
-    }
-
-    get onDidCloseRepository(): Event<Repository> {
-        return mapEvent(this._model.onDidCloseRepository, r => new ApiRepository(r));
-    }
-
-    get repositories(): Repository[] {
-        return this._model.repositories.map(r => new ApiRepository(r));
-    }
-
-    toGitUri(uri: Uri, ref: string): Uri {
-        return toGitUri(uri, ref);
-    }
-
-    getRepository(uri: Uri): Repository | null {
-        const result = this._model.getRepository(uri);
-        return result ? new ApiRepository(result) : null;
-    }
-
-    async init(root: Uri): Promise<Repository | null> {
-        const path = root.fsPath;
-        await this._model.git.init(path);
-        await this._model.openRepository(path);
-        return this.getRepository(root) || null;
-    }
-
-    async openRepository(root: Uri): Promise<Repository | null> {
-        await this._model.openRepository(root.fsPath);
-        return this.getRepository(root) || null;
-    }
-
-    registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable {
-        return this._model.registerRemoteSourceProvider(provider);
-    }
-
-    registerCredentialsProvider(provider: CredentialsProvider): Disposable {
-        return this._model.registerCredentialsProvider(provider);
-    }
-
-    registerPushErrorHandler(handler: PushErrorHandler): Disposable {
-        return this._model.registerPushErrorHandler(handler);
-    }
-
-    constructor(private _model: Model) {}
-}
-
-function getRefType(type: RefType): string {
-    switch (type) {
-        case RefType.Head:
-            return "Head";
-        case RefType.RemoteHead:
-            return "RemoteHead";
-        case RefType.Tag:
-            return "Tag";
-    }
-
-    return "unknown";
-}
-
-function getStatus(status: Status): string {
-    switch (status) {
-        case Status.INDEX_MODIFIED:
-            return "INDEX_MODIFIED";
-        case Status.INDEX_ADDED:
-            return "INDEX_ADDED";
-        case Status.INDEX_DELETED:
-            return "INDEX_DELETED";
-        case Status.INDEX_RENAMED:
-            return "INDEX_RENAMED";
-        case Status.INDEX_COPIED:
-            return "INDEX_COPIED";
-        case Status.MODIFIED:
-            return "MODIFIED";
-        case Status.DELETED:
-            return "DELETED";
-        case Status.UNTRACKED:
-            return "UNTRACKED";
-        case Status.IGNORED:
-            return "IGNORED";
-        case Status.INTENT_TO_ADD:
-            return "INTENT_TO_ADD";
-        case Status.ADDED_BY_US:
-            return "ADDED_BY_US";
-        case Status.ADDED_BY_THEM:
-            return "ADDED_BY_THEM";
-        case Status.DELETED_BY_US:
-            return "DELETED_BY_US";
-        case Status.DELETED_BY_THEM:
-            return "DELETED_BY_THEM";
-        case Status.BOTH_ADDED:
-            return "BOTH_ADDED";
-        case Status.BOTH_DELETED:
-            return "BOTH_DELETED";
-        case Status.BOTH_MODIFIED:
-            return "BOTH_MODIFIED";
-    }
-
-    return "UNKNOWN";
-}
-
-export function registerAPICommands(extension: GitExtensionImpl): Disposable {
-    const disposables: Disposable[] = [];
-
-    disposables.push(commands.registerCommand("git.api.getRepositories", () => {
-        const api = extension.getAPI(1);
-        return api.repositories.map(r => r.rootUri.toString());
-    }));
-
-    disposables.push(commands.registerCommand("git.api.getRepositoryState", (uri: string) => {
-        const api = extension.getAPI(1);
-        const repository = api.getRepository(Uri.parse(uri));
-
-        if (!repository) {
-            return null;
-        }
-
-        const state = repository.state;
-
-        const ref = (ref: Ref | undefined) => (ref && { ...ref, type: getRefType(ref.type) });
-        const change = (change: Change) => ({
-            uri: change.uri.toString(),
-            originalUri: change.originalUri.toString(),
-            renameUri: change.renameUri?.toString(),
-            status: getStatus(change.status),
-        });
-
-        return {
-            HEAD: ref(state.HEAD),
-            refs: state.refs.map(ref),
-            remotes: state.remotes,
-            submodules: state.submodules,
-            rebaseCommit: state.rebaseCommit,
-            mergeChanges: state.mergeChanges.map(change),
-            indexChanges: state.indexChanges.map(change),
-            workingTreeChanges: state.workingTreeChanges.map(change),
-        };
-    }));
-
-    disposables.push(commands.registerCommand("git.api.getRemoteSources", (opts?: PickRemoteSourceOptions) => {
-        if (!extension.model) {
-            return;
-        }
-
-        return pickRemoteSource(extension.model, opts as any);
-    }));
-
-    return Disposable.from(...disposables);
 }

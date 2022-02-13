@@ -3,39 +3,36 @@ import { Repository } from "../../../repository.js";
 import { localize } from "../../../util.js";
 
 export class CreateBranchItem implements QuickPickItem {
-    get label(): string {
-        return "$(plus) " + localize("create branch", "Create new branch...");
+    constructor() {
+        this.label = "$(plus) " + localize("create branch", "Create new branch...");
+        this.description = "";
+        this.alwaysShow = true;
     }
-    get description(): string {
-        return "";
-    }
-    get alwaysShow(): boolean {
-        return true;
-    }
+    label: string;
+    description: string;
+    alwaysShow: boolean;
 }
 
 export class CreateBranchFromItem implements QuickPickItem {
-    get label(): string {
-        return "$(plus) " + localize("create branch from", "Create new branch from...");
+    constructor() {
+        this.label = "$(plus) " + localize("create branch from", "Create new branch from...");
+        this.description = "";
+        this.alwaysShow = true;
     }
-    get description(): string {
-        return "";
-    }
-    get alwaysShow(): boolean {
-        return true;
-    }
+    label: string;
+    description: string;
+    alwaysShow: boolean;
 }
 
 export class HEADItem implements QuickPickItem {
-    constructor(private repository: Repository) {}
-
-    get label(): string {
-        return "HEAD";
+    constructor(private repository: Repository) {
+        this.label = "HEAD";
+        this.alwaysShow = true;
     }
+
+    label: string;
     get description(): string {
         return (this.repository.HEAD && this.repository.HEAD.commit || "").substr(0, 8);
     }
-    get alwaysShow(): boolean {
-        return true;
-    }
+    alwaysShow: boolean;
 }
