@@ -64,6 +64,7 @@ import {
     resolveDefaultCommand,
     resolveFileCommand,
 } from "./repository/resource-command-resolver.js";
+import { createWorkingTreeWatcher } from "./repository/working-tree-watcher.js";
 import { StatusBarCommands } from "./statusbar.js";
 import { toGitUri } from "./uri.js";
 import {
@@ -801,37 +802,21 @@ export class Repository implements Disposable {
         globalState: Memento,
         outputChannel: OutputChannel,
     ) {
-        const workspaceWatcher = workspace.createFileSystemWatcher("**");
-        this.disposables.push(workspaceWatcher);
-
-        const onWorkspaceFileChange = anyEvent(
-            workspaceWatcher.onDidChange,
-            workspaceWatcher.onDidCreate,
-            workspaceWatcher.onDidDelete,
-        );
-        const onWorkspaceRepositoryFileChange = filterEvent(
-            onWorkspaceFileChange,
-            uri => isDescendant(repository.root, uri.fsPath),
-        );
-        const onWorkspaceWorkingTreeFileChange = filterEvent(
-            onWorkspaceRepositoryFileChange,
-            uri => !/\/\.git($|\/)/.test(uri.path),
-        );
+        const workingTreeWatcher = createWorkingTreeWatcher(this.root);
+        this.disposables.push(workingTreeWatcher);
+        const onWorkingTreeFileChange = workingTreeWatcher.event;
 
         const dotGitFileWatcher = createDotGitWatcher(this.dotGit, outputChannel);
         this.disposables.push(dotGitFileWatcher);
         const onDotGitFileChange = dotGitFileWatcher.event;
 
-        // FS changes should trigger `git status`:
-        // 	- any change inside the repository working tree
-        // 	- any change whithin the first level of the `.git` folder, except the folder itself and `index.lock`
-        const onFileChange = anyEvent(onWorkspaceWorkingTreeFileChange, onDotGitFileChange);
+        const onFileChange = anyEvent(onWorkingTreeFileChange, onDotGitFileChange);
         onFileChange(this.onFileChange, this, this.disposables);
 
         // Relevate repository changes should trigger virtual document change events
         onDotGitFileChange(this._onDidChangeRepository.fire, this._onDidChangeRepository, this.disposables);
 
-        this.disposables.push(new FileEventLogger(onWorkspaceWorkingTreeFileChange, onDotGitFileChange, outputChannel));
+        this.disposables.push(new FileEventLogger(onWorkingTreeFileChange, onDotGitFileChange, outputChannel));
 
         const root = Uri.file(repository.root);
         this._sourceControl = scm.createSourceControl("git", "Git", root);
