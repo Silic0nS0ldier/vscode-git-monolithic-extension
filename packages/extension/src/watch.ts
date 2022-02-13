@@ -7,6 +7,7 @@ import * as fs from "node:fs";
 import { EventEmitter, OutputChannel, Uri } from "vscode";
 import Watcher from "watcher";
 import { TargetEvent } from "watcher/dist/enums.js";
+import { prettyPrint } from "./logging/pretty-print.js";
 
 /**
  * Creates an optimised watcher.
@@ -14,8 +15,8 @@ import { TargetEvent } from "watcher/dist/enums.js";
  * @returns
  */
 export function watch(locations: string[], locks: string[], outputChannel: OutputChannel) {
-    const onDotGitFileChangeEmitter = new EventEmitter<Uri>();
-    const dotGitWatcher = new Watcher(
+    const onFileChangeEmitter = new EventEmitter<Uri>();
+    const watcher = new Watcher(
         [...locations, ...locks],
         {
             debounce: 500,
@@ -31,19 +32,19 @@ export function watch(locations: string[], locks: string[], outputChannel: Outpu
             // Filter directory events, only files are of interest
             if (et !== TargetEvent.ADD_DIR && et !== TargetEvent.UNLINK_DIR && et !== TargetEvent.RENAME_DIR) {
                 outputChannel.appendLine(`TRACE: watcher event "${et}" "${path}"`);
-                onDotGitFileChangeEmitter.fire(Uri.file(path));
+                onFileChangeEmitter.fire(Uri.file(path));
             }
         },
     );
 
     // TODO Use unified logger
-    dotGitWatcher.on("error", err => console.error(err));
+    watcher.on("error", err => outputChannel.appendLine(`Watcher error: ${prettyPrint(err)}`));
 
     return {
-        event: onDotGitFileChangeEmitter.event,
+        event: onFileChangeEmitter.event,
         dispose() {
-            onDotGitFileChangeEmitter.dispose();
-            dotGitWatcher.close();
+            onFileChangeEmitter.dispose();
+            watcher.close();
         },
     };
 }

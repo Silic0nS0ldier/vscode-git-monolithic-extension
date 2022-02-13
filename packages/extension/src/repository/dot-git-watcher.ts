@@ -1,11 +1,10 @@
 import path from "node:path";
 import { Disposable, Event, EventEmitter, OutputChannel, Uri } from "vscode";
-import { Repository } from "../repository.js";
 import { anyEvent } from "../util.js";
 import { watch } from "../watch.js";
 
 export function createDotGitWatcher(
-    repository: Repository,
+    dotGitDir: string,
     outputChannel: OutputChannel,
 ): { event: Event<Uri> } & Disposable {
     const emitter = new EventEmitter<Uri>();
@@ -15,18 +14,18 @@ export function createDotGitWatcher(
     const rootWatcher = watch(
         [
             // Where we are
-            path.join(repository.dotGit, "HEAD"),
+            path.join(dotGitDir, "HEAD"),
             // What we are tracking
-            path.join(repository.dotGit, "index"),
+            path.join(dotGitDir, "index"),
             // Graph of what we know
-            path.join(repository.dotGit, "refs"),
+            path.join(dotGitDir, "refs"),
             // Current commit message
-            path.join(repository.dotGit, "COMMIT_EDITMSG"),
+            path.join(dotGitDir, "COMMIT_EDITMSG"),
             // How we do things
-            path.join(repository.dotGit, "config"),
+            path.join(dotGitDir, "config"),
         ],
         // Don't propagate events if index being modified
-        [path.join(repository.dotGit, "index.lock")],
+        [path.join(dotGitDir, "index.lock")],
         outputChannel,
     );
 

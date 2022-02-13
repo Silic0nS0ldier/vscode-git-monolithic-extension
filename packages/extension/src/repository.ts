@@ -818,7 +818,7 @@ export class Repository implements Disposable {
             uri => !/\/\.git($|\/)/.test(uri.path),
         );
 
-        const dotGitFileWatcher = createDotGitWatcher(this, outputChannel);
+        const dotGitFileWatcher = createDotGitWatcher(this.dotGit, outputChannel);
         this.disposables.push(dotGitFileWatcher);
         const onDotGitFileChange = dotGitFileWatcher.event;
 

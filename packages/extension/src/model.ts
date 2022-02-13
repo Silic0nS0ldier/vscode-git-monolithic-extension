@@ -155,13 +155,10 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         window.onDidChangeVisibleTextEditors(this.onDidChangeVisibleTextEditors, this, this.disposables);
         workspace.onDidChangeConfiguration(this.onDidChangeConfiguration, this, this.disposables);
 
-        const fsWatcher = workspace.createFileSystemWatcher("**");
-        this.disposables.push(fsWatcher);
-
-        const onWorkspaceChange = anyEvent(fsWatcher.onDidChange, fsWatcher.onDidCreate, fsWatcher.onDidDelete);
-        const onGitRepositoryChange = filterEvent(onWorkspaceChange, uri => /\/\.git/.test(uri.path));
-        const onPossibleGitRepositoryChange = filterEvent(onGitRepositoryChange, uri => !this.getRepository(uri));
-        onPossibleGitRepositoryChange(this.onPossibleGitRepositoryChange, this, this.disposables);
+        const gitIndexWatcher = workspace.createFileSystemWatcher("**/.git/index", false, true, false);
+        this.disposables.push(gitIndexWatcher);
+        const onGitIndexEvent = anyEvent(gitIndexWatcher.onDidCreate, gitIndexWatcher.onDidDelete);
+        onGitIndexEvent(this.onPossibleGitRepositoryChange, this, this.disposables);
 
         this.setState("uninitialized");
         this.doInitialScan().finally(() => this.setState("initialized"));
@@ -215,6 +212,12 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     }
 
     private onPossibleGitRepositoryChange(uri: Uri): void {
+        // TODO Handle repository removal
+        // Only process new repositories
+        if (this.getRepository(uri)) {
+            return;
+        }
+
         const config = workspace.getConfiguration("git");
         const autoRepositoryDetection = config.get<boolean | "subFolders" | "openEditors">("autoRepositoryDetection");
 
