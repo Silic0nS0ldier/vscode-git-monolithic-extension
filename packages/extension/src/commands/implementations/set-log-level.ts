@@ -1,5 +1,5 @@
 import { OutputChannel, window } from "vscode";
-import { Log, LogLevel } from "../../log.js";
+import { Log, LogLevel } from "../../logging/log.js";
 import { localize } from "../../util.js";
 import { ScmCommand } from "../helpers.js";
 

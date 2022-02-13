@@ -52,7 +52,7 @@ import {
 import { AutoFetcher } from "./autofetch.js";
 import { Commit, LogFileOptions, Repository as BaseRepository, Stash, Submodule } from "./git.js";
 import { GitError } from "./git/error.js";
-import { Log, LogLevel } from "./log.js";
+import { Log, LogLevel } from "./logging/log.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
