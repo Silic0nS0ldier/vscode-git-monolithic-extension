@@ -129,7 +129,20 @@ class GitDecorationProvider implements FileDecorationProvider {
         this._onDidChangeDecorations.fire([...uris.values()].map(value => Uri.parse(value, true)));
     }
 
-    private collectDecorationData = collectDecorationData;
+    private collectDecorationData(group: GitResourceGroup, bucket: Map<string, FileDecoration>): void {
+        for (const r of group.resourceStates) {
+            const decoration = r.resourceDecoration;
+
+            if (decoration) {
+                // not deleted and has a decoration
+                bucket.set(r.original.toString(), decoration);
+
+                if (r.type === Status.INDEX_RENAMED) {
+                    bucket.set(r.resourceUri.toString(), decoration);
+                }
+            }
+        }
+    }
 
     private collectSubmoduleDecorationData(bucket: Map<string, FileDecoration>): void {
         for (const submodule of this.repository.submodules) {
@@ -146,21 +159,6 @@ class GitDecorationProvider implements FileDecorationProvider {
 
     dispose(): void {
         this.disposables.forEach(d => d.dispose());
-    }
-}
-
-function collectDecorationData(group: GitResourceGroup, bucket: Map<string, FileDecoration>): void {
-    for (const r of group.resourceStates) {
-        const decoration = r.resourceDecoration;
-
-        if (decoration) {
-            // not deleted and has a decoration
-            bucket.set(r.original.toString(), decoration);
-
-            if (r.type === Status.INDEX_RENAMED) {
-                bucket.set(r.resourceUri.toString(), decoration);
-            }
-        }
     }
 }
 

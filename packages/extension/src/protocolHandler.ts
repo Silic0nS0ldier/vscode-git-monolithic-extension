@@ -21,19 +21,17 @@ export class GitProtocolHandler implements UriHandler {
         }
     }
 
-    private clone = clone;
+    private clone(uri: Uri): void {
+        const data = querystring.parse(uri.query);
+
+        if (!data.url) {
+            console.warn("Failed to open URI:", uri);
+        }
+
+        commands.executeCommand("git.clone", data.url);
+    }
 
     dispose(): void {
         this.disposables = dispose(this.disposables);
     }
-}
-
-function clone(uri: Uri): void {
-    const data = querystring.parse(uri.query);
-
-    if (!data.url) {
-        console.warn("Failed to open URI:", uri);
-    }
-
-    commands.executeCommand("git.clone", data.url);
 }
