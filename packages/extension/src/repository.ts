@@ -3,10 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { read as readUserConfig } from "monolithic-git-interop/api/config/user/read";
-import { read as readRepositoryConfig } from "monolithic-git-interop/api/repository/config/read";
 import { parseIgnoreCheck } from "monolithic-git-interop/api/repository/ignore/check/parser";
-import { isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import onetime from "onetime";
@@ -47,7 +44,6 @@ import {
 import { AutoFetcher } from "./autofetch.js";
 import { Commit, LogFileOptions, Repository as BaseRepository, Stash, Submodule } from "./git.js";
 import { GitError } from "./git/error.js";
-import { OperationResult } from "./repository/OperationResult.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
@@ -56,11 +52,15 @@ import { FileEventLogger } from "./repository/FileEventLogger.js";
 import { GitResourceGroup } from "./repository/GitResourceGroup.js";
 import { isReadOnly } from "./repository/isReadOnly.js";
 import { Operation } from "./repository/Operation.js";
+import { OperationResult } from "./repository/OperationResult.js";
 import { Operations, OperationsImpl } from "./repository/OperationsImpl.js";
 import { ProgressManager } from "./repository/ProgressManager.js";
+import { commit } from "./repository/repository-class/commit.js";
+import { getConfig, getConfigs, getGlobalConfig } from "./repository/repository-class/get-config.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
 import { Resource } from "./repository/Resource.js";
 import { ResourceGroupType } from "./repository/ResourceGroupType.js";
+import { retryRun } from "./repository/retryRun.js";
 import { timeout } from "./repository/timeout.js";
 import { StatusBarCommands } from "./statusbar.js";
 import { toGitUri } from "./uri.js";
@@ -442,27 +442,15 @@ export class Repository implements Disposable {
     }
 
     getConfigs(): Promise<{ key: string; value: string }[]> {
-        return this.run(Operation.Config, () => this.repository.getConfigs("local"));
+        return getConfigs(this.run.bind(this), this.repository);
     }
 
-    async getConfig(key: string): Promise<string> {
-        const result = await readRepositoryConfig(this.repository.git._context, this.repository.root, key);
-
-        if (isOk(result)) {
-            return unwrap(result).value;
-        }
-
-        throw unwrap(result);
+    getConfig(key: string): Promise<string> {
+        return getConfig(this.repository, key);
     }
 
-    async getGlobalConfig(key: string): Promise<string> {
-        const result = await readUserConfig(this.repository.git._context, this.repository.root, key);
-
-        if (isOk(result)) {
-            return unwrap(result).value;
-        }
-
-        throw unwrap(result);
+    getGlobalConfig(key: string): Promise<string> {
+        return getGlobalConfig(this.repository, key);
     }
 
     setConfig(key: string, value: string): Promise<string> {
@@ -552,33 +540,8 @@ export class Repository implements Disposable {
         await this.run(Operation.RevertFiles, () => this.repository.revert("HEAD", resources.map(r => r.fsPath)));
     }
 
-    async commit(message: string | undefined, opts: CommitOptions = Object.create(null)): Promise<void> {
-        if (this.rebaseCommit) {
-            await this.run(Operation.RebaseContinue, async () => {
-                if (opts.all) {
-                    const addOpts = opts.all === "tracked" ? { update: true } : {};
-                    await this.repository.add([], addOpts);
-                }
-
-                await this.repository.rebaseContinue();
-            });
-        } else {
-            await this.run(Operation.Commit, async () => {
-                if (opts.all) {
-                    const addOpts = opts.all === "tracked" ? { update: true } : {};
-                    await this.repository.add([], addOpts);
-                }
-
-                delete opts.all;
-
-                if (opts.requireUserConfig === undefined || opts.requireUserConfig === null) {
-                    const config = workspace.getConfiguration("git", Uri.file(this.root));
-                    opts.requireUserConfig = config.get<boolean>("requireGitUserConfig");
-                }
-
-                await this.repository.commit(message, opts);
-            });
-        }
+    commit(message: string | undefined, opts: CommitOptions = {}): Promise<void> {
+        return commit(this.run.bind(this), this.rebaseCommit, this.root, this.repository, message, opts);
     }
 
     async clean(resources: Uri[]): Promise<void> {
@@ -1115,6 +1078,7 @@ export class Repository implements Disposable {
         }
     }
 
+    // here
     private async run<T>(
         operation: Operation,
         runOperation: () => Promise<T> = () => Promise.resolve<any>(null),
@@ -1586,33 +1550,5 @@ export class Repository implements Disposable {
 
     dispose(): void {
         this.disposables = dispose(this.disposables);
-    }
-}
-
-async function retryRun<T>(
-    operation: Operation,
-    runOperation: () => Promise<T> = () => Promise.resolve<any>(null),
-): Promise<T> {
-    let attempt = 0;
-
-    while (true) {
-        try {
-            attempt++;
-            return await runOperation();
-        } catch (err) {
-            const shouldRetry = attempt <= 10 && (
-                (err.gitErrorCode === GitErrorCodes.RepositoryIsLocked)
-                || ((operation === Operation.Pull || operation === Operation.Sync || operation === Operation.Fetch)
-                    && (err.gitErrorCode === GitErrorCodes.CantLockRef
-                        || err.gitErrorCode === GitErrorCodes.CantRebaseMultipleBranches))
-            );
-
-            if (shouldRetry) {
-                // quatratic backoff
-                await timeout(Math.pow(attempt, 2) * 50);
-            } else {
-                throw err;
-            }
-        }
     }
 }
