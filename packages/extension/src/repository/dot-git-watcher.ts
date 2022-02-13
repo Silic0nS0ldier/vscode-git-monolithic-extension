@@ -1,37 +1,8 @@
 import path from "node:path";
 import { Disposable, Event, EventEmitter, OutputChannel, Uri } from "vscode";
-import { Log, LogLevel } from "../logging/log.js";
 import { Repository } from "../repository.js";
 import { anyEvent } from "../util.js";
 import { watch } from "../watch.js";
-
-// TODO This may destroy transient watchers which don't need to be
-function updateTransientWatchers(
-    repository: Repository,
-    emitter: EventEmitter<Uri>,
-    outputChannel: OutputChannel,
-): Disposable {
-    const disposables: Disposable[] = [];
-
-    if (!repository.HEAD?.upstream) {
-        return Disposable.from();
-    }
-
-    const { name, remote } = repository.HEAD.upstream;
-    const upstreamPath = path.join(repository.dotGit, "refs", "remotes", remote, name);
-
-    try {
-        const upstreamWatcher = watch([upstreamPath], [], outputChannel);
-        disposables.push(upstreamWatcher);
-        upstreamWatcher.event(emitter.fire, emitter, disposables);
-    } catch (err) {
-        if (Log.logLevel <= LogLevel.Error) {
-            outputChannel.appendLine(`Warning: Failed to watch ref '${upstreamPath}', is most likely packed.`);
-        }
-    }
-
-    return Disposable.from(...disposables);
-}
 
 export function createDotGitWatcher(
     repository: Repository,
@@ -59,20 +30,9 @@ export function createDotGitWatcher(
         outputChannel,
     );
 
-    let transientDisposable: Disposable = updateTransientWatchers(repository, emitter, outputChannel);
-
-    const onDidRunGitStatusDisposable = repository.onDidRunGitStatus(
-        () => {
-            transientDisposable.dispose();
-            transientDisposable = updateTransientWatchers(repository, emitter, outputChannel);
-        },
-    );
-
     const disposable = Disposable.from(
         emitter,
         rootWatcher,
-        onDidRunGitStatusDisposable,
-        { dispose: () => transientDisposable.dispose() },
     );
 
     return {
