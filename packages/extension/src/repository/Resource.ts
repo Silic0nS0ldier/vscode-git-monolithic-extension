@@ -1,21 +1,24 @@
 import onetime from "onetime";
 import {
     Command,
-    commands, FileDecoration, SourceControlResourceDecorations, SourceControlResourceState,
+    commands,
+    FileDecoration,
+    SourceControlResourceDecorations,
+    SourceControlResourceState,
     ThemeColor,
-    Uri
+    Uri,
 } from "vscode";
 import { Status } from "../api/git.js";
+import { Repository } from "../repository.js";
 import {
     getResources,
     resolveChangeCommand,
     resolveDefaultCommand,
-    resolveFileCommand
+    resolveFileCommand,
 } from "../repository/resource-command-resolver.js";
 import { localize } from "../util.js";
+import { getIconUri } from "./getIconUri.js";
 import { ResourceGroupType } from "./ResourceGroupType.js";
-import { getIconUri, Repository } from "../repository.js";
-
 
 export class Resource implements SourceControlResourceState {
     static getStatusText(type: Status) {
@@ -64,9 +67,11 @@ export class Resource implements SourceControlResourceState {
     }
 
     private ___resourceUri = onetime(() => {
-        if (this.renameResourceUri
+        if (
+            this.renameResourceUri
             && (this._type === Status.MODIFIED || this._type === Status.DELETED || this._type === Status.INDEX_RENAMED
-                || this._type === Status.INDEX_COPIED)) {
+                || this._type === Status.INDEX_COPIED)
+        ) {
             return this.renameResourceUri;
         }
 
@@ -297,8 +302,8 @@ export class Resource implements SourceControlResourceState {
         private _resourceUri: Uri,
         private _type: Status,
         private _useIcons: boolean,
-        private _renameResourceUri?: Uri
-    ) { }
+        private _renameResourceUri?: Uri,
+    ) {}
 
     async open(): Promise<void> {
         const command = this.command;

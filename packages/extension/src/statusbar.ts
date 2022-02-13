@@ -6,7 +6,8 @@
 import { Command, Disposable, Event, EventEmitter, Uri, workspace } from "vscode";
 import { Branch, RemoteSourceProvider } from "./api/git.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
-import { Operation, Repository } from "./repository.js";
+import { Repository } from "./repository.js";
+import { Operation } from "./repository/Operation.js";
 import { anyEvent, dispose, filterEvent, localize } from "./util.js";
 
 class CheckoutStatusBar {

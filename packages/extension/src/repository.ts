@@ -52,8 +52,13 @@ import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
-import { createDotGitWatcher } from "./watch/dot-git-watcher.js";
-import { createWorkingTreeWatcher } from "./watch/working-tree-watcher.js";
+import { isReadOnly } from "./repository/isReadOnly.js";
+import { Operation } from "./repository/Operation.js";
+import { Operations, OperationsImpl } from "./repository/OperationsImpl.js";
+import { RepositoryState } from "./repository/RepositoryState.js";
+import { Resource } from "./repository/Resource.js";
+import { ResourceGroupType } from "./repository/ResourceGroupType.js";
+import { timeout } from "./repository/timeout.js";
 import { StatusBarCommands } from "./statusbar.js";
 import { toGitUri } from "./uri.js";
 import {
@@ -70,150 +75,8 @@ import {
     localize,
     onceEvent,
 } from "./util.js";
-import { RepositoryState } from "./repository/RepositoryState.js";
-import { ResourceGroupType } from "./repository/ResourceGroupType.js";
-import { Resource } from "./repository/Resource.js";
-
-const timeout = (millis: number) => new Promise(c => setTimeout(c, millis));
-
-const iconsRootPath = path.join(path.dirname(__dirname), "resources", "icons");
-
-export function getIconUri(iconName: string, theme: string): Uri {
-    return Uri.file(path.join(iconsRootPath, theme, `${iconName}.svg`));
-}
-
-export const enum Operation {
-    Status = "Status",
-    Config = "Config",
-    Diff = "Diff",
-    MergeBase = "MergeBase",
-    Add = "Add",
-    Remove = "Remove",
-    RevertFiles = "RevertFiles",
-    Commit = "Commit",
-    Clean = "Clean",
-    Branch = "Branch",
-    GetBranch = "GetBranch",
-    GetBranches = "GetBranches",
-    SetBranchUpstream = "SetBranchUpstream",
-    HashObject = "HashObject",
-    Checkout = "Checkout",
-    CheckoutTracking = "CheckoutTracking",
-    Reset = "Reset",
-    Remote = "Remote",
-    Fetch = "Fetch",
-    Pull = "Pull",
-    Push = "Push",
-    CherryPick = "CherryPick",
-    Sync = "Sync",
-    Show = "Show",
-    Stage = "Stage",
-    GetCommitTemplate = "GetCommitTemplate",
-    DeleteBranch = "DeleteBranch",
-    RenameBranch = "RenameBranch",
-    DeleteRef = "DeleteRef",
-    Merge = "Merge",
-    Rebase = "Rebase",
-    Ignore = "Ignore",
-    Tag = "Tag",
-    DeleteTag = "DeleteTag",
-    Stash = "Stash",
-    CheckIgnore = "CheckIgnore",
-    GetObjectDetails = "GetObjectDetails",
-    SubmoduleUpdate = "SubmoduleUpdate",
-    RebaseAbort = "RebaseAbort",
-    RebaseContinue = "RebaseContinue",
-    FindTrackingBranches = "GetTracking",
-    Apply = "Apply",
-    Blame = "Blame",
-    Log = "Log",
-    LogFile = "LogFile",
-
-    Move = "Move",
-}
-
-function isReadOnly(operation: Operation): boolean {
-    switch (operation) {
-        case Operation.Blame:
-        case Operation.CheckIgnore:
-        case Operation.Diff:
-        case Operation.FindTrackingBranches:
-        case Operation.GetBranch:
-        case Operation.GetCommitTemplate:
-        case Operation.GetObjectDetails:
-        case Operation.Log:
-        case Operation.LogFile:
-        case Operation.MergeBase:
-        case Operation.Show:
-            return true;
-        default:
-            return false;
-    }
-}
-
-function shouldShowProgress(operation: Operation): boolean {
-    switch (operation) {
-        case Operation.Fetch:
-        case Operation.CheckIgnore:
-        case Operation.GetObjectDetails:
-        case Operation.Show:
-            return false;
-        default:
-            return true;
-    }
-}
-
-export interface Operations {
-    isIdle(): boolean;
-    shouldShowProgress(): boolean;
-    isRunning(operation: Operation): boolean;
-}
-
-class OperationsImpl implements Operations {
-    private operations = new Map<Operation, number>();
-
-    start(operation: Operation): void {
-        this.operations.set(operation, (this.operations.get(operation) || 0) + 1);
-    }
-
-    end(operation: Operation): void {
-        const count = (this.operations.get(operation) || 0) - 1;
-
-        if (count <= 0) {
-            this.operations.delete(operation);
-        } else {
-            this.operations.set(operation, count);
-        }
-    }
-
-    isRunning(operation: Operation): boolean {
-        return this.operations.has(operation);
-    }
-
-    isIdle(): boolean {
-        const operations = this.operations.keys();
-
-        for (const operation of operations) {
-            if (!isReadOnly(operation)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    shouldShowProgress(): boolean {
-        const operations = this.operations.keys();
-
-        for (const operation of operations) {
-            if (shouldShowProgress(operation)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-}
+import { createDotGitWatcher } from "./watch/dot-git-watcher.js";
+import { createWorkingTreeWatcher } from "./watch/working-tree-watcher.js";
 
 export interface GitResourceGroup extends SourceControlResourceGroup {
     resourceStates: Resource[];
