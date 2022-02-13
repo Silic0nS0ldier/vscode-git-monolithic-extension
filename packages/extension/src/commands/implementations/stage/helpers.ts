@@ -1,7 +1,9 @@
 import * as path from "node:path";
 import { Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
-import { Repository, Resource, ResourceGroupType } from "../../../repository.js";
+import { Repository } from "../../../repository.js";
+import { Resource } from "../../../repository/Resource.js";
+import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { grep, localize } from "../../../util.js";
 
 export async function categorizeResourceByResolution(

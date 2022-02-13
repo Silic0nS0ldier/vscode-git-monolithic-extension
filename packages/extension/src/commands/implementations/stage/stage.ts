@@ -1,7 +1,8 @@
 import * as path from "node:path";
 import { OutputChannel, SourceControlResourceState, Uri, window } from "vscode";
 import { Model } from "../../../model.js";
-import { Resource, ResourceGroupType } from "../../../repository.js";
+import { Resource } from "../../../repository/Resource.js";
+import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";

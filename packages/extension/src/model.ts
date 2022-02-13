@@ -37,7 +37,8 @@ import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
-import { Repository, RepositoryState } from "./repository.js";
+import { Repository } from "./repository.js";
+import { RepositoryState } from "./repository/RepositoryState.js";
 import { fromGitUri } from "./uri.js";
 import {
     anyEvent,

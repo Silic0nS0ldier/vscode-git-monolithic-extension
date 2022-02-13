@@ -1,6 +1,7 @@
 import { OutputChannel, SourceControlResourceState, Uri } from "vscode";
 import { Model } from "../../../model.js";
-import { Resource, ResourceGroupType } from "../../../repository.js";
+import { Resource } from "../../../repository/Resource.js";
+import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
 

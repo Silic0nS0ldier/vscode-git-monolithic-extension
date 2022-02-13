@@ -1,7 +1,9 @@
 import path from "node:path";
 import { Command, Uri, workspace } from "vscode";
 import { Status } from "../api/git.js";
-import { Repository, Resource, ResourceGroupType } from "../repository.js";
+import { Repository } from "../repository.js";
+import { Resource } from "./Resource.js";
+import { ResourceGroupType } from "./ResourceGroupType.js";
 import { toGitUri } from "../uri.js";
 import { localize } from "../util.js";
 

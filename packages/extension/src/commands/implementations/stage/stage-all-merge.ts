@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import { window } from "vscode";
-import { Repository, Resource } from "../../../repository.js";
+import { Repository } from "../../../repository.js";
+import { Resource } from "../../../repository/Resource.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";

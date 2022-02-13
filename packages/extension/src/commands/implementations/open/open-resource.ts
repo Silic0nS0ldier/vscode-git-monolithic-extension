@@ -1,5 +1,5 @@
 import { Model } from "../../../model.js";
-import { Resource } from "../../../repository.js";
+import { Resource } from "../../../repository/Resource.js";
 import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(

@@ -10,7 +10,7 @@ import {
 } from "vscode";
 import { Status } from "../../../../api/git.js";
 import { Model } from "../../../../model.js";
-import { Resource } from "../../../../repository.js";
+import { Resource } from "../../../../repository/Resource.js";
 import { fromGitUri, isGitUri } from "../../../../uri.js";
 import { ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";

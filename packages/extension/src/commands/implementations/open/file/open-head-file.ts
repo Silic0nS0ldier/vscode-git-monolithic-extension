@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { commands, OutputChannel, TextDocumentShowOptions, Uri, window } from "vscode";
 import { Model } from "../../../../model.js";
-import { Resource } from "../../../../repository.js";
+import { Resource } from "../../../../repository/Resource.js";
 import { localize } from "../../../../util.js";
 import { ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";

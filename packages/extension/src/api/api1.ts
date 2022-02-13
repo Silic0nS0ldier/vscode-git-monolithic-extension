@@ -6,7 +6,8 @@
 import { commands, Disposable, Event, SourceControl, SourceControlInputBox, Uri } from "vscode";
 import { Model } from "../model.js";
 import { pickRemoteSource, PickRemoteSourceOptions } from "../remoteSource.js";
-import { Repository as BaseRepository, Resource } from "../repository.js";
+import { Repository as BaseRepository } from "../repository.js";
+import { Resource } from "../repository/Resource.js";
 import { toGitUri } from "../uri.js";
 import { mapEvent } from "../util.js";
 import { GitExtensionImpl } from "./extension.js";

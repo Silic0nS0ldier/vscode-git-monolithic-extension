@@ -1,6 +1,6 @@
 import { OutputChannel, SourceControlResourceState, Uri } from "vscode";
 import { Model } from "../../../../model.js";
-import { Resource } from "../../../../repository.js";
+import { Resource } from "../../../../repository/Resource.js";
 import { ScmCommand } from "../../../helpers.js";
 import { openFile } from "./open-file.js";
 
