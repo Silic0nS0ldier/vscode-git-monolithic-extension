@@ -18,7 +18,8 @@ import {
 import { GitErrorCodes, Status } from "./api/git.js";
 import { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
-import { GitResourceGroup, Repository } from "./repository.js";
+import { Repository } from "./repository.js";
+import { GitResourceGroup } from "./repository/GitResourceGroup.js";
 import { anyEvent, dispose, filterEvent, fireEvent, PromiseSource } from "./util.js";
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {

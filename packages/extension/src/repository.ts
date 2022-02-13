@@ -47,143 +47,26 @@ import {
 import { AutoFetcher } from "./autofetch.js";
 import { Commit, LogFileOptions, Repository as BaseRepository, Stash, Submodule } from "./git.js";
 import { GitError } from "./git/error.js";
-import { Log, LogLevel } from "./logging/log.js";
+import { OperationResult } from "./repository/OperationResult.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
+import { FileEventLogger } from "./repository/FileEventLogger.js";
+import { GitResourceGroup } from "./repository/GitResourceGroup.js";
 import { isReadOnly } from "./repository/isReadOnly.js";
 import { Operation } from "./repository/Operation.js";
 import { Operations, OperationsImpl } from "./repository/OperationsImpl.js";
+import { ProgressManager } from "./repository/ProgressManager.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
 import { Resource } from "./repository/Resource.js";
 import { ResourceGroupType } from "./repository/ResourceGroupType.js";
 import { timeout } from "./repository/timeout.js";
 import { StatusBarCommands } from "./statusbar.js";
 import { toGitUri } from "./uri.js";
-import {
-    anyEvent,
-    combinedDisposable,
-    debounceEvent,
-    dispose,
-    EmptyDisposable,
-    eventToPromise,
-    filterEvent,
-    find,
-    IDisposable,
-    isDescendant,
-    localize,
-    onceEvent,
-} from "./util.js";
+import { anyEvent, dispose, eventToPromise, filterEvent, find, isDescendant, localize } from "./util.js";
 import { createDotGitWatcher } from "./watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "./watch/working-tree-watcher.js";
-
-export interface GitResourceGroup extends SourceControlResourceGroup {
-    resourceStates: Resource[];
-}
-
-export interface OperationResult {
-    operation: Operation;
-    error: any;
-}
-
-class ProgressManager {
-    private enabled = false;
-    private disposable: IDisposable = EmptyDisposable;
-
-    constructor(private repository: Repository) {
-        const onDidChange = filterEvent(
-            workspace.onDidChangeConfiguration,
-            e => e.affectsConfiguration("git", Uri.file(this.repository.root)),
-        );
-        onDidChange(_ => this.updateEnablement());
-        this.updateEnablement();
-    }
-
-    private updateEnablement(): void {
-        const config = workspace.getConfiguration("git", Uri.file(this.repository.root));
-
-        if (config.get<boolean>("showProgress")) {
-            this.enable();
-        } else {
-            this.disable();
-        }
-    }
-
-    private enable(): void {
-        if (this.enabled) {
-            return;
-        }
-
-        const start = onceEvent(
-            filterEvent(this.repository.onDidChangeOperations, () => this.repository.operations.shouldShowProgress()),
-        );
-        const end = onceEvent(
-            filterEvent(
-                debounceEvent(this.repository.onDidChangeOperations, 300),
-                () => !this.repository.operations.shouldShowProgress(),
-            ),
-        );
-
-        const setup = () => {
-            this.disposable = start(() => {
-                const promise = eventToPromise(end).then(() => setup());
-                window.withProgress({ location: ProgressLocation.SourceControl }, () => promise);
-            });
-        };
-
-        setup();
-        this.enabled = true;
-    }
-
-    private disable(): void {
-        if (!this.enabled) {
-            return;
-        }
-
-        this.disposable.dispose();
-        this.disposable = EmptyDisposable;
-        this.enabled = false;
-    }
-
-    dispose(): void {
-        this.disable();
-    }
-}
-
-class FileEventLogger {
-    private eventDisposable: IDisposable = EmptyDisposable;
-    private logLevelDisposable: IDisposable = EmptyDisposable;
-
-    constructor(
-        private onWorkspaceWorkingTreeFileChange: Event<Uri>,
-        private onDotGitFileChange: Event<Uri>,
-        private outputChannel: OutputChannel,
-    ) {
-        this.logLevelDisposable = Log.onDidChangeLogLevel(this.onDidChangeLogLevel, this);
-        this.onDidChangeLogLevel(Log.logLevel);
-    }
-
-    private onDidChangeLogLevel(level: LogLevel): void {
-        this.eventDisposable.dispose();
-
-        if (level > LogLevel.Debug) {
-            return;
-        }
-
-        this.eventDisposable = combinedDisposable([
-            this.onWorkspaceWorkingTreeFileChange(uri =>
-                this.outputChannel.appendLine(`[debug] [wt] Change: ${uri.fsPath}`)
-            ),
-            this.onDotGitFileChange(uri => this.outputChannel.appendLine(`[debug] [.git] Change: ${uri.fsPath}`)),
-        ]);
-    }
-
-    dispose(): void {
-        this.eventDisposable.dispose();
-        this.logLevelDisposable.dispose();
-    }
-}
 
 // TODO This has WAY TO MUCH responsibility
 // Parts should be shaved off into independent functions.
