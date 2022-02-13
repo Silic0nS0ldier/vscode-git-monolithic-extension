@@ -57,14 +57,14 @@ import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
-import { createDotGitWatcher } from "./repository/dot-git-watcher.js";
+import { createDotGitWatcher } from "./watch/dot-git-watcher.js";
 import {
     getResources,
     resolveChangeCommand,
     resolveDefaultCommand,
     resolveFileCommand,
 } from "./repository/resource-command-resolver.js";
-import { createWorkingTreeWatcher } from "./repository/working-tree-watcher.js";
+import { createWorkingTreeWatcher } from "./watch/working-tree-watcher.js";
 import { StatusBarCommands } from "./statusbar.js";
 import { toGitUri } from "./uri.js";
 import {
