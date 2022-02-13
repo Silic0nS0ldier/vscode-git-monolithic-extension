@@ -3,7 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { read as readUserConfig } from "monolithic-git-interop/api/config/user/read";
+import { read as readRepositoryConfig } from "monolithic-git-interop/api/repository/config/read";
 import { parseIgnoreCheck } from "monolithic-git-interop/api/repository/ignore/check/parser";
+import { isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import onetime from "onetime";
@@ -1032,12 +1035,24 @@ export class Repository implements Disposable {
         return this.run(Operation.Config, () => this.repository.getConfigs("local"));
     }
 
-    getConfig(key: string): Promise<string> {
-        return this.run(Operation.Config, () => this.repository.config("local", key));
+    async getConfig(key: string): Promise<string> {
+        const result = await readRepositoryConfig(this.repository.git._context, this.repository.root, key);
+
+        if (isOk(result)) {
+            return unwrap(result).value;
+        }
+
+        throw unwrap(result);
     }
 
-    getGlobalConfig(key: string): Promise<string> {
-        return this.run(Operation.Config, () => this.repository.config("global", key));
+    async getGlobalConfig(key: string): Promise<string> {
+        const result = await readUserConfig(this.repository.git._context, this.repository.root, key);
+
+        if (isOk(result)) {
+            return unwrap(result).value;
+        }
+
+        throw unwrap(result);
     }
 
     setConfig(key: string, value: string): Promise<string> {

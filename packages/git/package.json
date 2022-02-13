@@ -6,6 +6,18 @@
     "type": "module",
     "types": "./dist/main.d.ts",
     "exports": {
+        "./api/config/global/read": {
+            "import": "./dist/api/config/global/read.js",
+            "types": "./dist/api/config/global/read.d.ts"
+        },
+        "./api/config/user/read": {
+            "import": "./dist/api/config/user/read.js",
+            "types": "./dist/api/config/user/read.d.ts"
+        },
+        "./api/repository/config/read": {
+            "import": "./dist/api/repository/config/read.js",
+            "types": "./dist/api/repository/config/read.d.ts"
+        },
         "./api/repository/ignore/check/parser": {
             "import": "./dist/api/repository/ignore/check/parser.js",
             "types": "./dist/api/repository/ignore/check/parser.d.ts"
@@ -29,6 +41,10 @@
         "./api/rev-parse/show-toplevel": {
             "import": "./dist/api/rev-parse/show-toplevel.js",
             "types": "./dist/api/rev-parse/show-toplevel.d.ts"
+        },
+        "./api/worktree/config/read": {
+            "import": "./dist/api/worktree/config/read.js",
+            "types": "./dist/api/worktree/config/read.d.ts"
         },
         "./cli": {
             "import": "./dist/cli/mod.js",

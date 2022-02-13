@@ -582,18 +582,14 @@ export class Repository {
         return this.git.spawn(args, options);
     }
 
-    async config(scope: string, key: string, value: any = null, options: SpawnOptions = {}): Promise<string> {
+    async config(scope: string, key: string, value: string, options: SpawnOptions = {}): Promise<string> {
         const args = ["config"];
 
         if (scope) {
             args.push("--" + scope);
         }
 
-        args.push(key);
-
-        if (value) {
-            args.push(value);
-        }
+        args.push(key, value);
 
         const result = await this.exec(args, options);
         return result.stdout.trim();
