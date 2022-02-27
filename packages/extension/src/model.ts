@@ -156,9 +156,11 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         window.onDidChangeVisibleTextEditors(this.onDidChangeVisibleTextEditors, this, this.disposables);
         workspace.onDidChangeConfiguration(this.onDidChangeConfiguration, this, this.disposables);
 
-        const gitIndexWatcher = workspace.createFileSystemWatcher("**/.git/index", false, true, false);
-        this.disposables.push(gitIndexWatcher);
-        const onGitIndexEvent = anyEvent(gitIndexWatcher.onDidCreate, gitIndexWatcher.onDidDelete);
+        // Watchers are responsible for identifying deletion and addition of repositories (main and worktrees)
+        const gitMainTreeWatcher = workspace.createFileSystemWatcher("**/.git/HEAD", false, true, false);
+        const gitWorkTreeWatcher = workspace.createFileSystemWatcher("**/.git", false, true, false);
+        this.disposables.push(gitMainTreeWatcher, gitWorkTreeWatcher);
+        const onGitIndexEvent = anyEvent(gitMainTreeWatcher.onDidCreate, gitMainTreeWatcher.onDidDelete, gitWorkTreeWatcher.onDidCreate, gitWorkTreeWatcher.onDidDelete);
         onGitIndexEvent(this.onPossibleGitRepositoryChange, this, this.disposables);
 
         this.setState("uninitialized");
