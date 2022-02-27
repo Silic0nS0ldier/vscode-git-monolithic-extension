@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Repository } from "../../git.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { RunFn } from "./run.js";
 
 export async function buffer(

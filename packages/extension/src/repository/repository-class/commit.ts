@@ -1,7 +1,7 @@
 import { Uri, workspace } from "vscode";
 import { CommitOptions } from "../../api/git.js";
 import { Commit, Repository } from "../../git.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { RunFn } from "./run.js";
 
 export async function commit(

@@ -15,7 +15,7 @@ import {
     workspace,
 } from "vscode";
 import { GitErrorCodes } from "./api/git.js";
-import { Operation } from "./repository/Operation.js";
+import { Operation } from "./repository/Operations.js";
 import { FinalRepository } from "./repository/repository-class/mod.js";
 import { eventToPromise, filterEvent, localize, onceEvent } from "./util.js";
 

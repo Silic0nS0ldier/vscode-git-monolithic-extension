@@ -2,7 +2,7 @@ import { Branch, ForcePushMode } from "../../api/git.js";
 import { Repository } from "../../git.js";
 import { throat } from "../../package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { FinalRepository } from "./mod.js";
 import { pushInternal } from "./push-internal.js";
 import { RunFn } from "./run.js";

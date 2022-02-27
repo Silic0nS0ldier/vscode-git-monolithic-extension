@@ -6,7 +6,7 @@
 import { Command, Disposable, Event, EventEmitter, Uri, workspace } from "vscode";
 import { Branch, RemoteSourceProvider } from "./api/git.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
-import { Operation } from "./repository/Operation.js";
+import { Operation } from "./repository/Operations.js";
 import { FinalRepository } from "./repository/repository-class/mod.js";
 import { anyEvent, dispose, filterEvent, localize } from "./util.js";
 

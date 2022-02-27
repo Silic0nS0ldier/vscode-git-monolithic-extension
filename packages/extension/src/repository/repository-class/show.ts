@@ -2,7 +2,7 @@ import path from "path";
 import { Uri, workspace } from "vscode";
 import { GitErrorCodes } from "../../api/git.js";
 import { Repository } from "../../git.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { RunFn } from "./run.js";
 
 export async function show(run: RunFn<string>, repository: Repository, ref: string, filePath: string): Promise<string> {

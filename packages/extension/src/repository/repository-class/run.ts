@@ -1,4 +1,4 @@
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 
 export type RunFn<T> = (
     operation: Operation,

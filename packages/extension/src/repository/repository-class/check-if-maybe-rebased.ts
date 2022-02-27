@@ -1,7 +1,7 @@
 import { window, workspace } from "vscode";
 import { Repository } from "../../git.js";
 import { localize } from "../../util.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { RunFn } from "./run.js";
 
 export async function checkIfMaybeRebased(

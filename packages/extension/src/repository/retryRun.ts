@@ -1,5 +1,5 @@
 import { GitErrorCodes } from "../api/git.js";
-import { Operation } from "./Operation.js";
+import { Operation } from "./Operations.js";
 import { timeout } from "./timeout.js";
 
 export async function retryRun<T>(

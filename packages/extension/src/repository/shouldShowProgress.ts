@@ -1,4 +1,4 @@
-import { Operation } from "./Operation.js";
+import { Operation } from "./Operations.js";
 
 export function shouldShowProgress(operation: Operation): boolean {
     switch (operation) {

@@ -1,4 +1,4 @@
-import { Operation } from "./Operation.js";
+import { Operation } from "./Operations.js";
 
 export function isReadOnly(operation: Operation): boolean {
     switch (operation) {

@@ -4,7 +4,7 @@ import { Repository } from "../../git.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { localize } from "../../util.js";
 import { GitResourceGroup } from "../GitResourceGroup.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { maybeAutoStash } from "./maybe-auto-stash.js";
 import { FinalRepository } from "./mod.js";

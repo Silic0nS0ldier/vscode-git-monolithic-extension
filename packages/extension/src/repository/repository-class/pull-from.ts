@@ -2,7 +2,7 @@ import { Uri, workspace } from "vscode";
 import { Branch } from "../../api/git.js";
 import { Repository } from "../../git.js";
 import { GitResourceGroup } from "../GitResourceGroup.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { maybeAutoStash } from "./maybe-auto-stash.js";
 import { RunFn } from "./run.js";

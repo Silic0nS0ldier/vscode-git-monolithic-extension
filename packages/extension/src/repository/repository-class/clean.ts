@@ -4,7 +4,7 @@ import { Status } from "../../api/git.js";
 import { Repository, Submodule } from "../../git.js";
 import { find } from "../../util.js";
 import { GitResourceGroup } from "../GitResourceGroup.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { RunFn } from "./run.js";
 
 export async function clean(

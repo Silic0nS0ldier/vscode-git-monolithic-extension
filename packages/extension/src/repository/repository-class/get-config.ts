@@ -2,7 +2,7 @@ import { read as readUserConfig } from "monolithic-git-interop/api/config/user/r
 import { read as readRepositoryConfig } from "monolithic-git-interop/api/repository/config/read";
 import { isOk, unwrap } from "monolithic-git-interop/util/result";
 import { Repository } from "../../git.js";
-import { Operation } from "../Operation.js";
+import { Operation } from "../Operations.js";
 import { RunFn } from "./run.js";
 
 export function getConfigs(
