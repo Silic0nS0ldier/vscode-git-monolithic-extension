@@ -1,6 +1,6 @@
 import { QuickPickItem, window, workspace } from "vscode";
 import { Branch, Ref, RefType } from "../../api/git.js";
-import { Repository } from "../../repository.js";
+import { FinalRepository } from "../../repository/repository-class/mod.js";
 import { localize } from "../../util.js";
 import { ScmCommand } from "../helpers.js";
 
@@ -14,13 +14,13 @@ class MergeItem implements QuickPickItem {
 
     constructor(protected ref: Ref) {}
 
-    async run(repository: Repository): Promise<void> {
+    async run(repository: FinalRepository): Promise<void> {
         await repository.merge(this.ref.name! || this.ref.commit!);
     }
 }
 
 export function createCommand(): ScmCommand {
-    async function merge(repository: Repository): Promise<void> {
+    async function merge(repository: FinalRepository): Promise<void> {
         const config = workspace.getConfiguration("git");
         const checkoutType = config.get<string | string[]>("checkoutType");
         const includeRemotes = checkoutType === "all" || checkoutType === "remote" || checkoutType?.includes("remote");

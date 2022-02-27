@@ -1,9 +1,9 @@
 import { workspace } from "vscode";
 import { Ref, RefType } from "../../../api/git.js";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { CheckoutItem, CheckoutRemoteHeadItem, CheckoutTagItem } from "./quick-pick.js";
 
-export function createCheckoutItems(repository: Repository): CheckoutItem[] {
+export function createCheckoutItems(repository: FinalRepository): CheckoutItem[] {
     const config = workspace.getConfiguration("git");
     const checkoutTypeConfig = config.get<string | string[]>("checkoutType");
     let checkoutTypes: string[];

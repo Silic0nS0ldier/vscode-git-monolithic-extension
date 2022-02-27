@@ -1,10 +1,10 @@
 import * as path from "node:path";
 import { Uri, window, workspace } from "vscode";
 import { Stash } from "../../../git.js";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { isDescendant, localize, pathEquals } from "../../../util.js";
 
-export async function createStash(repository: Repository, includeUntracked = false): Promise<void> {
+export async function createStash(repository: FinalRepository, includeUntracked = false): Promise<void> {
     const noUnstagedChanges = repository.workingTreeGroup.resourceStates.length === 0
         && (!includeUntracked || repository.untrackedGroup.resourceStates.length === 0);
     const noStagedChanges = repository.indexGroup.resourceStates.length === 0;
@@ -75,7 +75,7 @@ export async function createStash(repository: Repository, includeUntracked = fal
     await repository.createStash(message, includeUntracked);
 }
 
-export async function pickStash(repository: Repository, placeHolder: string): Promise<Stash | undefined> {
+export async function pickStash(repository: FinalRepository, placeHolder: string): Promise<Stash | undefined> {
     const stashes = await repository.getStashes();
 
     if (stashes.length === 0) {

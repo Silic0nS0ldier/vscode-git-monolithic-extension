@@ -1,10 +1,10 @@
 import { window } from "vscode";
-import { Repository } from "../../repository.js";
+import { FinalRepository } from "../../repository/repository-class/mod.js";
 import { localize } from "../../util.js";
 import { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function cherryPick(repository: Repository): Promise<void> {
+    async function cherryPick(repository: FinalRepository): Promise<void> {
         const hash = await window.showInputBox({
             placeHolder: localize("commit hash", "Commit Hash"),
             prompt: localize("provide commit hash", "Please provide the commit hash"),

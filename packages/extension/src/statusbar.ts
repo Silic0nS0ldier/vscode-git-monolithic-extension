@@ -6,8 +6,8 @@
 import { Command, Disposable, Event, EventEmitter, Uri, workspace } from "vscode";
 import { Branch, RemoteSourceProvider } from "./api/git.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
-import { Repository } from "./repository.js";
 import { Operation } from "./repository/Operation.js";
+import { FinalRepository } from "./repository/repository-class/mod.js";
 import { anyEvent, dispose, filterEvent, localize } from "./util.js";
 
 class CheckoutStatusBar {
@@ -17,7 +17,7 @@ class CheckoutStatusBar {
     }
     private disposables: Disposable[] = [];
 
-    constructor(private repository: Repository) {
+    constructor(private repository: FinalRepository) {
         repository.onDidRunGitStatus(this._onDidChange.fire, this._onDidChange, this.disposables);
     }
 
@@ -64,7 +64,10 @@ class SyncStatusBar {
         this._onDidChange.fire();
     }
 
-    constructor(private repository: Repository, private remoteSourceProviderRegistry: IRemoteSourceProviderRegistry) {
+    constructor(
+        private repository: FinalRepository,
+        private remoteSourceProviderRegistry: IRemoteSourceProviderRegistry,
+    ) {
         this._state = {
             enabled: true,
             isSyncRunning: false,
@@ -74,7 +77,7 @@ class SyncStatusBar {
                 .filter(p => !!p.publishRepository),
         };
 
-        repository.onDidRunGitStatus(this.onDidRunGitStatus, this, this.disposables);
+        repository.onDidChangeStatus(this.onDidRunGitStatus, this, this.disposables);
         repository.onDidChangeOperations(this.onDidChangeOperations, this, this.disposables);
 
         anyEvent(
@@ -196,7 +199,7 @@ export class StatusBarCommands {
     private checkoutStatusBar: CheckoutStatusBar;
     private disposables: Disposable[] = [];
 
-    constructor(repository: Repository, remoteSourceProviderRegistry: IRemoteSourceProviderRegistry) {
+    constructor(repository: FinalRepository, remoteSourceProviderRegistry: IRemoteSourceProviderRegistry) {
         this.syncStatusBar = new SyncStatusBar(repository, remoteSourceProviderRegistry);
         this.checkoutStatusBar = new CheckoutStatusBar(repository);
         this.onDidChange = anyEvent(this.syncStatusBar.onDidChange, this.checkoutStatusBar.onDidChange);

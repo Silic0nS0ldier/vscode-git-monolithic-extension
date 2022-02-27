@@ -2,7 +2,7 @@ import { commands, MessageOptions, OutputChannel, Uri, window, workspace } from 
 import { GitErrorCodes } from "../api/git.js";
 import { Model } from "../model.js";
 import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
-import { Repository } from "../repository.js";
+import { FinalRepository } from "../repository/repository-class/mod.js";
 import { localize } from "../util.js";
 import { CommandErrorOutputTextDocumentContentProvider, ScmCommandOptions } from "./helpers.js";
 
@@ -24,7 +24,7 @@ export function createCommand(
         } else {
             // try to guess the repository based on the first argument
             const repository = model.getRepository(args[0]);
-            let repositoryPromise: Promise<Repository | undefined>;
+            let repositoryPromise: Promise<FinalRepository | undefined>;
 
             if (repository) {
                 repositoryPromise = Promise.resolve(repository);

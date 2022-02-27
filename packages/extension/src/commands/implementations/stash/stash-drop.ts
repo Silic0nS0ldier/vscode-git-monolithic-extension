@@ -1,11 +1,11 @@
 import { window } from "vscode";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 import { pickStash } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function stashDrop(repository: Repository): Promise<void> {
+    async function stashDrop(repository: FinalRepository): Promise<void> {
         const placeHolder = localize("pick stash to drop", "Pick a stash to drop");
         const stash = await pickStash(repository, placeHolder);
 

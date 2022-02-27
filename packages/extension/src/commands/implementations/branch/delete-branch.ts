@@ -1,6 +1,6 @@
 import { QuickPickItem, window } from "vscode";
 import { GitErrorCodes, Ref, RefType } from "../../../api/git.js";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 
@@ -20,7 +20,7 @@ class BranchDeleteItem implements QuickPickItem {
 
     constructor(private ref: Ref) {}
 
-    async run(repository: Repository, force?: boolean): Promise<void> {
+    async run(repository: FinalRepository, force?: boolean): Promise<void> {
         if (!this.branchName) {
             return;
         }
@@ -29,7 +29,7 @@ class BranchDeleteItem implements QuickPickItem {
 }
 
 export function createCommand(): ScmCommand {
-    async function deleteBranch(repository: Repository, name: string, force?: boolean): Promise<void> {
+    async function deleteBranch(repository: FinalRepository, name: string, force?: boolean): Promise<void> {
         let run: (force?: boolean) => Promise<void>;
         if (typeof name === "string") {
             run = force => repository.deleteBranch(name, force);

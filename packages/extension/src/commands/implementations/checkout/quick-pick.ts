@@ -1,6 +1,6 @@
 import { QuickPickItem } from "vscode";
 import { Ref } from "../../../api/git.js";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { localize } from "../../../util.js";
 
 export class CheckoutItem implements QuickPickItem {
@@ -16,7 +16,7 @@ export class CheckoutItem implements QuickPickItem {
 
     constructor(protected ref: Ref) {}
 
-    async run(repository: Repository, opts?: { detached?: boolean }): Promise<void> {
+    async run(repository: FinalRepository, opts?: { detached?: boolean }): Promise<void> {
         const ref = this.ref.name;
 
         if (!ref) {
@@ -38,7 +38,7 @@ export class CheckoutRemoteHeadItem extends CheckoutItem {
         return localize("remote branch at", "Remote branch at {0}", this.shortCommit);
     }
 
-    override async run(repository: Repository, opts?: { detached?: boolean }): Promise<void> {
+    override async run(repository: FinalRepository, opts?: { detached?: boolean }): Promise<void> {
         if (!this.ref.name) {
             return;
         }

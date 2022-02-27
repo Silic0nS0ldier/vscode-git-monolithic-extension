@@ -1,8 +1,8 @@
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function unstageAll(repository: Repository): Promise<void> {
+    async function unstageAll(repository: FinalRepository): Promise<void> {
         await repository.revert([]);
     }
 

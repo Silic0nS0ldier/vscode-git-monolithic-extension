@@ -1,10 +1,10 @@
 import * as path from "node:path";
 import { window } from "vscode";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { Resource } from "../../../repository/Resource.js";
 import { localize } from "../../../util.js";
 
-export async function cleanUntrackedChanges(repository: Repository, resources: Resource[]): Promise<void> {
+export async function cleanUntrackedChanges(repository: FinalRepository, resources: Resource[]): Promise<void> {
     const message = localize(
         "confirm delete multiple",
         "Are you sure you want to DELETE {0} files?\nThis is IRREVERSIBLE!\nThese files will be FOREVER LOST if you proceed.",
@@ -20,7 +20,7 @@ export async function cleanUntrackedChanges(repository: Repository, resources: R
     await repository.clean(resources.map(r => r.resourceUri));
 }
 
-export async function cleanUntrackedChange(repository: Repository, resource: Resource): Promise<void> {
+export async function cleanUntrackedChange(repository: FinalRepository, resource: Resource): Promise<void> {
     const message = localize(
         "confirm delete",
         "Are you sure you want to DELETE {0}?\nThis is IRREVERSIBLE!\nThis file will be FOREVER LOST if you proceed.",
@@ -36,7 +36,7 @@ export async function cleanUntrackedChange(repository: Repository, resource: Res
     await repository.clean([resource.resourceUri]);
 }
 
-export async function cleanTrackedChanges(repository: Repository, resources: Resource[]): Promise<void> {
+export async function cleanTrackedChanges(repository: FinalRepository, resources: Resource[]): Promise<void> {
     const message = resources.length === 1
         ? localize(
             "confirm discard all single",

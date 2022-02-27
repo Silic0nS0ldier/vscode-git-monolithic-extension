@@ -1,5 +1,5 @@
 import { QuickPickItem } from "vscode";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { localize } from "../../../util.js";
 
 export class CreateBranchItem implements QuickPickItem {
@@ -27,7 +27,7 @@ export class CreateBranchFromItem implements QuickPickItem {
 }
 
 export class HEADItem implements QuickPickItem {
-    constructor(private repository: Repository) {}
+    constructor(private repository: FinalRepository) {}
 
     get label(): string {
         return "HEAD";

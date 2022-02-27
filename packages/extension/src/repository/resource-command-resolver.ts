@@ -1,9 +1,10 @@
 import path from "node:path";
 import { Command, Uri, workspace } from "vscode";
 import { Status } from "../api/git.js";
-import { Repository } from "../repository.js";
+import { Submodule } from "../git.js";
 import { toGitUri } from "../uri.js";
 import { localize } from "../util.js";
+import { GitResourceGroup } from "./GitResourceGroup.js";
 import { Resource } from "./Resource.js";
 import { ResourceGroupType } from "./ResourceGroupType.js";
 
@@ -57,7 +58,7 @@ function getLeftResource(resource: Resource): Uri | undefined {
     return undefined;
 }
 
-function getRightResource(resource: Resource, repository: Repository): Uri | undefined {
+function getRightResource(resource: Resource, indexGroup: GitResourceGroup): Uri | undefined {
     switch (resource.type) {
         case Status.INDEX_MODIFIED:
         case Status.INDEX_ADDED:
@@ -80,9 +81,7 @@ function getRightResource(resource: Resource, repository: Repository): Uri | und
         case Status.IGNORED:
         case Status.INTENT_TO_ADD:
             const uriString = resource.resourceUri.toString();
-            const [indexStatus] = repository.indexGroup.resourceStates.filter(r =>
-                r.resourceUri.toString() === uriString
-            );
+            const [indexStatus] = indexGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString);
 
             if (indexStatus && indexStatus.renameResourceUri) {
                 return indexStatus.renameResourceUri;
@@ -128,25 +127,30 @@ export function resolveFileCommand(resource: Resource): Command {
     };
 }
 
-export function resolveDefaultCommand(resource: Resource, repository: Repository): Command {
-    const config = workspace.getConfiguration("git", Uri.file(repository.root));
+export function resolveDefaultCommand(resource: Resource, repoRoot: string): Command {
+    const config = workspace.getConfiguration("git", Uri.file(repoRoot));
     const openDiffOnClick = config.get<boolean>("openDiffOnClick", true);
     return openDiffOnClick ? resolveChangeCommand(resource) : resolveFileCommand(resource);
 }
 
-export function getResources(resource: Resource, repository: Repository): [Uri | undefined, Uri | undefined] {
-    for (const submodule of repository.submodules) {
-        if (path.join(repository.root, submodule.path) === resource.resourceUri.fsPath) {
+export function getResources(
+    resource: Resource,
+    repoRoot: string,
+    submodules: Submodule[],
+    indexGroup: GitResourceGroup,
+): [Uri | undefined, Uri | undefined] {
+    for (const submodule of submodules) {
+        if (path.join(repoRoot, submodule.path) === resource.resourceUri.fsPath) {
             return [
                 undefined,
                 toGitUri(
                     resource.resourceUri,
                     resource.resourceGroupType === ResourceGroupType.Index ? "index" : "wt",
-                    { submoduleOf: repository.root },
+                    { submoduleOf: repoRoot },
                 ),
             ];
         }
     }
 
-    return [getLeftResource(resource), getRightResource(resource, repository)];
+    return [getLeftResource(resource), getRightResource(resource, indexGroup)];
 }

@@ -14,5 +14,6 @@ module.exports = {
     ],
     "rules": {
         "class-methods-use-this": ["error"],
+        "sort-keys": ["error"],
     },
 };

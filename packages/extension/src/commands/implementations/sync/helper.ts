@@ -1,11 +1,11 @@
 import { window, workspace } from "vscode";
 import { Model } from "../../../model.js";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { localize } from "../../../util.js";
 import { publish } from "../publish/publish.js";
 
 export async function sync(
-    repository: Repository,
+    repository: FinalRepository,
     rebase: boolean,
     model: Model,
 ): Promise<void> {

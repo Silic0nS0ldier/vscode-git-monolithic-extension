@@ -1,10 +1,10 @@
 import { window } from "vscode";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function stashApplyLatest(repository: Repository): Promise<void> {
+    async function stashApplyLatest(repository: FinalRepository): Promise<void> {
         const stashes = await repository.getStashes();
 
         if (stashes.length === 0) {

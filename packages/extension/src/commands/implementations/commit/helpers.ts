@@ -2,13 +2,13 @@ import * as path from "node:path";
 import { Uri, window, workspace } from "vscode";
 import { CommitOptions, Status } from "../../../api/git.js";
 import { Model } from "../../../model.js";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { isDescendant, localize, pathEquals } from "../../../util.js";
 import { push, PushType } from "../push/helpers.js";
 import { sync } from "../sync/sync.js";
 
 async function smartCommit(
-    repository: Repository,
+    repository: FinalRepository,
     getCommitMessage: () => Promise<string | undefined>,
     model: Model,
     opts?: CommitOptions,
@@ -199,7 +199,7 @@ async function smartCommit(
 }
 
 export async function commitWithAnyInput(
-    repository: Repository,
+    repository: FinalRepository,
     model: Model,
     opts?: CommitOptions,
 ): Promise<void> {
@@ -242,7 +242,7 @@ export async function commitWithAnyInput(
 }
 
 export async function commitEmpty(
-    repository: Repository,
+    repository: FinalRepository,
     model: Model,
     noVerify?: boolean,
 ): Promise<void> {

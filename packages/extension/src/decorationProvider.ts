@@ -18,8 +18,8 @@ import {
 import { GitErrorCodes, Status } from "./api/git.js";
 import { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
-import { Repository } from "./repository.js";
 import { GitResourceGroup } from "./repository/GitResourceGroup.js";
+import { FinalRepository } from "./repository/repository-class/mod.js";
 import { anyEvent, dispose, filterEvent, fireEvent, PromiseSource } from "./util.js";
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
@@ -28,7 +28,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
     readonly onDidChangeFileDecorations: Event<Uri[]>;
     private queue = new Map<
         string,
-        { repository: Repository; queue: Map<string, PromiseSource<FileDecoration | undefined>> }
+        { repository: FinalRepository; queue: Map<string, PromiseSource<FileDecoration | undefined>> }
     >();
     private disposables: Disposable[] = [];
 
@@ -109,7 +109,7 @@ class GitDecorationProvider implements FileDecorationProvider {
     private disposables: Disposable[] = [];
     private decorations = new Map<string, FileDecoration>();
 
-    constructor(private repository: Repository) {
+    constructor(private repository: FinalRepository) {
         this.disposables.push(
             window.registerFileDecorationProvider(this),
             repository.onDidRunGitStatus(this.onDidRunGitStatus, this),
@@ -166,7 +166,7 @@ class GitDecorationProvider implements FileDecorationProvider {
 export class GitDecorations {
     private disposables: Disposable[] = [];
     private modelDisposables: Disposable[] = [];
-    private providers = new Map<Repository, Disposable>();
+    private providers = new Map<FinalRepository, Disposable>();
 
     constructor(private model: Model) {
         this.disposables.push(new GitIgnoreDecorationProvider(model));
@@ -201,12 +201,12 @@ export class GitDecorations {
         this.providers.clear();
     }
 
-    private onDidOpenRepository(repository: Repository): void {
+    private onDidOpenRepository(repository: FinalRepository): void {
         const provider = new GitDecorationProvider(repository);
         this.providers.set(repository, provider);
     }
 
-    private onDidCloseRepository(repository: Repository): void {
+    private onDidCloseRepository(repository: FinalRepository): void {
         const provider = this.providers.get(repository);
 
         if (provider) {

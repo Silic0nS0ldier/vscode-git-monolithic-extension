@@ -1,9 +1,9 @@
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { ScmCommand } from "../../helpers.js";
 import { createStash } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function stashWithoutUntracked(repository: Repository) {
+    async function stashWithoutUntracked(repository: FinalRepository) {
         await createStash(repository);
     }
 

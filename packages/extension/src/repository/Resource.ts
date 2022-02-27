@@ -9,7 +9,7 @@ import {
     Uri,
 } from "vscode";
 import { Status } from "../api/git.js";
-import { Repository } from "../repository.js";
+import { Submodule } from "../git.js";
 import {
     getResources,
     resolveChangeCommand,
@@ -18,6 +18,7 @@ import {
 } from "../repository/resource-command-resolver.js";
 import { localize } from "../util.js";
 import { getIconUri } from "./getIconUri.js";
+import { GitResourceGroup } from "./GitResourceGroup.js";
 import { ResourceGroupType } from "./ResourceGroupType.js";
 
 export class Resource implements SourceControlResourceState {
@@ -87,10 +88,12 @@ export class Resource implements SourceControlResourceState {
     }
 
     get command(): Command {
-        return resolveDefaultCommand(this, this._repository);
+        return resolveDefaultCommand(this, this.repoRoot);
     }
 
-    private _resources = onetime((): [Uri | undefined, Uri | undefined] => getResources(this, this._repository));
+    private _resources = onetime((): [Uri | undefined, Uri | undefined] =>
+        getResources(this, this.repoRoot, this.submodules, this.indexGroup)
+    );
 
     get resourceGroupType(): ResourceGroupType {
         return this._resourceGroupType;
@@ -297,7 +300,9 @@ export class Resource implements SourceControlResourceState {
     }
 
     constructor(
-        private _repository: Repository,
+        private repoRoot: string,
+        private submodules: Submodule[],
+        private indexGroup: GitResourceGroup,
         private _resourceGroupType: ResourceGroupType,
         private _resourceUri: Uri,
         private _type: Status,

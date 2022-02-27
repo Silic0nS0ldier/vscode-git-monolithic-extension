@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { grep, localize } from "../../../util.js";
@@ -26,7 +26,7 @@ export async function categorizeResourceByResolution(
     return { merge, resolved, unresolved, deletionConflicts };
 }
 
-export async function stageDeletionConflict(repository: Repository, uri: Uri): Promise<void> {
+export async function stageDeletionConflict(repository: FinalRepository, uri: Uri): Promise<void> {
     const uriString = uri.toString();
     const resource = repository.mergeGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString)[0];
 

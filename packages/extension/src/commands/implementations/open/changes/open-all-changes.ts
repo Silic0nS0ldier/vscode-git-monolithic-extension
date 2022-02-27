@@ -1,10 +1,10 @@
 import { commands } from "vscode";
 import { Status } from "../../../../api/git.js";
-import { Repository } from "../../../../repository.js";
+import { FinalRepository } from "../../../../repository/repository-class/mod.js";
 import { ScmCommand } from "../../../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function openAllChanges(repository: Repository): Promise<void> {
+    async function openAllChanges(repository: FinalRepository): Promise<void> {
         for (
             const resource of [
                 ...repository.workingTreeGroup.resourceStates,

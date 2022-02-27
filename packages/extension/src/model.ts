@@ -37,7 +37,7 @@ import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
-import { Repository } from "./repository.js";
+import { createRepository, FinalRepository, isFinalRepository } from "./repository/repository-class/mod.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
 import { fromGitUri } from "./uri.js";
 import {
@@ -68,29 +68,29 @@ class RepositoryPick implements QuickPickItem {
             .join(" ");
     });
 
-    constructor(public readonly repository: Repository, public readonly index: number) {}
+    constructor(public readonly repository: FinalRepository, public readonly index: number) {}
 }
 
 export interface ModelChangeEvent {
-    repository: Repository;
+    repository: FinalRepository;
     uri: Uri;
 }
 
 export interface OriginalResourceChangeEvent {
-    repository: Repository;
+    repository: FinalRepository;
     uri: Uri;
 }
 
 interface OpenRepository extends Disposable {
-    repository: Repository;
+    repository: FinalRepository;
 }
 
 export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRegistry {
-    private _onDidOpenRepository = new EventEmitter<Repository>();
-    readonly onDidOpenRepository: Event<Repository> = this._onDidOpenRepository.event;
+    private _onDidOpenRepository = new EventEmitter<FinalRepository>();
+    readonly onDidOpenRepository: Event<FinalRepository> = this._onDidOpenRepository.event;
 
-    private _onDidCloseRepository = new EventEmitter<Repository>();
-    readonly onDidCloseRepository: Event<Repository> = this._onDidCloseRepository.event;
+    private _onDidCloseRepository = new EventEmitter<FinalRepository>();
+    readonly onDidCloseRepository: Event<FinalRepository> = this._onDidCloseRepository.event;
 
     private _onDidChangeRepository = new EventEmitter<ModelChangeEvent>();
     readonly onDidChangeRepository: Event<ModelChangeEvent> = this._onDidChangeRepository.event;
@@ -99,7 +99,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     readonly onDidChangeOriginalResource: Event<OriginalResourceChangeEvent> = this._onDidChangeOriginalResource.event;
 
     private openRepositories: OpenRepository[] = [];
-    get repositories(): Repository[] {
+    get repositories(): FinalRepository[] {
         return this.openRepositories.map(r => r.repository);
     }
 
@@ -111,7 +111,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     private _onDidPublish = new EventEmitter<PublishEvent>();
     readonly onDidPublish = this._onDidPublish.event;
 
-    firePublishEvent(repository: Repository, branch?: string) {
+    firePublishEvent(repository: FinalRepository, branch?: string) {
         this._onDidPublish.fire({ repository: new ApiRepository(repository), branch: branch });
     }
 
@@ -248,9 +248,9 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 
         const activeRepositoriesList = window.visibleTextEditors
             .map(editor => this.getRepository(editor.document.uri))
-            .filter(repository => !!repository) as Repository[];
+            .filter(repository => !!repository) as FinalRepository[];
 
-        const activeRepositories = new Set<Repository>(activeRepositoriesList);
+        const activeRepositories = new Set<FinalRepository>(activeRepositoriesList);
         const openRepositoriesToDispose = removed
             .map(folder => this.getOpenRepository(folder.uri))
             .filter(r => !!r)
@@ -348,7 +348,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             }
 
             const dotGit = await this.git.getRepositoryDotGit(repositoryRoot);
-            const repository = new Repository(
+            const repository = createRepository(
                 this.git.open(repositoryRoot, dotGit),
                 this,
                 this,
@@ -366,7 +366,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         }
     });
 
-    private open(repository: Repository): void {
+    private open(repository: FinalRepository): void {
         this.outputChannel.appendLine(`Open repository: ${repository.root}`);
 
         const onDidDisappearRepository = filterEvent(
@@ -431,7 +431,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         this._onDidOpenRepository.fire(repository);
     }
 
-    close(repository: Repository): void {
+    close(repository: FinalRepository): void {
         const openRepository = this.getOpenRepository(repository);
 
         if (!openRepository) {
@@ -442,7 +442,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         openRepository.dispose();
     }
 
-    async pickRepository(): Promise<Repository | undefined> {
+    async pickRepository(): Promise<FinalRepository | undefined> {
         if (this.openRepositories.length === 0) {
             throw new Error(localize("no repositories", "There are no available repositories"));
         }
@@ -463,16 +463,16 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         return pick && pick.repository;
     }
 
-    getRepository(sourceControl: SourceControl): Repository | undefined;
-    getRepository(resourceGroup: SourceControlResourceGroup): Repository | undefined;
-    getRepository(path: string): Repository | undefined;
-    getRepository(resource: Uri): Repository | undefined;
-    getRepository(hint: any): Repository | undefined {
+    getRepository(sourceControl: SourceControl): FinalRepository | undefined;
+    getRepository(resourceGroup: SourceControlResourceGroup): FinalRepository | undefined;
+    getRepository(path: string): FinalRepository | undefined;
+    getRepository(resource: Uri): FinalRepository | undefined;
+    getRepository(hint: any): FinalRepository | undefined {
         const liveRepository = this.getOpenRepository(hint);
         return liveRepository && liveRepository.repository;
     }
 
-    private getOpenRepository(repository: Repository): OpenRepository | undefined;
+    private getOpenRepository(repository: FinalRepository): OpenRepository | undefined;
     private getOpenRepository(sourceControl: SourceControl): OpenRepository | undefined;
     private getOpenRepository(resourceGroup: SourceControlResourceGroup): OpenRepository | undefined;
     private getOpenRepository(path: string): OpenRepository | undefined;
@@ -482,8 +482,9 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             return undefined;
         }
 
-        if (hint instanceof Repository) {
-            return this.openRepositories.filter(r => r.repository === hint)[0];
+        if (isFinalRepository(hint)) {
+            const stableHint = hint;
+            return this.openRepositories.filter(r => r.repository === stableHint)[0];
         }
 
         if (typeof hint === "string") {
@@ -540,7 +541,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         return undefined;
     }
 
-    getRepositoryForSubmodule(submoduleUri: Uri): Repository | undefined {
+    getRepositoryForSubmodule(submoduleUri: Uri): FinalRepository | undefined {
         for (const repository of this.repositories) {
             for (const submodule of repository.submodules) {
                 const submodulePath = path.join(repository.root, submodule.path);

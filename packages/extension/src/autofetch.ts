@@ -15,8 +15,8 @@ import {
     workspace,
 } from "vscode";
 import { GitErrorCodes } from "./api/git.js";
-import { Repository } from "./repository.js";
 import { Operation } from "./repository/Operation.js";
+import { FinalRepository } from "./repository/repository-class/mod.js";
 import { eventToPromise, filterEvent, localize, onceEvent } from "./util.js";
 
 function isRemoteOperation(operation: Operation): boolean {
@@ -42,7 +42,7 @@ export class AutoFetcher {
 
     private disposables: Disposable[] = [];
 
-    constructor(private repository: Repository, private globalState: Memento) {
+    constructor(private repository: FinalRepository, private globalState: Memento) {
         workspace.onDidChangeConfiguration(this.onConfiguration, this, this.disposables);
         this.onConfiguration();
 

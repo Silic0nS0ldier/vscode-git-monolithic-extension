@@ -1,7 +1,7 @@
 import { Uri, window, workspace } from "vscode";
 import { ForcePushMode, GitErrorCodes } from "../../../api/git.js";
 import { Model } from "../../../model.js";
-import { Repository } from "../../../repository.js";
+import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { localize } from "../../../util.js";
 import { publish } from "../publish/publish.js";
 import { AddRemoteItem } from "../publish/quick-pick.js";
@@ -26,7 +26,7 @@ export interface PushOptions {
     };
 }
 
-export async function push(repository: Repository, pushOptions: PushOptions, model: Model) {
+export async function push(repository: FinalRepository, pushOptions: PushOptions, model: Model) {
     const remotes = repository.remotes;
 
     if (remotes.length === 0) {
