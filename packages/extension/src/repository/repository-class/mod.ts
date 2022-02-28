@@ -1,6 +1,3 @@
-import { parseIgnoreCheck } from "monolithic-git-interop/api/repository/ignore/check/parser";
-import * as fs from "node:fs";
-import path from "node:path";
 import {
     commands,
     Disposable,
@@ -16,7 +13,6 @@ import {
     Uri,
     window,
     workspace,
-    WorkspaceEdit,
 } from "vscode";
 import {
     Branch,
@@ -33,14 +29,13 @@ import {
 } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import { Commit, LogFileOptions, Repository as BaseRepository, Stash, Submodule } from "../../git.js";
-import { GitError } from "../../git/error.js";
 import { debounce } from "../../package-patches/just-debounce.js";
 import { throat } from "../../package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { IRemoteSourceProviderRegistry } from "../../remoteProvider.js";
 import { StatusBarCommands } from "../../statusbar.js";
 import { toGitUri } from "../../uri.js";
-import { anyEvent, dispose, eventToPromise, filterEvent, isDescendant, localize } from "../../util.js";
+import { anyEvent, Box, createBox, dispose, eventToPromise, filterEvent, localize } from "../../util.js";
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
@@ -51,8 +46,6 @@ import { OperationResult } from "../OperationResult.js";
 import { Operations, OperationsImpl } from "../Operations.js";
 import { ProgressManager } from "../ProgressManager.js";
 import { RepositoryState } from "../RepositoryState.js";
-import { Resource } from "../Resource.js";
-import { ResourceGroupType } from "../ResourceGroupType.js";
 import { retryRun } from "../retryRun.js";
 import { timeout } from "../timeout.js";
 import { buffer as bufferImpl } from "./buffer.js";
@@ -72,18 +65,22 @@ import { syncInternal } from "./sync-internal.js";
 import { syncLabel as syncLabelImpl } from "./sync-label.js";
 import { syncTooltip as syncTooltipImpl } from "./sync-tooltip.js";
 import { sync as syncImpl } from "./sync.js";
+import { updateModelState as updateModelStateImpl } from "./update-model-state.js";
+import { ignore as ignoreImpl } from "./ignore.js";
+import { getInputTemplate as getInputTemplateImpl } from "./get-input-template.js";
+import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
 
-function createState(
+function createStateBox(
     onDidChangeState: EventEmitter<RepositoryState>,
-    HEAD: { value: Branch | undefined },
-    refs: { value: Ref[] },
-    remotes: { value: Remote[] },
+    HEAD: Box<Branch | undefined>,
+    refs: Box<Ref[]>,
+    remotes: Box<Remote[]>,
     mergeGroup: SourceControlResourceGroup,
     indexGroup: SourceControlResourceGroup,
     workingTreeGroup: SourceControlResourceGroup,
     untrackedGroup: SourceControlResourceGroup,
     sourceControl: SourceControl,
-): { get: () => RepositoryState; set: (newState: RepositoryState) => void } {
+): Box<RepositoryState> {
     let state = RepositoryState.Idle;
 
     return {
@@ -92,9 +89,9 @@ function createState(
             state = newState;
             onDidChangeState.fire(state);
 
-            HEAD.value = undefined;
-            refs.value = [];
-            remotes.value = [];
+            HEAD.set(undefined);
+            refs.set([]);
+            remotes.set([]);
             mergeGroup.resourceStates = [];
             indexGroup.resourceStates = [];
             workingTreeGroup.resourceStates = [];
@@ -104,9 +101,9 @@ function createState(
     };
 }
 
-function createRebaseCommitStore(
+function createRebaseCommitBox(
     inputBox: SourceControlInputBox,
-): { get: () => Commit | undefined; set: (newRebaseCommit: Commit | undefined) => void } {
+): Box<Commit | undefined> {
     let rebaseCommit: Commit | undefined = undefined;
 
     return {
@@ -260,7 +257,7 @@ export function createRepository(
 
     const onFileChange = anyEvent(onWorkingTreeFileChange, onDotGitFileChange);
 
-    let isRepositoryHuge = false;
+    const isRepositoryHuge = createBox(false);
     const operations = new OperationsImpl();
 
     const onDidRunOperationEmitter = new EventEmitter<OperationResult>();
@@ -286,9 +283,9 @@ export function createRepository(
         }
     }
 
-    const HEAD: { value: Branch | undefined } = { value: undefined };
-    const refs: { value: Ref[] } = { value: [] };
-    const remotes: { value: Remote[] } = { value: [] };
+    const HEAD = createBox<Branch|undefined>(undefined);
+    const refs = createBox<Ref[]>([]);
+    const remotes = createBox<Remote[]>([]);
 
     const rootUri = Uri.file(repository.root);
     const sourceControl = scm.createSourceControl("git", "Git", rootUri);
@@ -310,7 +307,7 @@ export function createRepository(
         localize("untracked changes", "Untracked Changes"),
     ) as GitResourceGroup;
 
-    const state = createState(
+    const state = createStateBox(
         onDidChangeStateEmitter,
         HEAD,
         refs,
@@ -325,136 +322,10 @@ export function createRepository(
     const onRunOperationEmitter = new EventEmitter<Operation>();
     const onRunOperation = onRunOperationEmitter.event;
 
-    let didWarnAboutLimit = false;
+    const didWarnAboutLimit = createBox(false);
 
-    const KnownHugeFolderNames = ["node_modules"];
-
-    function checkIgnore(filePaths: string[]): Promise<Set<string>> {
-        return run(Operation.CheckIgnore, () => {
-            return new Promise<Set<string>>((resolve, reject) => {
-                filePaths = filePaths
-                    .filter(filePath => isDescendant(repoRoot, filePath));
-
-                if (filePaths.length === 0) {
-                    // nothing left
-                    return resolve(new Set<string>());
-                }
-
-                // https://git-scm.com/docs/git-check-ignore#git-check-ignore--z
-                const child = repository.stream(["check-ignore", "-v", "-z", "--stdin"], {
-                    stdio: [null, null, null],
-                });
-                child.stdin!.end(filePaths.join("\0"), "utf8");
-
-                const onExit = (exitCode: number) => {
-                    if (exitCode === 1) {
-                        // nothing ignored
-                        resolve(new Set<string>());
-                    } else if (exitCode === 0) {
-                        resolve(new Set<string>(parseIgnoreCheck(data)));
-                    } else {
-                        if (/ is in submodule /.test(stderr)) {
-                            reject(
-                                new GitError({
-                                    exitCode,
-                                    gitErrorCode: GitErrorCodes.IsInSubmodule,
-                                    stderr,
-                                    stdout: data,
-                                }),
-                            );
-                        } else {
-                            reject(
-                                new GitError({
-                                    exitCode,
-                                    stderr,
-                                    stdout: data,
-                                }),
-                            );
-                        }
-                    }
-                };
-
-                let data = "";
-                const onStdoutData = (raw: string) => {
-                    data += raw;
-                };
-
-                child.stdout!.setEncoding("utf8");
-                child.stdout!.on("data", onStdoutData);
-
-                let stderr: string = "";
-                child.stderr!.setEncoding("utf8");
-                child.stderr!.on("data", raw => stderr += raw);
-
-                child.on("error", reject);
-                child.on("exit", onExit);
-            });
-        });
-    }
-
-    async function findKnownHugeFolderPathsToIgnore(): Promise<string[]> {
-        const folderPaths: string[] = [];
-
-        for (const folderName of KnownHugeFolderNames) {
-            const folderPath = path.join(repository.root, folderName);
-
-            if (await new Promise<boolean>(c => fs.exists(folderPath, c))) {
-                folderPaths.push(folderPath);
-            }
-        }
-
-        const ignored = await checkIgnore(folderPaths);
-
-        return folderPaths.filter(p => !ignored.has(p));
-    }
-
-    async function ignore(files: Uri[]): Promise<void> {
-        return await run(Operation.Ignore, async () => {
-            const ignoreFile = `${repository.root}${path.sep}.gitignore`;
-            const textToAppend = files
-                .map(uri => path.relative(repository.root, uri.fsPath).replace(/\\/g, "/"))
-                .join("\n");
-
-            const document = await new Promise(c => fs.exists(ignoreFile, c))
-                ? await workspace.openTextDocument(ignoreFile)
-                : await workspace.openTextDocument(Uri.file(ignoreFile).with({ scheme: "untitled" }));
-
-            await window.showTextDocument(document);
-
-            const edit = new WorkspaceEdit();
-            const lastLine = document.lineAt(document.lineCount - 1);
-            const text = lastLine.isEmptyOrWhitespace ? `${textToAppend}\n` : `\n${textToAppend}\n`;
-
-            edit.insert(document.uri, lastLine.range.end, text);
-            await workspace.applyEdit(edit);
-            await document.save();
-        });
-    }
-
-    async function getRebaseCommit(): Promise<Commit | undefined> {
-        const rebaseHeadPath = path.join(repository.root, ".git", "REBASE_HEAD");
-        const rebaseApplyPath = path.join(repository.root, ".git", "rebase-apply");
-        const rebaseMergePath = path.join(repository.root, ".git", "rebase-merge");
-
-        try {
-            const [rebaseApplyExists, rebaseMergePathExists, rebaseHead] = await Promise.all([
-                new Promise<boolean>(c => fs.exists(rebaseApplyPath, c)),
-                new Promise<boolean>(c => fs.exists(rebaseMergePath, c)),
-                new Promise<string>((c, e) =>
-                    fs.readFile(rebaseHeadPath, "utf8", (err, result) => err ? e(err) : c(result))
-                ),
-            ]);
-            if (!rebaseApplyExists && !rebaseMergePathExists) {
-                return undefined;
-            }
-            return await repository.getCommit(rebaseHead.trim());
-        } catch (err) {
-            return undefined;
-        }
-    }
-
-    let submodules: Submodule[] = [];
-    const rebaseCommit = createRebaseCommitStore(sourceControl.inputBox);
+    const submodules = createBox<Submodule[]>([]);
+    const rebaseCommit = createRebaseCommitBox(sourceControl.inputBox);
 
     function setCountBadge(): void {
         const config = workspace.getConfiguration("git", Uri.file(repository.root));
@@ -487,394 +358,28 @@ export function createRepository(
     }
 
     const onDidChangeStatusEmitter = new EventEmitter<void>();
-    // aka onDidRunGitStatus
     const onDidChangeStatus = onDidChangeStatusEmitter.event;
 
-    async function getInputTemplate(): Promise<string> {
-        const commitMessage = (await Promise.all([repository.getMergeMessage(), repository.getSquashMessage()])).find(
-            msg => !!msg,
-        );
-
-        if (commitMessage) {
-            return commitMessage;
-        }
-
-        return await repository.getCommitTemplate();
-    }
-
     const updateModelState = throat(1, async () => {
-        const scopedConfig = workspace.getConfiguration("git", Uri.file(repository.root));
-        const ignoreSubmodules = scopedConfig.get<boolean>("ignoreSubmodules");
-
-        const { status, didHitLimit } = await repository.getStatus({ ignoreSubmodules });
-
-        const config = workspace.getConfiguration("git");
-        const shouldIgnore = config.get<boolean>("ignoreLimitWarning") === true;
-        const useIcons = !config.get<boolean>("decorations.enabled", true);
-        isRepositoryHuge = didHitLimit;
-
-        if (didHitLimit && !shouldIgnore && !didWarnAboutLimit) {
-            const knownHugeFolderPaths = await findKnownHugeFolderPathsToIgnore();
-            const gitWarn = localize(
-                "huge",
-                "The git repository at '{0}' has too many active changes, only a subset of Git features will be enabled.",
-                repository.root,
-            );
-            const neverAgain = { title: localize("neveragain", "Don't Show Again") };
-
-            if (knownHugeFolderPaths.length > 0) {
-                const folderPath = knownHugeFolderPaths[0];
-                const folderName = path.basename(folderPath);
-
-                const addKnown = localize("add known", "Would you like to add '{0}' to .gitignore?", folderName);
-                const yes = { title: localize("yes", "Yes") };
-
-                const result = await window.showWarningMessage(`${gitWarn} ${addKnown}`, yes, neverAgain);
-
-                if (result === neverAgain) {
-                    config.update("ignoreLimitWarning", true, false);
-                    didWarnAboutLimit = true;
-                } else if (result === yes) {
-                    ignore([Uri.file(folderPath)]);
-                }
-            } else {
-                const result = await window.showWarningMessage(gitWarn, neverAgain);
-
-                if (result === neverAgain) {
-                    config.update("ignoreLimitWarning", true, false);
-                }
-
-                didWarnAboutLimit = true;
-            }
-        }
-
-        let newHEAD: Branch | undefined;
-
-        try {
-            newHEAD = await repository.getHEAD();
-
-            if (newHEAD.name) {
-                try {
-                    newHEAD = await repository.getBranch(newHEAD.name);
-                } catch (err) {
-                    // noop
-                }
-            }
-        } catch (err) {
-            // noop
-        }
-
-        let sort = config.get<"alphabetically" | "committerdate">("branchSortOrder") || "alphabetically";
-        if (sort !== "alphabetically" && sort !== "committerdate") {
-            sort = "alphabetically";
-        }
-        const [newRefs, newRemotes, newSubmodules, newRebaseCommit] = await Promise.all([
-            repository.getRefs({ sort }),
-            repository.getRemotes(),
-            repository.getSubmodules(),
-            getRebaseCommit(),
-        ]);
-
-        HEAD.value = newHEAD;
-        refs.value = newRefs;
-        remotes.value = newRemotes;
-        submodules = newSubmodules;
-        rebaseCommit.set(newRebaseCommit);
-
-        const untrackedChanges = scopedConfig.get<"mixed" | "separate" | "hidden">("untrackedChanges");
-        const index: Resource[] = [];
-        const workingTree: Resource[] = [];
-        const merge: Resource[] = [];
-        const untracked: Resource[] = [];
-
-        status.forEach(raw => {
-            const uri = Uri.file(path.join(repository.root, raw.path));
-            const renameUri = raw.rename
-                ? Uri.file(path.join(repository.root, raw.rename))
-                : undefined;
-
-            switch (raw.x + raw.y) {
-                case "??":
-                    switch (untrackedChanges) {
-                        case "mixed":
-                            return workingTree.push(
-                                new Resource(
-                                    repoRoot,
-                                    submodules,
-                                    indexGroup as GitResourceGroup,
-                                    ResourceGroupType.WorkingTree,
-                                    uri,
-                                    Status.UNTRACKED,
-                                    useIcons,
-                                ),
-                            );
-                        case "separate":
-                            return untracked.push(
-                                new Resource(
-                                    repoRoot,
-                                    submodules,
-                                    indexGroup as GitResourceGroup,
-                                    ResourceGroupType.Untracked,
-                                    uri,
-                                    Status.UNTRACKED,
-                                    useIcons,
-                                ),
-                            );
-                        default:
-                            return undefined;
-                    }
-                case "!!":
-                    switch (untrackedChanges) {
-                        case "mixed":
-                            return workingTree.push(
-                                new Resource(
-                                    repoRoot,
-                                    submodules,
-                                    indexGroup as GitResourceGroup,
-                                    ResourceGroupType.WorkingTree,
-                                    uri,
-                                    Status.IGNORED,
-                                    useIcons,
-                                ),
-                            );
-                        case "separate":
-                            return untracked.push(
-                                new Resource(
-                                    repoRoot,
-                                    submodules,
-                                    indexGroup as GitResourceGroup,
-                                    ResourceGroupType.Untracked,
-                                    uri,
-                                    Status.IGNORED,
-                                    useIcons,
-                                ),
-                            );
-                        default:
-                            return undefined;
-                    }
-                case "DD":
-                    return merge.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Merge,
-                            uri,
-                            Status.BOTH_DELETED,
-                            useIcons,
-                        ),
-                    );
-                case "AU":
-                    return merge.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Merge,
-                            uri,
-                            Status.ADDED_BY_US,
-                            useIcons,
-                        ),
-                    );
-                case "UD":
-                    return merge.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Merge,
-                            uri,
-                            Status.DELETED_BY_THEM,
-                            useIcons,
-                        ),
-                    );
-                case "UA":
-                    return merge.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Merge,
-                            uri,
-                            Status.ADDED_BY_THEM,
-                            useIcons,
-                        ),
-                    );
-                case "DU":
-                    return merge.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Merge,
-                            uri,
-                            Status.DELETED_BY_US,
-                            useIcons,
-                        ),
-                    );
-                case "AA":
-                    return merge.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Merge,
-                            uri,
-                            Status.BOTH_ADDED,
-                            useIcons,
-                        ),
-                    );
-                case "UU":
-                    return merge.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Merge,
-                            uri,
-                            Status.BOTH_MODIFIED,
-                            useIcons,
-                        ),
-                    );
-            }
-
-            switch (raw.x) {
-                case "M":
-                    index.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Index,
-                            uri,
-                            Status.INDEX_MODIFIED,
-                            useIcons,
-                        ),
-                    );
-                    break;
-                case "A":
-                    index.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Index,
-                            uri,
-                            Status.INDEX_ADDED,
-                            useIcons,
-                        ),
-                    );
-                    break;
-                case "D":
-                    index.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Index,
-                            uri,
-                            Status.INDEX_DELETED,
-                            useIcons,
-                        ),
-                    );
-                    break;
-                case "R":
-                    index.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Index,
-                            uri,
-                            Status.INDEX_RENAMED,
-                            useIcons,
-                            renameUri,
-                        ),
-                    );
-                    break;
-                case "C":
-                    index.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.Index,
-                            uri,
-                            Status.INDEX_COPIED,
-                            useIcons,
-                            renameUri,
-                        ),
-                    );
-                    break;
-            }
-
-            switch (raw.y) {
-                case "M":
-                    workingTree.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.WorkingTree,
-                            uri,
-                            Status.MODIFIED,
-                            useIcons,
-                            renameUri,
-                        ),
-                    );
-                    break;
-                case "D":
-                    workingTree.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.WorkingTree,
-                            uri,
-                            Status.DELETED,
-                            useIcons,
-                            renameUri,
-                        ),
-                    );
-                    break;
-                case "A":
-                    workingTree.push(
-                        new Resource(
-                            repoRoot,
-                            submodules,
-                            indexGroup as GitResourceGroup,
-                            ResourceGroupType.WorkingTree,
-                            uri,
-                            Status.INTENT_TO_ADD,
-                            useIcons,
-                            renameUri,
-                        ),
-                    );
-                    break;
-            }
-
-            return undefined;
-        });
-
-        // set resource groups
-        mergeGroup.resourceStates = merge;
-        indexGroup.resourceStates = index;
-        workingTreeGroup.resourceStates = workingTree;
-        untrackedGroup.resourceStates = untracked;
-
-        // set count badge
-        setCountBadge();
-
-        // Update context key with changed resources
-        commands.executeCommand(
-            "setContext",
-            "git.changedResources",
-            [...merge, ...index, ...workingTree, ...untracked].map(r => r.resourceUri.fsPath.toString()),
+        return updateModelStateImpl(
+            repository,
+            isRepositoryHuge,
+            didWarnAboutLimit,
+            run,
+            HEAD,
+            refs,
+            remotes,
+            submodules,
+            rebaseCommit,
+            repoRoot,
+            indexGroup,
+            mergeGroup,
+            workingTreeGroup,
+            untrackedGroup,
+            setCountBadge,
+            onDidChangeStatusEmitter,
+            sourceControl,
         );
-
-        onDidChangeStatusEmitter.fire();
-
-        sourceControl.commitTemplate = await getInputTemplate();
     });
 
     async function run<T>(
@@ -977,22 +482,23 @@ export function createRepository(
     disposables.push(sourceControl);
 
     function headShortName(): string | undefined {
-        if (!HEAD.value) {
+        const valueHEAD = HEAD.get();
+        if (!valueHEAD) {
             return;
         }
 
-        if (HEAD.value.name) {
-            return HEAD.value.name;
+        if (valueHEAD.name) {
+            return valueHEAD.name;
         }
 
-        const tag = refs.value.filter(iref => iref.type === RefType.Tag && iref.commit === HEAD.value?.commit)[0];
+        const tag = refs.get().filter(iref => iref.type === RefType.Tag && iref.commit === valueHEAD.commit)[0];
         const tagName = tag && tag.name;
 
         if (tagName) {
             return tagName;
         }
 
-        return (HEAD.value.commit || "").substring(0, 8);
+        return (valueHEAD.commit || "").substring(0, 8);
     }
 
     function updateInputBoxPlaceholder(): void {
@@ -1065,16 +571,10 @@ export function createRepository(
     const onDidChangeOriginalResource = onDidChangeOriginalResourceEmitter.event;
 
     const finalRepository: FinalRepository = {
-        __type: FinalRepositorySymbol,
-        inputBox: sourceControl.inputBox,
-        ignore,
-        getInputTemplate,
-        get headShortName() {
-            return headShortName();
-        },
         get HEAD() {
-            return HEAD.value;
+            return HEAD.get();
         },
+        __type: FinalRepositorySymbol,
         add(resources, opts) {
             return run(Operation.Add, () => repository.add(resources.map(r => r.fsPath), opts));
         },
@@ -1094,7 +594,9 @@ export function createRepository(
             return run(Operation.Branch, () => repository.branch(name, _checkout, _ref));
         },
         buffer,
-        checkIgnore,
+        checkIgnore(filePaths) {
+            return checkIgnoreImpl(run, repoRoot, repository, filePaths);
+        },
         checkout(treeish, opts) {
             return run(Operation.Checkout, () => repository.checkout(treeish, [], opts));
         },
@@ -1105,7 +607,7 @@ export function createRepository(
             return run(Operation.CherryPick, () => repository.cherryPick(commitHash));
         },
         clean(resources) {
-            return cleanImpl(run, workingTreeGroup, untrackedGroup, submodules, repoRoot, repository, resources);
+            return cleanImpl(run, workingTreeGroup, untrackedGroup, submodules.get(), repoRoot, repository, resources);
         },
         commit(message, opts = {}) {
             return commitImpl(run, rebaseCommit.get(), repoRoot, repository, message, opts);
@@ -1179,6 +681,9 @@ export function createRepository(
         getGlobalConfig(key) {
             return getGlobalConfig(repository, key);
         },
+        getInputTemplate() {
+            return getInputTemplateImpl(repository);
+        },
         getMergeBase(ref1, ref2) {
             return run(Operation.MergeBase, () => repository.getMergeBase(ref1, ref2));
         },
@@ -1193,15 +698,22 @@ export function createRepository(
         },
         get headLabel() {
             return headLabelImpl(
-                HEAD.value,
-                refs.value,
+                HEAD.get(),
+                refs.get(),
                 workingTreeGroup,
                 untrackedGroup,
                 indexGroup,
                 mergeGroup,
             );
         },
+        get headShortName() {
+            return headShortName();
+        },
+        ignore(files) {
+            return ignoreImpl(run, repository, files);
+        },
         indexGroup,
+        inputBox: sourceControl.inputBox,
         log(options) {
             return run(Operation.Log, () => repository.log(options));
         },
@@ -1228,14 +740,14 @@ export function createRepository(
             return run(Operation.Stash, () => repository.popStash(index));
         },
         pull(head, unshallow) {
-            return pullImpl(run, repoRoot, repository, HEAD.value, workingTreeGroup, head, unshallow);
+            return pullImpl(run, repoRoot, repository, HEAD.get(), workingTreeGroup, head, unshallow);
         },
         pullFrom(rebase, remote, branch, unshallow) {
             return pullFromImpl(
                 run,
                 repoRoot,
                 repository,
-                HEAD.value,
+                HEAD.get(),
                 workingTreeGroup,
                 rebase,
                 remote,
@@ -1244,7 +756,7 @@ export function createRepository(
             );
         },
         pullWithRebase(head) {
-            return pullWithRebaseImpl(run, repoRoot, repository, workingTreeGroup, HEAD.value, head);
+            return pullWithRebaseImpl(run, repoRoot, repository, workingTreeGroup, HEAD.get(), head);
         },
         push(head, forcePushMode) {
             return pushImpl(run, repository, finalRepository, pushErrorHandlerRegistry, head, forcePushMode);
@@ -1308,10 +820,10 @@ export function createRepository(
             return rebaseCommit.get();
         },
         get refs() {
-            return refs.value;
+            return refs.get();
         },
         get remotes() {
-            return remotes.value;
+            return remotes.get();
         },
         removeRemote(name) {
             return run(Operation.Remote, () => repository.removeRemote(name));
@@ -1344,22 +856,24 @@ export function createRepository(
             return stageImpl(repository, run, onDidChangeOriginalResourceEmitter, resource, contents);
         },
         status,
-        submodules,
+        get submodules() {
+            return submodules.get();
+        },
         sync(head) {
             return syncImpl(
                 run,
                 repoRoot,
                 workingTreeGroup,
                 repository,
-                HEAD.value,
-                remotes.value,
+                HEAD.get(),
+                remotes.get(),
                 finalRepository,
                 pushErrorHandlerRegistry,
                 head,
             );
         },
         get syncLabel() {
-            return syncLabelImpl(HEAD.value, remotes.value);
+            return syncLabelImpl(HEAD.get(), remotes.get());
         },
         syncRebase: throat(
             1,
@@ -1369,8 +883,8 @@ export function createRepository(
                     repoRoot,
                     workingTreeGroup,
                     repository,
-                    HEAD.value,
-                    remotes.value,
+                    HEAD.get(),
+                    remotes.get(),
                     finalRepository,
                     pushErrorHandlerRegistry,
                     head,
@@ -1378,7 +892,7 @@ export function createRepository(
                 ),
         ),
         get syncTooltip() {
-            return syncTooltipImpl(HEAD.value, remotes.value);
+            return syncTooltipImpl(HEAD.get(), remotes.get());
         },
         tag(name, message) {
             return run(Operation.Tag, () => repository.tag(name, message));
