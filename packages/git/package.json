@@ -38,6 +38,10 @@
             "import": "./dist/api/rev-parse/head.js",
             "types": "./dist/api/rev-parse/head.d.ts"
         },
+        "./api/symbolic-ref/head": {
+            "import": "./dist/api/symbolic-ref/head.js",
+            "types": "./dist/api/symbolic-ref/head.d.ts"
+        },
         "./api/rev-parse/show-toplevel": {
             "import": "./dist/api/rev-parse/show-toplevel.js",
             "types": "./dist/api/rev-parse/show-toplevel.d.ts"

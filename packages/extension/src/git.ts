@@ -7,7 +7,6 @@ import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
 import { init } from "monolithic-git-interop/api/repository/init";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
-import { head } from "monolithic-git-interop/api/rev-parse/head";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
 import { GitContext } from "monolithic-git-interop/cli";
 import { AllServices } from "monolithic-git-interop/services";
@@ -53,6 +52,7 @@ import { Stash } from "./git/Stash.js";
 import { Submodule } from "./git/Submodule.js";
 import { groupBy, Limiter, splitInChunks } from "./util.js";
 import * as Versions from "./util/versions.js";
+import { getHEAD } from "./git/repository-class/get-head.js";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
@@ -1146,27 +1146,7 @@ export class Repository {
     }
 
     async getHEAD(): Promise<Ref> {
-        try {
-            const result = await this.exec(["symbolic-ref", "--short", "HEAD"]);
-
-            if (!result.stdout) {
-                throw new Error("Not in a branch");
-            }
-
-            return { commit: undefined, name: result.stdout.trim(), type: RefType.Head };
-        } catch (err) {
-            const result = await head(this._git._context, this.repositoryRoot);
-
-            if (isOk(result)) {
-                const commitMaybe = unwrap(result);
-                if (commitMaybe === undefined) {
-                    throw new Error("Error parsing HEAD");
-                }
-                return { commit: commitMaybe, name: undefined, type: RefType.Head };
-            }
-
-            throw unwrap(result);
-        }
+        return getHEAD(this._git._context, this.repositoryRoot);
     }
 
     async findTrackingBranches(upstreamBranch: string): Promise<Branch[]> {
