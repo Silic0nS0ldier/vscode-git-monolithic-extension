@@ -117,7 +117,7 @@ async function createModel(
         env: environment,
         gitPath: info.path,
         userAgent: `git/${info.version} (${
-            (os as any).version?.() ?? os.type()
+            os.version()
         } ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
         version: info.version,
     });
