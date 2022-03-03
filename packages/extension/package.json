@@ -11,6 +11,7 @@
         "jschardet": "3.0.0",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:*",
+        "node-abort-controller": "^3.0.1",
         "onetime": "^6.0.0",
         "throat": "^6.0.1",
         "vscode-nls": "^5.0.0",

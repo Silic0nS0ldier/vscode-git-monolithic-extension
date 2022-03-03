@@ -5,6 +5,7 @@ import { Model } from "../../../model.js";
 import { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import { localize } from "../../../util.js";
+import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
 
 export async function cloneRepository(
     model: Model,
@@ -75,7 +76,7 @@ export async function cloneRepository(
                 git.clone(
                     normalisedUrl!,
                     { parentPath: normalisedParentPath!, progress, recursive: options.recursive },
-                    token,
+                    fromCancellationToken(token),
                 ),
         );
 

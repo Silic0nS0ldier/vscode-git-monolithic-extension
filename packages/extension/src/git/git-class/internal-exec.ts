@@ -21,7 +21,7 @@ export async function internalExec(
         child.stdin!.end(options.input, "utf8");
     }
 
-    const bufferResult = await exec(child, options.cancellationToken);
+    const bufferResult = await exec(child, options.abortSignal);
 
     if (bufferResult.stderr.length > 0) {
         log(`PID_${child.pid} [${options.log_mode}] < [ERR] ${JSON.stringify(bufferResult.stderr)}\n`);

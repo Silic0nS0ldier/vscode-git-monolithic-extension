@@ -1,8 +1,10 @@
-import { CancellationToken, ProgressLocation, ProgressOptions, Uri, window, workspace } from "vscode";
+import type NAC from "node-abort-controller";
+import { ProgressLocation, ProgressOptions, Uri, window, workspace } from "vscode";
 import { Branch, Remote } from "../../api/git.js";
 import { Repository } from "../../git.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { localize } from "../../util.js";
+import { fromCancellationToken } from "../../util/abort-signal-adapters.js";
 import { GitResourceGroup } from "../GitResourceGroup.js";
 import { Operation } from "../Operations.js";
 import { AbstractRepository } from "./AbstractRepository.js";
@@ -45,14 +47,14 @@ export async function syncInternal(
                 const followTags = config.get<boolean>("followTagsWhenSync");
                 const supportCancellation = config.get<boolean>("supportCancellation");
 
-                const fn = async (cancellationToken?: CancellationToken) => {
+                const fn = async (abortSignal?: NAC.AbortSignal) => {
                     // When fetchOnPull is enabled, fetch all branches when pulling
                     if (fetchOnPull) {
-                        await repository.fetch({ all: true, cancellationToken });
+                        await repository.fetch({ all: true, abortSignal });
                     }
 
                     if (await checkIfMaybeRebased(run, repository, HEAD?.name)) {
-                        await repository.pull(rebase, remoteName, pullBranch, { cancellationToken, tags });
+                        await repository.pull(rebase, remoteName, pullBranch, { abortSignal, tags });
                     }
                 };
 
@@ -66,7 +68,7 @@ export async function syncInternal(
                         ),
                     };
 
-                    await window.withProgress(opts, (_, token) => fn(token));
+                    await window.withProgress(opts, (_, token) => fn(fromCancellationToken(token)));
                 } else {
                     await fn();
                 }

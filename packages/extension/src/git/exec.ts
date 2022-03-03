@@ -1,6 +1,6 @@
+import type NAC from "node-abort-controller";
 import * as cp from "node:child_process";
-import { CancellationToken } from "vscode";
-import { dispose, IDisposable, onceEvent, toDisposable } from "../util.js";
+import { dispose, IDisposable, toDisposable } from "../util.js";
 import { cpErrorHandler, GitError } from "./error.js";
 
 export interface IExecutionResult<T extends string | Buffer> {
@@ -11,13 +11,13 @@ export interface IExecutionResult<T extends string | Buffer> {
 
 export async function exec(
     child: cp.ChildProcess,
-    cancellationToken?: CancellationToken,
+    abortSignal?: NAC.AbortSignal,
 ): Promise<IExecutionResult<Buffer>> {
     if (!child.stdout || !child.stderr) {
         throw new GitError({ message: "Failed to get stdout or stderr from git process." });
     }
 
-    if (cancellationToken && cancellationToken.isCancellationRequested) {
+    if (abortSignal?.aborted) {
         throw new GitError({ message: "Cancelled" });
     }
 
@@ -50,9 +50,9 @@ export async function exec(
         }),
     ]) as Promise<[number, Buffer, string]>;
 
-    if (cancellationToken) {
+    if (abortSignal) {
         const cancellationPromise = new Promise<[number, Buffer, string]>((_, e) => {
-            onceEvent(cancellationToken.onCancellationRequested)(() => {
+            abortSignal.addEventListener("abort", () => {
                 try {
                     child.kill();
                 } catch (err) {

@@ -13,13 +13,14 @@ import { GitContext } from "monolithic-git-interop/cli";
 import { AllServices } from "monolithic-git-interop/services";
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isOk, unwrap } from "monolithic-git-interop/util/result";
+import type NAC from "node-abort-controller";
 import * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
 import { exists, promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { StringDecoder } from "node:string_decoder";
-import { CancellationToken, Progress, Uri } from "vscode";
+import { Progress, Uri } from "vscode";
 import {
     Branch,
     BranchQuery,
@@ -118,7 +119,7 @@ export class Git {
         throw unwrap(result);
     }
 
-    async clone(url: string, options: ICloneOptions, cancellationToken?: CancellationToken): Promise<string> {
+    async clone(url: string, options: ICloneOptions, abortSignal?: NAC.AbortSignal): Promise<string> {
         let baseFolderName = decodeURI(url).replace(/[\/]+$/, "").replace(/^.*[\/\\]/, "").replace(/\.git$/, "")
             || "repository";
         let folderName = baseFolderName;
@@ -166,7 +167,7 @@ export class Git {
                 command.push("--recursive");
             }
             await this.exec(options.parentPath, command, {
-                cancellationToken,
+                abortSignal,
                 env: { "GIT_HTTP_USER_AGENT": this.userAgent },
                 onSpawn,
             });
@@ -232,7 +233,7 @@ export const commitRegex = /([0-9a-f]{40})\n(.*)\n(.*)\n(.*)\n(.*)\n(.*)(?:\n([^
 export interface PullOptions {
     unshallow?: boolean;
     tags?: boolean;
-    readonly cancellationToken?: CancellationToken;
+    readonly abortSignal?: NAC.AbortSignal;
 }
 
 export class Repository {
@@ -883,12 +884,12 @@ export class Repository {
             prune?: boolean;
             depth?: number;
             silent?: boolean;
-            readonly cancellationToken?: CancellationToken;
+            readonly abortSignal?: NAC.AbortSignal;
         } = {},
     ): Promise<void> {
         const args = ["fetch"];
         const spawnOptions: SpawnOptions = {
-            cancellationToken: options.cancellationToken,
+            abortSignal: options.abortSignal,
             env: { "GIT_HTTP_USER_AGENT": this.git.userAgent },
         };
 
@@ -949,7 +950,7 @@ export class Repository {
 
         try {
             await this.exec(args, {
-                cancellationToken: options.cancellationToken,
+                abortSignal: options.abortSignal,
                 env: { "GIT_HTTP_USER_AGENT": this.git.userAgent },
             });
         } catch (err) {
