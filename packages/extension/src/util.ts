@@ -5,7 +5,7 @@
 
 import * as byline from "byline";
 import { createReadStream, promises as fs } from "node:fs";
-import path, { dirname, sep } from "node:path";
+import { dirname, sep } from "node:path";
 import { Readable } from "node:stream";
 import { Disposable, Event, EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
