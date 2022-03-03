@@ -1,9 +1,9 @@
 import { window } from "vscode";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 
-export async function stashPopLatest(repository: FinalRepository): Promise<void> {
+export async function stashPopLatest(repository: AbstractRepository): Promise<void> {
     const stashes = await repository.getStashes();
 
     if (stashes.length === 0) {

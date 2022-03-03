@@ -1,6 +1,6 @@
 import { QuickPickItem, window } from "vscode";
 import { GitErrorCodes } from "../../../api/git.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 import { branch } from "../branch/helpers.js";
@@ -12,7 +12,7 @@ import { createCheckoutItems } from "./helpers.js";
 import { CheckoutDetachedItem, CheckoutItem } from "./quick-pick.js";
 
 export async function checkout(
-    repository: FinalRepository,
+    repository: AbstractRepository,
     opts?: { detached?: boolean; treeish?: string },
 ): Promise<boolean> {
     if (typeof opts?.treeish === "string") {
@@ -88,7 +88,7 @@ export async function checkout(
 }
 
 export function createCommand(): ScmCommand {
-    async function checkoutFn(repository: FinalRepository, treeish?: string): Promise<boolean> {
+    async function checkoutFn(repository: AbstractRepository, treeish?: string): Promise<boolean> {
         return checkout(repository, { treeish });
     }
 

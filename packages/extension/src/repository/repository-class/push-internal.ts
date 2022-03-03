@@ -2,11 +2,11 @@ import { ApiRepository } from "../../api/api1.js";
 import { ForcePushMode } from "../../api/git.js";
 import { Repository } from "../../git.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
-import { FinalRepository } from "./mod.js";
+import { AbstractRepository } from "./AbstractRepository.js";
 
 export async function pushInternal(
     repository: Repository,
-    finalRepository: FinalRepository,
+    finalRepository: AbstractRepository,
     pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     remote?: string,
     refspec?: string,

@@ -1,10 +1,10 @@
 import { Model } from "../../../model.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../../helpers.js";
 import { commitWithAnyInput } from "./helpers.js";
 
 export function createCommand(model: Model): ScmCommand {
-    async function commitStagedSigned(repository: FinalRepository): Promise<void> {
+    async function commitStagedSigned(repository: AbstractRepository): Promise<void> {
         await commitWithAnyInput(repository, model, { all: false, signoff: true });
     }
 

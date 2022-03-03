@@ -1,8 +1,8 @@
-import { FinalRepository } from "../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function restoreCommitTemplate(repository: FinalRepository): Promise<void> {
+    async function restoreCommitTemplate(repository: AbstractRepository): Promise<void> {
         repository.inputBox.value = await repository.getCommitTemplate();
     }
 

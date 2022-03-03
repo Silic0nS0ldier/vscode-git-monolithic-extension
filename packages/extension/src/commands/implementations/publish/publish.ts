@@ -2,13 +2,13 @@ import { window } from "vscode";
 import { ApiRepository } from "../../../api/api1.js";
 import { RemoteSourceProvider } from "../../../api/git.js";
 import { Model } from "../../../model.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
 import { AddRemoteItem } from "./quick-pick.js";
 
-export async function publish(model: Model, repository: FinalRepository) {
+export async function publish(model: Model, repository: AbstractRepository) {
     const branchName = repository.HEAD && repository.HEAD.name || "";
     const remotes = repository.remotes;
 
@@ -86,7 +86,7 @@ export async function publish(model: Model, repository: FinalRepository) {
 }
 
 export function createCommand(model: Model): ScmCommand {
-    async function publishFn(repository: FinalRepository): Promise<void> {
+    async function publishFn(repository: AbstractRepository): Promise<void> {
         await publish(model, repository);
     }
 

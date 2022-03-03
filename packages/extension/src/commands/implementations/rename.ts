@@ -1,10 +1,10 @@
 import * as path from "node:path";
 import { Uri, window } from "vscode";
-import { FinalRepository } from "../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function rename(repository: FinalRepository, fromUri: Uri | undefined): Promise<void> {
+    async function rename(repository: AbstractRepository, fromUri: Uri | undefined): Promise<void> {
         const normalisedFromUri = fromUri ?? window.activeTextEditor?.document.uri;
 
         if (!normalisedFromUri) {

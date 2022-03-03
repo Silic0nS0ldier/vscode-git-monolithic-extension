@@ -1,13 +1,13 @@
 import * as path from "node:path";
 import { window } from "vscode";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../../../repository/Resource.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function stageAllMerge(repository: FinalRepository): Promise<void> {
+    async function stageAllMerge(repository: AbstractRepository): Promise<void> {
         const resources = repository.mergeGroup.resourceStates.filter(s => s instanceof Resource) as Resource[];
         const { merge, unresolved, deletionConflicts } = await categorizeResourceByResolution(resources);
 

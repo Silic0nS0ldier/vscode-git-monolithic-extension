@@ -1,13 +1,13 @@
 import { window } from "vscode";
 import { Model } from "../../../model.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 
 export async function addRemote(
     model: Model,
-    repository: FinalRepository,
+    repository: AbstractRepository,
 ): Promise<string | void> {
     const url = await pickRemoteSource(model, {
         providerLabel: provider => localize("addfrom", "Add remote from {0}", provider.name),
@@ -47,7 +47,7 @@ export async function addRemote(
 export function createCommand(
     model: Model,
 ): ScmCommand {
-    async function addRemoteFn(repository: FinalRepository): Promise<string | void> {
+    async function addRemoteFn(repository: AbstractRepository): Promise<string | void> {
         await addRemote(model, repository);
     }
 

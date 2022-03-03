@@ -1,6 +1,5 @@
 import { Submodule } from "./Submodule.js";
 
-
 export function parseGitmodules(raw: string): Submodule[] {
     const regex = /\r?\n/g;
     let position = 0;

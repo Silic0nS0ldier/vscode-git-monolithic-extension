@@ -1,10 +1,10 @@
 import { window } from "vscode";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function createTag(repository: FinalRepository): Promise<void> {
+    async function createTag(repository: AbstractRepository): Promise<void> {
         const inputTagName = await window.showInputBox({
             ignoreFocusOut: true,
             placeHolder: localize("tag name", "Tag name"),

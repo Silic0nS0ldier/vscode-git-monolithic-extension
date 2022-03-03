@@ -1,12 +1,12 @@
 import * as path from "node:path";
 import { window } from "vscode";
 import { Status } from "../../../api/git.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 import { cleanTrackedChanges, cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
 
-export async function cleanAll(repository: FinalRepository): Promise<void> {
+export async function cleanAll(repository: AbstractRepository): Promise<void> {
     let resources = repository.workingTreeGroup.resourceStates;
 
     if (resources.length === 0) {

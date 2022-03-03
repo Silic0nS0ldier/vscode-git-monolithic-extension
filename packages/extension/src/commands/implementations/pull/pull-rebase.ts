@@ -1,10 +1,10 @@
 import { window } from "vscode";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function pullRebase(repository: FinalRepository): Promise<void> {
+    async function pullRebase(repository: AbstractRepository): Promise<void> {
         const remotes = repository.remotes;
 
         if (remotes.length === 0) {

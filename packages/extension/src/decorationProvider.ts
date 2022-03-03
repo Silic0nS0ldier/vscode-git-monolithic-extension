@@ -20,7 +20,7 @@ import { GitErrorCodes, Status } from "./api/git.js";
 import { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { GitResourceGroup } from "./repository/GitResourceGroup.js";
-import { FinalRepository } from "./repository/repository-class/mod.js";
+import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { anyEvent, dispose, filterEvent, fireEvent, PromiseSource } from "./util.js";
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
@@ -29,12 +29,12 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
     readonly onDidChangeFileDecorations: Event<undefined>;
     private queue = new Map<
         string,
-        { repository: FinalRepository; queue: Map<string, PromiseSource<FileDecoration | undefined>> }
+        { repository: AbstractRepository; queue: Map<string, PromiseSource<FileDecoration | undefined>> }
     >();
     private disposables: Disposable[] = [];
 
     constructor(private model: Model) {
-        const sources = anyEvent<TextDocument | FinalRepository>(
+        const sources = anyEvent<TextDocument | AbstractRepository>(
             filterEvent(workspace.onDidSaveTextDocument, e => /\.gitignore$|\.git\/info\/exclude$/.test(e.uri.path)),
             model.onDidOpenRepository,
             model.onDidCloseRepository,
@@ -126,7 +126,7 @@ class GitDecorationProvider implements FileDecorationProvider {
     private disposables: Disposable[] = [];
     private decorations = new Map<string, FileDecoration>();
 
-    constructor(private repository: FinalRepository) {
+    constructor(private repository: AbstractRepository) {
         this.disposables.push(
             window.registerFileDecorationProvider(this),
             repository.onDidRunGitStatus(this.onDidRunGitStatus, this),
@@ -168,7 +168,7 @@ class GitDecorationProvider implements FileDecorationProvider {
 export class GitDecorations {
     private disposables: Disposable[] = [];
     private modelDisposables: Disposable[] = [];
-    private providers = new Map<FinalRepository, Disposable>();
+    private providers = new Map<AbstractRepository, Disposable>();
 
     constructor(private model: Model) {
         this.disposables.push(new GitIgnoreDecorationProvider(model));
@@ -203,12 +203,12 @@ export class GitDecorations {
         this.providers.clear();
     }
 
-    private onDidOpenRepository(repository: FinalRepository): void {
+    private onDidOpenRepository(repository: AbstractRepository): void {
         const provider = new GitDecorationProvider(repository);
         this.providers.set(repository, provider);
     }
 
-    private onDidCloseRepository(repository: FinalRepository): void {
+    private onDidCloseRepository(repository: AbstractRepository): void {
         const provider = this.providers.get(repository);
 
         if (provider) {

@@ -1,8 +1,8 @@
-import { FinalRepository } from "../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function refresh(repository: FinalRepository): Promise<void> {
+    async function refresh(repository: AbstractRepository): Promise<void> {
         await repository.status();
     }
 

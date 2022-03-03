@@ -5,9 +5,9 @@ import { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { localize } from "../../util.js";
 import { GitResourceGroup } from "../GitResourceGroup.js";
 import { Operation } from "../Operations.js";
+import { AbstractRepository } from "./AbstractRepository.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { maybeAutoStash } from "./maybe-auto-stash.js";
-import { FinalRepository } from "./mod.js";
 import { pushInternal } from "./push-internal.js";
 import { RunFn } from "./run.js";
 
@@ -18,7 +18,7 @@ export async function syncInternal(
     repository: Repository,
     HEAD: Branch | undefined,
     remotes: Remote[],
-    finalRepository: FinalRepository,
+    finalRepository: AbstractRepository,
     pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     head: Branch,
     rebase: boolean,

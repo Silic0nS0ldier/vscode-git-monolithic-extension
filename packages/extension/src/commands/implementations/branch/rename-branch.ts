@@ -1,12 +1,12 @@
 import { window } from "vscode";
 import { GitErrorCodes } from "../../../api/git.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 import { promptForBranchName } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function renameBranch(repository: FinalRepository): Promise<void> {
+    async function renameBranch(repository: AbstractRepository): Promise<void> {
         const currentBranchName = repository.HEAD && repository.HEAD.name;
         const branchName = await promptForBranchName(undefined, currentBranchName);
 

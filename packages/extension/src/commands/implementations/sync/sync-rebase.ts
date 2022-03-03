@@ -1,10 +1,10 @@
 import { Model } from "../../../model.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../../helpers.js";
 import { sync } from "./helper.js";
 
 export function createCommand(model: Model): ScmCommand {
-    async function syncRebase(repository: FinalRepository): Promise<void> {
+    async function syncRebase(repository: AbstractRepository): Promise<void> {
         try {
             await sync(repository, true, model);
         } catch (err) {

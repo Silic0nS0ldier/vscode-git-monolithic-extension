@@ -1,11 +1,11 @@
 import { Model } from "../../../model.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../../helpers.js";
 import { push, PushType } from "./helpers.js";
 
 export function createCommand(model: Model): ScmCommand {
     async function pushTo(
-        repository: FinalRepository,
+        repository: AbstractRepository,
         remote?: string,
         refspec?: string,
         setUpstream?: boolean,

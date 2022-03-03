@@ -1,7 +1,6 @@
 import * as cp from "node:child_process";
 import { CancellationToken } from "vscode";
 
-
 export interface SpawnOptions extends cp.SpawnOptions {
     input?: string;
     encoding?: string;

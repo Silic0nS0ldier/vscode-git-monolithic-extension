@@ -1,10 +1,10 @@
 import { window } from "vscode";
-import { FinalRepository } from "../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../util.js";
 import { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function cherryPick(repository: FinalRepository): Promise<void> {
+    async function cherryPick(repository: AbstractRepository): Promise<void> {
         const hash = await window.showInputBox({
             ignoreFocusOut: true,
             placeHolder: localize("commit hash", "Commit Hash"),

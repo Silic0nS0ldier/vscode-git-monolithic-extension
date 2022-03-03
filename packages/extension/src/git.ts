@@ -33,24 +33,24 @@ import {
     Remote,
 } from "./api/git.js";
 import { detectEncoding } from "./encoding.js";
-import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from "./git/git-class/diff.js";
+import { Commit } from "./git/Commit.js";
 import { GitError } from "./git/error.js";
 import { exec, IExecutionResult } from "./git/exec.js";
-import { sanitizePath } from "./git/helpers.js";
+import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from "./git/git-class/diff.js";
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
-import { getStatus } from "./git/repository-class/get-status.js";
+import { sanitizePath } from "./git/helpers.js";
 import { IFileStatus } from "./git/IFileStatus.js";
 import { LogFileOptions } from "./git/LogFileOptions.js";
-import { Stash } from "./git/Stash.js";
-import { groupBy, Limiter, mkdirp, splitInChunks, Versions } from "./util.js";
-import { SpawnOptions } from "./git/SpawnOptions.js";
-import { Commit } from "./git/Commit.js";
-import { Submodule } from "./git/Submodule.js";
-import { parseGitmodules } from "./git/parseGitmodules.js";
 import { parseGitCommits } from "./git/parseGitCommits.js";
-import { LsTreeElement, parseLsTree } from "./git/parseLsTree.js";
+import { parseGitmodules } from "./git/parseGitmodules.js";
 import { LsFilesElement, parseLsFiles } from "./git/parseLsFiles.js";
+import { LsTreeElement, parseLsTree } from "./git/parseLsTree.js";
+import { getStatus } from "./git/repository-class/get-status.js";
+import { SpawnOptions } from "./git/SpawnOptions.js";
+import { Stash } from "./git/Stash.js";
+import { Submodule } from "./git/Submodule.js";
+import { groupBy, Limiter, mkdirp, splitInChunks, Versions } from "./util.js";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;

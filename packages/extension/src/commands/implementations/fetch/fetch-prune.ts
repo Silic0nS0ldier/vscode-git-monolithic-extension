@@ -1,10 +1,10 @@
 import { window } from "vscode";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function fetchPrune(repository: FinalRepository): Promise<void> {
+    async function fetchPrune(repository: AbstractRepository): Promise<void> {
         if (repository.remotes.length === 0) {
             window.showWarningMessage(
                 localize("no remotes to fetch", "This repository has no remotes configured to fetch from."),

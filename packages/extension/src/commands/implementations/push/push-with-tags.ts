@@ -1,10 +1,10 @@
 import { Model } from "../../../model.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../../helpers.js";
 import { push, PushType } from "./helpers.js";
 
 export function createCommand(model: Model): ScmCommand {
-    async function pushWithTags(repository: FinalRepository): Promise<void> {
+    async function pushWithTags(repository: AbstractRepository): Promise<void> {
         await push(repository, { pushType: PushType.PushFollowTags }, model);
     }
 

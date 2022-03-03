@@ -1,12 +1,12 @@
 import { ProgressLocation, Uri, window, workspace } from "vscode";
 import { debounceEvent, EmptyDisposable, eventToPromise, filterEvent, IDisposable, onceEvent } from "../util.js";
-import { FinalRepository } from "./repository-class/mod.js";
+import { AbstractRepository } from "./repository-class/AbstractRepository.js";
 
 export class ProgressManager {
     private enabled = false;
     private disposable: IDisposable = EmptyDisposable;
 
-    constructor(private repository: FinalRepository) {
+    constructor(private repository: AbstractRepository) {
         const onDidChange = filterEvent(
             workspace.onDidChangeConfiguration,
             e => e.affectsConfiguration("git", Uri.file(this.repository.root)),

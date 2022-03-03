@@ -1,7 +1,7 @@
 import AggregateError from "aggregate-error";
 import { OutputChannel, TextDocumentContentProvider, Uri, window } from "vscode";
 import { Model } from "../model.js";
-import { FinalRepository } from "../repository/repository-class/mod.js";
+import { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../repository/Resource.js";
 import { fromGitUri, isGitUri } from "../uri.js";
 import { pathEquals } from "../util.js";
@@ -9,7 +9,7 @@ import { pathEquals } from "../util.js";
 export async function runByRepository(
     model: Model,
     resources: Uri[],
-    fn: (repository: FinalRepository, resources: Uri[]) => Promise<void>,
+    fn: (repository: AbstractRepository, resources: Uri[]) => Promise<void>,
 ): Promise<void> {
     const groups = resources.reduce((result, resource) => {
         let repository = model.getRepository(resource);
@@ -33,7 +33,7 @@ export async function runByRepository(
         }
 
         return result;
-    }, [] as { repository: FinalRepository; resources: Uri[] }[]);
+    }, [] as { repository: AbstractRepository; resources: Uri[] }[]);
 
     const promises = groups
         .map(({ repository, resources }) => fn(repository, resources));

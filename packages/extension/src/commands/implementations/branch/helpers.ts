@@ -1,5 +1,5 @@
 import { window, workspace } from "vscode";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { createCheckoutItems } from "../checkout/helpers.js";
 import { HEADItem } from "./quick-pick.js";
@@ -38,7 +38,7 @@ export async function promptForBranchName(defaultName?: string, initialValue?: s
     return sanitize(rawBranchName || "");
 }
 
-export async function branch(repository: FinalRepository, defaultName?: string, from = false): Promise<void> {
+export async function branch(repository: AbstractRepository, defaultName?: string, from = false): Promise<void> {
     const branchName = await promptForBranchName(defaultName);
 
     if (!branchName) {

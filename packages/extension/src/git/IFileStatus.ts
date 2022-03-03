@@ -1,4 +1,3 @@
-
 export interface IFileStatus {
     x: string;
     y: string;

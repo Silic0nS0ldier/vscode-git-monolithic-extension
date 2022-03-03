@@ -3,7 +3,7 @@ import { Repository } from "../../git.js";
 import { throat } from "../../package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { GitResourceGroup } from "../GitResourceGroup.js";
-import { FinalRepository } from "./mod.js";
+import { AbstractRepository } from "./AbstractRepository.js";
 import { RunFn } from "./run.js";
 import { syncInternal } from "./sync-internal.js";
 
@@ -14,7 +14,7 @@ export const sync = throat(1, (
     repository: Repository,
     HEAD: Branch | undefined,
     remotes: Remote[],
-    finalRepository: FinalRepository,
+    finalRepository: AbstractRepository,
     pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     head: Branch,
 ) => syncInternal(

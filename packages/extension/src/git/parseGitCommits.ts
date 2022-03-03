@@ -1,5 +1,5 @@
-import { Commit } from "./Commit.js";
 import { commitRegex } from "../git.js";
+import { Commit } from "./Commit.js";
 
 /**
  * @todo This appears to be vulnerable to an infinite loop, or has confusing flow.

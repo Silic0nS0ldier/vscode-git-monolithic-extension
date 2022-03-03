@@ -20,7 +20,7 @@ import {
 import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
-import { FinalRepository } from "./repository/repository-class/mod.js";
+import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { fromGitUri, toGitUri } from "./uri.js";
 import { EmptyDisposable, eventToPromise, filterEvent, isDescendant, pathEquals } from "./util.js";
 
@@ -32,7 +32,7 @@ interface CacheRow {
 const THREE_MINUTES = 1000 * 60 * 3;
 const FIVE_MINUTES = 1000 * 60 * 5;
 
-function sanitizeRef(ref: string, path: string, repository: FinalRepository): string {
+function sanitizeRef(ref: string, path: string, repository: AbstractRepository): string {
     if (ref === "~") {
         const fileUri = Uri.file(path);
         const uriString = fileUri.toString();

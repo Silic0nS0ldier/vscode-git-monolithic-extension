@@ -7,7 +7,7 @@ import { Command, Disposable, Event, EventEmitter, Uri, workspace } from "vscode
 import { Branch, RemoteSourceProvider } from "./api/git.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
 import { Operation } from "./repository/Operations.js";
-import { FinalRepository } from "./repository/repository-class/mod.js";
+import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { anyEvent, dispose, filterEvent, localize } from "./util.js";
 
 class CheckoutStatusBar {
@@ -17,7 +17,7 @@ class CheckoutStatusBar {
     }
     private disposables: Disposable[] = [];
 
-    constructor(private repository: FinalRepository) {
+    constructor(private repository: AbstractRepository) {
         repository.onDidRunGitStatus(this._onDidChange.fire, this._onDidChange, this.disposables);
     }
 
@@ -65,7 +65,7 @@ class SyncStatusBar {
     }
 
     constructor(
-        private repository: FinalRepository,
+        private repository: AbstractRepository,
         private remoteSourceProviderRegistry: IRemoteSourceProviderRegistry,
     ) {
         this._state = {
@@ -199,7 +199,7 @@ export class StatusBarCommands {
     private checkoutStatusBar: CheckoutStatusBar;
     private disposables: Disposable[] = [];
 
-    constructor(repository: FinalRepository, remoteSourceProviderRegistry: IRemoteSourceProviderRegistry) {
+    constructor(repository: AbstractRepository, remoteSourceProviderRegistry: IRemoteSourceProviderRegistry) {
         this.syncStatusBar = new SyncStatusBar(repository, remoteSourceProviderRegistry);
         this.checkoutStatusBar = new CheckoutStatusBar(repository);
         this.onDidChange = anyEvent(this.syncStatusBar.onDidChange, this.checkoutStatusBar.onDidChange);

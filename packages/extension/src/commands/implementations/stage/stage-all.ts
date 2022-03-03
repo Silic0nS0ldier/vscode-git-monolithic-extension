@@ -1,9 +1,9 @@
 import { Uri, workspace } from "vscode";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function stageAll(repository: FinalRepository): Promise<void> {
+    async function stageAll(repository: AbstractRepository): Promise<void> {
         const resources = [...repository.workingTreeGroup.resourceStates, ...repository.untrackedGroup.resourceStates];
         const uris = resources.map(r => r.resourceUri);
 

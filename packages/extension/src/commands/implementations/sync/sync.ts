@@ -1,9 +1,9 @@
 import { Model } from "../../../model.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { ScmCommand } from "../../helpers.js";
 import { sync as syncFn } from "./helper.js";
 
-export async function sync(repository: FinalRepository, model: Model): Promise<void> {
+export async function sync(repository: AbstractRepository, model: Model): Promise<void> {
     try {
         await syncFn(repository, false, model);
     } catch (err) {
@@ -16,7 +16,7 @@ export async function sync(repository: FinalRepository, model: Model): Promise<v
 }
 
 export function createCommand(model: Model): ScmCommand {
-    async function syncFn(repository: FinalRepository): Promise<void> {
+    async function syncFn(repository: AbstractRepository): Promise<void> {
         await sync(repository, model);
     }
 

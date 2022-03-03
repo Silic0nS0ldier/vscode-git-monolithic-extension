@@ -1,11 +1,11 @@
 import { QuickPickItem, window } from "vscode";
 import { Ref, RefType } from "../../../api/git.js";
-import { FinalRepository } from "../../../repository/repository-class/mod.js";
+import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function deleteTag(repository: FinalRepository): Promise<void> {
+    async function deleteTag(repository: AbstractRepository): Promise<void> {
         const picks = repository.refs.filter(ref => ref.type === RefType.Tag)
             .map(ref => new TagItem(ref));
 
