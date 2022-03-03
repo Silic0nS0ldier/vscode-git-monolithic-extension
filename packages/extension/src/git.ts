@@ -5,6 +5,7 @@
 
 import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
+import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
@@ -1150,16 +1151,14 @@ export class Repository {
     }
 
     async findTrackingBranches(upstreamBranch: string): Promise<Branch[]> {
-        const result = await this.exec([
-            "for-each-ref",
-            "--format",
-            "%(refname:short)%00%(upstream:short)",
-            "refs/heads",
-        ]);
-        return result.stdout.trim().split("\n")
-            .map(line => line.trim().split("\0"))
-            .filter(([_, upstream]) => upstream === upstreamBranch)
-            .map(([ref]) => ({ name: ref, type: RefType.Head } as Branch));
+        const result = await findTrackingBranches(this._git._context, this.repositoryRoot);
+        if (isOk(result)) {
+            return unwrap(result).trim().split("\n")
+                .map(line => line.trim().split("\0"))
+                .filter(([_, upstream]) => upstream === upstreamBranch)
+                .map(([ref]) => ({ name: ref, type: RefType.Head } as Branch));
+        }
+        throw unwrap(result);
     }
 
     async getRefs(

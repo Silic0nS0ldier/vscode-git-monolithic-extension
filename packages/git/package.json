@@ -18,6 +18,10 @@
             "import": "./dist/api/repository/config/read.js",
             "types": "./dist/api/repository/config/read.d.ts"
         },
+        "./api/repository/find-tracking-branches": {
+            "import": "./dist/api/repository/find-tracking-branches.js",
+            "types": "./dist/api/repository/find-tracking-branches.d.ts"
+        },
         "./api/repository/ignore/check/parser": {
             "import": "./dist/api/repository/ignore/check/parser.js",
             "types": "./dist/api/repository/ignore/check/parser.d.ts"
