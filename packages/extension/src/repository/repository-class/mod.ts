@@ -37,8 +37,8 @@ import { buffer as bufferImpl } from "./buffer.js";
 import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
 import { clean as cleanImpl } from "./clean.js";
 import { commit as commitImpl } from "./commit.js";
-import { createRebaseCommitBox } from "./createRebaseCommitBox";
-import { createStateBox } from "./createStateBox";
+import { createRebaseCommitBox } from "./createRebaseCommitBox.js";
+import { createStateBox } from "./createStateBox.js";
 import { fetch as fetchImpl } from "./fetch.js";
 import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConfig } from "./get-config.js";
 import { getInputTemplate as getInputTemplateImpl } from "./get-input-template.js";
@@ -258,7 +258,7 @@ export function createRepository(
             return;
         }
 
-        if (isRepositoryHuge) {
+        if (isRepositoryHuge.get()) {
             return;
         }
 

@@ -7,7 +7,7 @@ export function createWorkingTreeWatcher(
     repoRoot: string,
     dotGit: string,
 ): { event: Event<Uri> } & Disposable {
-    const indexLockPath = path.join(dotGit, ".git/index.lock");
+    const indexLockPath = path.join(dotGit, "index.lock");
     const repoWatcher = workspace.createFileSystemWatcher(new RelativePattern(repoRoot, "**"));
 
     const onRepoFileChange = anyEvent(
