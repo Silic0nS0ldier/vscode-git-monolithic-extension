@@ -73,8 +73,6 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
 
         const cp = unwrap(cpRes);
 
-        persistentContext.__UNSTABLE__log?.(`PID_${cp.pid} [nxtgen] > git ${args.join(" ")}`);
-
         if (context.stdout) {
             cp.stdout.pipe(context.stdout);
         }
@@ -115,20 +113,15 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
                 cp.kill();
             }
             // TODO Refine generic error into something more specific
-            persistentContext.__UNSTABLE__log?.(`PID_${cp.pid} [nxtgen] < ERROR {${unwrap(result).type.description}}`);
             return result;
         }
 
         const exitstate = unwrap(result);
 
         if (exitstate.code !== 0) {
-            persistentContext.__UNSTABLE__log?.(
-                `PID_${cp.pid} [nxtgen] < ERROR {${ERROR_NON_ZERO_EXIT.description}} ${JSON.stringify(exitstate)}`,
-            );
             return err(createError(ERROR_NON_ZERO_EXIT, { cmdContext, exitstate }));
         }
 
-        persistentContext.__UNSTABLE__log?.(`PID_${cp.pid} [nxtgen] < DONE`);
-        return ok(undefined);
+        return ok(void 0);
     };
 }

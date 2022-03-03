@@ -46,13 +46,13 @@ import { parseGitCommits } from "./git/parseGitCommits.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
 import { LsFilesElement, parseLsFiles } from "./git/parseLsFiles.js";
 import { LsTreeElement, parseLsTree } from "./git/parseLsTree.js";
+import { getHEAD } from "./git/repository-class/get-head.js";
 import { getStatus } from "./git/repository-class/get-status.js";
 import { SpawnOptions } from "./git/SpawnOptions.js";
 import { Stash } from "./git/Stash.js";
 import { Submodule } from "./git/Submodule.js";
 import { groupBy, Limiter, splitInChunks } from "./util.js";
 import * as Versions from "./util/versions.js";
-import { getHEAD } from "./git/repository-class/get-head.js";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;

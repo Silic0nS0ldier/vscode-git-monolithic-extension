@@ -7,27 +7,27 @@ import { Ref, RefType } from "../../api/git.js";
 export async function getHEAD(context: GitContext, repoRoot: string): Promise<Ref> {
     const symbolicRefHeadResult = await symbolicRefHead(context, repoRoot);
 
-        if (isOk(symbolicRefHeadResult)) {
-            const headRef = unwrap(symbolicRefHeadResult);
-            if (headRef) {
-                return { commit: undefined, name: headRef, type: RefType.Head };
-            }
+    if (isOk(symbolicRefHeadResult)) {
+        const headRef = unwrap(symbolicRefHeadResult);
+        if (headRef) {
+            return { commit: undefined, name: headRef, type: RefType.Head };
         }
+    }
 
-        const revParseHeadResult = await revParseHead(context, repoRoot);
+    const revParseHeadResult = await revParseHead(context, repoRoot);
 
-        if (isOk(revParseHeadResult)) {
-            const commitMaybe = unwrap(revParseHeadResult);
-            if (commitMaybe) {
-                return { commit: commitMaybe, name: undefined, type: RefType.Head };
-            }
+    if (isOk(revParseHeadResult)) {
+        const commitMaybe = unwrap(revParseHeadResult);
+        if (commitMaybe) {
+            return { commit: commitMaybe, name: undefined, type: RefType.Head };
         }
+    }
 
-        throw {
-            attempts: [
-                isErr(symbolicRefHeadResult) && unwrap(symbolicRefHeadResult),
-                isErr(revParseHeadResult) && unwrap(revParseHeadResult),
-            ],
-            message: "Could not get head",
-        };
+    throw {
+        attempts: [
+            isErr(symbolicRefHeadResult) && unwrap(symbolicRefHeadResult),
+            isErr(revParseHeadResult) && unwrap(revParseHeadResult),
+        ],
+        message: "Could not get head",
+    };
 }
