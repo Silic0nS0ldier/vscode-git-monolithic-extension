@@ -22,13 +22,13 @@ export function createCommand(
                 const pick = { label: localize("choose", "Choose Folder...") };
                 const items: { label: string; folder?: WorkspaceFolder }[] = [
                     ...workspace.workspaceFolders.map(folder => ({
-                        label: folder.name,
                         description: folder.uri.fsPath,
                         folder,
+                        label: folder.name,
                     })),
                     pick,
                 ];
-                const item = await window.showQuickPick(items, { placeHolder, ignoreFocusOut: true });
+                const item = await window.showQuickPick(items, { ignoreFocusOut: true, placeHolder });
 
                 if (!item) {
                     return;

@@ -113,13 +113,13 @@ async function createModel(
     disposables.push(registerTerminalEnvironmentManager(context, environment));
 
     const git = new Git({
+        context: info.context,
+        env: environment,
         gitPath: info.path,
         userAgent: `git/${info.version} (${
             (os as any).version?.() ?? os.type()
         } ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
         version: info.version,
-        context: info.context,
-        env: environment,
     });
     const onOutput = (str: string) => {
         const lines = str.split(/\r?\n/mg);

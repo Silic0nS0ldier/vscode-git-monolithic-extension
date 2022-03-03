@@ -11,12 +11,12 @@ export function createCommand(model: Model): ScmCommand {
         setUpstream?: boolean,
     ): Promise<void> {
         await push(repository, {
-            pushType: PushType.PushTo,
             pushTo: {
-                remote,
                 refspec,
+                remote,
                 setUpstream,
             },
+            pushType: PushType.PushTo,
         }, model);
     }
 

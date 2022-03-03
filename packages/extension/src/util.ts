@@ -365,7 +365,7 @@ export class Limiter<T> {
 
     queue(factory: () => Promise<T>): Promise<T> {
         return new Promise<T>((c, e) => {
-            this.outstandingPromises.push({ factory, c, e });
+            this.outstandingPromises.push({ c, e, factory });
             this.consume();
         });
     }
@@ -420,7 +420,7 @@ export class PromiseSource<T> {
     reject(err: any): void {
         if (!this._promise) {
             this._promise = Promise.reject(err);
-            this._onDidComplete.fire({ success: false, err });
+            this._onDidComplete.fire({ err, success: false });
         }
     }
 }

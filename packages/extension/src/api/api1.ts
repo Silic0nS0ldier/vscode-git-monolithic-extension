@@ -247,7 +247,7 @@ export class ApiRepository implements Repository {
             return this._repository.fetch(arg0);
         }
 
-        return this._repository.fetch({ remote: arg0, ref, depth, prune });
+        return this._repository.fetch({ depth, prune, ref, remote: arg0 });
     }
 
     pull(unshallow?: boolean): Promise<void> {

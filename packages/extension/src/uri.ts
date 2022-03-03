@@ -46,8 +46,8 @@ export function toGitUri(uri: Uri, ref: string, options: GitUriOptions = {}): Ur
     }
 
     return uri.with({
-        scheme: "git",
         path,
         query: JSON.stringify(params),
+        scheme: "git",
     });
 }

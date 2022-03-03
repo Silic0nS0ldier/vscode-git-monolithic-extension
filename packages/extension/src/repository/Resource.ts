@@ -205,7 +205,7 @@ export class Resource implements SourceControlResourceState {
         const tooltip = this.tooltip;
         const strikeThrough = this.strikeThrough;
         const faded = this._faded();
-        return { strikeThrough, faded, tooltip, light, dark };
+        return { dark, faded, light, strikeThrough, tooltip };
     }
 
     get letter(): string {

@@ -64,9 +64,9 @@ export async function cloneRepository(
 
     try {
         const opts = {
+            cancellable: true,
             location: ProgressLocation.Notification,
             title: localize("cloning", "Cloning git repository '{0}'...", normalisedUrl),
-            cancellable: true,
         };
 
         const repositoryPath = await window.withProgress(

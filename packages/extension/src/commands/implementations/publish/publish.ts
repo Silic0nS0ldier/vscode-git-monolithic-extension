@@ -29,9 +29,9 @@ export async function publish(model: Model, repository: FinalRepository) {
         } else {
             const picks = providers
                 .map(provider => ({
+                    alwaysShow: true,
                     label: (provider.icon ? `$(${provider.icon}) ` : "")
                         + localize("publish to", "Publish to {0}", provider.name),
-                    alwaysShow: true,
                     provider,
                 }));
             const placeHolder = localize(
@@ -62,7 +62,7 @@ export async function publish(model: Model, repository: FinalRepository) {
     }
 
     const addRemote = new AddRemoteItem(repository => addRemoteFn(model, repository));
-    const picks = [...repository.remotes.map(r => ({ label: r.name, description: r.pushUrl })), addRemote];
+    const picks = [...repository.remotes.map(r => ({ description: r.pushUrl, label: r.name })), addRemote];
     const placeHolder = localize("pick remote", "Pick a remote to publish the branch '{0}' to:", branchName);
     const choice = await window.showQuickPick(picks, { placeHolder });
 

@@ -34,7 +34,7 @@ export async function pullFrom(
                 }
 
                 if (await checkIfMaybeRebased(run, repository, HEAD?.name)) {
-                    await repository.pull(rebase, remote, branch, { unshallow, tags });
+                    await repository.pull(rebase, remote, branch, { tags, unshallow });
                 }
             },
         );

@@ -5,7 +5,7 @@ import { push, PushType } from "./helpers.js";
 
 export function createCommand(model: Model): ScmCommand {
     async function pushForce(repository: FinalRepository): Promise<void> {
-        await push(repository, { pushType: PushType.Push, forcePush: true }, model);
+        await push(repository, { forcePush: true, pushType: PushType.Push }, model);
     }
 
     return {

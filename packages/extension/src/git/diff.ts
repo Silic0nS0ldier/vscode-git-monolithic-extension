@@ -76,10 +76,10 @@ async function diffFiles(
 
                 const uri = Uri.file(path.isAbsolute(newPath) ? newPath : path.join(repositoryRoot, newPath));
                 result.push({
-                    uri,
-                    renameUri: uri,
                     originalUri,
+                    renameUri: uri,
                     status: Status.INDEX_RENAMED,
+                    uri,
                 });
 
                 continue;
@@ -91,10 +91,10 @@ async function diffFiles(
         }
 
         result.push({
-            status,
             originalUri,
-            uri: originalUri,
             renameUri: originalUri,
+            status,
+            uri: originalUri,
         });
     }
 

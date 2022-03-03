@@ -48,7 +48,7 @@ export async function fromPath(
         }
 
         const cli = create(gitPath, cliContext, services);
-        const versionResult = await version({ cli, version: "PENDING", path: gitPath });
+        const versionResult = await version({ cli, path: gitPath, version: "PENDING" });
 
         if (isErr(versionResult)) {
             return err(createError(ERROR_GIT_UNUSABLE, unwrap(versionResult)));
@@ -56,8 +56,8 @@ export async function fromPath(
 
         return ok({
             cli,
-            version: unwrap(versionResult),
             path: gitPath,
+            version: unwrap(versionResult),
         });
     }
 

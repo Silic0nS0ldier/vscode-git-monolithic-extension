@@ -8,9 +8,9 @@ export function createCommand(
 ): ScmCommand {
     async function setLogLevel(): Promise<void> {
         const createItem = (logLevel: LogLevel) => ({
+            description: Log.logLevel === logLevel ? localize("current", "Current") : undefined,
             label: LogLevel[logLevel],
             logLevel,
-            description: Log.logLevel === logLevel ? localize("current", "Current") : undefined,
         });
 
         const items = [

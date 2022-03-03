@@ -20,8 +20,8 @@ export function watch(locations: string[], locks: string[], outputChannel: Outpu
         [...locations, ...locks],
         {
             debounce: 500,
-            renameDetection: false,
             ignoreInitial: true,
+            renameDetection: false,
         },
         (et, path) => {
             if (locks.some(fs.existsSync)) {
@@ -41,10 +41,10 @@ export function watch(locations: string[], locks: string[], outputChannel: Outpu
     watcher.on("error", err => outputChannel.appendLine(`Watcher error: ${prettyPrint(err)}`));
 
     return {
-        event: onFileChangeEmitter.event,
         dispose() {
             onFileChangeEmitter.dispose();
             watcher.close();
         },
+        event: onFileChangeEmitter.event,
     };
 }

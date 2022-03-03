@@ -60,7 +60,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
         this.disposables.push(
             model.onDidChangeRepository(this.onDidChangeRepository, this),
             model.onDidChangeOriginalResource(this.onDidChangeOriginalResource, this),
-            workspace.registerFileSystemProvider("git", this, { isReadonly: true, isCaseSensitive: true }),
+            workspace.registerFileSystemProvider("git", this, { isCaseSensitive: true, isReadonly: true }),
             // workspace.registerResourceLabelFormatter({
             // 	scheme: 'git',
             // 	formatting: {
@@ -157,7 +157,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
         } catch {
             // noop
         }
-        return { type: FileType.File, size: size, mtime: this.mtime, ctime: 0 };
+        return { ctime: 0, mtime: this.mtime, size: size, type: FileType.File };
     }
 
     readDirectory(): Thenable<[string, FileType][]> {
@@ -196,7 +196,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
         }
 
         const timestamp = new Date().getTime();
-        const cacheValue: CacheRow = { uri, timestamp };
+        const cacheValue: CacheRow = { timestamp, uri };
 
         this.cache.set(uri.toString(), cacheValue);
 

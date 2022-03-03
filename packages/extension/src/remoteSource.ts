@@ -44,20 +44,20 @@ class RemoteSourceProviderQuickPick {
 
             if (remoteSources.length === 0) {
                 this.quickpick.items = [{
-                    label: localize("none found", "No remote repositories found."),
                     alwaysShow: true,
+                    label: localize("none found", "No remote repositories found."),
                 }];
             } else {
                 this.quickpick.items = remoteSources.map(remoteSource => ({
-                    label: remoteSource.name,
+                    alwaysShow: true,
                     description: remoteSource.description
                         || (typeof remoteSource.url === "string" ? remoteSource.url : remoteSource.url[0]),
+                    label: remoteSource.name,
                     remoteSource,
-                    alwaysShow: true,
                 }));
             }
         } catch (err) {
-            this.quickpick.items = [{ label: localize("error", "$(error) Error: {0}", err.message), alwaysShow: true }];
+            this.quickpick.items = [{ alwaysShow: true, label: localize("error", "$(error) Error: {0}", err.message) }];
             console.error(err);
         } finally {
             this.quickpick.busy = false;
@@ -111,10 +111,10 @@ export async function pickRemoteSource(
 
     const providers = model.getRemoteProviders()
         .map(provider => ({
+            alwaysShow: true,
             label: (provider.icon ? `$(${provider.icon}) ` : "") + (options.providerLabel
                 ? options.providerLabel(provider)
                 : provider.name),
-            alwaysShow: true,
             provider,
         }));
 
@@ -125,9 +125,9 @@ export async function pickRemoteSource(
     const updatePicks = (value?: string) => {
         if (value) {
             quickpick.items = [{
-                label: options.urlLabel ?? localize("url", "URL"),
-                description: value,
                 alwaysShow: true,
+                description: value,
+                label: options.urlLabel ?? localize("url", "URL"),
                 url: value,
             }, ...providers];
         } else {
@@ -193,5 +193,5 @@ async function pickProviderSource(
         return { url };
     }
 
-    return { url, branch };
+    return { branch, url };
 }

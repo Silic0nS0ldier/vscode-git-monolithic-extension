@@ -157,7 +157,7 @@ async function exec(child: cp.ChildProcess, cancellationToken?: CancellationToke
 
     try {
         const [exitCode, stdout, stderr] = await result;
-        return { exitCode, stdout, stderr };
+        return { exitCode, stderr, stdout };
     } finally {
         dispose(disposables);
     }
@@ -342,20 +342,20 @@ export class Git {
 
         const result: IExecutionResult<string> = {
             exitCode: bufferResult.exitCode,
-            stdout: iconv.decode(bufferResult.stdout, encoding),
             stderr: bufferResult.stderr,
+            stdout: iconv.decode(bufferResult.stdout, encoding),
         };
 
         if (bufferResult.exitCode) {
             return Promise.reject<IExecutionResult<string>>(
                 new GitError({
-                    message: "Failed to execute git",
-                    stdout: result.stdout,
-                    stderr: result.stderr,
                     exitCode: result.exitCode,
-                    gitErrorCode: getGitErrorCode(result.stderr),
-                    gitCommand: args[0],
                     gitArgs: args,
+                    gitCommand: args[0],
+                    gitErrorCode: getGitErrorCode(result.stderr),
+                    message: "Failed to execute git",
+                    stderr: result.stderr,
+                    stdout: result.stdout,
                 }),
             );
         }
@@ -373,10 +373,10 @@ export class Git {
         }
 
         options.env = assign({}, process.env, this.env, options.env || {}, {
-            VSCODE_GIT_COMMAND: args[0],
-            LC_ALL: "en_US.UTF-8",
-            LANG: "en_US.UTF-8",
             GIT_PAGER: "cat",
+            LANG: "en_US.UTF-8",
+            LC_ALL: "en_US.UTF-8",
+            VSCODE_GIT_COMMAND: args[0],
         });
 
         if (options.cwd) {
@@ -503,13 +503,13 @@ export function parseGitCommits(data: string): Commit[] {
 
         // Stop excessive memory usage by using substr -- https://bugs.chromium.org/p/v8/issues/detail?id=2869
         commits.push({
+            authorDate: new Date(Number(authorDate) * 1000),
+            authorEmail: ` ${authorEmail}`.substr(1),
+            authorName: ` ${authorName}`.substr(1),
+            commitDate: new Date(Number(commitDate) * 1000),
             hash: ` ${ref}`.substr(1),
             message: ` ${message}`.substr(1),
             parents: parents ? parents.split(" ") : [],
-            authorDate: new Date(Number(authorDate) * 1000),
-            authorName: ` ${authorName}`.substr(1),
-            authorEmail: ` ${authorEmail}`.substr(1),
-            commitDate: new Date(Number(commitDate) * 1000),
         });
     } while (true);
 
@@ -529,7 +529,7 @@ export function parseLsTree(raw: string): LsTreeElement[] {
         .filter(l => !!l)
         .map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line)!)
         .filter(m => !!m)
-        .map(([, mode, type, object, size, file]) => ({ mode, type, object, size, file }));
+        .map(([, mode, type, object, size, file]) => ({ file, mode, object, size, type }));
 }
 
 interface LsFilesElement {
@@ -544,7 +544,7 @@ export function parseLsFiles(raw: string): LsFilesElement[] {
         .filter(l => !!l)
         .map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line)!)
         .filter(m => !!m)
-        .map(([, mode, object, stage, file]) => ({ mode, object, stage, file }));
+        .map(([, mode, object, stage, file]) => ({ file, mode, object, stage }));
 }
 
 export interface PullOptions {
@@ -682,8 +682,8 @@ export class Repository {
 
         if (exitCode) {
             const err = new GitError({
-                message: "Could not show object.",
                 exitCode,
+                message: "Could not show object.",
             });
 
             if (/exists on disk, but not in/.test(stderr)) {
@@ -701,7 +701,7 @@ export class Repository {
             const elements = await this.lsfiles(path);
 
             if (elements.length === 0) {
-                throw new GitError({ message: "Path not known by git", gitErrorCode: GitErrorCodes.UnknownPath });
+                throw new GitError({ gitErrorCode: GitErrorCodes.UnknownPath, message: "Path not known by git" });
             }
 
             const { mode, object } = elements[0];
@@ -714,7 +714,7 @@ export class Repository {
         const elements = await this.lstree(treeish, path);
 
         if (elements.length === 0) {
-            throw new GitError({ message: "Path not known by git", gitErrorCode: GitErrorCodes.UnknownPath });
+            throw new GitError({ gitErrorCode: GitErrorCodes.UnknownPath, message: "Path not known by git" });
         }
 
         const { mode, object, size } = elements[0];
@@ -903,8 +903,8 @@ export class Repository {
 
         if (exitCode) {
             throw new GitError({
-                message: "Could not hash object.",
                 exitCode: exitCode,
+                message: "Could not hash object.",
             });
         }
 
@@ -1470,7 +1470,7 @@ export class Repository {
                 throw new Error("Not in a branch");
             }
 
-            return { name: result.stdout.trim(), commit: undefined, type: RefType.Head };
+            return { commit: undefined, name: result.stdout.trim(), type: RefType.Head };
         } catch (err) {
             const result = await head(this._git._context, this.repositoryRoot);
 
@@ -1479,7 +1479,7 @@ export class Repository {
                 if (commitMaybe === undefined) {
                     throw new Error("Error parsing HEAD");
                 }
-                return { name: undefined, commit: commitMaybe, type: RefType.Head };
+                return { commit: commitMaybe, name: undefined, type: RefType.Head };
             }
 
             throw unwrap(result);
@@ -1528,16 +1528,16 @@ export class Repository {
             let match: RegExpExecArray | null;
 
             if (match = /^refs\/heads\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
-                return { name: match[1], commit: match[2], type: RefType.Head };
+                return { commit: match[2], name: match[1], type: RefType.Head };
             } else if (match = /^refs\/remotes\/([^/]+)\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
                 return {
-                    name: `${match[1]}/${match[2]}`,
                     commit: match[3],
-                    type: RefType.RemoteHead,
+                    name: `${match[1]}/${match[2]}`,
                     remote: match[1],
+                    type: RefType.RemoteHead,
                 };
             } else if (match = /^refs\/tags\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
-                return { name: match[1], commit: match[3] ?? match[2], type: RefType.Tag };
+                return { commit: match[3] ?? match[2], name: match[1], type: RefType.Tag };
             }
 
             return null;
@@ -1556,7 +1556,7 @@ export class Repository {
             .filter(b => !!b)
             .map(line => regex.exec(line) as RegExpExecArray)
             .filter(g => !!g)
-            .map(([, index, description]: RegExpExecArray) => ({ index: parseInt(index), description }));
+            .map(([, index, description]: RegExpExecArray) => ({ description, index: parseInt(index) }));
 
         return rawStashes;
     }
@@ -1573,7 +1573,7 @@ export class Repository {
             let remote = remotes.find(r => r.name === name);
 
             if (!remote) {
-                remote = { name, isReadOnly: false };
+                remote = { isReadOnly: false, name };
                 remotes.push(remote);
             }
 
@@ -1630,27 +1630,27 @@ export class Repository {
                 }
 
                 return {
-                    type: RefType.Head,
+                    ahead: Number(ahead) || 0,
+                    behind: Number(behind) || 0,
+                    commit: ref || undefined,
                     name: branchName,
+                    type: RefType.Head,
                     upstream: upstream
                         ? {
                             name: upstream.substring(index + 1),
                             remote: upstream.substring(0, index),
                         }
                         : undefined,
-                    commit: ref || undefined,
-                    ahead: Number(ahead) || 0,
-                    behind: Number(behind) || 0,
                 };
             } else if (branchName.startsWith("refs/remotes/")) {
                 branchName = branchName.substring(13);
                 const index = branchName.indexOf("/");
 
                 return {
-                    type: RefType.RemoteHead,
+                    commit: ref,
                     name: branchName.substring(index + 1),
                     remote: branchName.substring(0, index),
-                    commit: ref,
+                    type: RefType.RemoteHead,
                 };
             } else {
                 return undefined;
@@ -1684,8 +1684,8 @@ export class Repository {
     async getBranches(query: BranchQuery): Promise<Ref[]> {
         const refs = await this.getRefs({
             contains: query.contains,
-            pattern: query.pattern ? `refs/${query.pattern}` : undefined,
             count: query.count,
+            pattern: query.pattern ? `refs/${query.pattern}` : undefined,
         });
         return refs.filter(value => (value.type !== RefType.Tag) && (query.remote || !value.remote));
     }

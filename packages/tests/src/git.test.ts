@@ -208,13 +208,13 @@ john.doe@mail.com
 This is a commit message.\x00`;
 
             assert.deepStrictEqual(parseGitCommits(GIT_OUTPUT_SINGLE_PARENT), [{
+                authorDate: new Date(1580811030000),
+                authorEmail: "john.doe@mail.com",
+                authorName: "John Doe",
+                commitDate: new Date(1580811031000),
                 hash: "52c293a05038d865604c2284aa8698bd087915a1",
                 message: "This is a commit message.",
                 parents: ["8e5a374372b8393906c7e380dbb09349c5385554"],
-                authorDate: new Date(1580811030000),
-                authorName: "John Doe",
-                authorEmail: "john.doe@mail.com",
-                commitDate: new Date(1580811031000),
             }]);
         });
 
@@ -228,13 +228,13 @@ john.doe@mail.com
 This is a commit message.\x00`;
 
             assert.deepStrictEqual(parseGitCommits(GIT_OUTPUT_MULTIPLE_PARENTS), [{
+                authorDate: new Date(1580811030000),
+                authorEmail: "john.doe@mail.com",
+                authorName: "John Doe",
+                commitDate: new Date(1580811031000),
                 hash: "52c293a05038d865604c2284aa8698bd087915a1",
                 message: "This is a commit message.",
                 parents: ["8e5a374372b8393906c7e380dbb09349c5385554", "df27d8c75b129ab9b178b386077da2822101b217"],
-                authorDate: new Date(1580811030000),
-                authorName: "John Doe",
-                authorEmail: "john.doe@mail.com",
-                commitDate: new Date(1580811031000),
             }]);
         });
 
@@ -248,13 +248,13 @@ john.doe@mail.com
 This is a commit message.\x00`;
 
             assert.deepStrictEqual(parseGitCommits(GIT_OUTPUT_NO_PARENTS), [{
+                authorDate: new Date(1580811030000),
+                authorEmail: "john.doe@mail.com",
+                authorName: "John Doe",
+                commitDate: new Date(1580811031000),
                 hash: "52c293a05038d865604c2284aa8698bd087915a1",
                 message: "This is a commit message.",
                 parents: [],
-                authorDate: new Date(1580811030000),
-                authorName: "John Doe",
-                authorEmail: "john.doe@mail.com",
-                commitDate: new Date(1580811031000),
             }]);
         });
     });
@@ -277,81 +277,81 @@ This is a commit message.\x00`;
 
             assert.deepStrictEqual(output, [
                 {
+                    file: ".vscode",
                     mode: "040000",
-                    type: "tree",
                     object: "0274a81f8ee9ca3669295dc40f510bd2021d0043",
                     size: "-",
-                    file: ".vscode",
+                    type: "tree",
                 },
                 {
+                    file: "Screen Shot 2018-06-01 at 14.48.05.png",
                     mode: "100644",
-                    type: "blob",
                     object: "1d487c1817262e4f20efbfa1d04c18f51b0046f6",
                     size: "491570",
-                    file: "Screen Shot 2018-06-01 at 14.48.05.png",
+                    type: "blob",
                 },
                 {
+                    file: "Screen Shot 2018-06-07 at 20.04.59.png",
                     mode: "100644",
-                    type: "blob",
                     object: "686c16e4f019b734655a2576ce8b98749a9ffdb9",
                     size: "764420",
-                    file: "Screen Shot 2018-06-07 at 20.04.59.png",
+                    type: "blob",
                 },
                 {
+                    file: "boom.txt",
                     mode: "100644",
-                    type: "blob",
                     object: "257cc5642cb1a054f08cc83f2d943e56fd3ebe99",
                     size: "4",
-                    file: "boom.txt",
+                    type: "blob",
                 },
                 {
+                    file: "boomcaboom.txt",
                     mode: "100644",
-                    type: "blob",
                     object: "86dc360dd25f13fa50ffdc8259e9653921f4f2b7",
                     size: "11",
-                    file: "boomcaboom.txt",
+                    type: "blob",
                 },
                 {
+                    file: "file.js",
                     mode: "100644",
-                    type: "blob",
                     object: "a68b14060589b16d7ac75f67b905c918c03c06eb",
                     size: "24",
-                    file: "file.js",
+                    type: "blob",
                 },
                 {
+                    file: "file.md",
                     mode: "100644",
-                    type: "blob",
                     object: "f7bcfb05af46850d780f88c069edcd57481d822d",
                     size: "201",
-                    file: "file.md",
+                    type: "blob",
                 },
                 {
+                    file: "hello.js",
                     mode: "100644",
-                    type: "blob",
                     object: "ab8b86114a051f6490f1ec5e3141b9a632fb46b5",
                     size: "8",
-                    file: "hello.js",
+                    type: "blob",
                 },
                 {
+                    file: "what.js",
                     mode: "100644",
-                    type: "blob",
                     object: "257cc5642cb1a054f08cc83f2d943e56fd3ebe99",
                     size: "4",
-                    file: "what.js",
+                    type: "blob",
                 },
                 {
+                    file: "what.txt",
                     mode: "100644",
-                    type: "blob",
                     object: "be859e3f412fa86513cd8bebe8189d1ea1a3e46d",
                     size: "24",
-                    file: "what.txt",
+                    type: "blob",
                 },
                 {
+                    file: "what.txt2",
                     mode: "100644",
-                    type: "blob",
                     object: "56ec42c9dc6fcf4534788f0fe34b36e09f37d085",
                     size: "261186",
-                    file: "what.txt2",
+                    type: "blob",
                 },
             ]);
         });
@@ -375,36 +375,36 @@ This is a commit message.\x00`;
 
             assert.deepStrictEqual(output, [
                 {
+                    file: ".vscode/settings.json",
                     mode: "100644",
                     object: "7a73a41bfdf76d6f793007240d80983a52f15f97",
                     stage: "0",
-                    file: ".vscode/settings.json",
                 },
                 {
+                    file: "Screen Shot 2018-06-01 at 14.48.05.png",
                     mode: "100644",
                     object: "1d487c1817262e4f20efbfa1d04c18f51b0046f6",
                     stage: "0",
-                    file: "Screen Shot 2018-06-01 at 14.48.05.png",
                 },
                 {
+                    file: "Screen Shot 2018-06-07 at 20.04.59.png",
                     mode: "100644",
                     object: "686c16e4f019b734655a2576ce8b98749a9ffdb9",
                     stage: "0",
-                    file: "Screen Shot 2018-06-07 at 20.04.59.png",
                 },
-                { mode: "100644", object: "257cc5642cb1a054f08cc83f2d943e56fd3ebe99", stage: "0", file: "boom.txt" },
+                { file: "boom.txt", mode: "100644", object: "257cc5642cb1a054f08cc83f2d943e56fd3ebe99", stage: "0" },
                 {
+                    file: "boomcaboom.txt",
                     mode: "100644",
                     object: "86dc360dd25f13fa50ffdc8259e9653921f4f2b7",
                     stage: "0",
-                    file: "boomcaboom.txt",
                 },
-                { mode: "100644", object: "a68b14060589b16d7ac75f67b905c918c03c06eb", stage: "0", file: "file.js" },
-                { mode: "100644", object: "f7bcfb05af46850d780f88c069edcd57481d822d", stage: "0", file: "file.md" },
-                { mode: "100644", object: "ab8b86114a051f6490f1ec5e3141b9a632fb46b5", stage: "0", file: "hello.js" },
-                { mode: "100644", object: "257cc5642cb1a054f08cc83f2d943e56fd3ebe99", stage: "0", file: "what.js" },
-                { mode: "100644", object: "be859e3f412fa86513cd8bebe8189d1ea1a3e46d", stage: "0", file: "what.txt" },
-                { mode: "100644", object: "56ec42c9dc6fcf4534788f0fe34b36e09f37d085", stage: "0", file: "what.txt2" },
+                { file: "file.js", mode: "100644", object: "a68b14060589b16d7ac75f67b905c918c03c06eb", stage: "0" },
+                { file: "file.md", mode: "100644", object: "f7bcfb05af46850d780f88c069edcd57481d822d", stage: "0" },
+                { file: "hello.js", mode: "100644", object: "ab8b86114a051f6490f1ec5e3141b9a632fb46b5", stage: "0" },
+                { file: "what.js", mode: "100644", object: "257cc5642cb1a054f08cc83f2d943e56fd3ebe99", stage: "0" },
+                { file: "what.txt", mode: "100644", object: "be859e3f412fa86513cd8bebe8189d1ea1a3e46d", stage: "0" },
+                { file: "what.txt2", mode: "100644", object: "56ec42c9dc6fcf4534788f0fe34b36e09f37d085", stage: "0" },
             ]);
         });
     });

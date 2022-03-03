@@ -51,15 +51,15 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         const cwd = context.cwd;
 
         const cmdContext = {
-            executablePath,
             args,
-            env,
             cwd,
+            env,
+            executablePath,
         };
 
         const cpRes: Result<ChildProcess, GenericError> = (() => {
             try {
-                return ok(services.child_process.spawn(executablePath, args, { env, cwd, stdio: "pipe" }));
+                return ok(services.child_process.spawn(executablePath, args, { cwd, env, stdio: "pipe" }));
             } catch (error) {
                 return err(createError(ERROR_GENERIC, { cmdContext, error }));
             }

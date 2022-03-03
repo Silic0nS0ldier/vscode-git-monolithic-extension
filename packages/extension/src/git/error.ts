@@ -6,8 +6,8 @@ export function cpErrorHandler(cb: (reason?: any) => void): (reason?: any) => vo
         if (/ENOENT/.test(err.message)) {
             normalisedErr = new GitError({
                 error: err,
-                message: "Failed to execute git (ENOENT)",
                 gitErrorCode: GitErrorCodes.NotAGitRepository,
+                message: "Failed to execute git (ENOENT)",
             });
         }
 
@@ -58,10 +58,10 @@ export class GitError {
         let result = this.message + " " + JSON.stringify(
             {
                 exitCode: this.exitCode,
-                gitErrorCode: this.gitErrorCode,
                 gitCommand: this.gitCommand,
-                stdout: this.stdout,
+                gitErrorCode: this.gitErrorCode,
                 stderr: this.stderr,
+                stdout: this.stdout,
             },
             null,
             2,

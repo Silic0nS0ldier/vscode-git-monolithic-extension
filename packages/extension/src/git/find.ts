@@ -17,9 +17,9 @@ export async function findGit(hints: string[]): Promise<IGit> {
         if (isOk(result)) {
             const context = unwrap(result);
             return {
+                context,
                 path: context.path,
                 version: context.version,
-                context,
             };
         }
     }
@@ -29,9 +29,9 @@ export async function findGit(hints: string[]): Promise<IGit> {
     if (isOk(result)) {
         const context = unwrap(result);
         return {
+            context,
             path: context.path,
             version: context.version,
-            context,
         };
     }
 

@@ -6,9 +6,9 @@ import { ScmCommand } from "../helpers.js";
 export function createCommand(): ScmCommand {
     async function cherryPick(repository: FinalRepository): Promise<void> {
         const hash = await window.showInputBox({
+            ignoreFocusOut: true,
             placeHolder: localize("commit hash", "Commit Hash"),
             prompt: localize("provide commit hash", "Please provide the commit hash"),
-            ignoreFocusOut: true,
         });
 
         if (!hash) {

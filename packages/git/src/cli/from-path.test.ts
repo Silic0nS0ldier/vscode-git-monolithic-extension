@@ -11,7 +11,7 @@ test("Basic case", async t => {
     const res = await fromPath(
         "/git",
         { env: {}, timeout: 1000 },
-        { fs: { exists: () => true }, child_process: { spawn }, process: { env: {} }, os: { platform: "TEST" } },
+        { child_process: { spawn }, fs: { exists: () => true }, os: { platform: "TEST" }, process: { env: {} } },
     );
     t.true(isOk(res));
     if (isOk(res)) {
@@ -26,7 +26,7 @@ test.only("No git", async t => {
     const res = await fromPath(
         "/git",
         { env: {}, timeout: 1000 },
-        { fs: { exists: () => true }, child_process: { spawn }, process: { env: {} }, os: { platform: "TEST" } },
+        { child_process: { spawn }, fs: { exists: () => true }, os: { platform: "TEST" }, process: { env: {} } },
     );
     t.true(isErr(res));
     if (isErr(res)) {

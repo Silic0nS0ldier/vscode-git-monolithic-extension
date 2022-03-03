@@ -32,16 +32,16 @@ export async function getStatus(
                 const stderr = stderrData.join("");
                 // TODO Ensure this propagates to child.on('error', ...)
                 throw new GitError({
+                    exitCode,
+                    gitArgs: args,
+                    gitCommand: "status",
+                    gitErrorCode: getGitErrorCode(stderr),
                     message: "Failed to execute git",
                     stderr,
-                    exitCode,
-                    gitErrorCode: getGitErrorCode(stderr),
-                    gitCommand: "status",
-                    gitArgs: args,
                 });
             }
 
-            c({ status: parser.status, didHitLimit: false });
+            c({ didHitLimit: false, status: parser.status });
         };
         child.on("exit", onExit);
 
@@ -53,7 +53,7 @@ export async function getStatus(
                 child.stdout?.removeListener("data", onStdoutData);
                 child.kill();
 
-                c({ status: parser.status.slice(0, limit), didHitLimit: true });
+                c({ didHitLimit: true, status: parser.status.slice(0, limit) });
             }
         };
         child.stdout?.on("data", onStdoutData);
@@ -90,10 +90,10 @@ class GitStatusParser {
 
         let lastIndex: number;
         const entry: IFileStatus = {
+            path: "",
+            rename: undefined,
             x: raw.charAt(i++),
             y: raw.charAt(i++),
-            rename: undefined,
-            path: "",
         };
 
         // space

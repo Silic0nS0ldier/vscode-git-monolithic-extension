@@ -17,10 +17,9 @@ export async function promptForBranchName(defaultName?: string, initialValue?: s
             : name;
 
     const rawBranchName = defaultName || await window.showInputBox({
+        ignoreFocusOut: true,
         placeHolder: localize("branch name", "Branch name"),
         prompt: localize("provide branch name", "Please provide a new branch name"),
-        value: initialValue,
-        ignoreFocusOut: true,
         validateInput: (name: string) => {
             const validateName = new RegExp(branchValidationRegex);
             if (validateName.test(sanitize(name))) {
@@ -33,6 +32,7 @@ export async function promptForBranchName(defaultName?: string, initialValue?: s
                 branchValidationRegex,
             );
         },
+        value: initialValue,
     });
 
     return sanitize(rawBranchName || "");

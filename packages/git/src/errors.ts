@@ -34,8 +34,8 @@ export function createError<TSymbol>(type: TSymbol, cause?: unknown): ErrorShape
         unstableStack = unstableStack.split("\n").slice(2).join("\n");
     }
     return {
+        cause,
         type,
         unstableStack,
-        cause,
     };
 }

@@ -225,10 +225,10 @@ export async function commitWithAnyInput(
             }
 
             _message = await window.showInputBox({
-                value,
+                ignoreFocusOut: true,
                 placeHolder,
                 prompt: localize("provide commit message", "Please provide a commit message"),
-                ignoreFocusOut: true,
+                value,
             });
         }
 

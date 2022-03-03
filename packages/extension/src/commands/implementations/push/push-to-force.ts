@@ -13,13 +13,13 @@ export function createCommand(model: Model): ScmCommand {
         await push(
             repository,
             {
-                pushType: PushType.PushTo,
+                forcePush: true,
                 pushTo: {
-                    remote,
                     refspec,
+                    remote,
                     setUpstream,
                 },
-                forcePush: true,
+                pushType: PushType.PushTo,
             },
             model,
         );

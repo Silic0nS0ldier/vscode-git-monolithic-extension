@@ -26,7 +26,7 @@ export async function readToString(context: ReadToContext, args: string[]): Prom
 
     // Read response
     try {
-        const cliAction = context.cli({ cwd: context.cwd, stdout, signal: abortController.signal }, args);
+        const cliAction = context.cli({ cwd: context.cwd, signal: abortController.signal, stdout }, args);
         // Throws on max buffer hit
         const streamReader = getStream(stdout, { encoding: "utf-8", maxBuffer: 1024 });
 

@@ -35,7 +35,7 @@ export function createDotGitWatcher(
     );
 
     return {
-        event: anyEvent(rootWatcher.event, emitter.event),
         dispose: () => disposable.dispose(),
+        event: anyEvent(rootWatcher.event, emitter.event),
     };
 }

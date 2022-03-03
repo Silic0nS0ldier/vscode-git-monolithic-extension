@@ -13,8 +13,8 @@ test("Basic case", async t => {
             }
             return ok(void 0);
         },
-        version: "PENDING",
         path: "",
+        version: "PENDING",
     });
     t.true(isOk(res));
     if (isOk(res)) {

@@ -52,18 +52,18 @@ export async function syncInternal(
                     }
 
                     if (await checkIfMaybeRebased(run, repository, HEAD?.name)) {
-                        await repository.pull(rebase, remoteName, pullBranch, { tags, cancellationToken });
+                        await repository.pull(rebase, remoteName, pullBranch, { cancellationToken, tags });
                     }
                 };
 
                 if (supportCancellation) {
                     const opts: ProgressOptions = {
+                        cancellable: true,
                         location: ProgressLocation.Notification,
                         title: localize(
                             "sync is unpredictable",
                             "Syncing. Cancelling may cause serious damages to the repository",
                         ),
-                        cancellable: true,
                     };
 
                     await window.withProgress(opts, (_, token) => fn(token));

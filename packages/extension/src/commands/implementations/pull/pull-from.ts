@@ -15,8 +15,8 @@ export function createCommand(): ScmCommand {
         }
 
         const remotePicks = remotes.filter(r => r.fetchUrl !== undefined).map(r => ({
-            label: r.name,
             description: r.fetchUrl!,
+            label: r.name,
         }));
         const placeHolder = localize("pick remote pull repo", "Pick a remote to pull the branch from");
         const remotePick = await window.showQuickPick(remotePicks, { placeHolder });

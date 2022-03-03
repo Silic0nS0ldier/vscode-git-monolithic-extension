@@ -131,7 +131,7 @@ export async function push(repository: FinalRepository, pushOptions: PushOptions
         if (!pushOptions.pushTo?.remote) {
             const addRemote = new AddRemoteItem(addRemoteFn.bind(null, model));
             const picks = [
-                ...remotes.filter(r => r.pushUrl !== undefined).map(r => ({ label: r.name, description: r.pushUrl })),
+                ...remotes.filter(r => r.pushUrl !== undefined).map(r => ({ description: r.pushUrl, label: r.name })),
                 addRemote,
             ];
             const placeHolder = localize("pick remote", "Pick a remote to publish the branch '{0}' to:", branchName);

@@ -66,10 +66,10 @@ export class Askpass implements IIPCHandler {
         }
 
         const options: InputBoxOptions = {
+            ignoreFocusOut: true,
             password,
             placeHolder: request,
             prompt: `Git: ${host}`,
-            ignoreFocusOut: true,
         };
 
         return await window.showInputBox(options) || "";
@@ -85,8 +85,8 @@ export class Askpass implements IIPCHandler {
         return {
             ...this.ipc.getEnv(),
             GIT_ASKPASS: path.join(__dirname, "askpass.sh"),
-            VSCODE_GIT_ASKPASS_NODE: process.execPath,
             VSCODE_GIT_ASKPASS_MAIN: path.join(__dirname, "askpass-main.js"),
+            VSCODE_GIT_ASKPASS_NODE: process.execPath,
         };
     }
 

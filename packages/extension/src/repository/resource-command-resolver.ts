@@ -102,28 +102,28 @@ export function resolveChangeCommand(resource: Resource): Command {
 
     if (!resource.leftUri) {
         return {
-            command: "vscode.open",
-            title: localize("open", "Open"),
             arguments: [
                 resource.rightUri,
                 { override: resource.type === Status.BOTH_MODIFIED ? false : undefined },
                 title,
             ],
+            command: "vscode.open",
+            title: localize("open", "Open"),
         };
     } else {
         return {
+            arguments: [resource.leftUri, resource.rightUri, title],
             command: "vscode.diff",
             title: localize("open", "Open"),
-            arguments: [resource.leftUri, resource.rightUri, title],
         };
     }
 }
 
 export function resolveFileCommand(resource: Resource): Command {
     return {
+        arguments: [resource.resourceUri],
         command: "vscode.open",
         title: localize("open", "Open"),
-        arguments: [resource.resourceUri],
     };
 }
 

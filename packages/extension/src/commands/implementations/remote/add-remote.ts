@@ -19,9 +19,9 @@ export async function addRemote(
     }
 
     const resultName = await window.showInputBox({
+        ignoreFocusOut: true,
         placeHolder: localize("remote name", "Remote name"),
         prompt: localize("provide remote name", "Please provide a remote name"),
-        ignoreFocusOut: true,
         validateInput: (name: string) => {
             if (!sanitizeRemoteName(name)) {
                 return localize("remote name format invalid", "Remote name format invalid");

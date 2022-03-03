@@ -112,7 +112,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     readonly onDidPublish = this._onDidPublish.event;
 
     firePublishEvent(repository: FinalRepository, branch?: string) {
-        this._onDidPublish.fire({ repository: new ApiRepository(repository), branch: branch });
+        this._onDidPublish.fire({ branch: branch, repository: new ApiRepository(repository) });
     }
 
     private _state: State = "uninitialized";
@@ -428,7 +428,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             this._onDidCloseRepository.fire(repository);
         };
 
-        const openRepository = { repository, dispose };
+        const openRepository = { dispose, repository };
         this.openRepositories.push(openRepository);
         this._onDidOpenRepository.fire(repository);
     }

@@ -20,9 +20,9 @@ export class IPCClient {
 
     call(request: any): Promise<any> {
         const opts: http.RequestOptions = {
-            socketPath: this.ipcHandlePath,
-            path: `/${this.handlerName}`,
             method: "POST",
+            path: `/${this.handlerName}`,
+            socketPath: this.ipcHandlePath,
         };
 
         return new Promise((c, e) => {

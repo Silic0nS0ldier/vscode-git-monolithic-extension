@@ -63,9 +63,9 @@ export async function createStash(repository: FinalRepository, includeUntracked 
     }
 
     message = await window.showInputBox({
-        value: message,
-        prompt: localize("provide stash message", "Optionally provide a stash message"),
         placeHolder: localize("stash message", "Stash message"),
+        prompt: localize("provide stash message", "Optionally provide a stash message"),
+        value: message,
     });
 
     if (typeof message === "undefined") {
@@ -84,9 +84,9 @@ export async function pickStash(repository: FinalRepository, placeHolder: string
     }
 
     const picks = stashes.map(stash => ({
-        label: `#${stash.index}:  ${stash.description}`,
         description: "",
         details: "",
+        label: `#${stash.index}:  ${stash.description}`,
         stash,
     }));
     const result = await window.showQuickPick(picks, { placeHolder });

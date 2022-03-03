@@ -23,7 +23,7 @@ export async function categorizeResourceByResolution(
         ...possibleUnresolved.filter((_s, i) => unresolvedBothModified[i]),
     ];
 
-    return { merge, resolved, unresolved, deletionConflicts };
+    return { deletionConflicts, merge, resolved, unresolved };
 }
 
 export async function stageDeletionConflict(repository: FinalRepository, uri: Uri): Promise<void> {

@@ -28,10 +28,10 @@ class CheckoutStatusBar {
         }`;
 
         return {
-            command: "git.checkout",
-            tooltip: localize("checkout", "Checkout branch/tag..."),
-            title,
             arguments: [this.repository.sourceControl],
+            command: "git.checkout",
+            title,
+            tooltip: localize("checkout", "Checkout branch/tag..."),
         };
     }
 
@@ -69,10 +69,10 @@ class SyncStatusBar {
         private remoteSourceProviderRegistry: IRemoteSourceProviderRegistry,
     ) {
         this._state = {
-            enabled: true,
-            isSyncRunning: false,
-            hasRemotes: false,
             HEAD: undefined,
+            enabled: true,
+            hasRemotes: false,
+            isSyncRunning: false,
             remoteSourceProviders: this.remoteSourceProviderRegistry.getRemoteProviders()
                 .filter(p => !!p.publishRepository),
         };
@@ -111,8 +111,8 @@ class SyncStatusBar {
     private onDidRunGitStatus(): void {
         this.state = {
             ...this.state,
-            hasRemotes: this.repository.remotes.length > 0,
             HEAD: this.repository.HEAD,
+            hasRemotes: this.repository.remotes.length > 0,
         };
     }
 
@@ -139,10 +139,10 @@ class SyncStatusBar {
                 : localize("publish to...", "Publish to...");
 
             return {
+                arguments: [this.repository.sourceControl],
                 command: "git.publish",
                 title: `$(cloud-upload)`,
                 tooltip,
-                arguments: [this.repository.sourceControl],
             };
         }
 
@@ -180,10 +180,10 @@ class SyncStatusBar {
         }
 
         return {
+            arguments: [this.repository.sourceControl],
             command,
             title: [icon, text].join(" ").trim(),
             tooltip,
-            arguments: [this.repository.sourceControl],
         };
     }
 

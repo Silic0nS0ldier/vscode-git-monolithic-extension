@@ -5,7 +5,7 @@ import { commitWithAnyInput } from "./helpers.js";
 
 export function createCommand(model: Model): ScmCommand {
     async function commitStagedSignedNoVerify(repository: FinalRepository): Promise<void> {
-        await commitWithAnyInput(repository, model, { all: false, signoff: true, noVerify: true });
+        await commitWithAnyInput(repository, model, { all: false, noVerify: true, signoff: true });
     }
 
     return {
