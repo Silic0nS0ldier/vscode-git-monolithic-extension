@@ -18,6 +18,10 @@
             "import": "./dist/api/repository/config/read.js",
             "types": "./dist/api/repository/config/read.d.ts"
         },
+        "./api/repository/remotes/get": {
+            "import": "./dist/api/repository/remotes/get.js",
+            "types": "./dist/api/repository/remotes/get.d.ts"
+        },
         "./api/repository/find-tracking-branches": {
             "import": "./dist/api/repository/find-tracking-branches.js",
             "types": "./dist/api/repository/find-tracking-branches.d.ts"

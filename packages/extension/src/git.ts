@@ -5,6 +5,7 @@
 
 import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
+import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
@@ -1224,35 +1225,41 @@ export class Repository {
     }
 
     async getRemotes(): Promise<Remote[]> {
-        const result = await this.exec(["remote", "--verbose"]);
-        const lines = result.stdout.trim().split("\n").filter(l => !!l);
-        const remotes: MutableRemote[] = [];
+        const result = await getRemotes(this._git._context, this.repositoryRoot);
 
-        for (const line of lines) {
-            const parts = line.split(/\s/);
-            const [name, url, type] = parts;
+        if (isOk(result)) {
+            const data = unwrap(result);
+            const lines = data.trim().split("\n").filter(l => !!l);
+            const remotes: MutableRemote[] = [];
 
-            let remote = remotes.find(r => r.name === name);
+            for (const line of lines) {
+                const parts = line.split(/\s/);
+                const [name, url, type] = parts;
 
-            if (!remote) {
-                remote = { isReadOnly: false, name };
-                remotes.push(remote);
+                let remote = remotes.find(r => r.name === name);
+
+                if (!remote) {
+                    remote = { isReadOnly: false, name };
+                    remotes.push(remote);
+                }
+
+                if (/fetch/i.test(type)) {
+                    remote.fetchUrl = url;
+                } else if (/push/i.test(type)) {
+                    remote.pushUrl = url;
+                } else {
+                    remote.fetchUrl = url;
+                    remote.pushUrl = url;
+                }
+
+                // https://github.com/microsoft/vscode/issues/45271
+                remote.isReadOnly = remote.pushUrl === undefined || remote.pushUrl === "no_push";
             }
 
-            if (/fetch/i.test(type)) {
-                remote.fetchUrl = url;
-            } else if (/push/i.test(type)) {
-                remote.pushUrl = url;
-            } else {
-                remote.fetchUrl = url;
-                remote.pushUrl = url;
-            }
-
-            // https://github.com/microsoft/vscode/issues/45271
-            remote.isReadOnly = remote.pushUrl === undefined || remote.pushUrl === "no_push";
+            return remotes;
         }
 
-        return remotes;
+        throw unwrap(result);
     }
 
     async getBranch(name: string): Promise<Branch> {
