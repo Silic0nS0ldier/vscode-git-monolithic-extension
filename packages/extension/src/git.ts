@@ -50,7 +50,7 @@ import { getStatus } from "./git/repository-class/get-status.js";
 import { SpawnOptions } from "./git/SpawnOptions.js";
 import { Stash } from "./git/Stash.js";
 import { Submodule } from "./git/Submodule.js";
-import { groupBy, Limiter, mkdirp, splitInChunks } from "./util.js";
+import { groupBy, Limiter, splitInChunks } from "./util.js";
 import * as Versions from "./util/versions.js";
 
 // https://github.com/microsoft/vscode/issues/65693
@@ -130,7 +130,7 @@ export class Git {
             folderPath = path.join(options.parentPath, folderName);
         }
 
-        await mkdirp(options.parentPath);
+        await fs.mkdir(options.parentPath, { recursive: true });
 
         const onSpawn = (child: cp.ChildProcess) => {
             const decoder = new StringDecoder("utf8");

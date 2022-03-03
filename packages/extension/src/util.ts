@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as byline from "byline";
-import { createReadStream, promises as fs } from "node:fs";
-import { dirname, sep } from "node:path";
+import { createReadStream } from "node:fs";
+import { sep } from "node:path";
 import { Readable } from "node:stream";
 import { Disposable, Event, EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
@@ -134,44 +134,6 @@ export function groupBy<T>(arr: T[], fn: (el: T) => string): { [key: string]: T[
         result[key] = [...(result[key] || []), el];
         return result;
     }, Object.create(null));
-}
-
-export async function mkdirp(path: string, mode?: number): Promise<boolean> {
-    const mkdir = async () => {
-        try {
-            await fs.mkdir(path, mode);
-        } catch (err) {
-            if (err.code === "EEXIST") {
-                const stat = await fs.stat(path);
-
-                if (stat.isDirectory()) {
-                    return;
-                }
-
-                throw new Error(`'${path}' exists and is not a directory.`);
-            }
-
-            throw err;
-        }
-    };
-
-    // is root?
-    if (path === dirname(path)) {
-        return true;
-    }
-
-    try {
-        await mkdir();
-    } catch (err) {
-        if (err.code !== "ENOENT") {
-            throw err;
-        }
-
-        await mkdirp(dirname(path), mode);
-        await mkdir();
-    }
-
-    return true;
 }
 
 export function uniqueFilter<T>(keyFn: (t: T) => string): (t: T) => boolean {
