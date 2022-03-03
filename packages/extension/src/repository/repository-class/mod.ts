@@ -1,14 +1,10 @@
 import {
-    commands,
     Disposable,
     EventEmitter,
     Memento,
     OutputChannel,
     QuickDiffProvider,
     scm,
-    SourceControl,
-    SourceControlInputBox,
-    SourceControlResourceGroup,
     Uri,
     window,
     workspace,
@@ -16,7 +12,6 @@ import {
 import { Branch, GitErrorCodes, Ref, RefType, Remote, Status } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import { Repository as BaseRepository } from "../../git.js";
-import { Commit } from "../../git/Commit.js";
 import { Submodule } from "../../git/Submodule.js";
 import { debounce } from "../../package-patches/just-debounce.js";
 import { throat } from "../../package-patches/throat.js";
@@ -24,7 +19,7 @@ import { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { IRemoteSourceProviderRegistry } from "../../remoteProvider.js";
 import { StatusBarCommands } from "../../statusbar.js";
 import { toGitUri } from "../../uri.js";
-import { anyEvent, Box, createBox, dispose, eventToPromise, filterEvent, localize } from "../../util.js";
+import { anyEvent, createBox, dispose, eventToPromise, filterEvent, localize } from "../../util.js";
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
@@ -42,11 +37,14 @@ import { buffer as bufferImpl } from "./buffer.js";
 import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
 import { clean as cleanImpl } from "./clean.js";
 import { commit as commitImpl } from "./commit.js";
+import { createRebaseCommitBox } from "./createRebaseCommitBox";
+import { createStateBox } from "./createStateBox";
 import { fetch as fetchImpl } from "./fetch.js";
 import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConfig } from "./get-config.js";
 import { getInputTemplate as getInputTemplateImpl } from "./get-input-template.js";
 import { headLabel as headLabelImpl } from "./head-label.js";
 import { ignore as ignoreImpl } from "./ignore.js";
+import { AbstractRepositorySymbol } from "./isAbstractRepository.js";
 import { pullFrom as pullFromImpl } from "./pull-from.js";
 import { pullWithRebase as pullWithRebaseImpl } from "./pull-with-rebase.js";
 import { pull as pullImpl } from "./pull.js";
@@ -59,63 +57,6 @@ import { syncLabel as syncLabelImpl } from "./sync-label.js";
 import { syncTooltip as syncTooltipImpl } from "./sync-tooltip.js";
 import { sync as syncImpl } from "./sync.js";
 import { updateModelState as updateModelStateImpl } from "./update-model-state.js";
-
-function createStateBox(
-    onDidChangeState: EventEmitter<RepositoryState>,
-    HEAD: Box<Branch | undefined>,
-    refs: Box<Ref[]>,
-    remotes: Box<Remote[]>,
-    mergeGroup: SourceControlResourceGroup,
-    indexGroup: SourceControlResourceGroup,
-    workingTreeGroup: SourceControlResourceGroup,
-    untrackedGroup: SourceControlResourceGroup,
-    sourceControl: SourceControl,
-): Box<RepositoryState> {
-    let state = RepositoryState.Idle;
-
-    return {
-        get: () => state,
-        set: (newState: RepositoryState) => {
-            state = newState;
-            onDidChangeState.fire(state);
-
-            HEAD.set(undefined);
-            refs.set([]);
-            remotes.set([]);
-            mergeGroup.resourceStates = [];
-            indexGroup.resourceStates = [];
-            workingTreeGroup.resourceStates = [];
-            untrackedGroup.resourceStates = [];
-            sourceControl.count = 0;
-        },
-    };
-}
-
-function createRebaseCommitBox(
-    inputBox: SourceControlInputBox,
-): Box<Commit | undefined> {
-    let rebaseCommit: Commit | undefined = undefined;
-
-    return {
-        get: () => rebaseCommit,
-        set: (newRebaseCommit) => {
-            if (rebaseCommit && !newRebaseCommit) {
-                inputBox.value = "";
-            } else if (newRebaseCommit && (!rebaseCommit || rebaseCommit.hash !== newRebaseCommit.hash)) {
-                inputBox.value = newRebaseCommit.message;
-            }
-
-            rebaseCommit = newRebaseCommit;
-            commands.executeCommand("setContext", "gitRebaseInProgress", !!rebaseCommit);
-        },
-    };
-}
-
-const FinalRepositorySymbol = Symbol();
-
-export function isAbstractRepository(value: unknown): value is AbstractRepository {
-    return (value as any).__type === FinalRepositorySymbol;
-}
 
 export function createRepository(
     repository: BaseRepository,
@@ -455,7 +396,7 @@ export function createRepository(
         get HEAD() {
             return HEAD.get();
         },
-        __type: FinalRepositorySymbol,
+        __type: AbstractRepositorySymbol,
         add(resources, opts) {
             return run(Operation.Add, () => repository.add(resources.map(r => r.fsPath), opts));
         },

@@ -38,7 +38,8 @@ import { throat } from "./package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "./pushError.js";
 import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
 import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
-import { createRepository, isAbstractRepository } from "./repository/repository-class/mod.js";
+import { isAbstractRepository } from "./repository/repository-class/isAbstractRepository";
+import { createRepository } from "./repository/repository-class/mod.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
 import { fromGitUri } from "./uri.js";
 import {
