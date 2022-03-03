@@ -9,7 +9,7 @@ export async function getHEAD(context: GitContext, repoRoot: string): Promise<Re
 
         if (isOk(symbolicRefHeadResult)) {
             const headRef = unwrap(symbolicRefHeadResult);
-            if (!headRef) {
+            if (headRef) {
                 return { commit: undefined, name: headRef, type: RefType.Head };
             }
         }
@@ -18,16 +18,15 @@ export async function getHEAD(context: GitContext, repoRoot: string): Promise<Re
 
         if (isOk(revParseHeadResult)) {
             const commitMaybe = unwrap(revParseHeadResult);
-            if (commitMaybe === undefined) {
-                throw new Error("Error parsing HEAD");
+            if (commitMaybe) {
+                return { commit: commitMaybe, name: undefined, type: RefType.Head };
             }
-            return { commit: commitMaybe, name: undefined, type: RefType.Head };
         }
 
         throw {
             attempts: [
                 isErr(symbolicRefHeadResult) && unwrap(symbolicRefHeadResult),
-                unwrap(revParseHeadResult),
+                isErr(revParseHeadResult) && unwrap(revParseHeadResult),
             ],
             message: "Could not get head",
         };
