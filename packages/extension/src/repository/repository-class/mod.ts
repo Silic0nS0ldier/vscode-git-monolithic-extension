@@ -247,7 +247,7 @@ export function createRepository(
     const repoRoot = repository.root;
     const dotGit = repository.dotGit;
 
-    const workingTreeWatcher = createWorkingTreeWatcher(repoRoot);
+    const workingTreeWatcher = createWorkingTreeWatcher(repoRoot, dotGit);
     disposables.push(workingTreeWatcher);
     const onWorkingTreeFileChange = workingTreeWatcher.event;
 
