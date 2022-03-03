@@ -10,6 +10,7 @@ import {
     EventEmitter,
     FileDecoration,
     FileDecorationProvider,
+    TextDocument,
     ThemeColor,
     Uri,
     window,
@@ -25,7 +26,7 @@ import { anyEvent, dispose, filterEvent, fireEvent, PromiseSource } from "./util
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
     private static Decoration: FileDecoration = { color: new ThemeColor("gitDecoration.ignoredResourceForeground") };
 
-    readonly onDidChangeFileDecorations: Event<Uri[]>;
+    readonly onDidChangeFileDecorations: Event<undefined>;
     private queue = new Map<
         string,
         { repository: FinalRepository; queue: Map<string, PromiseSource<FileDecoration | undefined>> }
@@ -33,11 +34,12 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
     private disposables: Disposable[] = [];
 
     constructor(private model: Model) {
-        this.onDidChangeFileDecorations = fireEvent(anyEvent<any>(
+        const sources = anyEvent<TextDocument | FinalRepository>(
             filterEvent(workspace.onDidSaveTextDocument, e => /\.gitignore$|\.git\/info\/exclude$/.test(e.uri.path)),
             model.onDidOpenRepository,
             model.onDidCloseRepository,
-        ));
+        );
+        this.onDidChangeFileDecorations = fireEvent(listener => sources(() => listener(undefined)));
 
         this.disposables.push(window.registerFileDecorationProvider(this));
     }
@@ -52,7 +54,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
         let queueItem = this.queue.get(repository.root);
 
         if (!queueItem) {
-            queueItem = { repository, queue: new Map<string, PromiseSource<FileDecoration | undefined>>() };
+            queueItem = { queue: new Map<string, PromiseSource<FileDecoration | undefined>>(), repository };
             this.queue.set(repository.root, queueItem);
         }
 
@@ -96,11 +98,26 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
     }
 }
 
+function collectDecorationData(group: GitResourceGroup, bucket: Map<string, FileDecoration>): void {
+    for (const r of group.resourceStates) {
+        const decoration = r.resourceDecoration;
+
+        if (decoration) {
+            // not deleted and has a decoration
+            bucket.set(r.original.toString(), decoration);
+
+            if (r.type === Status.INDEX_RENAMED) {
+                bucket.set(r.resourceUri.toString(), decoration);
+            }
+        }
+    }
+}
+
 class GitDecorationProvider implements FileDecorationProvider {
     private static SubmoduleDecorationData: FileDecoration = {
-        tooltip: "Submodule",
         badge: "S",
         color: new ThemeColor("gitDecoration.submoduleResourceForeground"),
+        tooltip: "Submodule",
     };
 
     private readonly _onDidChangeDecorations = new EventEmitter<Uri[]>();
@@ -120,29 +137,14 @@ class GitDecorationProvider implements FileDecorationProvider {
         let newDecorations = new Map<string, FileDecoration>();
 
         this.collectSubmoduleDecorationData(newDecorations);
-        this.collectDecorationData(this.repository.indexGroup, newDecorations);
-        this.collectDecorationData(this.repository.untrackedGroup, newDecorations);
-        this.collectDecorationData(this.repository.workingTreeGroup, newDecorations);
-        this.collectDecorationData(this.repository.mergeGroup, newDecorations);
+        collectDecorationData(this.repository.indexGroup, newDecorations);
+        collectDecorationData(this.repository.untrackedGroup, newDecorations);
+        collectDecorationData(this.repository.workingTreeGroup, newDecorations);
+        collectDecorationData(this.repository.mergeGroup, newDecorations);
 
         const uris = new Set([...this.decorations.keys()].concat([...newDecorations.keys()]));
         this.decorations = newDecorations;
         this._onDidChangeDecorations.fire([...uris.values()].map(value => Uri.parse(value, true)));
-    }
-
-    private collectDecorationData(group: GitResourceGroup, bucket: Map<string, FileDecoration>): void {
-        for (const r of group.resourceStates) {
-            const decoration = r.resourceDecoration;
-
-            if (decoration) {
-                // not deleted and has a decoration
-                bucket.set(r.original.toString(), decoration);
-
-                if (r.type === Status.INDEX_RENAMED) {
-                    bucket.set(r.resourceUri.toString(), decoration);
-                }
-            }
-        }
     }
 
     private collectSubmoduleDecorationData(bucket: Map<string, FileDecoration>): void {

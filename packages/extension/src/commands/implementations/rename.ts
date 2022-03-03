@@ -5,13 +5,13 @@ import { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function rename(repository: FinalRepository, fromUri: Uri | undefined): Promise<void> {
-        fromUri = fromUri ?? window.activeTextEditor?.document.uri;
+        const normalisedFromUri = fromUri ?? window.activeTextEditor?.document.uri;
 
-        if (!fromUri) {
+        if (!normalisedFromUri) {
             return;
         }
 
-        const from = path.relative(repository.root, fromUri.fsPath);
+        const from = path.relative(repository.root, normalisedFromUri.fsPath);
         let to = await window.showInputBox({
             value: from,
             valueSelection: [from.length - path.basename(from).length, from.length],

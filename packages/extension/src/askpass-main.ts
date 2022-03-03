@@ -7,9 +7,9 @@ import * as fs from "node:fs";
 import { IPCClient } from "./ipc/ipcClient.js";
 import { localize } from "./util.js";
 
-function fatal(err: any): void {
+function fatal(errMsg: string): void {
     console.error(localize("missOrInvalid", "Missing or invalid credentials."));
-    console.error(err);
+    console.error(errMsg);
     process.exit(1);
 }
 
@@ -31,7 +31,7 @@ function main(argv: string[]): void {
     const host = argv[4].replace(/^["']+|["':]+$/g, "");
     const ipcClient = new IPCClient("askpass");
 
-    ipcClient.call({ request, host }).then(res => {
+    ipcClient.call({ host, request }).then(res => {
         fs.writeFileSync(output, res + "\n");
         setTimeout(() => process.exit(0), 0);
     }).catch(err => fatal(err));

@@ -61,6 +61,6 @@ export function createCommand(
 }
 
 export function sanitizeRemoteName(name: string) {
-    name = name.trim();
-    return name && name.replace(/^\.|\/\.|\.\.|~|\^|:|\/$|\.lock$|\.lock\/|\\|\*|\s|^\s*$|\.$|\[|\]$/g, "-");
+    const trimmedName = name.trim();
+    return trimmedName && trimmedName.replace(/^\.|\/\.|\.\.|~|\^|:|\/$|\.lock$|\.lock\/|\\|\*|\s|^\s*$|\.$|\[|\]$/g, "-");
 }

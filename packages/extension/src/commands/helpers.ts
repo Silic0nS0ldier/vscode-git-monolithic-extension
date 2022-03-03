@@ -57,26 +57,26 @@ export function getSCMResource(
     outputChannel: OutputChannel,
     uri?: Uri,
 ): Resource | undefined {
-    uri = uri ? uri : (window.activeTextEditor && window.activeTextEditor.document.uri);
+    let normalisedUri = uri ? uri : (window.activeTextEditor?.document.uri);
 
-    outputChannel.appendLine(`git.getSCMResource.uri ${uri && uri.toString()}`);
+    outputChannel.appendLine(`git.getSCMResource.uri ${normalisedUri && normalisedUri.toString()}`);
 
     for (const r of model.repositories.map(r => r.root)) {
         outputChannel.appendLine(`repo root ${r}`);
     }
 
-    if (!uri) {
+    if (!normalisedUri) {
         return undefined;
     }
 
-    if (isGitUri(uri)) {
-        const { path } = fromGitUri(uri);
-        uri = Uri.file(path);
+    if (isGitUri(normalisedUri)) {
+        const { path } = fromGitUri(normalisedUri);
+        normalisedUri = Uri.file(path);
     }
 
-    if (uri.scheme === "file") {
-        const uriString = uri.toString();
-        const repository = model.getRepository(uri);
+    if (normalisedUri.scheme === "file") {
+        const uriString = normalisedUri.toString();
+        const repository = model.getRepository(normalisedUri);
 
         if (!repository) {
             return undefined;

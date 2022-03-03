@@ -29,10 +29,11 @@ class BranchDeleteItem implements QuickPickItem {
 }
 
 export function createCommand(): ScmCommand {
-    async function deleteBranch(repository: FinalRepository, name: string, force?: boolean): Promise<void> {
+    async function deleteBranch(repository: FinalRepository, branchName: string, force?: boolean): Promise<void> {
+        let normalisedBranchName = branchName;
         let run: (force?: boolean) => Promise<void>;
-        if (typeof name === "string") {
-            run = force => repository.deleteBranch(name, force);
+        if (typeof normalisedBranchName === "string") {
+            run = force => repository.deleteBranch(normalisedBranchName, force);
         } else {
             const currentHead = repository.HEAD && repository.HEAD.name;
             const heads = repository.refs.filter(ref => ref.type === RefType.Head && ref.name !== currentHead)
@@ -44,7 +45,7 @@ export function createCommand(): ScmCommand {
             if (!choice || !choice.branchName) {
                 return;
             }
-            name = choice.branchName;
+            normalisedBranchName = choice.branchName;
             run = force => choice.run(repository, force);
         }
 
@@ -58,7 +59,7 @@ export function createCommand(): ScmCommand {
             const message = localize(
                 "confirm force delete branch",
                 "The branch '{0}' is not fully merged. Delete anyway?",
-                name,
+                normalisedBranchName,
             );
             const yes = localize("delete branch", "Delete Branch");
             const pick = await window.showWarningMessage(message, { modal: true }, yes);

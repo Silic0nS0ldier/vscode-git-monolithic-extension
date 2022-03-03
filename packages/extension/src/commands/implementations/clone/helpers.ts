@@ -14,14 +14,16 @@ export async function cloneRepository(
     parentPath?: string,
     options: { recursive?: boolean } = {},
 ): Promise<void> {
-    if (!url || typeof url !== "string") {
-        url = await pickRemoteSource(model, {
+    let normalisedUrl = url;
+    let normalisedParentPath = parentPath;
+    if (!normalisedUrl || typeof normalisedUrl !== "string") {
+        normalisedUrl = await pickRemoteSource(model, {
             providerLabel: provider => localize("clonefrom", "Clone from {0}", provider.name),
             urlLabel: localize("repourl", "Clone from URL"),
         });
     }
 
-    if (!url) {
+    if (!normalisedUrl) {
         /* __GDPR__
 			"clone" : {
 				"outcome" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
@@ -31,9 +33,9 @@ export async function cloneRepository(
         return;
     }
 
-    url = url.trim().replace(/^git\s+clone\s+/, "");
+    normalisedUrl = normalisedUrl.trim().replace(/^git\s+clone\s+/, "");
 
-    if (!parentPath) {
+    if (!normalisedParentPath) {
         const config = workspace.getConfiguration("git");
         let defaultCloneDirectory = config.get<string>("defaultCloneDirectory") || os.homedir();
         defaultCloneDirectory = defaultCloneDirectory.replace(/^~/, os.homedir());
@@ -57,20 +59,20 @@ export async function cloneRepository(
         }
 
         const uri = uris[0];
-        parentPath = uri.fsPath;
+        normalisedParentPath = uri.fsPath;
     }
 
     try {
         const opts = {
             location: ProgressLocation.Notification,
-            title: localize("cloning", "Cloning git repository '{0}'...", url),
+            title: localize("cloning", "Cloning git repository '{0}'...", normalisedUrl),
             cancellable: true,
         };
 
         const repositoryPath = await window.withProgress(
             opts,
             (progress, token) =>
-                git.clone(url!, { parentPath: parentPath!, progress, recursive: options.recursive }, token),
+                git.clone(normalisedUrl!, { parentPath: normalisedParentPath!, progress, recursive: options.recursive }, token),
         );
 
         const config = workspace.getConfiguration("git");

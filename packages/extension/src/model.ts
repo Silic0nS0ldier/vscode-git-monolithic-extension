@@ -480,26 +480,27 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     private getOpenRepository(path: string): OpenRepository | undefined;
     private getOpenRepository(resource: Uri): OpenRepository | undefined;
     private getOpenRepository(hint: any): OpenRepository | undefined {
-        if (!hint) {
+        let normalisedHint = hint;
+        if (!normalisedHint) {
             return undefined;
         }
 
-        if (isFinalRepository(hint)) {
-            const stableHint = hint;
+        if (isFinalRepository(normalisedHint)) {
+            const stableHint = normalisedHint;
             return this.openRepositories.filter(r => r.repository === stableHint)[0];
         }
 
-        if (typeof hint === "string") {
-            hint = Uri.file(hint);
+        if (typeof normalisedHint === "string") {
+            normalisedHint = Uri.file(normalisedHint);
         }
 
-        if (hint instanceof Uri) {
+        if (normalisedHint instanceof Uri) {
             let resourcePath: string;
 
-            if (hint.scheme === "git") {
-                resourcePath = fromGitUri(hint).path;
+            if (normalisedHint.scheme === "git") {
+                resourcePath = fromGitUri(normalisedHint).path;
             } else {
-                resourcePath = hint.fsPath;
+                resourcePath = normalisedHint.fsPath;
             }
 
             outer:
@@ -529,12 +530,12 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         for (const liveRepository of this.openRepositories) {
             const repository = liveRepository.repository;
 
-            if (hint === repository.sourceControl) {
+            if (normalisedHint === repository.sourceControl) {
                 return liveRepository;
             }
 
             if (
-                hint === repository.mergeGroup || hint === repository.indexGroup || hint === repository.workingTreeGroup
+                normalisedHint === repository.mergeGroup || normalisedHint === repository.indexGroup || normalisedHint === repository.workingTreeGroup
             ) {
                 return liveRepository;
             }

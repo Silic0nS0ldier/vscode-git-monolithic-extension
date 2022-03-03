@@ -2,15 +2,16 @@ import { GitErrorCodes } from "../api/git.js";
 
 export function cpErrorHandler(cb: (reason?: any) => void): (reason?: any) => void {
     return err => {
+        let normalisedErr = err;
         if (/ENOENT/.test(err.message)) {
-            err = new GitError({
+            normalisedErr = new GitError({
                 error: err,
                 message: "Failed to execute git (ENOENT)",
                 gitErrorCode: GitErrorCodes.NotAGitRepository,
             });
         }
 
-        cb(err);
+        cb(normalisedErr);
     };
 }
 

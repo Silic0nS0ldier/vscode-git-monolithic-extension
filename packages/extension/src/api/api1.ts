@@ -416,20 +416,20 @@ export function registerAPICommands(extension: GitExtensionImpl): Disposable {
 
         const ref = (ref: Ref | undefined) => (ref && { ...ref, type: getRefType(ref.type) });
         const change = (change: Change) => ({
-            uri: change.uri.toString(),
             originalUri: change.originalUri.toString(),
             renameUri: change.renameUri?.toString(),
             status: getStatus(change.status),
+            uri: change.uri.toString(),
         });
 
         return {
             HEAD: ref(state.HEAD),
+            indexChanges: state.indexChanges.map(change),
+            mergeChanges: state.mergeChanges.map(change),
+            rebaseCommit: state.rebaseCommit,
             refs: state.refs.map(ref),
             remotes: state.remotes,
             submodules: state.submodules,
-            rebaseCommit: state.rebaseCommit,
-            mergeChanges: state.mergeChanges.map(change),
-            indexChanges: state.indexChanges.map(change),
             workingTreeChanges: state.workingTreeChanges.map(change),
         };
     }));

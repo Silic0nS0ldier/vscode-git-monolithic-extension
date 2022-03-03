@@ -108,30 +108,33 @@ export class Resource implements SourceControlResourceState {
         return this._renameResourceUri;
     }
 
-    private static Icons: any = {
-        light: {
-            Modified: getIconUri("status-modified", "light"),
-            Added: getIconUri("status-added", "light"),
-            Deleted: getIconUri("status-deleted", "light"),
-            Renamed: getIconUri("status-renamed", "light"),
-            Copied: getIconUri("status-copied", "light"),
-            Untracked: getIconUri("status-untracked", "light"),
-            Ignored: getIconUri("status-ignored", "light"),
-            Conflict: getIconUri("status-conflict", "light"),
-        },
+    private static Icons = {
         dark: {
-            Modified: getIconUri("status-modified", "dark"),
             Added: getIconUri("status-added", "dark"),
-            Deleted: getIconUri("status-deleted", "dark"),
-            Renamed: getIconUri("status-renamed", "dark"),
-            Copied: getIconUri("status-copied", "dark"),
-            Untracked: getIconUri("status-untracked", "dark"),
-            Ignored: getIconUri("status-ignored", "dark"),
             Conflict: getIconUri("status-conflict", "dark"),
+            Copied: getIconUri("status-copied", "dark"),
+            Deleted: getIconUri("status-deleted", "dark"),
+            Ignored: getIconUri("status-ignored", "dark"),
+            Modified: getIconUri("status-modified", "dark"),
+            Renamed: getIconUri("status-renamed", "dark"),
+            Untracked: getIconUri("status-untracked", "dark"),
         },
-    };
+        light: {
+            Added: getIconUri("status-added", "light"),
+            Conflict: getIconUri("status-conflict", "light"),
+            Copied: getIconUri("status-copied", "light"),
+            Deleted: getIconUri("status-deleted", "light"),
+            Ignored: getIconUri("status-ignored", "light"),
+            Modified: getIconUri("status-modified", "light"),
+            Renamed: getIconUri("status-renamed", "light"),
+            Untracked: getIconUri("status-untracked", "light"),
+        },
+    } as const;
 
     private getIconPath(theme: string): Uri {
+        if (theme !== "light" && theme !== "dark") {
+            throw new Error(`Unknown theme ${theme}`);
+        }
         switch (this.type) {
             case Status.INDEX_MODIFIED:
                 return Resource.Icons[theme].Modified;

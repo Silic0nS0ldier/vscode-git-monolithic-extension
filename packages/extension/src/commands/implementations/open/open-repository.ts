@@ -7,8 +7,9 @@ import { ScmCommand } from "../../helpers.js";
 export function createCommand(
     model: Model,
 ): ScmCommand {
-    async function openRepository(path?: string): Promise<void> {
-        if (!path) {
+    async function openRepository(repoPath?: string): Promise<void> {
+        let normalisedRepoPath = repoPath;
+        if (!normalisedRepoPath) {
             const result = await window.showOpenDialog({
                 canSelectFiles: false,
                 canSelectFolders: true,
@@ -21,10 +22,10 @@ export function createCommand(
                 return;
             }
 
-            path = result[0].fsPath;
+            normalisedRepoPath = result[0].fsPath;
         }
 
-        await model.openRepository(path);
+        await model.openRepository(normalisedRepoPath);
     }
 
     return {

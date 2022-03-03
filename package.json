@@ -3,14 +3,15 @@
     "scripts": {
         "test": "node ./packages/build-tools/test.js",
         "build": "node ./packages/build-tools/build.js",
+        "lint": "eslint --ext ts --fix --cache ./packages/",
         "update-emoji": "node ./packages/build-tools/update-emoji.js",
         "update-grammar": "node ./packages/build-tools/update-grammars.js",
         "vsce": "node ./packages/build-tools/vsce.js",
         "vscode:prepublish": "node ./packages/build-tools/build.js"
     },
     "dependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.11.0",
-        "@typescript-eslint/parser": "^5.11.0",
-        "eslint": "^8.9.0"
+        "@typescript-eslint/eslint-plugin": "^5.13.0",
+        "@typescript-eslint/parser": "^5.13.0",
+        "eslint": "^8.10.0"
     }
 }

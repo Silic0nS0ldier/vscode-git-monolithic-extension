@@ -69,19 +69,21 @@ class GitStatusParser {
     }
 
     update(raw: string): void {
+        let normalisedRaw = raw;
         let i = 0;
         let nextI: number | undefined;
 
-        raw = this.lastRaw + raw;
+        normalisedRaw = this.lastRaw + normalisedRaw;
 
-        while ((nextI = this.parseEntry(raw, i)) !== undefined) {
+        while ((nextI = this.parseEntry(normalisedRaw, i)) !== undefined) {
             i = nextI;
         }
 
-        this.lastRaw = raw.substr(i);
+        this.lastRaw = normalisedRaw.substr(i);
     }
 
-    private parseEntry(raw: string, i: number): number | undefined {
+    private parseEntry(raw: string, start: number): number | undefined {
+        let i = start;
         if (i + 4 >= raw.length) {
             return;
         }

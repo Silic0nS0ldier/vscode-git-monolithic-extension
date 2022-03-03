@@ -304,8 +304,7 @@ export class Git {
     }
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
-        options = { cwd, ...options };
-        return await this._exec(args, { ...options, log_mode: "buffer" });
+        return await this._exec(args, { cwd, ...options, log_mode: "buffer" });
     }
 
     async exec2(args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
@@ -313,8 +312,7 @@ export class Git {
     }
 
     stream(cwd: string, args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        options = { cwd, ...options };
-        return this.spawn(args, { ...options, log_mode: "stream" });
+        return this.spawn(args, { cwd, ...options, log_mode: "stream" });
     }
 
     private async _exec(args: string[], options: SpawnOptions): Promise<IExecutionResult<string>> {
@@ -663,13 +661,14 @@ export class Repository {
     async bufferString(object: string, encoding: string = "utf8", autoGuessEncoding = false): Promise<string> {
         const stdout = await this.buffer(object);
 
+        let normalisedEncoding = encoding;
         if (autoGuessEncoding) {
-            encoding = detectEncoding(stdout) || encoding;
+            normalisedEncoding = detectEncoding(stdout) || normalisedEncoding;
         }
 
-        encoding = iconv.encodingExists(encoding) ? encoding : "utf8";
+        normalisedEncoding = iconv.encodingExists(normalisedEncoding) ? normalisedEncoding : "utf8";
 
-        return iconv.decode(stdout, encoding);
+        return iconv.decode(stdout, normalisedEncoding);
     }
 
     async buffer(object: string): Promise<Buffer> {

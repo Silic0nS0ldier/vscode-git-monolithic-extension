@@ -14,10 +14,10 @@ export function checkIgnore(
 ): Promise<Set<string>> {
     return run(Operation.CheckIgnore, () => {
         return new Promise<Set<string>>((resolve, reject) => {
-            filePaths = filePaths
+            const filteredFilePaths = filePaths
                 .filter(filePath => isDescendant(repoRoot, filePath));
 
-            if (filePaths.length === 0) {
+            if (filteredFilePaths.length === 0) {
                 // nothing left
                 return resolve(new Set<string>());
             }
@@ -26,7 +26,7 @@ export function checkIgnore(
             const child = repository.stream(["check-ignore", "-v", "-z", "--stdin"], {
                 stdio: [null, null, null],
             });
-            child.stdin!.end(filePaths.join("\0"), "utf8");
+            child.stdin!.end(filteredFilePaths.join("\0"), "utf8");
 
             const onExit = (exitCode: number) => {
                 if (exitCode === 1) {

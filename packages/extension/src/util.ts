@@ -5,14 +5,10 @@
 
 import * as byline from "byline";
 import { createReadStream, promises as fs } from "node:fs";
-import { dirname, sep } from "node:path";
+import path, { dirname, sep } from "node:path";
 import { Readable } from "node:stream";
 import { Disposable, Event, EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
-
-export function log(...args: any[]): void {
-    console.log.apply(console, ["git:", ...args]);
-}
 
 export interface IDisposable {
     dispose(): void;
@@ -296,32 +292,36 @@ function isWindowsPath(path: string): boolean {
 }
 
 export function isDescendant(parent: string, descendant: string): boolean {
-    if (parent === descendant) {
+    let normalisedParent = parent;
+    let normalisedDescendant = descendant;
+    if (normalisedParent === normalisedDescendant) {
         return true;
     }
 
-    if (parent.charAt(parent.length - 1) !== sep) {
-        parent += sep;
+    if (normalisedParent.charAt(normalisedParent.length - 1) !== sep) {
+        normalisedParent += sep;
     }
 
     // Windows is case insensitive
-    if (isWindowsPath(parent)) {
-        parent = parent.toLowerCase();
-        descendant = descendant.toLowerCase();
+    if (isWindowsPath(normalisedParent)) {
+        normalisedParent = normalisedParent.toLowerCase();
+        normalisedDescendant = normalisedDescendant.toLowerCase();
     }
 
-    return descendant.startsWith(parent);
+    return normalisedDescendant.startsWith(normalisedParent);
 }
 
 // TODO This is an oversimplification, sensitivity depends on the disk
 export function pathEquals(a: string, b: string): boolean {
+    let normalisedA = a;
+    let normalisedB = b;
     // Windows is case insensitive
-    if (isWindowsPath(a)) {
-        a = a.toLowerCase();
-        b = b.toLowerCase();
+    if (isWindowsPath(normalisedA)) {
+        normalisedA = normalisedA.toLowerCase();
+        normalisedB = normalisedB.toLowerCase();
     }
 
-    return a === b;
+    return normalisedA === normalisedB;
 }
 
 export function* splitInChunks(array: string[], maxChunkLength: number): IterableIterator<string[]> {
@@ -436,27 +436,29 @@ export namespace Versions {
     }
 
     export function compare(v1: string | Version, v2: string | Version): VersionComparisonResult {
-        if (typeof v1 === "string") {
-            v1 = fromString(v1);
+        let normalisedV1 = v1;
+        let normalisedV2 = v2;
+        if (typeof normalisedV1 === "string") {
+            normalisedV1 = fromString(normalisedV1);
         }
-        if (typeof v2 === "string") {
-            v2 = fromString(v2);
+        if (typeof normalisedV2 === "string") {
+            normalisedV2 = fromString(normalisedV2);
         }
 
-        if (v1.major > v2.major) return 1;
-        if (v1.major < v2.major) return -1;
+        if (normalisedV1.major > normalisedV2.major) return 1;
+        if (normalisedV1.major < normalisedV2.major) return -1;
 
-        if (v1.minor > v2.minor) return 1;
-        if (v1.minor < v2.minor) return -1;
+        if (normalisedV1.minor > normalisedV2.minor) return 1;
+        if (normalisedV1.minor < normalisedV2.minor) return -1;
 
-        if (v1.patch > v2.patch) return 1;
-        if (v1.patch < v2.patch) return -1;
+        if (normalisedV1.patch > normalisedV2.patch) return 1;
+        if (normalisedV1.patch < normalisedV2.patch) return -1;
 
-        if (v1.pre === undefined && v2.pre !== undefined) return 1;
-        if (v1.pre !== undefined && v2.pre === undefined) return -1;
+        if (normalisedV1.pre === undefined && normalisedV2.pre !== undefined) return 1;
+        if (normalisedV1.pre !== undefined && normalisedV2.pre === undefined) return -1;
 
-        if (v1.pre !== undefined && v2.pre !== undefined) {
-            return v1.pre.localeCompare(v2.pre) as VersionComparisonResult;
+        if (normalisedV1.pre !== undefined && normalisedV2.pre !== undefined) {
+            return normalisedV1.pre.localeCompare(normalisedV2.pre) as VersionComparisonResult;
         }
 
         return 0;

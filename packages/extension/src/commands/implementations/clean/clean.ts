@@ -10,19 +10,19 @@ import { getSCMResource, runByRepository } from "../../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
     async function clean(...resourceStates: SourceControlResourceState[]): Promise<void> {
-        resourceStates = resourceStates.filter(s => !!s);
+        let normalisedResourceStates = resourceStates.filter(s => !!s);
 
-        if (resourceStates.length === 0 || (resourceStates[0] && !(resourceStates[0].resourceUri instanceof Uri))) {
+        if (normalisedResourceStates.length === 0 || (normalisedResourceStates[0] && !(normalisedResourceStates[0].resourceUri instanceof Uri))) {
             const resource = getSCMResource(model, outputChannel);
 
             if (!resource) {
                 return;
             }
 
-            resourceStates = [resource];
+            normalisedResourceStates = [resource];
         }
 
-        const scmResources = resourceStates.filter(s =>
+        const scmResources = normalisedResourceStates.filter(s =>
             s instanceof Resource
             && (s.resourceGroupType === ResourceGroupType.WorkingTree
                 || s.resourceGroupType === ResourceGroupType.Untracked)

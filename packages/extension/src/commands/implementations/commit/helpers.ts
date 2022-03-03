@@ -67,14 +67,15 @@ async function smartCommit(
         }
     }
 
-    if (!opts) {
-        opts = { all: noStagedChanges };
-    } else if (!opts.all && noStagedChanges && !opts.empty) {
-        opts = { ...opts, all: true };
+    let normalisedOpts = opts;
+    if (!normalisedOpts) {
+        normalisedOpts = { all: noStagedChanges };
+    } else if (!normalisedOpts.all && noStagedChanges && !normalisedOpts.empty) {
+        normalisedOpts = { ...normalisedOpts, all: true };
     }
 
     // no changes, and the user has not configured to commit all in this case
-    if (!noUnstagedChanges && noStagedChanges && !enableSmartCommit && !opts.empty) {
+    if (!noUnstagedChanges && noStagedChanges && !enableSmartCommit && !normalisedOpts.empty) {
         const suggestSmartCommit = config.get<boolean>("suggestSmartCommit") === true;
 
         if (!suggestSmartCommit) {
@@ -102,10 +103,10 @@ async function smartCommit(
     }
 
     // enable signing of commits if configured
-    opts.signCommit = enableCommitSigning;
+    normalisedOpts.signCommit = enableCommitSigning;
 
     if (config.get<boolean>("alwaysSignOff")) {
-        opts.signoff = true;
+        normalisedOpts.signoff = true;
     }
 
     const smartCommitChanges = config.get<"all" | "tracked">("smartCommitChanges");
@@ -115,14 +116,14 @@ async function smartCommit(
             // no changes
             (noStagedChanges && noUnstagedChanges)
             // or no staged changes and not `all`
-            || (!opts.all && noStagedChanges)
+            || (!normalisedOpts.all && noStagedChanges)
             // no staged changes and no tracked unstaged changes
             || (noStagedChanges && smartCommitChanges === "tracked"
                 && repository.workingTreeGroup.resourceStates.every(r => r.type === Status.UNTRACKED))
         )
         // amend allows changing only the commit message
-        && !opts.amend
-        && !opts.empty
+        && !normalisedOpts.amend
+        && !normalisedOpts.empty
     ) {
         const commitAnyway = localize("commit anyway", "Create Empty Commit");
         const answer = await window.showInformationMessage(
@@ -134,10 +135,10 @@ async function smartCommit(
             return false;
         }
 
-        opts.empty = true;
+        normalisedOpts.empty = true;
     }
 
-    if (opts.noVerify) {
+    if (normalisedOpts.noVerify) {
         if (!config.get<boolean>("allowNoVerifyCommit")) {
             await window.showErrorMessage(
                 localize(
@@ -167,19 +168,19 @@ async function smartCommit(
 
     let message = await getCommitMessage();
 
-    if (!message && !opts.amend) {
+    if (!message && !normalisedOpts.amend) {
         return false;
     }
 
-    if (opts.all && smartCommitChanges === "tracked") {
-        opts.all = "tracked";
+    if (normalisedOpts.all && smartCommitChanges === "tracked") {
+        normalisedOpts.all = "tracked";
     }
 
-    if (opts.all && config.get<"mixed" | "separate" | "hidden">("untrackedChanges") !== "mixed") {
-        opts.all = "tracked";
+    if (normalisedOpts.all && config.get<"mixed" | "separate" | "hidden">("untrackedChanges") !== "mixed") {
+        normalisedOpts.all = "tracked";
     }
 
-    await repository.commit(message, opts);
+    await repository.commit(message, normalisedOpts);
 
     const postCommitCommand = config.get<"none" | "push" | "sync">("postCommitCommand");
 

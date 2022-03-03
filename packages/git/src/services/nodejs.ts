@@ -13,12 +13,12 @@ export function createServices(): AllServices {
         fs: {
             exists,
         },
+        os: {
+            platform: process.platform,
+        },
         process,
         shell: {
             which,
-        },
-        os: {
-            platform: process.platform,
         },
     };
 }

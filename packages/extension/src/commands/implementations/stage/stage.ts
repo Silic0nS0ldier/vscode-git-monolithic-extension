@@ -15,9 +15,9 @@ export function createCommand(
     async function stage(...resourceStates: SourceControlResourceState[]): Promise<void> {
         outputChannel.appendLine(`git.stage ${resourceStates.length}`);
 
-        resourceStates = resourceStates.filter(s => !!s);
+        let normalisedResourceStates = resourceStates.filter(s => !!s);
 
-        if (resourceStates.length === 0 || (resourceStates[0] && !(resourceStates[0].resourceUri instanceof Uri))) {
+        if (normalisedResourceStates.length === 0 || (normalisedResourceStates[0] && !(normalisedResourceStates[0].resourceUri instanceof Uri))) {
             const resource = getSCMResource(model, outputChannel);
 
             outputChannel.appendLine(`git.stage.getSCMResource ${resource ? resource.resourceUri.toString() : null}`);
@@ -26,10 +26,10 @@ export function createCommand(
                 return;
             }
 
-            resourceStates = [resource];
+            normalisedResourceStates = [resource];
         }
 
-        const selection = resourceStates.filter(s => s instanceof Resource) as Resource[];
+        const selection = normalisedResourceStates.filter(s => s instanceof Resource) as Resource[];
         const { resolved, unresolved, deletionConflicts } = await categorizeResourceByResolution(selection);
 
         if (unresolved.length > 0) {

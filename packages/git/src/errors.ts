@@ -1,7 +1,7 @@
 type ErrorShape<TSymbol> = {
+    readonly cause?: unknown;
     readonly type: TSymbol;
     readonly unstableStack: unknown;
-    readonly cause?: unknown;
 };
 
 export const ERROR_GIT_NOT_FOUND = Symbol("GIT_NOT_FOUND");
