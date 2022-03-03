@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import { Uri, window, workspace } from "vscode";
-import { Stash } from "../../../git.js";
+import { Stash } from "../../../git/Stash.js";
 import { FinalRepository } from "../../../repository/repository-class/mod.js";
 import { isDescendant, localize, pathEquals } from "../../../util.js";
 

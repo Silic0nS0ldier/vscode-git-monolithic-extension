@@ -51,7 +51,6 @@ export const enum Operation {
     Move = "Move",
 }
 
-
 export interface Operations {
     isIdle(): boolean;
     shouldShowProgress(): boolean;

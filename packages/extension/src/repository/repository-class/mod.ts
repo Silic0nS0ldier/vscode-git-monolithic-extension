@@ -28,7 +28,11 @@ import {
     Status,
 } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
-import { Commit, LogFileOptions, Repository as BaseRepository, Stash, Submodule } from "../../git.js";
+import { Repository as BaseRepository } from "../../git.js";
+import { Submodule } from "../../git/Submodule.js";
+import { Commit } from "../../git/Commit.js";
+import { LogFileOptions } from "../../git/LogFileOptions.js";
+import { Stash } from "../../git/Stash.js";
 import { debounce } from "../../package-patches/just-debounce.js";
 import { throat } from "../../package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
@@ -41,19 +45,22 @@ import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
 import { GitResourceGroup } from "../GitResourceGroup.js";
 import { isReadOnly } from "../isReadOnly.js";
-import { Operation } from "../Operations.js";
 import { OperationResult } from "../OperationResult.js";
+import { Operation } from "../Operations.js";
 import { Operations, OperationsImpl } from "../Operations.js";
 import { ProgressManager } from "../ProgressManager.js";
 import { RepositoryState } from "../RepositoryState.js";
 import { retryRun } from "../retryRun.js";
 import { timeout } from "../timeout.js";
 import { buffer as bufferImpl } from "./buffer.js";
+import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
 import { clean as cleanImpl } from "./clean.js";
 import { commit as commitImpl } from "./commit.js";
 import { fetch as fetchImpl } from "./fetch.js";
 import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConfig } from "./get-config.js";
+import { getInputTemplate as getInputTemplateImpl } from "./get-input-template.js";
 import { headLabel as headLabelImpl } from "./head-label.js";
+import { ignore as ignoreImpl } from "./ignore.js";
 import { pullFrom as pullFromImpl } from "./pull-from.js";
 import { pullWithRebase as pullWithRebaseImpl } from "./pull-with-rebase.js";
 import { pull as pullImpl } from "./pull.js";
@@ -66,9 +73,6 @@ import { syncLabel as syncLabelImpl } from "./sync-label.js";
 import { syncTooltip as syncTooltipImpl } from "./sync-tooltip.js";
 import { sync as syncImpl } from "./sync.js";
 import { updateModelState as updateModelStateImpl } from "./update-model-state.js";
-import { ignore as ignoreImpl } from "./ignore.js";
-import { getInputTemplate as getInputTemplateImpl } from "./get-input-template.js";
-import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
 
 function createStateBox(
     onDidChangeState: EventEmitter<RepositoryState>,
@@ -132,7 +136,7 @@ export type FinalRepository = {
     readonly inputBox: SourceControlInputBox;
     readonly ignore: (files: Uri[]) => Promise<void>;
     readonly getInputTemplate: () => Promise<string>;
-    readonly headShortName: string|undefined;
+    readonly headShortName: string | undefined;
     readonly add: (resources: Uri[], opts?: { update?: boolean }) => Promise<void>;
     readonly addRemote: (name: string, url: string) => Promise<void>;
     readonly apply: (patch: string, reverse?: boolean) => Promise<void>;
@@ -283,7 +287,7 @@ export function createRepository(
         }
     }
 
-    const HEAD = createBox<Branch|undefined>(undefined);
+    const HEAD = createBox<Branch | undefined>(undefined);
     const refs = createBox<Ref[]>([]);
     const remotes = createBox<Remote[]>([]);
 

@@ -72,7 +72,11 @@ export async function cloneRepository(
         const repositoryPath = await window.withProgress(
             opts,
             (progress, token) =>
-                git.clone(normalisedUrl!, { parentPath: normalisedParentPath!, progress, recursive: options.recursive }, token),
+                git.clone(
+                    normalisedUrl!,
+                    { parentPath: normalisedParentPath!, progress, recursive: options.recursive },
+                    token,
+                ),
         );
 
         const config = workspace.getConfiguration("git");

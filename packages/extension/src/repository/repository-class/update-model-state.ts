@@ -1,21 +1,18 @@
 import path from "node:path";
-import { workspace, window, Uri, commands, EventEmitter, SourceControl } from "vscode";
+import { commands, EventEmitter, SourceControl, Uri, window, workspace } from "vscode";
+import { Branch, Ref, Remote, Status } from "../../api/git.js";
+import { Repository } from "../../git.js";
+import { Submodule } from "../../git/Submodule.js";
+import { Commit } from "../../git/Commit.js";
 import { Box, localize } from "../../util.js";
+import { GitResourceGroup } from "../GitResourceGroup.js";
 import { Resource } from "../Resource.js";
 import { ResourceGroupType } from "../ResourceGroupType.js";
-import {
-    Branch,
-    Ref,
-    Remote,
-    Status,
-} from "../../api/git.js";
 import { findKnownHugeFolderPathsToIgnore } from "./find-known-huge-folder-paths-to-ignore.js";
-import { Commit, Repository, Submodule } from "../../git.js";
+import { getInputTemplate } from "./get-input-template.js";
+import { getRebaseCommit } from "./get-rebase-commit.js";
 import { ignore } from "./ignore.js";
 import { RunFn } from "./run.js";
-import { getRebaseCommit } from "./get-rebase-commit.js";
-import { GitResourceGroup } from "../GitResourceGroup.js";
-import { getInputTemplate } from "./get-input-template.js";
 
 export async function updateModelState(
     repository: Repository,
@@ -26,7 +23,7 @@ export async function updateModelState(
     refs: Box<Ref[]>,
     remotes: Box<Remote[]>,
     submodules: Box<Submodule[]>,
-    rebaseCommit: Box<Commit|undefined>,
+    rebaseCommit: Box<Commit | undefined>,
     repoRoot: string,
     indexGroup: GitResourceGroup,
     mergeGroup: GitResourceGroup,

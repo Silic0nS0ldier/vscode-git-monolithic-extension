@@ -9,7 +9,7 @@ import {
     Uri,
 } from "vscode";
 import { Status } from "../api/git.js";
-import { Submodule } from "../git.js";
+import { Submodule } from "../git/Submodule.js";
 import {
     getResources,
     resolveChangeCommand,

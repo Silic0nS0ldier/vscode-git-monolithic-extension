@@ -160,7 +160,12 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         const gitMainTreeWatcher = workspace.createFileSystemWatcher("**/.git/HEAD", false, true, false);
         const gitWorkTreeWatcher = workspace.createFileSystemWatcher("**/.git", false, true, false);
         this.disposables.push(gitMainTreeWatcher, gitWorkTreeWatcher);
-        const onGitIndexEvent = anyEvent(gitMainTreeWatcher.onDidCreate, gitMainTreeWatcher.onDidDelete, gitWorkTreeWatcher.onDidCreate, gitWorkTreeWatcher.onDidDelete);
+        const onGitIndexEvent = anyEvent(
+            gitMainTreeWatcher.onDidCreate,
+            gitMainTreeWatcher.onDidDelete,
+            gitWorkTreeWatcher.onDidCreate,
+            gitWorkTreeWatcher.onDidDelete,
+        );
         onGitIndexEvent(this.onPossibleGitRepositoryChange, this, this.disposables);
 
         this.setState("uninitialized");
@@ -535,7 +540,8 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             }
 
             if (
-                normalisedHint === repository.mergeGroup || normalisedHint === repository.indexGroup || normalisedHint === repository.workingTreeGroup
+                normalisedHint === repository.mergeGroup || normalisedHint === repository.indexGroup
+                || normalisedHint === repository.workingTreeGroup
             ) {
                 return liveRepository;
             }

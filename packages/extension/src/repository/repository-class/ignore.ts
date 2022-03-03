@@ -1,6 +1,6 @@
-import path from "node:path";
 import fs from "node:fs";
-import { Uri, workspace, window, WorkspaceEdit } from "vscode";
+import path from "node:path";
+import { Uri, window, workspace, WorkspaceEdit } from "vscode";
 import { Repository } from "../../git.js";
 import { Operation } from "../Operations.js";
 import { RunFn } from "./run.js";

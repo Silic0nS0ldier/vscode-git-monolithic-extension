@@ -33,40 +33,27 @@ import {
     Remote,
 } from "./api/git.js";
 import { detectEncoding } from "./encoding.js";
-import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from "./git/diff.js";
-import { getGitErrorCode } from "./git/error.js";
-import { cpErrorHandler, GitError } from "./git/error.js";
+import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from "./git/git-class/diff.js";
+import { GitError } from "./git/error.js";
+import { exec, IExecutionResult } from "./git/exec.js";
 import { sanitizePath } from "./git/helpers.js";
-import { getStatus } from "./git/status.js";
-import {
-    assign,
-    dispose,
-    groupBy,
-    IDisposable,
-    Limiter,
-    mkdirp,
-    onceEvent,
-    splitInChunks,
-    toDisposable,
-    Versions,
-} from "./util.js";
-
-export { findGit, IGit } from "./git/find.js";
+import { internalExec } from "./git/git-class/internal-exec.js";
+import { internalSpawn } from "./git/git-class/internal-spawn.js";
+import { getStatus } from "./git/repository-class/get-status.js";
+import { IFileStatus } from "./git/IFileStatus.js";
+import { LogFileOptions } from "./git/LogFileOptions.js";
+import { Stash } from "./git/Stash.js";
+import { groupBy, Limiter, mkdirp, splitInChunks, Versions } from "./util.js";
+import { SpawnOptions } from "./git/SpawnOptions.js";
+import { Commit } from "./git/Commit.js";
+import { Submodule } from "./git/Submodule.js";
+import { parseGitmodules } from "./git/parseGitmodules.js";
+import { parseGitCommits } from "./git/parseGitCommits.js";
+import { LsTreeElement, parseLsTree } from "./git/parseLsTree.js";
+import { LsFilesElement, parseLsFiles } from "./git/parseLsFiles.js";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
-
-export interface IFileStatus {
-    x: string;
-    y: string;
-    path: string;
-    rename?: string;
-}
-
-export interface Stash {
-    index: number;
-    description: string;
-}
 
 interface MutableRemote extends Remote {
     fetchUrl?: string;
@@ -74,101 +61,12 @@ interface MutableRemote extends Remote {
     isReadOnly: boolean;
 }
 
-// TODO@eamodio: Move to git.d.ts once we are good with the api
-/**
- * Log file options.
- */
-export interface LogFileOptions {
-    /** Optional. The maximum number of log entries to retrieve. */
-    readonly maxEntries?: number | string;
-    /** Optional. The Git sha (hash) to start retrieving log entries from. */
-    readonly hash?: string;
-    /** Optional. Specifies whether to start retrieving log entries in reverse order. */
-    readonly reverse?: boolean;
-    readonly sortByAuthorDate?: boolean;
-}
-export interface IExecutionResult<T extends string | Buffer> {
-    exitCode: number;
-    stdout: T;
-    stderr: string;
-}
-
-export interface SpawnOptions extends cp.SpawnOptions {
-    input?: string;
-    encoding?: string;
-    cancellationToken?: CancellationToken;
-    onSpawn?: (childProcess: cp.ChildProcess) => void;
-    log_mode?: "stream" | "buffer";
-}
-
-async function exec(child: cp.ChildProcess, cancellationToken?: CancellationToken): Promise<IExecutionResult<Buffer>> {
-    if (!child.stdout || !child.stderr) {
-        throw new GitError({ message: "Failed to get stdout or stderr from git process." });
-    }
-
-    if (cancellationToken && cancellationToken.isCancellationRequested) {
-        throw new GitError({ message: "Cancelled" });
-    }
-
-    const disposables: IDisposable[] = [];
-
-    const once = (ee: NodeJS.EventEmitter, name: string, fn: (...args: any[]) => void) => {
-        ee.once(name, fn);
-        disposables.push(toDisposable(() => ee.removeListener(name, fn)));
-    };
-
-    const on = (ee: NodeJS.EventEmitter, name: string, fn: (...args: any[]) => void) => {
-        ee.on(name, fn);
-        disposables.push(toDisposable(() => ee.removeListener(name, fn)));
-    };
-
-    let result = Promise.all<any>([
-        new Promise<number>((c, e) => {
-            once(child, "error", cpErrorHandler(e));
-            once(child, "exit", c);
-        }),
-        new Promise<Buffer>(c => {
-            const buffers: Buffer[] = [];
-            on(child.stdout!, "data", (b: Buffer) => buffers.push(b));
-            once(child.stdout!, "close", () => c(Buffer.concat(buffers)));
-        }),
-        new Promise<string>(c => {
-            const buffers: Buffer[] = [];
-            on(child.stderr!, "data", (b: Buffer) => buffers.push(b));
-            once(child.stderr!, "close", () => c(Buffer.concat(buffers).toString("utf8")));
-        }),
-    ]) as Promise<[number, Buffer, string]>;
-
-    if (cancellationToken) {
-        const cancellationPromise = new Promise<[number, Buffer, string]>((_, e) => {
-            onceEvent(cancellationToken.onCancellationRequested)(() => {
-                try {
-                    child.kill();
-                } catch (err) {
-                    // noop
-                }
-
-                e(new GitError({ message: "Cancelled" }));
-            });
-        });
-
-        result = Promise.race([result, cancellationPromise]);
-    }
-
-    try {
-        const [exitCode, stdout, stderr] = await result;
-        return { exitCode, stderr, stdout };
-    } finally {
-        dispose(disposables);
-    }
-}
-
 export interface IGitOptions {
     gitPath: string;
     userAgent: string;
     version: string;
     context: GitContext;
-    env?: any;
+    env?: { [key: string]: string };
 }
 
 const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";
@@ -185,7 +83,7 @@ export class Git {
     readonly version: string;
     readonly _context: GitContext;
     private readonly services: AllServices;
-    private env: any;
+    private env: { [key: string]: string };
 
     private _onOutput = new EventEmitter();
     get onOutput(): EventEmitter {
@@ -316,82 +214,11 @@ export class Git {
     }
 
     private async _exec(args: string[], options: SpawnOptions): Promise<IExecutionResult<string>> {
-        const child = this.spawn(args, options);
-
-        if (options.onSpawn) {
-            options.onSpawn(child);
-        }
-
-        if (options.input) {
-            child.stdin!.end(options.input, "utf8");
-        }
-
-        const bufferResult = await exec(child, options.cancellationToken);
-
-        if (bufferResult.stderr.length > 0) {
-            this.log(`PID_${child.pid} [${options.log_mode}] < [ERR] ${JSON.stringify(bufferResult.stderr)}\n`);
-        }
-        let out = JSON.stringify(bufferResult.stdout.toString("utf-8"));
-        if (out.length > 150) {
-            out = out.slice(0, 150) + `" (${out.length - 150} chars hidden)`;
-        }
-        this.log(`PID_${child.pid} [${options.log_mode}] < ${out}\n`);
-
-        let encoding = options.encoding || "utf8";
-        encoding = iconv.encodingExists(encoding) ? encoding : "utf8";
-
-        const result: IExecutionResult<string> = {
-            exitCode: bufferResult.exitCode,
-            stderr: bufferResult.stderr,
-            stdout: iconv.decode(bufferResult.stdout, encoding),
-        };
-
-        if (bufferResult.exitCode) {
-            return Promise.reject<IExecutionResult<string>>(
-                new GitError({
-                    exitCode: result.exitCode,
-                    gitArgs: args,
-                    gitCommand: args[0],
-                    gitErrorCode: getGitErrorCode(result.stderr),
-                    message: "Failed to execute git",
-                    stderr: result.stderr,
-                    stdout: result.stdout,
-                }),
-            );
-        }
-
-        return result;
+        return internalExec(this.path, this.env, this.log.bind(this), args, options);
     }
 
     spawn(args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        if (!this.path) {
-            throw new Error("git could not be found in the system.");
-        }
-
-        if (!options.stdio && !options.input) {
-            options.stdio = ["ignore", null, null]; // Unless provided, ignore stdin and leave default streams for stdout and stderr
-        }
-
-        options.env = assign({}, process.env, this.env, options.env || {}, {
-            GIT_PAGER: "cat",
-            LANG: "en_US.UTF-8",
-            LC_ALL: "en_US.UTF-8",
-            VSCODE_GIT_COMMAND: args[0],
-        });
-
-        if (options.cwd) {
-            options.cwd = sanitizePath(options.cwd);
-        }
-
-        const cmd = `git ${args.join(" ")}`;
-        try {
-            const child = cp.spawn(this.path, args, options);
-            this.log(`PID_${child.pid} [${options.log_mode}] > ${cmd}\n`);
-            return child;
-        } catch (e) {
-            this.log(`LAUNCH_FAILED > ${cmd}`);
-            throw e;
-        }
+        return internalSpawn(this.path, this.env, this.log.bind(this), args, options);
     }
 
     private log(output: string): void {
@@ -399,153 +226,7 @@ export class Git {
     }
 }
 
-export interface Commit {
-    hash: string;
-    message: string;
-    parents: string[];
-    authorDate?: Date;
-    authorName?: string;
-    authorEmail?: string;
-    commitDate?: Date;
-}
-
-export interface Submodule {
-    name: string;
-    path: string;
-    url: string;
-}
-
-export function parseGitmodules(raw: string): Submodule[] {
-    const regex = /\r?\n/g;
-    let position = 0;
-    let match: RegExpExecArray | null = null;
-
-    const result: Submodule[] = [];
-    let submodule: Partial<Submodule> = {};
-
-    function parseLine(line: string): void {
-        const sectionMatch = /^\s*\[submodule "([^"]+)"\]\s*$/.exec(line);
-
-        if (sectionMatch) {
-            if (submodule.name && submodule.path && submodule.url) {
-                result.push(submodule as Submodule);
-            }
-
-            const name = sectionMatch[1];
-
-            if (name) {
-                submodule = { name };
-                return;
-            }
-        }
-
-        if (!submodule) {
-            return;
-        }
-
-        const propertyMatch = /^\s*(\w+)\s*=\s*(.*)$/.exec(line);
-
-        if (!propertyMatch) {
-            return;
-        }
-
-        const [, key, value] = propertyMatch;
-
-        switch (key) {
-            case "path":
-                submodule.path = value;
-                break;
-            case "url":
-                submodule.url = value;
-                break;
-        }
-    }
-
-    while (match = regex.exec(raw)) {
-        parseLine(raw.substring(position, match.index));
-        position = match.index + match[0].length;
-    }
-
-    parseLine(raw.substring(position));
-
-    if (submodule.name && submodule.path && submodule.url) {
-        result.push(submodule as Submodule);
-    }
-
-    return result;
-}
-
-const commitRegex = /([0-9a-f]{40})\n(.*)\n(.*)\n(.*)\n(.*)\n(.*)(?:\n([^]*?))?(?:\x00)/gm;
-
-export function parseGitCommits(data: string): Commit[] {
-    let commits: Commit[] = [];
-
-    let ref;
-    let authorName;
-    let authorEmail;
-    let authorDate;
-    let commitDate;
-    let parents;
-    let message;
-    let match;
-
-    do {
-        match = commitRegex.exec(data);
-        if (match === null) {
-            break;
-        }
-
-        [, ref, authorName, authorEmail, authorDate, commitDate, parents, message] = match;
-
-        if (message[message.length - 1] === "\n") {
-            message = message.substr(0, message.length - 1);
-        }
-
-        // Stop excessive memory usage by using substr -- https://bugs.chromium.org/p/v8/issues/detail?id=2869
-        commits.push({
-            authorDate: new Date(Number(authorDate) * 1000),
-            authorEmail: ` ${authorEmail}`.substr(1),
-            authorName: ` ${authorName}`.substr(1),
-            commitDate: new Date(Number(commitDate) * 1000),
-            hash: ` ${ref}`.substr(1),
-            message: ` ${message}`.substr(1),
-            parents: parents ? parents.split(" ") : [],
-        });
-    } while (true);
-
-    return commits;
-}
-
-interface LsTreeElement {
-    mode: string;
-    type: string;
-    object: string;
-    size: string;
-    file: string;
-}
-
-export function parseLsTree(raw: string): LsTreeElement[] {
-    return raw.split("\n")
-        .filter(l => !!l)
-        .map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line)!)
-        .filter(m => !!m)
-        .map(([, mode, type, object, size, file]) => ({ file, mode, object, size, type }));
-}
-
-interface LsFilesElement {
-    mode: string;
-    object: string;
-    stage: string;
-    file: string;
-}
-
-export function parseLsFiles(raw: string): LsFilesElement[] {
-    return raw.split("\n")
-        .filter(l => !!l)
-        .map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line)!)
-        .filter(m => !!m)
-        .map(([, mode, object, stage, file]) => ({ file, mode, object, stage }));
-}
+export const commitRegex = /([0-9a-f]{40})\n(.*)\n(.*)\n(.*)\n(.*)\n(.*)(?:\n([^]*?))?(?:\x00)/gm;
 
 export interface PullOptions {
     unshallow?: boolean;

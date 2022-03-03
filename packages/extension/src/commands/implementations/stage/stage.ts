@@ -17,7 +17,10 @@ export function createCommand(
 
         let normalisedResourceStates = resourceStates.filter(s => !!s);
 
-        if (normalisedResourceStates.length === 0 || (normalisedResourceStates[0] && !(normalisedResourceStates[0].resourceUri instanceof Uri))) {
+        if (
+            normalisedResourceStates.length === 0
+            || (normalisedResourceStates[0] && !(normalisedResourceStates[0].resourceUri instanceof Uri))
+        ) {
             const resource = getSCMResource(model, outputChannel);
 
             outputChannel.appendLine(`git.stage.getSCMResource ${resource ? resource.resourceUri.toString() : null}`);

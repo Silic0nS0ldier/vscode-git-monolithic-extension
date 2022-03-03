@@ -504,6 +504,6 @@ export function createBox<T>(initValue: T): Box<T> {
         },
         set(newValue) {
             value = newValue;
-        }
+        },
     };
 }

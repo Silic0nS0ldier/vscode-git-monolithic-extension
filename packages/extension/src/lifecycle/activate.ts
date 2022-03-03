@@ -20,7 +20,8 @@ import { Askpass } from "../askpass.js";
 import { registerCommands } from "../commands/register.js";
 import { GitDecorations } from "../decorationProvider.js";
 import { GitFileSystemProvider } from "../fileSystemProvider.js";
-import { findGit, Git, IGit } from "../git.js";
+import { Git } from "../git.js";
+import { findGit, IGit } from "../git/find.js";
 import { Model } from "../model.js";
 import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
@@ -116,9 +117,8 @@ async function createModel(
         context: info.context,
         env: environment,
         gitPath: info.path,
-        userAgent: `git/${info.version} (${
-            os.version()
-        } ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
+        userAgent:
+            `git/${info.version} (${os.version()} ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
         version: info.version,
     });
     const onOutput = (str: string) => {

@@ -1,6 +1,7 @@
 import * as cp from "node:child_process";
-import { IFileStatus, SpawnOptions } from "../git.js";
-import { cpErrorHandler, getGitErrorCode, GitError } from "./error.js";
+import { SpawnOptions } from "../SpawnOptions.js";
+import { IFileStatus } from "../IFileStatus.js";
+import { cpErrorHandler, getGitErrorCode, GitError } from "../error.js";
 
 export async function getStatus(
     stream: (args: string[], options?: SpawnOptions) => cp.ChildProcess,
