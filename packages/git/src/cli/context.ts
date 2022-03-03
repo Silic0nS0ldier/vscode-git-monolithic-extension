@@ -49,6 +49,7 @@ export type ContextCreationErrors =
 export type PersistentCLIContext = {
     readonly env: { readonly [x: string]: string | undefined };
     readonly timeout: number;
+    readonly __UNSTABLE__log?: (msg: string) => void;
 };
 
 export type CLIResult = Result<

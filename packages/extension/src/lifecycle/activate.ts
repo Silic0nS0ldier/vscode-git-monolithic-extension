@@ -104,7 +104,7 @@ async function createModel(
         pathHints = pathHints.filter(p => path.isAbsolute(p));
     }
 
-    const info = await findGit(pathHints);
+    const info = await findGit(outputChannel, pathHints);
     outputChannel.appendLine(localize("using git", "Using git {0} from {1}", info.version, info.path));
 
     const askpass = await Askpass.create(outputChannel, context.storagePath);
