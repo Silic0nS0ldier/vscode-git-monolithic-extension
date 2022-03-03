@@ -50,7 +50,8 @@ import { getStatus } from "./git/repository-class/get-status.js";
 import { SpawnOptions } from "./git/SpawnOptions.js";
 import { Stash } from "./git/Stash.js";
 import { Submodule } from "./git/Submodule.js";
-import { groupBy, Limiter, mkdirp, splitInChunks, Versions } from "./util.js";
+import { groupBy, Limiter, mkdirp, splitInChunks } from "./util.js";
+import * as Versions from "./util/versions.js";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
