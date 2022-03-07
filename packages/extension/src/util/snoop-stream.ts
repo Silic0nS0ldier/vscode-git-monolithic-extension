@@ -21,7 +21,9 @@ export function snoopOnStream(stream: NodeJS.WritableStream, log: (msg: string) 
                     if (escaped.length > 150) {
                         log(`${escaped.slice(0, 150)}" (${escaped.length - 150} chars hidden)`);
                     }
-                    log(escaped);
+                    else {
+                        log(escaped);
+                    }
                     target[p].call(target, ...arguments);
                 };
             }
