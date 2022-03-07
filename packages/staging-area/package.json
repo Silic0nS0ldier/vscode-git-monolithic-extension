@@ -4,9 +4,9 @@
     "description": "%description%",
     "publisher": "silicon-soldier",
     "license": "MIT",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "engines": {
-        "vscode": "^1.60.0"
+        "vscode": "^1.65.0"
     },
     "extensionKind": [
         "workspace"
