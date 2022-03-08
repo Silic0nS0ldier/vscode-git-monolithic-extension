@@ -4,7 +4,6 @@ import {
     Memento,
     OutputChannel,
     QuickDiffProvider,
-    scm,
     Uri,
     window,
     workspace,
@@ -18,12 +17,12 @@ import { throat } from "../../package-patches/throat.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { IRemoteSourceProviderRegistry } from "../../remoteProvider.js";
 import { StatusBarCommands } from "../../statusbar.js";
+import { create as createSourceControlUI } from "../../ui/source-control.js";
 import { toGitUri } from "../../uri.js";
 import { anyEvent, createBox, dispose, eventToPromise, filterEvent, localize } from "../../util.js";
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
-import { GitResourceGroup } from "../GitResourceGroup.js";
 import { isReadOnly } from "../isReadOnly.js";
 import { OperationResult } from "../OperationResult.js";
 import { Operation } from "../Operations.js";
@@ -110,35 +109,16 @@ export function createRepository(
     const remotes = createBox<Remote[]>([]);
 
     const rootUri = Uri.file(repository.root);
-    const sourceControl = scm.createSourceControl("git", "Git", rootUri);
 
-    const mergeGroup = sourceControl.createResourceGroup(
-        "merge",
-        localize("merge changes", "Merge Changes"),
-    ) as GitResourceGroup;
-    const indexGroup = sourceControl.createResourceGroup(
-        "index",
-        localize("staged changes", "Staged Changes"),
-    ) as GitResourceGroup;
-    const workingTreeGroup = sourceControl.createResourceGroup(
-        "workingTree",
-        localize("changes", "Changes"),
-    ) as GitResourceGroup;
-    const untrackedGroup = sourceControl.createResourceGroup(
-        "untracked",
-        localize("untracked changes", "Untracked Changes"),
-    ) as GitResourceGroup;
+    const sourceControlUI = createSourceControlUI(repoRoot);
+    disposables.push(sourceControlUI);
 
     const state = createStateBox(
         onDidChangeStateEmitter,
         HEAD,
         refs,
         remotes,
-        mergeGroup,
-        indexGroup,
-        workingTreeGroup,
-        untrackedGroup,
-        sourceControl,
+        sourceControlUI,
     );
 
     const onRunOperationEmitter = new EventEmitter<Operation>();
@@ -147,16 +127,16 @@ export function createRepository(
     const didWarnAboutLimit = createBox(false);
 
     const submodules = createBox<Submodule[]>([]);
-    const rebaseCommit = createRebaseCommitBox(sourceControl.inputBox);
+    const rebaseCommit = createRebaseCommitBox(sourceControlUI);
 
     function setCountBadge(): void {
         const config = workspace.getConfiguration("git", Uri.file(repository.root));
         const countBadge = config.get<"all" | "tracked" | "off">("countBadge");
         const untrackedChanges = config.get<"mixed" | "separate" | "hidden">("untrackedChanges");
 
-        let count = mergeGroup.resourceStates.length
-            + indexGroup.resourceStates.length
-            + workingTreeGroup.resourceStates.length;
+        let count = sourceControlUI.mergeGroup.resourceStates.length
+            + sourceControlUI.indexGroup.resourceStates.length
+            + sourceControlUI.workingTreeGroup.resourceStates.length;
 
         switch (countBadge) {
             case "off":
@@ -164,19 +144,19 @@ export function createRepository(
                 break;
             case "tracked":
                 if (untrackedChanges === "mixed") {
-                    count -= (workingTreeGroup as GitResourceGroup).resourceStates.filter(r =>
+                    count -= sourceControlUI.workingTreeGroup.resourceStates.filter(r =>
                         r.type === Status.UNTRACKED || r.type === Status.IGNORED
                     ).length;
                 }
                 break;
             case "all":
                 if (untrackedChanges === "separate") {
-                    count += untrackedGroup.resourceStates.length;
+                    count += sourceControlUI.untrackedGroup.resourceStates.length;
                 }
                 break;
         }
 
-        sourceControl.count = count;
+        sourceControlUI.sourceControl.count = count;
     }
 
     const onDidChangeStatusEmitter = new EventEmitter<void>();
@@ -194,13 +174,9 @@ export function createRepository(
             submodules,
             rebaseCommit,
             repoRoot,
-            indexGroup,
-            mergeGroup,
-            workingTreeGroup,
-            untrackedGroup,
             setCountBadge,
             onDidChangeStatusEmitter,
-            sourceControl,
+            sourceControlUI,
         );
     });
 
@@ -279,8 +255,8 @@ export function createRepository(
 
     disposables.push(new FileEventLogger(onWorkingTreeFileChange, onDotGitFileChange, outputChannel));
 
-    sourceControl.acceptInputCommand = {
-        arguments: [sourceControl],
+    sourceControlUI.sourceControl.acceptInputCommand = {
+        arguments: [sourceControlUI.sourceControl],
         command: "git.commit",
         title: localize("commit", "Commit"),
     };
@@ -292,16 +268,15 @@ export function createRepository(
 
             const path = uri.path;
 
-            if (mergeGroup.resourceStates.some(r => r.resourceUri.path === path)) {
+            if (sourceControlUI.mergeGroup.resourceStates.some(r => r.resourceUri.path === path)) {
                 return undefined;
             }
 
             return toGitUri(uri, "", { replaceFileExtension: true });
         },
     };
-    sourceControl.quickDiffProvider = quickDiffProvider;
+    sourceControlUI.sourceControl.quickDiffProvider = quickDiffProvider;
     // sourceControl.inputBox.validateInput = this.validateInput.bind(this);
-    disposables.push(sourceControl);
 
     function headShortName(): string | undefined {
         const valueHEAD = HEAD.get();
@@ -328,31 +303,19 @@ export function createRepository(
 
         if (branchName) {
             // '{0}' will be replaced by the corresponding key-command later in the process, which is why it needs to stay.
-            sourceControl.inputBox.placeholder = localize(
+            sourceControlUI.sourceControl.inputBox.placeholder = localize(
                 "commitMessageWithHeadLabel",
                 "Message ({0} to commit on '{1}')",
                 "{0}",
                 branchName,
             );
         } else {
-            sourceControl.inputBox.placeholder = localize("commitMessage", "Message ({0} to commit)");
+            sourceControlUI.sourceControl.inputBox.placeholder = localize("commitMessage", "Message ({0} to commit)");
         }
     }
 
     updateInputBoxPlaceholder();
     disposables.push(onDidChangeStatus(() => updateInputBoxPlaceholder()));
-
-    const updateIndexGroupVisibility = () => {
-        const config = workspace.getConfiguration("git", rootUri);
-        indexGroup.hideWhenEmpty = !config.get<boolean>("alwaysShowStagedChangesResourceGroup");
-    };
-
-    const onConfigListener = filterEvent(
-        workspace.onDidChangeConfiguration,
-        e => e.affectsConfiguration("git.alwaysShowStagedChangesResourceGroup", rootUri),
-    );
-    onConfigListener(updateIndexGroupVisibility, null, disposables);
-    updateIndexGroupVisibility();
 
     filterEvent(
         workspace.onDidChangeConfiguration,
@@ -364,7 +327,7 @@ export function createRepository(
 
     const updateInputBoxVisibility = () => {
         const config = workspace.getConfiguration("git", rootUri);
-        sourceControl.inputBox.visible = config.get<boolean>("showCommitInput", true);
+        sourceControlUI.sourceControl.inputBox.visible = config.get<boolean>("showCommitInput", true);
     };
 
     const onConfigListenerForInputBoxVisibility = filterEvent(
@@ -373,11 +336,6 @@ export function createRepository(
     );
     onConfigListenerForInputBoxVisibility(updateInputBoxVisibility, null, disposables);
     updateInputBoxVisibility();
-
-    mergeGroup.hideWhenEmpty = true;
-    untrackedGroup.hideWhenEmpty = true;
-
-    disposables.push(mergeGroup, indexGroup, workingTreeGroup, untrackedGroup);
 
     function buffer(ref: string, filePath: string): Promise<Buffer> {
         return bufferImpl(run, repository, ref, filePath);
@@ -429,7 +387,7 @@ export function createRepository(
             return run(Operation.CherryPick, () => repository.cherryPick(commitHash));
         },
         clean(resources) {
-            return cleanImpl(run, workingTreeGroup, untrackedGroup, submodules.get(), repoRoot, repository, resources);
+            return cleanImpl(run, sourceControlUI, submodules.get(), repoRoot, repository, resources);
         },
         commit(message, opts = {}) {
             return commitImpl(run, rebaseCommit.get(), repoRoot, repository, message, opts);
@@ -522,10 +480,7 @@ export function createRepository(
             return headLabelImpl(
                 HEAD.get(),
                 refs.get(),
-                workingTreeGroup,
-                untrackedGroup,
-                indexGroup,
-                mergeGroup,
+                sourceControlUI,
             );
         },
         get headShortName() {
@@ -534,8 +489,6 @@ export function createRepository(
         ignore(files) {
             return ignoreImpl(run, repository, files);
         },
-        indexGroup,
-        inputBox: sourceControl.inputBox,
         log(options) {
             return run(Operation.Log, () => repository.log(options));
         },
@@ -546,7 +499,6 @@ export function createRepository(
         merge(ref) {
             return run(Operation.Merge, () => repository.merge(ref));
         },
-        mergeGroup,
         move(from, to) {
             return run(Operation.Move, () => repository.move(from, to));
         },
@@ -562,7 +514,7 @@ export function createRepository(
             return run(Operation.Stash, () => repository.popStash(index));
         },
         pull(head, unshallow) {
-            return pullImpl(run, repoRoot, repository, HEAD.get(), workingTreeGroup, head, unshallow);
+            return pullImpl(run, repoRoot, repository, HEAD.get(), sourceControlUI, head, unshallow);
         },
         pullFrom(rebase, remote, branch, unshallow) {
             return pullFromImpl(
@@ -570,7 +522,7 @@ export function createRepository(
                 repoRoot,
                 repository,
                 HEAD.get(),
-                workingTreeGroup,
+                sourceControlUI,
                 rebase,
                 remote,
                 branch,
@@ -578,7 +530,7 @@ export function createRepository(
             );
         },
         pullWithRebase(head) {
-            return pullWithRebaseImpl(run, repoRoot, repository, workingTreeGroup, HEAD.get(), head);
+            return pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, HEAD.get(), head);
         },
         push(head, forcePushMode) {
             return pushImpl(run, repository, finalRepository, pushErrorHandlerRegistry, head, forcePushMode);
@@ -673,7 +625,7 @@ export function createRepository(
             return run(Operation.Config, () => repository.config("local", key, value));
         },
         show,
-        sourceControl,
+        sourceControlUI,
         stage(resource, contents) {
             return stageImpl(repository, run, onDidChangeOriginalResourceEmitter, resource, contents);
         },
@@ -685,7 +637,7 @@ export function createRepository(
             return syncImpl(
                 run,
                 repoRoot,
-                workingTreeGroup,
+                sourceControlUI,
                 repository,
                 HEAD.get(),
                 remotes.get(),
@@ -703,7 +655,7 @@ export function createRepository(
                 syncInternal(
                     run,
                     repoRoot,
-                    workingTreeGroup,
+                    sourceControlUI,
                     repository,
                     HEAD.get(),
                     remotes.get(),
@@ -719,9 +671,7 @@ export function createRepository(
         tag(name, message) {
             return run(Operation.Tag, () => repository.tag(name, message));
         },
-        untrackedGroup,
         whenIdleAndFocused,
-        workingTreeGroup,
     };
 
     // Don't allow auto-fetch in untrusted workspaces
@@ -752,8 +702,8 @@ export function createRepository(
     // TODO Yikes! `this` refers to a class under construction
     const statusBar = new StatusBarCommands(finalRepository, remoteSourceProviderRegistry);
     disposables.push(statusBar);
-    statusBar.onDidChange(() => sourceControl.statusBarCommands = statusBar.commands, null, disposables);
-    sourceControl.statusBarCommands = statusBar.commands;
+    statusBar.onDidChange(() => sourceControlUI.sourceControl.statusBarCommands = statusBar.commands, null, disposables);
+    sourceControlUI.sourceControl.statusBarCommands = statusBar.commands;
 
     const progressManager = new ProgressManager(finalRepository);
     disposables.push(progressManager);

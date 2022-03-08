@@ -2,9 +2,9 @@ import path from "node:path";
 import { Command, Uri, workspace } from "vscode";
 import { Status } from "../api/git.js";
 import { Submodule } from "../git/Submodule.js";
+import { SourceControlResourceGroupUI } from "../ui/source-control.js";
 import { toGitUri } from "../uri.js";
 import { localize } from "../util.js";
-import { GitResourceGroup } from "./GitResourceGroup.js";
 import { Resource } from "./Resource.js";
 import { ResourceGroupType } from "./ResourceGroupType.js";
 
@@ -58,7 +58,7 @@ function getLeftResource(resource: Resource): Uri | undefined {
     return undefined;
 }
 
-function getRightResource(resource: Resource, indexGroup: GitResourceGroup): Uri | undefined {
+function getRightResource(resource: Resource, indexGroup: SourceControlResourceGroupUI): Uri | undefined {
     switch (resource.type) {
         case Status.INDEX_MODIFIED:
         case Status.INDEX_ADDED:
@@ -133,11 +133,12 @@ export function resolveDefaultCommand(resource: Resource, repoRoot: string): Com
     return openDiffOnClick ? resolveChangeCommand(resource) : resolveFileCommand(resource);
 }
 
+/** @todo Strange responsibility set here. */
 export function getResources(
     resource: Resource,
     repoRoot: string,
     submodules: Submodule[],
-    indexGroup: GitResourceGroup,
+    indexGroup: SourceControlResourceGroupUI,
 ): [Uri | undefined, Uri | undefined] {
     for (const submodule of submodules) {
         if (path.join(repoRoot, submodule.path) === resource.resourceUri.fsPath) {

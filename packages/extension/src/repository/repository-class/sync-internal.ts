@@ -3,9 +3,9 @@ import { ProgressLocation, ProgressOptions, Uri, window, workspace } from "vscod
 import { Branch, Remote } from "../../api/git.js";
 import { Repository } from "../../git.js";
 import { IPushErrorHandlerRegistry } from "../../pushError.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { localize } from "../../util.js";
 import { fromCancellationToken } from "../../util/abort-signal-adapters.js";
-import { GitResourceGroup } from "../GitResourceGroup.js";
 import { Operation } from "../Operations.js";
 import { AbstractRepository } from "./AbstractRepository.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
@@ -16,7 +16,7 @@ import { RunFn } from "./run.js";
 export async function syncInternal(
     run: RunFn<void> & RunFn<boolean>,
     repoRoot: string,
-    workingTreeGroup: GitResourceGroup,
+    sourceControlUI: SourceControlUIGroup,
     repository: Repository,
     HEAD: Branch | undefined,
     remotes: Remote[],
@@ -38,7 +38,7 @@ export async function syncInternal(
     await run(Operation.Sync, async () => {
         await maybeAutoStash(
             repoRoot,
-            workingTreeGroup,
+            sourceControlUI,
             repository,
             async () => {
                 const config = workspace.getConfiguration("git", Uri.file(repoRoot));

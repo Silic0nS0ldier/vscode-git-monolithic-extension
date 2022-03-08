@@ -3,15 +3,14 @@ import { Uri } from "vscode";
 import { Status } from "../../api/git.js";
 import { Repository } from "../../git.js";
 import { Submodule } from "../../git/Submodule.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { find } from "../../util.js";
-import { GitResourceGroup } from "../GitResourceGroup.js";
 import { Operation } from "../Operations.js";
 import { RunFn } from "./run.js";
 
 export async function clean(
     run: RunFn<void>,
-    workingTreeGroup: GitResourceGroup,
-    untrackedGroup: GitResourceGroup,
+    sourceControlUI: SourceControlUIGroup,
     submodules: Submodule[],
     repoRoot: string,
     repository: Repository,
@@ -21,7 +20,7 @@ export async function clean(
         const toClean: string[] = [];
         const toCheckout: string[] = [];
         const submodulesToUpdate: string[] = [];
-        const resourceStates = [...workingTreeGroup.resourceStates, ...untrackedGroup.resourceStates];
+        const resourceStates = [...sourceControlUI.workingTreeGroup.resourceStates, ...sourceControlUI.untrackedGroup.resourceStates];
 
         resources.forEach(r => {
             const fsPath = r.fsPath;

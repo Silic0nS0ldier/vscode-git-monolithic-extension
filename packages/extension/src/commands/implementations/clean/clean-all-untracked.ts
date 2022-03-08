@@ -5,7 +5,7 @@ import { cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
     async function cleanAllUntracked(repository: AbstractRepository): Promise<void> {
-        const resources = [...repository.workingTreeGroup.resourceStates, ...repository.untrackedGroup.resourceStates]
+        const resources = [...repository.sourceControlUI.workingTreeGroup.resourceStates, ...repository.sourceControlUI.untrackedGroup.resourceStates]
             .filter(r => r.type === Status.UNTRACKED || r.type === Status.IGNORED);
 
         if (resources.length === 0) {

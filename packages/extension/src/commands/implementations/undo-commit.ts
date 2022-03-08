@@ -34,7 +34,7 @@ export function createCommand(): ScmCommand {
             await repository.revert([]);
         }
 
-        repository.inputBox.value = commit.message;
+        repository.sourceControlUI.sourceControl.inputBox.value = commit.message;
     }
 
     return {

@@ -19,8 +19,8 @@ import {
 import { GitErrorCodes, Status } from "./api/git.js";
 import { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
-import { GitResourceGroup } from "./repository/GitResourceGroup.js";
 import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
+import { SourceControlResourceGroupUI } from "./ui/source-control.js";
 import { anyEvent, dispose, filterEvent, fireEvent, PromiseSource } from "./util.js";
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
@@ -98,7 +98,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
     }
 }
 
-function collectDecorationData(group: GitResourceGroup, bucket: Map<string, FileDecoration>): void {
+function collectDecorationData(group: SourceControlResourceGroupUI, bucket: Map<string, FileDecoration>): void {
     for (const r of group.resourceStates) {
         const decoration = r.resourceDecoration;
 
@@ -137,10 +137,10 @@ class GitDecorationProvider implements FileDecorationProvider {
         let newDecorations = new Map<string, FileDecoration>();
 
         this.collectSubmoduleDecorationData(newDecorations);
-        collectDecorationData(this.repository.indexGroup, newDecorations);
-        collectDecorationData(this.repository.untrackedGroup, newDecorations);
-        collectDecorationData(this.repository.workingTreeGroup, newDecorations);
-        collectDecorationData(this.repository.mergeGroup, newDecorations);
+        collectDecorationData(this.repository.sourceControlUI.indexGroup, newDecorations);
+        collectDecorationData(this.repository.sourceControlUI.untrackedGroup, newDecorations);
+        collectDecorationData(this.repository.sourceControlUI.workingTreeGroup, newDecorations);
+        collectDecorationData(this.repository.sourceControlUI.mergeGroup, newDecorations);
 
         const uris = new Set([...this.decorations.keys()].concat([...newDecorations.keys()]));
         this.decorations = newDecorations;

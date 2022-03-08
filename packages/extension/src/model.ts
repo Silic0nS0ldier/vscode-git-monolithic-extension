@@ -481,6 +481,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         return liveRepository && liveRepository.repository;
     }
 
+    /** @todo This API is horrific, it should not be needed. */
     private getOpenRepository(repository: AbstractRepository): OpenRepository | undefined;
     private getOpenRepository(sourceControl: SourceControl): OpenRepository | undefined;
     private getOpenRepository(resourceGroup: SourceControlResourceGroup): OpenRepository | undefined;
@@ -537,13 +538,13 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         for (const liveRepository of this.openRepositories) {
             const repository = liveRepository.repository;
 
-            if (normalisedHint === repository.sourceControl) {
+            if (normalisedHint === repository.sourceControlUI.sourceControl) {
                 return liveRepository;
             }
 
             if (
-                normalisedHint === repository.mergeGroup || normalisedHint === repository.indexGroup
-                || normalisedHint === repository.workingTreeGroup
+                normalisedHint === repository.sourceControlUI.mergeGroup || normalisedHint === repository.sourceControlUI.indexGroup
+                || normalisedHint === repository.sourceControlUI.workingTreeGroup
             ) {
                 return liveRepository;
             }

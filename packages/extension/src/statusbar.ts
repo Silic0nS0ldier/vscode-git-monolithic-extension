@@ -28,7 +28,7 @@ class CheckoutStatusBar {
         }`;
 
         return {
-            arguments: [this.repository.sourceControl],
+            arguments: [this.repository.sourceControlUI.sourceControl],
             command: "git.checkout",
             title,
             tooltip: localize("checkout", "Checkout branch/tag..."),
@@ -139,7 +139,7 @@ class SyncStatusBar {
                 : localize("publish to...", "Publish to...");
 
             return {
-                arguments: [this.repository.sourceControl],
+                arguments: [this.repository.sourceControlUI.sourceControl],
                 command: "git.publish",
                 title: `$(cloud-upload)`,
                 tooltip,
@@ -180,7 +180,7 @@ class SyncStatusBar {
         }
 
         return {
-            arguments: [this.repository.sourceControl],
+            arguments: [this.repository.sourceControlUI.sourceControl],
             command,
             title: [icon, text].join(" ").trim(),
             tooltip,

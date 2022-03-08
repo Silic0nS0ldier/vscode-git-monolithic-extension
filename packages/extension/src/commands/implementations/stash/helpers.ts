@@ -5,9 +5,9 @@ import { AbstractRepository } from "../../../repository/repository-class/Abstrac
 import { isDescendant, localize, pathEquals } from "../../../util.js";
 
 export async function createStash(repository: AbstractRepository, includeUntracked = false): Promise<void> {
-    const noUnstagedChanges = repository.workingTreeGroup.resourceStates.length === 0
-        && (!includeUntracked || repository.untrackedGroup.resourceStates.length === 0);
-    const noStagedChanges = repository.indexGroup.resourceStates.length === 0;
+    const noUnstagedChanges = repository.sourceControlUI.workingTreeGroup.resourceStates.length === 0
+        && (!includeUntracked || repository.sourceControlUI.untrackedGroup.resourceStates.length === 0);
+    const noStagedChanges = repository.sourceControlUI.indexGroup.resourceStates.length === 0;
 
     if (noUnstagedChanges && noStagedChanges) {
         window.showInformationMessage(localize("no changes stash", "There are no changes to stash."));
@@ -21,10 +21,10 @@ export async function createStash(repository: AbstractRepository, includeUntrack
         let documents = workspace.textDocuments
             .filter(d => !d.isUntitled && d.isDirty && isDescendant(repository.root, d.uri.fsPath));
 
-        if (promptToSaveFilesBeforeStashing === "staged" || repository.indexGroup.resourceStates.length > 0) {
+        if (promptToSaveFilesBeforeStashing === "staged" || repository.sourceControlUI.indexGroup.resourceStates.length > 0) {
             documents = documents
                 .filter(d =>
-                    repository.indexGroup.resourceStates.some(s => pathEquals(s.resourceUri.fsPath, d.uri.fsPath))
+                    repository.sourceControlUI.indexGroup.resourceStates.some(s => pathEquals(s.resourceUri.fsPath, d.uri.fsPath))
                 );
         }
 
@@ -56,10 +56,10 @@ export async function createStash(repository: AbstractRepository, includeUntrack
 
     if (
         config.get<boolean>("useCommitInputAsStashMessage")
-        && (!repository.sourceControl.commitTemplate
-            || repository.inputBox.value !== repository.sourceControl.commitTemplate)
+        && (!repository.sourceControlUI.sourceControl.commitTemplate
+            || repository.sourceControlUI.sourceControl.inputBox.value !== repository.sourceControlUI.sourceControl.commitTemplate)
     ) {
-        message = repository.inputBox.value;
+        message = repository.sourceControlUI.sourceControl.inputBox.value;
     }
 
     message = await window.showInputBox({

@@ -1,7 +1,7 @@
 import { Uri, workspace } from "vscode";
 import { Branch } from "../../api/git.js";
 import { Repository } from "../../git.js";
-import { GitResourceGroup } from "../GitResourceGroup.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { Operation } from "../Operations.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { maybeAutoStash } from "./maybe-auto-stash.js";
@@ -12,7 +12,7 @@ export async function pullFrom(
     repoRoot: string,
     repository: Repository,
     HEAD: Branch | undefined,
-    workingTreeGroup: GitResourceGroup,
+    sourceControlUI: SourceControlUIGroup,
     rebase?: boolean,
     remote?: string,
     branch?: string,
@@ -21,7 +21,7 @@ export async function pullFrom(
     await run(Operation.Pull, async () => {
         await maybeAutoStash(
             repoRoot,
-            workingTreeGroup,
+            sourceControlUI,
             repository,
             async () => {
                 const config = workspace.getConfiguration("git", Uri.file(repoRoot));

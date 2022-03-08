@@ -1,10 +1,12 @@
-import { commands, SourceControlInputBox } from "vscode";
+import { commands } from "vscode";
 import { Commit } from "../../git/Commit.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { Box } from "../../util.js";
 
 export function createRebaseCommitBox(
-    inputBox: SourceControlInputBox,
+    sourceControlUI: SourceControlUIGroup,
 ): Box<Commit | undefined> {
+    const inputBox = sourceControlUI.sourceControl.inputBox;
     let rebaseCommit: Commit | undefined = undefined;
 
     return {

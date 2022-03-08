@@ -16,9 +16,9 @@ import {
     resolveDefaultCommand,
     resolveFileCommand,
 } from "../repository/resource-command-resolver.js";
+import { SourceControlUIGroup } from "../ui/source-control.js";
 import { localize } from "../util.js";
 import { getIconUri } from "./getIconUri.js";
-import { GitResourceGroup } from "./GitResourceGroup.js";
 import { ResourceGroupType } from "./ResourceGroupType.js";
 
 export class Resource implements SourceControlResourceState {
@@ -92,7 +92,7 @@ export class Resource implements SourceControlResourceState {
     }
 
     private _resources = onetime((): [Uri | undefined, Uri | undefined] =>
-        getResources(this, this.repoRoot, this.submodules, this.indexGroup)
+        getResources(this, this.repoRoot, this.submodules, this.sourceControlUI.indexGroup)
     );
 
     get resourceGroupType(): ResourceGroupType {
@@ -305,7 +305,7 @@ export class Resource implements SourceControlResourceState {
     constructor(
         private repoRoot: string,
         private submodules: Submodule[],
-        private indexGroup: GitResourceGroup,
+        private sourceControlUI: SourceControlUIGroup,
         private _resourceGroupType: ResourceGroupType,
         private _resourceUri: Uri,
         private _type: Status,

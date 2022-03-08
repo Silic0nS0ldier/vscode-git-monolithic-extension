@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, Disposable, Event, SourceControl, SourceControlInputBox, Uri } from "vscode";
+import { commands, Disposable, Event, SourceControlInputBox, Uri } from "vscode";
 import { Model } from "../model.js";
 import { pickRemoteSource, PickRemoteSourceOptions } from "../remoteSource.js";
 import { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
@@ -83,13 +83,13 @@ export class ApiRepositoryState implements RepositoryState {
     }
 
     get mergeChanges(): Change[] {
-        return this._repository.mergeGroup.resourceStates.map(r => new ApiChange(r));
+        return this._repository.sourceControlUI.mergeGroup.resourceStates.map(r => new ApiChange(r));
     }
     get indexChanges(): Change[] {
-        return this._repository.indexGroup.resourceStates.map(r => new ApiChange(r));
+        return this._repository.sourceControlUI.indexGroup.resourceStates.map(r => new ApiChange(r));
     }
     get workingTreeChanges(): Change[] {
-        return this._repository.workingTreeGroup.resourceStates.map(r => new ApiChange(r));
+        return this._repository.sourceControlUI.workingTreeGroup.resourceStates.map(r => new ApiChange(r));
     }
 
     readonly onDidChange: Event<void> = this._repository.onDidRunGitStatus;
@@ -109,15 +109,14 @@ export class ApiRepositoryUIState implements RepositoryUIState {
         () => null,
     );
 
-    // @ts-expect-error
-    constructor(private _sourceControl: SourceControl) {}
+    constructor() {}
 }
 
 export class ApiRepository implements Repository {
     readonly rootUri: Uri = Uri.file(this._repository.root);
-    readonly inputBox: InputBox = new ApiInputBox(this._repository.inputBox);
+    readonly inputBox: InputBox = new ApiInputBox(this._repository.sourceControlUI.sourceControl.inputBox);
     readonly state: RepositoryState = new ApiRepositoryState(this._repository);
-    readonly ui: RepositoryUIState = new ApiRepositoryUIState(this._repository.sourceControl);
+    readonly ui: RepositoryUIState = new ApiRepositoryUIState();
 
     constructor(private _repository: AbstractRepository) {}
 

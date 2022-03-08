@@ -3,7 +3,7 @@ import { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function restoreCommitTemplate(repository: AbstractRepository): Promise<void> {
-        repository.inputBox.value = await repository.getCommitTemplate();
+        repository.sourceControlUI.sourceControl.inputBox.value = await repository.getCommitTemplate();
     }
 
     return {

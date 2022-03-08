@@ -1,11 +1,11 @@
 import path from "node:path";
-import { commands, EventEmitter, SourceControl, Uri, window, workspace } from "vscode";
+import { commands, EventEmitter, Uri, window, workspace } from "vscode";
 import { Branch, Ref, Remote, Status } from "../../api/git.js";
 import { Repository } from "../../git.js";
 import { Commit } from "../../git/Commit.js";
 import { Submodule } from "../../git/Submodule.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { Box, localize } from "../../util.js";
-import { GitResourceGroup } from "../GitResourceGroup.js";
 import { Resource } from "../Resource.js";
 import { ResourceGroupType } from "../ResourceGroupType.js";
 import { findKnownHugeFolderPathsToIgnore } from "./find-known-huge-folder-paths-to-ignore.js";
@@ -25,13 +25,9 @@ export async function updateModelState(
     submodules: Box<Submodule[]>,
     rebaseCommit: Box<Commit | undefined>,
     repoRoot: string,
-    indexGroup: GitResourceGroup,
-    mergeGroup: GitResourceGroup,
-    workingTreeGroup: GitResourceGroup,
-    untrackedGroup: GitResourceGroup,
     setCountBadge: () => void,
     onDidChangeStatusEmitter: EventEmitter<void>,
-    sourceControl: SourceControl,
+    sourceControlUI: SourceControlUIGroup,
 ) {
     const scopedConfig = workspace.getConfiguration("git", Uri.file(repository.root));
     const ignoreSubmodules = scopedConfig.get<boolean>("ignoreSubmodules");
@@ -117,37 +113,58 @@ export async function updateModelState(
     const merge: Resource[] = [];
     const untracked: Resource[] = [];
 
+    function createResource(
+        resourceGroupType: ResourceGroupType,
+        resourceUri: Uri,
+        type: Status,
+        renameResourceUri?: Uri,
+    ) {
+        return new Resource(
+            repoRoot,
+            submodules.get(),
+            sourceControlUI,
+            resourceGroupType,
+            resourceUri,
+            type,
+            useIcons,
+            renameResourceUri,
+        )
+    }
+
     status.forEach(raw => {
         const uri = Uri.file(path.join(repository.root, raw.path));
         const renameUri = raw.rename
             ? Uri.file(path.join(repository.root, raw.rename))
             : undefined;
 
+        function createResourceWithUri(
+            resourceGroupType: ResourceGroupType,
+            type: Status,
+            renameResourceUri?: Uri,
+        ) {
+            return createResource(
+                resourceGroupType,
+                uri,
+                type,
+                renameResourceUri,
+            )
+        }
+
         switch (raw.x + raw.y) {
             case "??":
                 switch (untrackedChanges) {
                     case "mixed":
                         return workingTree.push(
-                            new Resource(
-                                repoRoot,
-                                submodules.get(),
-                                indexGroup,
+                            createResourceWithUri(
                                 ResourceGroupType.WorkingTree,
-                                uri,
                                 Status.UNTRACKED,
-                                useIcons,
                             ),
                         );
                     case "separate":
                         return untracked.push(
-                            new Resource(
-                                repoRoot,
-                                submodules.get(),
-                                indexGroup,
+                            createResourceWithUri(
                                 ResourceGroupType.Untracked,
-                                uri,
                                 Status.UNTRACKED,
-                                useIcons,
                             ),
                         );
                     default:
@@ -157,26 +174,16 @@ export async function updateModelState(
                 switch (untrackedChanges) {
                     case "mixed":
                         return workingTree.push(
-                            new Resource(
-                                repoRoot,
-                                submodules.get(),
-                                indexGroup,
+                            createResourceWithUri(
                                 ResourceGroupType.WorkingTree,
-                                uri,
                                 Status.IGNORED,
-                                useIcons,
                             ),
                         );
                     case "separate":
                         return untracked.push(
-                            new Resource(
-                                repoRoot,
-                                submodules.get(),
-                                indexGroup,
+                            createResourceWithUri(
                                 ResourceGroupType.Untracked,
-                                uri,
                                 Status.IGNORED,
-                                useIcons,
                             ),
                         );
                     default:
@@ -184,86 +191,51 @@ export async function updateModelState(
                 }
             case "DD":
                 return merge.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Merge,
-                        uri,
                         Status.BOTH_DELETED,
-                        useIcons,
                     ),
                 );
             case "AU":
                 return merge.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Merge,
-                        uri,
                         Status.ADDED_BY_US,
-                        useIcons,
                     ),
                 );
             case "UD":
                 return merge.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Merge,
-                        uri,
                         Status.DELETED_BY_THEM,
-                        useIcons,
                     ),
                 );
             case "UA":
                 return merge.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Merge,
-                        uri,
                         Status.ADDED_BY_THEM,
-                        useIcons,
                     ),
                 );
             case "DU":
                 return merge.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Merge,
-                        uri,
                         Status.DELETED_BY_US,
-                        useIcons,
                     ),
                 );
             case "AA":
                 return merge.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Merge,
-                        uri,
                         Status.BOTH_ADDED,
-                        useIcons,
                     ),
                 );
             case "UU":
                 return merge.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Merge,
-                        uri,
                         Status.BOTH_MODIFIED,
-                        useIcons,
                     ),
                 );
         }
@@ -271,67 +243,42 @@ export async function updateModelState(
         switch (raw.x) {
             case "M":
                 index.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Index,
-                        uri,
                         Status.INDEX_MODIFIED,
-                        useIcons,
                     ),
                 );
                 break;
             case "A":
                 index.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Index,
-                        uri,
                         Status.INDEX_ADDED,
-                        useIcons,
                     ),
                 );
                 break;
             case "D":
                 index.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Index,
-                        uri,
                         Status.INDEX_DELETED,
-                        useIcons,
                     ),
                 );
                 break;
             case "R":
                 index.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Index,
-                        uri,
                         Status.INDEX_RENAMED,
-                        useIcons,
                         renameUri,
                     ),
                 );
                 break;
             case "C":
                 index.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.Index,
-                        uri,
                         Status.INDEX_COPIED,
-                        useIcons,
                         renameUri,
                     ),
                 );
@@ -341,42 +288,27 @@ export async function updateModelState(
         switch (raw.y) {
             case "M":
                 workingTree.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.WorkingTree,
-                        uri,
                         Status.MODIFIED,
-                        useIcons,
                         renameUri,
                     ),
                 );
                 break;
             case "D":
                 workingTree.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.WorkingTree,
-                        uri,
                         Status.DELETED,
-                        useIcons,
                         renameUri,
                     ),
                 );
                 break;
             case "A":
                 workingTree.push(
-                    new Resource(
-                        repoRoot,
-                        submodules.get(),
-                        indexGroup,
+                    createResourceWithUri(
                         ResourceGroupType.WorkingTree,
-                        uri,
                         Status.INTENT_TO_ADD,
-                        useIcons,
                         renameUri,
                     ),
                 );
@@ -387,10 +319,10 @@ export async function updateModelState(
     });
 
     // set resource groups
-    mergeGroup.resourceStates = merge;
-    indexGroup.resourceStates = index;
-    workingTreeGroup.resourceStates = workingTree;
-    untrackedGroup.resourceStates = untracked;
+    sourceControlUI.mergeGroup.resourceStates = merge;
+    sourceControlUI.indexGroup.resourceStates = index;
+    sourceControlUI.workingTreeGroup.resourceStates = workingTree;
+    sourceControlUI.untrackedGroup.resourceStates = untracked;
 
     // set count badge
     setCountBadge();
@@ -404,5 +336,5 @@ export async function updateModelState(
 
     onDidChangeStatusEmitter.fire();
 
-    sourceControl.commitTemplate = await getInputTemplate(repository);
+    sourceControlUI.sourceControl.commitTemplate = await getInputTemplate(repository);
 }

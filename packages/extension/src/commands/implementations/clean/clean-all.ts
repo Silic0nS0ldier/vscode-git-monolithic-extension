@@ -7,7 +7,7 @@ import { ScmCommand } from "../../helpers.js";
 import { cleanTrackedChanges, cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
 
 export async function cleanAll(repository: AbstractRepository): Promise<void> {
-    let resources = repository.workingTreeGroup.resourceStates;
+    let resources = repository.sourceControlUI.workingTreeGroup.resourceStates;
 
     if (resources.length === 0) {
         return;

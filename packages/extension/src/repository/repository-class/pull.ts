@@ -1,7 +1,7 @@
 import { Branch } from "../../api/git.js";
 import { Repository } from "../../git.js";
 import { throat } from "../../package-patches/throat.js";
-import { GitResourceGroup } from "../GitResourceGroup.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { pullFrom } from "./pull-from.js";
 import { RunFn } from "./run.js";
 
@@ -10,7 +10,7 @@ export const pull = throat(1, (
     repoRoot: string,
     repository: Repository,
     HEAD: Branch | undefined,
-    workingTreeGroup: GitResourceGroup,
+    sourceControlUI: SourceControlUIGroup,
     head?: Branch,
     unshallow?: boolean,
 ) => {
@@ -22,5 +22,5 @@ export const pull = throat(1, (
         branch = `${head.upstream.name}`;
     }
 
-    return pullFrom(run, repoRoot, repository, HEAD, workingTreeGroup, false, remote, branch, unshallow);
+    return pullFrom(run, repoRoot, repository, HEAD, sourceControlUI, false, remote, branch, unshallow);
 });

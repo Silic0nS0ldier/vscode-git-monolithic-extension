@@ -12,3 +12,8 @@ Timeline view is not supported as the API surface is experimental.
 ```sh
 pnpm run vsce package
 ```
+
+## Terminology
+
+* Tracked Changes - Changes to files already present in the current git commit-ish.
+* Untracked Changed - New or previously ignored files which are not currently tracked.

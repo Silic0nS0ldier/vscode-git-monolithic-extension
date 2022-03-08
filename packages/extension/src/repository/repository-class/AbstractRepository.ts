@@ -1,4 +1,4 @@
-import { Disposable, Event, SourceControl, SourceControlInputBox, Uri } from "vscode";
+import { Disposable, Event, Uri } from "vscode";
 import {
     Branch,
     BranchQuery,
@@ -13,7 +13,7 @@ import { Commit } from "../../git/Commit.js";
 import { LogFileOptions } from "../../git/LogFileOptions.js";
 import { Stash } from "../../git/Stash.js";
 import { Submodule } from "../../git/Submodule.js";
-import { GitResourceGroup } from "../GitResourceGroup.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { OperationResult } from "../OperationResult.js";
 import { Operation } from "../Operations.js";
 import { Operations } from "../Operations.js";
@@ -21,7 +21,6 @@ import { RepositoryState } from "../RepositoryState.js";
 
 export type AbstractRepository = {
     readonly __type: Symbol;
-    readonly inputBox: SourceControlInputBox;
     readonly ignore: (files: Uri[]) => Promise<void>;
     readonly getInputTemplate: () => Promise<string>;
     readonly headShortName: string | undefined;
@@ -71,11 +70,9 @@ export type AbstractRepository = {
     readonly hashObject: (data: string) => Promise<string>;
     readonly HEAD: Branch | undefined;
     readonly headLabel: string;
-    readonly indexGroup: GitResourceGroup;
     readonly log: (options?: LogOptions) => Promise<Commit[]>;
     readonly logFile: (uri: Uri, options?: LogFileOptions) => Promise<Commit[]>;
     readonly merge: (ref: string) => Promise<void>;
-    readonly mergeGroup: GitResourceGroup;
     readonly move: (from: string, to: string) => Promise<void>;
     readonly onDidChangeOperations: Event<Operation | OperationResult>;
     readonly onDidChangeOriginalResource: Event<Uri>;
@@ -107,14 +104,14 @@ export type AbstractRepository = {
     readonly removeRemote: (name: string) => Promise<void>;
     readonly renameBranch: (name: string) => Promise<void>;
     readonly renameRemote: (name: string, newName: string) => Promise<void>;
-    readonly revert: (resources: Uri[]) => Promise<void>;
     readonly reset: (treeish: string, hard?: boolean) => Promise<void>;
+    readonly revert: (resources: Uri[]) => Promise<void>;
     readonly rm: (resources: Uri[]) => Promise<void>;
     readonly root: string;
     readonly setBranchUpstream: (name: string, upstream: string) => Promise<void>;
     readonly setConfig: (key: string, value: string) => Promise<string>;
     readonly show: (ref: string, filePath: string) => Promise<string>;
-    readonly sourceControl: SourceControl;
+    readonly sourceControlUI: SourceControlUIGroup,
     readonly stage: (resource: Uri, contents: string) => Promise<void>;
     readonly status: () => Promise<void>;
     readonly submodules: readonly Submodule[];
@@ -123,7 +120,5 @@ export type AbstractRepository = {
     readonly syncRebase: (head: Branch) => Promise<void>;
     readonly syncTooltip: string;
     readonly tag: (name: string, message?: string) => Promise<void>;
-    readonly untrackedGroup: GitResourceGroup;
     readonly whenIdleAndFocused: () => Promise<void>;
-    readonly workingTreeGroup: GitResourceGroup;
 } & Disposable;

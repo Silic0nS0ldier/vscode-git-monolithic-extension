@@ -1,13 +1,10 @@
-import { SourceControlResourceGroup } from "vscode";
 import { Branch, Ref, RefType } from "../../api/git.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 
 export function headLabel(
     HEAD: Branch | undefined,
     refs: Ref[],
-    workingTreeGroup: SourceControlResourceGroup,
-    untrackedGroup: SourceControlResourceGroup,
-    indexGroup: SourceControlResourceGroup,
-    mergeGroup: SourceControlResourceGroup,
+    sourceControlUI: SourceControlUIGroup,
 ): string {
     if (!HEAD) {
         return "";
@@ -18,7 +15,7 @@ export function headLabel(
     const head = HEAD.name || tagName || (HEAD.commit || "").substr(0, 8);
 
     return head
-        + (workingTreeGroup.resourceStates.length + untrackedGroup.resourceStates.length > 0 ? "*" : "")
-        + (indexGroup.resourceStates.length > 0 ? "+" : "")
-        + (mergeGroup.resourceStates.length > 0 ? "!" : "");
+        + (sourceControlUI.workingTreeGroup.resourceStates.length + sourceControlUI.untrackedGroup.resourceStates.length > 0 ? "*" : "")
+        + (sourceControlUI.indexGroup.resourceStates.length > 0 ? "+" : "")
+        + (sourceControlUI.mergeGroup.resourceStates.length > 0 ? "!" : "");
 }

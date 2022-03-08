@@ -1,5 +1,6 @@
-import { EventEmitter, SourceControl, SourceControlResourceGroup } from "vscode";
+import { EventEmitter } from "vscode";
 import { Branch, Ref, Remote } from "../../api/git.js";
+import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { Box } from "../../util.js";
 import { RepositoryState } from "../RepositoryState.js";
 
@@ -8,11 +9,7 @@ export function createStateBox(
     HEAD: Box<Branch | undefined>,
     refs: Box<Ref[]>,
     remotes: Box<Remote[]>,
-    mergeGroup: SourceControlResourceGroup,
-    indexGroup: SourceControlResourceGroup,
-    workingTreeGroup: SourceControlResourceGroup,
-    untrackedGroup: SourceControlResourceGroup,
-    sourceControl: SourceControl,
+    sourceControlUI: SourceControlUIGroup,
 ): Box<RepositoryState> {
     let state = RepositoryState.Idle;
 
@@ -25,11 +22,11 @@ export function createStateBox(
             HEAD.set(undefined);
             refs.set([]);
             remotes.set([]);
-            mergeGroup.resourceStates = [];
-            indexGroup.resourceStates = [];
-            workingTreeGroup.resourceStates = [];
-            untrackedGroup.resourceStates = [];
-            sourceControl.count = 0;
+            sourceControlUI.mergeGroup.resourceStates = [];
+            sourceControlUI.indexGroup.resourceStates = [];
+            sourceControlUI.workingTreeGroup.resourceStates = [];
+            sourceControlUI.untrackedGroup.resourceStates = [];
+            sourceControlUI.sourceControl.count = 0;
         },
     };
 }
