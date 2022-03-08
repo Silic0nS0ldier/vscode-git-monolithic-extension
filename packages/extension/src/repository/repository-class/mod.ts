@@ -320,7 +320,6 @@ export function createRepository(
     filterEvent(
         workspace.onDidChangeConfiguration,
         e => e.affectsConfiguration("git.branchSortOrder", rootUri)
-            || e.affectsConfiguration("git.untrackedChanges", rootUri)
             || e.affectsConfiguration("git.ignoreSubmodules", rootUri)
             || e.affectsConfiguration("git.openDiffOnClick", rootUri),
     )(updateModelState, null, disposables);

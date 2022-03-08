@@ -22,19 +22,12 @@ export function create(repoRoot: string): SourceControlUIGroup & Disposable {
         "workingTree",
         localize("changes", "Changes"),
     );
-    // wtf is this?
     const untrackedGroup = sourceControl.createResourceGroup(
         "untracked",
         localize("untracked changes", "Untracked Changes"),
     );
-    // sourceControl.createResourceGroup(
-    //     "untracked-real",
-    //     localize("untracked-real changes", "Untracked Files"),
-    // );
 
-    indexGroup.hideWhenEmpty = false;
     mergeGroup.hideWhenEmpty = true;
-    untrackedGroup.hideWhenEmpty = true;
 
     return {
         dispose() {

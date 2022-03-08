@@ -883,42 +883,42 @@
                 },
                 {
                     "command": "git.cleanAll",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.untrackedChanges == mixed",
+                    "when": "scmProvider == git && scmResourceGroup == workingTree",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.stageAll",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.untrackedChanges == mixed",
+                    "when": "scmProvider == git && scmResourceGroup == workingTree",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.cleanAll",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.untrackedChanges == mixed",
+                    "when": "scmProvider == git && scmResourceGroup == workingTree",
                     "group": "inline@2"
                 },
                 {
                     "command": "git.stageAll",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.untrackedChanges == mixed",
+                    "when": "scmProvider == git && scmResourceGroup == workingTree",
                     "group": "inline@2"
                 },
                 {
                     "command": "git.cleanAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.untrackedChanges != mixed",
+                    "when": "scmProvider == git && scmResourceGroup == workingTree",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.stageAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.untrackedChanges != mixed",
+                    "when": "scmProvider == git && scmResourceGroup == workingTree",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.cleanAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.untrackedChanges != mixed",
+                    "when": "scmProvider == git && scmResourceGroup == workingTree",
                     "group": "inline@2"
                 },
                 {
                     "command": "git.stageAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.untrackedChanges != mixed",
+                    "when": "scmProvider == git && scmResourceGroup == workingTree",
                     "group": "inline@2"
                 },
                 {
@@ -1890,22 +1890,6 @@
                     ],
                     "default": "committerdate",
                     "description": "%config.branchSortOrder%"
-                },
-                "git.untrackedChanges": {
-                    "type": "string",
-                    "enum": [
-                        "mixed",
-                        "separate",
-                        "hidden"
-                    ],
-                    "enumDescriptions": [
-                        "%config.untrackedChanges.mixed%",
-                        "%config.untrackedChanges.separate%",
-                        "%config.untrackedChanges.hidden%"
-                    ],
-                    "default": "mixed",
-                    "description": "%config.untrackedChanges%",
-                    "scope": "resource"
                 },
                 "git.requireGitUserConfig": {
                     "type": "boolean",

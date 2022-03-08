@@ -17,7 +17,6 @@ export function createStateBox(
         get: () => state,
         set: (newState: RepositoryState) => {
             state = newState;
-            onDidChangeState.fire(state);
 
             HEAD.set(undefined);
             refs.set([]);
@@ -27,6 +26,8 @@ export function createStateBox(
             sourceControlUI.workingTreeGroup.resourceStates = [];
             sourceControlUI.untrackedGroup.resourceStates = [];
             sourceControlUI.sourceControl.count = 0;
+
+            onDidChangeState.fire(state);
         },
     };
 }
