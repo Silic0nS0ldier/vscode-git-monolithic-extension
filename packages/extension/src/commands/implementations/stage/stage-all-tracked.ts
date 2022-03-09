@@ -4,7 +4,7 @@ import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function stageAllTracked(repository: AbstractRepository): Promise<void> {
-        const resources = repository.sourceControlUI.workingTreeGroup.resourceStates
+        const resources = repository.sourceControlUI.trackedGroup.resourceStates
             .filter(r => r.type !== Status.UNTRACKED && r.type !== Status.IGNORED);
         const uris = resources.map(r => r.resourceUri);
 

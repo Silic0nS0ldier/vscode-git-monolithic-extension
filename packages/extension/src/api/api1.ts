@@ -86,10 +86,10 @@ export class ApiRepositoryState implements RepositoryState {
         return this._repository.sourceControlUI.mergeGroup.resourceStates.map(r => new ApiChange(r));
     }
     get indexChanges(): Change[] {
-        return this._repository.sourceControlUI.indexGroup.resourceStates.map(r => new ApiChange(r));
+        return this._repository.sourceControlUI.stagedGroup.resourceStates.map(r => new ApiChange(r));
     }
     get workingTreeChanges(): Change[] {
-        return this._repository.sourceControlUI.workingTreeGroup.resourceStates.map(r => new ApiChange(r));
+        return this._repository.sourceControlUI.trackedGroup.resourceStates.map(r => new ApiChange(r));
     }
 
     readonly onDidChange: Event<void> = this._repository.onDidRunGitStatus;

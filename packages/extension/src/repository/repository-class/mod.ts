@@ -110,7 +110,23 @@ export function createRepository(
 
     const rootUri = Uri.file(repository.root);
 
-    const sourceControlUI = createSourceControlUI(repoRoot);
+    const quickDiffProvider: QuickDiffProvider = {
+        provideOriginalResource(uri) {
+            if (uri.scheme !== "file") {
+                return;
+            }
+
+            const path = uri.path;
+
+            if (sourceControlUI.mergeGroup.resourceStates.some(r => r.resourceUri.path === path)) {
+                return undefined;
+            }
+
+            return toGitUri(uri, "", { replaceFileExtension: true });
+        },
+    };
+
+    const sourceControlUI = createSourceControlUI(repoRoot, quickDiffProvider);
     disposables.push(sourceControlUI);
 
     const state = createStateBox(
@@ -135,8 +151,8 @@ export function createRepository(
         const untrackedChanges = config.get<"mixed" | "separate" | "hidden">("untrackedChanges");
 
         let count = sourceControlUI.mergeGroup.resourceStates.length
-            + sourceControlUI.indexGroup.resourceStates.length
-            + sourceControlUI.workingTreeGroup.resourceStates.length;
+            + sourceControlUI.stagedGroup.resourceStates.length
+            + sourceControlUI.trackedGroup.resourceStates.length;
 
         switch (countBadge) {
             case "off":
@@ -144,7 +160,7 @@ export function createRepository(
                 break;
             case "tracked":
                 if (untrackedChanges === "mixed") {
-                    count -= sourceControlUI.workingTreeGroup.resourceStates.filter(r =>
+                    count -= sourceControlUI.trackedGroup.resourceStates.filter(r =>
                         r.type === Status.UNTRACKED || r.type === Status.IGNORED
                     ).length;
                 }
@@ -254,29 +270,6 @@ export function createRepository(
     onDotGitFileChange(onDidChangeRepositoryEmitter.fire, onDidChangeRepositoryEmitter, disposables);
 
     disposables.push(new FileEventLogger(onWorkingTreeFileChange, onDotGitFileChange, outputChannel));
-
-    sourceControlUI.sourceControl.acceptInputCommand = {
-        arguments: [sourceControlUI.sourceControl],
-        command: "git.commit",
-        title: localize("commit", "Commit"),
-    };
-    const quickDiffProvider: QuickDiffProvider = {
-        provideOriginalResource(uri) {
-            if (uri.scheme !== "file") {
-                return;
-            }
-
-            const path = uri.path;
-
-            if (sourceControlUI.mergeGroup.resourceStates.some(r => r.resourceUri.path === path)) {
-                return undefined;
-            }
-
-            return toGitUri(uri, "", { replaceFileExtension: true });
-        },
-    };
-    sourceControlUI.sourceControl.quickDiffProvider = quickDiffProvider;
-    // sourceControl.inputBox.validateInput = this.validateInput.bind(this);
 
     function headShortName(): string | undefined {
         const valueHEAD = HEAD.get();
@@ -698,7 +691,6 @@ export function createRepository(
         disposables,
     );
 
-    // TODO Yikes! `this` refers to a class under construction
     const statusBar = new StatusBarCommands(finalRepository, remoteSourceProviderRegistry);
     disposables.push(statusBar);
     statusBar.onDidChange(() => sourceControlUI.sourceControl.statusBarCommands = statusBar.commands, null, disposables);

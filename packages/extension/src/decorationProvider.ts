@@ -137,9 +137,9 @@ class GitDecorationProvider implements FileDecorationProvider {
         let newDecorations = new Map<string, FileDecoration>();
 
         this.collectSubmoduleDecorationData(newDecorations);
-        collectDecorationData(this.repository.sourceControlUI.indexGroup, newDecorations);
+        collectDecorationData(this.repository.sourceControlUI.stagedGroup, newDecorations);
         collectDecorationData(this.repository.sourceControlUI.untrackedGroup, newDecorations);
-        collectDecorationData(this.repository.sourceControlUI.workingTreeGroup, newDecorations);
+        collectDecorationData(this.repository.sourceControlUI.trackedGroup, newDecorations);
         collectDecorationData(this.repository.sourceControlUI.mergeGroup, newDecorations);
 
         const uris = new Set([...this.decorations.keys()].concat([...newDecorations.keys()]));

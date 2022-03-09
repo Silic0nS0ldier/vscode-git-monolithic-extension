@@ -22,8 +22,8 @@ export function createStateBox(
             refs.set([]);
             remotes.set([]);
             sourceControlUI.mergeGroup.resourceStates = [];
-            sourceControlUI.indexGroup.resourceStates = [];
-            sourceControlUI.workingTreeGroup.resourceStates = [];
+            sourceControlUI.stagedGroup.resourceStates = [];
+            sourceControlUI.trackedGroup.resourceStates = [];
             sourceControlUI.untrackedGroup.resourceStates = [];
             sourceControlUI.sourceControl.count = 0;
 

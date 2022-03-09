@@ -20,7 +20,7 @@ export async function clean(
         const toClean: string[] = [];
         const toCheckout: string[] = [];
         const submodulesToUpdate: string[] = [];
-        const resourceStates = [...sourceControlUI.workingTreeGroup.resourceStates, ...sourceControlUI.untrackedGroup.resourceStates];
+        const resourceStates = [...sourceControlUI.trackedGroup.resourceStates, ...sourceControlUI.untrackedGroup.resourceStates];
 
         resources.forEach(r => {
             const fsPath = r.fsPath;

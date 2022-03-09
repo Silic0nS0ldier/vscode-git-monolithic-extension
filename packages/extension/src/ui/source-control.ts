@@ -1,4 +1,4 @@
-import { Command, Disposable, scm, SourceControlInputBox, Uri } from "vscode";
+import { Command, Disposable, QuickDiffProvider, scm, SourceControlInputBox, Uri } from "vscode";
 import { Resource } from "../repository/Resource.js";
 import { localize } from "../util.js";
 
@@ -7,64 +7,70 @@ import { localize } from "../util.js";
  * Eventually this will decouple UI state from application logic. For now it helps make existing
  * API usage easier to track.
  */
-export function create(repoRoot: string): SourceControlUIGroup & Disposable {
+export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): SourceControlUIGroup & Disposable {
     const rootUri = Uri.file(repoRoot);
+
     const sourceControl = scm.createSourceControl("git", "Git", rootUri);
+    sourceControl.acceptInputCommand = {
+        arguments: [sourceControl],
+        command: "git.commit",
+        title: localize("commit", "Commit"),
+    };
+    sourceControl.quickDiffProvider = quickDiffProvider;
+
     const mergeGroup = sourceControl.createResourceGroup(
         "merge",
-        localize("merge changes", "Merge Changes"),
+        localize("merge changes", "Merge"),
     );
-    const indexGroup = sourceControl.createResourceGroup(
+    const stagedGroup = sourceControl.createResourceGroup(
         "index",
-        localize("staged changes", "Staged Changes"),
+        localize("staged changes", "Staged"),
     );
-    const workingTreeGroup = sourceControl.createResourceGroup(
-        "workingTree",
-        localize("changes", "Changes"),
+    const trackedGroup = sourceControl.createResourceGroup(
+        "tracked",
+        localize("tracked changes", "Tracked"),
     );
     const untrackedGroup = sourceControl.createResourceGroup(
         "untracked",
-        localize("untracked changes", "Untracked Changes"),
+        localize("untracked changes", "Untracked"),
     );
 
     mergeGroup.hideWhenEmpty = true;
 
     return {
         dispose() {
-            indexGroup.dispose();
+            stagedGroup.dispose();
             mergeGroup.dispose();
             untrackedGroup.dispose();
-            workingTreeGroup.dispose();
+            trackedGroup.dispose();
             // Must go last
             sourceControl.dispose();
         },
-        indexGroup: indexGroup  as unknown as SourceControlResourceGroupUI,
         mergeGroup: mergeGroup as unknown as SourceControlResourceGroupUI,
         sourceControl: sourceControl as unknown as SourceControlUI,
+        stagedGroup: stagedGroup  as unknown as SourceControlResourceGroupUI,
+        trackedGroup: trackedGroup as unknown as SourceControlResourceGroupUI,
         untrackedGroup: untrackedGroup as unknown as SourceControlResourceGroupUI,
-        workingTreeGroup: workingTreeGroup as unknown as SourceControlResourceGroupUI,
     };
 }
 
 export type SourceControlUIGroup = {
     readonly sourceControl: SourceControlUI;
     readonly mergeGroup: SourceControlResourceGroupUI;
-    readonly indexGroup: SourceControlResourceGroupUI;
-    // TODO Rename to changes, as this won't be the only one
-    readonly workingTreeGroup: SourceControlResourceGroupUI;
+    readonly stagedGroup: SourceControlResourceGroupUI;
+    readonly trackedGroup: SourceControlResourceGroupUI;
     readonly untrackedGroup: SourceControlResourceGroupUI;
 }
 
 type SourceControlUI = {
-    inputBox: SourceControlInputBox;
+    readonly inputBox: SourceControlInputBox;
     count: number;
-    acceptInputCommand: {};
-    quickDiffProvider: unknown;
     statusBarCommands: Command[];
     commitTemplate?: string;
 };
 
 export type SourceControlResourceGroupUI = {
     // TODO This is used extensively as the source of truth, which couples the UI to application logic tightly
+    // With some refactoring it will be possible to have a UI grace period
     resourceStates: Resource[];
 };

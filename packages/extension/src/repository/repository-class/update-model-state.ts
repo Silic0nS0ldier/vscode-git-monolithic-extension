@@ -108,8 +108,8 @@ export async function updateModelState(
 
     // set resource groups
     sourceControlUI.mergeGroup.resourceStates = merge;
-    sourceControlUI.indexGroup.resourceStates = index;
-    sourceControlUI.workingTreeGroup.resourceStates = workingTree;
+    sourceControlUI.stagedGroup.resourceStates = index;
+    sourceControlUI.trackedGroup.resourceStates = workingTree;
     sourceControlUI.untrackedGroup.resourceStates = untracked;
 
     // set count badge

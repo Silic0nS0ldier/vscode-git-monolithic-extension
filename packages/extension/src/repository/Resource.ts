@@ -92,7 +92,7 @@ export class Resource implements SourceControlResourceState {
     }
 
     private _resources = onetime((): [Uri | undefined, Uri | undefined] =>
-        getResources(this, this.repoRoot, this.submodules, this.sourceControlUI.indexGroup)
+        getResources(this, this.repoRoot, this.submodules, this.sourceControlUI.stagedGroup)
     );
 
     get resourceGroupType(): ResourceGroupType {

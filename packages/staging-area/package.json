@@ -883,22 +883,22 @@
                 },
                 {
                     "command": "git.cleanAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.stageAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.cleanAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git.stageAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
@@ -945,27 +945,27 @@
                 },
                 {
                     "command": "git.stage",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.clean",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.clean",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git.stage",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git.ignore",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification@3"
                 },
                 {
@@ -1067,57 +1067,57 @@
                 },
                 {
                     "command": "git.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git.openHEADFile",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git.openFile",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git.stage",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.clean",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git.clean",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git.stage",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.showInlineOpenFileAction && config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == tracked && config.git.showInlineOpenFileAction && config.git.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree && config.git.showInlineOpenFileAction && !config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == tracked && config.git.showInlineOpenFileAction && !config.git.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git.ignore",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification@3"
                 },
                 {
                     "command": "git.revealInExplorer",
-                    "when": "scmProvider == git && scmResourceGroup == workingTree",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "2_view"
                 },
                 {

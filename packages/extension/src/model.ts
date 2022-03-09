@@ -543,8 +543,8 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             }
 
             if (
-                normalisedHint === repository.sourceControlUI.mergeGroup || normalisedHint === repository.sourceControlUI.indexGroup
-                || normalisedHint === repository.sourceControlUI.workingTreeGroup
+                normalisedHint === repository.sourceControlUI.mergeGroup || normalisedHint === repository.sourceControlUI.stagedGroup
+                || normalisedHint === repository.sourceControlUI.trackedGroup
             ) {
                 return liveRepository;
             }
