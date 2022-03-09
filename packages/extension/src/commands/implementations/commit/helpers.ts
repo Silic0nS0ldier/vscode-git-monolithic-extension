@@ -32,10 +32,15 @@ async function smartCommit(
         let documents = workspace.textDocuments
             .filter(d => !d.isUntitled && d.isDirty && isDescendant(repository.root, d.uri.fsPath));
 
-        if (promptToSaveFilesBeforeCommit === "staged" || repository.sourceControlUI.stagedGroup.resourceStates.length > 0) {
+        if (
+            promptToSaveFilesBeforeCommit === "staged"
+            || repository.sourceControlUI.stagedGroup.resourceStates.length > 0
+        ) {
             documents = documents
                 .filter(d =>
-                    repository.sourceControlUI.stagedGroup.resourceStates.some(s => pathEquals(s.resourceUri.fsPath, d.uri.fsPath))
+                    repository.sourceControlUI.stagedGroup.resourceStates.some(s =>
+                        pathEquals(s.state.resourceUri.fsPath, d.uri.fsPath)
+                    )
                 );
         }
 
@@ -119,7 +124,7 @@ async function smartCommit(
             || (!normalisedOpts.all && noStagedChanges)
             // no staged changes and no tracked unstaged changes
             || (noStagedChanges && smartCommitChanges === "tracked"
-                && repository.sourceControlUI.trackedGroup.resourceStates.every(r => r.type === Status.UNTRACKED))
+                && repository.sourceControlUI.trackedGroup.resourceStates.every(r => r.state.type === Status.UNTRACKED))
         )
         // amend allows changing only the commit message
         && !normalisedOpts.amend

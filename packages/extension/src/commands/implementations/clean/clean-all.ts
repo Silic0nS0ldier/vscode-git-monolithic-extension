@@ -13,8 +13,12 @@ export async function cleanAll(repository: AbstractRepository): Promise<void> {
         return;
     }
 
-    const trackedResources = resources.filter(r => r.type !== Status.UNTRACKED && r.type !== Status.IGNORED);
-    const untrackedResources = resources.filter(r => r.type === Status.UNTRACKED || r.type === Status.IGNORED);
+    const trackedResources = resources.filter(r =>
+        r.state.type !== Status.UNTRACKED && r.state.type !== Status.IGNORED
+    );
+    const untrackedResources = resources.filter(r =>
+        r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED
+    );
 
     if (untrackedResources.length === 0) {
         await cleanTrackedChanges(repository, resources);
@@ -27,7 +31,7 @@ export async function cleanAll(repository: AbstractRepository): Promise<void> {
             ? localize(
                 "there are untracked files single",
                 "The following untracked file will be DELETED FROM DISK if discarded: {0}.",
-                path.basename(untrackedResources[0].resourceUri.fsPath),
+                path.basename(untrackedResources[0].state.resourceUri.fsPath),
             )
             : localize(
                 "there are untracked files",
@@ -55,7 +59,7 @@ export async function cleanAll(repository: AbstractRepository): Promise<void> {
             return;
         }
 
-        await repository.clean(resources.map(r => r.resourceUri));
+        await repository.clean(resources.map(r => r.state.resourceUri));
     }
 }
 

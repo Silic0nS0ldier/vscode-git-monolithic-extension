@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { OutputChannel, SourceControlResourceState, Uri, window } from "vscode";
+import { OutputChannel, Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
 import { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
@@ -9,12 +9,12 @@ import { ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
-    async function clean(...resourceStates: SourceControlResourceState[]): Promise<void> {
+    async function clean(...resourceStates: Resource[]): Promise<void> {
         let normalisedResourceStates = resourceStates.filter(s => !!s);
 
         if (
             normalisedResourceStates.length === 0
-            || (normalisedResourceStates[0] && !(normalisedResourceStates[0].resourceUri instanceof Uri))
+            || (normalisedResourceStates[0] && !(normalisedResourceStates[0].state.resourceUri instanceof Uri))
         ) {
             const resource = getSCMResource(model, outputChannel);
 
@@ -27,15 +27,15 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
 
         const scmResources = normalisedResourceStates.filter(s =>
             s instanceof Resource
-            && (s.resourceGroupType === ResourceGroupType.WorkingTree
-                || s.resourceGroupType === ResourceGroupType.Untracked)
+            && (s.state.resourceGroupType === ResourceGroupType.WorkingTree
+                || s.state.resourceGroupType === ResourceGroupType.Untracked)
         ) as Resource[];
 
         if (!scmResources.length) {
             return;
         }
 
-        const untrackedCount = scmResources.reduce((s, r) => s + (r.type === Status.UNTRACKED ? 1 : 0), 0);
+        const untrackedCount = scmResources.reduce((s, r) => s + (r.state.type === Status.UNTRACKED ? 1 : 0), 0);
         let message: string;
         let yes = localize("discard", "Discard Changes");
 
@@ -44,27 +44,27 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
                 message = localize(
                     "confirm delete",
                     "Are you sure you want to DELETE {0}?\nThis is IRREVERSIBLE!\nThis file will be FOREVER LOST if you proceed.",
-                    path.basename(scmResources[0].resourceUri.fsPath),
+                    path.basename(scmResources[0].state.resourceUri.fsPath),
                 );
                 yes = localize("delete file", "Delete file");
             } else {
-                if (scmResources[0].type === Status.DELETED) {
+                if (scmResources[0].state.type === Status.DELETED) {
                     yes = localize("restore file", "Restore file");
                     message = localize(
                         "confirm restore",
                         "Are you sure you want to restore {0}?",
-                        path.basename(scmResources[0].resourceUri.fsPath),
+                        path.basename(scmResources[0].state.resourceUri.fsPath),
                     );
                 } else {
                     message = localize(
                         "confirm discard",
                         "Are you sure you want to discard changes in {0}?",
-                        path.basename(scmResources[0].resourceUri.fsPath),
+                        path.basename(scmResources[0].state.resourceUri.fsPath),
                     );
                 }
             }
         } else {
-            if (scmResources.every(resource => resource.type === Status.DELETED)) {
+            if (scmResources.every(resource => resource.state.type === Status.DELETED)) {
                 yes = localize("restore files", "Restore files");
                 message = localize(
                     "confirm restore multiple",
@@ -96,7 +96,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
             return;
         }
 
-        const resources = scmResources.map(r => r.resourceUri);
+        const resources = scmResources.map(r => r.state.resourceUri);
         await runByRepository(model, resources, async (repository, resources) => repository.clean(resources));
     }
 

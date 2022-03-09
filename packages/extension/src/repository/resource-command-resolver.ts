@@ -5,13 +5,13 @@ import { Submodule } from "../git/Submodule.js";
 import { SourceControlResourceGroupUI } from "../ui/source-control.js";
 import { toGitUri } from "../uri.js";
 import { localize } from "../util.js";
-import { Resource } from "./Resource.js";
+import { Resource, ResourceState } from "./Resource.js";
 import { ResourceGroupType } from "./ResourceGroupType.js";
 
 function getTitleFromResource(resource: Resource): string {
-    const basename = path.basename(resource.resourceUri.fsPath);
+    const basename = path.basename(resource.state.resourceUri.fsPath);
 
-    switch (resource.type) {
+    switch (resource.state.type) {
         case Status.INDEX_MODIFIED:
         case Status.INDEX_RENAMED:
         case Status.INDEX_ADDED:
@@ -40,58 +40,58 @@ function getTitleFromResource(resource: Resource): string {
     }
 }
 
-function getLeftResource(resource: Resource): Uri | undefined {
-    switch (resource.type) {
+function getLeftResource(resourceState: ResourceState): Uri | undefined {
+    switch (resourceState.type) {
         case Status.INDEX_MODIFIED:
         case Status.INDEX_RENAMED:
         case Status.INDEX_ADDED:
-            return toGitUri(resource.original, "HEAD");
+            return toGitUri(resourceState.original, "HEAD");
 
         case Status.MODIFIED:
         case Status.UNTRACKED:
-            return toGitUri(resource.resourceUri, "~");
+            return toGitUri(resourceState.resourceUri, "~");
 
         case Status.DELETED_BY_US:
         case Status.DELETED_BY_THEM:
-            return toGitUri(resource.resourceUri, "~1");
+            return toGitUri(resourceState.resourceUri, "~1");
     }
     return undefined;
 }
 
-function getRightResource(resource: Resource, indexGroup: SourceControlResourceGroupUI): Uri | undefined {
-    switch (resource.type) {
+function getRightResource(resourceState: ResourceState, indexGroup: SourceControlResourceGroupUI): Uri | undefined {
+    switch (resourceState.type) {
         case Status.INDEX_MODIFIED:
         case Status.INDEX_ADDED:
         case Status.INDEX_COPIED:
         case Status.INDEX_RENAMED:
-            return toGitUri(resource.resourceUri, "");
+            return toGitUri(resourceState.resourceUri, "");
 
         case Status.INDEX_DELETED:
         case Status.DELETED:
-            return toGitUri(resource.resourceUri, "HEAD");
+            return toGitUri(resourceState.resourceUri, "HEAD");
 
         case Status.DELETED_BY_US:
-            return toGitUri(resource.resourceUri, "~3");
+            return toGitUri(resourceState.resourceUri, "~3");
 
         case Status.DELETED_BY_THEM:
-            return toGitUri(resource.resourceUri, "~2");
+            return toGitUri(resourceState.resourceUri, "~2");
 
         case Status.MODIFIED:
         case Status.UNTRACKED:
         case Status.IGNORED:
         case Status.INTENT_TO_ADD:
-            const uriString = resource.resourceUri.toString();
-            const [indexStatus] = indexGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString);
+            const uriString = resourceState.resourceUri.toString();
+            const [indexStatus] = indexGroup.resourceStates.filter(r => r.state.resourceUri.toString() === uriString);
 
-            if (indexStatus && indexStatus.renameResourceUri) {
-                return indexStatus.renameResourceUri;
+            if (indexStatus && indexStatus.state.renameResourceUri) {
+                return indexStatus.state.renameResourceUri;
             }
 
-            return resource.resourceUri;
+            return resourceState.resourceUri;
 
         case Status.BOTH_ADDED:
         case Status.BOTH_MODIFIED:
-            return resource.resourceUri;
+            return resourceState.resourceUri;
     }
 
     return undefined;
@@ -100,11 +100,11 @@ function getRightResource(resource: Resource, indexGroup: SourceControlResourceG
 export function resolveChangeCommand(resource: Resource): Command {
     const title = getTitleFromResource(resource);
 
-    if (!resource.leftUri) {
+    if (!resource.state.leftUri) {
         return {
             arguments: [
-                resource.rightUri,
-                { override: resource.type === Status.BOTH_MODIFIED ? false : undefined },
+                resource.state.rightUri,
+                { override: resource.state.type === Status.BOTH_MODIFIED ? false : undefined },
                 title,
             ],
             command: "vscode.open",
@@ -112,7 +112,7 @@ export function resolveChangeCommand(resource: Resource): Command {
         };
     } else {
         return {
-            arguments: [resource.leftUri, resource.rightUri, title],
+            arguments: [resource.state.leftUri, resource.state.rightUri, title],
             command: "vscode.diff",
             title: localize("open", "Open"),
         };
@@ -121,7 +121,7 @@ export function resolveChangeCommand(resource: Resource): Command {
 
 export function resolveFileCommand(resource: Resource): Command {
     return {
-        arguments: [resource.resourceUri],
+        arguments: [resource.state.resourceUri],
         command: "vscode.open",
         title: localize("open", "Open"),
     };
@@ -135,23 +135,23 @@ export function resolveDefaultCommand(resource: Resource, repoRoot: string): Com
 
 /** @todo Strange responsibility set here. */
 export function getResources(
-    resource: Resource,
+    resourceState: ResourceState,
     repoRoot: string,
     submodules: Submodule[],
     indexGroup: SourceControlResourceGroupUI,
 ): [Uri | undefined, Uri | undefined] {
     for (const submodule of submodules) {
-        if (path.join(repoRoot, submodule.path) === resource.resourceUri.fsPath) {
+        if (path.join(repoRoot, submodule.path) === resourceState.resourceUri.fsPath) {
             return [
                 undefined,
                 toGitUri(
-                    resource.resourceUri,
-                    resource.resourceGroupType === ResourceGroupType.Index ? "index" : "wt",
+                    resourceState.resourceUri,
+                    resourceState.resourceGroupType === ResourceGroupType.Index ? "index" : "wt",
                     { submoduleOf: repoRoot },
                 ),
             ];
         }
     }
 
-    return [getLeftResource(resource), getRightResource(resource, indexGroup)];
+    return [getLeftResource(resourceState), getRightResource(resourceState, indexGroup)];
 }

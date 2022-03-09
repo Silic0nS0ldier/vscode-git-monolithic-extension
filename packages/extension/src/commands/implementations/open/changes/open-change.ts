@@ -32,7 +32,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
         }
 
         for (const resource of resources) {
-            await resource.openChange();
+            await resource.state.openChange();
         }
     }
 

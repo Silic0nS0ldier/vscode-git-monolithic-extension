@@ -1,13 +1,4 @@
-import {
-    Disposable,
-    EventEmitter,
-    Memento,
-    OutputChannel,
-    QuickDiffProvider,
-    Uri,
-    window,
-    workspace,
-} from "vscode";
+import { Disposable, EventEmitter, Memento, OutputChannel, QuickDiffProvider, Uri, window, workspace } from "vscode";
 import { Branch, GitErrorCodes, Ref, RefType, Remote, Status } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import { Repository as BaseRepository } from "../../git.js";
@@ -118,7 +109,7 @@ export function createRepository(
 
             const path = uri.path;
 
-            if (sourceControlUI.mergeGroup.resourceStates.some(r => r.resourceUri.path === path)) {
+            if (sourceControlUI.mergeGroup.resourceStates.some(r => r.state.resourceUri.path === path)) {
                 return undefined;
             }
 
@@ -161,7 +152,7 @@ export function createRepository(
             case "tracked":
                 if (untrackedChanges === "mixed") {
                     count -= sourceControlUI.trackedGroup.resourceStates.filter(r =>
-                        r.type === Status.UNTRACKED || r.type === Status.IGNORED
+                        r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED
                     ).length;
                 }
                 break;
@@ -693,7 +684,11 @@ export function createRepository(
 
     const statusBar = new StatusBarCommands(finalRepository, remoteSourceProviderRegistry);
     disposables.push(statusBar);
-    statusBar.onDidChange(() => sourceControlUI.sourceControl.statusBarCommands = statusBar.commands, null, disposables);
+    statusBar.onDidChange(
+        () => sourceControlUI.sourceControl.statusBarCommands = statusBar.commands,
+        null,
+        disposables,
+    );
     sourceControlUI.sourceControl.statusBarCommands = statusBar.commands;
 
     const progressManager = new ProgressManager(finalRepository);

@@ -15,5 +15,5 @@ pnpm run vsce package
 
 ## Terminology
 
-* Tracked Changes - Changes to files already present in the current git commit-ish.
-* Untracked Changed - New or previously ignored files which are not currently tracked.
+- Tracked Changes - Changes to files already present in the current git commit-ish.
+- Untracked Changed - New or previously ignored files which are not currently tracked.

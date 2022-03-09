@@ -50,16 +50,16 @@ class ApiInputBox implements InputBox {
 
 export class ApiChange implements Change {
     get uri(): Uri {
-        return this.resource.resourceUri;
+        return this.resource.state.resourceUri;
     }
     get originalUri(): Uri {
-        return this.resource.original;
+        return this.resource.state.original;
     }
     get renameUri(): Uri | undefined {
-        return this.resource.renameResourceUri;
+        return this.resource.state.renameResourceUri;
     }
     get status(): Status {
-        return this.resource.type;
+        return this.resource.state.type;
     }
 
     constructor(private readonly resource: Resource) {}

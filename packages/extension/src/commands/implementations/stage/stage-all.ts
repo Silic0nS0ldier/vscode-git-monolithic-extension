@@ -4,8 +4,11 @@ import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function stageAll(repository: AbstractRepository): Promise<void> {
-        const resources = [...repository.sourceControlUI.trackedGroup.resourceStates, ...repository.sourceControlUI.untrackedGroup.resourceStates];
-        const uris = resources.map(r => r.resourceUri);
+        const resources = [
+            ...repository.sourceControlUI.trackedGroup.resourceStates,
+            ...repository.sourceControlUI.untrackedGroup.resourceStates,
+        ];
+        const uris = resources.map(r => r.state.resourceUri);
 
         if (uris.length > 0) {
             const config = workspace.getConfiguration("git", Uri.file(repository.root));

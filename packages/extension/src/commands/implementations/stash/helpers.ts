@@ -21,10 +21,15 @@ export async function createStash(repository: AbstractRepository, includeUntrack
         let documents = workspace.textDocuments
             .filter(d => !d.isUntitled && d.isDirty && isDescendant(repository.root, d.uri.fsPath));
 
-        if (promptToSaveFilesBeforeStashing === "staged" || repository.sourceControlUI.stagedGroup.resourceStates.length > 0) {
+        if (
+            promptToSaveFilesBeforeStashing === "staged"
+            || repository.sourceControlUI.stagedGroup.resourceStates.length > 0
+        ) {
             documents = documents
                 .filter(d =>
-                    repository.sourceControlUI.stagedGroup.resourceStates.some(s => pathEquals(s.resourceUri.fsPath, d.uri.fsPath))
+                    repository.sourceControlUI.stagedGroup.resourceStates.some(s =>
+                        pathEquals(s.state.resourceUri.fsPath, d.uri.fsPath)
+                    )
                 );
         }
 
@@ -57,7 +62,8 @@ export async function createStash(repository: AbstractRepository, includeUntrack
     if (
         config.get<boolean>("useCommitInputAsStashMessage")
         && (!repository.sourceControlUI.sourceControl.commitTemplate
-            || repository.sourceControlUI.sourceControl.inputBox.value !== repository.sourceControlUI.sourceControl.commitTemplate)
+            || repository.sourceControlUI.sourceControl.inputBox.value
+                !== repository.sourceControlUI.sourceControl.commitTemplate)
     ) {
         message = repository.sourceControlUI.sourceControl.inputBox.value;
     }

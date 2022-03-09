@@ -7,7 +7,7 @@ import { IFileStatus } from "../../git/IFileStatus.js";
 import { Submodule } from "../../git/Submodule.js";
 import { SourceControlUIGroup } from "../../ui/source-control.js";
 import { Box, localize } from "../../util.js";
-import { Resource } from "../Resource.js";
+import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType } from "../ResourceGroupType.js";
 import { findKnownHugeFolderPathsToIgnore } from "./find-known-huge-folder-paths-to-ignore.js";
 import { getInputTemplate } from "./get-input-template.js";
@@ -90,7 +90,7 @@ export async function updateModelState(
         type: Status,
         renameResourceUri?: Uri,
     ) {
-        return new Resource(
+        return createBaseResource(
             repoRoot,
             submodules.get(),
             sourceControlUI,
@@ -99,7 +99,7 @@ export async function updateModelState(
             type,
             useIcons,
             renameResourceUri,
-        )
+        );
     }
 
     for (const fileStatus of status) {
@@ -119,7 +119,7 @@ export async function updateModelState(
     commands.executeCommand(
         "setContext",
         "git.changedResources",
-        [...merge, ...index, ...workingTree, ...untracked].map(r => r.resourceUri.fsPath.toString()),
+        [...merge, ...index, ...workingTree, ...untracked].map(r => r.state.resourceUri.fsPath.toString()),
     );
 
     onDidChangeStatusEmitter.fire();
@@ -130,15 +130,16 @@ export async function updateModelState(
 function pigeonholeFileStatus(
     repoRoot: string,
     fileStatus: IFileStatus,
-    createResource: (resourceGroupType: ResourceGroupType,
+    createResource: (
+        resourceGroupType: ResourceGroupType,
         resourceUri: Uri,
         type: Status,
-        renameResourceUri?: Uri,) => Resource,
+        renameResourceUri?: Uri,
+    ) => Resource,
     index: Resource[],
     workingTree: Resource[],
     merge: Resource[],
     untracked: Resource[],
-
 ) {
     const uri = Uri.file(path.join(repoRoot, fileStatus.path));
     const renameUri = fileStatus.rename
@@ -155,7 +156,7 @@ function pigeonholeFileStatus(
             uri,
             type,
             renameResourceUri,
-        )
+        );
     }
 
     switch (fileStatus.x + fileStatus.y) {

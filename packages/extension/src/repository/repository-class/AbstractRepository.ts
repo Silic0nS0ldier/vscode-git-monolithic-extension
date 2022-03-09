@@ -111,7 +111,7 @@ export type AbstractRepository = {
     readonly setBranchUpstream: (name: string, upstream: string) => Promise<void>;
     readonly setConfig: (key: string, value: string) => Promise<string>;
     readonly show: (ref: string, filePath: string) => Promise<string>;
-    readonly sourceControlUI: SourceControlUIGroup,
+    readonly sourceControlUI: SourceControlUIGroup;
     readonly stage: (resource: Uri, contents: string) => Promise<void>;
     readonly status: () => Promise<void>;
     readonly submodules: readonly Submodule[];

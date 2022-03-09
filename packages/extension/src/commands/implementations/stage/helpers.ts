@@ -10,11 +10,13 @@ export async function categorizeResourceByResolution(
     resources: Resource[],
 ): Promise<{ merge: Resource[]; resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[] }> {
     const selection = resources.filter(s => s instanceof Resource) as Resource[];
-    const merge = selection.filter(s => s.resourceGroupType === ResourceGroupType.Merge);
-    const isBothAddedOrModified = (s: Resource) => s.type === Status.BOTH_MODIFIED || s.type === Status.BOTH_ADDED;
-    const isAnyDeleted = (s: Resource) => s.type === Status.DELETED_BY_THEM || s.type === Status.DELETED_BY_US;
+    const merge = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.Merge);
+    const isBothAddedOrModified = (s: Resource) =>
+        s.state.type === Status.BOTH_MODIFIED || s.state.type === Status.BOTH_ADDED;
+    const isAnyDeleted = (s: Resource) =>
+        s.state.type === Status.DELETED_BY_THEM || s.state.type === Status.DELETED_BY_US;
     const possibleUnresolved = merge.filter(isBothAddedOrModified);
-    const promises = possibleUnresolved.map(s => grep(s.resourceUri.fsPath, /^<{7}|^={7}|^>{7}/));
+    const promises = possibleUnresolved.map(s => grep(s.state.resourceUri.fsPath, /^<{7}|^={7}|^>{7}/));
     const unresolvedBothModified = await Promise.all<boolean>(promises);
     const resolved = possibleUnresolved.filter((_s, i) => !unresolvedBothModified[i]);
     const deletionConflicts = merge.filter(s => isAnyDeleted(s));
@@ -28,13 +30,16 @@ export async function categorizeResourceByResolution(
 
 export async function stageDeletionConflict(repository: AbstractRepository, uri: Uri): Promise<void> {
     const uriString = uri.toString();
-    const resource = repository.sourceControlUI.mergeGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString)[0];
+    const resource =
+        repository.sourceControlUI.mergeGroup.resourceStates.filter(r =>
+            r.state.resourceUri.toString() === uriString
+        )[0];
 
     if (!resource) {
         return;
     }
 
-    if (resource.type === Status.DELETED_BY_THEM) {
+    if (resource.state.type === Status.DELETED_BY_THEM) {
         const keepIt = localize("keep ours", "Keep Our Version");
         const deleteIt = localize("delete", "Delete File");
         const result = await window.showInformationMessage(
@@ -55,7 +60,7 @@ export async function stageDeletionConflict(repository: AbstractRepository, uri:
         } else {
             throw new Error("Cancelled");
         }
-    } else if (resource.type === Status.DELETED_BY_US) {
+    } else if (resource.state.type === Status.DELETED_BY_US) {
         const keepIt = localize("keep theirs", "Keep Their Version");
         const deleteIt = localize("delete", "Delete File");
         const result = await window.showInformationMessage(

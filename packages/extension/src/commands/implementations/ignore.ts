@@ -1,16 +1,16 @@
-import { OutputChannel, SourceControlResourceState, Uri } from "vscode";
+import { OutputChannel, Uri } from "vscode";
 import { Model } from "../../model.js";
 import { Resource } from "../../repository/Resource.js";
 import { ScmCommand } from "../helpers.js";
 import { getSCMResource, runByRepository } from "../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
-    async function ignore(...resourceStates: SourceControlResourceState[]): Promise<void> {
+    async function ignore(...resourceStates: Resource[]): Promise<void> {
         let normalisedResourceStates = resourceStates.filter(s => !!s);
 
         if (
             normalisedResourceStates.length === 0
-            || (normalisedResourceStates[0] && !(normalisedResourceStates[0].resourceUri instanceof Uri))
+            || (normalisedResourceStates[0] && !(normalisedResourceStates[0].state.resourceUri instanceof Uri))
         ) {
             const resource = getSCMResource(model, outputChannel);
 
@@ -23,7 +23,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
 
         const resources = normalisedResourceStates
             .filter(s => s instanceof Resource)
-            .map(r => r.resourceUri);
+            .map(r => r.state.resourceUri);
 
         if (!resources.length) {
             return;

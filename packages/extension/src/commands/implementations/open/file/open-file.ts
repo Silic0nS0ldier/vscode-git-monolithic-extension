@@ -41,8 +41,8 @@ export async function openFile(
 
         if (resource) {
             uris = ([resource, ...resourceStates] as Resource[])
-                .filter(r => r.type !== Status.DELETED && r.type !== Status.INDEX_DELETED)
-                .map(r => r.resourceUri);
+                .filter(r => r.state.type !== Status.DELETED && r.state.type !== Status.INDEX_DELETED)
+                .map(r => r.state.resourceUri);
         } else if (window.activeTextEditor) {
             uris = [window.activeTextEditor.document.uri];
         }
@@ -67,7 +67,7 @@ export async function openFile(
         } catch (error) {
             await commands.executeCommand("vscode.open", uri, {
                 ...opts,
-                override: arg instanceof Resource && arg.type === Status.BOTH_MODIFIED ? false : undefined,
+                override: arg instanceof Resource && arg.state.type === Status.BOTH_MODIFIED ? false : undefined,
             });
             continue;
         }

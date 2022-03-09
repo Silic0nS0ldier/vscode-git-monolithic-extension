@@ -5,9 +5,9 @@
 
 import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
-import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
+import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
 import { GitContext } from "monolithic-git-interop/cli";

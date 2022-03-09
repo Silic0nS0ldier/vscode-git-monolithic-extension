@@ -23,8 +23,8 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
             return;
         }
 
-        const HEAD = resource.leftUri;
-        const basename = path.basename(resource.resourceUri.fsPath);
+        const HEAD = resource.state.leftUri;
+        const basename = path.basename(resource.state.resourceUri.fsPath);
         const title = `${basename} (HEAD)`;
 
         if (!HEAD) {
@@ -32,7 +32,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
                 localize(
                     "HEAD not available",
                     "HEAD version of '{0}' is not available.",
-                    path.basename(resource.resourceUri.fsPath),
+                    path.basename(resource.state.resourceUri.fsPath),
                 ),
             );
             return;

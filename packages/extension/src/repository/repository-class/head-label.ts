@@ -15,7 +15,9 @@ export function headLabel(
     const head = HEAD.name || tagName || (HEAD.commit || "").substr(0, 8);
 
     return head
-        + (sourceControlUI.trackedGroup.resourceStates.length + sourceControlUI.untrackedGroup.resourceStates.length > 0 ? "*" : "")
+        + (sourceControlUI.trackedGroup.resourceStates.length + sourceControlUI.untrackedGroup.resourceStates.length > 0
+            ? "*"
+            : "")
         + (sourceControlUI.stagedGroup.resourceStates.length > 0 ? "+" : "")
         + (sourceControlUI.mergeGroup.resourceStates.length > 0 ? "!" : "");
 }

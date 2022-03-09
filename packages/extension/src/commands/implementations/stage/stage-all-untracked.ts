@@ -4,9 +4,12 @@ import { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function stageAllUntracked(repository: AbstractRepository): Promise<void> {
-        const resources = [...repository.sourceControlUI.trackedGroup.resourceStates, ...repository.sourceControlUI.untrackedGroup.resourceStates]
-            .filter(r => r.type === Status.UNTRACKED || r.type === Status.IGNORED);
-        const uris = resources.map(r => r.resourceUri);
+        const resources = [
+            ...repository.sourceControlUI.trackedGroup.resourceStates,
+            ...repository.sourceControlUI.untrackedGroup.resourceStates,
+        ]
+            .filter(r => r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED);
+        const uris = resources.map(r => r.state.resourceUri);
 
         await repository.add(uris);
     }

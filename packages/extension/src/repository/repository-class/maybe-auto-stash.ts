@@ -11,7 +11,9 @@ export async function maybeAutoStash<T>(
 ): Promise<T> {
     const config = workspace.getConfiguration("git", Uri.file(repoRoot));
     const shouldAutoStash = config.get<boolean>("autoStash")
-        && sourceControlUI.trackedGroup.resourceStates.some(r => r.type !== Status.UNTRACKED && r.type !== Status.IGNORED);
+        && sourceControlUI.trackedGroup.resourceStates.some(r =>
+            r.state.type !== Status.UNTRACKED && r.state.type !== Status.IGNORED
+        );
 
     if (!shouldAutoStash) {
         return await runOperation();

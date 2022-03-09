@@ -20,7 +20,10 @@ export async function clean(
         const toClean: string[] = [];
         const toCheckout: string[] = [];
         const submodulesToUpdate: string[] = [];
-        const resourceStates = [...sourceControlUI.trackedGroup.resourceStates, ...sourceControlUI.untrackedGroup.resourceStates];
+        const resourceStates = [
+            ...sourceControlUI.trackedGroup.resourceStates,
+            ...sourceControlUI.untrackedGroup.resourceStates,
+        ];
 
         resources.forEach(r => {
             const fsPath = r.fsPath;
@@ -33,13 +36,13 @@ export async function clean(
             }
 
             const raw = r.toString();
-            const scmResource = find(resourceStates, sr => sr.resourceUri.toString() === raw);
+            const scmResource = find(resourceStates, sr => sr.state.resourceUri.toString() === raw);
 
             if (!scmResource) {
                 return;
             }
 
-            switch (scmResource.type) {
+            switch (scmResource.state.type) {
                 case Status.UNTRACKED:
                 case Status.IGNORED:
                     toClean.push(fsPath);

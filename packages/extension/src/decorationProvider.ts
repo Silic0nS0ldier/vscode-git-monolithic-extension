@@ -100,14 +100,14 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
 
 function collectDecorationData(group: SourceControlResourceGroupUI, bucket: Map<string, FileDecoration>): void {
     for (const r of group.resourceStates) {
-        const decoration = r.resourceDecoration;
+        const decoration = r.state.resourceDecoration;
 
         if (decoration) {
             // not deleted and has a decoration
-            bucket.set(r.original.toString(), decoration);
+            bucket.set(r.state.original.toString(), decoration);
 
-            if (r.type === Status.INDEX_RENAMED) {
-                bucket.set(r.resourceUri.toString(), decoration);
+            if (r.state.type === Status.INDEX_RENAMED) {
+                bucket.set(r.state.resourceUri.toString(), decoration);
             }
         }
     }

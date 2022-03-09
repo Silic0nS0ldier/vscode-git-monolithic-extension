@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { OutputChannel, SourceControlResourceState, Uri, window } from "vscode";
+import { OutputChannel, Uri, window } from "vscode";
 import { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
@@ -12,18 +12,20 @@ export function createCommand(
     outputChannel: OutputChannel,
     model: Model,
 ): ScmCommand {
-    async function stage(...resourceStates: SourceControlResourceState[]): Promise<void> {
+    async function stage(...resourceStates: Resource[]): Promise<void> {
         outputChannel.appendLine(`git.stage ${resourceStates.length}`);
 
         let normalisedResourceStates = resourceStates.filter(s => !!s);
 
         if (
             normalisedResourceStates.length === 0
-            || (normalisedResourceStates[0] && !(normalisedResourceStates[0].resourceUri instanceof Uri))
+            || (normalisedResourceStates[0] && !(normalisedResourceStates[0].state.resourceUri instanceof Uri))
         ) {
             const resource = getSCMResource(model, outputChannel);
 
-            outputChannel.appendLine(`git.stage.getSCMResource ${resource ? resource.resourceUri.toString() : null}`);
+            outputChannel.appendLine(
+                `git.stage.getSCMResource ${resource ? resource.state.resourceUri.toString() : null}`,
+            );
 
             if (!resource) {
                 return;
@@ -45,7 +47,7 @@ export function createCommand(
                 : localize(
                     "confirm stage file with merge conflicts",
                     "Are you sure you want to stage {0} with merge conflicts?",
-                    path.basename(unresolved[0].resourceUri.fsPath),
+                    path.basename(unresolved[0].state.resourceUri.fsPath),
                 );
 
             const yes = localize("yes", "Yes");
@@ -57,11 +59,15 @@ export function createCommand(
         }
 
         try {
-            await runByRepository(model, deletionConflicts.map(r => r.resourceUri), async (repository, resources) => {
-                for (const resource of resources) {
-                    await stageDeletionConflict(repository, resource);
-                }
-            });
+            await runByRepository(
+                model,
+                deletionConflicts.map(r => r.state.resourceUri),
+                async (repository, resources) => {
+                    for (const resource of resources) {
+                        await stageDeletionConflict(repository, resource);
+                    }
+                },
+            );
         } catch (err) {
             if (/Cancelled/.test(err.message)) {
                 return;
@@ -70,8 +76,8 @@ export function createCommand(
             throw err;
         }
 
-        const workingTree = selection.filter(s => s.resourceGroupType === ResourceGroupType.WorkingTree);
-        const untracked = selection.filter(s => s.resourceGroupType === ResourceGroupType.Untracked);
+        const workingTree = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.WorkingTree);
+        const untracked = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.Untracked);
         const scmResources = [...workingTree, ...untracked, ...resolved, ...unresolved];
 
         outputChannel.appendLine(`git.stage.scmResources ${scmResources.length}`);
@@ -79,7 +85,7 @@ export function createCommand(
             return;
         }
 
-        const resources = scmResources.map(r => r.resourceUri);
+        const resources = scmResources.map(r => r.state.resourceUri);
         await runByRepository(model, resources, async (repository, resources) => repository.add(resources));
     }
 

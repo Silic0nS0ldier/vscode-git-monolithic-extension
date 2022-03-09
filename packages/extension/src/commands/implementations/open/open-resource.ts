@@ -6,13 +6,13 @@ export function createCommand(
     model: Model,
 ): ScmCommand {
     async function openResource(resource: Resource): Promise<void> {
-        const repository = model.getRepository(resource.resourceUri);
+        const repository = model.getRepository(resource.state.resourceUri);
 
         if (!repository) {
             return;
         }
 
-        await resource.open();
+        await resource.state.open();
     }
 
     return {

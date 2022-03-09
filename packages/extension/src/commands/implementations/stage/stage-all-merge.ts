@@ -8,12 +8,14 @@ import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers
 
 export function createCommand(): ScmCommand {
     async function stageAllMerge(repository: AbstractRepository): Promise<void> {
-        const resources = repository.sourceControlUI.mergeGroup.resourceStates.filter(s => s instanceof Resource) as Resource[];
+        const resources = repository.sourceControlUI.mergeGroup.resourceStates.filter(s =>
+            s instanceof Resource
+        ) as Resource[];
         const { merge, unresolved, deletionConflicts } = await categorizeResourceByResolution(resources);
 
         try {
             for (const deletionConflict of deletionConflicts) {
-                await stageDeletionConflict(repository, deletionConflict.resourceUri);
+                await stageDeletionConflict(repository, deletionConflict.state.resourceUri);
             }
         } catch (err) {
             if (/Cancelled/.test(err.message)) {
@@ -33,7 +35,7 @@ export function createCommand(): ScmCommand {
                 : localize(
                     "confirm stage file with merge conflicts",
                     "Are you sure you want to stage {0} with merge conflicts?",
-                    path.basename(merge[0].resourceUri.fsPath),
+                    path.basename(merge[0].state.resourceUri.fsPath),
                 );
 
             const yes = localize("yes", "Yes");
@@ -44,7 +46,7 @@ export function createCommand(): ScmCommand {
             }
         }
 
-        const uris = resources.map(r => r.resourceUri);
+        const uris = resources.map(r => r.state.resourceUri);
 
         if (uris.length > 0) {
             await repository.add(uris);

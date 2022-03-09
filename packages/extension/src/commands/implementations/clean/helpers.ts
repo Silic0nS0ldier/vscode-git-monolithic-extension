@@ -17,14 +17,14 @@ export async function cleanUntrackedChanges(repository: AbstractRepository, reso
         return;
     }
 
-    await repository.clean(resources.map(r => r.resourceUri));
+    await repository.clean(resources.map(r => r.state.resourceUri));
 }
 
 export async function cleanUntrackedChange(repository: AbstractRepository, resource: Resource): Promise<void> {
     const message = localize(
         "confirm delete",
         "Are you sure you want to DELETE {0}?\nThis is IRREVERSIBLE!\nThis file will be FOREVER LOST if you proceed.",
-        path.basename(resource.resourceUri.fsPath),
+        path.basename(resource.state.resourceUri.fsPath),
     );
     const yes = localize("delete file", "Delete file");
     const pick = await window.showWarningMessage(message, { modal: true }, yes);
@@ -33,7 +33,7 @@ export async function cleanUntrackedChange(repository: AbstractRepository, resou
         return;
     }
 
-    await repository.clean([resource.resourceUri]);
+    await repository.clean([resource.state.resourceUri]);
 }
 
 export async function cleanTrackedChanges(repository: AbstractRepository, resources: Resource[]): Promise<void> {
@@ -41,7 +41,7 @@ export async function cleanTrackedChanges(repository: AbstractRepository, resour
         ? localize(
             "confirm discard all single",
             "Are you sure you want to discard changes in {0}?",
-            path.basename(resources[0].resourceUri.fsPath),
+            path.basename(resources[0].state.resourceUri.fsPath),
         )
         : localize(
             "confirm discard all",
@@ -57,5 +57,5 @@ export async function cleanTrackedChanges(repository: AbstractRepository, resour
         return;
     }
 
-    await repository.clean(resources.map(r => r.resourceUri));
+    await repository.clean(resources.map(r => r.state.resourceUri));
 }

@@ -48,7 +48,7 @@ export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): 
         },
         mergeGroup: mergeGroup as unknown as SourceControlResourceGroupUI,
         sourceControl: sourceControl as unknown as SourceControlUI,
-        stagedGroup: stagedGroup  as unknown as SourceControlResourceGroupUI,
+        stagedGroup: stagedGroup as unknown as SourceControlResourceGroupUI,
         trackedGroup: trackedGroup as unknown as SourceControlResourceGroupUI,
         untrackedGroup: untrackedGroup as unknown as SourceControlResourceGroupUI,
     };
@@ -60,7 +60,7 @@ export type SourceControlUIGroup = {
     readonly stagedGroup: SourceControlResourceGroupUI;
     readonly trackedGroup: SourceControlResourceGroupUI;
     readonly untrackedGroup: SourceControlResourceGroupUI;
-}
+};
 
 type SourceControlUI = {
     readonly inputBox: SourceControlInputBox;
