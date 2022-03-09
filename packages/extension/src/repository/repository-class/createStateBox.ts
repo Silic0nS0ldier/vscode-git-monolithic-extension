@@ -21,10 +21,10 @@ export function createStateBox(
             HEAD.set(undefined);
             refs.set([]);
             remotes.set([]);
-            sourceControlUI.mergeGroup.resourceStates = [];
-            sourceControlUI.stagedGroup.resourceStates = [];
-            sourceControlUI.trackedGroup.resourceStates = [];
-            sourceControlUI.untrackedGroup.resourceStates = [];
+            sourceControlUI.mergeGroup.resourceStates.set([]);
+            sourceControlUI.stagedGroup.resourceStates.set([]);
+            sourceControlUI.trackedGroup.resourceStates.set([]);
+            sourceControlUI.untrackedGroup.resourceStates.set([]);
             sourceControlUI.sourceControl.count = 0;
 
             onDidChangeState.fire(state);

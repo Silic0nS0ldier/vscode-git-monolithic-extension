@@ -107,10 +107,10 @@ export async function updateModelState(
     }
 
     // set resource groups
-    sourceControlUI.mergeGroup.resourceStates = merge;
-    sourceControlUI.stagedGroup.resourceStates = index;
-    sourceControlUI.trackedGroup.resourceStates = workingTree;
-    sourceControlUI.untrackedGroup.resourceStates = untracked;
+    sourceControlUI.mergeGroup.resourceStates.set(merge);
+    sourceControlUI.stagedGroup.resourceStates.set(index);
+    sourceControlUI.trackedGroup.resourceStates.set(workingTree);
+    sourceControlUI.untrackedGroup.resourceStates.set(untracked);
 
     // set count badge
     setCountBadge();

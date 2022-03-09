@@ -5,8 +5,8 @@ import { ScmCommand } from "../../helpers.js";
 export function createCommand(): ScmCommand {
     async function stageAllUntracked(repository: AbstractRepository): Promise<void> {
         const resources = [
-            ...repository.sourceControlUI.trackedGroup.resourceStates,
-            ...repository.sourceControlUI.untrackedGroup.resourceStates,
+            ...repository.sourceControlUI.trackedGroup.resourceStates.get(),
+            ...repository.sourceControlUI.untrackedGroup.resourceStates.get(),
         ]
             .filter(r => r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED);
         const uris = resources.map(r => r.state.resourceUri);

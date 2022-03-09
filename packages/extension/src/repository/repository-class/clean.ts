@@ -21,8 +21,8 @@ export async function clean(
         const toCheckout: string[] = [];
         const submodulesToUpdate: string[] = [];
         const resourceStates = [
-            ...sourceControlUI.trackedGroup.resourceStates,
-            ...sourceControlUI.untrackedGroup.resourceStates,
+            ...sourceControlUI.trackedGroup.resourceStates.get(),
+            ...sourceControlUI.untrackedGroup.resourceStates.get(),
         ];
 
         resources.forEach(r => {

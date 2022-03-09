@@ -99,7 +99,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
 }
 
 function collectDecorationData(group: SourceControlResourceGroupUI, bucket: Map<string, FileDecoration>): void {
-    for (const r of group.resourceStates) {
+    for (const r of group.resourceStates.get()) {
         const decoration = r.state.resourceDecoration;
 
         if (decoration) {

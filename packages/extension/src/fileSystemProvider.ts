@@ -36,7 +36,7 @@ function sanitizeRef(ref: string, path: string, repository: AbstractRepository):
     if (ref === "~") {
         const fileUri = Uri.file(path);
         const uriString = fileUri.toString();
-        const [indexStatus] = repository.sourceControlUI.stagedGroup.resourceStates.filter(r =>
+        const [indexStatus] = repository.sourceControlUI.stagedGroup.resourceStates.get().filter(r =>
             r.state.resourceUri.toString() === uriString
         );
         return indexStatus ? "" : "HEAD";

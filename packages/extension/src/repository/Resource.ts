@@ -289,7 +289,7 @@ export class Resource implements SourceControlResourceState {
     ) {
         const self = this;
         const resources = onetime((): [Uri | undefined, Uri | undefined] =>
-            getResources(this.state, this.repoRoot, submodules, sourceControlUI.stagedGroup)
+            getResources(self.state, self.repoRoot, submodules, sourceControlUI.stagedGroup)
         );
         this.state = {
             get leftUri(): Uri | undefined {
@@ -304,7 +304,7 @@ export class Resource implements SourceControlResourceState {
                 await commands.executeCommand<void>(command.command, ...(command.arguments || []));
             },
             get original() {
-                return this.resourceUri;
+                return self.resourceUri;
             },
             get renameResourceUri() {
                 return renameResourceUri_;
@@ -328,7 +328,7 @@ export class Resource implements SourceControlResourceState {
                 return resources()[1];
             },
             get type() {
-                return this.type;
+                return self.type;
             },
         };
     }

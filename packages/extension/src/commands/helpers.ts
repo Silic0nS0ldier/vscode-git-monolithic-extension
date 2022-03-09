@@ -82,10 +82,10 @@ export function getSCMResource(
             return undefined;
         }
 
-        return repository.sourceControlUI.trackedGroup.resourceStates.filter(r =>
+        return repository.sourceControlUI.trackedGroup.resourceStates.get().filter(r =>
             r.state.resourceUri.toString() === uriString
         )[0]
-            || repository.sourceControlUI.stagedGroup.resourceStates.filter(r =>
+            || repository.sourceControlUI.stagedGroup.resourceStates.get().filter(r =>
                 r.state.resourceUri.toString() === uriString
             )[0];
     }

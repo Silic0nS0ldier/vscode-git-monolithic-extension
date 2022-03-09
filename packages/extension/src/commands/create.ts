@@ -51,6 +51,11 @@ export function createCommand(
         telemetryReporter.sendTelemetryEvent("git.command", { command: id });
 
         return result.catch(async err => {
+            if (err instanceof Error) {
+                outputChannel.appendLine("An error occurred: " + err.message);
+                outputChannel.appendLine(err.stack ?? "(no stack)");
+            }
+
             const options: MessageOptions = {
                 modal: true,
             };

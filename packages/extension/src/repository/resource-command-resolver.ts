@@ -81,7 +81,9 @@ function getRightResource(resourceState: ResourceState, indexGroup: SourceContro
         case Status.IGNORED:
         case Status.INTENT_TO_ADD:
             const uriString = resourceState.resourceUri.toString();
-            const [indexStatus] = indexGroup.resourceStates.filter(r => r.state.resourceUri.toString() === uriString);
+            const [indexStatus] = indexGroup.resourceStates.get().filter(r =>
+                r.state.resourceUri.toString() === uriString
+            );
 
             if (indexStatus && indexStatus.state.renameResourceUri) {
                 return indexStatus.state.renameResourceUri;

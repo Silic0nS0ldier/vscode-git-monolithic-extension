@@ -8,7 +8,7 @@ import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers
 
 export function createCommand(): ScmCommand {
     async function stageAllMerge(repository: AbstractRepository): Promise<void> {
-        const resources = repository.sourceControlUI.mergeGroup.resourceStates.filter(s =>
+        const resources = repository.sourceControlUI.mergeGroup.resourceStates.get().filter(s =>
             s instanceof Resource
         ) as Resource[];
         const { merge, unresolved, deletionConflicts } = await categorizeResourceByResolution(resources);

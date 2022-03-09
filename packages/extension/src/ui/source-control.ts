@@ -1,6 +1,17 @@
-import { Command, Disposable, QuickDiffProvider, scm, SourceControlInputBox, Uri } from "vscode";
+import path from "node:path";
+import { setTimeout } from "node:timers";
+import {
+    Command,
+    Disposable,
+    QuickDiffProvider,
+    scm,
+    SourceControlInputBox,
+    SourceControlResourceGroup,
+    SourceControlResourceState,
+    Uri,
+} from "vscode";
 import { Resource } from "../repository/Resource.js";
-import { localize } from "../util.js";
+import { Box, localize } from "../util.js";
 
 /**
  * An encapsulatin of the source control panel.
@@ -46,11 +57,11 @@ export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): 
             // Must go last
             sourceControl.dispose();
         },
-        mergeGroup: mergeGroup as unknown as SourceControlResourceGroupUI,
+        mergeGroup: { resourceStates: withUX(mergeGroup, repoRoot) },
         sourceControl: sourceControl as unknown as SourceControlUI,
-        stagedGroup: stagedGroup as unknown as SourceControlResourceGroupUI,
-        trackedGroup: trackedGroup as unknown as SourceControlResourceGroupUI,
-        untrackedGroup: untrackedGroup as unknown as SourceControlResourceGroupUI,
+        stagedGroup: { resourceStates: withUX(stagedGroup, repoRoot) },
+        trackedGroup: { resourceStates: withUX(trackedGroup, repoRoot) },
+        untrackedGroup: { resourceStates: withUX(untrackedGroup, repoRoot) },
     };
 }
 
@@ -62,15 +73,51 @@ export type SourceControlUIGroup = {
     readonly untrackedGroup: SourceControlResourceGroupUI;
 };
 
-type SourceControlUI = {
+export type SourceControlUI = {
     readonly inputBox: SourceControlInputBox;
     count: number;
     statusBarCommands: Command[];
     commitTemplate?: string;
 };
 
+function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readonly Resource[]> {
+    let resources: readonly Resource[] = [];
+    const emptyResource: SourceControlResourceState = {
+        decorations: { faded: true, tooltip: "Nothing to show here. For now..." },
+        resourceUri: Uri.file(path.join(repoRoot, "(empty)")),
+    };
+    return {
+        get() {
+            // filter empty node
+            return resources;
+        },
+        set(newValue) {
+            // delay change with a faded look first
+            // ideally do only when status is slow to run
+            // TODO don't push state change to VSCode is nothing has changed
+            const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
+                decorations: { faded: true },
+                resourceUri: old.resourceUri,
+            }));
+            if (fadedResources.length > 0) {
+                group.resourceStates = fadedResources;
+            } else if (group.hideWhenEmpty !== true) {
+                group.resourceStates = [emptyResource];
+            }
+
+            setTimeout(() => {
+                resources = newValue;
+                if (newValue.length > 0) {
+                    group.resourceStates = newValue as Resource[];
+                } else if (group.hideWhenEmpty !== true) {
+                    group.resourceStates = [emptyResource];
+                }
+            }, 900);
+        },
+    };
+}
+
 export type SourceControlResourceGroupUI = {
     // TODO This is used extensively as the source of truth, which couples the UI to application logic tightly
-    // With some refactoring it will be possible to have a UI grace period
-    resourceStates: Resource[];
+    readonly resourceStates: Box<readonly Resource[]>;
 };

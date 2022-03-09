@@ -25,8 +25,8 @@ async function smartCommit(
 
     const enableSmartCommit = config.get<boolean>("enableSmartCommit") === true;
     const enableCommitSigning = config.get<boolean>("enableCommitSigning") === true;
-    let noStagedChanges = repository.sourceControlUI.stagedGroup.resourceStates.length === 0;
-    let noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.length === 0;
+    let noStagedChanges = repository.sourceControlUI.stagedGroup.resourceStates.get().length === 0;
+    let noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.get().length === 0;
 
     if (promptToSaveFilesBeforeCommit !== "never") {
         let documents = workspace.textDocuments
@@ -34,11 +34,11 @@ async function smartCommit(
 
         if (
             promptToSaveFilesBeforeCommit === "staged"
-            || repository.sourceControlUI.stagedGroup.resourceStates.length > 0
+            || repository.sourceControlUI.stagedGroup.resourceStates.get().length > 0
         ) {
             documents = documents
                 .filter(d =>
-                    repository.sourceControlUI.stagedGroup.resourceStates.some(s =>
+                    repository.sourceControlUI.stagedGroup.resourceStates.get().some(s =>
                         pathEquals(s.state.resourceUri.fsPath, d.uri.fsPath)
                     )
                 );
@@ -64,8 +64,8 @@ async function smartCommit(
                 await Promise.all(documents.map(d => d.save()));
                 await repository.add(documents.map(d => d.uri));
 
-                noStagedChanges = repository.sourceControlUI.stagedGroup.resourceStates.length === 0;
-                noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.length === 0;
+                noStagedChanges = repository.sourceControlUI.stagedGroup.resourceStates.get().length === 0;
+                noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.get().length === 0;
             } else if (pick !== commit) {
                 return false; // do not commit on cancel
             }
@@ -124,7 +124,9 @@ async function smartCommit(
             || (!normalisedOpts.all && noStagedChanges)
             // no staged changes and no tracked unstaged changes
             || (noStagedChanges && smartCommitChanges === "tracked"
-                && repository.sourceControlUI.trackedGroup.resourceStates.every(r => r.state.type === Status.UNTRACKED))
+                && repository.sourceControlUI.trackedGroup.resourceStates.get().every(r =>
+                    r.state.type === Status.UNTRACKED
+                ))
         )
         // amend allows changing only the commit message
         && !normalisedOpts.amend

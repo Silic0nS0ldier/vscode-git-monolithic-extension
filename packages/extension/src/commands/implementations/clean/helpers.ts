@@ -4,7 +4,10 @@ import { AbstractRepository } from "../../../repository/repository-class/Abstrac
 import { Resource } from "../../../repository/Resource.js";
 import { localize } from "../../../util.js";
 
-export async function cleanUntrackedChanges(repository: AbstractRepository, resources: Resource[]): Promise<void> {
+export async function cleanUntrackedChanges(
+    repository: AbstractRepository,
+    resources: readonly Resource[],
+): Promise<void> {
     const message = localize(
         "confirm delete multiple",
         "Are you sure you want to DELETE {0} files?\nThis is IRREVERSIBLE!\nThese files will be FOREVER LOST if you proceed.",
@@ -36,7 +39,10 @@ export async function cleanUntrackedChange(repository: AbstractRepository, resou
     await repository.clean([resource.state.resourceUri]);
 }
 
-export async function cleanTrackedChanges(repository: AbstractRepository, resources: Resource[]): Promise<void> {
+export async function cleanTrackedChanges(
+    repository: AbstractRepository,
+    resources: readonly Resource[],
+): Promise<void> {
     const message = resources.length === 1
         ? localize(
             "confirm discard all single",

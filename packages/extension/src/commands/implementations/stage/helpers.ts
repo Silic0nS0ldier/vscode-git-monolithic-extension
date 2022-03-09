@@ -31,7 +31,7 @@ export async function categorizeResourceByResolution(
 export async function stageDeletionConflict(repository: AbstractRepository, uri: Uri): Promise<void> {
     const uriString = uri.toString();
     const resource =
-        repository.sourceControlUI.mergeGroup.resourceStates.filter(r =>
+        repository.sourceControlUI.mergeGroup.resourceStates.get().filter(r =>
             r.state.resourceUri.toString() === uriString
         )[0];
 

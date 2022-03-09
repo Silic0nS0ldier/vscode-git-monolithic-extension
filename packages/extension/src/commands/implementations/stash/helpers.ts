@@ -5,9 +5,9 @@ import { AbstractRepository } from "../../../repository/repository-class/Abstrac
 import { isDescendant, localize, pathEquals } from "../../../util.js";
 
 export async function createStash(repository: AbstractRepository, includeUntracked = false): Promise<void> {
-    const noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.length === 0
-        && (!includeUntracked || repository.sourceControlUI.untrackedGroup.resourceStates.length === 0);
-    const noStagedChanges = repository.sourceControlUI.stagedGroup.resourceStates.length === 0;
+    const noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.get().length === 0
+        && (!includeUntracked || repository.sourceControlUI.untrackedGroup.resourceStates.get().length === 0);
+    const noStagedChanges = repository.sourceControlUI.stagedGroup.resourceStates.get().length === 0;
 
     if (noUnstagedChanges && noStagedChanges) {
         window.showInformationMessage(localize("no changes stash", "There are no changes to stash."));
@@ -23,11 +23,11 @@ export async function createStash(repository: AbstractRepository, includeUntrack
 
         if (
             promptToSaveFilesBeforeStashing === "staged"
-            || repository.sourceControlUI.stagedGroup.resourceStates.length > 0
+            || repository.sourceControlUI.stagedGroup.resourceStates.get().length > 0
         ) {
             documents = documents
                 .filter(d =>
-                    repository.sourceControlUI.stagedGroup.resourceStates.some(s =>
+                    repository.sourceControlUI.stagedGroup.resourceStates.get().some(s =>
                         pathEquals(s.state.resourceUri.fsPath, d.uri.fsPath)
                     )
                 );

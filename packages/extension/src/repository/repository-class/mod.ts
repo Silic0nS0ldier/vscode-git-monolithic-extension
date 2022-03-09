@@ -109,7 +109,7 @@ export function createRepository(
 
             const path = uri.path;
 
-            if (sourceControlUI.mergeGroup.resourceStates.some(r => r.state.resourceUri.path === path)) {
+            if (sourceControlUI.mergeGroup.resourceStates.get().some(r => r.state.resourceUri.path === path)) {
                 return undefined;
             }
 
@@ -141,9 +141,9 @@ export function createRepository(
         const countBadge = config.get<"all" | "tracked" | "off">("countBadge");
         const untrackedChanges = config.get<"mixed" | "separate" | "hidden">("untrackedChanges");
 
-        let count = sourceControlUI.mergeGroup.resourceStates.length
-            + sourceControlUI.stagedGroup.resourceStates.length
-            + sourceControlUI.trackedGroup.resourceStates.length;
+        let count = sourceControlUI.mergeGroup.resourceStates.get().length
+            + sourceControlUI.stagedGroup.resourceStates.get().length
+            + sourceControlUI.trackedGroup.resourceStates.get().length;
 
         switch (countBadge) {
             case "off":
@@ -151,14 +151,14 @@ export function createRepository(
                 break;
             case "tracked":
                 if (untrackedChanges === "mixed") {
-                    count -= sourceControlUI.trackedGroup.resourceStates.filter(r =>
+                    count -= sourceControlUI.trackedGroup.resourceStates.get().filter(r =>
                         r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED
                     ).length;
                 }
                 break;
             case "all":
                 if (untrackedChanges === "separate") {
-                    count += sourceControlUI.untrackedGroup.resourceStates.length;
+                    count += sourceControlUI.untrackedGroup.resourceStates.get().length;
                 }
                 break;
         }

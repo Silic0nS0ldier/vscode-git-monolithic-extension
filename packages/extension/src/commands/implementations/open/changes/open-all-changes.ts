@@ -7,8 +7,8 @@ export function createCommand(): ScmCommand {
     async function openAllChanges(repository: AbstractRepository): Promise<void> {
         for (
             const resource of [
-                ...repository.sourceControlUI.trackedGroup.resourceStates,
-                ...repository.sourceControlUI.untrackedGroup.resourceStates,
+                ...repository.sourceControlUI.trackedGroup.resourceStates.get(),
+                ...repository.sourceControlUI.untrackedGroup.resourceStates.get(),
             ]
         ) {
             if (
