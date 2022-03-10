@@ -1,5 +1,5 @@
 import { Disposable, EventEmitter, Memento, OutputChannel, QuickDiffProvider, Uri, window, workspace } from "vscode";
-import { Branch, GitErrorCodes, Ref, RefType, Remote, Status } from "../../api/git.js";
+import { Branch, GitErrorCodes, Ref, RefType, Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import { Repository as BaseRepository } from "../../git.js";
 import { Submodule } from "../../git/Submodule.js";
@@ -136,34 +136,21 @@ export function createRepository(
     const submodules = createBox<Submodule[]>([]);
     const rebaseCommit = createRebaseCommitBox(sourceControlUI);
 
+    // TODO UI logic should handle this
     function setCountBadge(): void {
         const config = workspace.getConfiguration("git", Uri.file(repository.root));
         const countBadge = config.get<"all" | "tracked" | "off">("countBadge");
-        const untrackedChanges = config.get<"mixed" | "separate" | "hidden">("untrackedChanges");
 
-        let count = sourceControlUI.mergeGroup.resourceStates.get().length
-            + sourceControlUI.stagedGroup.resourceStates.get().length
-            + sourceControlUI.trackedGroup.resourceStates.get().length;
-
-        switch (countBadge) {
-            case "off":
-                count = 0;
-                break;
-            case "tracked":
-                if (untrackedChanges === "mixed") {
-                    count -= sourceControlUI.trackedGroup.resourceStates.get().filter(r =>
-                        r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED
-                    ).length;
-                }
-                break;
-            case "all":
-                if (untrackedChanges === "separate") {
-                    count += sourceControlUI.untrackedGroup.resourceStates.get().length;
-                }
-                break;
+        if (countBadge === "off") {
+            sourceControlUI.sourceControl.count = 0;
+            return;
         }
 
-        sourceControlUI.sourceControl.count = count;
+        // TODO This is getting out of sync
+        sourceControlUI.sourceControl.count = sourceControlUI.mergeGroup.resourceStates.get().length
+            + sourceControlUI.stagedGroup.resourceStates.get().length
+            + sourceControlUI.trackedGroup.resourceStates.get().length
+            + sourceControlUI.untrackedGroup.resourceStates.get().length;
     }
 
     const onDidChangeStatusEmitter = new EventEmitter<void>();

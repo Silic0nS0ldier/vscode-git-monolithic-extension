@@ -3,15 +3,13 @@ import { cpErrorHandler, getGitErrorCode, GitError } from "../error.js";
 import { IFileStatus } from "../IFileStatus.js";
 import { SpawnOptions } from "../SpawnOptions.js";
 
-export async function getStatus(
+export async function getStatusTrackedAndMerge(
     stream: (args: string[], options?: SpawnOptions) => cp.ChildProcess,
     opts?: { limit?: number; ignoreSubmodules?: boolean },
 ): Promise<{ status: IFileStatus[]; didHitLimit: boolean }> {
     const parser = new GitStatusParser();
     const env = { GIT_OPTIONAL_LOCKS: "0" };
-    // TODO Seperate lookup of untracked files (which is super slow)
-    // -uno (no untracked)
-    const args = ["status", "-z", "-u"];
+    const args = ["status", "-z", "-uno"];
 
     if (opts?.ignoreSubmodules) {
         args.push("--ignore-submodules");

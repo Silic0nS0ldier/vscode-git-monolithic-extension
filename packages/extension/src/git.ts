@@ -49,7 +49,7 @@ import { parseGitmodules } from "./git/parseGitmodules.js";
 import { LsFilesElement, parseLsFiles } from "./git/parseLsFiles.js";
 import { LsTreeElement, parseLsTree } from "./git/parseLsTree.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
-import { getStatus } from "./git/repository-class/get-status.js";
+import { getStatusTrackedAndMerge } from "./git/repository-class/get-status.js";
 import { SpawnOptions } from "./git/SpawnOptions.js";
 import { Stash } from "./git/Stash.js";
 import { Submodule } from "./git/Submodule.js";
@@ -1141,10 +1141,20 @@ export class Repository {
         }
     }
 
-    getStatus(
+    // here
+    getStatusTrackedAndMerge(
         opts?: { limit?: number; ignoreSubmodules?: boolean },
     ): Promise<{ status: IFileStatus[]; didHitLimit: boolean }> {
-        return getStatus(this.stream.bind(this), opts);
+        return getStatusTrackedAndMerge(this.stream.bind(this), opts);
+    }
+
+    async getStatusUntracked(): Promise<string[]> {
+        const result = await this.exec(["ls-files", "--others", "--exclude-standard"]);
+        if (result.exitCode !== 0) {
+            throw new Error("Could not find untracked files");
+        }
+
+        return result.stdout.trim().split("\n").map(f => f.trim()).filter(f => f !== "");
     }
 
     async getHEAD(): Promise<Ref> {
