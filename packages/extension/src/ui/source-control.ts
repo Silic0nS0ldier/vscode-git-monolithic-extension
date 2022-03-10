@@ -82,9 +82,14 @@ export type SourceControlUI = {
 
 function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readonly Resource[]> {
     let resources: readonly Resource[] = [];
+    // TODO Find way to force these to be first item
     const emptyResource: SourceControlResourceState = {
         decorations: { faded: true, tooltip: "Nothing to show here. For now..." },
         resourceUri: Uri.file(path.join(repoRoot, "(empty)")),
+    };
+    const truncatedResource: SourceControlResourceState = {
+        decorations: { faded: true, tooltip: "Large changesets currently are poorly handled, some items may be missing." },
+        resourceUri: Uri.file(path.join(repoRoot, "(items may be missing)")),
     };
     return {
         get() {
@@ -100,7 +105,15 @@ function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readon
                 resourceUri: old.resourceUri,
             }));
             if (fadedResources.length > 0) {
-                group.resourceStates = fadedResources;
+                if (newValue.length >= 500) {
+                    // 500 used as the of limit 5000 is shared by multiple groups
+                    // 500 may seem low, but should 99% of cases until a more reliable solution
+                    // is used.
+                    group.resourceStates = [truncatedResource, ...fadedResources] as Resource[];
+                }
+                else {
+                    group.resourceStates = fadedResources;
+                }
             } else if (group.hideWhenEmpty !== true) {
                 group.resourceStates = [emptyResource];
             }
@@ -108,7 +121,15 @@ function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readon
             setTimeout(() => {
                 resources = newValue;
                 if (newValue.length > 0) {
-                    group.resourceStates = newValue as Resource[];
+                    if (newValue.length >= 500) {
+                        // 500 used as the of limit 5000 is shared by multiple groups
+                        // 500 may seem low, but should 99% of cases until a more reliable solution
+                        // is used.
+                        group.resourceStates = [truncatedResource, ...newValue] as Resource[];
+                    }
+                    else {
+                        group.resourceStates = newValue as Resource[];
+                    }
                 } else if (group.hideWhenEmpty !== true) {
                     group.resourceStates = [emptyResource];
                 }
