@@ -148,10 +148,6 @@ export class ApiRepository implements Repository {
         return this._repository.buffer(ref, filePath);
     }
 
-    show(ref: string, path: string): Promise<string> {
-        return this._repository.show(ref, path);
-    }
-
     getCommit(ref: string): Promise<Commit> {
         return this._repository.getCommit(ref);
     }

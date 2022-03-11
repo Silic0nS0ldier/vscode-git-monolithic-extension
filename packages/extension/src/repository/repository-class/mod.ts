@@ -40,7 +40,6 @@ import { pullWithRebase as pullWithRebaseImpl } from "./pull-with-rebase.js";
 import { pull as pullImpl } from "./pull.js";
 import { pushInternal } from "./push-internal.js";
 import { push as pushImpl } from "./push.js";
-import { show as showImpl } from "./show.js";
 import { stage as stageImpl } from "./stage.js";
 import { syncInternal } from "./sync-internal.js";
 import { syncLabel as syncLabelImpl } from "./sync-label.js";
@@ -309,10 +308,6 @@ export function createRepository(
 
     function buffer(ref: string, filePath: string): Promise<Buffer> {
         return bufferImpl(run, repository, ref, filePath);
-    }
-
-    function show(ref: string, filePath: string): Promise<string> {
-        return showImpl(run, repository, ref, filePath);
     }
 
     const onDidChangeOperations = anyEvent<Operation | OperationResult>(onRunOperation, onDidRunOperation);
@@ -594,7 +589,6 @@ export function createRepository(
         setConfig(key, value) {
             return run(Operation.Config, () => repository.config("local", key, value));
         },
-        show,
         sourceControlUI,
         stage(resource, contents) {
             return stageImpl(repository, run, onDidChangeOriginalResourceEmitter, resource, contents);

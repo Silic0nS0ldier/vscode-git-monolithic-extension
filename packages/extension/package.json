@@ -3,12 +3,11 @@
     "name": "extension",
     "type": "module",
     "dependencies": {
-        "@vscode/extension-telemetry": "0.4.6",
+        "@vscode/extension-telemetry": "0.4.9",
         "@vscode/iconv-lite-umd": "0.7.0",
         "aggregate-error": "^4.0.0",
         "byline": "^4.2.2",
         "get-stream": "^6.0.1",
-        "jschardet": "3.0.0",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:*",
         "node-abort-controller": "^3.0.1",

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as iconv from "@vscode/iconv-lite-umd";
 import * as byline from "byline";
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
@@ -34,7 +33,6 @@ import {
     RefType,
     Remote,
 } from "./api/git.js";
-import { detectEncoding } from "./encoding.js";
 import { Commit } from "./git/Commit.js";
 import { GitError } from "./git/error.js";
 import { exec, IExecutionResult } from "./git/exec.js";
@@ -341,19 +339,6 @@ export class Repository {
         }
 
         return parseGitCommits(result.stdout);
-    }
-
-    async bufferString(object: string, encoding: string = "utf8", autoGuessEncoding = false): Promise<string> {
-        const stdout = await this.buffer(object);
-
-        let normalisedEncoding = encoding;
-        if (autoGuessEncoding) {
-            normalisedEncoding = detectEncoding(stdout) || normalisedEncoding;
-        }
-
-        normalisedEncoding = iconv.encodingExists(normalisedEncoding) ? normalisedEncoding : "utf8";
-
-        return iconv.decode(stdout, normalisedEncoding);
     }
 
     async buffer(object: string): Promise<Buffer> {

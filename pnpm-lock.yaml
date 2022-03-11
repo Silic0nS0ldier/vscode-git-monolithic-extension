@@ -38,12 +38,11 @@ importers:
       '@types/node': ^14.18.12
       '@types/vscode': ^1.65.0
       '@types/which': ^2.0.1
-      '@vscode/extension-telemetry': 0.4.6
+      '@vscode/extension-telemetry': 0.4.9
       '@vscode/iconv-lite-umd': 0.7.0
       aggregate-error: ^4.0.0
       byline: ^4.2.2
       get-stream: ^6.0.1
-      jschardet: 3.0.0
       just-debounce: ^1.1.0
       monolithic-git-interop: workspace:*
       node-abort-controller: ^3.0.1
@@ -53,12 +52,11 @@ importers:
       watcher: ^1.2.0
       which: ^2.0.2
     dependencies:
-      '@vscode/extension-telemetry': 0.4.6
+      '@vscode/extension-telemetry': 0.4.9
       '@vscode/iconv-lite-umd': 0.7.0
       aggregate-error: 4.0.0
       byline: 4.2.2
       get-stream: 6.0.1
-      jschardet: 3.0.0
       just-debounce: 1.1.0
       monolithic-git-interop: link:../git
       node-abort-controller: 3.0.1
@@ -381,8 +379,8 @@ packages:
     resolution: {integrity: sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==}
     dev: true
 
-  /@vscode/extension-telemetry/0.4.6:
-    resolution: {integrity: sha512-bDXwHoNXIR1Rc8xdphJ4B3rWdzAGm+FUPk4mJl6/oyZmfEX+QdlDLxnCwlv/vxHU1p11ThHSB8kRhsWZ1CzOqw==}
+  /@vscode/extension-telemetry/0.4.9:
+    resolution: {integrity: sha512-ZQIqlcgJU462oyQJDVgmEKNSSibEp1CRs0ECoa43gwgkt877Jm2dpz5G+KQhXad/zJy1sxTq8r/5kD75nq4W8Q==}
     engines: {vscode: ^1.60.0}
     dev: false
 
@@ -1710,11 +1708,6 @@ packages:
     hasBin: true
     dependencies:
       argparse: 2.0.1
-
-  /jschardet/3.0.0:
-    resolution: {integrity: sha512-lJH6tJ77V8Nzd5QWRkFYCLc13a3vADkh3r/Fi8HupZGWk2OVVDfnZP8V/VgQgZ+lzW0kG2UGb5hFgt3V3ndotQ==}
-    engines: {node: '>=0.1.90'}
-    dev: false
 
   /json-schema-traverse/0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
