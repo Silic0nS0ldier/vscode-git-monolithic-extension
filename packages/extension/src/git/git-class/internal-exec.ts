@@ -34,7 +34,7 @@ export async function internalExec(
     const result: IExecutionResult<string> = {
         exitCode: bufferResult.exitCode,
         stderr: bufferResult.stderr,
-        stdout: bufferResult.stdout.toString('utf-8'),
+        stdout: bufferResult.stdout.toString("utf-8"),
     };
 
     if (bufferResult.exitCode) {

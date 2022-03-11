@@ -1,11 +1,11 @@
 import cjs from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
-import { execaSync } from "execa";
 import { globbySync, isGitIgnoredSync } from "globby";
 import * as FS from "node:fs";
 import * as Path from "node:path";
 import * as URL from "node:url";
 import { rollup } from "rollup";
+import { exec } from "./util/exec.js";
 
 async function main() {
     const buildToolsPkg = Path.dirname(URL.fileURLToPath(import.meta.url));
@@ -76,13 +76,7 @@ function cleanDist(packagePath) {
 
 function compile(pkgPath, buildToolsPkgPath) {
     console.log(`  ${pkgPath}`);
-    execaSync("tsc", [], {
-        preferLocal: true,
-        localDir: buildToolsPkgPath,
-        buffer: false,
-        stdio: "inherit",
-        cwd: pkgPath,
-    });
+    exec("tsc", [], buildToolsPkgPath, pkgPath);
 }
 
 function patchNodePrefix(packagePath) {

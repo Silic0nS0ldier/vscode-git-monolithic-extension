@@ -1,6 +1,6 @@
-import { execaSync } from "execa";
 import * as Path from "node:path";
 import * as URL from "node:url";
+import { exec } from "./util/exec.js";
 
 async function main() {
     console.log("Building everything first");
@@ -11,13 +11,7 @@ async function main() {
     const gitPkg = Path.resolve(thsPkg, "../git/");
 
     console.log("Testing...");
-    execaSync("ava", [], {
-        preferLocal: true,
-        localDir: gitPkg,
-        buffer: false,
-        stdio: "inherit",
-        cwd: gitPkg,
-    });
+    exec("ava", [], gitPkg, gitPkg);
 }
 
 main();
