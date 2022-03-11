@@ -3,7 +3,7 @@ import NAC from "node-abort-controller";
 import { PassThrough } from "stream";
 import { BufferOverflowError, createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, GenericError } from "../../errors.js";
 import { err, isErr, ok, Result, unwrap } from "../../func-result.js";
-import { CLI } from "../context.js";
+import type { CLI } from "../context.js";
 
 export type ReadToContext = {
     cli: CLI;

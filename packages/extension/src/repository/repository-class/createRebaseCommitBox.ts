@@ -1,7 +1,7 @@
 import { commands } from "vscode";
-import { Commit } from "../../git/Commit.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
-import { Box } from "../../util.js";
+import type { Commit } from "../../git/Commit.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { Box } from "../../util.js";
 
 export function createRebaseCommitBox(
     sourceControlUI: SourceControlUIGroup,

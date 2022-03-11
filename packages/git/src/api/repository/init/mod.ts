@@ -1,5 +1,5 @@
-import { CLIErrors, GitContext } from "../../../cli/context.js";
-import { Result } from "../../../func-result.js";
+import type { CLIErrors, GitContext } from "../../../cli/context.js";
+import type { Result } from "../../../func-result.js";
 
 export function init(
     git: GitContext,

@@ -1,6 +1,6 @@
-import { OutputChannel } from "vscode";
-import { Model } from "../../../../model.js";
-import { ScmCommand } from "../../../helpers.js";
+import type { OutputChannel } from "vscode";
+import type { Model } from "../../../../model.js";
+import type { ScmCommand } from "../../../helpers.js";
 import * as openFile2 from "./open-file-2.js";
 import * as openFile from "./open-file.js";
 import * as openHeadFile from "./open-head-file.js";

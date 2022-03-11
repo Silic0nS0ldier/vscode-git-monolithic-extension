@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { commands, Disposable, Event, SourceControlInputBox, Uri } from "vscode";
-import { Model } from "../model.js";
+import type { Model } from "../model.js";
 import { pickRemoteSource, PickRemoteSourceOptions } from "../remoteSource.js";
-import { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
-import { Resource } from "../repository/Resource.js";
+import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
+import type { Resource } from "../repository/Resource.js";
 import { toGitUri } from "../uri.js";
 import { mapEvent } from "../util.js";
-import { GitExtensionImpl } from "./extension.js";
+import type { GitExtensionImpl } from "./extension.js";
 import {
     API,
     APIState,

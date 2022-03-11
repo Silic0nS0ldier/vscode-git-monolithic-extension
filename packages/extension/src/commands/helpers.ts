@@ -1,8 +1,8 @@
 import AggregateError from "aggregate-error";
 import { OutputChannel, TextDocumentContentProvider, Uri, window } from "vscode";
-import { Model } from "../model.js";
-import { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
-import { Resource } from "../repository/Resource.js";
+import type { Model } from "../model.js";
+import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
+import type { Resource } from "../repository/Resource.js";
 import { fromGitUri, isGitUri } from "../uri.js";
 import { pathEquals } from "../util.js";
 

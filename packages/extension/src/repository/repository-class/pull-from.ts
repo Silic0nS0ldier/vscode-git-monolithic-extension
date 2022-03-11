@@ -1,11 +1,11 @@
 import { Uri, workspace } from "vscode";
-import { Branch } from "../../api/git.js";
-import { Repository } from "../../git.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { Branch } from "../../api/git.js";
+import type { Repository } from "../../git.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import { Operation } from "../Operations.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { maybeAutoStash } from "./maybe-auto-stash.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export async function pullFrom(
     run: RunFn<void> & RunFn<boolean>,

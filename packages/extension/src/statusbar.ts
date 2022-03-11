@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Command, Disposable, Event, EventEmitter, Uri, workspace } from "vscode";
-import { Branch, RemoteSourceProvider } from "./api/git.js";
-import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
+import type { Branch, RemoteSourceProvider } from "./api/git.js";
+import type { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
 import { Operation } from "./repository/Operations.js";
-import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
+import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { anyEvent, dispose, filterEvent, localize } from "./util.js";
 
 class CheckoutStatusBar {

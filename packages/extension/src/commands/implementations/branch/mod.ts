@@ -1,4 +1,4 @@
-import { ScmCommand } from "../../helpers.js";
+import type { ScmCommand } from "../../helpers.js";
 import * as branchFrom from "./branch-from.js";
 import * as branch from "./branch.js";
 import * as deleteBranch from "./delete-branch.js";

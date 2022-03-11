@@ -1,5 +1,5 @@
-import { Model } from "../../../model.js";
-import { ScmCommand } from "../../helpers.js";
+import type { Model } from "../../../model.js";
+import type { ScmCommand } from "../../helpers.js";
 import * as commitAllAmendNoVerify from "./commit-all-amend-no-verify.js";
 import * as commitAllAmend from "./commit-all-amend.js";
 import * as commitAllNoVerify from "./commit-all-no-verify.js";

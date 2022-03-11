@@ -6,8 +6,20 @@
 import * as fs from "node:fs";
 import { EventEmitter, OutputChannel, Uri } from "vscode";
 import Watcher from "watcher";
-import { TargetEvent } from "watcher/dist/enums.js";
+import type { TargetEvent } from "watcher/dist/enums.js";
 import { prettyPrint } from "../logging/pretty-print.js";
+
+// This funny looking object satisfies isolated modules rules regarding ambient const enum usage
+// while remaining type checked _just enough_ that if something changes in an update, we'll know.
+const TargetEventEnum: Record<TargetEvent, string> = {
+    add: "add",
+    addDir: "addDir",
+    change: "change",
+    rename: "rename",
+    renameDir: "renameDir",
+    unlink: "unlink",
+    unlinkDir: "unlinkDir",
+}
 
 /**
  * Creates an optimised watcher.
@@ -30,7 +42,8 @@ export function watch(locations: string[], locks: string[], outputChannel: Outpu
             }
 
             // Filter directory events, only files are of interest
-            if (et !== TargetEvent.ADD_DIR && et !== TargetEvent.UNLINK_DIR && et !== TargetEvent.RENAME_DIR) {
+            // TODO Do the individual files also get updated?
+            if (et !== TargetEventEnum.addDir && et !== TargetEventEnum.unlinkDir && et !== TargetEventEnum.renameDir) {
                 outputChannel.appendLine(`TRACE: watcher event "${et}" "${path}"`);
                 onFileChangeEmitter.fire(Uri.file(path));
             }

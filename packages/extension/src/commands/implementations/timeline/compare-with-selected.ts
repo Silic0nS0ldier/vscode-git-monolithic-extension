@@ -1,3 +1,4 @@
+export {};
 // import { commands, Uri } from "vscode";
 // import * as path from "node:path";
 // import { ScmCommand } from "../../../helpers.js";

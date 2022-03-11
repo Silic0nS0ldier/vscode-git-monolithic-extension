@@ -1,4 +1,4 @@
-import { ScmCommand } from "../../helpers.js";
+import type { ScmCommand } from "../../helpers.js";
 import * as createTag from "./create-tag.js";
 import * as deleteTag from "./delete-tag.js";
 

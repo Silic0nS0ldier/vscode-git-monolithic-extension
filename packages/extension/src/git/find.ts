@@ -2,7 +2,7 @@ import { fromEnvironment, fromPath, GitContext, PersistentCLIContext } from "mon
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
-import { OutputChannel } from "vscode";
+import type { OutputChannel } from "vscode";
 import { snoopOnStream, SnoopStream } from "../util/snoop-stream.js";
 
 export interface IGit {

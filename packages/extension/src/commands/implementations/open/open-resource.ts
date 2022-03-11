@@ -1,6 +1,6 @@
-import { Model } from "../../../model.js";
-import { Resource } from "../../../repository/Resource.js";
-import { ScmCommand } from "../../helpers.js";
+import type { Model } from "../../../model.js";
+import type { Resource } from "../../../repository/Resource.js";
+import type { ScmCommand } from "../../helpers.js";
 
 export function createCommand(
     model: Model,

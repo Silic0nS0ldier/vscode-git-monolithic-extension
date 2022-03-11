@@ -1,12 +1,12 @@
 import path from "node:path";
-import { Uri } from "vscode";
+import type { Uri } from "vscode";
 import { Status } from "../../api/git.js";
-import { Repository } from "../../git.js";
-import { Submodule } from "../../git/Submodule.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { Repository } from "../../git.js";
+import type { Submodule } from "../../git/Submodule.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import { find } from "../../util.js";
 import { Operation } from "../Operations.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export async function clean(
     run: RunFn<void>,

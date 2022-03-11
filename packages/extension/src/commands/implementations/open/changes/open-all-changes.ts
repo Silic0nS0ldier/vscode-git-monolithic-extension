@@ -1,7 +1,7 @@
 import { commands } from "vscode";
 import { Status } from "../../../../api/git.js";
-import { AbstractRepository } from "../../../../repository/repository-class/AbstractRepository.js";
-import { ScmCommand } from "../../../helpers.js";
+import type { AbstractRepository } from "../../../../repository/repository-class/AbstractRepository.js";
+import type { ScmCommand } from "../../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function openAllChanges(repository: AbstractRepository): Promise<void> {

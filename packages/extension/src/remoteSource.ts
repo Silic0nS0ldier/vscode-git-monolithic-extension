@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { QuickPick, QuickPickItem, window } from "vscode";
-import { RemoteSource, RemoteSourceProvider } from "./api/git.js";
-import { Model } from "./model.js";
+import type { RemoteSource, RemoteSourceProvider } from "./api/git.js";
+import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import { localize } from "./util.js";

@@ -1,10 +1,10 @@
 import path from "node:path";
 import { Uri, window, WorkspaceConfiguration } from "vscode";
-import { Repository } from "../../../git.js";
+import type { Repository } from "../../../git.js";
 import { Box, localize } from "../../../util.js";
 import { findKnownHugeFolderPathsToIgnore } from "../find-known-huge-folder-paths-to-ignore.js";
 import { ignore } from "../ignore.js";
-import { RunFn } from "../run.js";
+import type { RunFn } from "../run.js";
 
 export async function handleLimitHit(
     repoRoot: string,

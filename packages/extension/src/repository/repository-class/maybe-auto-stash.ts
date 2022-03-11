@@ -1,7 +1,7 @@
 import { Uri, workspace } from "vscode";
 import { Status } from "../../api/git.js";
-import { Repository } from "../../git.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { Repository } from "../../git.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
 
 export async function maybeAutoStash<T>(
     repoRoot: string,

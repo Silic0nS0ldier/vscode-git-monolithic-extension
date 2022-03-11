@@ -1,8 +1,8 @@
 import path from "node:path";
 import { Uri } from "vscode";
 import { Status } from "../../../api/git.js";
-import { IFileStatus } from "../../../git/IFileStatus.js";
-import { Resource } from "../../Resource.js";
+import type { IFileStatus } from "../../../git/IFileStatus.js";
+import type { Resource } from "../../Resource.js";
 import { ResourceGroupType } from "../../ResourceGroupType.js";
 
 // TODO Make pure

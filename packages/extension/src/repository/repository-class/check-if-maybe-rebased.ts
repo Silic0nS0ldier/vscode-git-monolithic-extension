@@ -1,8 +1,8 @@
 import { window, workspace } from "vscode";
-import { Repository } from "../../git.js";
+import type { Repository } from "../../git.js";
 import { localize } from "../../util.js";
 import { Operation } from "../Operations.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export async function checkIfMaybeRebased(
     run: RunFn<boolean>,

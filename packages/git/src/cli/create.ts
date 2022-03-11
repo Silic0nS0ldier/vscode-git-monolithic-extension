@@ -8,7 +8,7 @@ import {
     GenericError,
 } from "../errors.js";
 import { err, isErr, ok, Result, unwrap } from "../func-result.js";
-import { CLI, CLIResult, PersistentCLIContext } from "./context.js";
+import type { CLI, CLIResult, PersistentCLIContext } from "./context.js";
 
 export type ChildProcess = {
     readonly stdout: Readable;

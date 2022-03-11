@@ -1,5 +1,5 @@
-import { Model } from "../../../model.js";
-import { ScmCommand } from "../../helpers.js";
+import type { Model } from "../../../model.js";
+import type { ScmCommand } from "../../helpers.js";
 import * as syncRebase from "./sync-rebase.js";
 import * as sync from "./sync.js";
 

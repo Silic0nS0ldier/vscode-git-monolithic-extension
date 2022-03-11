@@ -1,9 +1,9 @@
 import * as os from "node:os";
 import { commands, Uri, window, workspace, WorkspaceFolder } from "vscode";
-import { Git } from "../../git.js";
-import { Model } from "../../model.js";
+import type { Git } from "../../git.js";
+import type { Model } from "../../model.js";
 import { localize } from "../../util.js";
-import { ScmCommand } from "../helpers.js";
+import type { ScmCommand } from "../helpers.js";
 
 export function createCommand(
     git: Git,

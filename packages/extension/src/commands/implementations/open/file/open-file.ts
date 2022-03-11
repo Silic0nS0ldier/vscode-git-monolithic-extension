@@ -9,10 +9,10 @@ import {
     workspace,
 } from "vscode";
 import { Status } from "../../../../api/git.js";
-import { Model } from "../../../../model.js";
+import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
 import { fromGitUri, isGitUri } from "../../../../uri.js";
-import { ScmCommand } from "../../../helpers.js";
+import type { ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
 export async function openFile(

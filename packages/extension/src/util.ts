@@ -6,7 +6,7 @@
 import * as byline from "byline";
 import { createReadStream } from "node:fs";
 import { sep } from "node:path";
-import { Readable } from "node:stream";
+import type { Readable } from "node:stream";
 import { Disposable, Event, EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
 

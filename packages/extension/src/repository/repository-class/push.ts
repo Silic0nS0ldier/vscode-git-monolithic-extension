@@ -1,11 +1,11 @@
-import { Branch, ForcePushMode } from "../../api/git.js";
-import { Repository } from "../../git.js";
+import type { Branch, ForcePushMode } from "../../api/git.js";
+import type { Repository } from "../../git.js";
 import { throat } from "../../package-patches/throat.js";
-import { IPushErrorHandlerRegistry } from "../../pushError.js";
+import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { Operation } from "../Operations.js";
-import { AbstractRepository } from "./AbstractRepository.js";
+import type { AbstractRepository } from "./AbstractRepository.js";
 import { pushInternal } from "./push-internal.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export const push = throat(1, async (
     run: RunFn<void>,

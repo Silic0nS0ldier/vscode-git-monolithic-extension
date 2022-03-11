@@ -1,7 +1,7 @@
-import * as cp from "node:child_process";
+import type * as cp from "node:child_process";
 import { cpErrorHandler, getGitErrorCode, GitError } from "../error.js";
-import { IFileStatus } from "../IFileStatus.js";
-import { SpawnOptions } from "../SpawnOptions.js";
+import type { IFileStatus } from "../IFileStatus.js";
+import type { SpawnOptions } from "../SpawnOptions.js";
 
 export async function getStatusTrackedAndMerge(
     stream: (args: string[], options?: SpawnOptions) => cp.ChildProcess,

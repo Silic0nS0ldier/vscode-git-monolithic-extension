@@ -1,8 +1,8 @@
 import { QuickPickItem, window } from "vscode";
 import { GitErrorCodes } from "../../../api/git.js";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
-import { ScmCommand } from "../../helpers.js";
+import type { ScmCommand } from "../../helpers.js";
 import { branch } from "../branch/helpers.js";
 import { CreateBranchFromItem, CreateBranchItem } from "../branch/quick-pick.js";
 import { cleanAll } from "../clean/clean-all.js";

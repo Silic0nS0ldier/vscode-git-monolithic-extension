@@ -23,21 +23,21 @@ import {
     WorkspaceFoldersChangeEvent,
 } from "vscode";
 import { ApiRepository } from "./api/api1.js";
-import {
+import type {
     APIState as State,
     CredentialsProvider,
     PublishEvent,
     PushErrorHandler,
     RemoteSourceProvider,
 } from "./api/git.js";
-import { Askpass } from "./askpass.js";
-import { Git } from "./git.js";
+import type { Askpass } from "./askpass.js";
+import type { Git } from "./git.js";
 import { prettyPrint } from "./logging/pretty-print.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
-import { IPushErrorHandlerRegistry } from "./pushError.js";
-import { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
-import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
+import type { IPushErrorHandlerRegistry } from "./pushError.js";
+import type { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
+import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { isAbstractRepository } from "./repository/repository-class/isAbstractRepository.js";
 import { createRepository } from "./repository/repository-class/mod.js";
 import { RepositoryState } from "./repository/RepositoryState.js";

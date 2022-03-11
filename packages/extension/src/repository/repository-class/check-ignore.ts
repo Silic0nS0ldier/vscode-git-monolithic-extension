@@ -1,10 +1,10 @@
 import { parseIgnoreCheck } from "monolithic-git-interop/api/repository/ignore/check/parser";
 import { GitErrorCodes } from "../../api/git.js";
-import { Repository } from "../../git.js";
+import type { Repository } from "../../git.js";
 import { GitError } from "../../git/error.js";
 import { isDescendant } from "../../util.js";
 import { Operation } from "../Operations.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export function checkIgnore(
     run: RunFn<Set<string>>,

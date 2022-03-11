@@ -1,5 +1,5 @@
 import NAC from "node-abort-controller";
-import { CancellationToken } from "vscode";
+import type { CancellationToken } from "vscode";
 
 export function fromCancellationToken(cancellationToken: CancellationToken): NAC.AbortSignal {
     const abortController = new NAC.AbortController();

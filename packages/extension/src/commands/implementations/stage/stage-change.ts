@@ -1,3 +1,4 @@
+export {};
 // import { Selection, TextEditor, Uri, window } from "vscode";
 // import { ScmCommand } from "../helpers.js";
 

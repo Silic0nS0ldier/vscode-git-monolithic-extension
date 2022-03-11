@@ -1,4 +1,4 @@
-import { Event, OutputChannel, Uri } from "vscode";
+import type { Event, OutputChannel, Uri } from "vscode";
 import { Log, LogLevel } from "../logging/log.js";
 import { combinedDisposable, EmptyDisposable, IDisposable } from "../util.js";
 

@@ -1,6 +1,6 @@
 import { ProgressLocation, Uri, window, workspace } from "vscode";
 import { debounceEvent, EmptyDisposable, eventToPromise, filterEvent, IDisposable, onceEvent } from "../util.js";
-import { AbstractRepository } from "./repository-class/AbstractRepository.js";
+import type { AbstractRepository } from "./repository-class/AbstractRepository.js";
 
 export class ProgressManager {
     private enabled = false;

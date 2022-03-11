@@ -16,7 +16,7 @@ import {
 } from "vscode";
 import { GitErrorCodes } from "./api/git.js";
 import { Operation } from "./repository/Operations.js";
-import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
+import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { eventToPromise, filterEvent, localize, onceEvent } from "./util.js";
 
 function isRemoteOperation(operation: Operation): boolean {

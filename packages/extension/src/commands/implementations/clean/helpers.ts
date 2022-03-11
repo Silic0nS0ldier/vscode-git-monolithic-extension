@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { window } from "vscode";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { Resource } from "../../../repository/Resource.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { Resource } from "../../../repository/Resource.js";
 import { localize } from "../../../util.js";
 
 export async function cleanUntrackedChanges(

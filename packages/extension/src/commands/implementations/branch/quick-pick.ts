@@ -1,5 +1,5 @@
-import { QuickPickItem } from "vscode";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { QuickPickItem } from "vscode";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 
 export class CreateBranchItem implements QuickPickItem {

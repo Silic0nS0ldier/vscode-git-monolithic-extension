@@ -1,4 +1,4 @@
-import { ScmCommand } from "../../helpers.js";
+import type { ScmCommand } from "../../helpers.js";
 import * as stashApplyLatest from "./stash-apply-latest.js";
 import * as stashApply from "./stash-apply.js";
 import * as stashDrop from "./stash-drop.js";

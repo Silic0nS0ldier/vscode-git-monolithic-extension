@@ -1,6 +1,6 @@
 import type NAC from "node-abort-controller";
-import { CancelledError, GenericError, GitNotFoundError, NonZeroExitError, TimeoutError } from "../errors.js";
-import { Result } from "../func-result.js";
+import type { CancelledError, GenericError, GitNotFoundError, NonZeroExitError, TimeoutError } from "../errors.js";
+import type { Result } from "../func-result.js";
 
 export type CLIContext = {
     /** @todo Replace with web stream once VSCode at NodeJS 16 */

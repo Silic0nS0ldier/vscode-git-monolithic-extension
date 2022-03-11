@@ -1,3 +1,4 @@
+export {};
 // import { Command, commands, TextDocumentShowOptions, Uri, ViewColumn } from "vscode";
 // import { ScmCommand } from "../../../helpers.js";
 

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { Repository } from "../../git.js";
-import { Commit } from "../../git/Commit.js";
+import type { Repository } from "../../git.js";
+import type { Commit } from "../../git/Commit.js";
 
 export async function getRebaseCommit(
     repository: Repository,

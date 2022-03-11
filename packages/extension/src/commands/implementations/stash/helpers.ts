@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { Uri, window, workspace } from "vscode";
-import { Stash } from "../../../git/Stash.js";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { Stash } from "../../../git/Stash.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { isDescendant, localize, pathEquals } from "../../../util.js";
 
 export async function createStash(repository: AbstractRepository, includeUntracked = false): Promise<void> {

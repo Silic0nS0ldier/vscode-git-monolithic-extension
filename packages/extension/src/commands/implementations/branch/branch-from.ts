@@ -1,5 +1,5 @@
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { ScmCommand } from "../../helpers.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { ScmCommand } from "../../helpers.js";
 import { branch } from "./helpers.js";
 
 export function createCommand(): ScmCommand {

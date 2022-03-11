@@ -1,6 +1,6 @@
-import { OutputChannel } from "vscode";
-import { Model } from "../../../model.js";
-import { ScmCommand } from "../../helpers.js";
+import type { OutputChannel } from "vscode";
+import type { Model } from "../../../model.js";
+import type { ScmCommand } from "../../helpers.js";
 import * as stageAllMerge from "./stage-all-merge.js";
 import * as stageAllTracked from "./stage-all-tracked.js";
 import * as stageAllUntracked from "./stage-all-untracked.js";

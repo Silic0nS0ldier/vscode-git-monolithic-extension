@@ -1,4 +1,4 @@
-import { Branch, Remote } from "../../api/git.js";
+import type { Branch, Remote } from "../../api/git.js";
 import { localize } from "../../util.js";
 
 export function syncTooltip(

@@ -1,3 +1,4 @@
+export {};
 // Used in timeline provider
 // Currently commented out citing extension lifetime violations
 // /*---------------------------------------------------------------------------------------------

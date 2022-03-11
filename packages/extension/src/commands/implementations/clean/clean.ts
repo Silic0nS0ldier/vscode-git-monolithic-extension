@@ -1,11 +1,11 @@
 import * as path from "node:path";
 import { OutputChannel, Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
-import { Model } from "../../../model.js";
+import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { localize } from "../../../util.js";
-import { ScmCommand } from "../../helpers.js";
+import type { ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {

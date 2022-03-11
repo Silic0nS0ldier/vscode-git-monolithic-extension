@@ -1,10 +1,10 @@
 import { window } from "vscode";
 import { ApiRepository } from "../../../api/api1.js";
-import { RemoteSourceProvider } from "../../../api/git.js";
-import { Model } from "../../../model.js";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { RemoteSourceProvider } from "../../../api/git.js";
+import type { Model } from "../../../model.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
-import { ScmCommand } from "../../helpers.js";
+import type { ScmCommand } from "../../helpers.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
 import { AddRemoteItem } from "./quick-pick.js";
 

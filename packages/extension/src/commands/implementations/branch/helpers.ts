@@ -1,5 +1,5 @@
 import { window, workspace } from "vscode";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { createCheckoutItems } from "../checkout/helpers.js";
 import { HEADItem } from "./quick-pick.js";

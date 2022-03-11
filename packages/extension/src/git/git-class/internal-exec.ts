@@ -1,6 +1,6 @@
 import { getGitErrorCode, GitError } from "../error.js";
 import { exec, IExecutionResult } from "../exec.js";
-import { SpawnOptions } from "../SpawnOptions.js";
+import type { SpawnOptions } from "../SpawnOptions.js";
 import { internalSpawn } from "./internal-spawn.js";
 
 export async function internalExec(

@@ -17,10 +17,10 @@ import {
     workspace,
 } from "vscode";
 import { GitErrorCodes, Status } from "./api/git.js";
-import { Model } from "./model.js";
+import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
-import { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
-import { SourceControlResourceGroupUI } from "./ui/source-control.js";
+import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
+import type { SourceControlResourceGroupUI } from "./ui/source-control.js";
 import { anyEvent, dispose, filterEvent, fireEvent, PromiseSource } from "./util.js";
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {

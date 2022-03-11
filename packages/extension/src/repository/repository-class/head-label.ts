@@ -1,5 +1,5 @@
 import { Branch, Ref, RefType } from "../../api/git.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
 
 export function headLabel(
     HEAD: Branch | undefined,

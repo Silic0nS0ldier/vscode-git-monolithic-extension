@@ -1,10 +1,10 @@
-import { Branch, Remote } from "../../api/git.js";
-import { Repository } from "../../git.js";
+import type { Branch, Remote } from "../../api/git.js";
+import type { Repository } from "../../git.js";
 import { throat } from "../../package-patches/throat.js";
-import { IPushErrorHandlerRegistry } from "../../pushError.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
-import { AbstractRepository } from "./AbstractRepository.js";
-import { RunFn } from "./run.js";
+import type { IPushErrorHandlerRegistry } from "../../pushError.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { AbstractRepository } from "./AbstractRepository.js";
+import type { RunFn } from "./run.js";
 import { syncInternal } from "./sync-internal.js";
 
 export const sync = throat(1, (

@@ -1,7 +1,7 @@
-import { EventEmitter } from "vscode";
-import { Branch, Ref, Remote } from "../../api/git.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
-import { Box } from "../../util.js";
+import type { EventEmitter } from "vscode";
+import type { Branch, Ref, Remote } from "../../api/git.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { Box } from "../../util.js";
 import { RepositoryState } from "../RepositoryState.js";
 
 export function createStateBox(

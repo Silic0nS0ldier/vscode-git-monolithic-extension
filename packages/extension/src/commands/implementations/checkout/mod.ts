@@ -1,4 +1,4 @@
-import { ScmCommand } from "../../helpers.js";
+import type { ScmCommand } from "../../helpers.js";
 import * as checkoutDetached from "./checkout-detached.js";
 import * as checkout from "./checkout.js";
 

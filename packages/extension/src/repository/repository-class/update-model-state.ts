@@ -1,16 +1,16 @@
 import path from "node:path";
 import { commands, EventEmitter, Uri, workspace } from "vscode";
 import { Branch, Ref, Remote, Status } from "../../api/git.js";
-import { Repository } from "../../git.js";
-import { Commit } from "../../git/Commit.js";
-import { Submodule } from "../../git/Submodule.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
-import { Box } from "../../util.js";
+import type { Repository } from "../../git.js";
+import type { Commit } from "../../git/Commit.js";
+import type { Submodule } from "../../git/Submodule.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { Box } from "../../util.js";
 import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType } from "../ResourceGroupType.js";
 import { getInputTemplate } from "./get-input-template.js";
 import { getRebaseCommit } from "./get-rebase-commit.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 import { handleLimitHit } from "./update-model-state/handle-limit-hit.js";
 import { pigeonholeFileStatus } from "./update-model-state/pigeonhole-file-status.js";
 

@@ -1,8 +1,8 @@
 import * as os from "node:os";
 import { commands, ProgressLocation, Uri, window, workspace } from "vscode";
-import { Git } from "../../../git.js";
-import { Model } from "../../../model.js";
-import { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
+import type { Git } from "../../../git.js";
+import type { Model } from "../../../model.js";
+import type { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import { localize } from "../../../util.js";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";

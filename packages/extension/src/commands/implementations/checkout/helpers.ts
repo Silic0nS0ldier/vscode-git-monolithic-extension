@@ -1,6 +1,6 @@
 import { workspace } from "vscode";
 import { Ref, RefType } from "../../../api/git.js";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { CheckoutItem, CheckoutRemoteHeadItem, CheckoutTagItem } from "./quick-pick.js";
 
 export function createCheckoutItems(repository: AbstractRepository): CheckoutItem[] {

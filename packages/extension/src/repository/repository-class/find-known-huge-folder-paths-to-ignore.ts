@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { Repository } from "../../git.js";
+import type { Repository } from "../../git.js";
 import { checkIgnore } from "./check-ignore.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 const KnownHugeFolderNames = ["node_modules"];
 

@@ -1,5 +1,5 @@
-import { Disposable, Event, Uri } from "vscode";
-import {
+import type { Disposable, Event, Uri } from "vscode";
+import type {
     Branch,
     BranchQuery,
     CommitOptions,
@@ -9,15 +9,15 @@ import {
     Ref,
     Remote,
 } from "../../api/git.js";
-import { Commit } from "../../git/Commit.js";
-import { LogFileOptions } from "../../git/LogFileOptions.js";
-import { Stash } from "../../git/Stash.js";
-import { Submodule } from "../../git/Submodule.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
-import { OperationResult } from "../OperationResult.js";
-import { Operation } from "../Operations.js";
-import { Operations } from "../Operations.js";
-import { RepositoryState } from "../RepositoryState.js";
+import type { Commit } from "../../git/Commit.js";
+import type { LogFileOptions } from "../../git/LogFileOptions.js";
+import type { Stash } from "../../git/Stash.js";
+import type { Submodule } from "../../git/Submodule.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { OperationResult } from "../OperationResult.js";
+import type { Operation } from "../Operations.js";
+import type { Operations } from "../Operations.js";
+import type { RepositoryState } from "../RepositoryState.js";
 
 export type AbstractRepository = {
     readonly __type: Symbol;

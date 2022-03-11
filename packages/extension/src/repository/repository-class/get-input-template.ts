@@ -1,4 +1,4 @@
-import { Repository } from "../../git.js";
+import type { Repository } from "../../git.js";
 
 export async function getInputTemplate(repository: Repository): Promise<string> {
     const commitMessage = (await Promise.all([repository.getMergeMessage(), repository.getSquashMessage()])).find(

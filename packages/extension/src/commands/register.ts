@@ -1,10 +1,10 @@
 import { commands, Disposable, OutputChannel, workspace } from "vscode";
-import { Git } from "../git.js";
-import { Model } from "../model.js";
+import type { Git } from "../git.js";
+import type { Model } from "../model.js";
 import { createCommand } from "./create.js";
 import { CommandErrorOutputTextDocumentContentProvider, ScmCommand } from "./helpers.js";
 
-import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
+import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import * as branch from "./implementations/branch/mod.js";
 import * as checkout from "./implementations/checkout/mod.js";
 import * as cherryPick from "./implementations/cherry-pick.js";

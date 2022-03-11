@@ -15,7 +15,7 @@ import {
 } from "vscode";
 import { registerAPICommands } from "../api/api1.js";
 import { GitExtensionImpl } from "../api/extension.js";
-import { GitExtension } from "../api/git.js";
+import type { GitExtension } from "../api/git.js";
 import { Askpass } from "../askpass.js";
 import { registerCommands } from "../commands/register.js";
 import { GitDecorations } from "../decorationProvider.js";
@@ -23,7 +23,7 @@ import { GitFileSystemProvider } from "../fileSystemProvider.js";
 import { Git } from "../git.js";
 import { findGit, IGit } from "../git/find.js";
 import { Model } from "../model.js";
-import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
+import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
 import { eventToPromise, filterEvent, localize, toDisposable } from "../util.js";

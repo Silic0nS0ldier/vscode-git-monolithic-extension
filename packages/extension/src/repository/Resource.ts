@@ -9,12 +9,12 @@ import {
     Uri,
 } from "vscode";
 import { Status } from "../api/git.js";
-import { Submodule } from "../git/Submodule.js";
+import type { Submodule } from "../git/Submodule.js";
 import { getResources, resolveChangeCommand, resolveDefaultCommand } from "../repository/resource-command-resolver.js";
-import { SourceControlUIGroup } from "../ui/source-control.js";
+import type { SourceControlUIGroup } from "../ui/source-control.js";
 import { localize } from "../util.js";
 import { getIconUri } from "./getIconUri.js";
-import { ResourceGroupType } from "./ResourceGroupType.js";
+import type { ResourceGroupType } from "./ResourceGroupType.js";
 
 export function createResource(
     repoRoot: string,

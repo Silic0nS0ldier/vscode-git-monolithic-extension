@@ -1,8 +1,8 @@
 import { ApiRepository } from "../../api/api1.js";
-import { ForcePushMode } from "../../api/git.js";
-import { Repository } from "../../git.js";
-import { IPushErrorHandlerRegistry } from "../../pushError.js";
-import { AbstractRepository } from "./AbstractRepository.js";
+import type { ForcePushMode } from "../../api/git.js";
+import type { Repository } from "../../git.js";
+import type { IPushErrorHandlerRegistry } from "../../pushError.js";
+import type { AbstractRepository } from "./AbstractRepository.js";
 
 export async function pushInternal(
     repository: Repository,

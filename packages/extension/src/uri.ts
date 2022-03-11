@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Uri } from "vscode";
+import type { Uri } from "vscode";
 
 export interface GitUriParams {
     path: string;

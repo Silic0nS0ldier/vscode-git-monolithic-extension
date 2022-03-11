@@ -1,17 +1,18 @@
+/* eslint-disable sort-keys */
 import type NAC from "node-abort-controller";
 import { ProgressLocation, ProgressOptions, Uri, window, workspace } from "vscode";
-import { Branch, Remote } from "../../api/git.js";
-import { Repository } from "../../git.js";
-import { IPushErrorHandlerRegistry } from "../../pushError.js";
-import { SourceControlUIGroup } from "../../ui/source-control.js";
+import type { Branch, Remote } from "../../api/git.js";
+import type { Repository } from "../../git.js";
+import type { IPushErrorHandlerRegistry } from "../../pushError.js";
+import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import { localize } from "../../util.js";
 import { fromCancellationToken } from "../../util/abort-signal-adapters.js";
 import { Operation } from "../Operations.js";
-import { AbstractRepository } from "./AbstractRepository.js";
+import type { AbstractRepository } from "./AbstractRepository.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { maybeAutoStash } from "./maybe-auto-stash.js";
 import { pushInternal } from "./push-internal.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export async function syncInternal(
     run: RunFn<void> & RunFn<boolean>,

@@ -1,6 +1,6 @@
 import intoStream from "into-stream";
 import { Readable } from "stream";
-import { ChildProcess, SpawnFn } from "./create.js";
+import type { ChildProcess, SpawnFn } from "./create.js";
 
 export function createSpawn(endWith: "error" | "exit", options: {
     out?: string;

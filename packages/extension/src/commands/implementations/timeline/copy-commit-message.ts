@@ -1,3 +1,4 @@
+export {};
 // import { env, Uri } from "vscode";
 // import { ScmCommand } from "../../../helpers.js";
 // import { GitTimelineItem } from '../../../../timelineProvider.js';

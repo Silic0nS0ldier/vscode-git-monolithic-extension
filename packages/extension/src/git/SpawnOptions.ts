@@ -1,5 +1,5 @@
 import type NAC from "node-abort-controller";
-import * as cp from "node:child_process";
+import type * as cp from "node:child_process";
 
 export interface SpawnOptions extends cp.SpawnOptions {
     input?: string;

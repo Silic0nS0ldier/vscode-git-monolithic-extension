@@ -1,4 +1,4 @@
-import { AbstractRepository } from "./AbstractRepository.js";
+import type { AbstractRepository } from "./AbstractRepository.js";
 
 export const AbstractRepositorySymbol = Symbol();
 

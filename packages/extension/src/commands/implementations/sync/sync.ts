@@ -1,6 +1,6 @@
-import { Model } from "../../../model.js";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { ScmCommand } from "../../helpers.js";
+import type { Model } from "../../../model.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { ScmCommand } from "../../helpers.js";
 import { sync as syncFn } from "./helper.js";
 
 export async function sync(repository: AbstractRepository, model: Model): Promise<void> {

@@ -1,3 +1,4 @@
+export {};
 // import { workspace } from "vscode";
 // import { localize } from "../../util.js";
 

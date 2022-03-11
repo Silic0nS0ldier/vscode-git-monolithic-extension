@@ -1,8 +1,8 @@
 import { Uri, workspace } from "vscode";
-import { FetchOptions } from "../../api/git.js";
-import { Repository } from "../../git.js";
+import type { FetchOptions } from "../../api/git.js";
+import type { Repository } from "../../git.js";
 import { Operation } from "../Operations.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export async function fetchInternal(
     repoRoot: string,

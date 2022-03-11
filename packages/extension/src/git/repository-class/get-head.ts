@@ -1,6 +1,6 @@
 import { head as revParseHead } from "monolithic-git-interop/api/rev-parse/head";
 import { head as symbolicRefHead } from "monolithic-git-interop/api/symbolic-ref/head";
-import { GitContext } from "monolithic-git-interop/cli";
+import type { GitContext } from "monolithic-git-interop/cli";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import { Ref, RefType } from "../../api/git.js";
 

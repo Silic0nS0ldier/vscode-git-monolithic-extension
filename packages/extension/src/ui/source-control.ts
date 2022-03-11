@@ -10,7 +10,7 @@ import {
     SourceControlResourceState,
     Uri,
 } from "vscode";
-import { Resource } from "../repository/Resource.js";
+import type { Resource } from "../repository/Resource.js";
 import { Box, localize } from "../util.js";
 
 /**

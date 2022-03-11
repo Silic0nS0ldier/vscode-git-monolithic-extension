@@ -9,18 +9,18 @@ import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
-import { GitContext } from "monolithic-git-interop/cli";
-import { AllServices } from "monolithic-git-interop/services";
+import type { GitContext } from "monolithic-git-interop/cli";
+import type { AllServices } from "monolithic-git-interop/services";
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isOk, unwrap } from "monolithic-git-interop/util/result";
 import type NAC from "node-abort-controller";
-import * as cp from "node:child_process";
+import type * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
 import { exists, promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { StringDecoder } from "node:string_decoder";
-import { Progress, Uri } from "vscode";
+import type { Progress, Uri } from "vscode";
 import {
     Branch,
     BranchQuery,
@@ -33,24 +33,24 @@ import {
     RefType,
     Remote,
 } from "./api/git.js";
-import { Commit } from "./git/Commit.js";
+import type { Commit } from "./git/Commit.js";
 import { GitError } from "./git/error.js";
 import { exec, IExecutionResult } from "./git/exec.js";
 import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from "./git/git-class/diff.js";
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
-import { IFileStatus } from "./git/IFileStatus.js";
-import { LogFileOptions } from "./git/LogFileOptions.js";
+import type { IFileStatus } from "./git/IFileStatus.js";
+import type { LogFileOptions } from "./git/LogFileOptions.js";
 import { parseGitCommits } from "./git/parseGitCommits.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
 import { LsFilesElement, parseLsFiles } from "./git/parseLsFiles.js";
 import { LsTreeElement, parseLsTree } from "./git/parseLsTree.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
 import { getStatusTrackedAndMerge } from "./git/repository-class/get-status.js";
-import { SpawnOptions } from "./git/SpawnOptions.js";
-import { Stash } from "./git/Stash.js";
-import { Submodule } from "./git/Submodule.js";
+import type { SpawnOptions } from "./git/SpawnOptions.js";
+import type { Stash } from "./git/Stash.js";
+import type { Submodule } from "./git/Submodule.js";
 import { groupBy, Limiter, splitInChunks } from "./util.js";
 import * as Versions from "./util/versions.js";
 

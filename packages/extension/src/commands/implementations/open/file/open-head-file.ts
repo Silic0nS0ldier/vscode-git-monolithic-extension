@@ -1,9 +1,9 @@
 import * as path from "node:path";
 import { commands, OutputChannel, TextDocumentShowOptions, Uri, window } from "vscode";
-import { Model } from "../../../../model.js";
+import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
 import { localize } from "../../../../util.js";
-import { ScmCommand } from "../../../helpers.js";
+import type { ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {

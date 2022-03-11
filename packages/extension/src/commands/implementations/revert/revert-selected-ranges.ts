@@ -1,3 +1,4 @@
+export {};
 // import { TextEditor, window } from "vscode";
 // import { ScmCommand } from "../helpers.js";
 // import { getModifiedRange } from "../../staging.js";

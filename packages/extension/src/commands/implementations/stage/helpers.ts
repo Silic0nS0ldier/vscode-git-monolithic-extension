@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { grep, localize } from "../../../util.js";

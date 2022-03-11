@@ -1,3 +1,4 @@
+export {};
 // import { window, workspace } from "vscode";
 // import { RunByRepository, ScmCommand } from "../../commands.js";
 // import { applyLineChanges, intersectDiffWithRange, invertLineChange, toLineRanges } from "../../staging.js";

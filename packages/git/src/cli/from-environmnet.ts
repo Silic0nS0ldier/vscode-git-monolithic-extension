@@ -1,8 +1,8 @@
 import { createError, ERROR_GIT_NOT_FOUND, GitNotFoundError, GitUnusableError, TimeoutError } from "../errors.js";
 import { err, Result } from "../func-result.js";
 import { isMacOS, isWindows } from "../helpers/platform-matchers.js";
-import { GitContext, PersistentCLIContext } from "./context.js";
-import { SpawnFn } from "./create.js";
+import type { GitContext, PersistentCLIContext } from "./context.js";
+import type { SpawnFn } from "./create.js";
 import { darwinBuiltinGitPath, fromPath } from "./from-path.js";
 
 export type FromEnvironmentErrors =

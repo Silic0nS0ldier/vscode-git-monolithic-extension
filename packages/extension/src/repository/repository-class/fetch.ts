@@ -1,7 +1,7 @@
-import { FetchOptions } from "../../api/git.js";
-import { Repository } from "../../git.js";
+import type { FetchOptions } from "../../api/git.js";
+import type { Repository } from "../../git.js";
 import { fetchInternal } from "./fetch-internal.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export async function fetch(
     repoRoot: string,

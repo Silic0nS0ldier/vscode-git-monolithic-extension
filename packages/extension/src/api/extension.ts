@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Event, EventEmitter } from "vscode";
-import { Model } from "../model.js";
+import type { Model } from "../model.js";
 import { ApiImpl } from "./api1.js";
-import { API, GitExtension } from "./git.js";
+import type { API, GitExtension } from "./git.js";
 
 export class GitExtensionImpl implements GitExtension {
     enabled: boolean = false;

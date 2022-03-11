@@ -1,6 +1,6 @@
 import { window, workspace } from "vscode";
-import { Model } from "../../../model.js";
-import { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import type { Model } from "../../../model.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import { publish } from "../publish/publish.js";
 

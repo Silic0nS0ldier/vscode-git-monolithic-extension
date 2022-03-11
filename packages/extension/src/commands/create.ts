@@ -1,10 +1,10 @@
 import { commands, MessageOptions, OutputChannel, Uri, window, workspace } from "vscode";
 import { GitErrorCodes } from "../api/git.js";
-import { Model } from "../model.js";
-import { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
-import { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
+import type { Model } from "../model.js";
+import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
+import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import { localize } from "../util.js";
-import { CommandErrorOutputTextDocumentContentProvider, ScmCommandOptions } from "./helpers.js";
+import type { CommandErrorOutputTextDocumentContentProvider, ScmCommandOptions } from "./helpers.js";
 
 // TODO Remove argument injection logic, it complicates code and hides potential errors
 export function createCommand(

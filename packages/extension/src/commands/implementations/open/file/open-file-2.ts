@@ -1,7 +1,7 @@
-import { OutputChannel, SourceControlResourceState, Uri } from "vscode";
-import { Model } from "../../../../model.js";
-import { Resource } from "../../../../repository/Resource.js";
-import { ScmCommand } from "../../../helpers.js";
+import type { OutputChannel, SourceControlResourceState, Uri } from "vscode";
+import type { Model } from "../../../../model.js";
+import type { Resource } from "../../../../repository/Resource.js";
+import type { ScmCommand } from "../../../helpers.js";
 import { openFile } from "./open-file.js";
 
 // TODO Merge with `openFile`, since they are identical

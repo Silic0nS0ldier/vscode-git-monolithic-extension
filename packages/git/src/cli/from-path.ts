@@ -9,7 +9,7 @@ import {
 } from "../errors.js";
 import { err, isErr, ok, Result, unwrap } from "../func-result.js";
 import { isMacOS } from "../helpers/platform-matchers.js";
-import { GitContext, PersistentCLIContext } from "./context.js";
+import type { GitContext, PersistentCLIContext } from "./context.js";
 import { create, SpawnFn } from "./create.js";
 import { readToString } from "./helpers/read-to-string.js";
 

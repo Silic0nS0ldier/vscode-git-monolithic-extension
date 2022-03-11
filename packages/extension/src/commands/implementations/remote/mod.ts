@@ -1,5 +1,5 @@
-import { Model } from "../../../model.js";
-import { ScmCommand } from "../../helpers.js";
+import type { Model } from "../../../model.js";
+import type { ScmCommand } from "../../helpers.js";
 import * as addRemote from "./add-remote.js";
 import * as removeRemote from "./remove-remote.js";
 

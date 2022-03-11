@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Uri, window, workspace, WorkspaceEdit } from "vscode";
-import { Repository } from "../../git.js";
+import type { Repository } from "../../git.js";
 import { Operation } from "../Operations.js";
-import { RunFn } from "./run.js";
+import type { RunFn } from "./run.js";
 
 export async function ignore(
     run: RunFn<void>,

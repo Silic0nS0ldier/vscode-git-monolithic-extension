@@ -1,7 +1,7 @@
 import * as cp from "node:child_process";
 import { assign } from "../../util.js";
 import { sanitizePath } from "../helpers.js";
-import { SpawnOptions } from "../SpawnOptions.js";
+import type { SpawnOptions } from "../SpawnOptions.js";
 
 export function internalSpawn(
     gitPath: string,

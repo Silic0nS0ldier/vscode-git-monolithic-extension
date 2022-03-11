@@ -6,7 +6,7 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Disposable, InputBoxOptions, OutputChannel, Uri, window, workspace } from "vscode";
-import { Credentials, CredentialsProvider } from "./api/git.js";
+import type { Credentials, CredentialsProvider } from "./api/git.js";
 import { createIPCServer, IIPCHandler, IIPCServer } from "./ipc/ipcServer.js";
 import { EmptyDisposable, IDisposable, toDisposable } from "./util.js";
 
