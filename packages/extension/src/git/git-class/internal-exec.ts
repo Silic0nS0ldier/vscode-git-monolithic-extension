@@ -1,4 +1,3 @@
-import * as iconv from "@vscode/iconv-lite-umd";
 import { getGitErrorCode, GitError } from "../error.js";
 import { exec, IExecutionResult } from "../exec.js";
 import { SpawnOptions } from "../SpawnOptions.js";
@@ -32,13 +31,10 @@ export async function internalExec(
     }
     log(`PID_${child.pid} [${options.log_mode}] < ${out}\n`);
 
-    let encoding = options.encoding || "utf8";
-    encoding = iconv.encodingExists(encoding) ? encoding : "utf8";
-
     const result: IExecutionResult<string> = {
         exitCode: bufferResult.exitCode,
         stderr: bufferResult.stderr,
-        stdout: iconv.decode(bufferResult.stdout, encoding),
+        stdout: bufferResult.stdout.toString('utf-8'),
     };
 
     if (bufferResult.exitCode) {

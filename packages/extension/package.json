@@ -4,7 +4,6 @@
     "type": "module",
     "dependencies": {
         "@vscode/extension-telemetry": "0.4.9",
-        "@vscode/iconv-lite-umd": "0.7.0",
         "aggregate-error": "^4.0.0",
         "byline": "^4.2.2",
         "get-stream": "^6.0.1",
