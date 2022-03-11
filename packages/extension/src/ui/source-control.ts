@@ -88,7 +88,10 @@ function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readon
         resourceUri: Uri.file(path.join(repoRoot, "(empty)")),
     };
     const truncatedResource: SourceControlResourceState = {
-        decorations: { faded: true, tooltip: "Large changesets currently are poorly handled, some items may be missing." },
+        decorations: {
+            faded: true,
+            tooltip: "Large changesets currently are poorly handled, some items may be missing.",
+        },
         resourceUri: Uri.file(path.join(repoRoot, "(items may be missing)")),
     };
     return {
@@ -110,12 +113,13 @@ function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readon
                     // 500 may seem low, but should 99% of cases until a more reliable solution
                     // is used.
                     group.resourceStates = [truncatedResource, ...fadedResources] as Resource[];
-                }
-                else {
+                } else {
                     group.resourceStates = fadedResources;
                 }
             } else if (group.hideWhenEmpty !== true) {
                 group.resourceStates = [emptyResource];
+            } else {
+                group.resourceStates = [];
             }
 
             setTimeout(() => {
@@ -126,12 +130,13 @@ function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readon
                         // 500 may seem low, but should 99% of cases until a more reliable solution
                         // is used.
                         group.resourceStates = [truncatedResource, ...newValue] as Resource[];
-                    }
-                    else {
+                    } else {
                         group.resourceStates = newValue as Resource[];
                     }
                 } else if (group.hideWhenEmpty !== true) {
                     group.resourceStates = [emptyResource];
+                } else {
+                    group.resourceStates = [];
                 }
             }, 900);
         },
