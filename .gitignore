@@ -2,3 +2,7 @@ node_modules
 dist
 .eslintcache
 .tsbuildinfo
+
+# Entries below this point are managed by Please (DO NOT EDIT)
+plz-out
+.plzconfig.local

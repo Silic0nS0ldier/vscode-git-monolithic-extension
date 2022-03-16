@@ -1,0 +1,8 @@
+"""
+"""
+
+def typescript_library(name, srcs):
+    build_rule(
+        name = name,
+        srcs = srcs,
+    )
