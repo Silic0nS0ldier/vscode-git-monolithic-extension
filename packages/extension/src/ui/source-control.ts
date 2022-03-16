@@ -1,4 +1,3 @@
-import path from "node:path";
 import { setTimeout } from "node:timers";
 import {
     Command,
@@ -57,11 +56,11 @@ export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): 
             // Must go last
             sourceControl.dispose();
         },
-        mergeGroup: { resourceStates: withUX(mergeGroup, repoRoot) },
+        mergeGroup: { resourceStates: withUX(mergeGroup) },
         sourceControl: sourceControl as unknown as SourceControlUI,
-        stagedGroup: { resourceStates: withUX(stagedGroup, repoRoot) },
-        trackedGroup: { resourceStates: withUX(trackedGroup, repoRoot) },
-        untrackedGroup: { resourceStates: withUX(untrackedGroup, repoRoot) },
+        stagedGroup: { resourceStates: withUX(stagedGroup) },
+        trackedGroup: { resourceStates: withUX(trackedGroup) },
+        untrackedGroup: { resourceStates: withUX(untrackedGroup) },
     };
 }
 
@@ -80,20 +79,9 @@ export type SourceControlUI = {
     commitTemplate?: string;
 };
 
-function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readonly Resource[]> {
+function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
     let resources: readonly Resource[] = [];
-    // TODO Find way to force these to be first item
-    const emptyResource: SourceControlResourceState = {
-        decorations: { faded: true, tooltip: "Nothing to show here. For now..." },
-        resourceUri: Uri.file(path.join(repoRoot, "(empty)")),
-    };
-    const truncatedResource: SourceControlResourceState = {
-        decorations: {
-            faded: true,
-            tooltip: "Large changesets currently are poorly handled, some items may be missing.",
-        },
-        resourceUri: Uri.file(path.join(repoRoot, "(items may be missing)")),
-    };
+    const baseLabel = group.label;
     return {
         get() {
             // filter empty node
@@ -103,41 +91,44 @@ function withUX(group: SourceControlResourceGroup, repoRoot: string): Box<readon
             // delay change with a faded look first
             // ideally do only when status is slow to run
             // TODO don't push state change to VSCode is nothing has changed
-            const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
-                decorations: { faded: true },
-                resourceUri: old.resourceUri,
-            }));
-            if (fadedResources.length > 0) {
-                if (newValue.length >= 500) {
-                    // 500 used as the of limit 5000 is shared by multiple groups
-                    // 500 may seem low, but should 99% of cases until a more reliable solution
-                    // is used.
-                    group.resourceStates = [truncatedResource, ...fadedResources] as Resource[];
+            {
+                const annotations: string[] = [];
+                const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
+                    decorations: { faded: true },
+                    resourceUri: old.resourceUri,
+                }));
+                if (fadedResources.length > 0) {
+                    if (fadedResources.length >= 500) {
+                        // 500 used as the of limit 5000 is shared by multiple groups
+                        // 500 may seem low, but should 99% of cases until a more reliable solution
+                        // is used.
+                        annotations.push("(too many changes)")
+                    }
                 } else {
-                    group.resourceStates = fadedResources;
+                    annotations.push("(empty)");
                 }
-            } else if (group.hideWhenEmpty !== true) {
-                group.resourceStates = [emptyResource];
-            } else {
-                group.resourceStates = [];
+
+                group.resourceStates = fadedResources;
+                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(' ')}` : "");
             }
 
             setTimeout(() => {
                 resources = newValue;
+
+                const annotations: string[] = [];
                 if (newValue.length > 0) {
                     if (newValue.length >= 500) {
                         // 500 used as the of limit 5000 is shared by multiple groups
                         // 500 may seem low, but should 99% of cases until a more reliable solution
                         // is used.
-                        group.resourceStates = [truncatedResource, ...newValue] as Resource[];
-                    } else {
-                        group.resourceStates = newValue as Resource[];
+                        annotations.push("(too many files)")
                     }
-                } else if (group.hideWhenEmpty !== true) {
-                    group.resourceStates = [emptyResource];
                 } else {
-                    group.resourceStates = [];
+                    annotations.push("(empty)");
                 }
+
+                group.resourceStates = [...resources];
+                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(' ')}` : "");
             }, 900);
         },
     };
