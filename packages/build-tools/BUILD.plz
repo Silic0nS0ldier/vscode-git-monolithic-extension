@@ -14,3 +14,13 @@ genrule(
     },
     cmd = '$TOOLS_PNPM install --offline --frozen-lockfile --verbose ; rm -r node_modules ; mv packages/build-tools/node_modules ./'
 )
+
+genrule(
+    name = 'pnpm_node_modules_bin',
+    srcs = [
+        ':pnpm_node_modules',
+        '//build/rules/nodejs:nodejs',
+    ],
+    # move deps into common folder
+    # have script which proxies binaries (and adds reference to NodeJS)
+)
