@@ -1,0 +1,16 @@
+genrule(
+    name = 'pnpm_node_modules',
+    labels = ['codegen'],
+    srcs = [
+        'package.json',
+        '//:pnpm_fetch',
+        '//:pnpm_config',
+    ],
+    outs = [
+        'node_modules',
+    ],
+    tools = {
+        'pnpm': '//build/rules/pnpm:pnpm',
+    },
+    cmd = '$TOOLS_PNPM install --offline --frozen-lockfile --verbose ; rm -r node_modules ; mv packages/build-tools/node_modules ./'
+)

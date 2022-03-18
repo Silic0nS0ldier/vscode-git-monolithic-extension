@@ -1,0 +1,23 @@
+genrule(
+    name = 'pnpm_fetch',
+    srcs = [
+        ':pnpm_config',
+    ],
+    outs = [
+        '.pnpm-store',
+    ],
+    tools = {
+        'pnpm': '//build/rules/pnpm:pnpm',
+    },
+    cmd = '$TOOLS_PNPM fetch --verbose',
+    visibility = ['PUBLIC'],
+)
+
+filegroup(
+    name = 'pnpm_config',
+    srcs = [
+        'pnpm-lock.yaml',
+        'pnpm-workspace.yaml',
+    ],
+    visibility = ['PUBLIC'],
+)
