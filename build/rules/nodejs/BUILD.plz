@@ -1,0 +1,19 @@
+remote_file(
+    name = 'nodejs_download',
+    url = ['https://nodejs.org/dist/v16.14.2/node-v16.14.2-darwin-x64.tar.gz'],
+    hashes = ['sha256:d3076ca7fcc7269c8ff9b03fe7d1c277d913a7e84a46a14eff4af7791ff9d055'],
+    out = 'nodejs.tar.gz',
+    visibility = ['PUBLIC'],
+)
+
+genrule(
+    name = 'nodejs',
+    srcs = [':nodejs_download'],
+    outs = ['node'],
+    visibility = ['PUBLIC'],
+    tools = {
+        'tar': 'tar',
+    },
+    cmd = 'mv build/rules/nodejs/nodejs.tar.gz ./ ; $TOOLS_TAR -xf nodejs.tar.gz ./node-v16.14.2-darwin-x64/bin/node ; mv ./node-v16.14.2-darwin-x64/bin/node ./',
+    binary = True,
+)
