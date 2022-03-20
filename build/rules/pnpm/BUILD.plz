@@ -1,9 +1,22 @@
-remote_file(
-    name = 'pnpm',
-    url = ['https://github.com/pnpm/pnpm/releases/download/v6.32.3/pnpm-macos-x64'],
-    hashes = ['sha256:9a8e6b5b3dfa3c97e92bbfd8df847d25e696c7ba0fe4f3cc532ab48fd7519353'],
-    binary = True,
-    out = 'pnpm',
-    licences = ['MIT'],
-    visibility = ['PUBLIC'],
-)
+
+if CONFIG.OS == 'linux':
+    remote_file(
+        name = 'pnpm',
+        url = ['https://github.com/pnpm/pnpm/releases/download/v6.32.3/pnpm-linux-x64'],
+        hashes = ['sha256:c95784f8f8190ef574dcd3f08da5e9441c005939a315ce35ee5e66cbb04284c0'],
+        binary = True,
+        out = 'pnpm',
+        licences = ['MIT'],
+        visibility = ['PUBLIC'],
+    )
+
+if CONFIG.OS == 'darwin':
+    remote_file(
+        name = 'pnpm',
+        url = ['https://github.com/pnpm/pnpm/releases/download/v6.32.3/pnpm-macos-x64'],
+        hashes = ['sha256:9a8e6b5b3dfa3c97e92bbfd8df847d25e696c7ba0fe4f3cc532ab48fd7519353'],
+        binary = True,
+        out = 'pnpm',
+        licences = ['MIT'],
+        visibility = ['PUBLIC'],
+    )

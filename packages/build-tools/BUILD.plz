@@ -12,7 +12,7 @@ genrule(
     tools = {
         'pnpm': '//build/rules/pnpm:pnpm',
     },
-    cmd = '$TOOLS_PNPM install --offline --frozen-lockfile --verbose ; rm -r node_modules ; mv packages/build-tools/node_modules ./'
+    cmd = '$TOOLS_PNPM install --offline --frozen-lockfile --ignore-scripts --verbose ; rm -r node_modules ; mv packages/build-tools/node_modules ./'
 )
 
 genrule(
@@ -21,6 +21,7 @@ genrule(
         ':pnpm_node_modules',
         '//build/rules/nodejs:nodejs',
     ],
+    cmd = '',
     # move deps into common folder
     # have script which proxies binaries (and adds reference to NodeJS)
 )

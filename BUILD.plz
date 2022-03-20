@@ -9,6 +9,7 @@ genrule(
     tools = {
         'pnpm': '//build/rules/pnpm:pnpm',
     },
+    # TODO Runs package scripts, needs NodeJS
     cmd = '$TOOLS_PNPM fetch --verbose',
     visibility = ['PUBLIC'],
 )
