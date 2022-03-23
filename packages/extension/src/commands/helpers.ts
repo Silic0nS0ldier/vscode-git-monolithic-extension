@@ -15,6 +15,7 @@ export async function runByRepository(
         let repository = model.getRepository(resource);
 
         if (!repository) {
+            // TODO This won't go anywhere useful
             console.warn("Could not find git repository for ", resource);
             return result;
         }

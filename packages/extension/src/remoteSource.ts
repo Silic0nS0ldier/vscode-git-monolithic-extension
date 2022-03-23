@@ -58,6 +58,7 @@ class RemoteSourceProviderQuickPick {
             }
         } catch (err) {
             this.quickpick.items = [{ alwaysShow: true, label: localize("error", "$(error) Error: {0}", err.message) }];
+            // TODO Follow up, this won't go anywhere useful
             console.error(err);
         } finally {
             this.quickpick.busy = false;

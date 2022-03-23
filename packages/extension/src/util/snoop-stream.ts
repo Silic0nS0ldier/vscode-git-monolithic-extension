@@ -1,5 +1,22 @@
 import { Writable } from "stream";
 
+function stringifyChunk(chunk: any, encoding: BufferEncoding): string {
+    try {
+        return Buffer.from(chunk).toString(encoding);
+    }
+    catch {
+        return String(chunk);
+    }
+}
+
+function clampLength(str: string): string {
+    if (str.length > 150) {
+        return `${str.slice(0, 150)}" (${str.length - 150} chars hidden)`;
+    } else {
+        return str;
+    }
+}
+
 /**
  * Wraps existing writable stream with proxy to enable monitoring with minimal overhead.
  */
@@ -10,7 +27,7 @@ export function snoopOnStream(stream: NodeJS.WritableStream, log: (msg: string) 
             if (p === "write") {
                 return function write(chunk: any, encoding: BufferEncoding) {
                     if (toLog.length < 150) {
-                        toLog += Buffer.from(chunk).toString(encoding);
+                        toLog += stringifyChunk(chunk, encoding);
                     }
                     target[p].call(target, ...arguments);
                 };
@@ -18,11 +35,7 @@ export function snoopOnStream(stream: NodeJS.WritableStream, log: (msg: string) 
             if (p === "destroy") {
                 return function destroy() {
                     const escaped = JSON.stringify(toLog);
-                    if (escaped.length > 150) {
-                        log(`${escaped.slice(0, 150)}" (${escaped.length - 150} chars hidden)`);
-                    } else {
-                        log(escaped);
-                    }
+                    log(clampLength(escaped));
                     target[p].call(target, ...arguments);
                 };
             }
@@ -40,15 +53,12 @@ export class SnoopStream extends Writable {
         super({
             final(cb) {
                 const escaped = JSON.stringify(toLog);
-                if (escaped.length > 150) {
-                    log(`${escaped.slice(0, 150)}" (${escaped.length - 150} chars hidden)`);
-                }
-                log(escaped);
+                log(clampLength(escaped));
                 cb();
             },
             write(chunk, encoding, cb) {
                 if (toLog.length < 150) {
-                    toLog += Buffer.from(chunk).toString(encoding);
+                    toLog += stringifyChunk(chunk, encoding);
                 }
                 cb();
             },

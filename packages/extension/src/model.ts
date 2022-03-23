@@ -208,8 +208,8 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
                 }
 
                 if (path.isAbsolute(scanPath)) {
-                    console.warn(
-                        localize("not supported", "Absolute paths not supported in 'git.scanRepositories' setting."),
+                    this.outputChannel.appendLine(
+                        "[WARN] " + localize("not supported", "Absolute paths not supported in 'git.scanRepositories' setting."),
                     );
                     continue;
                 }

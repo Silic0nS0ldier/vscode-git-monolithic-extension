@@ -4,13 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as querystring from "node:querystring";
-import { commands, Disposable, Uri, UriHandler, window } from "vscode";
+import { commands, Disposable, OutputChannel, Uri, UriHandler, window } from "vscode";
 import { dispose } from "./util.js";
 
 export class GitProtocolHandler implements UriHandler {
     private disposables: Disposable[] = [];
+    #outputChannel: OutputChannel;
 
-    constructor() {
+    constructor(outputChannel: OutputChannel) {
+        this.#outputChannel = outputChannel;
         this.disposables.push(window.registerUriHandler(this));
     }
 
@@ -25,7 +27,7 @@ export class GitProtocolHandler implements UriHandler {
         const data = querystring.parse(uri.query);
 
         if (!data.url) {
-            console.warn("Failed to open URI:", uri);
+            this.#outputChannel.appendLine("[WARN] Failed to open URI: " + uri.toString());
         }
 
         commands.executeCommand("git.clone", data.url);

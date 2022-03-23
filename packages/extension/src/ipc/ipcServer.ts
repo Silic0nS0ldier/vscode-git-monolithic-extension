@@ -82,6 +82,7 @@ class IPCServer implements IIPCServer, Disposable {
 
     private onRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
         if (!req.url) {
+            // TODO This won't go anywhere useful
             console.warn(`Request lacks url`);
             return;
         }
@@ -89,6 +90,7 @@ class IPCServer implements IIPCServer, Disposable {
         const handler = this.handlers.get(req.url);
 
         if (!handler) {
+            // TODO This won't go anywhere useful
             console.warn(`IPC handler for ${req.url} not found`);
             return;
         }
