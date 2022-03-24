@@ -21,7 +21,7 @@ import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import type { SourceControlResourceGroupUI } from "./ui/source-control.js";
-import { anyEvent, dispose, filterEvent, fireEvent, PromiseSource } from "./util.js";
+import { anyEvent, dispose as disposeHelper, filterEvent, fireEvent, PromiseSource } from "./util.js";
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
     static #Decoration: FileDecoration = { color: new ThemeColor("gitDecoration.ignoredResourceForeground") };
@@ -169,62 +169,64 @@ class GitDecorationProvider implements FileDecorationProvider {
     }
 }
 
-export class GitDecorations {
-    #disposables: Disposable[] = [];
-    #modelDisposables: Disposable[] = [];
-    #providers = new Map<AbstractRepository, Disposable>();
-    #model: Model;
+export function addDecorations(model: Model): Disposable {
+    const disposables: Disposable[] = [
+        new GitIgnoreDecorationProvider(model)
+    ];
+    const modelDisposables: Disposable[] = [];
+    const providers = new Map<AbstractRepository, Disposable>();
 
-    constructor(model: Model) {
-        this.#model = model;
-        this.#disposables.push(new GitIgnoreDecorationProvider(this.#model));
+    const onEnablementChange = filterEvent(
+        workspace.onDidChangeConfiguration,
+        e => e.affectsConfiguration("git.decorations.enabled"),
+    );
 
-        const onEnablementChange = filterEvent(
-            workspace.onDidChangeConfiguration,
-            e => e.affectsConfiguration("git.decorations.enabled"),
-        );
-        onEnablementChange(this.#update, this, this.#disposables);
-        this.#update();
-    }
-
-    #update(): void {
-        const enabled = workspace.getConfiguration("git").get("decorations.enabled");
-
-        if (enabled) {
-            this.#enable();
-        } else {
-            this.#disable();
-        }
-    }
-
-    #enable(): void {
-        this.#model.onDidOpenRepository(this.#onDidOpenRepository, this, this.#modelDisposables);
-        this.#model.onDidCloseRepository(this.#onDidCloseRepository, this, this.#modelDisposables);
-        this.#model.repositories.forEach(this.#onDidOpenRepository, this);
-    }
-
-    #disable(): void {
-        this.#modelDisposables = dispose(this.#modelDisposables);
-        this.#providers.forEach(value => value.dispose());
-        this.#providers.clear();
-    }
-
-    #onDidOpenRepository(repository: AbstractRepository): void {
-        const provider = new GitDecorationProvider(repository);
-        this.#providers.set(repository, provider);
-    }
-
-    #onDidCloseRepository(repository: AbstractRepository): void {
-        const provider = this.#providers.get(repository);
+    function onDidCloseRepository(repository: AbstractRepository): void {
+        const provider = providers.get(repository);
 
         if (provider) {
             provider.dispose();
-            this.#providers.delete(repository);
+            providers.delete(repository);
         }
     }
 
-    dispose(): void {
-        this.#disable();
-        this.#disposables = dispose(this.#disposables);
+    function onDidOpenRepository(repository: AbstractRepository): void {
+        const provider = new GitDecorationProvider(repository);
+        providers.set(repository, provider);
+    }
+
+    function enable(): void {
+        modelDisposables.push(model.onDidOpenRepository(onDidOpenRepository));
+        modelDisposables.push(model.onDidCloseRepository(onDidCloseRepository));
+        model.repositories.forEach(onDidOpenRepository);
+    }
+
+    function disable(): void {
+        disposeHelper(modelDisposables);
+        modelDisposables.length = 0;
+        providers.forEach(value => value.dispose());
+        providers.clear();
+    }
+
+    function update(): void {
+        const enabled = workspace.getConfiguration("git").get("decorations.enabled");
+
+        if (enabled) {
+            enable();
+        } else {
+            disable();
+        }
+    }
+
+    disposables.push(onEnablementChange(update));
+
+    update();
+
+    return {
+        dispose() {
+            disable();
+            disposeHelper(disposables);
+            disposables.length = 0;
+        },
     }
 }
