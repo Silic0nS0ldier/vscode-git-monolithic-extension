@@ -98,7 +98,8 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     readonly onDidChangeRepository: Event<ModelChangeEvent> = this.#onDidChangeRepositoryEmitter.event;
 
     #onDidChangeOriginalResourceEmitter = new EventEmitter<OriginalResourceChangeEvent>();
-    readonly onDidChangeOriginalResource: Event<OriginalResourceChangeEvent> = this.#onDidChangeOriginalResourceEmitter.event;
+    readonly onDidChangeOriginalResource: Event<OriginalResourceChangeEvent> =
+        this.#onDidChangeOriginalResourceEmitter.event;
 
     #openRepositories: OpenRepository[] = [];
     get repositories(): AbstractRepository[] {
@@ -148,7 +149,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 
     #disposables: Disposable[] = [];
     readonly #askpass: Askpass;
-    #globalState: Memento
+    #globalState: Memento;
     #outputChannel: OutputChannel;
 
     constructor(

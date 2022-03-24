@@ -7,7 +7,7 @@ export class FileEventLogger {
     #logLevelDisposable: IDisposable = EmptyDisposable;
     #onWorkspaceWorkingTreeFileChange: Event<Uri>;
     #onDotGitFileChange: Event<Uri>;
-    #outputChannel: OutputChannel
+    #outputChannel: OutputChannel;
 
     constructor(
         onWorkspaceWorkingTreeFileChange: Event<Uri>,

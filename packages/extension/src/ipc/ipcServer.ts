@@ -71,7 +71,7 @@ class IPCServer implements IIPCServer, Disposable {
         return this.#ipcHandlePath;
     }
 
-    #server: http.Server
+    #server: http.Server;
     #ipcHandlePath: string;
 
     constructor(server: http.Server, ipcHandlePath: string) {

@@ -126,14 +126,14 @@ export class ApiRepositoryUIState implements RepositoryUIState {
 
 export class ApiRepository implements Repository {
     readonly rootUri: Uri;
-    readonly inputBox: InputBox;;
+    readonly inputBox: InputBox;
     readonly state: RepositoryState;
     readonly ui: RepositoryUIState = new ApiRepositoryUIState();
     #repository: AbstractRepository;
 
     constructor(repository: AbstractRepository) {
         this.#repository = repository;
-        this.rootUri = Uri.file(this.#repository.root)
+        this.rootUri = Uri.file(this.#repository.root);
         this.inputBox = new ApiInputBox(this.#repository.sourceControlUI.sourceControl.inputBox);
         this.state = new ApiRepositoryState(this.#repository);
     }
@@ -358,7 +358,7 @@ export class ApiImpl implements API {
 
     constructor(model: Model) {
         this.#model = model;
-        this.git = new ApiGit(this.#model)
+        this.git = new ApiGit(this.#model);
     }
 }
 
