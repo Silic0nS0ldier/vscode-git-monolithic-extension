@@ -133,11 +133,11 @@ class GitDecorationProvider implements FileDecorationProvider {
         this.#repository = repository;
         this.#disposables.push(
             window.registerFileDecorationProvider(this),
-            this.#repository.onDidRunGitStatus(this.#onDidRunGitStatus, this),
+            this.#repository.onDidChangeStatus(this.#onDidGitStatusChange, this),
         );
     }
 
-    #onDidRunGitStatus(): void {
+    #onDidGitStatusChange(): void {
         let newDecorations = new Map<string, FileDecoration>();
 
         this.#collectSubmoduleDecorationData(newDecorations);

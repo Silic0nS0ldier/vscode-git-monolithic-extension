@@ -431,7 +431,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
                 .forEach(p => this.#eventuallyScanPossibleGitRepository(p));
         };
 
-        const statusListener = repository.onDidRunGitStatus(checkForSubmodules);
+        const statusListener = repository.onDidChangeStatus(checkForSubmodules);
         checkForSubmodules();
 
         const dispose = () => {

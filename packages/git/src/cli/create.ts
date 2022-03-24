@@ -17,8 +17,6 @@ export type ChildProcess = {
     once(event: "exit", listener: (code: number, signal: NodeJS.Signals) => void): ChildProcess;
     readonly connected: boolean;
     kill(signal?: number | NodeJS.Signals): boolean;
-    /** @deprecated */
-    readonly pid: number;
 };
 
 export type SpawnFn = (

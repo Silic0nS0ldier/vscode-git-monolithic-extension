@@ -43,7 +43,6 @@ export function createSpawn(endWith: "error" | "exit", options: {
 
                 return cp;
             },
-            pid: -1,
             stderr: options.err ? intoStream(options.err) : new Readable({
                 read() {
                     this.push(null);

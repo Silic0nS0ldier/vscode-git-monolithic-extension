@@ -472,7 +472,6 @@ export function createRepository(
         onDidChangeRepository,
         onDidChangeState,
         onDidChangeStatus,
-        onDidRunGitStatus: onDidChangeStatus,
         onDidRunOperation,
         operations,
         popStash(index) {

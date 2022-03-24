@@ -105,7 +105,7 @@ export class ApiRepositoryState implements RepositoryState {
 
     constructor(repository: AbstractRepository) {
         this.#repository = repository;
-        this.onDidChange = this.#repository.onDidRunGitStatus;
+        this.onDidChange = this.#repository.onDidChangeStatus;
     }
 }
 

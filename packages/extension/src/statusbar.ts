@@ -20,7 +20,7 @@ class CheckoutStatusBar {
 
     constructor(repository: AbstractRepository) {
         this.#repository = repository;
-        this.#repository.onDidRunGitStatus(this.#onDidChangeEmitter.fire, this.#onDidChangeEmitter, this.#disposables);
+        this.#repository.onDidChangeStatus(this.#onDidChangeEmitter.fire, this.#onDidChangeEmitter, this.#disposables);
     }
 
     get command(): Command | undefined {
@@ -84,7 +84,7 @@ class SyncStatusBar {
                 .filter(p => !!p.publishRepository),
         };
 
-        this.#repository.onDidChangeStatus(this.#onDidRunGitStatus, this, this.#disposables);
+        this.#repository.onDidChangeStatus(this.#onDidGitStatusChange, this, this.#disposables);
         this.#repository.onDidChangeOperations(this.#onDidChangeOperations, this, this.#disposables);
 
         anyEvent(
@@ -115,7 +115,7 @@ class SyncStatusBar {
         this.#state = { ...this.#state, isSyncRunning };
     }
 
-    #onDidRunGitStatus(): void {
+    #onDidGitStatusChange(): void {
         this.#state = {
             ...this.#state,
             HEAD: this.#repository.HEAD,
