@@ -6,23 +6,24 @@
 import * as http from "node:http";
 
 export class IPCClient {
-    private ipcHandlePath: string;
-
-    constructor(private handlerName: string) {
+    #ipcHandlePath: string;
+    #handlerName: string;
+    constructor(handlerName: string) {
+        this.#handlerName = handlerName;
         const ipcHandlePath = process.env["VSCODE_GIT_IPC_HANDLE"];
 
         if (!ipcHandlePath) {
             throw new Error("Missing VSCODE_GIT_IPC_HANDLE");
         }
 
-        this.ipcHandlePath = ipcHandlePath;
+        this.#ipcHandlePath = ipcHandlePath;
     }
 
     call(request: any): Promise<any> {
         const opts: http.RequestOptions = {
             method: "POST",
-            path: `/${this.handlerName}`,
-            socketPath: this.ipcHandlePath,
+            path: `/${this.#handlerName}`,
+            socketPath: this.#ipcHandlePath,
         };
 
         return new Promise((c, e) => {

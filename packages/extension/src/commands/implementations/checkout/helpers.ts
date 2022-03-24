@@ -42,15 +42,20 @@ function getCheckoutProcessor(type: string): CheckoutProcessor | undefined {
 }
 
 class CheckoutProcessor {
-    private refs: Ref[] = [];
+    #refs: Ref[] = [];
     get items(): CheckoutItem[] {
-        return this.refs.map(r => new this.ctor(r));
+        return this.#refs.map(r => new this.#ctor(r));
     }
-    constructor(private type: RefType, private ctor: { new(ref: Ref): CheckoutItem }) {}
+    #type: RefType;
+    #ctor: { new(ref: Ref): CheckoutItem };
+    constructor(type: RefType, ctor: { new(ref: Ref): CheckoutItem }) {
+        this.#type = type;
+        this.#ctor = ctor;
+    }
 
     onRef(ref: Ref): void {
-        if (ref.type === this.type) {
-            this.refs.push(ref);
+        if (ref.type === this.#type) {
+            this.#refs.push(ref);
         }
     }
 }

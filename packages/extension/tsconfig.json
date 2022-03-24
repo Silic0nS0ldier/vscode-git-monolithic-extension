@@ -41,7 +41,7 @@
         "outDir": "./dist",
         "skipLibCheck": true,
         "strict": true,
-        "target": "es2020",
+        "target": "es2022",
         "tsBuildInfoFile": ".tsbuildinfo",
         "useDefineForClassFields": true,
         "useUnknownInCatchVariables": false

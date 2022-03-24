@@ -3,7 +3,10 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { localize } from "../../../util.js";
 
 export class AddRemoteItem implements QuickPickItem {
-    constructor(private addRemote: (repository: AbstractRepository) => Promise<string | void>) {}
+    #addRemote: (repository: AbstractRepository) => Promise<string | void>;
+    constructor(addRemote: (repository: AbstractRepository) => Promise<string | void>) {
+        this.#addRemote = addRemote;
+    }
 
     get label(): string {
         return "$(plus) " + localize("add remote", "Add a new remote...");
@@ -17,6 +20,6 @@ export class AddRemoteItem implements QuickPickItem {
     }
 
     async run(repository: AbstractRepository): Promise<void> {
-        await this.addRemote(repository);
+        await this.#addRemote(repository);
     }
 }

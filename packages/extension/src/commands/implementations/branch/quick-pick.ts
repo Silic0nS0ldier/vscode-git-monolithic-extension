@@ -27,13 +27,16 @@ export class CreateBranchFromItem implements QuickPickItem {
 }
 
 export class HEADItem implements QuickPickItem {
-    constructor(private repository: AbstractRepository) {}
+    #repository: AbstractRepository;
+    constructor(repository: AbstractRepository) {
+        this.#repository = repository;
+    }
 
     get label(): string {
         return "HEAD";
     }
     get description(): string {
-        return (this.repository.HEAD && this.repository.HEAD.commit || "").substr(0, 8);
+        return (this.#repository.HEAD && this.#repository.HEAD.commit || "").substr(0, 8);
     }
     get alwaysShow(): boolean {
         return true;

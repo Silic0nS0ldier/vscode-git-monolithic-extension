@@ -83,13 +83,14 @@ export class Git {
     readonly path: string;
     readonly userAgent: string;
     readonly version: string;
+    // This is deliberately leaked to help migrate to new library
     readonly _context: GitContext;
-    private readonly services: AllServices;
-    private env: { [key: string]: string };
+    readonly #services: AllServices;
+    #env: { [key: string]: string };
 
-    private _onOutput = new EventEmitter();
+    #onOutputEmitter = new EventEmitter();
     get onOutput(): EventEmitter {
-        return this._onOutput;
+        return this.#onOutputEmitter;
     }
 
     constructor(options: IGitOptions) {
@@ -97,8 +98,8 @@ export class Git {
         this.version = options.version;
         this.userAgent = options.userAgent;
         this._context = options.context;
-        this.services = createServices();
-        this.env = options.env || {};
+        this.#services = createServices();
+        this.#env = options.env || {};
     }
 
     compareGitVersionTo(version: string): -1 | 0 | 1 {
@@ -184,7 +185,7 @@ export class Git {
     }
 
     async getRepositoryRoot(repositoryPath: string): Promise<string> {
-        const result = await showToplevel(this._context, repositoryPath, this.services);
+        const result = await showToplevel(this._context, repositoryPath, this.#services);
 
         if (isOk(result)) {
             return unwrap(result);
@@ -204,27 +205,27 @@ export class Git {
     }
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
-        return await this._exec(args, { cwd, ...options, log_mode: "buffer" });
+        return await this.#exec(args, { cwd, ...options, log_mode: "buffer" });
     }
 
     async exec2(args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
-        return await this._exec(args, { ...options, log_mode: "buffer" });
+        return await this.#exec(args, { ...options, log_mode: "buffer" });
     }
 
     stream(cwd: string, args: string[], options: SpawnOptions = {}): cp.ChildProcess {
         return this.spawn(args, { cwd, ...options, log_mode: "stream" });
     }
 
-    private async _exec(args: string[], options: SpawnOptions): Promise<IExecutionResult<string>> {
-        return internalExec(this.path, this.env, this.log.bind(this), args, options);
+    async #exec(args: string[], options: SpawnOptions): Promise<IExecutionResult<string>> {
+        return internalExec(this.path, this.#env, this.#log.bind(this), args, options);
     }
 
     spawn(args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        return internalSpawn(this.path, this.env, this.log.bind(this), args, options);
+        return internalSpawn(this.path, this.#env, this.#log.bind(this), args, options);
     }
 
-    private log(output: string): void {
-        this._onOutput.emit("log", output);
+    #log(output: string): void {
+        this.#onOutputEmitter.emit("log", output);
     }
 }
 
@@ -237,26 +238,31 @@ export interface PullOptions {
 }
 
 export class Repository {
+    #git: Git;
+    #repositoryRoot: string;
     constructor(
-        private _git: Git,
-        private repositoryRoot: string,
+        git: Git,
+        repositoryRoot: string,
         readonly dotGit: string,
-    ) {}
+    ) {
+        this.#git = git;
+        this.#repositoryRoot = repositoryRoot;
+    }
 
     get git(): Git {
-        return this._git;
+        return this.#git;
     }
 
     get root(): string {
-        return this.repositoryRoot;
+        return this.#repositoryRoot;
     }
 
     async exec(args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
-        return await this.git.exec(this.repositoryRoot, args, options);
+        return await this.git.exec(this.#repositoryRoot, args, options);
     }
 
     stream(args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        return this.git.stream(this.repositoryRoot, args, options);
+        return this.git.stream(this.#repositoryRoot, args, options);
     }
 
     spawn(args: string[], options: SpawnOptions = {}): cp.ChildProcess {
@@ -450,7 +456,7 @@ export class Repository {
         return diffWithHEAD(
             {
                 exec: this.exec.bind(this),
-                repositoryRoot: this.repositoryRoot,
+                repositoryRoot: this.#repositoryRoot,
             },
             path,
         );
@@ -463,7 +469,7 @@ export class Repository {
         return diffWith(
             {
                 exec: this.exec.bind(this),
-                repositoryRoot: this.repositoryRoot,
+                repositoryRoot: this.#repositoryRoot,
             },
             ref,
             path,
@@ -477,7 +483,7 @@ export class Repository {
         return diffIndexWithHEAD(
             {
                 exec: this.exec.bind(this),
-                repositoryRoot: this.repositoryRoot,
+                repositoryRoot: this.#repositoryRoot,
             },
             path,
         );
@@ -490,7 +496,7 @@ export class Repository {
         return diffIndexWith(
             {
                 exec: this.exec.bind(this),
-                repositoryRoot: this.repositoryRoot,
+                repositoryRoot: this.#repositoryRoot,
             },
             ref,
             path,
@@ -510,7 +516,7 @@ export class Repository {
         return diffBetween(
             {
                 exec: this.exec.bind(this),
-                repositoryRoot: this.repositoryRoot,
+                repositoryRoot: this.#repositoryRoot,
             },
             ref1,
             ref2,
@@ -675,7 +681,7 @@ export class Repository {
         try {
             await this.exec(args, !opts.amend || message ? { input: message || "" } : {});
         } catch (commitErr) {
-            await this.handleCommitError(commitErr);
+            await this.#handleCommitError(commitErr);
         }
     }
 
@@ -689,11 +695,11 @@ export class Repository {
         try {
             await this.exec(args);
         } catch (commitErr) {
-            await this.handleCommitError(commitErr);
+            await this.#handleCommitError(commitErr);
         }
     }
 
-    private async handleCommitError(commitErr: any): Promise<void> {
+    async #handleCommitError(commitErr: any): Promise<void> {
         if (/not possible because you have unmerged files/.test(commitErr.stderr || "")) {
             commitErr.gitErrorCode = GitErrorCodes.UnmergedChanges;
             throw commitErr;
@@ -1080,15 +1086,15 @@ export class Repository {
 
     async popStash(index?: number): Promise<void> {
         const args = ["stash", "pop"];
-        await this.popOrApplyStash(args, index);
+        await this.#popOrApplyStash(args, index);
     }
 
     async applyStash(index?: number): Promise<void> {
         const args = ["stash", "apply"];
-        await this.popOrApplyStash(args, index);
+        await this.#popOrApplyStash(args, index);
     }
 
-    private async popOrApplyStash(args: string[], index?: number): Promise<void> {
+    async #popOrApplyStash(args: string[], index?: number): Promise<void> {
         try {
             if (typeof index === "number") {
                 args.push(`stash@{${index}}`);
@@ -1143,11 +1149,11 @@ export class Repository {
     }
 
     async getHEAD(): Promise<Ref> {
-        return getHEAD(this._git._context, this.repositoryRoot);
+        return getHEAD(this.#git._context, this.#repositoryRoot);
     }
 
     async findTrackingBranches(upstreamBranch: string): Promise<Branch[]> {
-        const result = await findTrackingBranches(this._git._context, this.repositoryRoot);
+        const result = await findTrackingBranches(this.#git._context, this.#repositoryRoot);
         if (isOk(result)) {
             return unwrap(result).trim().split("\n")
                 .map(line => line.trim().split("\0"))
@@ -1220,7 +1226,7 @@ export class Repository {
     }
 
     async getRemotes(): Promise<Remote[]> {
-        const result = await getRemotes(this._git._context, this.repositoryRoot);
+        const result = await getRemotes(this.#git._context, this.#repositoryRoot);
 
         if (isOk(result)) {
             const data = unwrap(result);
@@ -1265,7 +1271,7 @@ export class Repository {
         const args = ["for-each-ref"];
 
         let supportsAheadBehind = true;
-        if (this._git.compareGitVersionTo("1.9.0") === -1) {
+        if (this.#git.compareGitVersionTo("1.9.0") === -1) {
             args.push("--format=%(refname)%00%(upstream:short)%00%(objectname)");
             supportsAheadBehind = false;
         } else {
@@ -1355,7 +1361,7 @@ export class Repository {
     }
 
     async getSquashMessage(): Promise<string | undefined> {
-        const squashMsgPath = path.join(this.repositoryRoot, ".git", "SQUASH_MSG");
+        const squashMsgPath = path.join(this.#repositoryRoot, ".git", "SQUASH_MSG");
 
         try {
             const raw = await fs.readFile(squashMsgPath, "utf8");
@@ -1366,7 +1372,7 @@ export class Repository {
     }
 
     async getMergeMessage(): Promise<string | undefined> {
-        const mergeMsgPath = path.join(this.repositoryRoot, ".git", "MERGE_MSG");
+        const mergeMsgPath = path.join(this.#repositoryRoot, ".git", "MERGE_MSG");
 
         try {
             const raw = await fs.readFile(mergeMsgPath, "utf8");
@@ -1390,7 +1396,7 @@ export class Repository {
                 .replace(/^~([^\/]*)\//, (_, user) => `${user ? path.join(path.dirname(homedir), user) : homedir}/`);
 
             if (!path.isAbsolute(templatePath)) {
-                templatePath = path.join(this.repositoryRoot, templatePath);
+                templatePath = path.join(this.#repositoryRoot, templatePath);
             }
 
             const raw = await fs.readFile(templatePath, "utf8");

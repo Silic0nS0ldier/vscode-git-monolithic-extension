@@ -3,8 +3,7 @@ import { Writable } from "stream";
 function stringifyChunk(chunk: any, encoding: BufferEncoding): string {
     try {
         return Buffer.from(chunk).toString(encoding);
-    }
-    catch {
+    } catch {
         return String(chunk);
     }
 }

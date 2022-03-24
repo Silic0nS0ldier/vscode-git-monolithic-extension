@@ -25,40 +25,45 @@ function isRemoteOperation(operation: Operation): boolean {
 }
 
 export class AutoFetcher {
-    private static DidInformUser = "autofetch.didInformUser";
+    static #DidInformUser = "autofetch.didInformUser";
 
-    private _onDidChange = new EventEmitter<boolean>();
-    private onDidChange = this._onDidChange.event;
+    #onDidChangeEmitter = new EventEmitter<boolean>();
+    #onDidChange = this.#onDidChangeEmitter.event;
 
-    private _enabled: boolean = false;
-    private _fetchAll: boolean = false;
+    #enabled: boolean = false;
+    #fetchAll: boolean = false;
     get enabled(): boolean {
-        return this._enabled;
+        return this.#enabled;
     }
     set enabled(enabled: boolean) {
-        this._enabled = enabled;
-        this._onDidChange.fire(enabled);
+        this.#enabled = enabled;
+        this.#onDidChangeEmitter.fire(enabled);
     }
 
-    private disposables: Disposable[] = [];
+    #disposables: Disposable[] = [];
 
-    constructor(private repository: AbstractRepository, private globalState: Memento) {
-        workspace.onDidChangeConfiguration(this.onConfiguration, this, this.disposables);
-        this.onConfiguration();
+    #repository: AbstractRepository;
+    #globalState: Memento;
+
+    constructor(repository: AbstractRepository, globalState: Memento) {
+        this.#repository = repository;
+        this.#globalState = globalState;
+        workspace.onDidChangeConfiguration(this.#onConfiguration, this, this.#disposables);
+        this.#onConfiguration();
 
         const onGoodRemoteOperation = filterEvent(
-            repository.onDidRunOperation,
+            this.#repository.onDidRunOperation,
             ({ operation, error }) => !error && isRemoteOperation(operation),
         );
         const onFirstGoodRemoteOperation = onceEvent(onGoodRemoteOperation);
-        onFirstGoodRemoteOperation(this.onFirstGoodRemoteOperation, this, this.disposables);
+        onFirstGoodRemoteOperation(this.#onFirstGoodRemoteOperation, this, this.#disposables);
     }
 
-    private async onFirstGoodRemoteOperation(): Promise<void> {
-        const didInformUser = !this.globalState.get<boolean>(AutoFetcher.DidInformUser);
+    async #onFirstGoodRemoteOperation(): Promise<void> {
+        const didInformUser = !this.#globalState.get<boolean>(AutoFetcher.#DidInformUser);
 
         if (this.enabled && !didInformUser) {
-            this.globalState.update(AutoFetcher.DidInformUser, true);
+            this.#globalState.update(AutoFetcher.#DidInformUser, true);
         }
 
         const shouldInformUser = !this.enabled && didInformUser;
@@ -86,31 +91,31 @@ export class AutoFetcher {
         }
 
         if (result === yes) {
-            const gitConfig = workspace.getConfiguration("git", Uri.file(this.repository.root));
+            const gitConfig = workspace.getConfiguration("git", Uri.file(this.#repository.root));
             gitConfig.update("autofetch", true, ConfigurationTarget.Global);
         }
 
-        this.globalState.update(AutoFetcher.DidInformUser, true);
+        this.#globalState.update(AutoFetcher.#DidInformUser, true);
     }
 
-    private onConfiguration(e?: ConfigurationChangeEvent): void {
+    #onConfiguration(e?: ConfigurationChangeEvent): void {
         if (e !== undefined && !e.affectsConfiguration("git.autofetch")) {
             return;
         }
 
-        const gitConfig = workspace.getConfiguration("git", Uri.file(this.repository.root));
+        const gitConfig = workspace.getConfiguration("git", Uri.file(this.#repository.root));
         switch (gitConfig.get<boolean | "all">("autofetch")) {
             case true:
-                this._fetchAll = false;
+                this.#fetchAll = false;
                 this.enable();
                 break;
             case "all":
-                this._fetchAll = true;
+                this.#fetchAll = true;
                 this.enable();
                 break;
             case false:
             default:
-                this._fetchAll = false;
+                this.#fetchAll = false;
                 this.disable();
                 break;
         }
@@ -122,26 +127,26 @@ export class AutoFetcher {
         }
 
         this.enabled = true;
-        this.run();
+        this.#run();
     }
 
     disable(): void {
         this.enabled = false;
     }
 
-    private async run(): Promise<void> {
+    async #run(): Promise<void> {
         while (this.enabled) {
-            await this.repository.whenIdleAndFocused();
+            await this.#repository.whenIdleAndFocused();
 
             if (!this.enabled) {
                 return;
             }
 
             try {
-                if (this._fetchAll) {
-                    await this.repository.fetchAll();
+                if (this.#fetchAll) {
+                    await this.#repository.fetchAll();
                 } else {
-                    await this.repository.fetchDefault({ silent: true });
+                    await this.#repository.fetchDefault({ silent: true });
                 }
             } catch (err) {
                 if (err.gitErrorCode === GitErrorCodes.AuthenticationFailed) {
@@ -154,10 +159,10 @@ export class AutoFetcher {
             }
 
             const period =
-                workspace.getConfiguration("git", Uri.file(this.repository.root)).get<number>("autofetchPeriod", 180)
+                workspace.getConfiguration("git", Uri.file(this.#repository.root)).get<number>("autofetchPeriod", 180)
                 * 1000;
             const timeout = new Promise(c => setTimeout(c, period));
-            const whenDisabled = eventToPromise(filterEvent(this.onDidChange, enabled => !enabled));
+            const whenDisabled = eventToPromise(filterEvent(this.#onDidChange, enabled => !enabled));
 
             await Promise.race([timeout, whenDisabled]);
         }
@@ -165,6 +170,6 @@ export class AutoFetcher {
 
     dispose(): void {
         this.disable();
-        this.disposables.forEach(d => d.dispose());
+        this.#disposables.forEach(d => d.dispose());
     }
 }

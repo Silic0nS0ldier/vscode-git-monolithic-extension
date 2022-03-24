@@ -5,20 +5,24 @@ import { localize } from "../../../util.js";
 import type { ScmCommand } from "../../helpers.js";
 
 class BranchDeleteItem implements QuickPickItem {
-    private get shortCommit(): string {
-        return (this.ref.commit || "").substr(0, 8);
+    get #shortCommit(): string {
+        return (this.#ref.commit || "").substr(0, 8);
     }
     get branchName(): string | undefined {
-        return this.ref.name;
+        return this.#ref.name;
     }
     get label(): string {
         return this.branchName || "";
     }
     get description(): string {
-        return this.shortCommit;
+        return this.#shortCommit;
     }
 
-    constructor(private ref: Ref) {}
+    #ref: Ref;
+
+    constructor(ref: Ref) {
+        this.#ref = ref;
+    }
 
     async run(repository: AbstractRepository, force?: boolean): Promise<void> {
         if (!this.branchName) {

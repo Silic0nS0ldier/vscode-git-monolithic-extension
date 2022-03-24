@@ -55,16 +55,16 @@ import {
 
 class RepositoryPick implements QuickPickItem {
     get label(): string {
-        return this._label();
+        return this.#label();
     }
 
-    private _label = onetime(() => path.basename(this.repository.root));
+    #label = onetime(() => path.basename(this.repository.root));
 
     get description(): string {
-        return this._description();
+        return this.#description();
     }
 
-    private _description = onetime(() => {
+    #description = onetime(() => {
         return [this.repository.headLabel, this.repository.syncLabel]
             .filter(l => !!l)
             .join(" ");
@@ -88,97 +88,103 @@ interface OpenRepository extends Disposable {
 }
 
 export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRegistry {
-    private _onDidOpenRepository = new EventEmitter<AbstractRepository>();
-    readonly onDidOpenRepository: Event<AbstractRepository> = this._onDidOpenRepository.event;
+    #onDidOpenRepositoryEmitter = new EventEmitter<AbstractRepository>();
+    readonly onDidOpenRepository: Event<AbstractRepository> = this.#onDidOpenRepositoryEmitter.event;
 
-    private _onDidCloseRepository = new EventEmitter<AbstractRepository>();
-    readonly onDidCloseRepository: Event<AbstractRepository> = this._onDidCloseRepository.event;
+    #onDidCloseRepositoryEmitter = new EventEmitter<AbstractRepository>();
+    readonly onDidCloseRepository: Event<AbstractRepository> = this.#onDidCloseRepositoryEmitter.event;
 
-    private _onDidChangeRepository = new EventEmitter<ModelChangeEvent>();
-    readonly onDidChangeRepository: Event<ModelChangeEvent> = this._onDidChangeRepository.event;
+    #onDidChangeRepositoryEmitter = new EventEmitter<ModelChangeEvent>();
+    readonly onDidChangeRepository: Event<ModelChangeEvent> = this.#onDidChangeRepositoryEmitter.event;
 
-    private _onDidChangeOriginalResource = new EventEmitter<OriginalResourceChangeEvent>();
-    readonly onDidChangeOriginalResource: Event<OriginalResourceChangeEvent> = this._onDidChangeOriginalResource.event;
+    #onDidChangeOriginalResourceEmitter = new EventEmitter<OriginalResourceChangeEvent>();
+    readonly onDidChangeOriginalResource: Event<OriginalResourceChangeEvent> = this.#onDidChangeOriginalResourceEmitter.event;
 
-    private openRepositories: OpenRepository[] = [];
+    #openRepositories: OpenRepository[] = [];
     get repositories(): AbstractRepository[] {
-        return this.openRepositories.map(r => r.repository);
+        return this.#openRepositories.map(r => r.repository);
     }
 
-    private possibleGitRepositoryPaths = new Set<string>();
+    #possibleGitRepositoryPaths = new Set<string>();
 
-    private _onDidChangeState = new EventEmitter<State>();
-    readonly onDidChangeState = this._onDidChangeState.event;
+    #onDidChangeStateEmitter = new EventEmitter<State>();
+    readonly onDidChangeState = this.#onDidChangeStateEmitter.event;
 
-    private _onDidPublish = new EventEmitter<PublishEvent>();
-    readonly onDidPublish = this._onDidPublish.event;
+    #onDidPublishEmitter = new EventEmitter<PublishEvent>();
+    readonly onDidPublish = this.#onDidPublishEmitter.event;
 
     firePublishEvent(repository: AbstractRepository, branch?: string) {
-        this._onDidPublish.fire({ branch: branch, repository: new ApiRepository(repository) });
+        this.#onDidPublishEmitter.fire({ branch: branch, repository: new ApiRepository(repository) });
     }
 
-    private _state: State = "uninitialized";
+    #state: State = "uninitialized";
     get state(): State {
-        return this._state;
+        return this.#state;
     }
 
     setState(state: State): void {
-        this._state = state;
-        this._onDidChangeState.fire(state);
+        this.#state = state;
+        this.#onDidChangeStateEmitter.fire(state);
         commands.executeCommand("setContext", "git.state", state);
     }
 
     isInitialized = onetime(async () => {
-        if (this._state === "initialized") {
+        if (this.#state === "initialized") {
             return Promise.resolve();
         }
 
         await eventToPromise(filterEvent(this.onDidChangeState, s => s === "initialized"));
     });
 
-    private remoteSourceProviders = new Set<RemoteSourceProvider>();
+    #remoteSourceProviders = new Set<RemoteSourceProvider>();
 
-    private _onDidAddRemoteSourceProvider = new EventEmitter<RemoteSourceProvider>();
-    readonly onDidAddRemoteSourceProvider = this._onDidAddRemoteSourceProvider.event;
+    #onDidAddRemoteSourceProviderEmitter = new EventEmitter<RemoteSourceProvider>();
+    readonly onDidAddRemoteSourceProvider = this.#onDidAddRemoteSourceProviderEmitter.event;
 
-    private _onDidRemoveRemoteSourceProvider = new EventEmitter<RemoteSourceProvider>();
-    readonly onDidRemoveRemoteSourceProvider = this._onDidRemoveRemoteSourceProvider.event;
+    #onDidRemoveRemoteSourceProviderEmitter = new EventEmitter<RemoteSourceProvider>();
+    readonly onDidRemoveRemoteSourceProvider = this.#onDidRemoveRemoteSourceProviderEmitter.event;
 
-    private pushErrorHandlers = new Set<PushErrorHandler>();
+    #pushErrorHandlers = new Set<PushErrorHandler>();
 
-    private disposables: Disposable[] = [];
+    #disposables: Disposable[] = [];
+    readonly #askpass: Askpass;
+    #globalState: Memento
+    #outputChannel: OutputChannel;
 
     constructor(
         readonly git: Git,
-        private readonly askpass: Askpass,
-        private globalState: Memento,
-        private outputChannel: OutputChannel,
+        askpass: Askpass,
+        globalState: Memento,
+        outputChannel: OutputChannel,
     ) {
-        workspace.onDidChangeWorkspaceFolders(this.onDidChangeWorkspaceFolders, this, this.disposables);
-        window.onDidChangeVisibleTextEditors(this.onDidChangeVisibleTextEditors, this, this.disposables);
-        workspace.onDidChangeConfiguration(this.onDidChangeConfiguration, this, this.disposables);
+        this.#askpass = askpass;
+        this.#globalState = globalState;
+        this.#outputChannel = outputChannel;
+        workspace.onDidChangeWorkspaceFolders(this.#onDidChangeWorkspaceFolders, this, this.#disposables);
+        window.onDidChangeVisibleTextEditors(this.#onDidChangeVisibleTextEditors, this, this.#disposables);
+        workspace.onDidChangeConfiguration(this.#onDidChangeConfiguration, this, this.#disposables);
 
         // Watchers are responsible for identifying deletion and addition of repositories (main and worktrees)
         const gitMainTreeWatcher = workspace.createFileSystemWatcher("**/.git/HEAD", false, true, false);
         const gitWorkTreeWatcher = workspace.createFileSystemWatcher("**/.git", false, true, false);
-        this.disposables.push(gitMainTreeWatcher, gitWorkTreeWatcher);
+        this.#disposables.push(gitMainTreeWatcher, gitWorkTreeWatcher);
         const onGitIndexEvent = anyEvent(
             gitMainTreeWatcher.onDidCreate,
             gitMainTreeWatcher.onDidDelete,
             gitWorkTreeWatcher.onDidCreate,
             gitWorkTreeWatcher.onDidDelete,
         );
-        onGitIndexEvent(this.onPossibleGitRepositoryChange, this, this.disposables);
+        onGitIndexEvent(this.#onPossibleGitRepositoryChange, this, this.#disposables);
 
         this.setState("uninitialized");
-        this.doInitialScan().finally(() => this.setState("initialized"));
+        this.#doInitialScan().finally(() => this.setState("initialized"));
     }
 
-    private async doInitialScan(): Promise<void> {
+    async #doInitialScan(): Promise<void> {
         await Promise.all([
-            this.onDidChangeWorkspaceFolders({ added: workspace.workspaceFolders || [], removed: [] }),
-            this.onDidChangeVisibleTextEditors(window.visibleTextEditors),
-            this.scanWorkspaceFolders(),
+            this.#onDidChangeWorkspaceFolders({ added: workspace.workspaceFolders || [], removed: [] }),
+            this.#onDidChangeVisibleTextEditors(window.visibleTextEditors),
+            this.#scanWorkspaceFolders(),
         ]);
     }
 
@@ -186,7 +192,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
      * Scans the first level of each workspace folder, looking
      * for git repositories.
      */
-    private async scanWorkspaceFolders(): Promise<void> {
+    async #scanWorkspaceFolders(): Promise<void> {
         const config = workspace.getConfiguration("git");
         const autoRepositoryDetection = config.get<boolean | "subFolders" | "openEditors">("autoRepositoryDetection");
 
@@ -208,8 +214,12 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
                 }
 
                 if (path.isAbsolute(scanPath)) {
-                    this.outputChannel.appendLine(
-                        "[WARN] " + localize("not supported", "Absolute paths not supported in 'git.scanRepositories' setting."),
+                    this.#outputChannel.appendLine(
+                        "[WARN] "
+                            + localize(
+                                "not supported",
+                                "Absolute paths not supported in 'git.scanRepositories' setting.",
+                            ),
                     );
                     continue;
                 }
@@ -221,7 +231,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         }));
     }
 
-    private onPossibleGitRepositoryChange(uri: Uri): void {
+    #onPossibleGitRepositoryChange(uri: Uri): void {
         // TODO Handle repository removal
         // Only process new repositories
         if (this.getRepository(uri)) {
@@ -235,25 +245,25 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             return;
         }
 
-        this.eventuallyScanPossibleGitRepository(uri.fsPath.replace(/\.git.*$/, ""));
+        this.#eventuallyScanPossibleGitRepository(uri.fsPath.replace(/\.git.*$/, ""));
     }
 
-    private eventuallyScanPossibleGitRepository(path: string) {
-        this.possibleGitRepositoryPaths.add(path);
-        this.eventuallyScanPossibleGitRepositories();
+    #eventuallyScanPossibleGitRepository(path: string) {
+        this.#possibleGitRepositoryPaths.add(path);
+        this.#eventuallyScanPossibleGitRepositories();
     }
 
-    private eventuallyScanPossibleGitRepositories = debounce(() => {
-        for (const path of this.possibleGitRepositoryPaths) {
+    #eventuallyScanPossibleGitRepositories = debounce(() => {
+        for (const path of this.#possibleGitRepositoryPaths) {
             this.openRepository(path);
         }
 
-        this.possibleGitRepositoryPaths.clear();
+        this.#possibleGitRepositoryPaths.clear();
     }, 500);
 
-    private async onDidChangeWorkspaceFolders({ added, removed }: WorkspaceFoldersChangeEvent): Promise<void> {
+    async #onDidChangeWorkspaceFolders({ added, removed }: WorkspaceFoldersChangeEvent): Promise<void> {
         const possibleRepositoryFolders = added
-            .filter(folder => !this.getOpenRepository(folder.uri));
+            .filter(folder => !this.#getOpenRepository(folder.uri));
 
         const activeRepositoriesList = window.visibleTextEditors
             .map(editor => this.getRepository(editor.document.uri))
@@ -261,7 +271,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 
         const activeRepositories = new Set<AbstractRepository>(activeRepositoriesList);
         const openRepositoriesToDispose = removed
-            .map(folder => this.getOpenRepository(folder.uri))
+            .map(folder => this.#getOpenRepository(folder.uri))
             .filter(r => !!r)
             .filter(r => !activeRepositories.has(r!.repository))
             .filter(r =>
@@ -272,12 +282,12 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         await Promise.all(possibleRepositoryFolders.map(p => this.openRepository(p.uri.fsPath)));
     }
 
-    private onDidChangeConfiguration(): void {
+    #onDidChangeConfiguration(): void {
         const possibleRepositoryFolders = (workspace.workspaceFolders || [])
             .filter(folder => workspace.getConfiguration("git", folder.uri).get<boolean>("enabled") === true)
-            .filter(folder => !this.getOpenRepository(folder.uri));
+            .filter(folder => !this.#getOpenRepository(folder.uri));
 
-        const openRepositoriesToDispose = this.openRepositories
+        const openRepositoriesToDispose = this.#openRepositories
             .map(repository => ({ repository, root: Uri.file(repository.repository.root) }))
             .filter(({ root }) => workspace.getConfiguration("git", root).get<boolean>("enabled") !== true)
             .map(({ repository }) => repository);
@@ -286,7 +296,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         openRepositoriesToDispose.forEach(r => r.dispose());
     }
 
-    private async onDidChangeVisibleTextEditors(editors: readonly TextEditor[]): Promise<void> {
+    async #onDidChangeVisibleTextEditors(editors: readonly TextEditor[]): Promise<void> {
         if (!workspace.isTrusted) {
             return;
         }
@@ -361,22 +371,22 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
                 this.git.open(repositoryRoot, dotGit),
                 this,
                 this,
-                this.globalState,
-                this.outputChannel,
+                this.#globalState,
+                this.#outputChannel,
             );
 
-            this.open(repository);
+            this.#open(repository);
             await repository.status();
         } catch (ex) {
             // noop
-            this.outputChannel.appendLine(
+            this.#outputChannel.appendLine(
                 `Opening repository for path='${repoPath}' failed; ex=${await prettyPrint(ex)}`,
             );
         }
     });
 
-    private open(repository: AbstractRepository): void {
-        this.outputChannel.appendLine(`Open repository: ${repository.root}`);
+    #open(repository: AbstractRepository): void {
+        this.#outputChannel.appendLine(`Open repository: ${repository.root}`);
 
         const onDidDisappearRepository = filterEvent(
             repository.onDidChangeState,
@@ -384,10 +394,10 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         );
         const disappearListener = onDidDisappearRepository(() => dispose());
         const changeListener = repository.onDidChangeRepository(uri =>
-            this._onDidChangeRepository.fire({ repository, uri })
+            this.#onDidChangeRepositoryEmitter.fire({ repository, uri })
         );
         const originalResourceChangeListener = repository.onDidChangeOriginalResource(uri =>
-            this._onDidChangeOriginalResource.fire({ repository, uri })
+            this.#onDidChangeOriginalResourceEmitter.fire({ repository, uri })
         );
 
         const shouldDetectSubmodules = workspace
@@ -418,7 +428,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             repository.submodules
                 .slice(0, submodulesLimit)
                 .map(r => path.join(repository.root, r.path))
-                .forEach(p => this.eventuallyScanPossibleGitRepository(p));
+                .forEach(p => this.#eventuallyScanPossibleGitRepository(p));
         };
 
         const statusListener = repository.onDidRunGitStatus(checkForSubmodules);
@@ -431,32 +441,32 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             statusListener.dispose();
             repository.dispose();
 
-            this.openRepositories = this.openRepositories.filter(e => e !== openRepository);
-            this._onDidCloseRepository.fire(repository);
+            this.#openRepositories = this.#openRepositories.filter(e => e !== openRepository);
+            this.#onDidCloseRepositoryEmitter.fire(repository);
         };
 
         const openRepository = { dispose, repository };
-        this.openRepositories.push(openRepository);
-        this._onDidOpenRepository.fire(repository);
+        this.#openRepositories.push(openRepository);
+        this.#onDidOpenRepositoryEmitter.fire(repository);
     }
 
     close(repository: AbstractRepository): void {
-        const openRepository = this.getOpenRepository(repository);
+        const openRepository = this.#getOpenRepository(repository);
 
         if (!openRepository) {
             return;
         }
 
-        this.outputChannel.appendLine(`Close repository: ${repository.root}`);
+        this.#outputChannel.appendLine(`Close repository: ${repository.root}`);
         openRepository.dispose();
     }
 
     async pickRepository(): Promise<AbstractRepository | undefined> {
-        if (this.openRepositories.length === 0) {
+        if (this.#openRepositories.length === 0) {
             throw new Error(localize("no repositories", "There are no available repositories"));
         }
 
-        const picks = this.openRepositories.map((e, index) => new RepositoryPick(e.repository, index));
+        const picks = this.#openRepositories.map((e, index) => new RepositoryPick(e.repository, index));
         const active = window.activeTextEditor;
         const repository = active && this.getRepository(active.document.fileName);
         const index = picks.findIndex(pick => pick.repository === repository);
@@ -477,17 +487,17 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     getRepository(path: string): AbstractRepository | undefined;
     getRepository(resource: Uri): AbstractRepository | undefined;
     getRepository(hint: any): AbstractRepository | undefined {
-        const liveRepository = this.getOpenRepository(hint);
+        const liveRepository = this.#getOpenRepository(hint);
         return liveRepository && liveRepository.repository;
     }
 
     /** @todo This API is horrific, it should not be needed. */
-    private getOpenRepository(repository: AbstractRepository): OpenRepository | undefined;
-    private getOpenRepository(sourceControl: SourceControl): OpenRepository | undefined;
-    private getOpenRepository(resourceGroup: SourceControlResourceGroup): OpenRepository | undefined;
-    private getOpenRepository(path: string): OpenRepository | undefined;
-    private getOpenRepository(resource: Uri): OpenRepository | undefined;
-    private getOpenRepository(hint: any): OpenRepository | undefined {
+    #getOpenRepository(repository: AbstractRepository): OpenRepository | undefined;
+    #getOpenRepository(sourceControl: SourceControl): OpenRepository | undefined;
+    #getOpenRepository(resourceGroup: SourceControlResourceGroup): OpenRepository | undefined;
+    #getOpenRepository(path: string): OpenRepository | undefined;
+    #getOpenRepository(resource: Uri): OpenRepository | undefined;
+    #getOpenRepository(hint: any): OpenRepository | undefined {
         let normalisedHint = hint;
         if (!normalisedHint) {
             return undefined;
@@ -495,7 +505,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 
         if (isAbstractRepository(normalisedHint)) {
             const stableHint = normalisedHint;
-            return this.openRepositories.filter(r => r.repository === stableHint)[0];
+            return this.#openRepositories.filter(r => r.repository === stableHint)[0];
         }
 
         if (typeof normalisedHint === "string") {
@@ -513,7 +523,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 
             outer:
             for (
-                const liveRepository of this.openRepositories.sort((a, b) =>
+                const liveRepository of this.#openRepositories.sort((a, b) =>
                     b.repository.root.length - a.repository.root.length
                 )
             ) {
@@ -535,7 +545,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             return undefined;
         }
 
-        for (const liveRepository of this.openRepositories) {
+        for (const liveRepository of this.#openRepositories) {
             const repository = liveRepository.repository;
 
             if (normalisedHint === repository.sourceControlUI.sourceControl) {
@@ -569,39 +579,39 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     }
 
     registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable {
-        this.remoteSourceProviders.add(provider);
-        this._onDidAddRemoteSourceProvider.fire(provider);
+        this.#remoteSourceProviders.add(provider);
+        this.#onDidAddRemoteSourceProviderEmitter.fire(provider);
 
         return toDisposable(() => {
-            this.remoteSourceProviders.delete(provider);
-            this._onDidRemoveRemoteSourceProvider.fire(provider);
+            this.#remoteSourceProviders.delete(provider);
+            this.#onDidRemoveRemoteSourceProviderEmitter.fire(provider);
         });
     }
 
     registerCredentialsProvider(provider: CredentialsProvider): Disposable {
-        return this.askpass.registerCredentialsProvider(provider);
+        return this.#askpass.registerCredentialsProvider(provider);
     }
 
     getRemoteProviders(): RemoteSourceProvider[] {
-        return [...this.remoteSourceProviders.values()];
+        return [...this.#remoteSourceProviders.values()];
     }
 
     registerPushErrorHandler(handler: PushErrorHandler): Disposable {
-        this.pushErrorHandlers.add(handler);
-        return toDisposable(() => this.pushErrorHandlers.delete(handler));
+        this.#pushErrorHandlers.add(handler);
+        return toDisposable(() => this.#pushErrorHandlers.delete(handler));
     }
 
     getPushErrorHandlers(): PushErrorHandler[] {
-        return [...this.pushErrorHandlers];
+        return [...this.#pushErrorHandlers];
     }
 
     dispose(): void {
-        const openRepositories = [...this.openRepositories];
+        const openRepositories = [...this.#openRepositories];
         openRepositories.forEach(r => r.dispose());
-        this.openRepositories = [];
+        this.#openRepositories = [];
 
-        this.possibleGitRepositoryPaths.clear();
-        this.disposables = dispose(this.disposables);
+        this.#possibleGitRepositoryPaths.clear();
+        this.#disposables = dispose(this.#disposables);
     }
 }
 
