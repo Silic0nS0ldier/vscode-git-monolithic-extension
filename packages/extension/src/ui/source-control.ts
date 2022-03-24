@@ -90,10 +90,11 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
         set(newValue) {
             // delay change with a faded look first
             // ideally do only when status is slow to run
-            // TODO don't push state change to VSCode is nothing has changed
+            // TODO don't push state change to VSCode if nothing has changed
             {
                 const annotations: string[] = [];
                 const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
+                    command: old.command,
                     decorations: { faded: true },
                     resourceUri: old.resourceUri,
                 }));
