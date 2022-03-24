@@ -12,6 +12,7 @@
     "dependencies": {
         "@typescript-eslint/eslint-plugin": "^5.13.0",
         "@typescript-eslint/parser": "^5.13.0",
-        "eslint": "^8.10.0"
+        "eslint": "^8.10.0",
+        "typescript": "https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz"
     }
 }
