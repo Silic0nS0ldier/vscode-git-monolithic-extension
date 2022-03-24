@@ -7,12 +7,12 @@ importers:
       '@typescript-eslint/eslint-plugin': ^5.13.0
       '@typescript-eslint/parser': ^5.13.0
       eslint: ^8.10.0
-      typescript: https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz
+      typescript: https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz
     dependencies:
-      '@typescript-eslint/eslint-plugin': 5.13.0_0721baedea64bd17a3fb2f4f90d41ac9
-      '@typescript-eslint/parser': 5.13.0_eslint@8.10.0+typescript@4.6.0
+      '@typescript-eslint/eslint-plugin': 5.13.0_bb622ae4e3ce2dd08635f0bf17a64279
+      '@typescript-eslint/parser': 5.13.0_eslint@8.10.0+typescript@4.7.0
       eslint: 8.10.0
-      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz'
+      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz'
 
   packages/build-tools:
     specifiers:
@@ -21,7 +21,7 @@ importers:
       execa: ^6.1.0
       globby: ^13.1.1
       rollup: ^2.70.1
-      typescript: https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz
+      typescript: https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz
       vsce: ^2.7.0
       vscode-grammar-updater: ^1.0.4
     dependencies:
@@ -30,7 +30,7 @@ importers:
       execa: 6.1.0
       globby: 13.1.1
       rollup: 2.70.1
-      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz'
+      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz'
       vsce: 2.7.0
       vscode-grammar-updater: 1.0.4
 
@@ -253,7 +253,7 @@ packages:
     resolution: {integrity: sha512-Jjakcv8Roqtio6w1gr0D7y6twbhx6gGgFGF5BLwajPpnOIOxFkakFhCq+LmyyeAz7BX6ULrjBOxdKaCDy+4+dQ==}
     dev: true
 
-  /@typescript-eslint/eslint-plugin/5.13.0_0721baedea64bd17a3fb2f4f90d41ac9:
+  /@typescript-eslint/eslint-plugin/5.13.0_bb622ae4e3ce2dd08635f0bf17a64279:
     resolution: {integrity: sha512-vLktb2Uec81fxm/cfz2Hd6QaWOs8qdmVAZXLdOBX6JFJDhf6oDZpMzZ4/LZ6SFM/5DgDcxIMIvy3F+O9yZBuiQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -264,23 +264,23 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@typescript-eslint/parser': 5.13.0_eslint@8.10.0+typescript@4.6.0
+      '@typescript-eslint/parser': 5.13.0_eslint@8.10.0+typescript@4.7.0
       '@typescript-eslint/scope-manager': 5.13.0
-      '@typescript-eslint/type-utils': 5.13.0_eslint@8.10.0+typescript@4.6.0
-      '@typescript-eslint/utils': 5.13.0_eslint@8.10.0+typescript@4.6.0
+      '@typescript-eslint/type-utils': 5.13.0_eslint@8.10.0+typescript@4.7.0
+      '@typescript-eslint/utils': 5.13.0_eslint@8.10.0+typescript@4.7.0
       debug: 4.3.3
       eslint: 8.10.0
       functional-red-black-tree: 1.0.1
       ignore: 5.2.0
       regexpp: 3.2.0
       semver: 7.3.5
-      tsutils: 3.21.0_typescript@4.6.0
-      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz'
+      tsutils: 3.21.0_typescript@4.7.0
+      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz'
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /@typescript-eslint/parser/5.13.0_eslint@8.10.0+typescript@4.6.0:
+  /@typescript-eslint/parser/5.13.0_eslint@8.10.0+typescript@4.7.0:
     resolution: {integrity: sha512-GdrU4GvBE29tm2RqWOM0P5QfCtgCyN4hXICj/X9ibKED16136l9ZpoJvCL5pSKtmJzA+NRDzQ312wWMejCVVfg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -292,10 +292,10 @@ packages:
     dependencies:
       '@typescript-eslint/scope-manager': 5.13.0
       '@typescript-eslint/types': 5.13.0
-      '@typescript-eslint/typescript-estree': 5.13.0_typescript@4.6.0
+      '@typescript-eslint/typescript-estree': 5.13.0_typescript@4.7.0
       debug: 4.3.3
       eslint: 8.10.0
-      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz'
+      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz'
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -308,7 +308,7 @@ packages:
       '@typescript-eslint/visitor-keys': 5.13.0
     dev: false
 
-  /@typescript-eslint/type-utils/5.13.0_eslint@8.10.0+typescript@4.6.0:
+  /@typescript-eslint/type-utils/5.13.0_eslint@8.10.0+typescript@4.7.0:
     resolution: {integrity: sha512-/nz7qFizaBM1SuqAKb7GLkcNn2buRdDgZraXlkhz+vUGiN1NZ9LzkA595tHHeduAiS2MsHqMNhE2zNzGdw43Yg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -318,11 +318,11 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@typescript-eslint/utils': 5.13.0_eslint@8.10.0+typescript@4.6.0
+      '@typescript-eslint/utils': 5.13.0_eslint@8.10.0+typescript@4.7.0
       debug: 4.3.3
       eslint: 8.10.0
-      tsutils: 3.21.0_typescript@4.6.0
-      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz'
+      tsutils: 3.21.0_typescript@4.7.0
+      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz'
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -332,7 +332,7 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: false
 
-  /@typescript-eslint/typescript-estree/5.13.0_typescript@4.6.0:
+  /@typescript-eslint/typescript-estree/5.13.0_typescript@4.7.0:
     resolution: {integrity: sha512-Q9cQow0DeLjnp5DuEDjLZ6JIkwGx3oYZe+BfcNuw/POhtpcxMTy18Icl6BJqTSd+3ftsrfuVb7mNHRZf7xiaNA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -347,13 +347,13 @@ packages:
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.3.5
-      tsutils: 3.21.0_typescript@4.6.0
-      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz'
+      tsutils: 3.21.0_typescript@4.7.0
+      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz'
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /@typescript-eslint/utils/5.13.0_eslint@8.10.0+typescript@4.6.0:
+  /@typescript-eslint/utils/5.13.0_eslint@8.10.0+typescript@4.7.0:
     resolution: {integrity: sha512-+9oHlPWYNl6AwwoEt5TQryEHwiKRVjz7Vk6kaBeD3/kwHE5YqTGHtm/JZY8Bo9ITOeKutFaXnBlMgSATMJALUQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -362,7 +362,7 @@ packages:
       '@types/json-schema': 7.0.9
       '@typescript-eslint/scope-manager': 5.13.0
       '@typescript-eslint/types': 5.13.0
-      '@typescript-eslint/typescript-estree': 5.13.0_typescript@4.6.0
+      '@typescript-eslint/typescript-estree': 5.13.0_typescript@4.7.0
       eslint: 8.10.0
       eslint-scope: 5.1.1
       eslint-utils: 3.0.0_eslint@8.10.0
@@ -2631,14 +2631,14 @@ packages:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
     dev: false
 
-  /tsutils/3.21.0_typescript@4.6.0:
+  /tsutils/3.21.0_typescript@4.7.0:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
     engines: {node: '>= 6'}
     peerDependencies:
       typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
     dependencies:
       tslib: 1.14.1
-      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz'
+      typescript: '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz'
     dev: false
 
   /tunnel-agent/0.6.0:
@@ -2890,10 +2890,10 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz':
-    resolution: {tarball: https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz}
+  '@github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz':
+    resolution: {tarball: https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz}
     name: typescript
-    version: 4.6.0
+    version: 4.7.0
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: false

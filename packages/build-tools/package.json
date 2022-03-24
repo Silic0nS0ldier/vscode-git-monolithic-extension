@@ -7,7 +7,7 @@
         "execa": "^6.1.0",
         "globby": "^13.1.1",
         "rollup": "^2.70.1",
-        "typescript": "https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz",
+        "typescript": "https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz",
         "vsce": "^2.7.0",
         "vscode-grammar-updater": "^1.0.4"
     }
