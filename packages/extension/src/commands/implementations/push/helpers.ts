@@ -1,5 +1,5 @@
 import { Uri, window, workspace } from "vscode";
-import { ForcePushMode, GitErrorCodes } from "../../../api/git.js";
+import { ForcePushMode, ForcePushModeOptions, GitErrorCodes } from "../../../api/git.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
@@ -7,15 +7,16 @@ import { publish } from "../publish/publish.js";
 import { AddRemoteItem } from "../publish/quick-pick.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
 
-export enum PushType {
-    Push,
-    PushTo,
-    PushFollowTags,
-    PushTags,
-}
+export type PushTypeOptions = "Push" | "PushTo" | "PushFollowTags" | "PushTags";
+export const PushType: Record<PushTypeOptions, PushTypeOptions> = {
+    Push: "Push",
+    PushTo: "PushTo",
+    PushFollowTags: "PushFollowTags",
+    PushTags: "PushTags",
+};
 
 export interface PushOptions {
-    pushType: PushType;
+    pushType: PushTypeOptions;
     forcePush?: boolean;
     silent?: boolean;
 
@@ -48,7 +49,7 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
     }
 
     const config = workspace.getConfiguration("git", Uri.file(repository.root));
-    let forcePushMode: ForcePushMode | undefined = undefined;
+    let forcePushMode: ForcePushModeOptions | undefined = undefined;
 
     if (pushOptions.forcePush) {
         if (!config.get<boolean>("allowForcePush")) {

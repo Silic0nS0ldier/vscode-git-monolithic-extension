@@ -16,10 +16,10 @@ import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
 import { isReadOnly } from "../isReadOnly.js";
 import type { OperationResult } from "../OperationResult.js";
-import { Operation } from "../Operations.js";
+import { Operation, OperationOptions } from "../Operations.js";
 import { OperationsImpl } from "../Operations.js";
 import { ProgressManager } from "../ProgressManager.js";
-import { RepositoryState } from "../RepositoryState.js";
+import { RepositoryState, RepositoryStateOptions } from "../RepositoryState.js";
 import { retryRun } from "../retryRun.js";
 import { timeout } from "../timeout.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
@@ -74,7 +74,7 @@ export function createRepository(
     const onDidRunOperationEmitter = new EventEmitter<OperationResult>();
     const onDidRunOperation = onDidRunOperationEmitter.event;
 
-    const onDidChangeStateEmitter = new EventEmitter<RepositoryState>();
+    const onDidChangeStateEmitter = new EventEmitter<RepositoryStateOptions>();
     const onDidChangeState = onDidChangeStateEmitter.event;
 
     async function whenIdleAndFocused(): Promise<void> {
@@ -127,7 +127,7 @@ export function createRepository(
         sourceControlUI,
     );
 
-    const onRunOperationEmitter = new EventEmitter<Operation>();
+    const onRunOperationEmitter = new EventEmitter<OperationOptions>();
     const onRunOperation = onRunOperationEmitter.event;
 
     const didWarnAboutLimit = createBox(false);
@@ -174,7 +174,7 @@ export function createRepository(
     });
 
     async function run<T>(
-        operation: Operation,
+        operation: OperationOptions,
         runOperation: () => Promise<T> = () => Promise.resolve<any>(null),
     ): Promise<T> {
         if (state.get() !== RepositoryState.Idle) {
@@ -310,7 +310,7 @@ export function createRepository(
         return bufferImpl(run, repository, ref, filePath);
     }
 
-    const onDidChangeOperations = anyEvent<Operation | OperationResult>(onRunOperation, onDidRunOperation);
+    const onDidChangeOperations = anyEvent<OperationOptions | OperationResult>(onRunOperation, onDidRunOperation);
 
     const onDidChangeOriginalResourceEmitter = new EventEmitter<Uri>();
     const onDidChangeOriginalResource = onDidChangeOriginalResourceEmitter.event;

@@ -21,7 +21,7 @@ import {
     CommitOptions,
     CredentialsProvider,
     FetchOptions,
-    ForcePushMode,
+    ForcePushModeOptions,
     Git,
     InputBox,
     LogOptions,
@@ -29,12 +29,14 @@ import {
     PushErrorHandler,
     Ref,
     RefType,
+    RefTypeOptions,
     Remote,
     RemoteSourceProvider,
     Repository,
     RepositoryState,
     RepositoryUIState,
     Status,
+    StatusOptions,
     Submodule,
 } from "./git.js";
 
@@ -61,7 +63,7 @@ export class ApiChange implements Change {
     get renameUri(): Uri | undefined {
         return this.#resource.state.renameResourceUri;
     }
-    get status(): Status {
+    get status(): StatusOptions {
         return this.#resource.state.type;
     }
 
@@ -267,7 +269,12 @@ export class ApiRepository implements Repository {
         return this.#repository.pull(undefined, unshallow);
     }
 
-    push(remoteName?: string, branchName?: string, setUpstream: boolean = false, force?: ForcePushMode): Promise<void> {
+    push(
+        remoteName?: string,
+        branchName?: string,
+        setUpstream: boolean = false,
+        force?: ForcePushModeOptions,
+    ): Promise<void> {
         return this.#repository.pushTo(remoteName, branchName, setUpstream, force);
     }
 
@@ -362,7 +369,7 @@ export class ApiImpl implements API {
     }
 }
 
-function getRefType(type: RefType): string {
+function getRefType(type: RefTypeOptions): string {
     switch (type) {
         case RefType.Head:
             return "Head";
@@ -375,7 +382,7 @@ function getRefType(type: RefType): string {
     return "unknown";
 }
 
-function getStatus(status: Status): string {
+function getStatus(status: StatusOptions): string {
     switch (status) {
         case Status.INDEX_MODIFIED:
             return "INDEX_MODIFIED";

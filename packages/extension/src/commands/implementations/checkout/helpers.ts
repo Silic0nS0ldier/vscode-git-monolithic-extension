@@ -1,5 +1,5 @@
 import { workspace } from "vscode";
-import { Ref, RefType } from "../../../api/git.js";
+import { Ref, RefType, RefTypeOptions } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { CheckoutItem, CheckoutRemoteHeadItem, CheckoutTagItem } from "./quick-pick.js";
 
@@ -46,9 +46,9 @@ class CheckoutProcessor {
     get items(): CheckoutItem[] {
         return this.#refs.map(r => new this.#ctor(r));
     }
-    #type: RefType;
+    #type: RefTypeOptions;
     #ctor: { new(ref: Ref): CheckoutItem };
-    constructor(type: RefType, ctor: { new(ref: Ref): CheckoutItem }) {
+    constructor(type: RefTypeOptions, ctor: { new(ref: Ref): CheckoutItem }) {
         this.#type = type;
         this.#ctor = ctor;
     }

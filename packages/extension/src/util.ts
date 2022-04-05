@@ -214,13 +214,14 @@ export function readBytes(stream: Readable, bytes: number): Promise<Buffer> {
     });
 }
 
-export const enum Encoding {
-    UTF8 = "utf8",
-    UTF16be = "utf16be",
-    UTF16le = "utf16le",
-}
+type EncodingOptions = "utf8" | "utf16be" | "utf16le";
+const Encoding: Record<EncodingOptions, EncodingOptions> = {
+    utf16be: "utf16be",
+    utf16le: "utf16le",
+    utf8: "utf8",
+};
 
-export function detectUnicodeEncoding(buffer: Buffer): Encoding | null {
+export function detectUnicodeEncoding(buffer: Buffer): EncodingOptions | null {
     if (buffer.length < 2) {
         return null;
     }
@@ -229,11 +230,11 @@ export function detectUnicodeEncoding(buffer: Buffer): Encoding | null {
     const b1 = buffer.readUInt8(1);
 
     if (b0 === 0xFE && b1 === 0xFF) {
-        return Encoding.UTF16be;
+        return Encoding.utf16be;
     }
 
     if (b0 === 0xFF && b1 === 0xFE) {
-        return Encoding.UTF16le;
+        return Encoding.utf16le;
     }
 
     if (buffer.length < 3) {
@@ -243,7 +244,7 @@ export function detectUnicodeEncoding(buffer: Buffer): Encoding | null {
     const b2 = buffer.readUInt8(2);
 
     if (b0 === 0xEF && b1 === 0xBB && b2 === 0xBF) {
-        return Encoding.UTF8;
+        return Encoding.utf8;
     }
 
     return null;

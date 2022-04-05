@@ -1,13 +1,13 @@
 import path from "node:path";
 import { commands, EventEmitter, Uri, workspace } from "vscode";
-import { Branch, Ref, Remote, Status } from "../../api/git.js";
+import { Branch, Ref, Remote, Status, StatusOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
 import type { Submodule } from "../../git/Submodule.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import type { Box } from "../../util.js";
 import { createResource as createBaseResource, Resource } from "../Resource.js";
-import { ResourceGroupType } from "../ResourceGroupType.js";
+import { ResourceGroupType, ResourceGroupTypeOptions } from "../ResourceGroupType.js";
 import { getInputTemplate } from "./get-input-template.js";
 import { getRebaseCommit } from "./get-rebase-commit.js";
 import type { RunFn } from "./run.js";
@@ -86,9 +86,9 @@ export async function updateModelState(
     const untracked: Resource[] = [];
 
     function createResource(
-        resourceGroupType: ResourceGroupType,
+        resourceGroupType: ResourceGroupTypeOptions,
         resourceUri: Uri,
-        type: Status,
+        type: StatusOptions,
         renameResourceUri?: Uri,
     ) {
         return createBaseResource(

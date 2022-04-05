@@ -14,19 +14,21 @@ export interface InputBox {
     value: string;
 }
 
-export const enum ForcePushMode {
-    Force,
-    ForceWithLease,
-}
+export type ForcePushModeOptions = "Force" | "ForceWithLease";
+export const ForcePushMode: Record<ForcePushModeOptions, ForcePushModeOptions> = {
+    Force: "Force",
+    ForceWithLease: "ForceWithLease",
+};
 
-export const enum RefType {
-    Head,
-    RemoteHead,
-    Tag,
-}
+export type RefTypeOptions = "Head" | "RemoteHead" | "Tag";
+export const RefType: Record<RefTypeOptions, RefTypeOptions> = {
+    Head: "Head",
+    RemoteHead: "RemoteHead",
+    Tag: "Tag",
+};
 
 export interface Ref {
-    readonly type: RefType;
+    readonly type: RefTypeOptions;
     readonly name?: string;
     readonly commit?: string;
     readonly remote?: string;
@@ -66,27 +68,44 @@ export interface Remote {
     readonly isReadOnly: boolean;
 }
 
-export const enum Status {
-    INDEX_MODIFIED,
-    INDEX_ADDED,
-    INDEX_DELETED,
-    INDEX_RENAMED,
-    INDEX_COPIED,
-
-    MODIFIED,
-    DELETED,
-    UNTRACKED,
-    IGNORED,
-    INTENT_TO_ADD,
-
-    ADDED_BY_US,
-    ADDED_BY_THEM,
-    DELETED_BY_US,
-    DELETED_BY_THEM,
-    BOTH_ADDED,
-    BOTH_DELETED,
-    BOTH_MODIFIED,
-}
+export type StatusOptions =
+    | "INDEX_MODIFIED"
+    | "INDEX_ADDED"
+    | "INDEX_DELETED"
+    | "INDEX_RENAMED"
+    | "INDEX_COPIED"
+    | "MODIFIED"
+    | "DELETED"
+    | "DELETED"
+    | "UNTRACKED"
+    | "IGNORED"
+    | "INTENT_TO_ADD"
+    | "ADDED_BY_US"
+    | "ADDED_BY_THEM"
+    | "DELETED_BY_US"
+    | "DELETED_BY_THEM"
+    | "BOTH_ADDED"
+    | "BOTH_DELETED"
+    | "BOTH_MODIFIED";
+export const Status: Record<StatusOptions, StatusOptions> = {
+    INDEX_MODIFIED: "INDEX_MODIFIED",
+    INDEX_ADDED: "INDEX_ADDED",
+    INDEX_DELETED: "INDEX_DELETED",
+    INDEX_RENAMED: "INDEX_RENAMED",
+    INDEX_COPIED: "INDEX_COPIED",
+    MODIFIED: "MODIFIED",
+    DELETED: "DELETED",
+    UNTRACKED: "UNTRACKED",
+    IGNORED: "IGNORED",
+    INTENT_TO_ADD: "INTENT_TO_ADD",
+    ADDED_BY_US: "ADDED_BY_US",
+    ADDED_BY_THEM: "ADDED_BY_THEM",
+    DELETED_BY_US: "DELETED_BY_US",
+    DELETED_BY_THEM: "DELETED_BY_THEM",
+    BOTH_ADDED: "BOTH_ADDED",
+    BOTH_DELETED: "BOTH_DELETED",
+    BOTH_MODIFIED: "BOTH_MODIFIED",
+};
 
 export interface Change {
     /**
@@ -97,7 +116,7 @@ export interface Change {
     readonly uri: Uri;
     readonly originalUri: Uri;
     readonly renameUri: Uri | undefined;
-    readonly status: Status;
+    readonly status: StatusOptions;
 }
 
 export interface RepositoryState {
@@ -199,7 +218,7 @@ export interface Repository {
     fetch(options?: FetchOptions): Promise<void>;
     fetch(remote?: string, ref?: string, depth?: number): Promise<void>;
     pull(unshallow?: boolean): Promise<void>;
-    push(remoteName?: string, branchName?: string, setUpstream?: boolean, force?: ForcePushMode): Promise<void>;
+    push(remoteName?: string, branchName?: string, setUpstream?: boolean, force?: ForcePushModeOptions): Promise<void>;
 
     blame(path: string): Promise<string>;
     log(options?: LogOptions): Promise<Commit[]>;
@@ -236,7 +255,7 @@ export interface PushErrorHandler {
         repository: Repository,
         remote: Remote,
         refspec: string,
-        error: Error & { gitErrorCode: GitErrorCodes },
+        error: Error & { gitErrorCode: GitErrorCodesOptions },
     ): Promise<boolean>;
 }
 
@@ -286,40 +305,76 @@ export interface GitExtension {
     getAPI(version: 1): API;
 }
 
-export const enum GitErrorCodes {
-    BadConfigFile = "BadConfigFile",
-    AuthenticationFailed = "AuthenticationFailed",
-    NoUserNameConfigured = "NoUserNameConfigured",
-    NoUserEmailConfigured = "NoUserEmailConfigured",
-    NoRemoteRepositorySpecified = "NoRemoteRepositorySpecified",
-    NotAGitRepository = "NotAGitRepository",
-    NotAtRepositoryRoot = "NotAtRepositoryRoot",
-    Conflict = "Conflict",
-    StashConflict = "StashConflict",
-    UnmergedChanges = "UnmergedChanges",
-    PushRejected = "PushRejected",
-    RemoteConnectionError = "RemoteConnectionError",
-    DirtyWorkTree = "DirtyWorkTree",
-    CantOpenResource = "CantOpenResource",
-    GitNotFound = "GitNotFound",
-    CantCreatePipe = "CantCreatePipe",
-    PermissionDenied = "PermissionDenied",
-    CantAccessRemote = "CantAccessRemote",
-    RepositoryNotFound = "RepositoryNotFound",
-    RepositoryIsLocked = "RepositoryIsLocked",
-    BranchNotFullyMerged = "BranchNotFullyMerged",
-    NoRemoteReference = "NoRemoteReference",
-    InvalidBranchName = "InvalidBranchName",
-    BranchAlreadyExists = "BranchAlreadyExists",
-    NoLocalChanges = "NoLocalChanges",
-    NoStashFound = "NoStashFound",
-    LocalChangesOverwritten = "LocalChangesOverwritten",
-    NoUpstreamBranch = "NoUpstreamBranch",
-    IsInSubmodule = "IsInSubmodule",
-    WrongCase = "WrongCase",
-    CantLockRef = "CantLockRef",
-    CantRebaseMultipleBranches = "CantRebaseMultipleBranches",
-    PatchDoesNotApply = "PatchDoesNotApply",
-    NoPathFound = "NoPathFound",
-    UnknownPath = "UnknownPath",
-}
+export type GitErrorCodesOptions =
+    | "BadConfigFile"
+    | "AuthenticationFailed"
+    | "NoUserNameConfigured"
+    | "NoUserEmailConfigured"
+    | "NoRemoteRepositorySpecified"
+    | "NotAGitRepository"
+    | "NotAtRepositoryRoot"
+    | "Conflict"
+    | "StashConflict"
+    | "UnmergedChanges"
+    | "PushRejected"
+    | "RemoteConnectionError"
+    | "DirtyWorkTree"
+    | "CantOpenResource"
+    | "GitNotFound"
+    | "CantCreatePipe"
+    | "PermissionDenied"
+    | "CantAccessRemote"
+    | "RepositoryNotFound"
+    | "RepositoryIsLocked"
+    | "BranchNotFullyMerged"
+    | "NoRemoteReference"
+    | "InvalidBranchName"
+    | "BranchAlreadyExists"
+    | "NoLocalChanges"
+    | "NoStashFound"
+    | "LocalChangesOverwritten"
+    | "NoUpstreamBranch"
+    | "IsInSubmodule"
+    | "WrongCase"
+    | "CantLockRef"
+    | "CantRebaseMultipleBranches"
+    | "PatchDoesNotApply"
+    | "NoPathFound"
+    | "UnknownPath";
+export const GitErrorCodes: Record<GitErrorCodesOptions, GitErrorCodesOptions> = {
+    BadConfigFile: "BadConfigFile",
+    AuthenticationFailed: "AuthenticationFailed",
+    NoUserNameConfigured: "NoUserNameConfigured",
+    NoUserEmailConfigured: "NoUserEmailConfigured",
+    NoRemoteRepositorySpecified: "NoRemoteRepositorySpecified",
+    NotAGitRepository: "NotAGitRepository",
+    NotAtRepositoryRoot: "NotAtRepositoryRoot",
+    Conflict: "Conflict",
+    StashConflict: "StashConflict",
+    UnmergedChanges: "UnmergedChanges",
+    PushRejected: "PushRejected",
+    RemoteConnectionError: "RemoteConnectionError",
+    DirtyWorkTree: "DirtyWorkTree",
+    CantOpenResource: "CantOpenResource",
+    GitNotFound: "GitNotFound",
+    CantCreatePipe: "CantCreatePipe",
+    PermissionDenied: "PermissionDenied",
+    CantAccessRemote: "CantAccessRemote",
+    RepositoryNotFound: "RepositoryNotFound",
+    RepositoryIsLocked: "RepositoryIsLocked",
+    BranchNotFullyMerged: "BranchNotFullyMerged",
+    NoRemoteReference: "NoRemoteReference",
+    InvalidBranchName: "InvalidBranchName",
+    BranchAlreadyExists: "BranchAlreadyExists",
+    NoLocalChanges: "NoLocalChanges",
+    NoStashFound: "NoStashFound",
+    LocalChangesOverwritten: "LocalChangesOverwritten",
+    NoUpstreamBranch: "NoUpstreamBranch",
+    IsInSubmodule: "IsInSubmodule",
+    WrongCase: "WrongCase",
+    CantLockRef: "CantLockRef",
+    CantRebaseMultipleBranches: "CantRebaseMultipleBranches",
+    PatchDoesNotApply: "PatchDoesNotApply",
+    NoPathFound: "NoPathFound",
+    UnknownPath: "UnknownPath",
+};

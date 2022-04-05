@@ -1,6 +1,6 @@
-import { Operation } from "./Operations.js";
+import { Operation, OperationOptions } from "./Operations.js";
 
-export function isReadOnly(operation: Operation): boolean {
+export function isReadOnly(operation: OperationOptions): boolean {
     switch (operation) {
         case Operation.Blame:
         case Operation.CheckIgnore:

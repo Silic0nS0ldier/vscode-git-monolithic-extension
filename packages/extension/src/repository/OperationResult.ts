@@ -1,6 +1,6 @@
-import type { Operation } from "./Operations.js";
+import type { OperationOptions } from "./Operations.js";
 
 export interface OperationResult {
-    operation: Operation;
+    operation: OperationOptions;
     error: any;
 }

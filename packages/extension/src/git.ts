@@ -27,6 +27,7 @@ import {
     Change,
     CommitOptions,
     ForcePushMode,
+    ForcePushModeOptions,
     GitErrorCodes,
     LogOptions,
     Ref,
@@ -995,7 +996,7 @@ export class Repository {
         name?: string,
         setUpstream: boolean = false,
         followTags = false,
-        forcePushMode?: ForcePushMode,
+        forcePushMode?: ForcePushModeOptions,
         tags = false,
     ): Promise<void> {
         const args = ["push"];

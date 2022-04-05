@@ -1,5 +1,5 @@
 import { OutputChannel, window } from "vscode";
-import { Log, LogLevel } from "../../logging/log.js";
+import { Log, LogLevel, LogLevelOptions } from "../../logging/log.js";
 import { localize } from "../../util.js";
 import type { ScmCommand } from "../helpers.js";
 
@@ -7,7 +7,7 @@ export function createCommand(
     outputChannel: OutputChannel,
 ): ScmCommand {
     async function setLogLevel(): Promise<void> {
-        const createItem = (logLevel: LogLevel) => ({
+        const createItem = (logLevel: LogLevelOptions) => ({
             description: Log.logLevel === logLevel ? localize("current", "Current") : undefined,
             label: LogLevel[logLevel],
             logLevel,

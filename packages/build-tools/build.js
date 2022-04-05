@@ -1,11 +1,11 @@
 import cjs from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import { erase } from "@silicon-soldier/erase-ts-types";
 import { globbySync, isGitIgnoredSync } from "globby";
 import * as FS from "node:fs";
 import * as Path from "node:path";
 import * as URL from "node:url";
 import { rollup } from "rollup";
-import { exec } from "./util/exec.js";
 
 async function main() {
     const buildToolsPkg = Path.dirname(URL.fileURLToPath(import.meta.url));
@@ -76,7 +76,22 @@ function cleanDist(packagePath) {
 
 function compile(pkgPath, buildToolsPkgPath) {
     console.log(`  ${pkgPath}`);
-    exec("tsc", [], buildToolsPkgPath, pkgPath);
+    const paths = globbySync(Path.join(pkgPath, "src/**/*.ts"));
+    for (const path of paths) {
+        // Read
+        const tsContent = FS.readFileSync(path, "utf-8");
+        // Erase
+        const jsContent = erase(tsContent);
+        // Work out dest
+        const outPath = Path.join(pkgPath, "dist", Path.relative(Path.join(pkgPath, "src"), path)).replace(
+            /\.ts$/,
+            ".js",
+        );
+        // Prepare parent folders
+        FS.mkdirSync(Path.join(outPath, ".."), { recursive: true });
+        // Write
+        FS.writeFileSync(outPath, jsContent, "utf-8");
+    }
 }
 
 function patchNodePrefix(packagePath) {
