@@ -1,18 +1,18 @@
 import path from "node:path";
 import { Uri } from "vscode";
-import { Status } from "../../../api/git.js";
+import { Status, StatusOptions } from "../../../api/git.js";
 import type { IFileStatus } from "../../../git/IFileStatus.js";
 import type { Resource } from "../../Resource.js";
-import { ResourceGroupType } from "../../ResourceGroupType.js";
+import { ResourceGroupType, ResourceGroupTypeOptions } from "../../ResourceGroupType.js";
 
 // TODO Make pure
 export function pigeonholeFileStatus(
     repoRoot: string,
     fileStatus: IFileStatus,
     createResource: (
-        resourceGroupType: ResourceGroupType,
+        resourceGroupType: ResourceGroupTypeOptions,
         resourceUri: Uri,
-        type: Status,
+        type: StatusOptions,
         renameResourceUri?: Uri,
     ) => Resource,
     index: Resource[],
@@ -25,8 +25,8 @@ export function pigeonholeFileStatus(
         : undefined;
 
     function createResourceWithUri(
-        resourceGroupType: ResourceGroupType,
-        type: Status,
+        resourceGroupType: ResourceGroupTypeOptions,
+        type: StatusOptions,
         renameResourceUri?: Uri,
     ) {
         return createResource(

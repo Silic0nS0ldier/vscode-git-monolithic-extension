@@ -102,14 +102,14 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
                         // 500 used as the of limit 5000 is shared by multiple groups
                         // 500 may seem low, but should 99% of cases until a more reliable solution
                         // is used.
-                        annotations.push("(too many changes)")
+                        annotations.push("(too many changes)");
                     }
                 } else {
                     annotations.push("(empty)");
                 }
 
                 group.resourceStates = fadedResources;
-                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(' ')}` : "");
+                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
             }
 
             setTimeout(() => {
@@ -121,14 +121,14 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
                         // 500 used as the of limit 5000 is shared by multiple groups
                         // 500 may seem low, but should 99% of cases until a more reliable solution
                         // is used.
-                        annotations.push("(too many files)")
+                        annotations.push("(too many files)");
                     }
                 } else {
                     annotations.push("(empty)");
                 }
 
                 group.resourceStates = [...resources];
-                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(' ')}` : "");
+                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
             }, 900);
         },
     };

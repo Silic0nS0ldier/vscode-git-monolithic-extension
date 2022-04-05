@@ -7,6 +7,13 @@ import { pickRemoteSource } from "../../../remoteSource.js";
 import { localize } from "../../../util.js";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
 
+type PostCloneActionOptions = "Open" | "OpenNewWindow" | "AddToWorkspace";
+const PostCloneAction: Record<PostCloneActionOptions, PostCloneActionOptions> = {
+    Open: "Open",
+    OpenNewWindow: "OpenNewWindow",
+    AddToWorkspace: "AddToWorkspace",
+};
+
 export async function cloneRepository(
     model: Model,
     telemetryReporter: TelemetryReporter,
@@ -85,12 +92,7 @@ export async function cloneRepository(
             "openAfterClone",
         );
 
-        enum PostCloneAction {
-            Open,
-            OpenNewWindow,
-            AddToWorkspace,
-        }
-        let action: PostCloneAction | undefined = undefined;
+        let action: PostCloneActionOptions | undefined = undefined;
 
         if (openAfterClone === "always") {
             action = PostCloneAction.Open;

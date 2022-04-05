@@ -4,7 +4,7 @@ import type {
     BranchQuery,
     CommitOptions,
     FetchOptions,
-    ForcePushMode,
+    ForcePushModeOptions,
     LogOptions,
     Ref,
     Remote,
@@ -15,9 +15,9 @@ import type { Stash } from "../../git/Stash.js";
 import type { Submodule } from "../../git/Submodule.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import type { OperationResult } from "../OperationResult.js";
-import type { Operation } from "../Operations.js";
+import type { OperationOptions } from "../Operations.js";
 import type { Operations } from "../Operations.js";
-import type { RepositoryState } from "../RepositoryState.js";
+import type { RepositoryStateOptions } from "../RepositoryState.js";
 
 export type AbstractRepository = {
     readonly __type: Symbol;
@@ -74,10 +74,10 @@ export type AbstractRepository = {
     readonly logFile: (uri: Uri, options?: LogFileOptions) => Promise<Commit[]>;
     readonly merge: (ref: string) => Promise<void>;
     readonly move: (from: string, to: string) => Promise<void>;
-    readonly onDidChangeOperations: Event<Operation | OperationResult>;
+    readonly onDidChangeOperations: Event<OperationOptions | OperationResult>;
     readonly onDidChangeOriginalResource: Event<Uri>;
     readonly onDidChangeRepository: Event<Uri>;
-    readonly onDidChangeState: Event<RepositoryState>;
+    readonly onDidChangeState: Event<RepositoryStateOptions>;
     readonly onDidChangeStatus: Event<void>;
     /** @deprecated use onDidChangeStatus */
     readonly onDidRunGitStatus: Event<void>;
@@ -87,14 +87,14 @@ export type AbstractRepository = {
     readonly pull: (head?: Branch, unshallow?: boolean) => Promise<void>;
     readonly pullFrom: (rebase?: boolean, remote?: string, branch?: string, unshallow?: boolean) => Promise<void>;
     readonly pullWithRebase: (head: Branch | undefined) => Promise<void>;
-    readonly push: (head: Branch, forcePushMode?: ForcePushMode) => Promise<void>;
-    readonly pushFollowTags: (remote?: string, forcePushMode?: ForcePushMode) => Promise<void>;
-    readonly pushTags: (remote?: string, forcePushMode?: ForcePushMode) => Promise<void>;
+    readonly push: (head: Branch, forcePushMode?: ForcePushModeOptions) => Promise<void>;
+    readonly pushFollowTags: (remote?: string, forcePushMode?: ForcePushModeOptions) => Promise<void>;
+    readonly pushTags: (remote?: string, forcePushMode?: ForcePushModeOptions) => Promise<void>;
     readonly pushTo: (
         remote?: string,
         name?: string,
         setUpstream?: boolean,
-        forcePushMode?: ForcePushMode,
+        forcePushMode?: ForcePushModeOptions,
     ) => Promise<void>;
     readonly rebase: (branch: string) => Promise<void>;
     readonly rebaseAbort: () => Promise<void>;

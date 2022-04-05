@@ -1,4 +1,4 @@
-import type { Branch, ForcePushMode } from "../../api/git.js";
+import type { Branch, ForcePushModeOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import { throat } from "../../package-patches/throat.js";
 import type { IPushErrorHandlerRegistry } from "../../pushError.js";
@@ -13,7 +13,7 @@ export const push = throat(1, async (
     finalRepository: AbstractRepository,
     pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     head: Branch,
-    forcePushMode?: ForcePushMode,
+    forcePushMode?: ForcePushModeOptions,
 ) => {
     let remote: string | undefined;
     let branch: string | undefined;

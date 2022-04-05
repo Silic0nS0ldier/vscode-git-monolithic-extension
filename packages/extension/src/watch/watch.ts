@@ -19,7 +19,7 @@ const TargetEventEnum: Record<TargetEvent, string> = {
     renameDir: "renameDir",
     unlink: "unlink",
     unlinkDir: "unlinkDir",
-}
+};
 
 /**
  * Creates an optimised watcher.

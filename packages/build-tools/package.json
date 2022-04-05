@@ -9,6 +9,7 @@
         "rollup": "^2.69.2",
         "typescript": "https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.6.0-dev-tmp.1/typescript-4.6.0.tgz",
         "vsce": "^2.6.7",
-        "vscode-grammar-updater": "^1.0.4"
+        "vscode-grammar-updater": "^1.0.4",
+        "@silicon-soldier/erase-ts-types": "./silicon-soldier-erase-ts-types-0.1.0.tgz"
     }
 }

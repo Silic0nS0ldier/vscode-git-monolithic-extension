@@ -8,21 +8,21 @@ import {
     ThemeColor,
     Uri,
 } from "vscode";
-import { Status } from "../api/git.js";
+import { Status, StatusOptions } from "../api/git.js";
 import type { Submodule } from "../git/Submodule.js";
 import { getResources, resolveChangeCommand, resolveDefaultCommand } from "../repository/resource-command-resolver.js";
 import type { SourceControlUIGroup } from "../ui/source-control.js";
 import { localize } from "../util.js";
 import { getIconUri } from "./getIconUri.js";
-import type { ResourceGroupType } from "./ResourceGroupType.js";
+import type { ResourceGroupTypeOptions } from "./ResourceGroupType.js";
 
 export function createResource(
     repoRoot: string,
     submodules: Submodule[],
     sourceControlUI: SourceControlUIGroup,
-    resourceGroupType: ResourceGroupType,
+    resourceGroupType: ResourceGroupTypeOptions,
     resourceUri: Uri,
-    type: Status,
+    type: StatusOptions,
     useIcons: boolean,
     renameResourceUri?: Uri,
 ) {
@@ -50,7 +50,7 @@ export function createResource(
     );
 }
 
-function getStatusText(type: Status) {
+function getStatusText(type: StatusOptions) {
     switch (type) {
         case Status.INDEX_MODIFIED:
             return localize("index modified", "Index Modified");
@@ -114,7 +114,7 @@ const Icons = {
     },
 };
 
-function getIconPath(type: Status, theme: string): Uri {
+function getIconPath(type: StatusOptions, theme: string): Uri {
     if (theme !== "light" && theme !== "dark") {
         throw new Error(`Unknown theme ${theme}`);
     }
@@ -159,7 +159,7 @@ function getIconPath(type: Status, theme: string): Uri {
     }
 }
 
-function getStateLetter(type: Status): string {
+function getStateLetter(type: StatusOptions): string {
     switch (type) {
         case Status.INDEX_MODIFIED:
         case Status.MODIFIED:
@@ -193,7 +193,7 @@ function getStateLetter(type: Status): string {
     }
 }
 
-function getStateColor(type: Status) {
+function getStateColor(type: StatusOptions) {
     switch (type) {
         case Status.INDEX_MODIFIED:
             return new ThemeColor("gitDecoration.stageModifiedResourceForeground");
@@ -226,7 +226,7 @@ function getStateColor(type: Status) {
     }
 }
 
-function getStateStrikethrough(type: Status) {
+function getStateStrikethrough(type: StatusOptions) {
     switch (type) {
         case Status.DELETED:
         case Status.BOTH_DELETED:
@@ -243,8 +243,8 @@ export type ResourceState = {
     readonly leftUri: Uri | undefined;
     readonly rightUri: Uri | undefined;
     readonly resourceUri: Uri;
-    readonly resourceGroupType: ResourceGroupType;
-    readonly type: Status;
+    readonly resourceGroupType: ResourceGroupTypeOptions;
+    readonly type: StatusOptions;
     readonly original: Uri;
     readonly renameResourceUri: Uri | undefined;
     readonly resourceDecoration: FileDecoration;
@@ -282,8 +282,8 @@ export class Resource implements SourceControlResourceState {
         private repoRoot: string,
         submodules: Submodule[],
         sourceControlUI: SourceControlUIGroup,
-        resourceGroupType: ResourceGroupType,
-        private type: Status,
+        resourceGroupType: ResourceGroupTypeOptions,
+        private type: StatusOptions,
         private _useIcons: boolean,
         renameResourceUri_?: Uri,
     ) {

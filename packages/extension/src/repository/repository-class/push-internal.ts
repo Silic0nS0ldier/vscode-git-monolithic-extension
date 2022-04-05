@@ -1,5 +1,5 @@
 import { ApiRepository } from "../../api/api1.js";
-import type { ForcePushMode } from "../../api/git.js";
+import type { ForcePushModeOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
@@ -12,7 +12,7 @@ export async function pushInternal(
     refspec?: string,
     setUpstream: boolean = false,
     followTags = false,
-    forcePushMode?: ForcePushMode,
+    forcePushMode?: ForcePushModeOptions,
     tags = false,
 ): Promise<void> {
     try {

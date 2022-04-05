@@ -2,20 +2,20 @@ import type { EventEmitter } from "vscode";
 import type { Branch, Ref, Remote } from "../../api/git.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import type { Box } from "../../util.js";
-import { RepositoryState } from "../RepositoryState.js";
+import { RepositoryState, RepositoryStateOptions } from "../RepositoryState.js";
 
 export function createStateBox(
-    onDidChangeState: EventEmitter<RepositoryState>,
+    onDidChangeState: EventEmitter<RepositoryStateOptions>,
     HEAD: Box<Branch | undefined>,
     refs: Box<Ref[]>,
     remotes: Box<Remote[]>,
     sourceControlUI: SourceControlUIGroup,
-): Box<RepositoryState> {
+): Box<RepositoryStateOptions> {
     let state = RepositoryState.Idle;
 
     return {
         get: () => state,
-        set: (newState: RepositoryState) => {
+        set: (newState: RepositoryStateOptions) => {
             state = newState;
 
             HEAD.set(undefined);

@@ -1,5 +1,5 @@
 import type { Event, OutputChannel, Uri } from "vscode";
-import { Log, LogLevel } from "../logging/log.js";
+import { Log, LogLevel, LogLevelOptions } from "../logging/log.js";
 import { combinedDisposable, EmptyDisposable, IDisposable } from "../util.js";
 
 export class FileEventLogger {
@@ -15,7 +15,7 @@ export class FileEventLogger {
         this.onDidChangeLogLevel(Log.logLevel);
     }
 
-    private onDidChangeLogLevel(level: LogLevel): void {
+    private onDidChangeLogLevel(level: LogLevelOptions): void {
         this.eventDisposable.dispose();
 
         if (level > LogLevel.Debug) {

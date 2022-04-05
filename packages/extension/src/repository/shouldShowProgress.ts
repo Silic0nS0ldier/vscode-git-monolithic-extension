@@ -1,6 +1,6 @@
-import { Operation } from "./Operations.js";
+import { Operation, OperationOptions } from "./Operations.js";
 
-export function shouldShowProgress(operation: Operation): boolean {
+export function shouldShowProgress(operation: OperationOptions): boolean {
     switch (operation) {
         case Operation.Fetch:
         case Operation.CheckIgnore:
