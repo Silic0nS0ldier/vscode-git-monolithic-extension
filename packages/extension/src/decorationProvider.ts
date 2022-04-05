@@ -171,7 +171,7 @@ class GitDecorationProvider implements FileDecorationProvider {
 
 export function addDecorations(model: Model): Disposable {
     const disposables: Disposable[] = [
-        new GitIgnoreDecorationProvider(model)
+        new GitIgnoreDecorationProvider(model),
     ];
     const modelDisposables: Disposable[] = [];
     const providers = new Map<AbstractRepository, Disposable>();
@@ -228,5 +228,5 @@ export function addDecorations(model: Model): Disposable {
             disposeHelper(disposables);
             disposables.length = 0;
         },
-    }
+    };
 }

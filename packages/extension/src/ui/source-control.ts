@@ -143,8 +143,7 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
                 group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
 
                 setTimeout(apply, 900);
-            }
-            else {
+            } else {
                 apply();
             }
         },
