@@ -3,35 +3,41 @@ import { Log, LogLevel, LogLevelOptions } from "../logging/log.js";
 import { combinedDisposable, EmptyDisposable, IDisposable } from "../util.js";
 
 export class FileEventLogger {
-    private eventDisposable: IDisposable = EmptyDisposable;
-    private logLevelDisposable: IDisposable = EmptyDisposable;
+    #eventDisposable: IDisposable = EmptyDisposable;
+    #logLevelDisposable: IDisposable = EmptyDisposable;
+    #onWorkspaceWorkingTreeFileChange: Event<Uri>;
+    #onDotGitFileChange: Event<Uri>;
+    #outputChannel: OutputChannel;
 
     constructor(
-        private onWorkspaceWorkingTreeFileChange: Event<Uri>,
-        private onDotGitFileChange: Event<Uri>,
-        private outputChannel: OutputChannel,
+        onWorkspaceWorkingTreeFileChange: Event<Uri>,
+        onDotGitFileChange: Event<Uri>,
+        outputChannel: OutputChannel,
     ) {
-        this.logLevelDisposable = Log.onDidChangeLogLevel(this.onDidChangeLogLevel, this);
-        this.onDidChangeLogLevel(Log.logLevel);
+        this.#onWorkspaceWorkingTreeFileChange = onWorkspaceWorkingTreeFileChange;
+        this.#onDotGitFileChange = onDotGitFileChange;
+        this.#outputChannel = outputChannel;
+        this.#logLevelDisposable = Log.onDidChangeLogLevel(this.#onDidChangeLogLevel, this);
+        this.#onDidChangeLogLevel(Log.logLevel);
     }
 
-    private onDidChangeLogLevel(level: LogLevelOptions): void {
-        this.eventDisposable.dispose();
+    #onDidChangeLogLevel(level: LogLevelOptions): void {
+        this.#eventDisposable.dispose();
 
         if (level > LogLevel.Debug) {
             return;
         }
 
-        this.eventDisposable = combinedDisposable([
-            this.onWorkspaceWorkingTreeFileChange(uri =>
-                this.outputChannel.appendLine(`[debug] [wt] Change: ${uri.fsPath}`)
+        this.#eventDisposable = combinedDisposable([
+            this.#onWorkspaceWorkingTreeFileChange(uri =>
+                this.#outputChannel.appendLine(`[debug] [wt] Change: ${uri.fsPath}`)
             ),
-            this.onDotGitFileChange(uri => this.outputChannel.appendLine(`[debug] [.git] Change: ${uri.fsPath}`)),
+            this.#onDotGitFileChange(uri => this.#outputChannel.appendLine(`[debug] [.git] Change: ${uri.fsPath}`)),
         ]);
     }
 
     dispose(): void {
-        this.eventDisposable.dispose();
-        this.logLevelDisposable.dispose();
+        this.#eventDisposable.dispose();
+        this.#logLevelDisposable.dispose();
     }
 }

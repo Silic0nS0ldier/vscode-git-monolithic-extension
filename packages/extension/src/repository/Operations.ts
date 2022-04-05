@@ -104,28 +104,28 @@ export interface Operations {
 }
 
 export class OperationsImpl implements Operations {
-    private operations = new Map<OperationOptions, number>();
+    #operations = new Map<OperationOptions, number>();
 
     start(operation: OperationOptions): void {
-        this.operations.set(operation, (this.operations.get(operation) || 0) + 1);
+        this.#operations.set(operation, (this.#operations.get(operation) || 0) + 1);
     }
 
     end(operation: OperationOptions): void {
-        const count = (this.operations.get(operation) || 0) - 1;
+        const count = (this.#operations.get(operation) || 0) - 1;
 
         if (count <= 0) {
-            this.operations.delete(operation);
+            this.#operations.delete(operation);
         } else {
-            this.operations.set(operation, count);
+            this.#operations.set(operation, count);
         }
     }
 
     isRunning(operation: OperationOptions): boolean {
-        return this.operations.has(operation);
+        return this.#operations.has(operation);
     }
 
     isIdle(): boolean {
-        const operations = this.operations.keys();
+        const operations = this.#operations.keys();
 
         for (const operation of operations) {
             if (!isReadOnly(operation)) {
@@ -137,7 +137,7 @@ export class OperationsImpl implements Operations {
     }
 
     shouldShowProgress(): boolean {
-        const operations = this.operations.keys();
+        const operations = this.#operations.keys();
 
         for (const operation of operations) {
             if (shouldShowProgress(operation)) {

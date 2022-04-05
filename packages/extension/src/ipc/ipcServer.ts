@@ -66,29 +66,36 @@ export interface IIPCServer extends Disposable {
 }
 
 class IPCServer implements IIPCServer, Disposable {
-    private handlers = new Map<string, IIPCHandler>();
+    #handlers = new Map<string, IIPCHandler>();
     get ipcHandlePath(): string {
-        return this._ipcHandlePath;
+        return this.#ipcHandlePath;
     }
 
-    constructor(private server: http.Server, private _ipcHandlePath: string) {
-        this.server.on("request", this.onRequest.bind(this));
+    #server: http.Server;
+    #ipcHandlePath: string;
+
+    constructor(server: http.Server, ipcHandlePath: string) {
+        this.#server = server;
+        this.#ipcHandlePath = ipcHandlePath;
+        this.#server.on("request", this.#onRequest.bind(this));
     }
 
     registerHandler(name: string, handler: IIPCHandler): Disposable {
-        this.handlers.set(`/${name}`, handler);
-        return toDisposable(() => this.handlers.delete(name));
+        this.#handlers.set(`/${name}`, handler);
+        return toDisposable(() => this.#handlers.delete(name));
     }
 
-    private onRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
+    #onRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
         if (!req.url) {
+            // TODO This won't go anywhere useful
             console.warn(`Request lacks url`);
             return;
         }
 
-        const handler = this.handlers.get(req.url);
+        const handler = this.#handlers.get(req.url);
 
         if (!handler) {
+            // TODO This won't go anywhere useful
             console.warn(`IPC handler for ${req.url} not found`);
             return;
         }
@@ -112,11 +119,11 @@ class IPCServer implements IIPCServer, Disposable {
     }
 
     dispose(): void {
-        this.handlers.clear();
-        this.server.close();
+        this.#handlers.clear();
+        this.#server.close();
 
-        if (this._ipcHandlePath && process.platform !== "win32") {
-            fs.unlinkSync(this._ipcHandlePath);
+        if (this.#ipcHandlePath && process.platform !== "win32") {
+            fs.unlinkSync(this.#ipcHandlePath);
         }
     }
 }

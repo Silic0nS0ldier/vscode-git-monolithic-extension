@@ -14,9 +14,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export class Askpass implements IIPCHandler {
-    private disposable: IDisposable = EmptyDisposable;
-    private cache = new Map<string, Credentials>();
-    private credentialsProviders = new Set<CredentialsProvider>();
+    #disposable: IDisposable = EmptyDisposable;
+    #cache = new Map<string, Credentials>();
+    #credentialsProviders = new Set<CredentialsProvider>();
+    #ipc?: IIPCServer;
 
     static async create(outputChannel: OutputChannel, context?: string): Promise<Askpass> {
         try {
@@ -27,9 +28,10 @@ export class Askpass implements IIPCHandler {
         }
     }
 
-    private constructor(private ipc?: IIPCServer) {
-        if (ipc) {
-            this.disposable = ipc.registerHandler("askpass", this);
+    private constructor(ipc?: IIPCServer) {
+        this.#ipc = ipc;
+        if (this.#ipc) {
+            this.#disposable = this.#ipc.registerHandler("askpass", this);
         }
     }
 
@@ -44,21 +46,21 @@ export class Askpass implements IIPCHandler {
         const uri = Uri.parse(host);
         const authority = uri.authority.replace(/^.*@/, "");
         const password = /password/i.test(request);
-        const cached = this.cache.get(authority);
+        const cached = this.#cache.get(authority);
 
         if (cached && password) {
-            this.cache.delete(authority);
+            this.#cache.delete(authority);
             return cached.password;
         }
 
         if (!password) {
-            for (const credentialsProvider of this.credentialsProviders) {
+            for (const credentialsProvider of this.#credentialsProviders) {
                 try {
                     const credentials = await credentialsProvider.getCredentials(uri);
 
                     if (credentials) {
-                        this.cache.set(authority, credentials);
-                        setTimeout(() => this.cache.delete(authority), 60_000);
+                        this.#cache.set(authority, credentials);
+                        setTimeout(() => this.#cache.delete(authority), 60_000);
                         return credentials.username;
                     }
                 } catch {}
@@ -76,14 +78,14 @@ export class Askpass implements IIPCHandler {
     }
 
     getEnv(): { [key: string]: string } {
-        if (!this.ipc) {
+        if (!this.#ipc) {
             return {
                 GIT_ASKPASS: path.join(__dirname, "askpass-empty.sh"),
             };
         }
 
         return {
-            ...this.ipc.getEnv(),
+            ...this.#ipc.getEnv(),
             GIT_ASKPASS: path.join(__dirname, "askpass.sh"),
             VSCODE_GIT_ASKPASS_MAIN: path.join(__dirname, "askpass-main.js"),
             VSCODE_GIT_ASKPASS_NODE: process.execPath,
@@ -91,11 +93,11 @@ export class Askpass implements IIPCHandler {
     }
 
     registerCredentialsProvider(provider: CredentialsProvider): Disposable {
-        this.credentialsProviders.add(provider);
-        return toDisposable(() => this.credentialsProviders.delete(provider));
+        this.#credentialsProviders.add(provider);
+        return toDisposable(() => this.#credentialsProviders.delete(provider));
     }
 
     dispose(): void {
-        this.disposable.dispose();
+        this.#disposable.dispose();
     }
 }

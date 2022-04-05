@@ -3,7 +3,7 @@
     "name": "extension",
     "type": "module",
     "dependencies": {
-        "@vscode/extension-telemetry": "0.4.9",
+        "@vscode/extension-telemetry": "0.4.10",
         "aggregate-error": "^4.0.0",
         "byline": "^4.2.2",
         "get-stream": "^6.0.1",

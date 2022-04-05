@@ -1,5 +1,6 @@
 import { commands, MessageOptions, OutputChannel, Uri, window, workspace } from "vscode";
 import { GitErrorCodes } from "../api/git.js";
+import { prettyPrint } from "../logging/pretty-print.js";
 import type { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
@@ -150,7 +151,7 @@ export function createCommand(
             }
 
             if (!message) {
-                console.error(err);
+                outputChannel.appendLine("[ERROR] " + await prettyPrint(err));
                 return;
             }
 

@@ -18,10 +18,11 @@ import { GitExtensionImpl } from "../api/extension.js";
 import type { GitExtension } from "../api/git.js";
 import { Askpass } from "../askpass.js";
 import { registerCommands } from "../commands/register.js";
-import { GitDecorations } from "../decorationProvider.js";
+import { addDecorations } from "../decorationProvider.js";
 import { GitFileSystemProvider } from "../fileSystemProvider.js";
 import { Git } from "../git.js";
 import { findGit, IGit } from "../git/find.js";
+import { prettyPrint } from "../logging/pretty-print.js";
 import { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
@@ -30,11 +31,13 @@ import { eventToPromise, filterEvent, localize, toDisposable } from "../util.js"
 import { deactivateTasks } from "./deactivate.js";
 
 export async function activate(context: ExtensionContext): Promise<GitExtension> {
-    console.warn("git ext starting");
+    const outputChannel = window.createOutputChannel("Git");
+
+    outputChannel.appendLine("Monolithic Git for VSCode is starting...");
+
     const disposables: Disposable[] = [];
     context.subscriptions.push(new Disposable(() => Disposable.from(...disposables).dispose()));
 
-    const outputChannel = window.createOutputChannel("Git");
     commands.registerCommand("git.showOutput", () => outputChannel.show());
     disposables.push(outputChannel);
 
@@ -76,8 +79,7 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
             throw err;
         }
 
-        console.warn(err.message);
-        outputChannel.appendLine(err.message);
+        outputChannel.appendLine("[WARN] " + await prettyPrint(err.message));
 
         commands.executeCommand("setContext", "git.missing", true);
         warnAboutMissingGit();
@@ -149,8 +151,8 @@ async function createModel(
         // TODO This is a really funky pattern that relies on side effects
         // Find a better way
         new GitFileSystemProvider(model),
-        new GitDecorations(model),
-        new GitProtocolHandler(),
+        addDecorations(model),
+        new GitProtocolHandler(outputChannel),
         // new GitTimelineProvider(model, cc)
     );
 

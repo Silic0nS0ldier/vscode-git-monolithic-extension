@@ -79,8 +79,6 @@ export type AbstractRepository = {
     readonly onDidChangeRepository: Event<Uri>;
     readonly onDidChangeState: Event<RepositoryStateOptions>;
     readonly onDidChangeStatus: Event<void>;
-    /** @deprecated use onDidChangeStatus */
-    readonly onDidRunGitStatus: Event<void>;
     readonly onDidRunOperation: Event<OperationResult>;
     readonly operations: Operations;
     readonly popStash: (index?: number) => Promise<void>;

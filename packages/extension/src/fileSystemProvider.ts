@@ -50,18 +50,20 @@ function sanitizeRef(ref: string, path: string, repository: AbstractRepository):
 }
 
 export class GitFileSystemProvider implements FileSystemProvider {
-    private _onDidChangeFile = new EventEmitter<FileChangeEvent[]>();
-    readonly onDidChangeFile: Event<FileChangeEvent[]> = this._onDidChangeFile.event;
+    #onDidChangeFileEmitter = new EventEmitter<FileChangeEvent[]>();
+    readonly onDidChangeFile: Event<FileChangeEvent[]> = this.#onDidChangeFileEmitter.event;
 
-    private changedRepositoryRoots = new Set<string>();
-    private cache = new Map<string, CacheRow>();
-    private mtime = new Date().getTime();
-    private disposables: Disposable[] = [];
+    #changedRepositoryRoots = new Set<string>();
+    #cache = new Map<string, CacheRow>();
+    #mtime = new Date().getTime();
+    #disposables: Disposable[] = [];
+    #model: Model;
 
-    constructor(private model: Model) {
-        this.disposables.push(
-            model.onDidChangeRepository(this.onDidChangeRepository, this),
-            model.onDidChangeOriginalResource(this.onDidChangeOriginalResource, this),
+    constructor(model: Model) {
+        this.#model = model;
+        this.#disposables.push(
+            this.#model.onDidChangeRepository(this.#onDidChangeRepository, this),
+            this.#model.onDidChangeOriginalResource(this.#onDidChangeOriginalResource, this),
             workspace.registerFileSystemProvider("git", this, { isCaseSensitive: true, isReadonly: true }),
             // workspace.registerResourceLabelFormatter({
             // 	scheme: 'git',
@@ -72,25 +74,25 @@ export class GitFileSystemProvider implements FileSystemProvider {
             // })
         );
 
-        setInterval(() => this.cleanup(), FIVE_MINUTES);
+        setInterval(() => this.#cleanup(), FIVE_MINUTES);
     }
 
-    private onDidChangeRepository({ repository }: ModelChangeEvent): void {
-        this.changedRepositoryRoots.add(repository.root);
-        this.eventuallyFireChangeEvents();
+    #onDidChangeRepository({ repository }: ModelChangeEvent): void {
+        this.#changedRepositoryRoots.add(repository.root);
+        this.#eventuallyFireChangeEvents();
     }
 
-    private onDidChangeOriginalResource({ uri }: OriginalResourceChangeEvent): void {
+    #onDidChangeOriginalResource({ uri }: OriginalResourceChangeEvent): void {
         if (uri.scheme !== "file") {
             return;
         }
 
         const gitUri = toGitUri(uri, "", { replaceFileExtension: true });
-        this.mtime = new Date().getTime();
-        this._onDidChangeFile.fire([{ type: FileChangeType.Changed, uri: gitUri }]);
+        this.#mtime = new Date().getTime();
+        this.#onDidChangeFileEmitter.fire([{ type: FileChangeType.Changed, uri: gitUri }]);
     }
 
-    private fireChangeEvents = throat(1, async () => {
+    #fireChangeEvents = throat(1, async () => {
         if (!window.state.focused) {
             const onDidFocusWindow = filterEvent(window.onDidChangeWindowState, e => e.focused);
             await eventToPromise(onDidFocusWindow);
@@ -98,10 +100,10 @@ export class GitFileSystemProvider implements FileSystemProvider {
 
         const events: FileChangeEvent[] = [];
 
-        for (const { uri } of this.cache.values()) {
+        for (const { uri } of this.#cache.values()) {
             const fsPath = uri.fsPath;
 
-            for (const root of this.changedRepositoryRoots) {
+            for (const root of this.#changedRepositoryRoots) {
                 if (isDescendant(root, fsPath)) {
                     events.push({ type: FileChangeType.Changed, uri });
                     break;
@@ -110,20 +112,20 @@ export class GitFileSystemProvider implements FileSystemProvider {
         }
 
         if (events.length > 0) {
-            this.mtime = new Date().getTime();
-            this._onDidChangeFile.fire(events);
+            this.#mtime = new Date().getTime();
+            this.#onDidChangeFileEmitter.fire(events);
         }
 
-        this.changedRepositoryRoots.clear();
+        this.#changedRepositoryRoots.clear();
     });
 
-    private eventuallyFireChangeEvents = debounce(this.fireChangeEvents, 1100);
+    #eventuallyFireChangeEvents = debounce(this.#fireChangeEvents, 1100);
 
-    private cleanup(): void {
+    #cleanup(): void {
         const now = new Date().getTime();
         const cache = new Map<string, CacheRow>();
 
-        for (const row of this.cache.values()) {
+        for (const row of this.#cache.values()) {
             const { path } = fromGitUri(row.uri);
             const isOpen = workspace.textDocuments
                 .filter(d => d.uri.scheme === "file")
@@ -136,7 +138,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
             }
         }
 
-        this.cache = cache;
+        this.#cache = cache;
     }
 
     watch(): Disposable {
@@ -144,10 +146,10 @@ export class GitFileSystemProvider implements FileSystemProvider {
     }
 
     async stat(uri: Uri): Promise<FileStat> {
-        await this.model.isInitialized();
+        await this.#model.isInitialized();
 
         const { submoduleOf, path, ref } = fromGitUri(uri);
-        const repository = submoduleOf ? this.model.getRepository(submoduleOf) : this.model.getRepository(uri);
+        const repository = submoduleOf ? this.#model.getRepository(submoduleOf) : this.#model.getRepository(uri);
         if (!repository) {
             throw FileSystemError.FileNotFound();
         }
@@ -159,7 +161,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
         } catch {
             // noop
         }
-        return { ctime: 0, mtime: this.mtime, size: size, type: FileType.File };
+        return { ctime: 0, mtime: this.#mtime, size: size, type: FileType.File };
     }
 
     readDirectory(): Thenable<[string, FileType][]> {
@@ -171,12 +173,12 @@ export class GitFileSystemProvider implements FileSystemProvider {
     }
 
     async readFile(uri: Uri): Promise<Uint8Array> {
-        await this.model.isInitialized();
+        await this.#model.isInitialized();
 
         const { path, ref, submoduleOf } = fromGitUri(uri);
 
         if (submoduleOf) {
-            const repository = this.model.getRepository(submoduleOf);
+            const repository = this.#model.getRepository(submoduleOf);
 
             if (!repository) {
                 throw FileSystemError.FileNotFound();
@@ -191,7 +193,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
             }
         }
 
-        const repository = this.model.getRepository(uri);
+        const repository = this.#model.getRepository(uri);
 
         if (!repository) {
             throw FileSystemError.FileNotFound();
@@ -200,7 +202,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
         const timestamp = new Date().getTime();
         const cacheValue: CacheRow = { timestamp, uri };
 
-        this.cache.set(uri.toString(), cacheValue);
+        this.#cache.set(uri.toString(), cacheValue);
 
         try {
             return await repository.buffer(sanitizeRef(ref, path, repository), path);
@@ -222,6 +224,6 @@ export class GitFileSystemProvider implements FileSystemProvider {
     }
 
     dispose(): void {
-        this.disposables.forEach(d => d.dispose());
+        this.#disposables.forEach(d => d.dispose());
     }
 }

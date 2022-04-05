@@ -60,11 +60,11 @@ export async function getStatusTrackedAndMerge(
 }
 
 class GitStatusParser {
-    private lastRaw = "";
-    private result: IFileStatus[] = [];
+    #lastRaw = "";
+    #result: IFileStatus[] = [];
 
     get status(): IFileStatus[] {
-        return this.result;
+        return this.#result;
     }
 
     update(raw: string): void {
@@ -72,16 +72,16 @@ class GitStatusParser {
         let i = 0;
         let nextI: number | undefined;
 
-        normalisedRaw = this.lastRaw + normalisedRaw;
+        normalisedRaw = this.#lastRaw + normalisedRaw;
 
-        while ((nextI = this.parseEntry(normalisedRaw, i)) !== undefined) {
+        while ((nextI = this.#parseEntry(normalisedRaw, i)) !== undefined) {
             i = nextI;
         }
 
-        this.lastRaw = normalisedRaw.substr(i);
+        this.#lastRaw = normalisedRaw.substr(i);
     }
 
-    private parseEntry(raw: string, start: number): number | undefined {
+    #parseEntry(raw: string, start: number): number | undefined {
         let i = start;
         if (i + 4 >= raw.length) {
             return;
@@ -119,7 +119,7 @@ class GitStatusParser {
 
         // If path ends with slash, it must be a nested git repo
         if (entry.path[entry.path.length - 1] !== "/") {
-            this.result.push(entry);
+            this.#result.push(entry);
         }
 
         return lastIndex + 1;

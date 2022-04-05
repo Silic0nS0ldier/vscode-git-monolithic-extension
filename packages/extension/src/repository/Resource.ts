@@ -261,35 +261,44 @@ export class Resource implements SourceControlResourceState {
     readonly state: ResourceState;
 
     get resourceUri(): Uri {
-        return this.normalisedResourceUri();
+        return this.#normalisedResourceUri();
     }
 
     get command(): Command {
-        return resolveDefaultCommand(this, this.repoRoot);
+        return resolveDefaultCommand(this, this.#repoRoot);
     }
 
     get decorations(): SourceControlResourceDecorations {
-        const light = this._useIcons ? { iconPath: getIconPath(this.type, "light") } : undefined;
-        const dark = this._useIcons ? { iconPath: getIconPath(this.type, "dark") } : undefined;
-        const tooltip = getStatusText(this.type);
-        const strikeThrough = getStateStrikethrough(this.type);
+        const light = this.#useIcons ? { iconPath: getIconPath(this.#type, "light") } : undefined;
+        const dark = this.#useIcons ? { iconPath: getIconPath(this.#type, "dark") } : undefined;
+        const tooltip = getStatusText(this.#type);
+        const strikeThrough = getStateStrikethrough(this.#type);
         const faded = false;
         return { dark, faded, light, strikeThrough, tooltip };
     }
 
+    #normalisedResourceUri: () => Uri;
+    #repoRoot: string;
+    #type: StatusOptions;
+    #useIcons: boolean;
+
     constructor(
-        private normalisedResourceUri: () => Uri,
-        private repoRoot: string,
+        normalisedResourceUri: () => Uri,
+        repoRoot: string,
         submodules: Submodule[],
         sourceControlUI: SourceControlUIGroup,
         resourceGroupType: ResourceGroupTypeOptions,
-        private type: StatusOptions,
-        private _useIcons: boolean,
+        type: StatusOptions,
+        useIcons: boolean,
         renameResourceUri_?: Uri,
     ) {
+        this.#normalisedResourceUri = normalisedResourceUri;
+        this.#repoRoot = repoRoot;
+        this.#type = type;
+        this.#useIcons = useIcons;
         const self = this;
         const resources = onetime((): [Uri | undefined, Uri | undefined] =>
-            getResources(self.state, self.repoRoot, submodules, sourceControlUI.stagedGroup)
+            getResources(self.state, self.#repoRoot, submodules, sourceControlUI.stagedGroup)
         );
         this.state = {
             get leftUri(): Uri | undefined {
@@ -311,11 +320,11 @@ export class Resource implements SourceControlResourceState {
             },
             get resourceDecoration() {
                 const res = new FileDecoration(
-                    getStateLetter(self.type),
-                    getStatusText(self.type),
-                    getStateColor(self.type),
+                    getStateLetter(self.#type),
+                    getStatusText(self.#type),
+                    getStateColor(self.#type),
                 );
-                res.propagate = self.type !== Status.DELETED && self.type !== Status.INDEX_DELETED;
+                res.propagate = self.#type !== Status.DELETED && self.#type !== Status.INDEX_DELETED;
                 return res;
             },
             get resourceGroupType() {
@@ -328,7 +337,7 @@ export class Resource implements SourceControlResourceState {
                 return resources()[1];
             },
             get type() {
-                return self.type;
+                return self.#type;
             },
         };
     }

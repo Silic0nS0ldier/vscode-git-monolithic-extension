@@ -15,6 +15,7 @@ export async function runByRepository(
         let repository = model.getRepository(resource);
 
         if (!repository) {
+            // TODO This won't go anywhere useful
             console.warn("Could not find git repository for ", resource);
             return result;
         }
@@ -104,17 +105,17 @@ export interface ScmCommand {
 }
 
 export class CommandErrorOutputTextDocumentContentProvider implements TextDocumentContentProvider {
-    private items = new Map<string, string>();
+    #items = new Map<string, string>();
 
     set(uri: Uri, contents: string): void {
-        this.items.set(uri.path, contents);
+        this.#items.set(uri.path, contents);
     }
 
     delete(uri: Uri): void {
-        this.items.delete(uri.path);
+        this.#items.delete(uri.path);
     }
 
     provideTextDocumentContent(uri: Uri): string | undefined {
-        return this.items.get(uri.path);
+        return this.#items.get(uri.path);
     }
 }

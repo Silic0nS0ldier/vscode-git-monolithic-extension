@@ -11,13 +11,13 @@ import type { API, GitExtension } from "./git.js";
 export class GitExtensionImpl implements GitExtension {
     enabled: boolean = false;
 
-    private _onDidChangeEnablement = new EventEmitter<boolean>();
-    readonly onDidChangeEnablement: Event<boolean> = this._onDidChangeEnablement.event;
+    #onDidChangeEnablementEmitter = new EventEmitter<boolean>();
+    readonly onDidChangeEnablement: Event<boolean> = this.#onDidChangeEnablementEmitter.event;
 
-    private _model: Model | undefined = undefined;
+    #model: Model | undefined = undefined;
 
     set model(model: Model | undefined) {
-        this._model = model;
+        this.#model = model;
 
         const enabled = !!model;
 
@@ -26,22 +26,22 @@ export class GitExtensionImpl implements GitExtension {
         }
 
         this.enabled = enabled;
-        this._onDidChangeEnablement.fire(this.enabled);
+        this.#onDidChangeEnablementEmitter.fire(this.enabled);
     }
 
     get model(): Model | undefined {
-        return this._model;
+        return this.#model;
     }
 
     constructor(model?: Model) {
         if (model) {
             this.enabled = true;
-            this._model = model;
+            this.#model = model;
         }
     }
 
     getAPI(version: number): API {
-        if (!this._model) {
+        if (!this.#model) {
             throw new Error("Git model not found");
         }
 
@@ -49,6 +49,6 @@ export class GitExtensionImpl implements GitExtension {
             throw new Error(`No API version ${version} found.`);
         }
 
-        return new ApiImpl(this._model);
+        return new ApiImpl(this.#model);
     }
 }

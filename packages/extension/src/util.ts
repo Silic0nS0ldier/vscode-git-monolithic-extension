@@ -316,39 +316,39 @@ interface ILimitedTaskFactory<T> {
 }
 
 export class Limiter<T> {
-    private runningPromises: number;
-    private maxDegreeOfParalellism: number;
-    private outstandingPromises: ILimitedTaskFactory<T>[];
+    #runningPromises: number;
+    #maxDegreeOfParalellism: number;
+    #outstandingPromises: ILimitedTaskFactory<T>[];
 
     constructor(maxDegreeOfParalellism: number) {
-        this.maxDegreeOfParalellism = maxDegreeOfParalellism;
-        this.outstandingPromises = [];
-        this.runningPromises = 0;
+        this.#maxDegreeOfParalellism = maxDegreeOfParalellism;
+        this.#outstandingPromises = [];
+        this.#runningPromises = 0;
     }
 
     queue(factory: () => Promise<T>): Promise<T> {
         return new Promise<T>((c, e) => {
-            this.outstandingPromises.push({ c, e, factory });
-            this.consume();
+            this.#outstandingPromises.push({ c, e, factory });
+            this.#consume();
         });
     }
 
-    private consume(): void {
-        while (this.outstandingPromises.length && this.runningPromises < this.maxDegreeOfParalellism) {
-            const iLimitedTask = this.outstandingPromises.shift()!;
-            this.runningPromises++;
+    #consume(): void {
+        while (this.#outstandingPromises.length && this.#runningPromises < this.#maxDegreeOfParalellism) {
+            const iLimitedTask = this.#outstandingPromises.shift()!;
+            this.#runningPromises++;
 
             const promise = iLimitedTask.factory();
             promise.then(iLimitedTask.c, iLimitedTask.e);
-            promise.then(() => this.consumed(), () => this.consumed());
+            promise.then(() => this.#consumed(), () => this.#consumed());
         }
     }
 
-    private consumed(): void {
-        this.runningPromises--;
+    #consumed(): void {
+        this.#runningPromises--;
 
-        if (this.outstandingPromises.length > 0) {
-            this.consume();
+        if (this.#outstandingPromises.length > 0) {
+            this.#consume();
         }
     }
 }
@@ -356,15 +356,15 @@ export class Limiter<T> {
 type Completion<T> = { success: true; value: T } | { success: false; err: any };
 
 export class PromiseSource<T> {
-    private _onDidComplete = new EventEmitter<Completion<T>>();
+    #onDidCompleteEmitter = new EventEmitter<Completion<T>>();
 
-    private _promise: Promise<T> | undefined;
+    #promise: Promise<T> | undefined;
     get promise(): Promise<T> {
-        if (this._promise) {
-            return this._promise;
+        if (this.#promise) {
+            return this.#promise;
         }
 
-        return eventToPromise(this._onDidComplete.event).then(completion => {
+        return eventToPromise(this.#onDidCompleteEmitter.event).then(completion => {
             if (completion.success) {
                 return completion.value;
             } else {
@@ -374,16 +374,16 @@ export class PromiseSource<T> {
     }
 
     resolve(value: T): void {
-        if (!this._promise) {
-            this._promise = Promise.resolve(value);
-            this._onDidComplete.fire({ success: true, value });
+        if (!this.#promise) {
+            this.#promise = Promise.resolve(value);
+            this.#onDidCompleteEmitter.fire({ success: true, value });
         }
     }
 
     reject(err: any): void {
-        if (!this._promise) {
-            this._promise = Promise.reject(err);
-            this._onDidComplete.fire({ err, success: false });
+        if (!this.#promise) {
+            this.#promise = Promise.reject(err);
+            this.#onDidCompleteEmitter.fire({ err, success: false });
         }
     }
 }

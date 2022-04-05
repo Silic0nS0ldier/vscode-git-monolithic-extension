@@ -81,19 +81,50 @@ export type SourceControlUI = {
 
 function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
     let resources: readonly Resource[] = [];
+    let resourceStrings = new Set<string>();
     const baseLabel = group.label;
     return {
         get() {
-            // filter empty node
             return resources;
         },
         set(newValue) {
-            // delay change with a faded look first
-            // ideally do only when status is slow to run
-            // TODO don't push state change to VSCode is nothing has changed
-            {
+            // Unexpected layout shifts can be expensive (e.g. accidentally reverting wrong file)
+            // To avoid this we provide a grace period when the files shown change
+            let mayCauseLayoutShift = true;
+
+            if (newValue.length === resources.length) {
+                // Possibly unchanged, check more closely
+                if (newValue.every(nr => resourceStrings.has(nr.resourceUri.toString()))) {
+                    // No change or decorations only, no need for grace period
+                    mayCauseLayoutShift = false;
+                }
+            }
+
+            function apply() {
+                resources = newValue;
+                resourceStrings = new Set<string>(newValue.map(r => r.resourceUri.toString()));
+
+                const annotations: string[] = [];
+                if (newValue.length > 0) {
+                    if (newValue.length >= 500) {
+                        // 500 used as the of limit 5000 is shared by multiple groups
+                        // 500 may seem low, but should 99% of cases until a more reliable solution
+                        // is used.
+                        annotations.push("(too many files)");
+                    }
+                } else {
+                    annotations.push("(empty)");
+                }
+
+                group.resourceStates = [...resources];
+                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
+            }
+
+            if (mayCauseLayoutShift) {
                 const annotations: string[] = [];
                 const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
+                    // Command carried over to allow viewing
+                    command: old.command,
                     decorations: { faded: true },
                     resourceUri: old.resourceUri,
                 }));
@@ -110,26 +141,12 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
 
                 group.resourceStates = fadedResources;
                 group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
+
+                setTimeout(apply, 900);
             }
-
-            setTimeout(() => {
-                resources = newValue;
-
-                const annotations: string[] = [];
-                if (newValue.length > 0) {
-                    if (newValue.length >= 500) {
-                        // 500 used as the of limit 5000 is shared by multiple groups
-                        // 500 may seem low, but should 99% of cases until a more reliable solution
-                        // is used.
-                        annotations.push("(too many files)");
-                    }
-                } else {
-                    annotations.push("(empty)");
-                }
-
-                group.resourceStates = [...resources];
-                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
-            }, 900);
+            else {
+                apply();
+            }
         },
     };
 }
