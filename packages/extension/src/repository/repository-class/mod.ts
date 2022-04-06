@@ -14,9 +14,8 @@ import { anyEvent, createBox, dispose, eventToPromise, filterEvent, localize } f
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
-import { isReadOnly } from "../isReadOnly.js";
 import type { OperationResult } from "../OperationResult.js";
-import { Operation, OperationOptions } from "../Operations.js";
+import { isReadOnly, Operation, OperationOptions } from "../Operations.js";
 import { OperationsImpl } from "../Operations.js";
 import { ProgressManager } from "../ProgressManager.js";
 import { RepositoryState, RepositoryStateOptions } from "../RepositoryState.js";

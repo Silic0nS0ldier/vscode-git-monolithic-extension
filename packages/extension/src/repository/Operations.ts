@@ -1,5 +1,33 @@
-import { isReadOnly } from "./isReadOnly.js";
-import { shouldShowProgress } from "./shouldShowProgress.js";
+export function isReadOnly(operation: OperationOptions): boolean {
+    switch (operation) {
+        case Operation.Blame:
+        case Operation.CheckIgnore:
+        case Operation.Diff:
+        case Operation.FindTrackingBranches:
+        case Operation.GetBranch:
+        case Operation.GetCommitTemplate:
+        case Operation.GetObjectDetails:
+        case Operation.Log:
+        case Operation.LogFile:
+        case Operation.MergeBase:
+        case Operation.Show:
+            return true;
+        default:
+            return false;
+    }
+}
+
+function shouldShowProgress(operation: OperationOptions): boolean {
+    switch (operation) {
+        case Operation.Fetch:
+        case Operation.CheckIgnore:
+        case Operation.GetObjectDetails:
+        case Operation.Show:
+            return false;
+        default:
+            return true;
+    }
+}
 
 export type OperationOptions =
     | "Status"

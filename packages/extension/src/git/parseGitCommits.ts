@@ -1,4 +1,4 @@
-import { commitRegex } from "../git.js";
+import { commitRegex } from "./commit-regex.js";
 import type { Commit } from "./Commit.js";
 
 /**
