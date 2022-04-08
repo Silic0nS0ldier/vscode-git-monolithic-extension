@@ -2,12 +2,11 @@
     "private": true,
     "scripts": {
         "test": "node ./packages/build-tools/test.js",
-        "build": "node ./packages/build-tools/build.js",
+        "build": "node --experimental-import-meta-resolve ./packages/build-tools/build.js",
         "lint": "eslint --ext ts --fix --cache ./packages/",
         "update-emoji": "node ./packages/build-tools/update-emoji.js",
         "update-grammar": "node ./packages/build-tools/update-grammars.js",
-        "vsce": "node ./packages/build-tools/vsce.js",
-        "vscode:prepublish": "node ./packages/build-tools/build.js"
+        "vsce": "node --experimental-import-meta-resolve ./packages/build-tools/vsce.js"
     },
     "dependencies": {
         "@typescript-eslint/eslint-plugin": "^5.13.0",

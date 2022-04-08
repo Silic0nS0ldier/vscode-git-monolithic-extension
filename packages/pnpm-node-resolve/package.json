@@ -1,0 +1,8 @@
+{
+    "name": "pnpm-node-resolve",
+    "type": "module",
+    "exports": "./src/main.js",
+    "devDependencies": {
+        "rollup": "^2.70.1"
+    }
+}
