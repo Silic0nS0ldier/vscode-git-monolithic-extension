@@ -1,5 +1,5 @@
 // @ts-check
-import { createRequire, builtinModules } from "node:module";
+import { builtinModules, createRequire } from "node:module";
 
 /**
  * @typedef {{
@@ -13,7 +13,7 @@ export function nodeResolve(options) {
         name: "node-resolve",
         // TODO Mark how module was resolved. Once resolved via require, only require can be used
         // Ideally we'd follow the scope of the importer
-        async resolveId(source, importer, options) {
+        async resolveId(source, importer) {
             if (!importer) {
                 return source;
             }
@@ -21,16 +21,17 @@ export function nodeResolve(options) {
                 return false;
             }
             try {
-                let result = await import.meta.resolve(source, 'file://' + importer);
+                // As ESM?
+                let result = await import.meta.resolve(source, "file://" + importer);
                 result = result.replace(/file:\/\//, "");
                 return result;
-            } catch (e) {
-                // maybe old fashioned
+            } catch (esmErr) {
+                // Maybe CJS?
                 try {
                     const r = createRequire(importer);
                     return r.resolve(source);
-                } catch (ee) {
-                    throw new Error('damnit, but cjs', { cause: [ee, e] });
+                } catch (cjsErr) {
+                    throw new Error(`Failed to resolve module ${source} from ${importer}`, { cause: [esmErr, cjsErr] });
                 }
             }
         },

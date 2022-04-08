@@ -1,10 +1,10 @@
 import cjs from "@rollup/plugin-commonjs";
-import { nodeResolve } from "pnpm-node-resolve";
 import { erase } from "@silicon-soldier/erase-ts-types";
 import { globby, isGitIgnoredSync } from "globby";
 import * as FS from "node:fs";
 import * as Path from "node:path";
 import * as URL from "node:url";
+import { nodeResolve } from "pnpm-node-resolve";
 import { rollup } from "rollup";
 
 async function main() {
@@ -32,15 +32,24 @@ async function main() {
         compile(extensionPkg),
     ]);
     const copyPending = Promise.all([
-        FS.promises.cp(Path.join(extensionPkg, "src/askpass-empty.sh"), Path.join(stagingAreaPkg, "src/askpass-empty.sh")),
+        FS.promises.cp(
+            Path.join(extensionPkg, "src/askpass-empty.sh"),
+            Path.join(stagingAreaPkg, "src/askpass-empty.sh"),
+        ),
         FS.promises.cp(Path.join(extensionPkg, "src/askpass.sh"), Path.join(stagingAreaPkg, "src/askpass.sh")),
-        FS.promises.cp(Path.join(extensionPkg, "languages"), Path.join(stagingAreaPkg, "languages"), { recursive: true }),
-        FS.promises.cp(Path.join(extensionPkg, "resources"), Path.join(stagingAreaPkg, "resources"), { recursive: true }),
+        FS.promises.cp(Path.join(extensionPkg, "languages"), Path.join(stagingAreaPkg, "languages"), {
+            recursive: true,
+        }),
+        FS.promises.cp(Path.join(extensionPkg, "resources"), Path.join(stagingAreaPkg, "resources"), {
+            recursive: true,
+        }),
         FS.promises.cp(Path.join(extensionPkg, "syntaxes"), Path.join(stagingAreaPkg, "syntaxes"), { recursive: true }),
         FS.promises.cp(Path.join(extensionPkg, "cgmanifest.json"), Path.join(stagingAreaPkg, "cgmanifest.json"), {
             recursive: true,
         }),
-        FS.promises.cp(Path.join(repoRoot, "LICENSE.txt"), Path.join(stagingAreaPkg, "LICENSE.txt"), { recursive: true }),
+        FS.promises.cp(Path.join(repoRoot, "LICENSE.txt"), Path.join(stagingAreaPkg, "LICENSE.txt"), {
+            recursive: true,
+        }),
     ]);
 
     console.log("Bundling and coping artefacts...");
@@ -99,7 +108,7 @@ async function bundle(entrypoints, outputDir) {
         });
         await bundle.close();
     } catch (e) {
-        throw new Error('Bundling failed', { cause: e });
+        throw new Error("Bundling failed", { cause: e });
     }
 }
 
