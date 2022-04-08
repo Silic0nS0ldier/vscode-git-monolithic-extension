@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@rollup/plugin-commonjs": "^21.0.2",
+        "@rollup/plugin-commonjs": "^21.0.3",
         "execa": "^6.1.0",
         "globby": "^13.1.1",
         "rollup": "^2.70.1",

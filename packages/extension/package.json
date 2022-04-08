@@ -3,7 +3,7 @@
     "name": "extension",
     "type": "module",
     "dependencies": {
-        "@vscode/extension-telemetry": "0.4.10",
+        "@vscode/extension-telemetry": "^0.5.0",
         "aggregate-error": "^4.0.0",
         "byline": "^4.2.2",
         "get-stream": "^6.0.1",
@@ -13,13 +13,11 @@
         "onetime": "^6.0.0",
         "throat": "^6.0.1",
         "vscode-nls": "^5.0.0",
-        "watcher": "^1.2.0",
-        "which": "^2.0.2"
+        "watcher": "^1.2.0"
     },
     "devDependencies": {
         "@types/byline": "4.2.31",
         "@types/node": "^14.18.12",
-        "@types/vscode": "^1.65.0",
-        "@types/which": "^2.0.1"
+        "@types/vscode": "^1.65.0"
     }
 }
