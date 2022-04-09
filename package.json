@@ -11,13 +11,14 @@
     "dependencies": {
         "@typescript-eslint/eslint-plugin": "^5.18.0",
         "@typescript-eslint/parser": "^5.18.0",
-        "eslint": "^8.12.0",
+        "eslint": "^8.13.0",
         "eslint-plugin-ava": "^13.2.0",
         "typescript": "https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz"
     },
     "pnpm": {
         "overrides": {
-            "minimist@<1.2.6": ">=1.2.6"
+            "minimist@<1.2.6": "^1.2.6",
+            "semver@<7": "^7.3.6"
         }
     }
 }

@@ -3,13 +3,13 @@
     "type": "module",
     "dependencies": {
         "@rollup/plugin-commonjs": "^21.0.3",
+        "@silicon-soldier/erase-ts-types": "file:silicon-soldier-erase-ts-types-0.1.0.tgz",
         "execa": "^6.1.0",
         "globby": "^13.1.1",
+        "pnpm-node-resolve": "workspace:*",
         "rollup": "^2.70.1",
         "typescript": "https://github.com/Silic0nS0ldier/TypeScript/releases/download/v4.7.0-dev-tmp.0/typescript-4.7.0.tgz",
         "vsce": "^2.7.0",
-        "vscode-grammar-updater": "^1.0.4",
-        "@silicon-soldier/erase-ts-types": "./silicon-soldier-erase-ts-types-0.1.0.tgz",
-        "pnpm-node-resolve": "workspace:*"
+        "vscode-grammar-updater": "^1.0.4"
     }
 }
