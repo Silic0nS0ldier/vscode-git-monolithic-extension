@@ -1,6 +1,7 @@
 // @ts-check
 import cjs from "@rollup/plugin-commonjs";
 import { nodeResolve } from "pnpm-node-resolve";
+import * as Path from "node:path";
 import { rollup } from "rollup";
 import { clean } from "./build/clean.js";
 import { compile } from "./build/compile.js";
