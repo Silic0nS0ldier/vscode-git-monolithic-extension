@@ -1,4 +1,3 @@
-// @ts-expect-error
 import test from "ava";
 import NAC from "node-abort-controller";
 import { ERROR_CANCELLED, ERROR_GENERIC, ERROR_TIMEOUT } from "../errors.js";
@@ -6,7 +5,6 @@ import { isErr, isOk, unwrap } from "../func-result.js";
 import { create } from "./create.js";
 import { createSpawn } from "./create.stub.js";
 
-// @ts-ignore
 test("Basic case", async t => {
     const spawn = createSpawn("exit");
     const cli = create(
@@ -18,7 +16,6 @@ test("Basic case", async t => {
     t.true(isOk(res));
 });
 
-// @ts-ignore
 test("Timeout", async t => {
     const spawn = createSpawn("exit", { delay: 250 });
     const cli = create(
@@ -33,7 +30,6 @@ test("Timeout", async t => {
     }
 });
 
-// @ts-ignore
 test("Child process error", async t => {
     const spawn = createSpawn("error");
     const cli = create(
@@ -48,7 +44,6 @@ test("Child process error", async t => {
     }
 });
 
-// @ts-ignore
 test("Aborted before", async t => {
     const spawn = createSpawn("exit");
     const cli = create(
@@ -65,7 +60,6 @@ test("Aborted before", async t => {
     }
 });
 
-// @ts-ignore
 test("Aborted during", async t => {
     const spawn = createSpawn("exit", { delay: 250 });
     const cli = create(

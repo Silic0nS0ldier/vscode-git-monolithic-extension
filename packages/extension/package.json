@@ -5,7 +5,6 @@
     "dependencies": {
         "@vscode/extension-telemetry": "^0.5.0",
         "aggregate-error": "^4.0.0",
-        "byline": "^4.2.2",
         "get-stream": "^6.0.1",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:*",
@@ -16,8 +15,8 @@
         "watcher": "^1.2.0"
     },
     "devDependencies": {
-        "@types/byline": "4.2.31",
         "@types/node": "^14.18.12",
-        "@types/vscode": "^1.65.0"
+        "@types/vscode": "^1.65.0",
+        "ava": "workspace:*"
     }
 }

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as byline from "byline";
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
@@ -53,6 +52,7 @@ import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
 import { groupBy, Limiter, splitInChunks } from "./util.js";
+import { LineStream } from "./util/stream-by-line.js";
 import * as Versions from "./util/versions.js";
 
 // https://github.com/microsoft/vscode/issues/65693
@@ -137,7 +137,7 @@ export class Git {
 
         const onSpawn = (child: cp.ChildProcess) => {
             const decoder = new StringDecoder("utf8");
-            const lineStream = new byline.LineStream({ encoding: "utf8" });
+            const lineStream = new LineStream({ encoding: "utf8" });
             child.stderr!.on("data", (buffer: Buffer) => lineStream.write(decoder.write(buffer)));
 
             let totalProgress = 0;

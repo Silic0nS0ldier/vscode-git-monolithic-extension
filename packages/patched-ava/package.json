@@ -1,0 +1,14 @@
+{
+    "name": "ava",
+    "type": "module",
+    "exports": {
+        "default": "./lib.js",
+        "types": "./lib.d.ts"
+    },
+    "bin": {
+        "ava": "./cli.js"
+    },
+    "dependencies": {
+        "real-ava": "npm:ava@^4.1.0"
+    }
+}

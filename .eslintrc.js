@@ -3,7 +3,9 @@ module.exports = {
         "browser": true,
         "es2021": true,
     },
-    "extends": [],
+    "extends": [
+        "plugin:ava/recommended",
+    ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": 13,

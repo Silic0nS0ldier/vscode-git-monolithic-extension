@@ -1,7 +1,10 @@
 {
     "name": "pnpm-node-resolve",
     "type": "module",
-    "exports": "./src/main.js",
+    "exports": {
+        "default": "./lib.js",
+        "types": "./lib.d.ts"
+    },
     "devDependencies": {
         "rollup": "^2.70.1"
     }

@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as byline from "byline";
 import { createReadStream } from "node:fs";
 import { sep } from "node:path";
 import type { Readable } from "node:stream";
 import { Disposable, Event, EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
+import { toLineStream } from "./util/stream-by-line.js";
 
 export interface IDisposable {
     dispose(): void;
@@ -169,7 +169,7 @@ export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
 export async function grep(filename: string, pattern: RegExp): Promise<boolean> {
     return new Promise<boolean>((c, e) => {
         const fileStream = createReadStream(filename, { encoding: "utf8" });
-        const stream = byline.createStream(fileStream);
+        const stream = toLineStream(fileStream, { encoding: "utf8" });
         stream.on("data", (line: string) => {
             if (pattern.test(line)) {
                 fileStream.close();
