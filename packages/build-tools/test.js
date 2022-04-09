@@ -1,10 +1,12 @@
 import * as Path from "node:path";
 import * as URL from "node:url";
+import { clean } from "./build/clean.js";
 import { compile } from "./build/compile.js";
 import { exec } from "./util/exec.js";
 
 async function main() {
     console.log("Building everything first");
+    await clean();
     const { js, misc } = compile();
     await js;
     await misc;
