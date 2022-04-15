@@ -9,7 +9,7 @@ import { pickRemoteSource, PickRemoteSourceOptions } from "../remoteSource.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../repository/Resource.js";
 import { toGitUri } from "../uri.js";
-import { mapEvent } from "../util.js";
+import { mapEvent } from "../util/events.js";
 import type { GitExtensionImpl } from "./extension.js";
 import {
     API,

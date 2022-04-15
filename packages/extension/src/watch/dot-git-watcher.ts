@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Disposable, Event, EventEmitter, OutputChannel, Uri } from "vscode";
-import { anyEvent } from "../util.js";
+import { anyEvent } from "../util/events.js";
 import { watch } from "./watch.js";
 
 export function createDotGitWatcher(

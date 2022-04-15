@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import path from "node:path";
 import { Disposable, Event, RelativePattern, Uri, workspace } from "vscode";
-import { anyEvent, filterEvent } from "../util.js";
+import { anyEvent, filterEvent } from "../util/events.js";
 
 export function createWorkingTreeWatcher(
     repoRoot: string,

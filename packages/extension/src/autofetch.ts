@@ -18,7 +18,8 @@ import { GitErrorCodes } from "./api/git.js";
 import { GitError } from "./git/error.js";
 import { Operation, OperationOptions } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
-import { eventToPromise, filterEvent, localize, onceEvent } from "./util.js";
+import { localize } from "./util.js";
+import { eventToPromise, filterEvent, onceEvent } from "./util/events.js";
 
 function isRemoteOperation(operation: OperationOptions): boolean {
     return operation === Operation.Pull || operation === Operation.Push || operation === Operation.Sync

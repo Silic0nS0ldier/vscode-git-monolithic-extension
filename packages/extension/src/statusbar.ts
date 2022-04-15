@@ -8,8 +8,9 @@ import type { Branch, RemoteSourceProvider } from "./api/git.js";
 import type { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
 import { Operation } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
-import { anyEvent, filterEvent, localize } from "./util.js";
+import { localize } from "./util.js";
 import { dispose } from "./util/disposals.js";
+import { anyEvent, filterEvent } from "./util/events.js";
 
 class CheckoutStatusBar {
     #onDidChangeEmitter = new EventEmitter<void>();

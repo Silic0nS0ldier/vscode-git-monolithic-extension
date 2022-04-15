@@ -1443,7 +1443,7 @@ export class Repository {
             const gitmodulesRaw = await fs.readFile(gitmodulesPath, "utf8");
             return parseGitmodules(gitmodulesRaw);
         } catch (err) {
-            if (err instanceof GitError && /ENOENT/.test(err.message)) {
+            if (err instanceof Error && /ENOENT/.test(err.message)) {
                 return [];
             }
 

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Disposable, ExtensionContext, workspace } from "vscode";
-import { filterEvent } from "./util.js";
+import { filterEvent } from "./util/events.js";
 
 // TODO Review function name
 export function registerTerminalEnvironmentManager(
