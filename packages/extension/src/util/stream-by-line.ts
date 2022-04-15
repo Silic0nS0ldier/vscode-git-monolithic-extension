@@ -26,7 +26,6 @@ import stream from "node:stream";
 import timers from "node:timers";
 
 type LineStreamOptions = stream.TransformOptions & {
-    keepEmptyLines?: boolean;
     encoding: BufferEncoding;
 };
 
@@ -56,7 +55,6 @@ export class LineStream extends stream.Transform {
         });
 
         this.#lineBuffer = [];
-        this.#keepEmptyLines = options.keepEmptyLines || false;
         this.#lastChunkEndedWithCR = false;
     }
 
@@ -85,20 +83,23 @@ export class LineStream extends stream.Transform {
 
         this.#lastChunkEndedWithCR = str[str.length - 1] == "\r";
         this.#lineBuffer = this.#lineBuffer.concat(lines);
-        this._pushBuffer(encoding, 1, done);
+        this.#pushBuffer(1, done);
     }
 
-    _pushBuffer(encoding: BufferEncoding, keep: number, done: stream.TransformCallback) {
+    #pushBuffer(keep: number, done: stream.TransformCallback) {
         // always buffer the last (possibly partial) line
         while (this.#lineBuffer.length > keep) {
             var line = this.#lineBuffer.shift();
-            // skip empty lines
-            if (this.#keepEmptyLines || line.length > 0) {
-                if (!this.push(this._reencode(line, encoding))) {
+            if (!line) {
+                // Nothing to push
+                break;
+            }
+            if (line.length > 0) {
+                if (!this.push(line)) {
                     // when the high-water mark is reached, defer pushes until the next tick
                     var self = this;
                     timers.setImmediate(function() {
-                        self._pushBuffer(encoding, keep, done);
+                        self.#pushBuffer(keep, done);
                     });
                     return;
                 }
@@ -108,18 +109,6 @@ export class LineStream extends stream.Transform {
     }
 
     override _flush(done: stream.TransformCallback): void {
-        this._pushBuffer(this._chunkEncoding, 0, done);
-    }
-
-    // see Readable::push
-    _reencode(line: string, chunkEncoding: BufferEncoding) {
-        if (this.encoding && this.encoding != chunkEncoding) {
-            return Buffer.from(line, chunkEncoding).toString(this.encoding);
-        } else if (this.encoding) {
-            // this should be the most common case, i.e. we're using an encoded source stream
-            return line;
-        } else {
-            return Buffer.from(line, chunkEncoding);
-        }
+        this.#pushBuffer(0, done);
     }
 }

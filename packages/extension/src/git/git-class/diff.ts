@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import { Uri } from "vscode";
-import { Change, Status } from "../../api/git.js";
+import { Change, Status, StatusOptions } from "../../api/git.js";
 import type { IExecutionResult } from "../exec.js";
 import { sanitizePath } from "../helpers.js";
 import type { SpawnOptions } from "../SpawnOptions.js";
@@ -47,7 +47,7 @@ async function diffFiles(
         const originalUri = Uri.file(
             path.isAbsolute(resourcePath) ? resourcePath : path.join(repositoryRoot, resourcePath),
         );
-        let status: Status = Status.UNTRACKED;
+        let status: StatusOptions = Status.UNTRACKED;
 
         // Copy or Rename status comes with a number, e.g. 'R100'. We don't need the number, so we use only first character of the status.
         switch (change[0]) {

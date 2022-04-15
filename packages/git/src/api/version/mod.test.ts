@@ -1,10 +1,8 @@
-// @ts-expect-error
 import test from "ava";
 import intoStream from "into-stream";
 import { isOk, ok, unwrap } from "../../func-result.js";
 import { version } from "./mod.js";
 
-// @ts-ignore
 test("Basic case", async t => {
     const res = await version({
         cli: async (context) => {

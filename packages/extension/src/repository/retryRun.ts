@@ -1,9 +1,9 @@
 import { GitErrorCodes } from "../api/git.js";
-import { Operation } from "./Operations.js";
+import { Operation, OperationOptions } from "./Operations.js";
 import { timeout } from "./timeout.js";
 
 export async function retryRun<T>(
-    operation: Operation,
+    operation: OperationOptions,
     runOperation: () => Promise<T> = () => Promise.resolve<any>(null),
 ): Promise<T> {
     let attempt = 0;

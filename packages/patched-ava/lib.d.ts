@@ -1,4 +1,4 @@
-import type { TestFn } from "./node_modules/real-ava/index.js";
+import type { TestFn } from "./types/test-fn.js";
 
-const test: TestFn;
+declare const test: TestFn;
 export default test;

@@ -5,7 +5,7 @@ import * as Path from "node:path";
 import { rollup } from "rollup";
 import { clean } from "./build/clean.js";
 import { compile } from "./build/compile.js";
-import { extensionPkg, stagingAreaPkg } from "./build/helpers.js";
+import { extensionPkg, stagingAreaPkg } from "./util/paths.js";
 
 async function main() {
     console.log("Cleaning...");

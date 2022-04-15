@@ -3,7 +3,7 @@ import { erase } from "@silicon-soldier/erase-ts-types";
 import { globby } from "globby";
 import * as FS from "node:fs";
 import * as Path from "node:path";
-import { extensionPkg, gitPkg, repoRoot, stagingAreaPkg } from "./helpers.js";
+import { extensionPkg, gitPkg, repoRoot, stagingAreaPkg } from "../util/paths.js";
 
 async function compileSource(pkgPath) {
     const paths = await globby(Path.join(pkgPath, "src/**/*.ts"));

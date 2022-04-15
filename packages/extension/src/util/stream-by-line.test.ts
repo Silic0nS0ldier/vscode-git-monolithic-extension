@@ -10,23 +10,9 @@ test("ignores empty lines", async t => {
     t.deepEqual(results, ["foo", "bar"]);
 });
 
-test("includes empty lines", async t => {
-    const source = stream.Readable.from(["foo\n", "\n", "bar\n"]);
-    const ls = toLineStream(source, { encoding: "utf-8", keepEmptyLines: true });
-    const results = await getStream.array(ls);
-    t.deepEqual(results, ["foo", "", "bar", ""]);
-});
-
 test("correctly handles CRLF being split across chunks, ignores empty lines", async t => {
     const source = stream.Readable.from(["foo\r", "\n\r\n", "bar\r", "\n"]);
     const ls = toLineStream(source, { encoding: "utf-8" });
     const results = await getStream.array(ls);
     t.deepEqual(results, ["foo", "bar"]);
-});
-
-test("correctly handles CRLF being split across chunks, includes empty lines", async t => {
-    const source = stream.Readable.from(["foo\r", "\n\r\n", "bar\r", "\n"]);
-    const ls = toLineStream(source, { encoding: "utf-8", keepEmptyLines: true });
-    const results = await getStream.array(ls);
-    t.deepEqual(results, ["foo", "", "bar", ""]);
 });
