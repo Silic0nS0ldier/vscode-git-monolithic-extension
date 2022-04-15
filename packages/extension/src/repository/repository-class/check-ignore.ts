@@ -2,7 +2,7 @@ import { parseIgnoreCheck } from "monolithic-git-interop/api/repository/ignore/c
 import { GitErrorCodes } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import { GitError } from "../../git/error.js";
-import { isDescendant } from "../../util.js";
+import { isDescendant } from "../../util/paths.js";
 import { Operation } from "../Operations.js";
 import type { RunFn } from "./run.js";
 

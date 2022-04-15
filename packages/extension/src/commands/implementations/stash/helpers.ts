@@ -2,7 +2,8 @@ import * as path from "node:path";
 import { Uri, window, workspace } from "vscode";
 import type { Stash } from "../../../git/Stash.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { isDescendant, localize, pathEquals } from "../../../util.js";
+import { localize } from "../../../util.js";
+import { isDescendant, pathEquals } from "../../../util/paths.js";
 
 export async function createStash(repository: AbstractRepository, includeUntracked = false): Promise<void> {
     const noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.get().length === 0

@@ -3,7 +3,7 @@ import type { Model } from "../model.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../repository/Resource.js";
 import { fromGitUri, isGitUri } from "../uri.js";
-import { pathEquals } from "../util.js";
+import { pathEquals } from "../util/paths.js";
 
 export async function runByRepository(
     model: Model,

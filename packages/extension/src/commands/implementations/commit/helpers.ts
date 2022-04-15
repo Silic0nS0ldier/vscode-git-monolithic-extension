@@ -3,7 +3,8 @@ import { Uri, window, workspace } from "vscode";
 import { CommitOptions, Status } from "../../../api/git.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { isDescendant, localize, pathEquals } from "../../../util.js";
+import { localize } from "../../../util.js";
+import { isDescendant, pathEquals } from "../../../util/paths.js";
 import { push, PushType } from "../push/helpers.js";
 import { sync } from "../sync/sync.js";
 
