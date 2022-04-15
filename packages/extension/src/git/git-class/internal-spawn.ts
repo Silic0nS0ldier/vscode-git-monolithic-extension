@@ -1,5 +1,4 @@
 import * as cp from "node:child_process";
-import { assign } from "../../util.js";
 import { sanitizePath } from "../helpers.js";
 import type { SpawnOptions } from "../SpawnOptions.js";
 
@@ -18,12 +17,15 @@ export function internalSpawn(
         options.stdio = ["ignore", null, null]; // Unless provided, ignore stdin and leave default streams for stdout and stderr
     }
 
-    options.env = assign({}, process.env, env, options.env || {}, {
+    options.env = {
+        ...process.env,
+        ...env,
+        ...options.env,
         GIT_PAGER: "cat",
         LANG: "en_US.UTF-8",
         LC_ALL: "en_US.UTF-8",
         VSCODE_GIT_COMMAND: args[0],
-    });
+    };
 
     if (options.cwd) {
         options.cwd = sanitizePath(options.cwd);

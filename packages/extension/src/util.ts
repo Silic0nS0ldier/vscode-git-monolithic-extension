@@ -9,14 +9,6 @@ import * as nls from "vscode-nls";
 import { eventToPromise } from "./util/events.js";
 import { toLineStream } from "./util/stream-by-line.js";
 
-export function assign<T>(destination: T, ...sources: any[]): T {
-    for (const source of sources) {
-        Object.keys(source).forEach(key => (destination as any)[key] = source[key]);
-    }
-
-    return destination;
-}
-
 export function groupBy<T>(arr: T[], fn: (el: T) => string): { [key: string]: T[] } {
     return arr.reduce((result, el) => {
         const key = fn(el);
