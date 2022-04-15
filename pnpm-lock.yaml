@@ -52,7 +52,6 @@ importers:
       get-stream: ^6.0.1
       just-debounce: ^1.1.0
       monolithic-git-interop: workspace:*
-      node-abort-controller: ^3.0.1
       onetime: ^6.0.0
       throat: ^6.0.1
       vscode-nls: ^5.0.0
@@ -63,7 +62,6 @@ importers:
       get-stream: 6.0.1
       just-debounce: 1.1.0
       monolithic-git-interop: link:../git
-      node-abort-controller: 3.0.1
       onetime: 6.0.0
       throat: 6.0.1
       vscode-nls: 5.0.0
@@ -81,12 +79,10 @@ importers:
       compare-versions: ^4.1.3
       get-stream: ^6.0.1
       into-stream: ^7.0.0
-      node-abort-controller: ^3.0.1
       which: ^2.0.2
     dependencies:
       compare-versions: 4.1.3
       get-stream: 6.0.1
-      node-abort-controller: 3.0.1
       which: 2.0.2
     devDependencies:
       '@types/node': 16.11.27
@@ -1861,10 +1857,6 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       semver: 7.3.6
-    dev: false
-
-  /node-abort-controller/3.0.1:
-    resolution: {integrity: sha512-/ujIVxthRs+7q6hsdjHMaj8hRG9NuWmwrz+JdRwZ14jdFoKSkm+vDsCbF9PLpnSqjaWQJuTmVtcWHNLr+vrOFw==}
     dev: false
 
   /node-addon-api/4.3.0:

@@ -1,5 +1,4 @@
 import test from "ava";
-import NAC from "node-abort-controller";
 import { ERROR_CANCELLED, ERROR_GENERIC, ERROR_TIMEOUT } from "../errors.js";
 import { isErr, isOk, unwrap } from "../func-result.js";
 import { create } from "./create.js";
@@ -51,7 +50,7 @@ test("Aborted before", async t => {
         { env: {}, timeout: 250 },
         { child_process: { spawn }, process: { env: {} } },
     );
-    const abortController = new NAC.AbortController();
+    const abortController = new AbortController();
     abortController.abort();
     const res = await cli({ cwd: "/", signal: abortController.signal }, ["foobar"]);
     t.true(isErr(res));
@@ -68,7 +67,7 @@ test("Aborted during", async t => {
         { child_process: { spawn }, process: { env: {} } },
     );
     // TODO This could be better validated by checking what the value of `aborted` was when accessed
-    const abortController = new NAC.AbortController();
+    const abortController = new AbortController();
     const pendingRes = cli({ cwd: "/", signal: abortController.signal }, ["foobar"]);
     const pendingAbort = new Promise<void>(resolve => {
         setTimeout(() => {

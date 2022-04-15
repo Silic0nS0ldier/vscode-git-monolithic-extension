@@ -12,7 +12,6 @@ import type { GitContext } from "monolithic-git-interop/cli";
 import type { AllServices } from "monolithic-git-interop/services";
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isOk, unwrap } from "monolithic-git-interop/util/result";
-import type NAC from "node-abort-controller";
 import type * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
 import { exists, promises as fs } from "node:fs";
@@ -121,7 +120,7 @@ export class Git {
         throw unwrap(result);
     }
 
-    async clone(url: string, options: ICloneOptions, abortSignal?: NAC.AbortSignal): Promise<string> {
+    async clone(url: string, options: ICloneOptions, abortSignal?: AbortSignal): Promise<string> {
         let baseFolderName = decodeURI(url).replace(/[\/]+$/, "").replace(/^.*[\/\\]/, "").replace(/\.git$/, "")
             || "repository";
         let folderName = baseFolderName;
@@ -233,7 +232,7 @@ export class Git {
 export interface PullOptions {
     unshallow?: boolean;
     tags?: boolean;
-    readonly abortSignal?: NAC.AbortSignal;
+    readonly abortSignal?: AbortSignal;
 }
 
 export class Repository {
@@ -876,7 +875,7 @@ export class Repository {
             prune?: boolean;
             depth?: number;
             silent?: boolean;
-            readonly abortSignal?: NAC.AbortSignal;
+            readonly abortSignal?: AbortSignal;
         } = {},
     ): Promise<void> {
         const args = ["fetch"];

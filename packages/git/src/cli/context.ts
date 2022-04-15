@@ -1,4 +1,3 @@
-import type NAC from "node-abort-controller";
 import type { CancelledError, GenericError, GitNotFoundError, NonZeroExitError, TimeoutError } from "../errors.js";
 import type { Result } from "../func-result.js";
 
@@ -11,7 +10,7 @@ export type CLIContext = {
     readonly cwd: string;
     readonly timeout?: number;
     /** @todo Use native types once VSCode at NodeJS 15. */
-    readonly signal?: NAC.AbortSignal;
+    readonly signal?: AbortSignal;
 };
 
 export type CLIErrors =

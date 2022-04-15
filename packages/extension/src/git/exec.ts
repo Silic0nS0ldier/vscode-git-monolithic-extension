@@ -1,4 +1,3 @@
-import type NAC from "node-abort-controller";
 import type * as cp from "node:child_process";
 import { dispose, IDisposable, toDisposable } from "../util.js";
 import { cpErrorHandler, GitError } from "./error.js";
@@ -11,7 +10,7 @@ export interface IExecutionResult<T extends string | Buffer> {
 
 export async function exec(
     child: cp.ChildProcess,
-    abortSignal?: NAC.AbortSignal,
+    abortSignal?: AbortSignal,
 ): Promise<IExecutionResult<Buffer>> {
     if (!child.stdout || !child.stderr) {
         throw new GitError({ message: "Failed to get stdout or stderr from git process." });

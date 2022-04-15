@@ -1,5 +1,4 @@
 import getStream, { MaxBufferError } from "get-stream";
-import NAC from "node-abort-controller";
 import { PassThrough } from "stream";
 import { BufferOverflowError, createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, GenericError } from "../../errors.js";
 import { err, isErr, ok, Result, unwrap } from "../../func-result.js";
@@ -22,7 +21,7 @@ export type ReadToErrors =
  */
 export async function readToString(context: ReadToContext, args: string[]): Promise<Result<string, ReadToErrors>> {
     const stdout = new PassThrough();
-    const abortController = new NAC.AbortController();
+    const abortController = new AbortController();
 
     // Read response
     try {

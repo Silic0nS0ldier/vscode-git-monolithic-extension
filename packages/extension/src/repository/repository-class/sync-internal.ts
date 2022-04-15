@@ -1,5 +1,4 @@
 /* eslint-disable sort-keys */
-import type NAC from "node-abort-controller";
 import { ProgressLocation, ProgressOptions, Uri, window, workspace } from "vscode";
 import type { Branch, Remote } from "../../api/git.js";
 import type { Repository } from "../../git.js";
@@ -48,7 +47,7 @@ export async function syncInternal(
                 const followTags = config.get<boolean>("followTagsWhenSync");
                 const supportCancellation = config.get<boolean>("supportCancellation");
 
-                const fn = async (abortSignal?: NAC.AbortSignal) => {
+                const fn = async (abortSignal?: AbortSignal) => {
                     // When fetchOnPull is enabled, fetch all branches when pulling
                     if (fetchOnPull) {
                         await repository.fetch({ all: true, abortSignal });
