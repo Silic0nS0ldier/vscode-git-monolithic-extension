@@ -4,7 +4,6 @@ import { Status } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { Submodule } from "../../git/Submodule.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
-import { find } from "../../util.js";
 import { Operation } from "../Operations.js";
 import type { RunFn } from "./run.js";
 
@@ -36,7 +35,7 @@ export async function clean(
             }
 
             const raw = r.toString();
-            const scmResource = find(resourceStates, sr => sr.state.resourceUri.toString() === raw);
+            const scmResource = resourceStates.find(sr => sr.state.resourceUri.toString() === raw);
 
             if (!scmResource) {
                 return;

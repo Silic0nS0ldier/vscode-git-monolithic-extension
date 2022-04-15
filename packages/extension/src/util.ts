@@ -7,21 +7,6 @@ import { EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
 import { eventToPromise } from "./util/events.js";
 
-export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
-    let result: T | undefined = undefined;
-
-    array.some(e => {
-        if (fn(e)) {
-            result = e;
-            return true;
-        }
-
-        return false;
-    });
-
-    return result;
-}
-
 export function* splitInChunks(array: string[], maxChunkLength: number): IterableIterator<string[]> {
     let current: string[] = [];
     let length = 0;
