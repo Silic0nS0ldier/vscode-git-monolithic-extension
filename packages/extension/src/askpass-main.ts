@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fs from "node:fs";
+import { missOrInvalid } from "./i18n/mod.js";
 import { IPCClient } from "./ipc/ipcClient.js";
-import { localize } from "./util.js";
 
 function fatal(errMsg: string): void {
-    console.error(localize("missOrInvalid", "Missing or invalid credentials."));
+    console.error(missOrInvalid());
     console.error(errMsg);
     process.exit(1);
 }

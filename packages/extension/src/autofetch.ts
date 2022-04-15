@@ -16,9 +16,9 @@ import {
 } from "vscode";
 import { GitErrorCodes } from "./api/git.js";
 import { GitError } from "./git/error.js";
+import { askLater, no, suggestAutoFetch, yes } from "./i18n/mod.js";
 import { Operation, OperationOptions } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
-import { localize } from "./util.js";
 import { eventToPromise, filterEvent, onceEvent } from "./util/events.js";
 
 function isRemoteOperation(operation: OperationOptions): boolean {
@@ -74,25 +74,21 @@ export class AutoFetcher {
             return;
         }
 
-        const yes: MessageItem = { title: localize("yes", "Yes") };
-        const no: MessageItem = { isCloseAffordance: true, title: localize("no", "No") };
-        const askLater: MessageItem = { title: localize("not now", "Ask Me Later") };
+        const yesMsg: MessageItem = { title: yes() };
+        const noMsg: MessageItem = { isCloseAffordance: true, title: no() };
+        const askLaterMsg: MessageItem = { title: askLater() };
         const result = await window.showInformationMessage(
-            localize(
-                "suggest auto fetch",
-                "Would you like Code to [periodically run 'git fetch']({0})?",
-                "https://go.microsoft.com/fwlink/?linkid=865294",
-            ),
-            yes,
-            no,
-            askLater,
+            suggestAutoFetch(),
+            yesMsg,
+            noMsg,
+            askLaterMsg,
         );
 
-        if (result === askLater) {
+        if (result === askLaterMsg) {
             return;
         }
 
-        if (result === yes) {
+        if (result === yesMsg) {
             const gitConfig = workspace.getConfiguration("git", Uri.file(this.#repository.root));
             gitConfig.update("autofetch", true, ConfigurationTarget.Global);
         }

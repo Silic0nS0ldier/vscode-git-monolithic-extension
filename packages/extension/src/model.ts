@@ -267,7 +267,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         const activeRepositories = new Set<AbstractRepository>(activeRepositoriesList);
         const openRepositoriesToDispose = removed
             .map(folder => this.#getOpenRepository(folder.uri))
-            .filter<OpenRepository>((r => !!r) as (v: OpenRepository|undefined) => v is OpenRepository)
+            .filter<OpenRepository>((r => !!r) as (v: OpenRepository | undefined) => v is OpenRepository)
             .filter(r => !activeRepositories.has(r.repository))
             .filter(r =>
                 !(workspace.workspaceFolders || []).some(f => isDescendant(f.uri.fsPath, r.repository.root))
