@@ -5,7 +5,6 @@
 
 import { createReadStream } from "node:fs";
 import { sep } from "node:path";
-import type { Readable } from "node:stream";
 import { Disposable, Event, EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
 import { combinedDisposable } from "./util/disposals.js";
@@ -36,10 +35,6 @@ export function anyEvent<T>(...events: Event<T>[]): Event<T> {
 
         return result;
     };
-}
-
-export function done<T>(promise: Promise<T>): Promise<void> {
-    return promise.then<void>(() => undefined);
 }
 
 export function onceEvent<T>(event: Event<T>): Event<T> {
@@ -75,18 +70,6 @@ export function eventToPromise<T>(event: Event<T>): Promise<T> {
     return new Promise<T>(c => onceEvent(event)(c));
 }
 
-export function once(fn: (...args: any[]) => any): (...args: any[]) => any {
-    let didRun = false;
-
-    return (...args) => {
-        if (didRun) {
-            return;
-        }
-
-        return fn(...args);
-    };
-}
-
 export function assign<T>(destination: T, ...sources: any[]): T {
     for (const source of sources) {
         Object.keys(source).forEach(key => (destination as any)[key] = source[key]);
@@ -95,42 +78,12 @@ export function assign<T>(destination: T, ...sources: any[]): T {
     return destination;
 }
 
-export function uniqBy<T>(arr: T[], fn: (el: T) => string): T[] {
-    const seen = Object.create(null);
-
-    return arr.filter(el => {
-        const key = fn(el);
-
-        if (seen[key]) {
-            return false;
-        }
-
-        seen[key] = true;
-        return true;
-    });
-}
-
 export function groupBy<T>(arr: T[], fn: (el: T) => string): { [key: string]: T[] } {
     return arr.reduce((result, el) => {
         const key = fn(el);
         result[key] = [...(result[key] || []), el];
         return result;
     }, Object.create(null));
-}
-
-export function uniqueFilter<T>(keyFn: (t: T) => string): (t: T) => boolean {
-    const seen: { [key: string]: boolean } = Object.create(null);
-
-    return element => {
-        const key = keyFn(element);
-
-        if (seen[key]) {
-            return false;
-        }
-
-        seen[key] = true;
-        return true;
-    };
 }
 
 export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
@@ -162,74 +115,6 @@ export async function grep(filename: string, pattern: RegExp): Promise<boolean> 
         stream.on("error", e);
         stream.on("end", () => c(false));
     });
-}
-
-export function readBytes(stream: Readable, bytes: number): Promise<Buffer> {
-    return new Promise<Buffer>((complete, error) => {
-        let done = false;
-        let buffer = Buffer.allocUnsafe(bytes);
-        let bytesRead = 0;
-
-        stream.on("data", (data: Buffer) => {
-            let bytesToRead = Math.min(bytes - bytesRead, data.length);
-            data.copy(buffer, bytesRead, 0, bytesToRead);
-            bytesRead += bytesToRead;
-
-            if (bytesRead === bytes) {
-                (stream as any).destroy(); // Will trigger the close event eventually
-            }
-        });
-
-        stream.on("error", (e: Error) => {
-            if (!done) {
-                done = true;
-                error(e);
-            }
-        });
-
-        stream.on("close", () => {
-            if (!done) {
-                done = true;
-                complete(buffer.slice(0, bytesRead));
-            }
-        });
-    });
-}
-
-type EncodingOptions = "utf8" | "utf16be" | "utf16le";
-const Encoding: Record<EncodingOptions, EncodingOptions> = {
-    utf16be: "utf16be",
-    utf16le: "utf16le",
-    utf8: "utf8",
-};
-
-export function detectUnicodeEncoding(buffer: Buffer): EncodingOptions | null {
-    if (buffer.length < 2) {
-        return null;
-    }
-
-    const b0 = buffer.readUInt8(0);
-    const b1 = buffer.readUInt8(1);
-
-    if (b0 === 0xFE && b1 === 0xFF) {
-        return Encoding.utf16be;
-    }
-
-    if (b0 === 0xFF && b1 === 0xFE) {
-        return Encoding.utf16le;
-    }
-
-    if (buffer.length < 3) {
-        return null;
-    }
-
-    const b2 = buffer.readUInt8(2);
-
-    if (b0 === 0xEF && b1 === 0xBB && b2 === 0xBF) {
-        return Encoding.utf8;
-    }
-
-    return null;
 }
 
 function isWindowsPath(path: string): boolean {
