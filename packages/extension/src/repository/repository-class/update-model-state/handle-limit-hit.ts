@@ -1,7 +1,8 @@
 import path from "node:path";
 import { Uri, window, WorkspaceConfiguration } from "vscode";
 import type { Repository } from "../../../git.js";
-import { Box, localize } from "../../../util.js";
+import { localize } from "../../../util.js";
+import type { Box } from "../../../util/box.js";
 import { findKnownHugeFolderPathsToIgnore } from "../find-known-huge-folder-paths-to-ignore.js";
 import { ignore } from "../ignore.js";
 import type { RunFn } from "../run.js";

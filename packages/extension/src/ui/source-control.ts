@@ -10,7 +10,8 @@ import {
     Uri,
 } from "vscode";
 import type { Resource } from "../repository/Resource.js";
-import { Box, localize } from "../util.js";
+import { localize } from "../util.js";
+import type { Box } from "../util/box.js";
 
 /**
  * An encapsulatin of the source control panel.

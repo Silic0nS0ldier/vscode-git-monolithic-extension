@@ -5,7 +5,7 @@ import type { Repository } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
 import type { Submodule } from "../../git/Submodule.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
-import type { Box } from "../../util.js";
+import type { Box } from "../../util/box.js";
 import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType, ResourceGroupTypeOptions } from "../ResourceGroupType.js";
 import { getInputTemplate } from "./get-input-template.js";
