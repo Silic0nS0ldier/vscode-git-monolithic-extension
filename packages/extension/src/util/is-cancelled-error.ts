@@ -9,7 +9,7 @@ export function isCancelledError(err: unknown): boolean {
         msg = err.message;
     }
     if (!!msg && err instanceof GitError && err.stderr) {
-        msg = err.stderr
+        msg = err.stderr;
     }
 
     return /Cancelled/i.test(msg);

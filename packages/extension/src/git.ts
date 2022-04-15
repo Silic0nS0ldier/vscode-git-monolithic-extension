@@ -711,7 +711,7 @@ export class Repository {
             if (err instanceof GitError) {
                 gitErr = err;
             } else {
-                gitErr = new GitError({}, { cause: err as Error })
+                gitErr = new GitError({}, { cause: err as Error });
             }
             gitErr.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
             throw gitErr;
@@ -724,7 +724,7 @@ export class Repository {
             if (err instanceof GitError) {
                 gitErr = err;
             } else {
-                gitErr = new GitError({}, { cause: err as Error })
+                gitErr = new GitError({}, { cause: err as Error });
             }
             gitErr.gitErrorCode = GitErrorCodes.NoUserEmailConfigured;
             throw gitErr;
@@ -966,7 +966,8 @@ export class Repository {
                 } else if (/Could not read from remote repository/.test(err.stderr || "")) {
                     err.gitErrorCode = GitErrorCodes.RemoteConnectionError;
                 } else if (
-                    err.stderr && /Pull(?:ing)? is not possible because you have unmerged files|Cannot pull with rebase: You have unstaged changes|Your local changes to the following files would be overwritten|Please, commit your changes before you can merge/i
+                    err.stderr
+                    && /Pull(?:ing)? is not possible because you have unmerged files|Cannot pull with rebase: You have unstaged changes|Your local changes to the following files would be overwritten|Please, commit your changes before you can merge/i
                         .test(err.stderr)
                 ) {
                     err.stderr = err.stderr.replace(
@@ -1120,7 +1121,9 @@ export class Repository {
             if (err instanceof GitError) {
                 if (/No stash found/.test(err.stderr || "")) {
                     err.gitErrorCode = GitErrorCodes.NoStashFound;
-                } else if (/error: Your local changes to the following files would be overwritten/.test(err.stderr || "")) {
+                } else if (
+                    /error: Your local changes to the following files would be overwritten/.test(err.stderr || "")
+                ) {
                     err.gitErrorCode = GitErrorCodes.LocalChangesOverwritten;
                 } else if (/^CONFLICT/m.test(err.stdout || "")) {
                     err.gitErrorCode = GitErrorCodes.StashConflict;
