@@ -3,9 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
-import { eventToPromise } from "./util/events.js";
 
 export function* splitInChunks(array: string[], maxChunkLength: number): IterableIterator<string[]> {
     let current: string[] = [];
@@ -69,41 +67,6 @@ export class Limiter<T> {
 
         if (this.#outstandingPromises.length > 0) {
             this.#consume();
-        }
-    }
-}
-
-type Completion<T> = { success: true; value: T } | { success: false; err: any };
-
-export class PromiseSource<T> {
-    #onDidCompleteEmitter = new EventEmitter<Completion<T>>();
-
-    #promise: Promise<T> | undefined;
-    get promise(): Promise<T> {
-        if (this.#promise) {
-            return this.#promise;
-        }
-
-        return eventToPromise(this.#onDidCompleteEmitter.event).then(completion => {
-            if (completion.success) {
-                return completion.value;
-            } else {
-                throw completion.err;
-            }
-        });
-    }
-
-    resolve(value: T): void {
-        if (!this.#promise) {
-            this.#promise = Promise.resolve(value);
-            this.#onDidCompleteEmitter.fire({ success: true, value });
-        }
-    }
-
-    reject(err: any): void {
-        if (!this.#promise) {
-            this.#promise = Promise.reject(err);
-            this.#onDidCompleteEmitter.fire({ err, success: false });
         }
     }
 }

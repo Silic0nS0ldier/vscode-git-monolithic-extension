@@ -22,7 +22,7 @@ import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import type { SourceControlResourceGroupUI } from "./ui/source-control.js";
-import { PromiseSource } from "./util.js";
+import { PromiseSource } from "./util/promise-source.js";
 import { dispose as disposeHelper } from "./util/disposals.js";
 import { anyEvent, filterEvent, fireEvent } from "./util/events.js";
 import { isExpectedError } from "./util/is-expected-error.js";
