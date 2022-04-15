@@ -3,11 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createReadStream } from "node:fs";
 import { EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
 import { eventToPromise } from "./util/events.js";
-import { toLineStream } from "./util/stream-by-line.js";
 
 export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
     let result: T | undefined = undefined;
@@ -22,22 +20,6 @@ export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
     });
 
     return result;
-}
-
-export async function grep(filename: string, pattern: RegExp): Promise<boolean> {
-    return new Promise<boolean>((c, e) => {
-        const fileStream = createReadStream(filename, { encoding: "utf8" });
-        const stream = toLineStream(fileStream, { encoding: "utf8" });
-        stream.on("data", (line: string) => {
-            if (pattern.test(line)) {
-                fileStream.close();
-                c(true);
-            }
-        });
-
-        stream.on("error", e);
-        stream.on("end", () => c(false));
-    });
 }
 
 export function* splitInChunks(array: string[], maxChunkLength: number): IterableIterator<string[]> {

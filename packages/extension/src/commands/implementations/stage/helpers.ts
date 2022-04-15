@@ -4,12 +4,13 @@ import { Status } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import { grep, localize } from "../../../util.js";
+import { localize } from "../../../util.js";
+import { grep } from "../../../util/grep.js";
 
 export async function categorizeResourceByResolution(
     resources: Resource[],
 ): Promise<{ merge: Resource[]; resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[] }> {
-    const selection = resources.filter(s => s instanceof Resource) as Resource[];
+    const selection: Resource[] = resources.filter(s => s instanceof Resource);
     const merge = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.Merge);
     const isBothAddedOrModified = (s: Resource) =>
         s.state.type === Status.BOTH_MODIFIED || s.state.type === Status.BOTH_ADDED;
