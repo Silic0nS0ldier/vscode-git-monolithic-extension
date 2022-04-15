@@ -136,9 +136,13 @@ export class Git {
         await fs.mkdir(options.parentPath, { recursive: true });
 
         const onSpawn = (child: cp.ChildProcess) => {
+            if (!child.stderr) {
+                return;
+            }
+
             const decoder = new StringDecoder("utf8");
             const lineStream = new LineStream({ encoding: "utf8" });
-            child.stderr!.on("data", (buffer: Buffer) => lineStream.write(decoder.write(buffer)));
+            child.stderr.on("data", (buffer: Buffer) => lineStream.write(decoder.write(buffer)));
 
             let totalProgress = 0;
             let previousProgress = 0;
@@ -571,7 +575,10 @@ export class Repository {
         const child = this.stream(["hash-object", "--stdin", "-w", "--path", sanitizePath(path)], {
             stdio: [null, null, null],
         });
-        child.stdin!.end(data, "utf8");
+        if (!child.stdin) {
+            throw new Error("stdin not available");
+        }
+        child.stdin.end(data, "utf8");
 
         const { exitCode, stdout } = await exec(child);
         const hash = stdout.toString("utf8");

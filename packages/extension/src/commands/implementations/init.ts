@@ -110,7 +110,7 @@ export function createCommand(
         if (result === open) {
             commands.executeCommand("vscode.openFolder", uri);
         } else if (result === addToWorkspace) {
-            workspace.updateWorkspaceFolders(workspace.workspaceFolders!.length, 0, { uri });
+            workspace.updateWorkspaceFolders(workspace.workspaceFolders?.length ?? 0, 0, { uri });
         } else if (result === openNewWindow) {
             commands.executeCommand("vscode.openFolder", uri, true);
         } else {

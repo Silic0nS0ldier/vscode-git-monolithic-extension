@@ -17,7 +17,10 @@ export async function internalExec(
     }
 
     if (options.input) {
-        child.stdin!.end(options.input, "utf8");
+        if (!child.stdin) {
+            throw new Error("stdin not available");
+        }
+        child.stdin.end(options.input, "utf8");
     }
 
     const bufferResult = await exec(child, options.abortSignal);

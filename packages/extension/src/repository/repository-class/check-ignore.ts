@@ -26,7 +26,10 @@ export function checkIgnore(
             const child = repository.stream(["check-ignore", "-v", "-z", "--stdin"], {
                 stdio: [null, null, null],
             });
-            child.stdin!.end(filteredFilePaths.join("\0"), "utf8");
+            if (!child.stdin) {
+                throw new Error("stdin not available");
+            }
+            child.stdin.end(filteredFilePaths.join("\0"), "utf8");
 
             const onExit = (exitCode: number) => {
                 if (exitCode === 1) {
@@ -61,12 +64,18 @@ export function checkIgnore(
                 data += raw;
             };
 
-            child.stdout!.setEncoding("utf8");
-            child.stdout!.on("data", onStdoutData);
+            if (!child.stdout) {
+                throw new Error("stdout not available");
+            }
+            child.stdout.setEncoding("utf8");
+            child.stdout.on("data", onStdoutData);
 
+            if (!child.stderr) {
+                throw new Error("stderr not available");
+            }
             let stderr: string = "";
-            child.stderr!.setEncoding("utf8");
-            child.stderr!.on("data", raw => stderr += raw);
+            child.stderr.setEncoding("utf8");
+            child.stderr.on("data", raw => stderr += raw);
 
             child.on("error", reject);
             child.on("exit", onExit);

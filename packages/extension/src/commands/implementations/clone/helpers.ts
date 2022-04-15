@@ -145,7 +145,7 @@ export async function cloneRepository(
         if (action === PostCloneAction.Open) {
             commands.executeCommand("vscode.openFolder", uri, { forceReuseWindow: true });
         } else if (action === PostCloneAction.AddToWorkspace) {
-            workspace.updateWorkspaceFolders(workspace.workspaceFolders!.length, 0, { uri });
+            workspace.updateWorkspaceFolders(workspace.workspaceFolders?.length ?? 0, 0, { uri });
         } else if (action === PostCloneAction.OpenNewWindow) {
             commands.executeCommand("vscode.openFolder", uri, { forceNewWindow: true });
         }
