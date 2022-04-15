@@ -9,14 +9,6 @@ import * as nls from "vscode-nls";
 import { eventToPromise } from "./util/events.js";
 import { toLineStream } from "./util/stream-by-line.js";
 
-export function groupBy<T>(arr: T[], fn: (el: T) => string): { [key: string]: T[] } {
-    return arr.reduce((result, el) => {
-        const key = fn(el);
-        result[key] = [...(result[key] || []), el];
-        return result;
-    }, Object.create(null));
-}
-
 export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
     let result: T | undefined = undefined;
 
