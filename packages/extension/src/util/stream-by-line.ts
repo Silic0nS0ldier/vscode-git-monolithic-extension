@@ -30,9 +30,6 @@ type LineStreamOptions = stream.TransformOptions & {
 };
 
 export function toLineStream(readStream: stream.Readable, options: LineStreamOptions): LineStream {
-    if (!readStream) {
-        throw new Error("expected readStream");
-    }
     if (!readStream.readable) {
         throw new Error("readStream must be readable");
     }
@@ -43,7 +40,6 @@ export function toLineStream(readStream: stream.Readable, options: LineStreamOpt
 
 export class LineStream extends stream.Transform {
     #lineBuffer: string[];
-    #keepEmptyLines: boolean;
     #lastChunkEndedWithCR: boolean;
 
     constructor(options: LineStreamOptions) {

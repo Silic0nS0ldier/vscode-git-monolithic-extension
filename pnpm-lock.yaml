@@ -47,7 +47,6 @@ importers:
       '@types/node': ^16.0.0
       '@types/vscode': ^1.66.0
       '@vscode/extension-telemetry': ^0.5.0
-      aggregate-error: ^4.0.0
       ava: workspace:*
       get-stream: ^6.0.1
       just-debounce: ^1.1.0
@@ -58,7 +57,6 @@ importers:
       watcher: ^1.2.0
     dependencies:
       '@vscode/extension-telemetry': 0.5.0
-      aggregate-error: 4.0.0
       get-stream: 6.0.1
       just-debounce: 1.1.0
       monolithic-git-interop: link:../git

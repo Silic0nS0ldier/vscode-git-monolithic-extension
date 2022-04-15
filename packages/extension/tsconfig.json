@@ -28,9 +28,10 @@
             "ES2020.Promise",
             "ES2020.String",
             "ES2020.Symbol.WellKnown",
-            "ES2020.Intl"
+            "ES2020.Intl",
+            "ES2021.promise"
         ],
-        "module": "ES2020",
+        "module": "ES2022",
         "moduleResolution": "nodenext",
         "noImplicitAny": true,
         "noImplicitOverride": true,

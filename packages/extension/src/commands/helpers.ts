@@ -1,4 +1,3 @@
-import AggregateError from "aggregate-error";
 import { OutputChannel, TextDocumentContentProvider, Uri, window } from "vscode";
 import type { Model } from "../model.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
@@ -49,7 +48,7 @@ export async function runByRepository(
     }
 
     if (errors.length > 0) {
-        throw new AggregateError(errors as any);
+        throw new AggregateError(errors);
     }
 }
 
