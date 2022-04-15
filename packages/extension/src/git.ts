@@ -698,8 +698,10 @@ export class Repository {
         }
     }
 
-    async #handleCommitError(commitErr: any): Promise<void> {
-        if (/not possible because you have unmerged files/.test(commitErr.stderr || "")) {
+    async #handleCommitError(commitErr: unknown): Promise<void> {
+        if (
+            commitErr instanceof GitError && /not possible because you have unmerged files/.test(commitErr.stderr || "")
+        ) {
             commitErr.gitErrorCode = GitErrorCodes.UnmergedChanges;
             throw commitErr;
         }
@@ -707,12 +709,7 @@ export class Repository {
         try {
             await this.exec(["config", "--get-all", "user.name"]);
         } catch (err) {
-            let gitErr: GitError;
-            if (err instanceof GitError) {
-                gitErr = err;
-            } else {
-                gitErr = new GitError({}, { cause: err as Error });
-            }
+            const gitErr = new GitError({}, { cause: new AggregateError([commitErr, err]) });
             gitErr.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
             throw gitErr;
         }
@@ -720,12 +717,7 @@ export class Repository {
         try {
             await this.exec(["config", "--get-all", "user.email"]);
         } catch (err) {
-            let gitErr: GitError;
-            if (err instanceof GitError) {
-                gitErr = err;
-            } else {
-                gitErr = new GitError({}, { cause: err as Error });
-            }
+            const gitErr = new GitError({}, { cause: new AggregateError([commitErr, err]) });
             gitErr.gitErrorCode = GitErrorCodes.NoUserEmailConfigured;
             throw gitErr;
         }
@@ -804,7 +796,7 @@ export class Repository {
         const groups = Object.keys(pathsByGroup).map(k => pathsByGroup[k]);
 
         const limiter = new Limiter(5);
-        const promises: Promise<any>[] = [];
+        const promises: Promise<unknown>[] = [];
         const args = ["clean", "-f", "-q"];
 
         for (const paths of groups) {
@@ -1360,6 +1352,7 @@ export class Repository {
                     ]);
                     const [ahead, behind] = result.stdout.trim().split("\t");
 
+                    // TODO Anti-pattern, overriding types
                     (branch as any).ahead = Number(ahead) || 0;
                     (branch as any).behind = Number(behind) || 0;
                 } catch {}
