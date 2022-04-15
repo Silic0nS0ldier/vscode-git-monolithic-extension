@@ -1,5 +1,5 @@
 import type * as cp from "node:child_process";
-import { dispose, IDisposable, toDisposable } from "../util.js";
+import { dispose, IDisposable, toDisposable } from "../util/disposals.js";
 import { cpErrorHandler, GitError } from "./error.js";
 
 export interface IExecutionResult<T extends string | Buffer> {

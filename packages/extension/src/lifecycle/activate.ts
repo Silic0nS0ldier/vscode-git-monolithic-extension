@@ -27,7 +27,8 @@ import { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
-import { eventToPromise, filterEvent, localize, toDisposable } from "../util.js";
+import { eventToPromise, filterEvent, localize } from "../util.js";
+import { toDisposable } from "../util/disposals.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
 

@@ -1,6 +1,6 @@
 import type { Event, OutputChannel, Uri } from "vscode";
 import { Log, LogLevel, LogLevelOptions } from "../logging/log.js";
-import { combinedDisposable, EmptyDisposable, IDisposable } from "../util.js";
+import { combinedDisposable, EmptyDisposable, IDisposable } from "../util/disposals.js";
 
 export class FileEventLogger {
     #eventDisposable: IDisposable = EmptyDisposable;

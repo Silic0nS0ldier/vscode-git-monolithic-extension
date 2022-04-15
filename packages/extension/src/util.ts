@@ -8,26 +8,8 @@ import { sep } from "node:path";
 import type { Readable } from "node:stream";
 import { Disposable, Event, EventEmitter } from "vscode";
 import * as nls from "vscode-nls";
+import { combinedDisposable } from "./util/disposals.js";
 import { toLineStream } from "./util/stream-by-line.js";
-
-export interface IDisposable {
-    dispose(): void;
-}
-
-export function dispose<T extends IDisposable>(disposables: T[]): T[] {
-    disposables.forEach(d => d.dispose());
-    return [];
-}
-
-export function toDisposable(dispose: () => void): IDisposable {
-    return { dispose };
-}
-
-export function combinedDisposable(disposables: IDisposable[]): IDisposable {
-    return toDisposable(() => dispose(disposables));
-}
-
-export const EmptyDisposable = toDisposable(() => null);
 
 export function fireEvent<T>(event: Event<T>): Event<T> {
     return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) =>

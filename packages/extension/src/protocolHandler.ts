@@ -5,7 +5,7 @@
 
 import * as querystring from "node:querystring";
 import { commands, Disposable, OutputChannel, Uri, UriHandler, window } from "vscode";
-import { dispose } from "./util.js";
+import { dispose } from "./util/disposals.js";
 
 export class GitProtocolHandler implements UriHandler {
     #disposables: Disposable[] = [];

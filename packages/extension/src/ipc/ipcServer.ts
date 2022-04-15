@@ -9,7 +9,7 @@ import * as http from "node:http";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { Disposable } from "vscode";
-import { toDisposable } from "../util.js";
+import { toDisposable } from "../util/disposals.js";
 
 function getIPCHandlePath(id: string): string {
     if (process.platform === "win32") {

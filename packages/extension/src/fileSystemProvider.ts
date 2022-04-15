@@ -22,7 +22,8 @@ import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { fromGitUri, toGitUri } from "./uri.js";
-import { EmptyDisposable, eventToPromise, filterEvent, isDescendant, pathEquals } from "./util.js";
+import { eventToPromise, filterEvent, isDescendant, pathEquals } from "./util.js";
+import { EmptyDisposable } from "./util/disposals.js";
 
 interface CacheRow {
     uri: Uri;

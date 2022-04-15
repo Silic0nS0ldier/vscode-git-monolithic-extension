@@ -42,16 +42,8 @@ import { isAbstractRepository } from "./repository/repository-class/isAbstractRe
 import { createRepository } from "./repository/repository-class/mod.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
 import { fromGitUri } from "./uri.js";
-import {
-    anyEvent,
-    dispose,
-    eventToPromise,
-    filterEvent,
-    isDescendant,
-    localize,
-    pathEquals,
-    toDisposable,
-} from "./util.js";
+import { anyEvent, eventToPromise, filterEvent, isDescendant, localize, pathEquals } from "./util.js";
+import { dispose, toDisposable } from "./util/disposals.js";
 
 class RepositoryPick implements QuickPickItem {
     get label(): string {
