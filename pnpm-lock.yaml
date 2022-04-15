@@ -44,7 +44,7 @@ importers:
 
   packages/extension:
     specifiers:
-      '@types/node': ^16.0.0
+      '@types/node': ^16.9.0
       '@types/vscode': ^1.66.0
       '@vscode/extension-telemetry': ^0.5.0
       ava: workspace:*
@@ -71,7 +71,7 @@ importers:
 
   packages/git:
     specifiers:
-      '@types/node': ^16.0.0
+      '@types/node': ^16.9.0
       '@types/which': ^2.0.1
       ava: workspace:*
       compare-versions: ^4.1.3

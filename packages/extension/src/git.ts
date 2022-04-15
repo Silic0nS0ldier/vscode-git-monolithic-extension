@@ -51,6 +51,7 @@ import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
 import { groupBy, Limiter, splitInChunks } from "./util.js";
+import { isExpectedError } from "./util/is-expected-error.js";
 import { LineStream } from "./util/stream-by-line.js";
 import * as Versions from "./util/versions.js";
 
@@ -173,7 +174,7 @@ export class Git {
                 onSpawn,
             });
         } catch (err) {
-            if (err.stderr) {
+            if (err instanceof GitError && err.stderr) {
                 err.stderr = err.stderr.replace(/^Cloning.+$/m, "").trim();
                 err.stderr = err.stderr.replace(/^ERROR:\s+/, "").trim();
             }
@@ -428,7 +429,7 @@ export class Repository {
         try {
             await this.exec(args);
         } catch (err) {
-            if (/patch does not apply/.test(err.stderr)) {
+            if (err instanceof GitError && /patch does not apply/.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.PatchDoesNotApply;
             }
 
@@ -590,7 +591,7 @@ export class Repository {
             const details = await this.getObjectDetails(treeish, path);
             mode = details.mode;
         } catch (err) {
-            if (err.gitErrorCode !== GitErrorCodes.UnknownPath) {
+            if (!isExpectedError(err, GitError, e => e.gitErrorCode === GitErrorCodes.UnknownPath)) {
                 throw err;
             }
 
@@ -629,7 +630,7 @@ export class Repository {
                 await this.exec(args);
             }
         } catch (err) {
-            if (/Please,? commit your changes or stash them/.test(err.stderr || "")) {
+            if (err instanceof GitError && /Please,? commit your changes or stash them/.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.DirtyWorkTree;
                 err.gitTreeish = treeish;
             }
@@ -706,15 +707,27 @@ export class Repository {
         try {
             await this.exec(["config", "--get-all", "user.name"]);
         } catch (err) {
-            err.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
-            throw err;
+            let gitErr: GitError;
+            if (err instanceof GitError) {
+                gitErr = err;
+            } else {
+                gitErr = new GitError({}, { cause: err as Error })
+            }
+            gitErr.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
+            throw gitErr;
         }
 
         try {
             await this.exec(["config", "--get-all", "user.email"]);
         } catch (err) {
-            err.gitErrorCode = GitErrorCodes.NoUserEmailConfigured;
-            throw err;
+            let gitErr: GitError;
+            if (err instanceof GitError) {
+                gitErr = err;
+            } else {
+                gitErr = new GitError({}, { cause: err as Error })
+            }
+            gitErr.gitErrorCode = GitErrorCodes.NoUserEmailConfigured;
+            throw gitErr;
         }
 
         throw commitErr;
@@ -761,7 +774,7 @@ export class Repository {
         try {
             await this.exec(args);
         } catch (err) {
-            if (/^CONFLICT /m.test(err.stdout || "")) {
+            if (err instanceof GitError && /^CONFLICT /m.test(err.stdout || "")) {
                 err.gitErrorCode = GitErrorCodes.Conflict;
             }
 
@@ -809,7 +822,7 @@ export class Repository {
         try {
             await this.exec(["checkout", "--", "."]);
         } catch (err) {
-            if (/did not match any file\(s\) known to git\./.test(err.stderr || "")) {
+            if (err instanceof GitError && /did not match any file\(s\) known to git\./.test(err.stderr || "")) {
                 return;
             }
 
@@ -844,7 +857,7 @@ export class Repository {
         } catch (err) {
             // In case there are merge conflicts to be resolved, git reset will output
             // some "needs merge" data. We try to get around that.
-            if (/([^:]+: needs merge\n)+/m.test(err.stdout || "")) {
+            if (err instanceof GitError && /([^:]+: needs merge\n)+/m.test(err.stdout || "")) {
                 return;
             }
 
@@ -909,9 +922,9 @@ export class Repository {
         try {
             await this.exec(args, spawnOptions);
         } catch (err) {
-            if (/No remote repository specified\./.test(err.stderr || "")) {
+            if (err instanceof GitError && /No remote repository specified\./.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.NoRemoteRepositorySpecified;
-            } else if (/Could not read from remote repository/.test(err.stderr || "")) {
+            } else if (err instanceof GitError && /Could not read from remote repository/.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.RemoteConnectionError;
             }
 
@@ -945,25 +958,27 @@ export class Repository {
                 env: { "GIT_HTTP_USER_AGENT": this.git.userAgent },
             });
         } catch (err) {
-            if (/^CONFLICT \([^)]+\): \b/m.test(err.stdout || "")) {
-                err.gitErrorCode = GitErrorCodes.Conflict;
-            } else if (/Please tell me who you are\./.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
-            } else if (/Could not read from remote repository/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.RemoteConnectionError;
-            } else if (
-                /Pull(?:ing)? is not possible because you have unmerged files|Cannot pull with rebase: You have unstaged changes|Your local changes to the following files would be overwritten|Please, commit your changes before you can merge/i
-                    .test(err.stderr)
-            ) {
-                err.stderr = err.stderr.replace(
-                    /Cannot pull with rebase: You have unstaged changes/i,
-                    "Cannot pull with rebase, you have unstaged changes",
-                );
-                err.gitErrorCode = GitErrorCodes.DirtyWorkTree;
-            } else if (/cannot lock ref|unable to update local ref/i.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.CantLockRef;
-            } else if (/cannot rebase onto multiple branches/i.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.CantRebaseMultipleBranches;
+            if (err instanceof GitError) {
+                if (/^CONFLICT \([^)]+\): \b/m.test(err.stdout || "")) {
+                    err.gitErrorCode = GitErrorCodes.Conflict;
+                } else if (/Please tell me who you are\./.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
+                } else if (/Could not read from remote repository/.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.RemoteConnectionError;
+                } else if (
+                    err.stderr && /Pull(?:ing)? is not possible because you have unmerged files|Cannot pull with rebase: You have unstaged changes|Your local changes to the following files would be overwritten|Please, commit your changes before you can merge/i
+                        .test(err.stderr)
+                ) {
+                    err.stderr = err.stderr.replace(
+                        /Cannot pull with rebase: You have unstaged changes/i,
+                        "Cannot pull with rebase, you have unstaged changes",
+                    );
+                    err.gitErrorCode = GitErrorCodes.DirtyWorkTree;
+                } else if (/cannot lock ref|unable to update local ref/i.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.CantLockRef;
+                } else if (/cannot rebase onto multiple branches/i.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.CantRebaseMultipleBranches;
+                }
             }
 
             throw err;
@@ -978,9 +993,9 @@ export class Repository {
         try {
             await this.exec(args, options);
         } catch (err) {
-            if (/^CONFLICT \([^)]+\): \b/m.test(err.stdout || "")) {
+            if (err instanceof GitError && /^CONFLICT \([^)]+\): \b/m.test(err.stdout || "")) {
                 err.gitErrorCode = GitErrorCodes.Conflict;
-            } else if (/cannot rebase onto multiple branches/i.test(err.stderr || "")) {
+            } else if (err instanceof GitError && /cannot rebase onto multiple branches/i.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.CantRebaseMultipleBranches;
             }
 
@@ -1027,14 +1042,16 @@ export class Repository {
         try {
             await this.exec(args, { env: { "GIT_HTTP_USER_AGENT": this.git.userAgent } });
         } catch (err) {
-            if (/^error: failed to push some refs to\b/m.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.PushRejected;
-            } else if (/Could not read from remote repository/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.RemoteConnectionError;
-            } else if (/^fatal: The current branch .* has no upstream branch/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.NoUpstreamBranch;
-            } else if (/Permission.*denied/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.PermissionDenied;
+            if (err instanceof GitError) {
+                if (/^error: failed to push some refs to\b/m.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.PushRejected;
+                } else if (/Could not read from remote repository/.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.RemoteConnectionError;
+                } else if (/^fatal: The current branch .* has no upstream branch/.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.NoUpstreamBranch;
+                } else if (/Permission.*denied/.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.PermissionDenied;
+                }
             }
 
             throw err;
@@ -1052,7 +1069,7 @@ export class Repository {
             const result = await this.exec(args);
             return result.stdout.trim();
         } catch (err) {
-            if (/^fatal: no such path/.test(err.stderr || "")) {
+            if (err instanceof GitError && /^fatal: no such path/.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.NoPathFound;
             }
 
@@ -1074,7 +1091,7 @@ export class Repository {
 
             await this.exec(args);
         } catch (err) {
-            if (/No local changes to save/.test(err.stderr || "")) {
+            if (err instanceof GitError && /No local changes to save/.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.NoLocalChanges;
             }
 
@@ -1100,12 +1117,14 @@ export class Repository {
 
             await this.exec(args);
         } catch (err) {
-            if (/No stash found/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.NoStashFound;
-            } else if (/error: Your local changes to the following files would be overwritten/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.LocalChangesOverwritten;
-            } else if (/^CONFLICT/m.test(err.stdout || "")) {
-                err.gitErrorCode = GitErrorCodes.StashConflict;
+            if (err instanceof GitError) {
+                if (/No stash found/.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.NoStashFound;
+                } else if (/error: Your local changes to the following files would be overwritten/.test(err.stderr || "")) {
+                    err.gitErrorCode = GitErrorCodes.LocalChangesOverwritten;
+                } else if (/^CONFLICT/m.test(err.stdout || "")) {
+                    err.gitErrorCode = GitErrorCodes.StashConflict;
+                }
             }
 
             throw err;
@@ -1122,7 +1141,7 @@ export class Repository {
         try {
             await this.exec(args);
         } catch (err) {
-            if (/No stash found/.test(err.stderr || "")) {
+            if (err instanceof GitError && /No stash found/.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.NoStashFound;
             }
 
@@ -1428,7 +1447,7 @@ export class Repository {
             const gitmodulesRaw = await fs.readFile(gitmodulesPath, "utf8");
             return parseGitmodules(gitmodulesRaw);
         } catch (err) {
-            if (/ENOENT/.test(err.message)) {
+            if (err instanceof GitError && /ENOENT/.test(err.message)) {
                 return [];
             }
 

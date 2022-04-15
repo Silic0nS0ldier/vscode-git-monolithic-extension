@@ -15,6 +15,7 @@ import {
     workspace,
 } from "vscode";
 import { GitErrorCodes } from "./api/git.js";
+import { GitError } from "./git/error.js";
 import { Operation, OperationOptions } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { eventToPromise, filterEvent, localize, onceEvent } from "./util.js";
@@ -149,7 +150,7 @@ export class AutoFetcher {
                     await this.#repository.fetchDefault({ silent: true });
                 }
             } catch (err) {
-                if (err.gitErrorCode === GitErrorCodes.AuthenticationFailed) {
+                if (err instanceof GitError && err.gitErrorCode === GitErrorCodes.AuthenticationFailed) {
                     this.disable();
                 }
             }

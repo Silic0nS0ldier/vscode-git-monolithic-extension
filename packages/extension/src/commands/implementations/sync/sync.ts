@@ -1,5 +1,6 @@
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import type { ScmCommand } from "../../helpers.js";
 import { sync as syncFn } from "./helper.js";
 
@@ -7,7 +8,7 @@ export async function sync(repository: AbstractRepository, model: Model): Promis
     try {
         await syncFn(repository, false, model);
     } catch (err) {
-        if (/Cancelled/i.test(err && (err.message || err.stderr || ""))) {
+        if (isCancelledError(err)) {
             return;
         }
 

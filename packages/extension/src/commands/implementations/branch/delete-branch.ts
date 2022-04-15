@@ -1,7 +1,9 @@
 import { QuickPickItem, window } from "vscode";
 import { GitErrorCodes, Ref, RefType } from "../../../api/git.js";
+import { GitError } from "../../../git/error.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
+import { isExpectedError } from "../../../util/is-expected-error.js";
 import type { ScmCommand } from "../../helpers.js";
 
 class BranchDeleteItem implements QuickPickItem {
@@ -56,7 +58,7 @@ export function createCommand(): ScmCommand {
         try {
             await run(force);
         } catch (err) {
-            if (err.gitErrorCode !== GitErrorCodes.BranchNotFullyMerged) {
+            if (!isExpectedError(err, GitError, e => e.gitErrorCode === GitErrorCodes.BranchNotFullyMerged)) {
                 throw err;
             }
 

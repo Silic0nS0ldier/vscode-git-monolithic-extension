@@ -1,6 +1,15 @@
 import { GitErrorCodes } from "../api/git.js";
+import { GitError } from "../git/error.js";
 import { Operation, OperationOptions } from "./Operations.js";
 import { timeout } from "./timeout.js";
+
+function isOperationRetrySafe(err: GitError, operation: OperationOptions) {
+    return (operation === Operation.Pull || operation === Operation.Sync || operation === Operation.Fetch)
+        && (
+            err.gitErrorCode === GitErrorCodes.CantLockRef
+            || err.gitErrorCode === GitErrorCodes.CantRebaseMultipleBranches
+        );
+}
 
 export async function retryRun<T>(
     operation: OperationOptions,
@@ -13,11 +22,9 @@ export async function retryRun<T>(
             attempt++;
             return await runOperation();
         } catch (err) {
-            const shouldRetry = attempt <= 10 && (
+            const shouldRetry = err instanceof GitError && attempt <= 10 && (
                 (err.gitErrorCode === GitErrorCodes.RepositoryIsLocked)
-                || ((operation === Operation.Pull || operation === Operation.Sync || operation === Operation.Fetch)
-                    && (err.gitErrorCode === GitErrorCodes.CantLockRef
-                        || err.gitErrorCode === GitErrorCodes.CantRebaseMultipleBranches))
+                || isOperationRetrySafe(err, operation)
             );
 
             if (shouldRetry) {

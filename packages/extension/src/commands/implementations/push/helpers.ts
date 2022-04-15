@@ -1,5 +1,6 @@
 import { Uri, window, workspace } from "vscode";
 import { ForcePushMode, ForcePushModeOptions, GitErrorCodes } from "../../../api/git.js";
+import { GitError } from "../../../git/error.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
@@ -103,7 +104,7 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
         try {
             await repository.push(repository.HEAD, forcePushMode);
         } catch (err) {
-            if (err.gitErrorCode !== GitErrorCodes.NoUpstreamBranch) {
+            if (!(err instanceof GitError && err.gitErrorCode == GitErrorCodes.NoUpstreamBranch)) {
                 throw err;
             }
 

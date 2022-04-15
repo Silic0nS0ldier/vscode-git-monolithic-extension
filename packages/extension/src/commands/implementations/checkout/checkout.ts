@@ -1,7 +1,9 @@
 import { QuickPickItem, window } from "vscode";
 import { GitErrorCodes } from "../../../api/git.js";
+import { GitError } from "../../../git/error.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
+import { isExpectedError } from "../../../util/is-expected-error.js";
 import type { ScmCommand } from "../../helpers.js";
 import { branch } from "../branch/helpers.js";
 import { CreateBranchFromItem, CreateBranchItem } from "../branch/quick-pick.js";
@@ -60,7 +62,7 @@ export async function checkout(
         try {
             await item.run(repository, opts);
         } catch (err) {
-            if (err.gitErrorCode !== GitErrorCodes.DirtyWorkTree) {
+            if (!isExpectedError(err, GitError, e => e.gitErrorCode === GitErrorCodes.DirtyWorkTree)) {
                 throw err;
             }
 

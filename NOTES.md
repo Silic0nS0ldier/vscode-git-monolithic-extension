@@ -14,7 +14,3 @@ This issue can be trivially worked around by not recycling promises for a long t
 By default extensions operate within the same thread. This allows resource sharing, but can make it very easy to form bottlenecks.
 
 The solution is to shift long running tasks into another thread (worker).
-
-## Error Tracing
-
-The next version of VSCode will have NodeJS 16.9, meaning Error.cause is available. A lot of internal refactoring can happen to eliminate redundant code and improving tracing of errors.

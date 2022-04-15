@@ -2,6 +2,7 @@ import { Disposable, EventEmitter, Memento, OutputChannel, QuickDiffProvider, Ur
 import { Branch, GitErrorCodes, Ref, RefType, Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import type { Repository as BaseRepository } from "../../git.js";
+import { GitError } from "../../git/error.js";
 import type { Submodule } from "../../git/Submodule.js";
 import { debounce } from "../../package-patches/just-debounce.js";
 import { throat } from "../../package-patches/throat.js";
@@ -180,7 +181,7 @@ export function createRepository(
             throw new Error("Repository not initialized");
         }
 
-        let error: any = null;
+        let error: unknown = null;
 
         operations.start(operation);
         onRunOperationEmitter.fire(operation);
@@ -196,7 +197,7 @@ export function createRepository(
         } catch (err) {
             error = err;
 
-            if (err.gitErrorCode === GitErrorCodes.NotAGitRepository) {
+            if (err instanceof GitError && err.gitErrorCode === GitErrorCodes.NotAGitRepository) {
                 state.set(RepositoryState.Disposed);
             }
 

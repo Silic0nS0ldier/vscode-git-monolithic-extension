@@ -80,7 +80,7 @@
         }
     },
     "devDependencies": {
-        "@types/node": "^16.0.0",
+        "@types/node": "^16.9.0",
         "@types/which": "^2.0.1",
         "ava": "workspace:*",
         "into-stream": "^7.0.0"

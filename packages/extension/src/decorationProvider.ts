@@ -17,11 +17,13 @@ import {
     workspace,
 } from "vscode";
 import { GitErrorCodes, Status } from "./api/git.js";
+import { GitError } from "./git/error.js";
 import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import type { SourceControlResourceGroupUI } from "./ui/source-control.js";
 import { anyEvent, dispose as disposeHelper, filterEvent, fireEvent, PromiseSource } from "./util.js";
+import { isExpectedError } from "./util/is-expected-error.js";
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
     static #Decoration: FileDecoration = { color: new ThemeColor("gitDecoration.ignoredResourceForeground") };
@@ -83,7 +85,8 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
                     promiseSource.resolve(ignoreSet.has(path) ? GitIgnoreDecorationProvider.#Decoration : undefined);
                 }
             }, err => {
-                if (err.gitErrorCode !== GitErrorCodes.IsInSubmodule) {
+                if (!isExpectedError(err, GitError, e => e.gitErrorCode === GitErrorCodes.IsInSubmodule)) {
+                    // TODO This is logged into oblivion
                     console.error(err);
                 }
 

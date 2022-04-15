@@ -1,11 +1,13 @@
 import * as os from "node:os";
 import { commands, ProgressLocation, Uri, window, workspace } from "vscode";
 import type { Git } from "../../../git.js";
+import { GitError } from "../../../git/error.js";
 import type { Model } from "../../../model.js";
 import type { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import { localize } from "../../../util.js";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
+import { isCancelledError } from "../../../util/is-cancelled-error.js";
 
 type PostCloneActionOptions = "Open" | "OpenNewWindow" | "AddToWorkspace";
 const PostCloneAction: Record<PostCloneActionOptions, PostCloneActionOptions> = {
@@ -148,14 +150,14 @@ export async function cloneRepository(
             commands.executeCommand("vscode.openFolder", uri, { forceNewWindow: true });
         }
     } catch (err) {
-        if (/already exists and is not an empty directory/.test(err && err.stderr || "")) {
+        if (/already exists and is not an empty directory/.test(err instanceof GitError && err.stderr || "")) {
             /* __GDPR__
 				"clone" : {
 					"outcome" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
 				}
 			*/
             telemetryReporter.sendTelemetryEvent("clone", { outcome: "directory_not_empty" });
-        } else if (/Cancelled/i.test(err && (err.message || err.stderr || ""))) {
+        } else if (isCancelledError(err)) {
             return;
         } else {
             /* __GDPR__

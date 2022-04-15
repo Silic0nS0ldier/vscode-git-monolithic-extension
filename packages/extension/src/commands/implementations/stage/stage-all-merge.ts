@@ -3,6 +3,7 @@ import { window } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../../../repository/Resource.js";
 import { localize } from "../../../util.js";
+import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import type { ScmCommand } from "../../helpers.js";
 import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";
 
@@ -18,7 +19,7 @@ export function createCommand(): ScmCommand {
                 await stageDeletionConflict(repository, deletionConflict.state.resourceUri);
             }
         } catch (err) {
-            if (/Cancelled/.test(err.message)) {
+            if (isCancelledError(err)) {
                 return;
             }
 

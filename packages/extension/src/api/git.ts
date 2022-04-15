@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Disposable, Event, ProviderResult, Uri } from "vscode";
+import type { GitError } from "../git/error.js";
 export type { ProviderResult } from "vscode";
 
 export interface Git {
@@ -255,7 +256,7 @@ export interface PushErrorHandler {
         repository: Repository,
         remote: Remote,
         refspec: string,
-        error: Error & { gitErrorCode: GitErrorCodesOptions },
+        error: GitError,
     ): Promise<boolean>;
 }
 

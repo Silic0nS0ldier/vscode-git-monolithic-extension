@@ -30,7 +30,7 @@ export function createError<TSymbol>(type: TSymbol, cause?: unknown): ErrorShape
     try {
         throw new Error();
     } catch (e) {
-        unstableStack = e.stack as string ?? "";
+        unstableStack = (e as Error).stack as string ?? "";
         unstableStack = unstableStack.split("\n").slice(2).join("\n");
     }
     return {

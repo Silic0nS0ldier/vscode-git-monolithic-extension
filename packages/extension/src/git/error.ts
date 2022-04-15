@@ -26,17 +26,18 @@ export interface IGitErrorData {
     gitArgs?: string[];
 }
 
-export class GitError {
+export class GitError extends Error {
     error?: Error;
-    message: string;
     stdout?: string;
     stderr?: string;
     exitCode?: number;
     gitErrorCode?: string;
     gitCommand?: string;
     gitArgs?: string[];
+    gitTreeish?: string;
 
-    constructor(data: IGitErrorData) {
+    constructor(data: IGitErrorData, options?: ErrorOptions) {
+        super("", options);
         if (data.error) {
             this.error = data.error;
             this.message = data.error.message;
@@ -54,7 +55,7 @@ export class GitError {
         this.gitArgs = data.gitArgs;
     }
 
-    toString(): string {
+    override toString(): string {
         let result = this.message + " " + JSON.stringify(
             {
                 exitCode: this.exitCode,

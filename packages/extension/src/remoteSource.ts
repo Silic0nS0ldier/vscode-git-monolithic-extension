@@ -5,6 +5,7 @@
 
 import { QuickPick, QuickPickItem, window } from "vscode";
 import type { RemoteSource, RemoteSourceProvider } from "./api/git.js";
+import { prettyPrint } from "./logging/pretty-print.js";
 import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
@@ -61,7 +62,7 @@ class RemoteSourceProviderQuickPick {
         } catch (err) {
             this.#quickpick.items = [{
                 alwaysShow: true,
-                label: localize("error", "$(error) Error: {0}", err.message),
+                label: localize("error", "$(error) Error: {0}", await prettyPrint(err)),
             }];
             // TODO Follow up, this won't go anywhere useful
             console.error(err);

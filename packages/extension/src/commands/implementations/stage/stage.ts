@@ -4,6 +4,7 @@ import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { localize } from "../../../util.js";
+import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import type { ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
 import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";
@@ -69,7 +70,7 @@ export function createCommand(
                 },
             );
         } catch (err) {
-            if (/Cancelled/.test(err.message)) {
+            if (isCancelledError(err)) {
                 return;
             }
 

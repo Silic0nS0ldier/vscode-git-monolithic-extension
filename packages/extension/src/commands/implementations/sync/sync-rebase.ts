@@ -1,5 +1,6 @@
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import type { ScmCommand } from "../../helpers.js";
 import { sync } from "./helper.js";
 
@@ -8,7 +9,7 @@ export function createCommand(model: Model): ScmCommand {
         try {
             await sync(repository, true, model);
         } catch (err) {
-            if (/Cancelled/i.test(err && (err.message || err.stderr || ""))) {
+            if (isCancelledError(err)) {
                 return;
             }
 

@@ -28,6 +28,7 @@ import type { TelemetryReporter } from "../package-patches/vscode-extension-tele
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
 import { eventToPromise, filterEvent, localize, toDisposable } from "../util.js";
+import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
 
 export async function activate(context: ExtensionContext): Promise<GitExtension> {
@@ -75,11 +76,11 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
         context.subscriptions.push(registerAPICommands(result));
         return result;
     } catch (err) {
-        if (!/Git installation not found/.test(err.message || "")) {
+        if (!isExpectedError(err, Error, e => /Git installation not found/.test(e.message))) {
             throw err;
         }
 
-        outputChannel.appendLine("[WARN] " + await prettyPrint(err.message));
+        outputChannel.appendLine("[WARN] " + await prettyPrint(err));
 
         commands.executeCommand("setContext", "git.missing", true);
         warnAboutMissingGit();

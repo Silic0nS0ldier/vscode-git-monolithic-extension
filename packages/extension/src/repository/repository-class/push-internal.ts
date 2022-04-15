@@ -1,6 +1,7 @@
 import { ApiRepository } from "../../api/api1.js";
 import type { ForcePushModeOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
+import { GitError } from "../../git/error.js";
 import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 
@@ -29,9 +30,11 @@ export async function pushInternal(
             throw err;
         }
 
-        for (const handler of pushErrorHandlerRegistry.getPushErrorHandlers()) {
-            if (await handler.handlePushError(repository, remoteObj, refspec, err)) {
-                return;
+        if (err instanceof GitError) {
+            for (const handler of pushErrorHandlerRegistry.getPushErrorHandlers()) {
+                if (await handler.handlePushError(repository, remoteObj, refspec, err)) {
+                    return;
+                }
             }
         }
 

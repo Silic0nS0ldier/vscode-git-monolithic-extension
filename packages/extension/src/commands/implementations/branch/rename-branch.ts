@@ -1,5 +1,6 @@
 import { window } from "vscode";
 import { GitErrorCodes } from "../../../api/git.js";
+import { GitError } from "../../../git/error.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { localize } from "../../../util.js";
 import type { ScmCommand } from "../../helpers.js";
@@ -17,18 +18,21 @@ export function createCommand(): ScmCommand {
         try {
             await repository.renameBranch(branchName);
         } catch (err) {
-            switch (err.gitErrorCode) {
-                case GitErrorCodes.InvalidBranchName:
-                    window.showErrorMessage(localize("invalid branch name", "Invalid branch name"));
-                    return;
-                case GitErrorCodes.BranchAlreadyExists:
-                    window.showErrorMessage(
-                        localize("branch already exists", "A branch named '{0}' already exists", branchName),
-                    );
-                    return;
-                default:
-                    throw err;
+            if (err instanceof GitError) {
+                switch (err.gitErrorCode) {
+                    case GitErrorCodes.InvalidBranchName:
+                        window.showErrorMessage(localize("invalid branch name", "Invalid branch name"));
+                        return;
+                    case GitErrorCodes.BranchAlreadyExists:
+                        window.showErrorMessage(
+                            localize("branch already exists", "A branch named '{0}' already exists", branchName),
+                        );
+                        return;
+                    default:
+                        throw new Error("Unexpected issue while attempting branch rename", { cause: err });
+                }
             }
+            throw err;
         }
     }
 
