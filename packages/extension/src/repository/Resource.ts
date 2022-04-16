@@ -10,9 +10,9 @@ import {
 } from "vscode";
 import { Status, StatusOptions } from "../api/git.js";
 import type { Submodule } from "../git/Submodule.js";
+import * as i18n from "../i18n/mod.js";
 import { getResources, resolveChangeCommand, resolveDefaultCommand } from "../repository/resource-command-resolver.js";
 import type { SourceControlUIGroup } from "../ui/source-control.js";
-import { localize } from "../util.js";
 import { getIconUri } from "./getIconUri.js";
 import type { ResourceGroupTypeOptions } from "./ResourceGroupType.js";
 
@@ -50,42 +50,42 @@ export function createResource(
     );
 }
 
-function getStatusText(type: StatusOptions) {
+function getStatusText(type: StatusOptions): string {
     switch (type) {
         case Status.INDEX_MODIFIED:
-            return localize("index modified", "Index Modified");
+            return i18n.Translations.indexModified();
         case Status.MODIFIED:
-            return localize("modified", "Modified");
+            return i18n.Translations.modified();
         case Status.INDEX_ADDED:
-            return localize("index added", "Index Added");
+            return i18n.Translations.indexAdded();
         case Status.INDEX_DELETED:
-            return localize("index deleted", "Index Deleted");
+            return i18n.Translations.indexDeleted();
         case Status.DELETED:
-            return localize("deleted", "Deleted");
+            return i18n.Translations.deleted();
         case Status.INDEX_RENAMED:
-            return localize("index renamed", "Index Renamed");
+            return i18n.Translations.indexRenamed();
         case Status.INDEX_COPIED:
-            return localize("index copied", "Index Copied");
+            return i18n.Translations.indexCopied();
         case Status.UNTRACKED:
-            return localize("untracked", "Untracked");
+            return i18n.Translations.untracked();
         case Status.IGNORED:
-            return localize("ignored", "Ignored");
+            return i18n.Translations.ignored();
         case Status.INTENT_TO_ADD:
-            return localize("intent to add", "Intent to Add");
+            return i18n.Translations.intentToAdd();
         case Status.BOTH_DELETED:
-            return localize("both deleted", "Conflict: Both Deleted");
+            return i18n.Translations.bothDeleted();
         case Status.ADDED_BY_US:
-            return localize("added by us", "Conflict: Added By Us");
+            return i18n.Translations.addedByUs();
         case Status.DELETED_BY_THEM:
-            return localize("deleted by them", "Conflict: Deleted By Them");
+            return i18n.Translations.deletedByThem();
         case Status.ADDED_BY_THEM:
-            return localize("added by them", "Conflict: Added By Them");
+            return i18n.Translations.addedByThem();
         case Status.DELETED_BY_US:
-            return localize("deleted by us", "Conflict: Deleted By Us");
+            return i18n.Translations.deletedByUs();
         case Status.BOTH_ADDED:
-            return localize("both added", "Conflict: Both Added");
+            return i18n.Translations.bothAdded();
         case Status.BOTH_MODIFIED:
-            return localize("both modified", "Conflict: Both Modified");
+            return i18n.Translations.bothModified();
         default:
             return "";
     }

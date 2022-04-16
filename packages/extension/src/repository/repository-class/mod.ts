@@ -4,6 +4,7 @@ import { AutoFetcher } from "../../autofetch.js";
 import type { Repository as BaseRepository } from "../../git.js";
 import { GitError } from "../../git/error.js";
 import type { Submodule } from "../../git/Submodule.js";
+import * as i18n from "../../i18n/mod.js";
 import { debounce } from "../../package-patches/just-debounce.js";
 import { throat } from "../../package-patches/throat.js";
 import type { IPushErrorHandlerRegistry } from "../../pushError.js";
@@ -11,7 +12,6 @@ import type { IRemoteSourceProviderRegistry } from "../../remoteProvider.js";
 import { StatusBarCommands } from "../../statusbar.js";
 import { create as createSourceControlUI } from "../../ui/source-control.js";
 import { toGitUri } from "../../uri.js";
-import { localize } from "../../util.js";
 import { createBox } from "../../util/box.js";
 import { dispose } from "../../util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "../../util/events.js";
@@ -273,18 +273,7 @@ export function createRepository(
 
     function updateInputBoxPlaceholder(): void {
         const branchName = headShortName();
-
-        if (branchName) {
-            // '{0}' will be replaced by the corresponding key-command later in the process, which is why it needs to stay.
-            sourceControlUI.sourceControl.inputBox.placeholder = localize(
-                "commitMessageWithHeadLabel",
-                "Message ({0} to commit on '{1}')",
-                "{0}",
-                branchName,
-            );
-        } else {
-            sourceControlUI.sourceControl.inputBox.placeholder = localize("commitMessage", "Message ({0} to commit)");
-        }
+        sourceControlUI.sourceControl.inputBox.placeholder = i18n.Translations.commitMessage(branchName);
     }
 
     updateInputBoxPlaceholder();
@@ -658,7 +647,7 @@ export function createRepository(
             const gitConfig = workspace.getConfiguration("git");
 
             if (gitConfig.get<boolean>("showPushSuccessNotification")) {
-                window.showInformationMessage(localize("push success", "Successfully pushed."));
+                window.showInformationMessage(i18n.Translations.pushSuccess());
             }
         },
         null,

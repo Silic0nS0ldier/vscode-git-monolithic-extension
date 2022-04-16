@@ -1,7 +1,7 @@
 import path from "node:path";
 import { Uri, window, WorkspaceConfiguration } from "vscode";
 import type { Repository } from "../../../git.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { Box } from "../../../util/box.js";
 import { findKnownHugeFolderPathsToIgnore } from "../find-known-huge-folder-paths-to-ignore.js";
 import { ignore } from "../ignore.js";
@@ -15,19 +15,16 @@ export async function handleLimitHit(
     didWarnAboutLimit: Box<boolean>,
 ) {
     const knownHugeFolderPaths = await findKnownHugeFolderPathsToIgnore(repoRoot, run, repository);
-    const gitWarn = localize(
-        "huge",
-        "The git repository at '{0}' has too many active changes, only a subset of Git features will be enabled.",
-        repoRoot,
-    );
-    const neverAgain = { title: localize("neveragain", "Don't Show Again") };
+    const gitWarn = i18n.Translations.tooManyChanges(repoRoot);
+    const neverAgain = { title: i18n.Translations.neverAgain() };
 
     if (knownHugeFolderPaths.length > 0) {
+        // TODO This is naive
         const folderPath = knownHugeFolderPaths[0];
         const folderName = path.basename(folderPath);
 
-        const addKnown = localize("add known", "Would you like to add '{0}' to .gitignore?", folderName);
-        const yes = { title: localize("yes", "Yes") };
+        const addKnown = i18n.Translations.addKnown(folderName);
+        const yes = { title: i18n.Translations.yes() };
 
         const result = await window.showWarningMessage(`${gitWarn} ${addKnown}`, yes, neverAgain);
 

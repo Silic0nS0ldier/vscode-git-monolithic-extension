@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fs from "node:fs";
-import { missOrInvalid } from "./i18n/mod.js";
+import * as i18n from "./i18n/mod.js";
 import { IPCClient } from "./ipc/ipcClient.js";
 
 function fatal(errMsg: string): void {
-    console.error(missOrInvalid());
+    console.error(i18n.Translations.missOrInvalid());
     console.error(errMsg);
     process.exit(1);
 }

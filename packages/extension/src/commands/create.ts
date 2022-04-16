@@ -1,19 +1,7 @@
 import { commands, MessageOptions, OutputChannel, Uri, window, workspace } from "vscode";
 import { GitErrorCodes } from "../api/git.js";
 import { GitError } from "../git/error.js";
-import {
-    authFailed,
-    cantPush,
-    cleanRepo,
-    fallthroughError,
-    gitError,
-    learnMore,
-    mergeConflicts,
-    missingUserInfo,
-    openGitLog,
-    showCommandOutput,
-    stashMergeConflicts,
-} from "../i18n/mod.js";
+import * as i18n from "../i18n/mod.js";
 import { prettyPrint } from "../logging/pretty-print.js";
 import type { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
@@ -84,16 +72,16 @@ async function handleError(
     const options: MessageOptions = {
         modal: true,
     };
-    let message = fallthroughError();
+    let message = i18n.Translations.fallthroughError();
     let type: "error" | "warning" = "error";
     const choices = new Map<string, () => void>();
 
     if (err instanceof GitError) {
-        const openOutputChannelChoice = openGitLog();
+        const openOutputChannelChoice = i18n.Translations.openGitLog();
         choices.set(openOutputChannelChoice, () => outputChannel.show());
 
         if (err.stderr) {
-            const showCommandOutputChoice = showCommandOutput();
+            const showCommandOutputChoice = i18n.Translations.showCommandOutput();
             choices.set(showCommandOutputChoice, async () => {
                 const timestamp = new Date().getTime();
                 // TODO Hard coded URL may break in the future
@@ -120,31 +108,31 @@ async function handleError(
 
         switch (err.gitErrorCode) {
             case GitErrorCodes.DirtyWorkTree:
-                message = cleanRepo();
+                message = i18n.Translations.cleanRepo();
                 break;
             case GitErrorCodes.PushRejected:
-                message = cantPush();
+                message = i18n.Translations.cantPush();
                 break;
             case GitErrorCodes.Conflict:
-                message = mergeConflicts();
+                message = i18n.Translations.mergeConflicts();
                 type = "warning";
                 options.modal = false;
                 break;
             case GitErrorCodes.StashConflict:
-                message = stashMergeConflicts();
+                message = i18n.Translations.stashMergeConflicts();
                 type = "warning";
                 options.modal = false;
                 break;
             case GitErrorCodes.AuthenticationFailed:
                 const regex = /Authentication failed for '(.*)'/i;
                 const match = regex.exec(err.stderr || String(err));
-                message = authFailed(match?.[1]);
+                message = i18n.Translations.authFailed(match?.[1]);
                 break;
             case GitErrorCodes.NoUserNameConfigured:
             case GitErrorCodes.NoUserEmailConfigured:
-                message = missingUserInfo();
+                message = i18n.Translations.missingUserInfo();
                 choices.set(
-                    learnMore(),
+                    i18n.Translations.learnMore(),
                     () =>
                         commands.executeCommand(
                             "vscode.open",
@@ -160,7 +148,7 @@ async function handleError(
                     .split(/[\r\n]/)
                     .filter((line: string) => !!line)[0];
 
-                message = gitError(hint);
+                message = i18n.Translations.gitError(hint);
                 break;
         }
     }

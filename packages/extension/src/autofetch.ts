@@ -16,7 +16,7 @@ import {
 } from "vscode";
 import { GitErrorCodes } from "./api/git.js";
 import { GitError } from "./git/error.js";
-import { askLater, no, suggestAutoFetch, yes } from "./i18n/mod.js";
+import * as i18n from "./i18n/mod.js";
 import { Operation, OperationOptions } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { eventToPromise, filterEvent, onceEvent } from "./util/events.js";
@@ -74,11 +74,11 @@ export class AutoFetcher {
             return;
         }
 
-        const yesMsg: MessageItem = { title: yes() };
-        const noMsg: MessageItem = { isCloseAffordance: true, title: no() };
-        const askLaterMsg: MessageItem = { title: askLater() };
+        const yesMsg: MessageItem = { title: i18n.Translations.yes() };
+        const noMsg: MessageItem = { isCloseAffordance: true, title: i18n.Translations.no() };
+        const askLaterMsg: MessageItem = { title: i18n.Translations.askLater() };
         const result = await window.showInformationMessage(
-            suggestAutoFetch(),
+            i18n.Translations.suggestAutoFetch(),
             yesMsg,
             noMsg,
             askLaterMsg,

@@ -1,5 +1,5 @@
 import type { Branch, Remote } from "../../api/git.js";
-import { localize } from "../../util.js";
+import * as i18n from "../../i18n/mod.js";
 
 export function syncTooltip(
     HEAD: Branch | undefined,
@@ -12,34 +12,29 @@ export function syncTooltip(
         || !HEAD.upstream
         || !(HEAD.ahead || HEAD.behind)
     ) {
-        return localize("sync changes", "Synchronize Changes");
+        return i18n.Translations.syncChanges();
     }
 
     const remoteName = HEAD && HEAD.remote || HEAD.upstream.remote;
     const remote = remotes.find(r => r.name === remoteName);
 
+    // TODO Revisit the strange nullability here
     if ((remote && remote.isReadOnly) || !HEAD.ahead) {
-        return localize(
-            "pull n",
-            "Pull {0} commits from {1}/{2}",
-            HEAD.behind,
+        return i18n.Translations.pullN(
+            HEAD.behind ?? Number.NaN,
             HEAD.upstream.remote,
             HEAD.upstream.name,
         );
     } else if (!HEAD.behind) {
-        return localize(
-            "push n",
-            "Push {0} commits to {1}/{2}",
-            HEAD.ahead,
+        return i18n.Translations.pushN(
+            HEAD.ahead ?? Number.NaN,
             HEAD.upstream.remote,
             HEAD.upstream.name,
         );
     } else {
-        return localize(
-            "pull push n",
-            "Pull {0} and push {1} commits between {2}/{3}",
-            HEAD.behind,
-            HEAD.ahead,
+        return i18n.Translations.pullPushN(
+            HEAD.behind ?? Number.NaN,
+            HEAD.ahead ?? Number.NaN,
             HEAD.upstream.remote,
             HEAD.upstream.name,
         );

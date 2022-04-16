@@ -2,9 +2,9 @@
 import { ProgressLocation, ProgressOptions, Uri, window, workspace } from "vscode";
 import type { Branch, Remote } from "../../api/git.js";
 import type { Repository } from "../../git.js";
+import * as i18n from "../../i18n/mod.js";
 import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
-import { localize } from "../../util.js";
 import { fromCancellationToken } from "../../util/abort-signal-adapters.js";
 import { Operation } from "../Operations.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
@@ -62,10 +62,7 @@ export async function syncInternal(
                     const opts: ProgressOptions = {
                         cancellable: true,
                         location: ProgressLocation.Notification,
-                        title: localize(
-                            "sync is unpredictable",
-                            "Syncing. Cancelling may cause serious damages to the repository",
-                        ),
+                        title: i18n.Translations.syncIsUnpredictable(),
                     };
 
                     await window.withProgress(opts, (_, token) => fn(fromCancellationToken(token)));

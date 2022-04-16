@@ -9,8 +9,8 @@ import {
     SourceControlResourceState,
     Uri,
 } from "vscode";
+import * as i18n from "../i18n/mod.js";
 import type { Resource } from "../repository/Resource.js";
-import { localize } from "../util.js";
 import type { Box } from "../util/box.js";
 
 /**
@@ -25,25 +25,25 @@ export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): 
     sourceControl.acceptInputCommand = {
         arguments: [sourceControl],
         command: "git.commit",
-        title: localize("commit", "Commit"),
+        title: i18n.Translations.commit(),
     };
     sourceControl.quickDiffProvider = quickDiffProvider;
 
     const mergeGroup = sourceControl.createResourceGroup(
         "merge",
-        localize("merge changes", "Merge"),
+        i18n.Translations.mergeChanges(),
     );
     const stagedGroup = sourceControl.createResourceGroup(
         "index",
-        localize("staged changes", "Staged"),
+        i18n.Translations.stagedChanges(),
     );
     const trackedGroup = sourceControl.createResourceGroup(
         "tracked",
-        localize("tracked changes", "Tracked"),
+        i18n.Translations.trackedChanges(),
     );
     const untrackedGroup = sourceControl.createResourceGroup(
         "untracked",
-        localize("untracked changes", "Untracked"),
+        i18n.Translations.untrackedChanges(),
     );
 
     mergeGroup.hideWhenEmpty = true;

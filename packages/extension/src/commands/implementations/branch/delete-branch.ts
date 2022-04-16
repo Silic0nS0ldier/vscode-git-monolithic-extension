@@ -1,8 +1,8 @@
 import { QuickPickItem, window } from "vscode";
 import { GitErrorCodes, Ref, RefType } from "../../../api/git.js";
 import { GitError } from "../../../git/error.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
 import { isExpectedError } from "../../../util/is-expected-error.js";
 import type { ScmCommand } from "../../helpers.js";
 
@@ -45,7 +45,7 @@ export function createCommand(): ScmCommand {
             const heads = repository.refs.filter(ref => ref.type === RefType.Head && ref.name !== currentHead)
                 .map(ref => new BranchDeleteItem(ref));
 
-            const placeHolder = localize("select branch to delete", "Select a branch to delete");
+            const placeHolder = i18n.Translations.selectBranchToDelete();
             const choice = await window.showQuickPick<BranchDeleteItem>(heads, { placeHolder });
 
             if (!choice || !choice.branchName) {
@@ -62,12 +62,8 @@ export function createCommand(): ScmCommand {
                 throw err;
             }
 
-            const message = localize(
-                "confirm force delete branch",
-                "The branch '{0}' is not fully merged. Delete anyway?",
-                normalisedBranchName,
-            );
-            const yes = localize("delete branch", "Delete Branch");
+            const message = i18n.Translations.confirmForceDeleteBranch(normalisedBranchName);
+            const yes = i18n.Translations.deleteBranch();
             const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
             if (pick === yes) {

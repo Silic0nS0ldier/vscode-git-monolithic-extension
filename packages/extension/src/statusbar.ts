@@ -5,10 +5,10 @@
 
 import { Command, Disposable, Event, EventEmitter, Uri, workspace } from "vscode";
 import type { Branch, RemoteSourceProvider } from "./api/git.js";
+import * as i18n from "./i18n/mod.js";
 import type { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
 import { Operation } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
-import { localize } from "./util.js";
 import { dispose } from "./util/disposals.js";
 import { anyEvent, filterEvent } from "./util/events.js";
 
@@ -28,14 +28,14 @@ class CheckoutStatusBar {
     get command(): Command | undefined {
         const rebasing = !!this.#repository.rebaseCommit;
         const title = `$(git-branch) ${this.#repository.headLabel}${
-            rebasing ? ` (${localize("rebasing", "Rebasing")})` : ""
+            rebasing ? ` (${i18n.Translations.rebasing()})` : ""
         }`;
 
         return {
             arguments: [this.#repository.sourceControlUI.sourceControl],
             command: "git.checkout",
             title,
-            tooltip: localize("checkout", "Checkout branch/tag..."),
+            tooltip: i18n.Translations.checkout(),
         };
     }
 
@@ -143,9 +143,11 @@ class SyncStatusBar {
                 return;
             }
 
-            const tooltip = this.#state.remoteSourceProviders.length === 1
-                ? localize("publish to", "Publish to {0}", this.#state.remoteSourceProviders[0].name)
-                : localize("publish to...", "Publish to...");
+            const tooltip = i18n.Translations.publishTo(
+                this.#state.remoteSourceProviders.length === 1
+                    ? this.#state.remoteSourceProviders[0].name
+                    : undefined,
+            );
 
             return {
                 arguments: [this.#repository.sourceControlUI.sourceControl],
@@ -175,7 +177,7 @@ class SyncStatusBar {
             } else {
                 icon = "$(cloud-upload)";
                 command = "git.publish";
-                tooltip = localize("publish changes", "Publish Changes");
+                tooltip = i18n.Translations.publishChanges();
             }
         } else {
             command = "";
@@ -185,7 +187,7 @@ class SyncStatusBar {
         if (this.#state.isSyncRunning) {
             icon = "$(sync~spin)";
             command = "";
-            tooltip = localize("syncing changes", "Synchronizing Changes...");
+            tooltip = i18n.Translations.syncingChanges();
         }
 
         return {

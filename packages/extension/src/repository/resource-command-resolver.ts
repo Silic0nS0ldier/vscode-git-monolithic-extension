@@ -2,9 +2,9 @@ import path from "node:path";
 import { Command, Uri, workspace } from "vscode";
 import { Status } from "../api/git.js";
 import type { Submodule } from "../git/Submodule.js";
+import * as i18n from "../i18n/mod.js";
 import type { SourceControlResourceGroupUI } from "../ui/source-control.js";
 import { toGitUri } from "../uri.js";
-import { localize } from "../util.js";
 import type { Resource, ResourceState } from "./Resource.js";
 import { ResourceGroupType } from "./ResourceGroupType.js";
 
@@ -15,25 +15,25 @@ function getTitleFromResource(resource: Resource): string {
         case Status.INDEX_MODIFIED:
         case Status.INDEX_RENAMED:
         case Status.INDEX_ADDED:
-            return localize("git.title.index", "{0} (Index)", basename);
+            return i18n.Translations.gitTitleIndex(basename);
 
         case Status.MODIFIED:
         case Status.BOTH_ADDED:
         case Status.BOTH_MODIFIED:
-            return localize("git.title.workingTree", "{0} (Working Tree)", basename);
+            return i18n.Translations.gitTitleWorkingTree(basename);
 
         case Status.INDEX_DELETED:
         case Status.DELETED:
-            return localize("git.title.deleted", "{0} (Deleted)", basename);
+            return i18n.Translations.gitTitleDeleted(basename);
 
         case Status.DELETED_BY_US:
-            return localize("git.title.theirs", "{0} (Theirs)", basename);
+            return i18n.Translations.gitTitleTheirs(basename);
 
         case Status.DELETED_BY_THEM:
-            return localize("git.title.ours", "{0} (Ours)", basename);
+            return i18n.Translations.gitTitleOurs(basename);
 
         case Status.UNTRACKED:
-            return localize("git.title.untracked", "{0} (Untracked)", basename);
+            return i18n.Translations.gitTitleUntracked(basename);
 
         default:
             return "";
@@ -110,13 +110,13 @@ export function resolveChangeCommand(resource: Resource): Command {
                 title,
             ],
             command: "vscode.open",
-            title: localize("open", "Open"),
+            title: i18n.Translations.open(),
         };
     } else {
         return {
             arguments: [resource.state.leftUri, resource.state.rightUri, title],
             command: "vscode.diff",
-            title: localize("open", "Open"),
+            title: i18n.Translations.open(),
         };
     }
 }
@@ -125,7 +125,7 @@ export function resolveFileCommand(resource: Resource): Command {
     return {
         arguments: [resource.state.resourceUri],
         command: "vscode.open",
-        title: localize("open", "Open"),
+        title: i18n.Translations.open(),
     };
 }
 

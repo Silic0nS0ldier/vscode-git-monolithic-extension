@@ -1,6 +1,6 @@
 import { window, workspace } from "vscode";
 import type { Repository } from "../../git.js";
-import { localize } from "../../util.js";
+import * as i18n from "../../i18n/mod.js";
 import { Operation } from "../Operations.js";
 import type { RunFn } from "./run.js";
 
@@ -39,20 +39,11 @@ export async function checkIfMaybeRebased(
         return true;
     }
 
-    const always = { title: localize("always pull", "Always Pull") };
-    const pull = { title: localize("pull", "Pull") };
-    const cancel = { title: localize("dont pull", "Don't Pull") };
+    const always = { title: i18n.Translations.alwaysPull() };
+    const pull = { title: i18n.Translations.pull() };
+    const cancel = { title: i18n.Translations.dontPull() };
     const result = await window.showWarningMessage(
-        currentBranch
-            ? localize(
-                "pull branch maybe rebased",
-                "It looks like the current branch '{0}' might have been rebased. Are you sure you still want to pull into it?",
-                currentBranch,
-            )
-            : localize(
-                "pull maybe rebased",
-                "It looks like the current branch might have been rebased. Are you sure you still want to pull into it?",
-            ),
+        i18n.Translations.pullMaybeRebased(currentBranch),
         always,
         pull,
         cancel,
