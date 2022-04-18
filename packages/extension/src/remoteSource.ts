@@ -9,7 +9,7 @@ import { prettyPrint } from "./logging/pretty-print.js";
 import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
-import { localize } from "./util.js";
+import * as i18n from "./i18n/mod.js";
 
 async function getQuickPickResult<T extends QuickPickItem>(quickpick: QuickPick<T>): Promise<T | undefined> {
     const result = await new Promise<T | undefined>(c => {
@@ -32,10 +32,10 @@ class RemoteSourceProviderQuickPick {
         this.#quickpick.ignoreFocusOut = true;
 
         if (this.#provider.supportsQuery) {
-            this.#quickpick.placeholder = localize("type to search", "Repository name (type to search)");
+            this.#quickpick.placeholder = i18n.Translations.typeToSearch();
             this.#quickpick.onDidChangeValue(this.#onDidChangeValue, this);
         } else {
-            this.#quickpick.placeholder = localize("type to filter", "Repository name");
+            this.#quickpick.placeholder = i18n.Translations.typeToFilter();
         }
     }
 
@@ -48,7 +48,7 @@ class RemoteSourceProviderQuickPick {
             if (remoteSources.length === 0) {
                 this.#quickpick.items = [{
                     alwaysShow: true,
-                    label: localize("none found", "No remote repositories found."),
+                    label: i18n.Translations.noneFound(),
                 }];
             } else {
                 this.#quickpick.items = remoteSources.map(remoteSource => ({
@@ -62,7 +62,7 @@ class RemoteSourceProviderQuickPick {
         } catch (err) {
             this.#quickpick.items = [{
                 alwaysShow: true,
-                label: localize("error", "$(error) Error: {0}", await prettyPrint(err)),
+                label: i18n.Translations.error(await prettyPrint(err)),
             }];
             // TODO Follow up, this won't go anywhere useful
             console.error(err);
@@ -126,15 +126,15 @@ export async function pickRemoteSource(
         }));
 
     quickpick.placeholder = providers.length === 0
-        ? localize("provide url", "Provide repository URL")
-        : localize("provide url or pick", "Provide repository URL or pick a repository source.");
+        ? i18n.Translations.provideUrl()
+        : i18n.Translations.provideUrlOrPick();
 
-    const updatePicks = (value?: string) => {
+    const updatePicks = (value?: string): void => {
         if (value) {
             quickpick.items = [{
                 alwaysShow: true,
                 description: value,
-                label: options.urlLabel ?? localize("url", "URL"),
+                label: options.urlLabel ?? i18n.Translations.url(),
                 url: value,
             }, ...providers];
         } else {
@@ -173,7 +173,7 @@ async function pickProviderSource(
         } else if (remote.url.length > 0) {
             url = await window.showQuickPick(remote.url, {
                 ignoreFocusOut: true,
-                placeHolder: localize("pick url", "Choose a URL to clone from."),
+                placeHolder: i18n.Translations.pickUrl(),
             });
         }
     }
@@ -193,7 +193,7 @@ async function pickProviderSource(
     }
 
     const branch = await window.showQuickPick(branches, {
-        placeHolder: localize("branch name", "Branch name"),
+        placeHolder: i18n.Translations.branchName(),
     });
 
     if (!branch) {

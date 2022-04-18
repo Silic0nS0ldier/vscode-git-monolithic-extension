@@ -344,3 +344,39 @@ export function bothAdded() {
 export function bothModified() {
     return localize("both modified", "Conflict: Both Modified");
 }
+
+export function typeToSearch() {
+    return localize("type to search", "Repository name (type to search)");
+}
+
+export function typeToFilter(): string {
+    return localize("type to filter", "Repository name");
+}
+
+export function noneFound(): string {
+    return localize("none found", "No remote repositories found.");
+}
+
+export function error(err: string): string {
+    return localize("error", "$(error) Error: {0}", err);
+}
+
+export function pickUrl(): string {
+    return localize("pick url", "Choose a URL to clone from.");
+}
+
+export function branchName(): string {
+    return localize("branch name", "Branch name");
+}
+
+export function provideUrl(): string {
+    return localize("provide url", "Provide repository URL");
+}
+
+export function provideUrlOrPick(): string {
+    return localize("provide url or pick", "Provide repository URL or pick a repository source.");
+}
+
+export function url(): string {
+    return localize("url", "URL");
+}
