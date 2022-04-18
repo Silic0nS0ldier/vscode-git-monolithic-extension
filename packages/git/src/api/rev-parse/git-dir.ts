@@ -13,7 +13,7 @@ export async function gitDir(
     }
 
     // Keep trailing spaces which are part of the directory name
-    const dotGitDir = unwrap(result).trimLeft().replace(/[\r\n]+$/, "");
+    const dotGitDir = unwrap(result).trimStart().replace(/[\r\n]+$/, "");
 
     return ok(dotGitDir);
 }

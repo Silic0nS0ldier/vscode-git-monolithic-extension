@@ -16,6 +16,7 @@ export async function ignore(
             .map(uri => path.relative(repository.root, uri.fsPath).replace(/\\/g, "/"))
             .join("\n");
 
+        // TODO Deal with this deprecation in a sane way (VSCode is already safe here)
         const document = await new Promise(c => fs.exists(ignoreFile, c))
             ? await workspace.openTextDocument(ignoreFile)
             : await workspace.openTextDocument(Uri.file(ignoreFile).with({ scheme: "untitled" }));

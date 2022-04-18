@@ -23,7 +23,7 @@ export async function showToplevel(
     }
 
     // Keep trailing spaces which are part of the directory name
-    const repoRoot = unwrap(result).trimLeft().replace(/[\r\n]+$/, "");
+    const repoRoot = unwrap(result).trimStart().replace(/[\r\n]+$/, "");
 
     if (isWindows(services.os.platform) && trySemverCheck(git.version, ">=2.25")) {
         // On Git 2.25+ if you call `rev-parse --show-toplevel` on a mapped drive, instead of getting the mapped drive path back, you get the UNC path for the mapped drive.

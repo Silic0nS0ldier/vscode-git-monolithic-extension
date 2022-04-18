@@ -13,10 +13,13 @@ module.exports = {
     },
     "plugins": [
         "@typescript-eslint",
+        "deprecation",
     ],
+    "root": true,
     "rules": {
         "@typescript-eslint/explicit-function-return-type": ["warn"],
         "class-methods-use-this": ["error"],
+        "deprecation/deprecation": ["warn"],
         "no-param-reassign": ["error"],
         "sort-keys": ["error"],
     },
