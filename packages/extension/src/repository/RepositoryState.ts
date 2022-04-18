@@ -1,5 +1,5 @@
-export type RepositoryStateOptions = "Idle" | "Disposed";
+export type RepositoryStateOptions =  "Disposed" | "Idle";
 export const RepositoryState: Record<RepositoryStateOptions, RepositoryStateOptions> = {
-    Idle: "Idle",
     Disposed: "Disposed",
+    Idle: "Idle",
 };

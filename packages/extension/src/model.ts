@@ -108,7 +108,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     #onDidPublishEmitter = new EventEmitter<PublishEvent>();
     readonly onDidPublish = this.#onDidPublishEmitter.event;
 
-    firePublishEvent(repository: AbstractRepository, branch?: string) {
+    firePublishEvent(repository: AbstractRepository, branch?: string): void {
         this.#onDidPublishEmitter.fire({ branch: branch, repository: new ApiRepository(repository) });
     }
 
@@ -243,7 +243,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         this.#eventuallyScanPossibleGitRepository(uri.fsPath.replace(/\.git.*$/, ""));
     }
 
-    #eventuallyScanPossibleGitRepository(path: string) {
+    #eventuallyScanPossibleGitRepository(path: string): void {
         this.#possibleGitRepositoryPaths.add(path);
         this.#eventuallyScanPossibleGitRepositories();
     }
@@ -403,7 +403,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             .getConfiguration("git", Uri.file(repository.root))
             .get<number>("detectSubmodulesLimit") as number;
 
-        const checkForSubmodules = () => {
+        const checkForSubmodules = (): void => {
             if (!shouldDetectSubmodules) {
                 return;
             }
@@ -429,7 +429,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         const statusListener = repository.onDidChangeStatus(checkForSubmodules);
         checkForSubmodules();
 
-        const dispose = () => {
+        const dispose = (): void => {
             disappearListener.dispose();
             changeListener.dispose();
             originalResourceChangeListener.dispose();

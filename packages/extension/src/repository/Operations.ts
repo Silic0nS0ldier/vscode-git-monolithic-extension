@@ -30,99 +30,99 @@ function shouldShowProgress(operation: OperationOptions): boolean {
 }
 
 export type OperationOptions =
-    | "Status"
-    | "Config"
-    | "Diff"
-    | "MergeBase"
     | "Add"
-    | "Remove"
-    | "RevertFiles"
-    | "Commit"
-    | "Clean"
-    | "Branch"
-    | "GetBranch"
-    | "GetBranches"
-    | "SetBranchUpstream"
-    | "HashObject"
-    | "Checkout"
-    | "CheckoutTracking"
-    | "Reset"
-    | "Remote"
-    | "Fetch"
-    | "Pull"
-    | "Push"
-    | "CherryPick"
-    | "Sync"
-    | "Show"
-    | "Stage"
-    | "GetCommitTemplate"
-    | "DeleteBranch"
-    | "RenameBranch"
-    | "DeleteRef"
-    | "Merge"
-    | "Rebase"
-    | "Ignore"
-    | "Tag"
-    | "DeleteTag"
-    | "Stash"
-    | "CheckIgnore"
-    | "GetObjectDetails"
-    | "SubmoduleUpdate"
-    | "RebaseAbort"
-    | "RebaseContinue"
-    | "FindTrackingBranches"
     | "Apply"
     | "Blame"
+    | "Branch"
+    | "CheckIgnore"
+    | "Checkout"
+    | "CheckoutTracking"
+    | "CherryPick"
+    | "Clean"
+    | "Commit"
+    | "Config"
+    | "DeleteBranch"
+    | "DeleteRef"
+    | "DeleteTag"
+    | "Diff"
+    | "Fetch"
+    | "FindTrackingBranches"
+    | "GetBranch"
+    | "GetBranches"
+    | "GetCommitTemplate"
+    | "GetObjectDetails"
+    | "HashObject"
+    | "Ignore"
     | "Log"
     | "LogFile"
-    | "Move";
+    | "Merge"
+    | "MergeBase"
+    | "Move"
+    | "Pull"
+    | "Push"
+    | "Rebase"
+    | "RebaseAbort"
+    | "RebaseContinue"
+    | "Remote"
+    | "Remove"
+    | "RenameBranch"
+    | "Reset"
+    | "RevertFiles"
+    | "SetBranchUpstream"
+    | "Show"
+    | "Stage"
+    | "Stash"
+    | "Status"
+    | "SubmoduleUpdate"
+    | "Sync"
+    | "Tag";
 export const Operation: Record<OperationOptions, OperationOptions> = {
-    Status: "Status",
-    Config: "Config",
-    Diff: "Diff",
-    MergeBase: "MergeBase",
     Add: "Add",
-    Remove: "Remove",
-    RevertFiles: "RevertFiles",
-    Commit: "Commit",
-    Clean: "Clean",
-    Branch: "Branch",
-    GetBranch: "GetBranch",
-    GetBranches: "GetBranches",
-    SetBranchUpstream: "SetBranchUpstream",
-    HashObject: "HashObject",
-    Checkout: "Checkout",
-    CheckoutTracking: "CheckoutTracking",
-    Reset: "Reset",
-    Remote: "Remote",
-    Fetch: "Fetch",
-    Pull: "Pull",
-    Push: "Push",
-    CherryPick: "CherryPick",
-    Sync: "Sync",
-    Show: "Show",
-    Stage: "Stage",
-    GetCommitTemplate: "GetCommitTemplate",
-    DeleteBranch: "DeleteBranch",
-    RenameBranch: "RenameBranch",
-    DeleteRef: "DeleteRef",
-    Merge: "Merge",
-    Rebase: "Rebase",
-    Ignore: "Ignore",
-    Tag: "Tag",
-    DeleteTag: "DeleteTag",
-    Stash: "Stash",
-    CheckIgnore: "CheckIgnore",
-    GetObjectDetails: "GetObjectDetails",
-    SubmoduleUpdate: "SubmoduleUpdate",
-    RebaseAbort: "RebaseAbort",
-    RebaseContinue: "RebaseContinue",
-    FindTrackingBranches: "FindTrackingBranches",
     Apply: "Apply",
     Blame: "Blame",
+    Branch: "Branch",
+    CheckIgnore: "CheckIgnore",
+    Checkout: "Checkout",
+    CheckoutTracking: "CheckoutTracking",
+    CherryPick: "CherryPick",
+    Clean: "Clean",
+    Commit: "Commit",
+    Config: "Config",
+    DeleteBranch: "DeleteBranch",
+    DeleteRef: "DeleteRef",
+    DeleteTag: "DeleteTag",
+    Diff: "Diff",
+    Fetch: "Fetch",
+    FindTrackingBranches: "FindTrackingBranches",
+    GetBranch: "GetBranch",
+    GetBranches: "GetBranches",
+    GetCommitTemplate: "GetCommitTemplate",
+    GetObjectDetails: "GetObjectDetails",
+    HashObject: "HashObject",
+    Ignore: "Ignore",
     Log: "Log",
     LogFile: "LogFile",
+    Merge: "Merge",
+    MergeBase: "MergeBase",
     Move: "Move",
+    Pull: "Pull",
+    Push: "Push",
+    Rebase: "Rebase",
+    RebaseAbort: "RebaseAbort",
+    RebaseContinue: "RebaseContinue",
+    Remote: "Remote",
+    Remove: "Remove",
+    RenameBranch: "RenameBranch",
+    Reset: "Reset",
+    RevertFiles: "RevertFiles",
+    SetBranchUpstream: "SetBranchUpstream",
+    Show: "Show",
+    Stage: "Stage",
+    Stash: "Stash",
+    Status: "Status",
+    SubmoduleUpdate: "SubmoduleUpdate",
+    Sync: "Sync",
+    Tag: "Tag",
 };
 
 export interface Operations {

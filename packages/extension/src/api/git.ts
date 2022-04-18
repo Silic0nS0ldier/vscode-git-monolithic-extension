@@ -70,42 +70,42 @@ export interface Remote {
 }
 
 export type StatusOptions =
-    | "INDEX_MODIFIED"
-    | "INDEX_ADDED"
-    | "INDEX_DELETED"
-    | "INDEX_RENAMED"
-    | "INDEX_COPIED"
-    | "MODIFIED"
-    | "DELETED"
-    | "DELETED"
-    | "UNTRACKED"
-    | "IGNORED"
-    | "INTENT_TO_ADD"
-    | "ADDED_BY_US"
     | "ADDED_BY_THEM"
-    | "DELETED_BY_US"
-    | "DELETED_BY_THEM"
+    | "ADDED_BY_US"
     | "BOTH_ADDED"
     | "BOTH_DELETED"
-    | "BOTH_MODIFIED";
+    | "BOTH_MODIFIED"
+    | "DELETED_BY_THEM"
+    | "DELETED_BY_US"
+    | "DELETED"
+    | "DELETED"
+    | "IGNORED"
+    | "INDEX_ADDED"
+    | "INDEX_COPIED"
+    | "INDEX_DELETED"
+    | "INDEX_MODIFIED"
+    | "INDEX_RENAMED"
+    | "INTENT_TO_ADD"
+    | "MODIFIED"
+    | "UNTRACKED";
 export const Status: Record<StatusOptions, StatusOptions> = {
-    INDEX_MODIFIED: "INDEX_MODIFIED",
-    INDEX_ADDED: "INDEX_ADDED",
-    INDEX_DELETED: "INDEX_DELETED",
-    INDEX_RENAMED: "INDEX_RENAMED",
-    INDEX_COPIED: "INDEX_COPIED",
-    MODIFIED: "MODIFIED",
-    DELETED: "DELETED",
-    UNTRACKED: "UNTRACKED",
-    IGNORED: "IGNORED",
-    INTENT_TO_ADD: "INTENT_TO_ADD",
-    ADDED_BY_US: "ADDED_BY_US",
     ADDED_BY_THEM: "ADDED_BY_THEM",
-    DELETED_BY_US: "DELETED_BY_US",
-    DELETED_BY_THEM: "DELETED_BY_THEM",
+    ADDED_BY_US: "ADDED_BY_US",
     BOTH_ADDED: "BOTH_ADDED",
     BOTH_DELETED: "BOTH_DELETED",
     BOTH_MODIFIED: "BOTH_MODIFIED",
+    DELETED: "DELETED",
+    DELETED_BY_THEM: "DELETED_BY_THEM",
+    DELETED_BY_US: "DELETED_BY_US",
+    IGNORED: "IGNORED",
+    INDEX_ADDED: "INDEX_ADDED",
+    INDEX_COPIED: "INDEX_COPIED",
+    INDEX_DELETED: "INDEX_DELETED",
+    INDEX_MODIFIED: "INDEX_MODIFIED",
+    INDEX_RENAMED: "INDEX_RENAMED",
+    INTENT_TO_ADD: "INTENT_TO_ADD",
+    MODIFIED: "MODIFIED",
+    UNTRACKED: "UNTRACKED",
 };
 
 export interface Change {
@@ -307,75 +307,75 @@ export interface GitExtension {
 }
 
 export type GitErrorCodesOptions =
-    | "BadConfigFile"
     | "AuthenticationFailed"
-    | "NoUserNameConfigured"
-    | "NoUserEmailConfigured"
+    | "BadConfigFile"
+    | "BranchAlreadyExists"
+    | "BranchNotFullyMerged"
+    | "CantAccessRemote"
+    | "CantCreatePipe"
+    | "CantLockRef"
+    | "CantOpenResource"
+    | "CantRebaseMultipleBranches"
+    | "Conflict"
+    | "DirtyWorkTree"
+    | "GitNotFound"
+    | "InvalidBranchName"
+    | "IsInSubmodule"
+    | "LocalChangesOverwritten"
+    | "NoLocalChanges"
+    | "NoPathFound"
+    | "NoRemoteReference"
     | "NoRemoteRepositorySpecified"
+    | "NoStashFound"
     | "NotAGitRepository"
     | "NotAtRepositoryRoot"
-    | "Conflict"
-    | "StashConflict"
-    | "UnmergedChanges"
+    | "NoUpstreamBranch"
+    | "NoUserEmailConfigured"
+    | "NoUserNameConfigured"
+    | "PatchDoesNotApply"
+    | "PermissionDenied"
     | "PushRejected"
     | "RemoteConnectionError"
-    | "DirtyWorkTree"
-    | "CantOpenResource"
-    | "GitNotFound"
-    | "CantCreatePipe"
-    | "PermissionDenied"
-    | "CantAccessRemote"
-    | "RepositoryNotFound"
     | "RepositoryIsLocked"
-    | "BranchNotFullyMerged"
-    | "NoRemoteReference"
-    | "InvalidBranchName"
-    | "BranchAlreadyExists"
-    | "NoLocalChanges"
-    | "NoStashFound"
-    | "LocalChangesOverwritten"
-    | "NoUpstreamBranch"
-    | "IsInSubmodule"
-    | "WrongCase"
-    | "CantLockRef"
-    | "CantRebaseMultipleBranches"
-    | "PatchDoesNotApply"
-    | "NoPathFound"
-    | "UnknownPath";
+    | "RepositoryNotFound"
+    | "StashConflict"
+    | "UnknownPath"
+    | "UnmergedChanges"
+    | "WrongCase";
 export const GitErrorCodes: Record<GitErrorCodesOptions, GitErrorCodesOptions> = {
-    BadConfigFile: "BadConfigFile",
     AuthenticationFailed: "AuthenticationFailed",
-    NoUserNameConfigured: "NoUserNameConfigured",
-    NoUserEmailConfigured: "NoUserEmailConfigured",
+    BadConfigFile: "BadConfigFile",
+    BranchAlreadyExists: "BranchAlreadyExists",
+    BranchNotFullyMerged: "BranchNotFullyMerged",
+    CantAccessRemote: "CantAccessRemote",
+    CantCreatePipe: "CantCreatePipe",
+    CantLockRef: "CantLockRef",
+    CantOpenResource: "CantOpenResource",
+    CantRebaseMultipleBranches: "CantRebaseMultipleBranches",
+    Conflict: "Conflict",
+    DirtyWorkTree: "DirtyWorkTree",
+    GitNotFound: "GitNotFound",
+    InvalidBranchName: "InvalidBranchName",
+    IsInSubmodule: "IsInSubmodule",
+    LocalChangesOverwritten: "LocalChangesOverwritten",
+    NoLocalChanges: "NoLocalChanges",
+    NoPathFound: "NoPathFound",
+    NoRemoteReference: "NoRemoteReference",
     NoRemoteRepositorySpecified: "NoRemoteRepositorySpecified",
+    NoStashFound: "NoStashFound",
+    NoUpstreamBranch: "NoUpstreamBranch",
+    NoUserEmailConfigured: "NoUserEmailConfigured",
+    NoUserNameConfigured: "NoUserNameConfigured",
     NotAGitRepository: "NotAGitRepository",
     NotAtRepositoryRoot: "NotAtRepositoryRoot",
-    Conflict: "Conflict",
-    StashConflict: "StashConflict",
-    UnmergedChanges: "UnmergedChanges",
+    PatchDoesNotApply: "PatchDoesNotApply",
+    PermissionDenied: "PermissionDenied",
     PushRejected: "PushRejected",
     RemoteConnectionError: "RemoteConnectionError",
-    DirtyWorkTree: "DirtyWorkTree",
-    CantOpenResource: "CantOpenResource",
-    GitNotFound: "GitNotFound",
-    CantCreatePipe: "CantCreatePipe",
-    PermissionDenied: "PermissionDenied",
-    CantAccessRemote: "CantAccessRemote",
-    RepositoryNotFound: "RepositoryNotFound",
     RepositoryIsLocked: "RepositoryIsLocked",
-    BranchNotFullyMerged: "BranchNotFullyMerged",
-    NoRemoteReference: "NoRemoteReference",
-    InvalidBranchName: "InvalidBranchName",
-    BranchAlreadyExists: "BranchAlreadyExists",
-    NoLocalChanges: "NoLocalChanges",
-    NoStashFound: "NoStashFound",
-    LocalChangesOverwritten: "LocalChangesOverwritten",
-    NoUpstreamBranch: "NoUpstreamBranch",
-    IsInSubmodule: "IsInSubmodule",
-    WrongCase: "WrongCase",
-    CantLockRef: "CantLockRef",
-    CantRebaseMultipleBranches: "CantRebaseMultipleBranches",
-    PatchDoesNotApply: "PatchDoesNotApply",
-    NoPathFound: "NoPathFound",
+    RepositoryNotFound: "RepositoryNotFound",
+    StashConflict: "StashConflict",
     UnknownPath: "UnknownPath",
+    UnmergedChanges: "UnmergedChanges",
+    WrongCase: "WrongCase",
 };

@@ -31,7 +31,7 @@ export function checkIgnore(
             }
             child.stdin.end(filteredFilePaths.join("\0"), "utf8");
 
-            const onExit = (exitCode: number) => {
+            const onExit = (exitCode: number): void => {
                 if (exitCode === 1) {
                     // nothing ignored
                     resolve(new Set<string>());
@@ -60,7 +60,7 @@ export function checkIgnore(
             };
 
             let data = "";
-            const onStdoutData = (raw: string) => {
+            const onStdoutData = (raw: string): void => {
                 data += raw;
             };
 

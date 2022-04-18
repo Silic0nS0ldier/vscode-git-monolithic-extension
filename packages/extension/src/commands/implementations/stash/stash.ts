@@ -3,8 +3,8 @@ import type { ScmCommand } from "../../helpers.js";
 import { createStash } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
-    async function stashWithoutUntracked(repository: AbstractRepository) {
-        await createStash(repository);
+    function stashWithoutUntracked(repository: AbstractRepository): Promise<void> {
+        return createStash(repository);
     }
 
     return {

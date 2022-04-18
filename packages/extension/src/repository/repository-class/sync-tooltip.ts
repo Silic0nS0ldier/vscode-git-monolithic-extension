@@ -4,7 +4,7 @@ import * as i18n from "../../i18n/mod.js";
 export function syncTooltip(
     HEAD: Branch | undefined,
     remotes: Remote[],
-) {
+): string {
     if (
         !HEAD
         || !HEAD.name

@@ -1,19 +1,23 @@
-import { OutputChannel, window } from "vscode";
+import { OutputChannel, QuickPickItem, window } from "vscode";
 import { Log, LogLevel, LogLevelOptions } from "../../logging/log.js";
 import { localize } from "../../util.js";
 import type { ScmCommand } from "../helpers.js";
+
+type LogLevelQuickPickOption = {
+    logLevel: LogLevelOptions;
+} & QuickPickItem;
 
 export function createCommand(
     outputChannel: OutputChannel,
 ): ScmCommand {
     async function setLogLevel(): Promise<void> {
-        const createItem = (logLevel: LogLevelOptions) => ({
+        const createItem = (logLevel: LogLevelOptions): LogLevelQuickPickOption => ({
             description: Log.logLevel === logLevel ? localize("current", "Current") : undefined,
             label: LogLevel[logLevel],
             logLevel,
         });
 
-        const items = [
+        const items: LogLevelQuickPickOption[] = [
             createItem(LogLevel.Trace),
             createItem(LogLevel.Debug),
             createItem(LogLevel.Info),

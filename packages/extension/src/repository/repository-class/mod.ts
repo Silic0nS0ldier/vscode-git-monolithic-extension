@@ -24,7 +24,7 @@ import { OperationsImpl } from "../Operations.js";
 import { ProgressManager } from "../ProgressManager.js";
 import { RepositoryState, RepositoryStateOptions } from "../RepositoryState.js";
 import { retryRun } from "../retryRun.js";
-import { timeout } from "../timeout.js";
+import { timeout } from "../../util/timeout.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 import { buffer as bufferImpl } from "./buffer.js";
 import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
@@ -178,7 +178,7 @@ export function createRepository(
 
     async function run<T>(
         operation: OperationOptions,
-        runOperation: () => Promise<T> = () => Promise.resolve<any>(null),
+        runOperation: () => Promise<T> = (): Promise<T> => Promise.resolve<any>(null),
     ): Promise<T> {
         if (state.get() !== RepositoryState.Idle) {
             throw new Error("Repository not initialized");
@@ -286,7 +286,7 @@ export function createRepository(
             || e.affectsConfiguration("git.openDiffOnClick", rootUri),
     )(updateModelState, null, disposables);
 
-    const updateInputBoxVisibility = () => {
+    const updateInputBoxVisibility = (): void => {
         const config = workspace.getConfiguration("git", rootUri);
         sourceControlUI.sourceControl.inputBox.visible = config.get<boolean>("showCommitInput", true);
     };

@@ -39,7 +39,7 @@ export function createCommand(): ScmCommand {
         let normalisedBranchName = branchName;
         let run: (force?: boolean) => Promise<void>;
         if (typeof normalisedBranchName === "string") {
-            run = force => repository.deleteBranch(normalisedBranchName, force);
+            run = (force): Promise<void> => repository.deleteBranch(normalisedBranchName, force);
         } else {
             const currentHead = repository.HEAD && repository.HEAD.name;
             const heads = repository.refs.filter(ref => ref.type === RefType.Head && ref.name !== currentHead)
@@ -52,7 +52,7 @@ export function createCommand(): ScmCommand {
                 return;
             }
             normalisedBranchName = choice.branchName;
-            run = force => choice.run(repository, force);
+            run = (force): Promise<void> => choice.run(repository, force);
         }
 
         try {

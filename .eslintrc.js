@@ -15,6 +15,7 @@ module.exports = {
         "@typescript-eslint",
     ],
     "rules": {
+        "@typescript-eslint/explicit-function-return-type": ["warn"],
         "class-methods-use-this": ["error"],
         "no-param-reassign": ["error"],
         "sort-keys": ["error"],

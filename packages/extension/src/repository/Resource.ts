@@ -25,7 +25,7 @@ export function createResource(
     type: StatusOptions,
     useIcons: boolean,
     renameResourceUri?: Uri,
-) {
+): Resource {
     const normalisedResourceUri = onetime(() => {
         if (
             renameResourceUri
@@ -193,7 +193,7 @@ function getStateLetter(type: StatusOptions): string {
     }
 }
 
-function getStateColor(type: StatusOptions) {
+function getStateColor(type: StatusOptions): ThemeColor {
     switch (type) {
         case Status.INDEX_MODIFIED:
             return new ThemeColor("gitDecoration.stageModifiedResourceForeground");
@@ -226,7 +226,7 @@ function getStateColor(type: StatusOptions) {
     }
 }
 
-function getStateStrikethrough(type: StatusOptions) {
+function getStateStrikethrough(type: StatusOptions): boolean {
     switch (type) {
         case Status.DELETED:
         case Status.BOTH_DELETED:
@@ -304,21 +304,21 @@ export class Resource implements SourceControlResourceState {
             get leftUri(): Uri | undefined {
                 return resources()[0];
             },
-            async open() {
+            async open(): Promise<void> {
                 const command = self.command;
                 await commands.executeCommand<void>(command.command, ...(command.arguments || []));
             },
-            async openChange() {
+            async openChange(): Promise<void> {
                 const command = resolveChangeCommand(self);
                 await commands.executeCommand<void>(command.command, ...(command.arguments || []));
             },
-            get original() {
+            get original(): Uri {
                 return self.resourceUri;
             },
-            get renameResourceUri() {
+            get renameResourceUri(): Uri|undefined {
                 return renameResourceUri_;
             },
-            get resourceDecoration() {
+            get resourceDecoration(): FileDecoration {
                 const res = new FileDecoration(
                     getStateLetter(self.#type),
                     getStatusText(self.#type),
@@ -327,16 +327,16 @@ export class Resource implements SourceControlResourceState {
                 res.propagate = self.#type !== Status.DELETED && self.#type !== Status.INDEX_DELETED;
                 return res;
             },
-            get resourceGroupType() {
+            get resourceGroupType(): ResourceGroupTypeOptions {
                 return resourceGroupType;
             },
-            get resourceUri() {
+            get resourceUri(): Uri {
                 return self.resourceUri;
             },
-            get rightUri() {
+            get rightUri(): Uri|undefined {
                 return resources()[1];
             },
-            get type() {
+            get type(): StatusOptions {
                 return self.#type;
             },
         };

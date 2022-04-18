@@ -18,14 +18,14 @@ export function createSpawn(endWith: "error" | "exit", options: {
             once: (event, listener) => {
                 let fn: (() => Promise<void>) | null = null;
                 if (event === "error" && endWith === "error") {
-                    fn = async () => {
+                    fn = async (): Promise<void> => {
                         if (cp.connected) {
                             // @ts-expect-error
                             listener(new Error());
                         }
                     };
                 } else if (event === "exit" && endWith === "exit") {
-                    fn = async () => {
+                    fn = async (): Promise<void> => {
                         if (cp.connected) {
                             // @ts-expect-error
                             listener(0, "SIGQUIT");
@@ -44,12 +44,12 @@ export function createSpawn(endWith: "error" | "exit", options: {
                 return cp;
             },
             stderr: options.err ? intoStream(options.err) : new Readable({
-                read() {
+                read(): void {
                     this.push(null);
                 },
             }),
             stdout: options.out ? intoStream(options.out) : new Readable({
-                read() {
+                read(): void {
                     this.push(null);
                 },
             }),

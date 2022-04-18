@@ -8,7 +8,7 @@ export async function checkIfMaybeRebased(
     run: RunFn<boolean>,
     repository: Repository,
     currentBranch?: string,
-) {
+): Promise<boolean> {
     const config = workspace.getConfiguration("git");
     const shouldIgnore = config.get<boolean>("ignoreRebaseWarning") === true;
 

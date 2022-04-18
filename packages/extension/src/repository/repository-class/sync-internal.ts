@@ -47,7 +47,7 @@ export async function syncInternal(
                 const followTags = config.get<boolean>("followTagsWhenSync");
                 const supportCancellation = config.get<boolean>("supportCancellation");
 
-                const fn = async (abortSignal?: AbortSignal) => {
+                const fn = async (abortSignal?: AbortSignal): Promise<void> => {
                     // When fetchOnPull is enabled, fetch all branches when pulling
                     if (fetchOnPull) {
                         await repository.fetch({ all: true, abortSignal });

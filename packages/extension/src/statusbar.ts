@@ -60,7 +60,7 @@ class SyncStatusBar {
     #disposables: Disposable[] = [];
 
     #stateStore: SyncStatusBarState;
-    get #state() {
+    get #state(): SyncStatusBarState {
         return this.#stateStore;
     }
     set #state(state: SyncStatusBarState) {

@@ -43,11 +43,11 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                 outputChannel.appendLine(`${logId} > git ${a.join(" ")}`);
 
                 // Log output
-                const stdoutLog = (msg: string) => outputChannel.appendLine(`${logId} < [STDOUT] ${msg}`);
+                const stdoutLog = (msg: string): void => outputChannel.appendLine(`${logId} < [STDOUT] ${msg}`);
                 const stdout = c.stdout
                     ? snoopOnStream(c.stdout, stdoutLog)
                     : new SnoopStream(stdoutLog);
-                const stderrLog = (msg: string) => outputChannel.appendLine(`${logId} < [STDERR] ${msg}`);
+                const stderrLog = (msg: string): void => outputChannel.appendLine(`${logId} < [STDERR] ${msg}`);
                 const stderr = c.stderr
                     ? snoopOnStream(c.stderr, stderrLog)
                     : new SnoopStream(stderrLog);

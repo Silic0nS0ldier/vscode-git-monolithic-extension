@@ -57,7 +57,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
             executablePath,
         };
 
-        const cpRes: Result<ChildProcess, GenericError> = (() => {
+        const cpRes = ((): Result<ChildProcess, GenericError> => {
             try {
                 return ok(services.child_process.spawn(executablePath, args, { cwd, env, stdio: "pipe" }));
             } catch (error) {
@@ -91,7 +91,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
                 if (context.signal.aborted) {
                     return resolve(err(createError(ERROR_CANCELLED, cmdContext)));
                 }
-                context.signal.onabort = () => void resolve(err(createError(ERROR_CANCELLED, cmdContext)));
+                context.signal.onabort = (): void => void resolve(err(createError(ERROR_CANCELLED, cmdContext)));
             }
         });
         const onError = new Promise<CLIResult>(resolve =>

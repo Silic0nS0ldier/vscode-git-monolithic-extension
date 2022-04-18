@@ -228,7 +228,7 @@ export function addDecorations(model: Model): Disposable {
     update();
 
     return {
-        dispose() {
+        dispose(): void {
             disable();
             disposeHelper(disposables);
             disposables.length = 0;

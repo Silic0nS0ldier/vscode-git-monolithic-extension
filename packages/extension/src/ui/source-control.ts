@@ -49,7 +49,7 @@ export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): 
     mergeGroup.hideWhenEmpty = true;
 
     return {
-        dispose() {
+        dispose(): void {
             stagedGroup.dispose();
             mergeGroup.dispose();
             untrackedGroup.dispose();
@@ -85,10 +85,10 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
     let resourceStrings = new Set<string>();
     const baseLabel = group.label;
     return {
-        get() {
+        get(): readonly Resource[] {
             return resources;
         },
-        set(newValue) {
+        set(newValue): void {
             // Unexpected layout shifts can be expensive (e.g. accidentally reverting wrong file)
             // To avoid this we provide a grace period when the files shown change
             let mayCauseLayoutShift = true;
@@ -101,7 +101,7 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
                 }
             }
 
-            function apply() {
+            function apply(): void {
                 resources = newValue;
                 resourceStrings = new Set<string>(newValue.map(r => r.resourceUri.toString()));
 

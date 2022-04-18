@@ -8,7 +8,7 @@ import type { ScmCommand } from "../../helpers.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
 import { AddRemoteItem } from "./quick-pick.js";
 
-export async function publish(model: Model, repository: AbstractRepository) {
+export async function publish(model: Model, repository: AbstractRepository): Promise<void> {
     const branchName = repository.HEAD && repository.HEAD.name || "";
     const remotes = repository.remotes;
 

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fs from "node:fs";
-import { EventEmitter, OutputChannel, Uri } from "vscode";
+import { EventEmitter, OutputChannel, Uri, Event, Disposable } from "vscode";
 import Watcher from "watcher";
 import type { TargetEvent } from "watcher/dist/enums.js";
 import { prettyPrint } from "../logging/pretty-print.js";
@@ -21,12 +21,16 @@ const TargetEventEnum: Record<TargetEvent, string> = {
     unlinkDir: "unlinkDir",
 };
 
+type Watcher = {
+    event: Event<Uri>;
+} & Disposable;
+
 /**
  * Creates an optimised watcher.
  * @param location
  * @returns
  */
-export function watch(locations: string[], locks: string[], outputChannel: OutputChannel) {
+export function watch(locations: string[], locks: string[], outputChannel: OutputChannel): Watcher {
     const onFileChangeEmitter = new EventEmitter<Uri>();
     const watcher = new Watcher(
         [...locations, ...locks],
@@ -54,7 +58,7 @@ export function watch(locations: string[], locks: string[], outputChannel: Outpu
     watcher.on("error", err => outputChannel.appendLine(`Watcher error: ${prettyPrint(err)}`));
 
     return {
-        dispose() {
+        dispose(): void {
             onFileChangeEmitter.dispose();
             watcher.close();
         },

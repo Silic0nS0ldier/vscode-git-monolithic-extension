@@ -1,9 +1,9 @@
 import { GitErrorCodes } from "../api/git.js";
 import { GitError } from "../git/error.js";
 import { Operation, OperationOptions } from "./Operations.js";
-import { timeout } from "./timeout.js";
+import { timeout } from "../util/timeout.js";
 
-function isOperationRetrySafe(err: GitError, operation: OperationOptions) {
+function isOperationRetrySafe(err: GitError, operation: OperationOptions): boolean {
     return (operation === Operation.Pull || operation === Operation.Sync || operation === Operation.Fetch)
         && (
             err.gitErrorCode === GitErrorCodes.CantLockRef
@@ -13,7 +13,7 @@ function isOperationRetrySafe(err: GitError, operation: OperationOptions) {
 
 export async function retryRun<T>(
     operation: OperationOptions,
-    runOperation: () => Promise<T> = () => Promise.resolve<any>(null),
+    runOperation: () => Promise<T> = (): Promise<T> => Promise.resolve<any>(null),
 ): Promise<T> {
     let attempt = 0;
 

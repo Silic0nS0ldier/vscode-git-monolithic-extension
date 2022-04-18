@@ -28,7 +28,7 @@ export async function updateModelState(
     setCountBadge: () => void,
     onDidChangeStatusEmitter: EventEmitter<void>,
     sourceControlUI: SourceControlUIGroup,
-) {
+): Promise<void> {
     const scopedConfig = workspace.getConfiguration("git", Uri.file(repository.root));
     const ignoreSubmodules = scopedConfig.get<boolean>("ignoreSubmodules");
 
@@ -90,7 +90,7 @@ export async function updateModelState(
         resourceUri: Uri,
         type: StatusOptions,
         renameResourceUri?: Uri,
-    ) {
+    ): Resource {
         return createBaseResource(
             repoRoot,
             submodules.get(),

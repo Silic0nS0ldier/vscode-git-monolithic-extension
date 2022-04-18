@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -118,7 +119,7 @@ export class ApiRepositoryUIState implements RepositoryUIState {
     }
 
     readonly onDidChange: Event<void> = mapEvent<boolean, void>(
-        () => ({ dispose() {} }),
+        () => ({ dispose(): void {} }),
         // this._sourceControl.onDidChangeSelection,
         () => null,
     );
@@ -172,11 +173,11 @@ export class ApiRepository implements Repository {
         return this.#repository.getCommit(ref);
     }
 
-    clean(paths: string[]) {
+    clean(paths: string[]): Promise<void> {
         return this.#repository.clean(paths.map(p => Uri.file(p)));
     }
 
-    diff(cached?: boolean) {
+    diff(cached?: boolean): Promise<string> {
         return this.#repository.diff(cached);
     }
 
@@ -423,6 +424,7 @@ function getStatus(status: StatusOptions): string {
     return "UNKNOWN";
 }
 
+// TODO This may not be needed
 export function registerAPICommands(extension: GitExtensionImpl): Disposable {
     const disposables: Disposable[] = [];
 

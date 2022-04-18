@@ -10,10 +10,10 @@ export type Box<T> = {
 export function createBox<T>(initValue: T): Box<T> {
     let value = initValue;
     return {
-        get() {
+        get(): T {
             return value;
         },
-        set(newValue) {
+        set(newValue): void {
             value = newValue;
         },
     };

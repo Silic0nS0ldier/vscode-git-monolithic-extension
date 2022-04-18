@@ -13,7 +13,7 @@ export async function handleLimitHit(
     repository: Repository,
     config: WorkspaceConfiguration,
     didWarnAboutLimit: Box<boolean>,
-) {
+): Promise<void> {
     const knownHugeFolderPaths = await findKnownHugeFolderPathsToIgnore(repoRoot, run, repository);
     const gitWarn = i18n.Translations.tooManyChanges(repoRoot);
     const neverAgain = { title: i18n.Translations.neverAgain() };

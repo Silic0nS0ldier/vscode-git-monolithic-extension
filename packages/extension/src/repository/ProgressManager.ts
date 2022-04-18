@@ -43,7 +43,7 @@ export class ProgressManager {
             ),
         );
 
-        const setup = () => {
+        const setup = (): void => {
             this.#disposable = start(() => {
                 const promise = eventToPromise(end).then(() => setup());
                 window.withProgress({ location: ProgressLocation.SourceControl }, () => promise);

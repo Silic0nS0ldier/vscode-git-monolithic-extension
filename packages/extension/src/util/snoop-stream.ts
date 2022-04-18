@@ -22,7 +22,7 @@ function clampLength(str: string): string {
 export function snoopOnStream(stream: NodeJS.WritableStream, log: (msg: string) => void): NodeJS.WritableStream {
     let toLog = "";
     return new Proxy(stream, {
-        get(target: any, p) {
+        get(target: any, p): any {
             if (p === "write") {
                 return function write(chunk: any, encoding: BufferEncoding) {
                     if (toLog.length < 150) {
@@ -38,7 +38,7 @@ export function snoopOnStream(stream: NodeJS.WritableStream, log: (msg: string) 
                     target[p].call(target, ...arguments);
                 };
             }
-            return (target as any)[p];
+            return target[p];
         },
     });
 }

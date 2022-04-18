@@ -213,7 +213,7 @@ export async function commitWithAnyInput(
     opts?: CommitOptions,
 ): Promise<void> {
     const message = repository.sourceControlUI.sourceControl.inputBox.value;
-    const getCommitMessage = async () => {
+    const getCommitMessage = async (): Promise<string|undefined> => {
         let _message: string | undefined = message;
 
         if (!_message) {

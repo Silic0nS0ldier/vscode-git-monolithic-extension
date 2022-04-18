@@ -8,15 +8,15 @@ import { Event, EventEmitter } from "vscode";
 /**
  * The severity level of a log message
  */
-export type LogLevelOptions = "Trace" | "Debug" | "Info" | "Warning" | "Error" | "Critical" | "Off";
+export type LogLevelOptions = "Critical" | "Debug" | "Error" | "Info" | "Off" | "Trace" | "Warning";
 export const LogLevel: Record<LogLevelOptions, LogLevelOptions> = {
-    Trace: "Trace",
-    Debug: "Debug",
-    Info: "Info",
-    Warning: "Warning",
-    Error: "Error",
     Critical: "Critical",
+    Debug: "Debug",
+    Error: "Error",
+    Info: "Info",
     Off: "Off",
+    Trace: "Trace",
+    Warning: "Warning",
 };
 
 let _logLevel: LogLevelOptions = LogLevel.Info;

@@ -16,6 +16,6 @@ export async function version(git: GitContext): Promise<Result<string, ReadToErr
 }
 
 /** Attempts to compare the git version to a semver range. Useful for handling version specific behaviours. */
-export function trySemverCheck(gitVersion: string, range: string) {
+export function trySemverCheck(gitVersion: string, range: string): boolean {
     return compareVersions(gitVersion, range) >= 0;
 }

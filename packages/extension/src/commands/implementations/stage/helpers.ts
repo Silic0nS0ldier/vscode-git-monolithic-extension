@@ -12,9 +12,9 @@ export async function categorizeResourceByResolution(
 ): Promise<{ merge: Resource[]; resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[] }> {
     const selection: Resource[] = resources.filter(s => s instanceof Resource);
     const merge = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.Merge);
-    const isBothAddedOrModified = (s: Resource) =>
+    const isBothAddedOrModified = (s: Resource): boolean =>
         s.state.type === Status.BOTH_MODIFIED || s.state.type === Status.BOTH_ADDED;
-    const isAnyDeleted = (s: Resource) =>
+    const isAnyDeleted = (s: Resource): boolean =>
         s.state.type === Status.DELETED_BY_THEM || s.state.type === Status.DELETED_BY_US;
     const possibleUnresolved = merge.filter(isBothAddedOrModified);
     const promises = possibleUnresolved.map(s => grep(s.state.resourceUri.fsPath, /^<{7}|^={7}|^>{7}/));

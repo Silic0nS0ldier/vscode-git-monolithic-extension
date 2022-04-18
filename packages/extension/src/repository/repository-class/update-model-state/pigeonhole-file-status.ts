@@ -18,7 +18,7 @@ export function pigeonholeFileStatus(
     index: Resource[],
     tracked: Resource[],
     merge: Resource[],
-) {
+): number | undefined {
     const uri = Uri.file(path.join(repoRoot, fileStatus.path));
     const renameUri = fileStatus.rename
         ? Uri.file(path.join(repoRoot, fileStatus.rename))
@@ -28,7 +28,7 @@ export function pigeonholeFileStatus(
         resourceGroupType: ResourceGroupTypeOptions,
         type: StatusOptions,
         renameResourceUri?: Uri,
-    ) {
+    ): Resource {
         return createResource(
             resourceGroupType,
             uri,

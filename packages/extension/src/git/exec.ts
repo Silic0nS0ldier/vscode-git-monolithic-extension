@@ -22,12 +22,12 @@ export async function exec(
 
     const disposables: IDisposable[] = [];
 
-    const once = (ee: NodeJS.EventEmitter, name: string, fn: (...args: any[]) => void) => {
+    const once = (ee: NodeJS.EventEmitter, name: string, fn: (...args: any[]) => void): void => {
         ee.once(name, fn);
         disposables.push(toDisposable(() => ee.removeListener(name, fn)));
     };
 
-    const on = (ee: NodeJS.EventEmitter, name: string, fn: (...args: any[]) => void) => {
+    const on = (ee: NodeJS.EventEmitter, name: string, fn: (...args: any[]) => void): void => {
         ee.on(name, fn);
         disposables.push(toDisposable(() => ee.removeListener(name, fn)));
     };

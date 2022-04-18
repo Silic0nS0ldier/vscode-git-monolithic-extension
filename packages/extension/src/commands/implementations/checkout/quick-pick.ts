@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import type { QuickPickItem } from "vscode";
 import type { Ref } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";

@@ -18,7 +18,7 @@ export function createCommand(
     method: Function,
     options: ScmCommandOptions,
 ): (...args: any[]) => any {
-    const result = (...args: any[]) => {
+    const result = (...args: any[]): Promise<any> => {
         let result: Promise<any>;
 
         if (!options.repository) {
@@ -62,7 +62,7 @@ async function handleError(
     rawErr: unknown,
     outputChannel: OutputChannel,
     commandErrors: CommandErrorOutputTextDocumentContentProvider,
-) {
+): Promise<void> {
     const err = rawErr instanceof Error
         ? rawErr
         : new Error("Error running command", { cause: rawErr as Error });

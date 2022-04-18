@@ -8,12 +8,13 @@ export async function promptForBranchName(defaultName?: string, initialValue?: s
     const config = workspace.getConfiguration("git");
     const branchWhitespaceChar = config.get<string>("branchWhitespaceChar")!;
     const branchValidationRegex = config.get<string>("branchValidationRegex")!;
-    const sanitize = (name: string) =>
+    const sanitize = (name: string): string =>
         name
             ? name.trim().replace(/^-+/, "").replace(
                 /^\.|\/\.|\.\.|~|\^|:|\/$|\.lock$|\.lock\/|\\|\*|\s|^\s*$|\.$|\[|\]$/g,
                 branchWhitespaceChar,
             )
+            // TODO Wouldn't this be an empty string?
             : name;
 
     const rawBranchName = defaultName || await window.showInputBox({

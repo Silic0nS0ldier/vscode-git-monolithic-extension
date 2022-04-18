@@ -135,7 +135,7 @@ export class Git {
 
         await fs.mkdir(options.parentPath, { recursive: true });
 
-        const onSpawn = (child: cp.ChildProcess) => {
+        const onSpawn = (child: cp.ChildProcess): void => {
             if (!child.stderr) {
                 return;
             }

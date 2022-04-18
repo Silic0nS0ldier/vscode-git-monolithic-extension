@@ -11,7 +11,7 @@ export function createRebaseCommitBox(
 
     return {
         get: () => rebaseCommit,
-        set: (newRebaseCommit) => {
+        set: (newRebaseCommit): void => {
             if (rebaseCommit && !newRebaseCommit) {
                 inputBox.value = "";
             } else if (newRebaseCommit && (!rebaseCommit || rebaseCommit.hash !== newRebaseCommit.hash)) {

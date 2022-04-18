@@ -26,7 +26,7 @@ export async function getStatusTrackedAndMerge(
     return await new Promise((c, e) => {
         child.on("error", cpErrorHandler(e));
 
-        const onExit = (exitCode: number) => {
+        const onExit = (exitCode: number): void => {
             if (exitCode !== 0) {
                 const stderr = stderrData.join("");
                 // TODO Ensure this propagates to child.on('error', ...)
@@ -44,7 +44,7 @@ export async function getStatusTrackedAndMerge(
         };
         child.on("exit", onExit);
 
-        const onStdoutData = (raw: string) => {
+        const onStdoutData = (raw: string): void => {
             parser.update(raw);
 
             if (parser.status.length > limit) {

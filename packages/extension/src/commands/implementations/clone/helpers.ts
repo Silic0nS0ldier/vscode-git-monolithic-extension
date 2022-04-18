@@ -9,11 +9,11 @@ import { localize } from "../../../util.js";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
 
-type PostCloneActionOptions = "Open" | "OpenNewWindow" | "AddToWorkspace";
+type PostCloneActionOptions = "AddToWorkspace" | "Open" | "OpenNewWindow";
 const PostCloneAction: Record<PostCloneActionOptions, PostCloneActionOptions> = {
+    AddToWorkspace: "AddToWorkspace",
     Open: "Open",
     OpenNewWindow: "OpenNewWindow",
-    AddToWorkspace: "AddToWorkspace",
 };
 
 export async function cloneRepository(

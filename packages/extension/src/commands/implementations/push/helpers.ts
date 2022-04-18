@@ -8,12 +8,12 @@ import { publish } from "../publish/publish.js";
 import { AddRemoteItem } from "../publish/quick-pick.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
 
-export type PushTypeOptions = "Push" | "PushTo" | "PushFollowTags" | "PushTags";
+export type PushTypeOptions = "Push" | "PushFollowTags" | "PushTags" | "PushTo";
 export const PushType: Record<PushTypeOptions, PushTypeOptions> = {
     Push: "Push",
-    PushTo: "PushTo",
     PushFollowTags: "PushFollowTags",
     PushTags: "PushTags",
+    PushTo: "PushTo",
 };
 
 export interface PushOptions {
@@ -28,7 +28,7 @@ export interface PushOptions {
     };
 }
 
-export async function push(repository: AbstractRepository, pushOptions: PushOptions, model: Model) {
+export async function push(repository: AbstractRepository, pushOptions: PushOptions, model: Model): Promise<void> {
     const remotes = repository.remotes;
 
     if (remotes.length === 0) {

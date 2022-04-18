@@ -15,7 +15,7 @@ export function createStateBox(
 
     return {
         get: () => state,
-        set: (newState: RepositoryStateOptions) => {
+        set: (newState: RepositoryStateOptions): void => {
             state = newState;
 
             HEAD.set(undefined);

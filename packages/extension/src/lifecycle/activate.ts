@@ -126,7 +126,7 @@ async function createModel(
             `git/${info.version} (${os.version()} ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
         version: info.version,
     });
-    const onOutput = (str: string) => {
+    const onOutput = (str: string): void => {
         const lines = str.split(/\r?\n/mg);
 
         while (/^\s*$/.test(lines[lines.length - 1])) {
@@ -140,8 +140,8 @@ async function createModel(
     const model = new Model(git, askpass, context.globalState, outputChannel);
     disposables.push(model);
 
-    const onRepository = () =>
-        commands.executeCommand("setContext", "gitOpenRepositoryCount", `${model.repositories.length}`);
+    const onRepository = async (): Promise<void> =>
+        void await commands.executeCommand<unknown>("setContext", "gitOpenRepositoryCount", `${model.repositories.length}`);
     model.onDidOpenRepository(onRepository, null, disposables);
     model.onDidCloseRepository(onRepository, null, disposables);
     onRepository();

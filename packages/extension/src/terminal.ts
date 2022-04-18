@@ -13,7 +13,7 @@ export function registerTerminalEnvironmentManager(
 ): Disposable {
     let enabled = false;
 
-    function refresh() {
+    function refresh(): void {
         const config = workspace.getConfiguration("git", null);
         const newEnabled = config.get<boolean>("enabled", true) && config.get("terminalAuthentication", true);
 

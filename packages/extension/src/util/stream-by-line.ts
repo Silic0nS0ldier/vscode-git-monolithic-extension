@@ -82,7 +82,7 @@ export class LineStream extends stream.Transform {
         this.#pushBuffer(1, done);
     }
 
-    #pushBuffer(keep: number, done: stream.TransformCallback) {
+    #pushBuffer(keep: number, done: stream.TransformCallback): void {
         // always buffer the last (possibly partial) line
         while (this.#lineBuffer.length > keep) {
             var line = this.#lineBuffer.shift();

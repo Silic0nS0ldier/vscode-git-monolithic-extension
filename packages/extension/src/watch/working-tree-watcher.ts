@@ -28,7 +28,7 @@ export function createWorkingTreeWatcher(
     );
 
     return {
-        dispose() {
+        dispose(): void {
             repoWatcher.dispose();
         },
         event: onWorkingTreeFileChange,
