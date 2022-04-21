@@ -380,3 +380,122 @@ export function provideUrlOrPick(): string {
 export function url(): string {
     return localize("url", "URL");
 }
+
+// TODO Too specific in purpose for its name
+export function notSupported(): string {
+    return localize(
+        "not supported",
+        "Absolute paths not supported in 'git.scanRepositories' setting.",
+    );
+}
+
+export function tooManySubmodules(repoRoot: string, submodules: number): string {
+    return localize(
+        "too many submodules",
+        "The '{0}' repository has {1} submodules which won't be opened automatically. You can still open each one individually by opening a file within.",
+        repoRoot,
+        submodules,
+    )
+}
+
+export function pickRepo(): string {
+    return localize("pick repo", "Choose a repository");
+}
+
+export function noRepositories(): string {
+    return localize("no repositories", "There are no available repositories");
+}
+
+export function usingGit(gitVersion: string, gitPath: string): string {
+    return localize("using git", "Using git {0} from {1}", gitVersion, gitPath);
+}
+
+export function downloadGit(): string {
+    return localize("downloadgit", "Download Git");
+}
+
+// TODO Duplicate message, duplicate meaning across all contexts
+export function neverShowAgain(): string {
+    return localize("neverShowAgain", "Don't Show Again");
+}
+
+export function notFound(): string {
+    return localize("notfound", "Git not found. Install it or configure it using the 'git.path' setting.");
+}
+
+export function updateGit(): string {
+    return localize("updateGit", "Update Git");
+}
+
+export function git20(gitVersion: string): string {
+    return localize("git20", "You seem to have git {0} installed. Code works best with git >= 2", gitVersion);
+}
+
+export function git2526(gitVersion: string): string {
+    return localize(
+        "git2526",
+        "There are known issues with the installed Git {0}. Please update to Git >= 2.27 for the git features to work correctly.",
+        gitVersion,
+    );
+}
+
+export function noMore(): string {
+    return localize("no more", "Can't undo because HEAD doesn't point to any commit.");
+}
+
+export function undoCommit(): string {
+    return localize("undo commit", "Undo merge commit");
+}
+
+export function mergeCommit(): string {
+    return localize("merge commit", "The last commit was a merge commit. Are you sure you want to undo it?");
+}
+
+export function noTags(): string {
+    return localize("no tags", "This repository has no tags.");
+}
+
+export function selectTagToDelete(): string {
+    return localize("select a tag to delete", "Select a tag to delete");
+}
+
+export function tagName(): string {
+    return localize("tag name", "Tag name");
+}
+
+export function provideTagName(): string {
+    return localize("provide tag name", "Please provide a tag name");
+}
+
+export function tagMessage(): string {
+    return localize("provide tag name", "Please provide a tag name");
+}
+
+export function provideTagMessage(): string {
+    return localize("provide tag message", "Please provide a message to annotate the tag");
+}
+
+export function confirmPublishBranch(branchName: string): string {
+    return localize(
+        "confirm publish branch",
+        "The branch '{0}' has no upstream branch. Would you like to publish this branch?",
+        branchName,
+    );
+}
+
+export function ok(): string {
+    return localize("ok", "OK");
+}
+
+export function syncIsUnpredictable2(remotePath: string, remoteName: string): string {
+    return localize(
+        "sync is unpredictable 2",
+        "This action will push and pull commits to and from '{0}/{1}'.",
+        remotePath,
+        remoteName,
+    );
+}
+
+export function neverAgain2(): string {
+    return localize("never again 2", "OK, Don't Show Again");
+}

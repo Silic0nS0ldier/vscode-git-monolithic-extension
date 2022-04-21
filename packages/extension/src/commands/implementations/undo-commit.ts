@@ -1,6 +1,6 @@
 import { window } from "vscode";
 import type { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../util.js";
+import * as i18n from "../../i18n/mod.js";
 import type { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
@@ -8,16 +8,16 @@ export function createCommand(): ScmCommand {
         const HEAD = repository.HEAD;
 
         if (!HEAD || !HEAD.commit) {
-            window.showWarningMessage(localize("no more", "Can't undo because HEAD doesn't point to any commit."));
+            window.showWarningMessage(i18n.Translations.noMore());
             return;
         }
 
         const commit = await repository.getCommit("HEAD");
 
         if (commit.parents.length > 1) {
-            const yes = localize("undo commit", "Undo merge commit");
+            const yes = i18n.Translations.undoCommit();
             const result = await window.showWarningMessage(
-                localize("merge commit", "The last commit was a merge commit. Are you sure you want to undo it?"),
+                i18n.Translations.mergeCommit(),
                 { modal: true },
                 yes,
             );

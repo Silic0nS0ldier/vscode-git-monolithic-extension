@@ -42,7 +42,7 @@ import { isAbstractRepository } from "./repository/repository-class/isAbstractRe
 import { createRepository } from "./repository/repository-class/mod.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
 import { fromGitUri } from "./uri.js";
-import { localize } from "./util.js";
+import * as i18n from "./i18n/mod.js";
 import { dispose, toDisposable } from "./util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "./util/events.js";
 import { isDescendant, pathEquals } from "./util/paths.js";
@@ -211,10 +211,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
                 if (path.isAbsolute(scanPath)) {
                     this.#outputChannel.appendLine(
                         "[WARN] "
-                            + localize(
-                                "not supported",
-                                "Absolute paths not supported in 'git.scanRepositories' setting.",
-                            ),
+                            + i18n.Translations.notSupported(),
                     );
                     continue;
                 }
@@ -410,9 +407,8 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 
             if (repository.submodules.length > submodulesLimit) {
                 window.showWarningMessage(
-                    localize(
-                        "too many submodules",
-                        "The '{0}' repository has {1} submodules which won't be opened automatically. You can still open each one individually by opening a file within.",
+                    i18n.Translations.tooManySubmodules(
+                        // TODO If there are multiple repositories open in workspace, this will be a source of confusion
                         path.basename(repository.root),
                         repository.submodules.length,
                     ),
@@ -458,7 +454,8 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 
     async pickRepository(): Promise<AbstractRepository | undefined> {
         if (this.#openRepositories.length === 0) {
-            throw new Error(localize("no repositories", "There are no available repositories"));
+            // TODO Errors should be internal, localisation not necessary
+            throw new Error(i18n.Translations.noRepositories());
         }
 
         const picks = this.#openRepositories.map((e, index) => new RepositoryPick(e.repository, index));
@@ -471,7 +468,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             picks.unshift(...picks.splice(index, 1));
         }
 
-        const placeHolder = localize("pick repo", "Choose a repository");
+        const placeHolder = i18n.Translations.pickRepo();;
         const pick = await window.showQuickPick(picks, { placeHolder });
 
         return pick && pick.repository;

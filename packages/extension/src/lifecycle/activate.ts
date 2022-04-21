@@ -27,7 +27,7 @@ import { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
-import { localize } from "../util.js";
+import * as i18n from "../i18n/mod.js";
 import { toDisposable } from "../util/disposals.js";
 import { eventToPromise, filterEvent } from "../util/events.js";
 import { isExpectedError } from "../util/is-expected-error.js";
@@ -110,7 +110,7 @@ async function createModel(
     }
 
     const info = await findGit(outputChannel, pathHints);
-    outputChannel.appendLine(localize("using git", "Using git {0} from {1}", info.version, info.path));
+    outputChannel.appendLine(i18n.Translations.usingGit(info.version, info.path));
 
     // TODO Migrate to context.storageUri
     const askpass = await Askpass.create(outputChannel, context.storagePath);
@@ -183,15 +183,16 @@ async function warnAboutMissingGit(): Promise<void> {
         return;
     }
 
-    const download = localize("downloadgit", "Download Git");
-    const neverShowAgain = localize("neverShowAgain", "Don't Show Again");
+    const download = i18n.Translations.downloadGit();
+    const neverShowAgain = i18n.Translations.neverShowAgain();
     const choice = await window.showWarningMessage(
-        localize("notfound", "Git not found. Install it or configure it using the 'git.path' setting."),
+        i18n.Translations.notFound(),
         download,
         neverShowAgain,
     );
 
     if (choice === download) {
+        // TODO Address hard coded URL
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
         await config.update("ignoreMissingGitWarning", true, true);
@@ -235,16 +236,17 @@ async function checkGitv1(info: IGit): Promise<void> {
         return;
     }
 
-    const update = localize("updateGit", "Update Git");
-    const neverShowAgain = localize("neverShowAgain", "Don't Show Again");
+    const update = i18n.Translations.updateGit();
+    const neverShowAgain = i18n.Translations.neverShowAgain();
 
     const choice = await window.showWarningMessage(
-        localize("git20", "You seem to have git {0} installed. Code works best with git >= 2", info.version),
+        i18n.Translations.git20(info.version),
         update,
         neverShowAgain,
     );
 
     if (choice === update) {
+        // TODO Repeated
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
         await config.update("ignoreLegacyWarning", true, true);
@@ -263,19 +265,16 @@ async function checkGitWindows(info: IGit): Promise<void> {
         return;
     }
 
-    const update = localize("updateGit", "Update Git");
-    const neverShowAgain = localize("neverShowAgain", "Don't Show Again");
+    const update = i18n.Translations.updateGit();
+    const neverShowAgain = i18n.Translations.neverShowAgain();
     const choice = await window.showWarningMessage(
-        localize(
-            "git2526",
-            "There are known issues with the installed Git {0}. Please update to Git >= 2.27 for the git features to work correctly.",
-            info.version,
-        ),
+        i18n.Translations.git2526(info.version),
         update,
         neverShowAgain,
     );
 
     if (choice === update) {
+        // TODO Repeated
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
         await config.update("ignoreWindowsGit27Warning", true, true);

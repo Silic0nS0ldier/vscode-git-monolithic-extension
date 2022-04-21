@@ -1,7 +1,7 @@
 import { window, workspace } from "vscode";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { publish } from "../publish/publish.js";
 
 export async function sync(
@@ -15,12 +15,9 @@ export async function sync(
         return;
     } else if (!HEAD.upstream) {
         const branchName = HEAD.name;
-        const message = localize(
-            "confirm publish branch",
-            "The branch '{0}' has no upstream branch. Would you like to publish this branch?",
-            branchName,
-        );
-        const yes = localize("ok", "OK");
+        // TODO Address nullability issue
+        const message = i18n.Translations.confirmPublishBranch(branchName ?? "(undefined)");
+        const yes = i18n.Translations.ok();
         const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
         if (pick === yes) {
@@ -40,14 +37,12 @@ export async function sync(
     const shouldPrompt = !isReadonly && config.get<boolean>("confirmSync") === true;
 
     if (shouldPrompt) {
-        const message = localize(
-            "sync is unpredictable",
-            "This action will push and pull commits to and from '{0}/{1}'.",
+        const message = i18n.Translations.syncIsUnpredictable2(
             HEAD.upstream.remote,
             HEAD.upstream.name,
         );
-        const yes = localize("ok", "OK");
-        const neverAgain = localize("never again", "OK, Don't Show Again");
+        const yes = i18n.Translations.ok();
+        const neverAgain = i18n.Translations.neverAgain2();
         const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
         if (pick === neverAgain) {
