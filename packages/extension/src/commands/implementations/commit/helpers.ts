@@ -3,6 +3,7 @@ import { CommitOptions, Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import * as config from "../../../util/config.js";
 import { isDescendant, pathEquals } from "../../../util/paths.js";
 import { push, PushType } from "../push/helpers.js";
 import { sync } from "../sync/sync.js";
@@ -13,9 +14,10 @@ async function smartCommit(
     model: Model,
     opts?: CommitOptions,
 ): Promise<boolean> {
-    const config = workspace.getConfiguration("git", Uri.file(repository.root));
-    let promptToSaveFilesBeforeCommit = config.get<"always" | "staged" | "never">("promptToSaveFilesBeforeCommit");
+    const repositoryUri = Uri.file(repository.root);
+    let promptToSaveFilesBeforeCommit = config.promptToSaveFilesBeforeCommit(repositoryUri);
 
+    // TODO Leftovers
     // migration
     if (promptToSaveFilesBeforeCommit as any === true) {
         promptToSaveFilesBeforeCommit = "always";
@@ -23,8 +25,8 @@ async function smartCommit(
         promptToSaveFilesBeforeCommit = "never";
     }
 
-    const enableSmartCommit = config.get<boolean>("enableSmartCommit") === true;
-    const enableCommitSigning = config.get<boolean>("enableCommitSigning") === true;
+    const enableSmartCommit = config.enableSmartCommit(repositoryUri);
+    const enableCommitSigning = config.enableCommitSigning(repositoryUri);
     let noStagedChanges = repository.sourceControlUI.stagedGroup.resourceStates.get().length === 0;
     let noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.get().length === 0;
 
@@ -71,7 +73,7 @@ async function smartCommit(
 
     // no changes, and the user has not configured to commit all in this case
     if (!noUnstagedChanges && noStagedChanges && !enableSmartCommit && !normalisedOpts.empty) {
-        const suggestSmartCommit = config.get<boolean>("suggestSmartCommit") === true;
+        const suggestSmartCommit = config.suggestSmartCommit(repositoryUri);
 
         if (!suggestSmartCommit) {
             return false;
@@ -84,10 +86,11 @@ async function smartCommit(
         const never = i18n.Translations.never();
         const pick = await window.showWarningMessage(message, { modal: true }, yes, always, never);
 
+        const legacyConfig = config.legacy(repositoryUri);
         if (pick === always) {
-            config.update("enableSmartCommit", true, true);
+            legacyConfig.update("enableSmartCommit", true, true);
         } else if (pick === never) {
-            config.update("suggestSmartCommit", false, true);
+            legacyConfig.update("suggestSmartCommit", false, true);
             return false;
         } else if (pick !== yes) {
             return false; // do not commit on cancel
@@ -97,11 +100,11 @@ async function smartCommit(
     // enable signing of commits if configured
     normalisedOpts.signCommit = enableCommitSigning;
 
-    if (config.get<boolean>("alwaysSignOff")) {
+    if (config.alwaysSignOff(repositoryUri)) {
         normalisedOpts.signoff = true;
     }
 
-    const smartCommitChanges = config.get<"all" | "tracked">("smartCommitChanges");
+    const smartCommitChanges = config.smartCommitChanges(repositoryUri);
 
     if (
         (
@@ -133,21 +136,22 @@ async function smartCommit(
     }
 
     if (normalisedOpts.noVerify) {
-        if (!config.get<boolean>("allowNoVerifyCommit")) {
+        if (!config.allowNoVerifyCommit(repositoryUri)) {
             await window.showErrorMessage(
                 i18n.Translations.commitRequiresVerification(),
             );
             return false;
         }
 
-        if (config.get<boolean>("confirmNoVerifyCommit")) {
+        if (config.confirmNoVerifyCommit(repositoryUri)) {
             const message = i18n.Translations.confirmCommitWithoutVerification();
             const yes = i18n.Translations.ok();
             const neverAgain = i18n.Translations.neverAgain3();
             const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
             if (pick === neverAgain) {
-                config.update("confirmNoVerifyCommit", false, true);
+                const legacyConfig = config.legacy(repositoryUri);
+                legacyConfig.update("confirmNoVerifyCommit", false, true);
             } else if (pick !== yes) {
                 return false;
             }
@@ -164,13 +168,13 @@ async function smartCommit(
         normalisedOpts.all = "tracked";
     }
 
-    if (normalisedOpts.all && config.get<"mixed" | "separate" | "hidden">("untrackedChanges") !== "mixed") {
+    if (normalisedOpts.all && config.untrackedChanges(repositoryUri) !== "mixed") {
         normalisedOpts.all = "tracked";
     }
 
     await repository.commit(message, normalisedOpts);
 
-    const postCommitCommand = config.get<"none" | "push" | "sync">("postCommitCommand");
+    const postCommitCommand = config.postCommitCommand(repositoryUri);
 
     switch (postCommitCommand) {
         case "push":
@@ -230,8 +234,7 @@ export async function commitEmpty(
     noVerify?: boolean,
 ): Promise<void> {
     const root = Uri.file(repository.root);
-    const config = workspace.getConfiguration("git", root);
-    const shouldPrompt = config.get<boolean>("confirmEmptyCommits") === true;
+    const shouldPrompt = config.confirmEmptyCommits(root);
 
     if (shouldPrompt) {
         const message = i18n.Translations.confirmEmptyCommit();
@@ -240,7 +243,8 @@ export async function commitEmpty(
         const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
         if (pick === neverAgain) {
-            await config.update("confirmEmptyCommits", false, true);
+            const legacyConfig = config.legacy(root);
+            await legacyConfig.update("confirmEmptyCommits", false, true);
         } else if (pick !== yes) {
             return;
         }

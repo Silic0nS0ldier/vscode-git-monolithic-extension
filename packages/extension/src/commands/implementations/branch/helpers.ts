@@ -1,13 +1,13 @@
-import { window, workspace } from "vscode";
+import { window } from "vscode";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import * as config from "../../../util/config.js";
 import { createCheckoutItems } from "../checkout/helpers.js";
 import { HEADItem } from "./quick-pick.js";
 
 export async function promptForBranchName(defaultName?: string, initialValue?: string): Promise<string> {
-    const config = workspace.getConfiguration("git");
-    const branchWhitespaceChar = config.get<string>("branchWhitespaceChar")!;
-    const branchValidationRegex = config.get<string>("branchValidationRegex")!;
+    const branchWhitespaceChar = config.branchWhitespaceChar();
+    const branchValidationRegex = config.branchValidationRegex();
     const sanitize = (name: string): string =>
         name
             ? name.trim().replace(/^-+/, "").replace(

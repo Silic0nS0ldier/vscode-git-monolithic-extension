@@ -1,7 +1,8 @@
-import { QuickPickItem, window, workspace } from "vscode";
+import { QuickPickItem, window } from "vscode";
 import { Ref, RefType } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import * as config from "../../../util/config.js";
 import type { ScmCommand } from "../../helpers.js";
 
 class RebaseItem implements QuickPickItem {
@@ -21,8 +22,7 @@ class RebaseItem implements QuickPickItem {
 
 export function createCommand(): ScmCommand {
     async function rebase(repository: AbstractRepository): Promise<void> {
-        const config = workspace.getConfiguration("git");
-        const checkoutType = config.get<string | string[]>("checkoutType");
+        const checkoutType = config.checkoutType();
         const includeRemotes = checkoutType === "all" || checkoutType === "remote" || checkoutType?.includes("remote");
 
         const heads = repository.refs.filter(ref => ref.type === RefType.Head)

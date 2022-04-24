@@ -7,6 +7,7 @@ import type { Model } from "../../../model.js";
 import type { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
+import * as config from "../../../util/config.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
 
 type PostCloneActionOptions = "AddToWorkspace" | "Open" | "OpenNewWindow";
@@ -46,8 +47,7 @@ export async function cloneRepository(
     normalisedUrl = normalisedUrl.trim().replace(/^git\s+clone\s+/, "");
 
     if (!normalisedParentPath) {
-        const config = workspace.getConfiguration("git");
-        let defaultCloneDirectory = config.get<string>("defaultCloneDirectory") || os.homedir();
+        let defaultCloneDirectory = config.defaultCloneDirectory();
         defaultCloneDirectory = defaultCloneDirectory.replace(/^~/, os.homedir());
 
         const uris = await window.showOpenDialog({
@@ -89,10 +89,7 @@ export async function cloneRepository(
                 ),
         );
 
-        const config = workspace.getConfiguration("git");
-        const openAfterClone = config.get<"always" | "alwaysNewWindow" | "whenNoFolderOpen" | "prompt">(
-            "openAfterClone",
-        );
+        const openAfterClone = config.openAfterClone();
 
         let action: PostCloneActionOptions | undefined = undefined;
 

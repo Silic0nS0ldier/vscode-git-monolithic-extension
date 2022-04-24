@@ -1,9 +1,10 @@
-import { Uri, window, workspace } from "vscode";
+import { Uri, window } from "vscode";
 import { ForcePushMode, ForcePushModeOptions, GitErrorCodes } from "../../../api/git.js";
 import { GitError } from "../../../git/error.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import * as config from "../../../util/config.js";
 import { publish } from "../publish/publish.js";
 import { AddRemoteItem } from "../publish/quick-pick.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
@@ -49,29 +50,30 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
         return;
     }
 
-    const config = workspace.getConfiguration("git", Uri.file(repository.root));
+    const repositoryUri = Uri.file(repository.root);
     let forcePushMode: ForcePushModeOptions | undefined = undefined;
 
     if (pushOptions.forcePush) {
-        if (!config.get<boolean>("allowForcePush")) {
+        if (!config.allowForcePush(repositoryUri)) {
             await window.showErrorMessage(
                 i18n.Translations.forcePushNotAllowed(),
             );
             return;
         }
 
-        forcePushMode = config.get<boolean>("useForcePushWithLease") === true
+        forcePushMode = config.useForcePushWithLease(repositoryUri)
             ? ForcePushMode.ForceWithLease
             : ForcePushMode.Force;
 
-        if (config.get<boolean>("confirmForcePush")) {
+        if (config.useForcePushWithLease(repositoryUri)) {
             const message = i18n.Translations.confirmForcePush();
             const yes = i18n.Translations.ok();
             const neverAgain = i18n.Translations.neverAgain2();
             const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
             if (pick === neverAgain) {
-                config.update("confirmForcePush", false, true);
+                const legacyConfig = config.legacy(repositoryUri);
+                legacyConfig.update("confirmForcePush", false, true);
             } else if (pick !== yes) {
                 return;
             }

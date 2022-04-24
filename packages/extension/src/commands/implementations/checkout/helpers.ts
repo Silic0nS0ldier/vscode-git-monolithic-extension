@@ -1,11 +1,10 @@
-import { workspace } from "vscode";
 import { Ref, RefType, RefTypeOptions } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import * as config from "../../../util/config.js";
 import { CheckoutItem, CheckoutRemoteHeadItem, CheckoutTagItem } from "./quick-pick.js";
 
 export function createCheckoutItems(repository: AbstractRepository): CheckoutItem[] {
-    const config = workspace.getConfiguration("git");
-    const checkoutTypeConfig = config.get<string | string[]>("checkoutType");
+    const checkoutTypeConfig = config.checkoutType();
     let checkoutTypes: string[];
 
     if (checkoutTypeConfig === "all" || !checkoutTypeConfig || checkoutTypeConfig.length === 0) {

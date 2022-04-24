@@ -1,5 +1,6 @@
-import { Uri, workspace } from "vscode";
+import { Uri } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import * as config from "../../../util/config.js";
 import type { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
@@ -11,8 +12,7 @@ export function createCommand(): ScmCommand {
         const uris = resources.map(r => r.state.resourceUri);
 
         if (uris.length > 0) {
-            const config = workspace.getConfiguration("git", Uri.file(repository.root));
-            const untrackedChanges = config.get<"mixed" | "separate" | "hidden">("untrackedChanges");
+            const untrackedChanges = config.untrackedChanges(Uri.file(repository.root));
             await repository.add(uris, untrackedChanges === "mixed" ? undefined : { update: true });
         }
     }

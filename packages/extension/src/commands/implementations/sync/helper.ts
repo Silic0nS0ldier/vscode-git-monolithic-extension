@@ -1,7 +1,8 @@
-import { window, workspace } from "vscode";
+import { window } from "vscode";
 import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
+import * as config from "../../../util/config.js";
 import { publish } from "../publish/publish.js";
 
 export async function sync(
@@ -33,8 +34,7 @@ export async function sync(
     const remote = repository.remotes.find(r => r.name === remoteName);
     const isReadonly = remote && remote.isReadOnly;
 
-    const config = workspace.getConfiguration("git");
-    const shouldPrompt = !isReadonly && config.get<boolean>("confirmSync") === true;
+    const shouldPrompt = !isReadonly && config.confirmSync();
 
     if (shouldPrompt) {
         const message = i18n.Translations.syncIsUnpredictable2(
@@ -46,7 +46,7 @@ export async function sync(
         const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
         if (pick === neverAgain) {
-            await config.update("confirmSync", false, true);
+            await config.legacy().update("confirmSync", false, true);
         } else if (pick !== yes) {
             return;
         }
