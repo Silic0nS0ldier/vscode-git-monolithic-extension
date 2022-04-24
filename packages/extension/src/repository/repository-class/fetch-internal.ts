@@ -1,6 +1,7 @@
-import { Uri, workspace } from "vscode";
+import { Uri } from "vscode";
 import type { FetchOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
+import * as config from "../../util/config.js";
 import { Operation } from "../Operations.js";
 import type { RunFn } from "./run.js";
 
@@ -11,8 +12,7 @@ export async function fetchInternal(
     options: FetchOptions & { silent?: boolean } = {},
 ): Promise<void> {
     if (!options.prune) {
-        const config = workspace.getConfiguration("git", Uri.file(repoRoot));
-        const prune = config.get<boolean>("pruneOnFetch");
+        const prune = config.pruneOnFetch(Uri.file(repoRoot));
         options.prune = prune;
     }
 

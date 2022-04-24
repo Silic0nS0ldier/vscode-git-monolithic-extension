@@ -1,4 +1,5 @@
 import { ProgressLocation, Uri, window, workspace } from "vscode";
+import * as config from "../util/config.js";
 import { EmptyDisposable, IDisposable } from "../util/disposals.js";
 import { debounceEvent, eventToPromise, filterEvent, onceEvent } from "../util/events.js";
 import type { AbstractRepository } from "./repository-class/AbstractRepository.js";
@@ -19,9 +20,7 @@ export class ProgressManager {
     }
 
     #updateEnablement(): void {
-        const config = workspace.getConfiguration("git", Uri.file(this.#repository.root));
-
-        if (config.get<boolean>("showProgress")) {
+        if (config.showProgress(Uri.file(this.#repository.root))) {
             this.#enable();
         } else {
             this.#disable();

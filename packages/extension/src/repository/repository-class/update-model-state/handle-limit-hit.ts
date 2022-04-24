@@ -1,8 +1,9 @@
 import path from "node:path";
-import { Uri, window, WorkspaceConfiguration } from "vscode";
+import { Uri, window } from "vscode";
 import type { Repository } from "../../../git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { Box } from "../../../util/box.js";
+import * as config from "../../../util/config.js";
 import { findKnownHugeFolderPathsToIgnore } from "../find-known-huge-folder-paths-to-ignore.js";
 import { ignore } from "../ignore.js";
 import type { RunFn } from "../run.js";
@@ -11,7 +12,6 @@ export async function handleLimitHit(
     repoRoot: string,
     run: RunFn<void> & RunFn<Set<string>>,
     repository: Repository,
-    config: WorkspaceConfiguration,
     didWarnAboutLimit: Box<boolean>,
 ): Promise<void> {
     const knownHugeFolderPaths = await findKnownHugeFolderPathsToIgnore(repoRoot, run, repository);
@@ -29,7 +29,7 @@ export async function handleLimitHit(
         const result = await window.showWarningMessage(`${gitWarn} ${addKnown}`, yes, neverAgain);
 
         if (result === neverAgain) {
-            config.update("ignoreLimitWarning", true, false);
+            config.legacy().update("ignoreLimitWarning", true, false);
             didWarnAboutLimit.set(true);
         } else if (result === yes) {
             ignore(run, repository, [Uri.file(folderPath)]);
@@ -38,7 +38,7 @@ export async function handleLimitHit(
         const result = await window.showWarningMessage(gitWarn, neverAgain);
 
         if (result === neverAgain) {
-            config.update("ignoreLimitWarning", true, false);
+            config.legacy().update("ignoreLimitWarning", true, false);
         }
 
         didWarnAboutLimit.set(true);

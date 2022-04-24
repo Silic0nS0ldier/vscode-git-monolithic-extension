@@ -1,10 +1,11 @@
 import path from "node:path";
-import { Command, Uri, workspace } from "vscode";
+import { Command, Uri } from "vscode";
 import { Status } from "../api/git.js";
 import type { Submodule } from "../git/Submodule.js";
 import * as i18n from "../i18n/mod.js";
 import type { SourceControlResourceGroupUI } from "../ui/source-control.js";
 import { toGitUri } from "../uri.js";
+import * as config from "../util/config.js";
 import type { Resource, ResourceState } from "./Resource.js";
 import { ResourceGroupType } from "./ResourceGroupType.js";
 
@@ -130,8 +131,7 @@ export function resolveFileCommand(resource: Resource): Command {
 }
 
 export function resolveDefaultCommand(resource: Resource, repoRoot: string): Command {
-    const config = workspace.getConfiguration("git", Uri.file(repoRoot));
-    const openDiffOnClick = config.get<boolean>("openDiffOnClick", true);
+    const openDiffOnClick = config.openDiffOnClick(Uri.file(repoRoot));
     return openDiffOnClick ? resolveChangeCommand(resource) : resolveFileCommand(resource);
 }
 

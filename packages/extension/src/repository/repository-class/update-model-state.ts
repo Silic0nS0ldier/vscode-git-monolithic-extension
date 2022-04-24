@@ -1,11 +1,12 @@
 import path from "node:path";
-import { commands, EventEmitter, Uri, workspace } from "vscode";
+import { commands, EventEmitter, Uri } from "vscode";
 import { Branch, Ref, Remote, Status, StatusOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
 import type { Submodule } from "../../git/Submodule.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import type { Box } from "../../util/box.js";
+import * as config from "../../util/config.js";
 import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType, ResourceGroupTypeOptions } from "../ResourceGroupType.js";
 import { getInputTemplate } from "./get-input-template.js";
@@ -29,22 +30,22 @@ export async function updateModelState(
     onDidChangeStatusEmitter: EventEmitter<void>,
     sourceControlUI: SourceControlUIGroup,
 ): Promise<void> {
-    const scopedConfig = workspace.getConfiguration("git", Uri.file(repository.root));
-    const ignoreSubmodules = scopedConfig.get<boolean>("ignoreSubmodules");
+    const ignoreSubmodules = config.ignoreSubmodules(Uri.file(repository.root));
 
     // TODO Account for potential missing items when limit is hit
     // Could use placeholder like "(empty)"
+    // UI currently handles this using a heuristic
     const { status, didHitLimit } = await repository.getStatusTrackedAndMerge({ ignoreSubmodules });
     const pendingUntrackedStatus = repository.getStatusUntracked();
 
-    const config = workspace.getConfiguration("git");
-    const shouldIgnore = config.get<boolean>("ignoreLimitWarning") === true;
-    const useIcons = !config.get<boolean>("decorations.enabled", true);
+    // const config = workspace.getConfiguration("git");
+    const shouldIgnore = config.ignoreLimitWarning();
+    const useIcons = !config.decorationsEnabled();
     isRepositoryHuge.set(didHitLimit);
 
     if (didHitLimit && !shouldIgnore && !didWarnAboutLimit.get()) {
         // Deliberately not awaited to keep model update going
-        handleLimitHit(repoRoot, run, repository, config, didWarnAboutLimit);
+        handleLimitHit(repoRoot, run, repository, didWarnAboutLimit);
     }
 
     let newHEAD: Branch | undefined;
@@ -63,7 +64,8 @@ export async function updateModelState(
         // noop
     }
 
-    let sort = config.get<"alphabetically" | "committerdate">("branchSortOrder") || "alphabetically";
+    let sort = config.branchSortOrder();
+    // TODO Handle in config sanitisation
     if (sort !== "alphabetically" && sort !== "committerdate") {
         sort = "alphabetically";
     }

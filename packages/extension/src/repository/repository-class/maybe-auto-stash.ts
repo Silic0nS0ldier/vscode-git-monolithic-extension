@@ -1,7 +1,8 @@
-import { Uri, workspace } from "vscode";
+import { Uri } from "vscode";
 import { Status } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
+import * as config from "../../util/config.js";
 
 export async function maybeAutoStash<T>(
     repoRoot: string,
@@ -9,8 +10,7 @@ export async function maybeAutoStash<T>(
     repository: Repository,
     runOperation: () => Promise<T>,
 ): Promise<T> {
-    const config = workspace.getConfiguration("git", Uri.file(repoRoot));
-    const shouldAutoStash = config.get<boolean>("autoStash")
+    const shouldAutoStash = config.autoStash(Uri.file(repoRoot))
         && sourceControlUI.trackedGroup.resourceStates.get().some(r =>
             r.state.type !== Status.UNTRACKED && r.state.type !== Status.IGNORED
         );

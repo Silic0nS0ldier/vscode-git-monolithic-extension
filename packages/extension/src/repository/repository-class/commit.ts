@@ -1,7 +1,8 @@
-import { Uri, workspace } from "vscode";
+import { Uri } from "vscode";
 import type { CommitOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
+import * as config from "../../util/config.js";
 import { Operation } from "../Operations.js";
 import type { RunFn } from "./run.js";
 
@@ -32,8 +33,7 @@ export async function commit(
             delete opts.all;
 
             if (opts.requireUserConfig === undefined || opts.requireUserConfig === null) {
-                const config = workspace.getConfiguration("git", Uri.file(root));
-                opts.requireUserConfig = config.get<boolean>("requireGitUserConfig");
+                opts.requireUserConfig = config.requireGitUserConfig(Uri.file(root));
             }
 
             await repository.commit(message, opts);

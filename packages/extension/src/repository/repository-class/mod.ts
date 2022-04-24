@@ -13,6 +13,7 @@ import { StatusBarCommands } from "../../statusbar.js";
 import { create as createSourceControlUI } from "../../ui/source-control.js";
 import { toGitUri } from "../../uri.js";
 import { createBox } from "../../util/box.js";
+import * as config from "../../util/config.js";
 import { dispose } from "../../util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "../../util/events.js";
 import { timeout } from "../../util/timeout.js";
@@ -140,15 +141,14 @@ export function createRepository(
 
     // TODO UI logic should handle this
     function setCountBadge(): void {
-        const config = workspace.getConfiguration("git", Uri.file(repository.root));
-        const countBadge = config.get<"all" | "tracked" | "off">("countBadge");
+        const countBadge = config.countBadge(Uri.file(repository.root));
 
         if (countBadge === "off") {
             sourceControlUI.sourceControl.count = 0;
             return;
         }
 
-        // TODO This is getting out of sync
+        // TODO This is getting out of sync, likely due to delayed update (UX)
         sourceControlUI.sourceControl.count = sourceControlUI.mergeGroup.resourceStates.get().length
             + sourceControlUI.stagedGroup.resourceStates.get().length
             + sourceControlUI.trackedGroup.resourceStates.get().length
@@ -223,8 +223,7 @@ export function createRepository(
     const eventuallyUpdateWhenIdleAndWait = debounce(updateWhenIdleAndWait, 1000);
 
     function onFileChangeHandler(_uri: Uri): void {
-        const config = workspace.getConfiguration("git");
-        const autorefresh = config.get<boolean>("autorefresh");
+        const autorefresh = config.autoRefresh();
 
         if (!autorefresh) {
             return;
@@ -287,8 +286,7 @@ export function createRepository(
     )(updateModelState, null, disposables);
 
     const updateInputBoxVisibility = (): void => {
-        const config = workspace.getConfiguration("git", rootUri);
-        sourceControlUI.sourceControl.inputBox.visible = config.get<boolean>("showCommitInput", true);
+        sourceControlUI.sourceControl.inputBox.visible = config.showCommitInput(rootUri);
     };
 
     const onConfigListenerForInputBoxVisibility = filterEvent(
@@ -644,9 +642,7 @@ export function createRepository(
     const onSuccessfulPush = filterEvent(onDidRunOperation, e => e.operation === Operation.Push && !e.error);
     onSuccessfulPush(
         () => {
-            const gitConfig = workspace.getConfiguration("git");
-
-            if (gitConfig.get<boolean>("showPushSuccessNotification")) {
+            if (config.showPushSuccessNotification()) {
                 window.showInformationMessage(i18n.Translations.pushSuccess());
             }
         },

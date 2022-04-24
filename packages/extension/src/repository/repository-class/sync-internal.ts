@@ -1,11 +1,12 @@
 /* eslint-disable sort-keys */
-import { ProgressLocation, ProgressOptions, Uri, window, workspace } from "vscode";
+import { ProgressLocation, ProgressOptions, Uri, window } from "vscode";
 import type { Branch, Remote } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import * as i18n from "../../i18n/mod.js";
 import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import { fromCancellationToken } from "../../util/abort-signal-adapters.js";
+import * as config from "../../util/config.js";
 import { Operation } from "../Operations.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
@@ -41,11 +42,11 @@ export async function syncInternal(
             sourceControlUI,
             repository,
             async () => {
-                const config = workspace.getConfiguration("git", Uri.file(repoRoot));
-                const fetchOnPull = config.get<boolean>("fetchOnPull");
-                const tags = config.get<boolean>("pullTags");
-                const followTags = config.get<boolean>("followTagsWhenSync");
-                const supportCancellation = config.get<boolean>("supportCancellation");
+                const repositoryUri = Uri.file(repoRoot);
+                const fetchOnPull = config.fetchOnPull(repositoryUri);
+                const tags = config.pullTags(repositoryUri);
+                const followTags = config.followTagsWhenSync(repositoryUri);
+                const supportCancellation = config.supportCancellation(repositoryUri);
 
                 const fn = async (abortSignal?: AbortSignal): Promise<void> => {
                     // When fetchOnPull is enabled, fetch all branches when pulling

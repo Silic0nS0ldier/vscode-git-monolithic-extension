@@ -1,7 +1,8 @@
-import { Uri, workspace } from "vscode";
+import { Uri } from "vscode";
 import type { Branch } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
+import * as config from "../../util/config.js";
 import { Operation } from "../Operations.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { maybeAutoStash } from "./maybe-auto-stash.js";
@@ -24,9 +25,9 @@ export async function pullFrom(
             sourceControlUI,
             repository,
             async () => {
-                const config = workspace.getConfiguration("git", Uri.file(repoRoot));
-                const fetchOnPull = config.get<boolean>("fetchOnPull");
-                const tags = config.get<boolean>("pullTags");
+                const repositoryUri = Uri.file(repoRoot);
+                const fetchOnPull = config.fetchOnPull(repositoryUri);
+                const tags = config.pullTags(repositoryUri);
 
                 // When fetchOnPull is enabled, fetch all branches when pulling
                 if (fetchOnPull) {

@@ -1,6 +1,7 @@
-import { window, workspace } from "vscode";
+import { window } from "vscode";
 import type { Repository } from "../../git.js";
 import * as i18n from "../../i18n/mod.js";
+import * as config from "../../util/config.js";
 import { Operation } from "../Operations.js";
 import type { RunFn } from "./run.js";
 
@@ -9,8 +10,7 @@ export async function checkIfMaybeRebased(
     repository: Repository,
     currentBranch?: string,
 ): Promise<boolean> {
-    const config = workspace.getConfiguration("git");
-    const shouldIgnore = config.get<boolean>("ignoreRebaseWarning") === true;
+    const shouldIgnore = config.ignoreRebaseWarning();
 
     if (shouldIgnore) {
         return true;
@@ -54,7 +54,7 @@ export async function checkIfMaybeRebased(
     }
 
     if (result === always) {
-        await config.update("ignoreRebaseWarning", true, true);
+        await config.legacy().update("ignoreRebaseWarning", true, true);
 
         return true;
     }
