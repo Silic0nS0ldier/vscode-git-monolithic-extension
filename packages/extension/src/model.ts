@@ -46,6 +46,7 @@ import * as i18n from "./i18n/mod.js";
 import { dispose, toDisposable } from "./util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "./util/events.js";
 import { isDescendant, pathEquals } from "./util/paths.js";
+import * as config from "./util/config.js";
 
 class RepositoryPick implements QuickPickItem {
     get label(): string {
@@ -188,8 +189,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
      * for git repositories.
      */
     async #scanWorkspaceFolders(): Promise<void> {
-        const config = workspace.getConfiguration("git");
-        const autoRepositoryDetection = config.get<boolean | "subFolders" | "openEditors">("autoRepositoryDetection");
+        const autoRepositoryDetection = config.autoRepositoryDetection();
 
         if (autoRepositoryDetection !== true && autoRepositoryDetection !== "subFolders") {
             return;
@@ -200,9 +200,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             const children = await new Promise<string[]>((c, e) => fs.readdir(root, (err, r) => err ? e(err) : c(r)));
             const subfolders = new Set(children.filter(child => child !== ".git").map(child => path.join(root, child)));
 
-            const scanPaths = (workspace.isTrusted
-                ? workspace.getConfiguration("git", folder.uri)
-                : config).get<string[]>("scanRepositories") || [];
+            const scanPaths = config.scanRepositories(folder.uri);
             for (const scanPath of scanPaths) {
                 if (scanPath !== ".git") {
                     continue;
@@ -230,8 +228,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             return;
         }
 
-        const config = workspace.getConfiguration("git");
-        const autoRepositoryDetection = config.get<boolean | "subFolders" | "openEditors">("autoRepositoryDetection");
+        const autoRepositoryDetection = config.autoRepositoryDetection();
 
         if (autoRepositoryDetection === false) {
             return;
@@ -293,8 +290,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             return;
         }
 
-        const config = workspace.getConfiguration("git");
-        const autoRepositoryDetection = config.get<boolean | "subFolders" | "openEditors">("autoRepositoryDetection");
+        const autoRepositoryDetection = config.autoRepositoryDetection();
 
         if (autoRepositoryDetection !== true && autoRepositoryDetection !== "openEditors") {
             return;
