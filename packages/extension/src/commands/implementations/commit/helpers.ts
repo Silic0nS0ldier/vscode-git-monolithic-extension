@@ -1,8 +1,8 @@
 import { Uri, window, workspace } from "vscode";
 import { CommitOptions, Status } from "../../../api/git.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import * as i18n from "../../../i18n/mod.js";
 import { isDescendant, pathEquals } from "../../../util/paths.js";
 import { push, PushType } from "../push/helpers.js";
 import { sync } from "../sync/sync.js";
@@ -193,7 +193,7 @@ export async function commitWithAnyInput(
     opts?: CommitOptions,
 ): Promise<void> {
     const message = repository.sourceControlUI.sourceControl.inputBox.value;
-    const getCommitMessage = async (): Promise<string|undefined> => {
+    const getCommitMessage = async (): Promise<string | undefined> => {
         let _message: string | undefined = message;
 
         if (!_message) {

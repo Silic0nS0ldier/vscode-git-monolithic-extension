@@ -1,8 +1,8 @@
 import * as path from "node:path";
 import { commands, OutputChannel, TextDocumentShowOptions, Uri, window } from "vscode";
+import * as i18n from "../../../../i18n/mod.js";
 import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
-import * as i18n from "../../../../i18n/mod.js";
 import type { ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 

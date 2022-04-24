@@ -1,9 +1,9 @@
 import { OutputChannel, Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
 
@@ -59,9 +59,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
             }
 
             if (untrackedCount > 0) {
-                message = `${message}\n\n${
-                    i18n.Translations.warnUntracked(untrackedCount)
-                }`;
+                message = `${message}\n\n${i18n.Translations.warnUntracked(untrackedCount)}`;
             }
         }
 

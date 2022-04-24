@@ -1,6 +1,6 @@
 import { OutputChannel, QuickPickItem, window } from "vscode";
-import { Log, LogLevel, LogLevelOptions } from "../../logging/log.js";
 import * as i18n from "../../i18n/mod.js";
+import { Log, LogLevel, LogLevelOptions } from "../../logging/log.js";
 import type { ScmCommand } from "../helpers.js";
 
 type LogLevelQuickPickOption = {

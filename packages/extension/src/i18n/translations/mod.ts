@@ -218,7 +218,12 @@ export function pushN(commitsAhead: number, upstreamRemote: string, upstreamName
     );
 }
 
-export function pullPushN(commitsBehind: number, commitsAhead: number, upstreamRemote: string, upstreamName: string): string {
+export function pullPushN(
+    commitsBehind: number,
+    commitsAhead: number,
+    upstreamRemote: string,
+    upstreamName: string,
+): string {
     return localize(
         "pull push n",
         "Pull {0} and push {1} commits between {2}/{3}",
@@ -399,7 +404,7 @@ export function tooManySubmodules(repoRoot: string, submodules: number): string 
         "The '{0}' repository has {1} submodules which won't be opened automatically. You can still open each one individually by opening a file within.",
         repoRoot,
         submodules,
-    )
+    );
 }
 
 export function pickRepo(): string {
@@ -747,7 +752,7 @@ export function proposeOpenInitedRepository(): string {
 }
 
 export function openRepository2(): string {
-    return localize("openrepo", "Open");;
+    return localize("openrepo", "Open");
 }
 
 export function openRepositoryInNewWindow(): string {

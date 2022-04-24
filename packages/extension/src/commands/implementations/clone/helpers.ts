@@ -2,10 +2,10 @@ import * as os from "node:os";
 import { commands, ProgressLocation, Uri, window, workspace } from "vscode";
 import type { Git } from "../../../git.js";
 import { GitError } from "../../../git/error.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
-import * as i18n from "../../../i18n/mod.js";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
 

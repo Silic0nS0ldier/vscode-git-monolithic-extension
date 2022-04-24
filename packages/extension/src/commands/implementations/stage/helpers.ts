@@ -1,9 +1,9 @@
 import { Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import * as i18n from "../../../i18n/mod.js";
 import { grep } from "../../../util/grep.js";
 
 export async function categorizeResourceByResolution(

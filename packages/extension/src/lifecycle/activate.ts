@@ -22,12 +22,12 @@ import { addDecorations } from "../decorationProvider.js";
 import { GitFileSystemProvider } from "../fileSystemProvider.js";
 import { Git } from "../git.js";
 import { findGit, IGit } from "../git/find.js";
+import * as i18n from "../i18n/mod.js";
 import { prettyPrint } from "../logging/pretty-print.js";
 import { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
-import * as i18n from "../i18n/mod.js";
 import { toDisposable } from "../util/disposals.js";
 import { eventToPromise, filterEvent } from "../util/events.js";
 import { isExpectedError } from "../util/is-expected-error.js";
@@ -142,7 +142,11 @@ async function createModel(
     disposables.push(model);
 
     const onRepository = async (): Promise<void> =>
-        void await commands.executeCommand<unknown>("setContext", "gitOpenRepositoryCount", `${model.repositories.length}`);
+        void await commands.executeCommand<unknown>(
+            "setContext",
+            "gitOpenRepositoryCount",
+            `${model.repositories.length}`,
+        );
     model.onDidOpenRepository(onRepository, null, disposables);
     model.onDidCloseRepository(onRepository, null, disposables);
     onRepository();

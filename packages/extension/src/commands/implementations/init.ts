@@ -1,8 +1,8 @@
 import * as os from "node:os";
 import { commands, Uri, window, workspace, WorkspaceFolder } from "vscode";
 import type { Git } from "../../git.js";
-import type { Model } from "../../model.js";
 import * as i18n from "../../i18n/mod.js";
+import type { Model } from "../../model.js";
 import type { ScmCommand } from "../helpers.js";
 
 export function createCommand(

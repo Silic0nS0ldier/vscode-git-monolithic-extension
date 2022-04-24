@@ -1,9 +1,9 @@
 import { Uri, window, workspace } from "vscode";
 import { ForcePushMode, ForcePushModeOptions, GitErrorCodes } from "../../../api/git.js";
 import { GitError } from "../../../git/error.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import * as i18n from "../../../i18n/mod.js";
 import { publish } from "../publish/publish.js";
 import { AddRemoteItem } from "../publish/quick-pick.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";

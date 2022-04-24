@@ -315,7 +315,7 @@ export class Resource implements SourceControlResourceState {
             get original(): Uri {
                 return self.resourceUri;
             },
-            get renameResourceUri(): Uri|undefined {
+            get renameResourceUri(): Uri | undefined {
                 return renameResourceUri_;
             },
             get resourceDecoration(): FileDecoration {
@@ -333,7 +333,7 @@ export class Resource implements SourceControlResourceState {
             get resourceUri(): Uri {
                 return self.resourceUri;
             },
-            get rightUri(): Uri|undefined {
+            get rightUri(): Uri | undefined {
                 return resources()[1];
             },
             get type(): StatusOptions {

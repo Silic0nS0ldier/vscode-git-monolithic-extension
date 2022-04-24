@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 import { Disposable, InputBoxOptions, OutputChannel, Uri, window } from "vscode";
 import type { Credentials, CredentialsProvider } from "./api/git.js";
 import { createIPCServer, IIPCHandler, IIPCServer } from "./ipc/ipcServer.js";
-import { EmptyDisposable, IDisposable, toDisposable } from "./util/disposals.js";
 import * as config from "./util/config.js";
+import { EmptyDisposable, IDisposable, toDisposable } from "./util/disposals.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

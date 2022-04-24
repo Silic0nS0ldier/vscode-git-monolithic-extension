@@ -1,7 +1,7 @@
 import { Uri, window, workspace } from "vscode";
 import type { Stash } from "../../../git/Stash.js";
-import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { isDescendant, pathEquals } from "../../../util/paths.js";
 
 export async function createStash(repository: AbstractRepository, includeUntracked = false): Promise<void> {

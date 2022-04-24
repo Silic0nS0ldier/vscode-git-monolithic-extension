@@ -1,8 +1,8 @@
 import { window } from "vscode";
 import { GitErrorCodes } from "../../../api/git.js";
 import { GitError } from "../../../git/error.js";
-import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import type { ScmCommand } from "../../helpers.js";
 import { promptForBranchName } from "./helpers.js";
 

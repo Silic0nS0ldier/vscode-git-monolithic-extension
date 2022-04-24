@@ -1,8 +1,8 @@
 import { window } from "vscode";
+import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 
 export async function addRemote(

@@ -1,6 +1,6 @@
 import { window, workspace } from "vscode";
-import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { createCheckoutItems } from "../checkout/helpers.js";
 import { HEADItem } from "./quick-pick.js";
 
@@ -14,8 +14,8 @@ export async function promptForBranchName(defaultName?: string, initialValue?: s
                 /^\.|\/\.|\.\.|~|\^|:|\/$|\.lock$|\.lock\/|\\|\*|\s|^\s*$|\.$|\[|\]$/g,
                 branchWhitespaceChar,
             )
-            // TODO Wouldn't this be an empty string?
-            : name;
+            : // TODO Wouldn't this be an empty string?
+                name;
 
     const rawBranchName = defaultName || await window.showInputBox({
         ignoreFocusOut: true,

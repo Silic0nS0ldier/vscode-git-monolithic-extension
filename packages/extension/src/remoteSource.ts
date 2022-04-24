@@ -5,11 +5,11 @@
 
 import { QuickPick, QuickPickItem, window } from "vscode";
 import type { RemoteSource, RemoteSourceProvider } from "./api/git.js";
+import * as i18n from "./i18n/mod.js";
 import { prettyPrint } from "./logging/pretty-print.js";
 import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
-import * as i18n from "./i18n/mod.js";
 
 async function getQuickPickResult<T extends QuickPickItem>(quickpick: QuickPick<T>): Promise<T | undefined> {
     const result = await new Promise<T | undefined>(c => {

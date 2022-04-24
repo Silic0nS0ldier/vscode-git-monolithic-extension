@@ -1,7 +1,7 @@
 import { QuickPickItem, window, workspace } from "vscode";
 import { Ref, RefType } from "../../../api/git.js";
-import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import type { ScmCommand } from "../../helpers.js";
 
 class RebaseItem implements QuickPickItem {

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fs from "node:fs";
-import { EventEmitter, OutputChannel, Uri, Event, Disposable } from "vscode";
+import { Disposable, Event, EventEmitter, OutputChannel, Uri } from "vscode";
 import Watcher from "watcher";
 import type { TargetEvent } from "watcher/dist/enums.js";
 import { prettyPrint } from "../logging/pretty-print.js";

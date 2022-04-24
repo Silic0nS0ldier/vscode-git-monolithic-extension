@@ -1,4 +1,4 @@
-export type ResourceGroupTypeOptions =  "Index" | "Merge" | "Untracked" | "WorkingTree";
+export type ResourceGroupTypeOptions = "Index" | "Merge" | "Untracked" | "WorkingTree";
 export const ResourceGroupType: Record<ResourceGroupTypeOptions, ResourceGroupTypeOptions> = {
     Index: "Index",
     Merge: "Merge",

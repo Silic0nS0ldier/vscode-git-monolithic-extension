@@ -1,7 +1,7 @@
 import * as os from "node:os";
 import { Uri, window } from "vscode";
-import type { Model } from "../../../model.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { Model } from "../../../model.js";
 import type { ScmCommand } from "../../helpers.js";
 
 export function createCommand(

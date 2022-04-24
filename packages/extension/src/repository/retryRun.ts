@@ -1,7 +1,7 @@
 import { GitErrorCodes } from "../api/git.js";
 import { GitError } from "../git/error.js";
-import { Operation, OperationOptions } from "./Operations.js";
 import { timeout } from "../util/timeout.js";
+import { Operation, OperationOptions } from "./Operations.js";
 
 function isOperationRetrySafe(err: GitError, operation: OperationOptions): boolean {
     return (operation === Operation.Pull || operation === Operation.Sync || operation === Operation.Fetch)

@@ -32,6 +32,7 @@ import type {
 } from "./api/git.js";
 import type { Askpass } from "./askpass.js";
 import type { Git } from "./git.js";
+import * as i18n from "./i18n/mod.js";
 import { prettyPrint } from "./logging/pretty-print.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
@@ -42,11 +43,10 @@ import { isAbstractRepository } from "./repository/repository-class/isAbstractRe
 import { createRepository } from "./repository/repository-class/mod.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
 import { fromGitUri } from "./uri.js";
-import * as i18n from "./i18n/mod.js";
+import * as config from "./util/config.js";
 import { dispose, toDisposable } from "./util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "./util/events.js";
 import { isDescendant, pathEquals } from "./util/paths.js";
-import * as config from "./util/config.js";
 
 class RepositoryPick implements QuickPickItem {
     get label(): string {
@@ -464,7 +464,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             picks.unshift(...picks.splice(index, 1));
         }
 
-        const placeHolder = i18n.Translations.pickRepo();;
+        const placeHolder = i18n.Translations.pickRepo();
         const pick = await window.showQuickPick(picks, { placeHolder });
 
         return pick && pick.repository;

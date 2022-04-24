@@ -1,8 +1,8 @@
 import { QuickPickItem, window } from "vscode";
 import { GitErrorCodes } from "../../../api/git.js";
 import { GitError } from "../../../git/error.js";
-import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { isExpectedError } from "../../../util/is-expected-error.js";
 import type { ScmCommand } from "../../helpers.js";
 import { branch } from "../branch/helpers.js";

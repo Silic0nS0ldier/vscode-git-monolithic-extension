@@ -1,7 +1,7 @@
 import { window, workspace } from "vscode";
+import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import * as i18n from "../../../i18n/mod.js";
 import { publish } from "../publish/publish.js";
 
 export async function sync(

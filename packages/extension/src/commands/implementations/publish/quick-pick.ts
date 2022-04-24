@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import type { QuickPickItem } from "vscode";
-import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 
 export class AddRemoteItem implements QuickPickItem {
     #addRemote: (repository: AbstractRepository) => Promise<string | void>;
