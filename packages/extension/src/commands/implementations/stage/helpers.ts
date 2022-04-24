@@ -1,10 +1,9 @@
-import * as path from "node:path";
 import { Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { grep } from "../../../util/grep.js";
 
 export async function categorizeResourceByResolution(
@@ -41,14 +40,10 @@ export async function stageDeletionConflict(repository: AbstractRepository, uri:
     }
 
     if (resource.state.type === Status.DELETED_BY_THEM) {
-        const keepIt = localize("keep ours", "Keep Our Version");
-        const deleteIt = localize("delete", "Delete File");
+        const keepIt = i18n.Translations.keepOurs();
+        const deleteIt = i18n.Translations.allowDeletion();
         const result = await window.showInformationMessage(
-            localize(
-                "deleted by them",
-                "File '{0}' was deleted by them and modified by us.\n\nWhat would you like to do?",
-                path.basename(uri.fsPath),
-            ),
+            i18n.Translations.stageDeletedByThem(uri),
             { modal: true },
             keepIt,
             deleteIt,
@@ -62,14 +57,10 @@ export async function stageDeletionConflict(repository: AbstractRepository, uri:
             throw new Error("Cancelled");
         }
     } else if (resource.state.type === Status.DELETED_BY_US) {
-        const keepIt = localize("keep theirs", "Keep Their Version");
-        const deleteIt = localize("delete", "Delete File");
+        const keepIt = i18n.Translations.keepTheirs();
+        const deleteIt = i18n.Translations.allowDeletion();
         const result = await window.showInformationMessage(
-            localize(
-                "deleted by us",
-                "File '{0}' was deleted by us and modified by them.\n\nWhat would you like to do?",
-                path.basename(uri.fsPath),
-            ),
+            i18n.Translations.stageDeletedByUs(uri),
             { modal: true },
             keepIt,
             deleteIt,

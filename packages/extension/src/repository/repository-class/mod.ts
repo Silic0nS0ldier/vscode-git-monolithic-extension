@@ -273,7 +273,7 @@ export function createRepository(
 
     function updateInputBoxPlaceholder(): void {
         const branchName = headShortName();
-        sourceControlUI.sourceControl.inputBox.placeholder = i18n.Translations.commitMessage(branchName);
+        sourceControlUI.sourceControl.inputBox.placeholder = i18n.Translations.commitMessageForCommand(branchName);
     }
 
     updateInputBoxPlaceholder();

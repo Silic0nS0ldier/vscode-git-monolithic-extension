@@ -3,7 +3,7 @@ import { ApiRepository } from "../../../api/api1.js";
 import type { RemoteSourceProvider } from "../../../api/git.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
 import { AddRemoteItem } from "./quick-pick.js";
@@ -17,7 +17,7 @@ export async function publish(model: Model, repository: AbstractRepository): Pro
 
         if (providers.length === 0) {
             window.showWarningMessage(
-                localize("no remotes to publish", "Your repository has no remotes configured to publish to."),
+                i18n.Translations.noRemotesToPublish(),
             );
             return;
         }
@@ -31,14 +31,10 @@ export async function publish(model: Model, repository: AbstractRepository): Pro
                 .map(provider => ({
                     alwaysShow: true,
                     label: (provider.icon ? `$(${provider.icon}) ` : "")
-                        + localize("publish to", "Publish to {0}", provider.name),
+                        + i18n.Translations.publishTo(provider.name),
                     provider,
                 }));
-            const placeHolder = localize(
-                "pick provider",
-                "Pick a provider to publish the branch '{0}' to:",
-                branchName,
-            );
+            const placeHolder = i18n.Translations.pickRemote(branchName);
             const choice = await window.showQuickPick(picks, { placeHolder });
 
             if (!choice) {
@@ -63,7 +59,7 @@ export async function publish(model: Model, repository: AbstractRepository): Pro
 
     const addRemote = new AddRemoteItem(repository => addRemoteFn(model, repository));
     const picks = [...repository.remotes.map(r => ({ description: r.pushUrl, label: r.name })), addRemote];
-    const placeHolder = localize("pick remote", "Pick a remote to publish the branch '{0}' to:", branchName);
+    const placeHolder = i18n.Translations.pickRemote(branchName);
     const choice = await window.showQuickPick(picks, { placeHolder });
 
     if (!choice) {

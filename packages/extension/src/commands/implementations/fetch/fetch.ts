@@ -1,13 +1,13 @@
 import { window } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function fetch(repository: AbstractRepository): Promise<void> {
         if (repository.remotes.length === 0) {
             window.showWarningMessage(
-                localize("no remotes to fetch", "This repository has no remotes configured to fetch from."),
+                i18n.Translations.noRemotesToFetch(),
             );
             return;
         }

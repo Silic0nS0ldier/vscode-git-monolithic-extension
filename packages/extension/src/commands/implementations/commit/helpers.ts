@@ -1,9 +1,8 @@
-import * as path from "node:path";
 import { Uri, window, workspace } from "vscode";
 import { CommitOptions, Status } from "../../../api/git.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { isDescendant, pathEquals } from "../../../util/paths.js";
 import { push, PushType } from "../push/helpers.js";
 import { sync } from "../sync/sync.js";
@@ -46,19 +45,9 @@ async function smartCommit(
         }
 
         if (documents.length > 0) {
-            const message = documents.length === 1
-                ? localize(
-                    "unsaved files single",
-                    "The following file has unsaved changes which won't be included in the commit if you proceed: {0}.\n\nWould you like to save it before committing?",
-                    path.basename(documents[0].uri.fsPath),
-                )
-                : localize(
-                    "unsaved files",
-                    "There are {0} unsaved files.\n\nWould you like to save them before committing?",
-                    documents.length,
-                );
-            const saveAndCommit = localize("save and commit", "Save All & Commit");
-            const commit = localize("commit", "Commit Staged Changes");
+            const message = i18n.Translations.unsavedCommitFiles(documents);
+            const saveAndCommit = i18n.Translations.saveAndCommit();
+            const commit = i18n.Translations.commitStaged();
             const pick = await window.showWarningMessage(message, { modal: true }, saveAndCommit, commit);
 
             if (pick === saveAndCommit) {
@@ -89,13 +78,10 @@ async function smartCommit(
         }
 
         // prompt the user if we want to commit all or not
-        const message = localize(
-            "no staged changes",
-            "There are no staged changes to commit.\n\nWould you like to stage all your changes and commit them directly?",
-        );
-        const yes = localize("yes", "Yes");
-        const always = localize("always", "Always");
-        const never = localize("never", "Never");
+        const message = i18n.Translations.noStagedChanges();
+        const yes = i18n.Translations.yes();
+        const always = i18n.Translations.always();
+        const never = i18n.Translations.never();
         const pick = await window.showWarningMessage(message, { modal: true }, yes, always, never);
 
         if (pick === always) {
@@ -133,9 +119,9 @@ async function smartCommit(
         && !normalisedOpts.amend
         && !normalisedOpts.empty
     ) {
-        const commitAnyway = localize("commit anyway", "Create Empty Commit");
+        const commitAnyway = i18n.Translations.commitAnyway();
         const answer = await window.showInformationMessage(
-            localize("no changes", "There are no changes to commit."),
+            i18n.Translations.noChanges(),
             commitAnyway,
         );
 
@@ -149,21 +135,15 @@ async function smartCommit(
     if (normalisedOpts.noVerify) {
         if (!config.get<boolean>("allowNoVerifyCommit")) {
             await window.showErrorMessage(
-                localize(
-                    "no verify commit not allowed",
-                    "Commits without verification are not allowed, please enable them with the 'git.allowNoVerifyCommit' setting.",
-                ),
+                i18n.Translations.commitRequiresVerification(),
             );
             return false;
         }
 
         if (config.get<boolean>("confirmNoVerifyCommit")) {
-            const message = localize(
-                "confirm no verify commit",
-                "You are about to commit your changes without verification, this skips pre-commit hooks and can be undesirable.\n\nAre you sure to continue?",
-            );
-            const yes = localize("ok", "OK");
-            const neverAgain = localize("never ask again", "OK, Don't Ask Again");
+            const message = i18n.Translations.confirmCommitWithoutVerification();
+            const yes = i18n.Translations.ok();
+            const neverAgain = i18n.Translations.neverAgain3();
             const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
             if (pick === neverAgain) {
@@ -224,18 +204,12 @@ export async function commitWithAnyInput(
             }
 
             const branchName = repository.headShortName;
-            let placeHolder: string;
-
-            if (branchName) {
-                placeHolder = localize("commitMessageWithHeadLabel2", "Message (commit on '{0}')", branchName);
-            } else {
-                placeHolder = localize("commit message", "Commit message");
-            }
+            let placeHolder = i18n.Translations.commitMessage(branchName);
 
             _message = await window.showInputBox({
                 ignoreFocusOut: true,
                 placeHolder,
-                prompt: localize("provide commit message", "Please provide a commit message"),
+                prompt: i18n.Translations.provideCommitMessage(),
                 value,
             });
         }
@@ -260,9 +234,9 @@ export async function commitEmpty(
     const shouldPrompt = config.get<boolean>("confirmEmptyCommits") === true;
 
     if (shouldPrompt) {
-        const message = localize("confirm emtpy commit", "Are you sure you want to create an empty commit?");
-        const yes = localize("yes", "Yes");
-        const neverAgain = localize("yes never again", "Yes, Don't Show Again");
+        const message = i18n.Translations.confirmEmptyCommit();
+        const yes = i18n.Translations.yes();
+        const neverAgain = i18n.Translations.yesNeverAgain();
         const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
         if (pick === neverAgain) {

@@ -1,8 +1,7 @@
-import * as path from "node:path";
 import { Uri, window, workspace } from "vscode";
 import type { Stash } from "../../../git/Stash.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { isDescendant, pathEquals } from "../../../util/paths.js";
 
 export async function createStash(repository: AbstractRepository, includeUntracked = false): Promise<void> {
@@ -11,7 +10,7 @@ export async function createStash(repository: AbstractRepository, includeUntrack
     const noStagedChanges = repository.sourceControlUI.stagedGroup.resourceStates.get().length === 0;
 
     if (noUnstagedChanges && noStagedChanges) {
-        window.showInformationMessage(localize("no changes stash", "There are no changes to stash."));
+        window.showInformationMessage(i18n.Translations.noChangesStash());
         return;
     }
 
@@ -35,19 +34,9 @@ export async function createStash(repository: AbstractRepository, includeUntrack
         }
 
         if (documents.length > 0) {
-            const message = documents.length === 1
-                ? localize(
-                    "unsaved stash files single",
-                    "The following file has unsaved changes which won't be included in the stash if you proceed: {0}.\n\nWould you like to save it before stashing?",
-                    path.basename(documents[0].uri.fsPath),
-                )
-                : localize(
-                    "unsaved stash files",
-                    "There are {0} unsaved files.\n\nWould you like to save them before stashing?",
-                    documents.length,
-                );
-            const saveAndStash = localize("save and stash", "Save All & Stash");
-            const stash = localize("stash", "Stash Anyway");
+            const message = i18n.Translations.unsavedStashFiles(documents);
+            const saveAndStash = i18n.Translations.saveAndStash();
+            const stash = i18n.Translations.stash();
             const pick = await window.showWarningMessage(message, { modal: true }, saveAndStash, stash);
 
             if (pick === saveAndStash) {
@@ -70,8 +59,8 @@ export async function createStash(repository: AbstractRepository, includeUntrack
     }
 
     message = await window.showInputBox({
-        placeHolder: localize("stash message", "Stash message"),
-        prompt: localize("provide stash message", "Optionally provide a stash message"),
+        placeHolder: i18n.Translations.stashMessage(),
+        prompt: i18n.Translations.provideStashMessage(),
         value: message,
     });
 
@@ -86,7 +75,7 @@ export async function pickStash(repository: AbstractRepository, placeHolder: str
     const stashes = await repository.getStashes();
 
     if (stashes.length === 0) {
-        window.showInformationMessage(localize("no stashes", "There are no stashes in the repository."));
+        window.showInformationMessage(i18n.Translations.noStashes());
         return;
     }
 

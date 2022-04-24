@@ -2,7 +2,7 @@ import { window } from "vscode";
 import type { Model } from "../../../model.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 
 export async function addRemote(
@@ -10,8 +10,8 @@ export async function addRemote(
     repository: AbstractRepository,
 ): Promise<string | void> {
     const url = await pickRemoteSource(model, {
-        providerLabel: provider => localize("addfrom", "Add remote from {0}", provider.name),
-        urlLabel: localize("addFrom", "Add remote from URL"),
+        providerLabel: provider => i18n.Translations.addRemoteFrom(provider.name),
+        urlLabel: i18n.Translations.addRemoteFromLabel(),
     });
 
     if (!url) {
@@ -20,13 +20,13 @@ export async function addRemote(
 
     const resultName = await window.showInputBox({
         ignoreFocusOut: true,
-        placeHolder: localize("remote name", "Remote name"),
-        prompt: localize("provide remote name", "Please provide a remote name"),
+        placeHolder: i18n.Translations.remoteName(),
+        prompt: i18n.Translations.provideRemoteName(),
         validateInput: (name: string) => {
             if (!sanitizeRemoteName(name)) {
-                return localize("remote name format invalid", "Remote name format invalid");
+                return i18n.Translations.remoteNameFormatInvalid();
             } else if (repository.remotes.find(r => r.name === name)) {
-                return localize("remote already exists", "Remote '{0}' already exists.", name);
+                return i18n.Translations.remoteAlreadyExists(name);
             }
 
             return null;

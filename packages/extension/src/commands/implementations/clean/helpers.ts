@@ -1,19 +1,14 @@
-import * as path from "node:path";
 import { window } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../../../repository/Resource.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 
 export async function cleanUntrackedChanges(
     repository: AbstractRepository,
     resources: readonly Resource[],
 ): Promise<void> {
-    const message = localize(
-        "confirm delete multiple",
-        "Are you sure you want to DELETE {0} files?\nThis is IRREVERSIBLE!\nThese files will be FOREVER LOST if you proceed.",
-        resources.length,
-    );
-    const yes = localize("delete files", "Delete Files");
+    const message = i18n.Translations.confirmDelete(resources);
+    const yes = i18n.Translations.deleteFiles();
     const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
     if (pick !== yes) {
@@ -24,12 +19,8 @@ export async function cleanUntrackedChanges(
 }
 
 export async function cleanUntrackedChange(repository: AbstractRepository, resource: Resource): Promise<void> {
-    const message = localize(
-        "confirm delete",
-        "Are you sure you want to DELETE {0}?\nThis is IRREVERSIBLE!\nThis file will be FOREVER LOST if you proceed.",
-        path.basename(resource.state.resourceUri.fsPath),
-    );
-    const yes = localize("delete file", "Delete file");
+    const message = i18n.Translations.confirmDelete([resource]);
+    const yes = i18n.Translations.deleteFile();
     const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
     if (pick !== yes) {
@@ -43,20 +34,8 @@ export async function cleanTrackedChanges(
     repository: AbstractRepository,
     resources: readonly Resource[],
 ): Promise<void> {
-    const message = resources.length === 1
-        ? localize(
-            "confirm discard all single",
-            "Are you sure you want to discard changes in {0}?",
-            path.basename(resources[0].state.resourceUri.fsPath),
-        )
-        : localize(
-            "confirm discard all",
-            "Are you sure you want to discard ALL changes in {0} files?\nThis is IRREVERSIBLE!\nYour current working set will be FOREVER LOST if you proceed.",
-            resources.length,
-        );
-    const yes = resources.length === 1
-        ? localize("discardAll multiple", "Discard 1 File")
-        : localize("discardAll", "Discard All {0} Files", resources.length);
+    const message = i18n.Translations.cleanTrackedChanges(resources);
+    const yes = i18n.Translations.discardTracked(resources);
     const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
     if (pick !== yes) {

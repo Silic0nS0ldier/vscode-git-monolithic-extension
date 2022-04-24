@@ -1,14 +1,14 @@
 import { window } from "vscode";
 import type { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../util.js";
+import * as i18n from "../../i18n/mod.js";
 import type { ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function cherryPick(repository: AbstractRepository): Promise<void> {
         const hash = await window.showInputBox({
             ignoreFocusOut: true,
-            placeHolder: localize("commit hash", "Commit Hash"),
-            prompt: localize("provide commit hash", "Please provide the commit hash"),
+            placeHolder: i18n.Translations.commitHash(),
+            prompt: i18n.Translations.provideCommitHash(),
         });
 
         if (!hash) {

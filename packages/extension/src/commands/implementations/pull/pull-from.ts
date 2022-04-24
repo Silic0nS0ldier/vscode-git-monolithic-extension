@@ -1,6 +1,6 @@
 import { window } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
@@ -9,7 +9,7 @@ export function createCommand(): ScmCommand {
 
         if (remotes.length === 0) {
             window.showWarningMessage(
-                localize("no remotes to pull", "Your repository has no remotes configured to pull from."),
+                i18n.Translations.noRemotesToPull(),
             );
             return;
         }
@@ -18,7 +18,7 @@ export function createCommand(): ScmCommand {
             description: r.fetchUrl!,
             label: r.name,
         }));
-        const placeHolder = localize("pick remote pull repo", "Pick a remote to pull the branch from");
+        const placeHolder = i18n.Translations.pickRemotePull();
         const remotePick = await window.showQuickPick(remotePicks, { placeHolder });
 
         if (!remotePick) {
@@ -28,7 +28,7 @@ export function createCommand(): ScmCommand {
         const remoteRefs = repository.refs;
         const remoteRefsFiltered = remoteRefs.filter(r => (r.remote === remotePick.label));
         const branchPicks = remoteRefsFiltered.map(r => ({ label: r.name! }));
-        const branchPlaceHolder = localize("pick branch pull", "Pick a branch to pull from");
+        const branchPlaceHolder = i18n.Translations.pickBranchPull();
         const branchPick = await window.showQuickPick(branchPicks, { placeHolder: branchPlaceHolder });
 
         if (!branchPick) {

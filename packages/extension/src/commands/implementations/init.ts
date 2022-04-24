@@ -2,7 +2,7 @@ import * as os from "node:os";
 import { commands, Uri, window, workspace, WorkspaceFolder } from "vscode";
 import type { Git } from "../../git.js";
 import type { Model } from "../../model.js";
-import { localize } from "../../util.js";
+import * as i18n from "../../i18n/mod.js";
 import type { ScmCommand } from "../helpers.js";
 
 export function createCommand(
@@ -18,8 +18,8 @@ export function createCommand(
                 repositoryPath = workspace.workspaceFolders[0].uri.fsPath;
                 askToOpen = false;
             } else {
-                const placeHolder = localize("init", "Pick workspace folder to initialize git repo in");
-                const pick = { label: localize("choose", "Choose Folder...") };
+                const placeHolder = i18n.Translations.initRepository();
+                const pick = { label: i18n.Translations.chooseFolder() };
                 const items: { label: string; folder?: WorkspaceFolder }[] = [
                     ...workspace.workspaceFolders.map(folder => ({
                         description: folder.uri.fsPath,
@@ -50,7 +50,7 @@ export function createCommand(
                 canSelectFolders: true,
                 canSelectMany: false,
                 defaultUri,
-                openLabel: localize("init repo", "Initialize Repository"),
+                openLabel: i18n.Translations.initRepository2(),
             });
 
             if (!result || result.length === 0) {
@@ -60,13 +60,9 @@ export function createCommand(
             const uri = result[0];
 
             if (homeUri.toString().startsWith(uri.toString())) {
-                const yes = localize("create repo", "Initialize Repository");
+                const yes = i18n.Translations.initRepository2();
                 const answer = await window.showWarningMessage(
-                    localize(
-                        "are you sure",
-                        "This will create a Git repository in '{0}'. Are you sure you want to continue?",
-                        uri.fsPath,
-                    ),
+                    i18n.Translations.initRepositoryConfirm(uri),
                     yes,
                 );
 
@@ -86,21 +82,19 @@ export function createCommand(
 
         await git.init(repositoryPath);
 
-        let message = localize("proposeopen init", "Would you like to open the initialized repository?");
-        const open = localize("openrepo", "Open");
-        const openNewWindow = localize("openreponew", "Open in New Window");
+        // TODO Logic flow here seems flawed
+        let message = i18n.Translations.proposeOpenInitedRepository();
+        const open = i18n.Translations.openRepository2();
+        const openNewWindow = i18n.Translations.openRepositoryInNewWindow();
         const choices = [open, openNewWindow];
 
         if (!askToOpen) {
             return;
         }
 
-        const addToWorkspace = localize("add", "Add to Workspace");
+        const addToWorkspace = i18n.Translations.addToWorkspace();
         if (workspace.workspaceFolders) {
-            message = localize(
-                "proposeopen2 init",
-                "Would you like to open the initialized repository, or add it to the current workspace?",
-            );
+            message = i18n.Translations.proposeOpenInitedRepository2();
             choices.push(addToWorkspace);
         }
 

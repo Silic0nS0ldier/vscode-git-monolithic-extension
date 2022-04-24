@@ -1,6 +1,6 @@
 import { OutputChannel, QuickPickItem, window } from "vscode";
 import { Log, LogLevel, LogLevelOptions } from "../../logging/log.js";
-import { localize } from "../../util.js";
+import * as i18n from "../../i18n/mod.js";
 import type { ScmCommand } from "../helpers.js";
 
 type LogLevelQuickPickOption = {
@@ -12,7 +12,7 @@ export function createCommand(
 ): ScmCommand {
     async function setLogLevel(): Promise<void> {
         const createItem = (logLevel: LogLevelOptions): LogLevelQuickPickOption => ({
-            description: Log.logLevel === logLevel ? localize("current", "Current") : undefined,
+            description: Log.logLevel === logLevel ? i18n.Translations.current() : undefined,
             label: LogLevel[logLevel],
             logLevel,
         });
@@ -28,7 +28,7 @@ export function createCommand(
         ];
 
         const choice = await window.showQuickPick(items, {
-            placeHolder: localize("select log level", "Select log level"),
+            placeHolder: i18n.Translations.selectLogLevel(),
         });
 
         if (!choice) {
@@ -36,7 +36,7 @@ export function createCommand(
         }
 
         Log.logLevel = choice.logLevel;
-        outputChannel.appendLine(localize("changed", "Log level changed to: {0}", LogLevel[Log.logLevel]));
+        outputChannel.appendLine(i18n.Translations.logLevelChanged(Log.logLevel));
     }
 
     return {

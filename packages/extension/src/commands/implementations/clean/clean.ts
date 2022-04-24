@@ -1,10 +1,9 @@
-import * as path from "node:path";
 import { OutputChannel, Uri, window } from "vscode";
 import { Status } from "../../../api/git.js";
 import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
 
@@ -37,55 +36,31 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
 
         const untrackedCount = scmResources.reduce((s, r) => s + (r.state.type === Status.UNTRACKED ? 1 : 0), 0);
         let message: string;
-        let yes = localize("discard", "Discard Changes");
+        let yes = i18n.Translations.discard();
 
         if (scmResources.length === 1) {
             if (untrackedCount > 0) {
-                message = localize(
-                    "confirm delete",
-                    "Are you sure you want to DELETE {0}?\nThis is IRREVERSIBLE!\nThis file will be FOREVER LOST if you proceed.",
-                    path.basename(scmResources[0].state.resourceUri.fsPath),
-                );
-                yes = localize("delete file", "Delete file");
+                message = i18n.Translations.confirmDelete(scmResources);
+                yes = i18n.Translations.deleteFile();
             } else {
                 if (scmResources[0].state.type === Status.DELETED) {
-                    yes = localize("restore file", "Restore file");
-                    message = localize(
-                        "confirm restore",
-                        "Are you sure you want to restore {0}?",
-                        path.basename(scmResources[0].state.resourceUri.fsPath),
-                    );
+                    yes = i18n.Translations.restoreFile();
+                    message = i18n.Translations.confirmRestoreFiles(scmResources);
                 } else {
-                    message = localize(
-                        "confirm discard",
-                        "Are you sure you want to discard changes in {0}?",
-                        path.basename(scmResources[0].state.resourceUri.fsPath),
-                    );
+                    message = i18n.Translations.confirmDiscard(scmResources);
                 }
             }
         } else {
             if (scmResources.every(resource => resource.state.type === Status.DELETED)) {
-                yes = localize("restore files", "Restore files");
-                message = localize(
-                    "confirm restore multiple",
-                    "Are you sure you want to restore {0} files?",
-                    scmResources.length,
-                );
+                yes = i18n.Translations.restoreFiles();
+                message = i18n.Translations.confirmRestoreFiles(scmResources);
             } else {
-                message = localize(
-                    "confirm discard multiple",
-                    "Are you sure you want to discard changes in {0} files?",
-                    scmResources.length,
-                );
+                message = i18n.Translations.confirmDiscard(scmResources);
             }
 
             if (untrackedCount > 0) {
                 message = `${message}\n\n${
-                    localize(
-                        "warn untracked",
-                        "This will DELETE {0} untracked files!\nThis is IRREVERSIBLE!\nThese files will be FOREVER LOST.",
-                        untrackedCount,
-                    )
+                    i18n.Translations.warnUntracked(untrackedCount)
                 }`;
             }
         }

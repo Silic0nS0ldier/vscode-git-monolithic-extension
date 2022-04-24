@@ -1,11 +1,11 @@
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 import { pickStash } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
     async function stashApply(repository: AbstractRepository): Promise<void> {
-        const placeHolder = localize("pick stash to apply", "Pick a stash to apply");
+        const placeHolder = i18n.Translations.pickStashToApply();
         const stash = await pickStash(repository, placeHolder);
 
         if (!stash) {

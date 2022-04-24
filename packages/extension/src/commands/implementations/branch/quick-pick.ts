@@ -1,11 +1,11 @@
 /* eslint-disable class-methods-use-this */
 import type { QuickPickItem } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 
 export class CreateBranchItem implements QuickPickItem {
     get label(): string {
-        return "$(plus) " + localize("create branch", "Create new branch...");
+        return "$(plus) " + i18n.Translations.createBranch();
     }
     get description(): string {
         return "";
@@ -17,7 +17,7 @@ export class CreateBranchItem implements QuickPickItem {
 
 export class CreateBranchFromItem implements QuickPickItem {
     get label(): string {
-        return "$(plus) " + localize("create branch from", "Create new branch from...");
+        return "$(plus) " + i18n.Translations.createBranchFrom();
     }
     get description(): string {
         return "";
@@ -37,7 +37,7 @@ export class HEADItem implements QuickPickItem {
         return "HEAD";
     }
     get description(): string {
-        return (this.#repository.HEAD && this.#repository.HEAD.commit || "").substr(0, 8);
+        return (this.#repository.HEAD?.commit || "").substr(0, 8);
     }
     get alwaysShow(): boolean {
         return true;

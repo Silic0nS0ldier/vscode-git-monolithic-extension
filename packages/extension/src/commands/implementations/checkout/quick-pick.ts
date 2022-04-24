@@ -2,7 +2,7 @@
 import type { QuickPickItem } from "vscode";
 import type { Ref } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 
 export class CheckoutItem implements QuickPickItem {
     protected get shortCommit(): string {
@@ -30,13 +30,13 @@ export class CheckoutItem implements QuickPickItem {
 
 export class CheckoutTagItem extends CheckoutItem {
     override get description(): string {
-        return localize("tag at", "Tag at {0}", this.shortCommit);
+        return i18n.Translations.tagAt(this.shortCommit);
     }
 }
 
 export class CheckoutRemoteHeadItem extends CheckoutItem {
     override get description(): string {
-        return localize("remote branch at", "Remote branch at {0}", this.shortCommit);
+        return i18n.Translations.remoteBranchAt(this.shortCommit);
     }
 
     override async run(repository: AbstractRepository, opts?: { detached?: boolean }): Promise<void> {
@@ -56,7 +56,7 @@ export class CheckoutRemoteHeadItem extends CheckoutItem {
 
 export class CheckoutDetachedItem implements QuickPickItem {
     get label(): string {
-        return "$(debug-disconnect) " + localize("checkout detached", "Checkout detached...");
+        return "$(debug-disconnect) " + i18n.Translations.checkoutDetached();
     }
     get description(): string {
         return "";

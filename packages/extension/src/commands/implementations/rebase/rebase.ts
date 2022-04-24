@@ -1,7 +1,7 @@
 import { QuickPickItem, window, workspace } from "vscode";
 import { Ref, RefType } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 
 class RebaseItem implements QuickPickItem {
@@ -47,7 +47,7 @@ export function createCommand(): ScmCommand {
             }
         }
 
-        const placeHolder = localize("select a branch to rebase onto", "Select a branch to rebase onto");
+        const placeHolder = i18n.Translations.selectRebaseTarget();
         const choice = await window.showQuickPick<RebaseItem>(picks, { placeHolder });
 
         if (!choice) {

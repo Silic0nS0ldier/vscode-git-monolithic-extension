@@ -1,6 +1,6 @@
 import { window } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
@@ -8,12 +8,12 @@ export function createCommand(): ScmCommand {
         const remotes = repository.remotes;
 
         if (remotes.length === 0) {
-            window.showErrorMessage(localize("no remotes added", "Your repository has no remotes."));
+            window.showErrorMessage(i18n.Translations.noRemotesAdded());
             return;
         }
 
         const picks = remotes.map(r => r.name);
-        const placeHolder = localize("remove remote", "Pick a remote to remove");
+        const placeHolder = i18n.Translations.removeRemote();
 
         const remoteName = await window.showQuickPick(picks, { placeHolder });
 

@@ -1,8 +1,7 @@
-import * as path from "node:path";
 import { window } from "vscode";
 import { Status } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 import { cleanTrackedChanges, cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
 
@@ -27,30 +26,16 @@ export async function cleanAll(repository: AbstractRepository): Promise<void> {
     } else if (trackedResources.length === 0) {
         await cleanUntrackedChanges(repository, resources);
     } else { // resources.length > 1 && untrackedResources.length > 0 && trackedResources.length > 0
-        const untrackedMessage = untrackedResources.length === 1
-            ? localize(
-                "there are untracked files single",
-                "The following untracked file will be DELETED FROM DISK if discarded: {0}.",
-                path.basename(untrackedResources[0].state.resourceUri.fsPath),
-            )
-            : localize(
-                "there are untracked files",
-                "There are {0} untracked files which will be DELETED FROM DISK if discarded.",
-                untrackedResources.length,
-            );
+        const untrackedMessage = i18n.Translations.warnUntracked2(untrackedResources);
 
-        const message = localize(
-            "confirm discard all 2",
-            "{0}\n\nThis is IRREVERSIBLE, your current working set will be FOREVER LOST.",
+        const message = i18n.Translations.confirmDiscard2(
             untrackedMessage,
-            resources.length,
+            resources,
         );
 
-        const yesTracked = trackedResources.length === 1
-            ? localize("yes discard tracked", "Discard 1 Tracked File", trackedResources.length)
-            : localize("yes discard tracked multiple", "Discard {0} Tracked Files", trackedResources.length);
+        const yesTracked = i18n.Translations.confirmDiscardTracked(trackedResources);
 
-        const yesAll = localize("discardAll", "Discard All {0} Files", resources.length);
+        const yesAll = i18n.Translations.discardAll(resources);
         const pick = await window.showWarningMessage(message, { modal: true }, yesTracked, yesAll);
 
         if (pick === yesTracked) {

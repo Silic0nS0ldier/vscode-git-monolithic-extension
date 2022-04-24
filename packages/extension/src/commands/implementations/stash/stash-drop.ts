@@ -1,12 +1,12 @@
 import { window } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 import { pickStash } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
     async function stashDrop(repository: AbstractRepository): Promise<void> {
-        const placeHolder = localize("pick stash to drop", "Pick a stash to drop");
+        const placeHolder = i18n.Translations.pickStashToDrop();
         const stash = await pickStash(repository, placeHolder);
 
         if (!stash) {
@@ -14,9 +14,9 @@ export function createCommand(): ScmCommand {
         }
 
         // request confirmation for the operation
-        const yes = localize("yes", "Yes");
+        const yes = i18n.Translations.yes();
         const result = await window.showWarningMessage(
-            localize("sure drop", "Are you sure you want to drop the stash: {0}?", stash.description),
+            i18n.Translations.sureDropStash(stash.description),
             yes,
         );
         if (result !== yes) {

@@ -5,7 +5,7 @@ import { GitError } from "../../../git/error.js";
 import type { Model } from "../../../model.js";
 import type { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
 
@@ -28,8 +28,8 @@ export async function cloneRepository(
     let normalisedParentPath = parentPath;
     if (!normalisedUrl || typeof normalisedUrl !== "string") {
         normalisedUrl = await pickRemoteSource(model, {
-            providerLabel: provider => localize("clonefrom", "Clone from {0}", provider.name),
-            urlLabel: localize("repourl", "Clone from URL"),
+            providerLabel: provider => i18n.Translations.cloneFrom(provider.name),
+            urlLabel: i18n.Translations.cloneUrl(),
         });
     }
 
@@ -55,7 +55,7 @@ export async function cloneRepository(
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(defaultCloneDirectory),
-            openLabel: localize("selectFolder", "Select Repository Location"),
+            openLabel: i18n.Translations.selectRepositoryFolder(),
         });
 
         if (!uris || uris.length === 0) {
@@ -76,7 +76,7 @@ export async function cloneRepository(
         const opts = {
             cancellable: true,
             location: ProgressLocation.Notification,
-            title: localize("cloning", "Cloning git repository '{0}'...", normalisedUrl),
+            title: i18n.Translations.cloning(normalisedUrl),
         };
 
         const repositoryPath = await window.withProgress(
@@ -105,17 +105,14 @@ export async function cloneRepository(
         }
 
         if (action === undefined) {
-            let message = localize("proposeopen", "Would you like to open the cloned repository?");
-            const open = localize("openrepo", "Open");
-            const openNewWindow = localize("openreponew", "Open in New Window");
+            let message = i18n.Translations.proposeOpenClonedRepository();
+            const open = i18n.Translations.openRepository2();
+            const openNewWindow = i18n.Translations.openRepositoryInNewWindow();
             const choices = [open, openNewWindow];
 
-            const addToWorkspace = localize("add", "Add to Workspace");
+            const addToWorkspace = i18n.Translations.addToWorkspace();
             if (workspace.workspaceFolders) {
-                message = localize(
-                    "proposeopen2",
-                    "Would you like to open the cloned repository, or add it to the current workspace?",
-                );
+                message = i18n.Translations.proposeOpenClonedRepository2();
                 choices.push(addToWorkspace);
             }
 

@@ -1,6 +1,6 @@
 import { window, workspace } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { createCheckoutItems } from "../checkout/helpers.js";
 import { HEADItem } from "./quick-pick.js";
 
@@ -19,17 +19,15 @@ export async function promptForBranchName(defaultName?: string, initialValue?: s
 
     const rawBranchName = defaultName || await window.showInputBox({
         ignoreFocusOut: true,
-        placeHolder: localize("branch name", "Branch name"),
-        prompt: localize("provide branch name", "Please provide a new branch name"),
+        placeHolder: i18n.Translations.branchName(),
+        prompt: i18n.Translations.provideBranchName(),
         validateInput: (name: string) => {
             const validateName = new RegExp(branchValidationRegex);
             if (validateName.test(sanitize(name))) {
                 return null;
             }
 
-            return localize(
-                "branch name format invalid",
-                "Branch name needs to match regex: {0}",
+            return i18n.Translations.branchNameFormatInvalid(
                 branchValidationRegex,
             );
         },
@@ -50,11 +48,7 @@ export async function branch(repository: AbstractRepository, defaultName?: strin
 
     if (from) {
         const picks = [new HEADItem(repository), ...createCheckoutItems(repository)];
-        const placeHolder = localize(
-            "select a ref to create a new branch from",
-            "Select a ref to create the '{0}' branch from",
-            branchName,
-        );
+        const placeHolder = i18n.Translations.selectRefToBranchFrom(branchName);
         const choice = await window.showQuickPick(picks, { placeHolder });
 
         if (!choice) {

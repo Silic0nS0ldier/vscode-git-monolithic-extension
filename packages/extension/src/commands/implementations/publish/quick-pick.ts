@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import type { QuickPickItem } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 
 export class AddRemoteItem implements QuickPickItem {
     #addRemote: (repository: AbstractRepository) => Promise<string | void>;
@@ -10,7 +10,7 @@ export class AddRemoteItem implements QuickPickItem {
     }
 
     get label(): string {
-        return "$(plus) " + localize("add remote", "Add a new remote...");
+        return "$(plus) " + i18n.Translations.addRemote2();
     }
     get description(): string {
         return "";

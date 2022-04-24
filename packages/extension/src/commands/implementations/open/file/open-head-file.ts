@@ -2,7 +2,7 @@ import * as path from "node:path";
 import { commands, OutputChannel, TextDocumentShowOptions, Uri, window } from "vscode";
 import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
-import { localize } from "../../../../util.js";
+import * as i18n from "../../../../i18n/mod.js";
 import type { ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
@@ -29,11 +29,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
 
         if (!HEAD) {
             window.showWarningMessage(
-                localize(
-                    "HEAD not available",
-                    "HEAD version of '{0}' is not available.",
-                    path.basename(resource.state.resourceUri.fsPath),
-                ),
+                i18n.Translations.headNotAvailable(resource.state.resourceUri),
             );
             return;
         }

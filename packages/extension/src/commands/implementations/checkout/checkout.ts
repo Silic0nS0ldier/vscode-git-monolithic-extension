@@ -2,7 +2,7 @@ import { QuickPickItem, window } from "vscode";
 import { GitErrorCodes } from "../../../api/git.js";
 import { GitError } from "../../../git/error.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { isExpectedError } from "../../../util/is-expected-error.js";
 import type { ScmCommand } from "../../helpers.js";
 import { branch } from "../branch/helpers.js";
@@ -36,8 +36,8 @@ export async function checkout(
     const quickpick = window.createQuickPick();
     quickpick.items = picks;
     quickpick.placeholder = opts?.detached
-        ? localize("select a ref to checkout detached", "Select a ref to checkout in detached mode")
-        : localize("select a ref to checkout", "Select a ref to checkout");
+        ? i18n.Translations.selectRefToCheckoutDetached()
+        : i18n.Translations.selectRefToCheckout();
 
     quickpick.show();
 
@@ -66,10 +66,10 @@ export async function checkout(
                 throw err;
             }
 
-            const force = localize("force", "Force Checkout");
-            const stash = localize("stashcheckout", "Stash & Checkout");
+            const force = i18n.Translations.forceCheckout();
+            const stash = i18n.Translations.stashAndCheckout();
             const choice = await window.showWarningMessage(
-                localize("local changes", "Your local changes would be overwritten by checkout."),
+                i18n.Translations.localChanges(),
                 { modal: true },
                 force,
                 stash,

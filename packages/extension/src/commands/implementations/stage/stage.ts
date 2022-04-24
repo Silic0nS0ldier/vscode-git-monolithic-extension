@@ -1,9 +1,8 @@
-import * as path from "node:path";
 import { OutputChannel, Uri, window } from "vscode";
 import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import type { ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
@@ -39,19 +38,8 @@ export function createCommand(
         const { resolved, unresolved, deletionConflicts } = await categorizeResourceByResolution(selection);
 
         if (unresolved.length > 0) {
-            const message = unresolved.length > 1
-                ? localize(
-                    "confirm stage files with merge conflicts",
-                    "Are you sure you want to stage {0} files with merge conflicts?",
-                    unresolved.length,
-                )
-                : localize(
-                    "confirm stage file with merge conflicts",
-                    "Are you sure you want to stage {0} with merge conflicts?",
-                    path.basename(unresolved[0].state.resourceUri.fsPath),
-                );
-
-            const yes = localize("yes", "Yes");
+            const message = i18n.Translations.confirmStageWithMergeConflicts(unresolved);
+            const yes = i18n.Translations.yes();
             const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
             if (pick !== yes) {

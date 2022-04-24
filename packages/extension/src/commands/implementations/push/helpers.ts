@@ -3,7 +3,7 @@ import { ForcePushMode, ForcePushModeOptions, GitErrorCodes } from "../../../api
 import { GitError } from "../../../git/error.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import { publish } from "../publish/publish.js";
 import { AddRemoteItem } from "../publish/quick-pick.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
@@ -36,9 +36,9 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
             return;
         }
 
-        const addRemote = localize("addremote", "Add Remote");
+        const addRemote = i18n.Translations.addRemote();
         const result = await window.showWarningMessage(
-            localize("no remotes to push", "Your repository has no remotes configured to push to."),
+            i18n.Translations.noRemotesToPush(),
             addRemote,
         );
 
@@ -55,10 +55,7 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
     if (pushOptions.forcePush) {
         if (!config.get<boolean>("allowForcePush")) {
             await window.showErrorMessage(
-                localize(
-                    "force push not allowed",
-                    "Force push is not allowed, please enable it with the 'git.allowForcePush' setting.",
-                ),
+                i18n.Translations.forcePushNotAllowed(),
             );
             return;
         }
@@ -68,12 +65,9 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
             : ForcePushMode.Force;
 
         if (config.get<boolean>("confirmForcePush")) {
-            const message = localize(
-                "confirm force push",
-                "You are about to force push your changes, this can be destructive and could inadvertently overwrite changes made by others.\n\nAre you sure to continue?",
-            );
-            const yes = localize("ok", "OK");
-            const neverAgain = localize("never ask again", "OK, Don't Ask Again");
+            const message = i18n.Translations.confirmForcePush();
+            const yes = i18n.Translations.ok();
+            const neverAgain = i18n.Translations.neverAgain2();
             const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
             if (pick === neverAgain) {
@@ -95,7 +89,7 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
 
     if (!repository.HEAD || !repository.HEAD.name) {
         if (!pushOptions.silent) {
-            window.showWarningMessage(localize("nobranch", "Please check out a branch to push to a remote."));
+            window.showWarningMessage(i18n.Translations.noBranch());
         }
         return;
     }
@@ -113,12 +107,8 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
             }
 
             const branchName = repository.HEAD.name;
-            const message = localize(
-                "confirm publish branch",
-                "The branch '{0}' has no upstream branch. Would you like to publish this branch?",
-                branchName,
-            );
-            const yes = localize("ok", "OK");
+            const message = i18n.Translations.confirmPublishBranch(branchName);
+            const yes = i18n.Translations.ok();
             const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
             if (pick === yes) {
@@ -136,7 +126,7 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
                 ...remotes.filter(r => r.pushUrl !== undefined).map(r => ({ description: r.pushUrl, label: r.name })),
                 addRemote,
             ];
-            const placeHolder = localize("pick remote", "Pick a remote to publish the branch '{0}' to:", branchName);
+            const placeHolder = i18n.Translations.pickRemote(branchName);
             const choice = await window.showQuickPick(picks, { placeHolder });
 
             if (!choice) {

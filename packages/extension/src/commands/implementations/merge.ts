@@ -1,7 +1,7 @@
 import { QuickPickItem, window, workspace } from "vscode";
 import { Branch, Ref, RefType } from "../../api/git.js";
 import type { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
-import { localize } from "../../util.js";
+import * as i18n from "../../i18n/mod.js";
 import type { ScmCommand } from "../helpers.js";
 
 class MergeItem implements QuickPickItem {
@@ -34,7 +34,7 @@ export function createCommand(): ScmCommand {
             .map(ref => new MergeItem(ref as Branch));
 
         const picks = [...heads, ...remoteHeads];
-        const placeHolder = localize("select a branch to merge from", "Select a branch to merge from");
+        const placeHolder = i18n.Translations.selectBranchToMerge();
         const choice = await window.showQuickPick<MergeItem>(picks, { placeHolder });
 
         if (!choice) {

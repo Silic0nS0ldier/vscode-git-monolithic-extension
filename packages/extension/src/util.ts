@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as nls from "vscode-nls";
-
 export function* splitInChunks(array: string[], maxChunkLength: number): IterableIterator<string[]> {
     let current: string[] = [];
     let length = 0;
@@ -70,5 +68,3 @@ export class Limiter<T> {
         }
     }
 }
-
-export const localize = nls.loadMessageBundle();

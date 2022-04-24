@@ -1,7 +1,7 @@
 import * as os from "node:os";
 import { Uri, window } from "vscode";
 import type { Model } from "../../../model.js";
-import { localize } from "../../../util.js";
+import * as i18n from "../../../i18n/mod.js";
 import type { ScmCommand } from "../../helpers.js";
 
 export function createCommand(
@@ -15,7 +15,7 @@ export function createCommand(
                 canSelectFolders: true,
                 canSelectMany: false,
                 defaultUri: Uri.file(os.homedir()),
-                openLabel: localize("open repo", "Open Repository"),
+                openLabel: i18n.Translations.openRepository(),
             });
 
             if (!result || result.length === 0) {
