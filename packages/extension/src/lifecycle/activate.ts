@@ -28,6 +28,7 @@ import { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
+import * as config from "../util/config.js";
 import { toDisposable } from "../util/disposals.js";
 import { eventToPromise, filterEvent } from "../util/events.js";
 import { isExpectedError } from "../util/is-expected-error.js";
@@ -54,14 +55,13 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
     });
     deactivateTasks.push(() => telemetryReporter.dispose());
 
-    const config = workspace.getConfiguration("git", null);
-    const enabled = config.get<boolean>("enabled");
+    const enabled = config.enabled();
 
     if (!enabled) {
         const onConfigChange = filterEvent(workspace.onDidChangeConfiguration, e => e.affectsConfiguration("git"));
         const onEnabled = filterEvent(
             onConfigChange,
-            () => workspace.getConfiguration("git", null).get<boolean>("enabled") === true,
+            () => config.enabled(),
         );
         const result = new GitExtensionImpl();
 
@@ -99,7 +99,7 @@ async function createModel(
     telemetryReporter: TelemetryReporter,
     disposables: Disposable[],
 ): Promise<Model> {
-    const pathValue = workspace.getConfiguration("git").get<string | string[]>("path");
+    const pathValue = config.path();
     let pathHints = Array.isArray(pathValue) ? pathValue : pathValue ? [pathValue] : [];
 
     const { isTrusted } = workspace;
@@ -170,8 +170,7 @@ async function createModel(
 }
 
 async function warnAboutMissingGit(): Promise<void> {
-    const config = workspace.getConfiguration("git");
-    const shouldIgnore = config.get<boolean>("ignoreMissingGitWarning") === true;
+    const shouldIgnore = config.ignoreMissingGitWarning();
 
     if (shouldIgnore) {
         return;
@@ -199,7 +198,7 @@ async function warnAboutMissingGit(): Promise<void> {
         // TODO Address hard coded URL
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
-        await config.update("ignoreMissingGitWarning", true, true);
+        await config.legacy().update("ignoreMissingGitWarning", true, true);
     }
 }
 
@@ -229,8 +228,7 @@ async function checkGitVersion(info: IGit): Promise<void> {
 }
 
 async function checkGitv1(info: IGit): Promise<void> {
-    const config = workspace.getConfiguration("git");
-    const shouldIgnore = config.get<boolean>("ignoreLegacyWarning") === true;
+    const shouldIgnore = config.ignoreLegacyWarning();
 
     if (shouldIgnore) {
         return;
@@ -253,7 +251,7 @@ async function checkGitv1(info: IGit): Promise<void> {
         // TODO Repeated
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
-        await config.update("ignoreLegacyWarning", true, true);
+        await config.legacy().update("ignoreLegacyWarning", true, true);
     }
 }
 
@@ -262,8 +260,7 @@ async function checkGitWindows(info: IGit): Promise<void> {
         return;
     }
 
-    const config = workspace.getConfiguration("git");
-    const shouldIgnore = config.get<boolean>("ignoreWindowsGit27Warning") === true;
+    const shouldIgnore = config.ignoreWindowsGit27Warning();
 
     if (shouldIgnore) {
         return;
@@ -281,6 +278,6 @@ async function checkGitWindows(info: IGit): Promise<void> {
         // TODO Repeated
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
-        await config.update("ignoreWindowsGit27Warning", true, true);
+        await config.legacy().update("ignoreWindowsGit27Warning", true, true);
     }
 }

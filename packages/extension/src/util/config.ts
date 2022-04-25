@@ -218,7 +218,7 @@ export function autoFetch(scope: ConfigurationScope): boolean | "all" {
 }
 
 export function autoFetchPeriod(scope: ConfigurationScope): number {
-    return getExtensionConfig(scope).get<number>("autofetchPeriod", 100);
+    return getExtensionConfig(scope).get<number>("autofetchPeriod", 3 /** minutes */ * 60);
 }
 
 export function path(): string | string[] | null {
