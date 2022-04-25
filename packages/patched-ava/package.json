@@ -9,6 +9,6 @@
         "ava": "./cli.js"
     },
     "dependencies": {
-        "real-ava": "npm:ava@^4.1.0"
+        "real-ava": "npm:ava@^4.2.0"
     }
 }

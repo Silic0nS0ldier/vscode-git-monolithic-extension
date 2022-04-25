@@ -6,6 +6,6 @@
         "types": "./lib.d.ts"
     },
     "devDependencies": {
-        "rollup": "^2.70.1"
+        "rollup": "^2.70.2"
     }
 }
