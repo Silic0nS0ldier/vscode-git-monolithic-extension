@@ -9,6 +9,7 @@ import * as i18n from "./i18n/mod.js";
 import type { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
 import { Operation } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
+import * as config from "./util/config.js";
 import { dispose } from "./util/disposals.js";
 import { anyEvent, filterEvent } from "./util/events.js";
 
@@ -103,8 +104,7 @@ class SyncStatusBar {
     }
 
     #updateEnablement(): void {
-        const config = workspace.getConfiguration("git", Uri.file(this.#repository.root));
-        const enabled = config.get<boolean>("enableStatusBarSync", true);
+        const enabled = config.enableStatusBarSync(Uri.file(this.#repository.root));
 
         this.#state = { ...this.#state, enabled };
     }
@@ -169,8 +169,7 @@ class SyncStatusBar {
                     text += this.#repository.syncLabel;
                 }
 
-                const config = workspace.getConfiguration("git", Uri.file(this.#repository.root));
-                const rebaseWhenSync = config.get<string>("rebaseWhenSync");
+                const rebaseWhenSync = config.rebaseWhenSync(Uri.file(this.#repository.root));
 
                 command = rebaseWhenSync ? "git.syncRebase" : "git.sync";
                 tooltip = this.#repository.syncTooltip;

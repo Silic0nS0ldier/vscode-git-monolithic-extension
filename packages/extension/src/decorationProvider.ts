@@ -22,6 +22,7 @@ import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import type { SourceControlResourceGroupUI } from "./ui/source-control.js";
+import * as config from "./util/config.js";
 import { dispose as disposeHelper } from "./util/disposals.js";
 import { anyEvent, filterEvent, fireEvent } from "./util/events.js";
 import { isExpectedError } from "./util/is-expected-error.js";
@@ -214,7 +215,7 @@ export function addDecorations(model: Model): Disposable {
     }
 
     function update(): void {
-        const enabled = workspace.getConfiguration("git").get("decorations.enabled");
+        const enabled = config.decorationsEnabled();
 
         if (enabled) {
             enable();

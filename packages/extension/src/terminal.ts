@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Disposable, ExtensionContext, workspace } from "vscode";
+import * as config from "./util/config.js";
 import { filterEvent } from "./util/events.js";
 
 // TODO Review function name
@@ -14,8 +15,7 @@ export function registerTerminalEnvironmentManager(
     let enabled = false;
 
     function refresh(): void {
-        const config = workspace.getConfiguration("git", null);
-        const newEnabled = config.get<boolean>("enabled", true) && config.get("terminalAuthentication", true);
+        const newEnabled = config.enabled() && config.terminalAuthentication();
 
         if (newEnabled === enabled) {
             return;

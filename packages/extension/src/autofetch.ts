@@ -19,6 +19,7 @@ import { GitError } from "./git/error.js";
 import * as i18n from "./i18n/mod.js";
 import { Operation, OperationOptions } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
+import * as config from "./util/config.js";
 import { eventToPromise, filterEvent, onceEvent } from "./util/events.js";
 
 function isRemoteOperation(operation: OperationOptions): boolean {
@@ -89,7 +90,7 @@ export class AutoFetcher {
         }
 
         if (result === yesMsg) {
-            const gitConfig = workspace.getConfiguration("git", Uri.file(this.#repository.root));
+            const gitConfig = config.legacy(Uri.file(this.#repository.root));
             gitConfig.update("autofetch", true, ConfigurationTarget.Global);
         }
 
@@ -101,8 +102,7 @@ export class AutoFetcher {
             return;
         }
 
-        const gitConfig = workspace.getConfiguration("git", Uri.file(this.#repository.root));
-        switch (gitConfig.get<boolean | "all">("autofetch")) {
+        switch (config.autoFetch(Uri.file(this.#repository.root))) {
             case true:
                 this.#fetchAll = false;
                 this.enable();
@@ -156,8 +156,7 @@ export class AutoFetcher {
                 return;
             }
 
-            const period =
-                workspace.getConfiguration("git", Uri.file(this.#repository.root)).get<number>("autofetchPeriod", 180)
+            const period = config.autoFetchPeriod(Uri.file(this.#repository.root))
                 * 1000;
             const timeout = new Promise(c => setTimeout(c, period));
             const whenDisabled = eventToPromise(filterEvent(this.#onDidChange, enabled => !enabled));
