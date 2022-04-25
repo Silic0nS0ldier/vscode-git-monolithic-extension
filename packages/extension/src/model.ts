@@ -8,6 +8,7 @@ import * as path from "node:path";
 import onetime from "onetime";
 import {
     commands,
+    ConfigurationChangeEvent,
     Disposable,
     Event,
     EventEmitter,
@@ -200,7 +201,9 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             const children = await new Promise<string[]>((c, e) => fs.readdir(root, (err, r) => err ? e(err) : c(r)));
             const subfolders = new Set(children.filter(child => child !== ".git").map(child => path.join(root, child)));
 
-            const scanPaths = config.scanRepositories(folder.uri);
+            const scanPaths = workspace.isTrusted
+                ? config.scanRepositories(folder.uri)
+                : config.scanRepositories();
             for (const scanPath of scanPaths) {
                 if (scanPath !== ".git") {
                     continue;
@@ -271,14 +274,24 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         await Promise.all(possibleRepositoryFolders.map(p => this.openRepository(p.uri.fsPath)));
     }
 
-    #onDidChangeConfiguration(): void {
+    /**
+     * @todo Config hook should be consolidated
+     */
+    #onDidChangeConfiguration(e: ConfigurationChangeEvent): void {
+        // NOTE This is imperfect as individual repositories may have their own configuration
+        // Considered an acceptable trade off as continuely refreshing based on all config changes
+        // is expensive
+        if (!e.affectsConfiguration("git")) {
+            return;
+        }
+
         const possibleRepositoryFolders = (workspace.workspaceFolders || [])
-            .filter(folder => workspace.getConfiguration("git", folder.uri).get<boolean>("enabled") === true)
+            .filter(folder => config.enabled(folder.uri))
             .filter(folder => !this.#getOpenRepository(folder.uri));
 
         const openRepositoriesToDispose = this.#openRepositories
             .map(repository => ({ repository, root: Uri.file(repository.repository.root) }))
-            .filter(({ root }) => workspace.getConfiguration("git", root).get<boolean>("enabled") !== true)
+            .filter(({ root }) => !config.enabled(root))
             .map(({ repository }) => repository);
 
         possibleRepositoryFolders.forEach(p => this.openRepository(p.uri.fsPath));
@@ -318,8 +331,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             return;
         }
 
-        const config = workspace.getConfiguration("git", Uri.file(repoPath));
-        const enabled = config.get<boolean>("enabled") === true;
+        const enabled = config.enabled(Uri.file(repoPath));
 
         if (!enabled) {
             return;
@@ -604,8 +616,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 }
 
 function shouldRepositoryBeIgnored(repositoryRoot: string): boolean {
-    const config = workspace.getConfiguration("git");
-    const ignoredRepos = config.get<string[]>("ignoredRepositories") || [];
+    const ignoredRepos = config.ignoredRepositories();
 
     for (const ignoredRepo of ignoredRepos) {
         if (path.isAbsolute(ignoredRepo)) {
