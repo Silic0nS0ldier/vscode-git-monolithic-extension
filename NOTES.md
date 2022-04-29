@@ -14,3 +14,15 @@ This issue can be trivially worked around by not recycling promises for a long t
 By default extensions operate within the same thread. This allows resource sharing, but can make it very easy to form bottlenecks.
 
 The solution is to shift long running tasks into another thread (worker).
+
+---
+
+config keys should use SSOT
+
+---
+
+git commands should survive VSCode closing to prevent repo corruption
+
+---
+
+CI should check for disabled eslint rules and report so they are followed up
