@@ -6,7 +6,7 @@ import * as stageAllTracked from "./stage-all-tracked.js";
 import * as stageAllUntracked from "./stage-all-untracked.js";
 import * as stageAll from "./stage-all.js";
 // import * as stageChange from "./stage-change.js";
-// import * as stageSelectedRanges from "./stage-selected-ranges.js";
+import * as stageSelectedRanges from "./stage-selected-ranges.js";
 import * as stage from "./stage.js";
 
 export function createCommands(model: Model, outputChannel: OutputChannel): ScmCommand[] {
@@ -16,5 +16,6 @@ export function createCommands(model: Model, outputChannel: OutputChannel): ScmC
         stageAllMerge.createCommand(),
         stageAllTracked.createCommand(),
         stageAllUntracked.createCommand(),
+        stageSelectedRanges.createCommand(model, outputChannel),
     ];
 }

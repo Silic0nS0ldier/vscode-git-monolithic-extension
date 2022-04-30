@@ -9,7 +9,6 @@
     "config.timeline.date.committed": "Use the committed date",
     "config.timeline.date.authored": "Use the authored date",
     "command.unstageSelectedRanges": "Unstage Selected Ranges",
-    "command.stageSelectedRanges": "Stage Selected Ranges",
     "command.stageChange": "Stage Change",
     "command.revertSelectedRanges": "Revert Selected Ranges",
     "command.revertChange": "Revert Change"

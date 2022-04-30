@@ -106,6 +106,7 @@ export function resolveChangeCommand(resource: Resource): Command {
     if (!resource.state.leftUri) {
         return {
             arguments: [
+                // TODO This may not be defined, according to existing types
                 resource.state.rightUri,
                 { override: resource.state.type === Status.BOTH_MODIFIED ? false : undefined },
                 title,
@@ -115,7 +116,12 @@ export function resolveChangeCommand(resource: Resource): Command {
         };
     } else {
         return {
-            arguments: [resource.state.leftUri, resource.state.rightUri, title],
+            arguments: [
+                resource.state.leftUri,
+                // TODO This may not be defined, according to existing types
+                resource.state.rightUri,
+                title,
+            ],
             command: "vscode.diff",
             title: i18n.Translations.open(),
         };

@@ -34,11 +34,6 @@
                 "category": "Git"
             },
             {
-                "command": "git.stageSelectedRanges",
-                "title": "%command.stageSelectedRanges%",
-                "category": "Git"
-            },
-            {
                 "command": "git.stageChange",
                 "title": "%command.stageChange%",
                 "category": "Git",
@@ -61,12 +56,6 @@
                 "command": "git.unstageSelectedRanges",
                 "key": "ctrl+k ctrl+n",
                 "mac": "cmd+k cmd+n",
-                "when": "isInDiffEditor"
-            },
-            {
-                "command": "git.stageSelectedRanges",
-                "key": "ctrl+k ctrl+alt+s",
-                "mac": "cmd+k cmd+alt+s",
                 "when": "isInDiffEditor"
             },
             {
@@ -103,10 +92,6 @@
                     "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stageSelectedRanges",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
-                },
-                {
                     "command": "git.stageChange",
                     "when": "false"
                 },
@@ -126,11 +111,6 @@
                     "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 },
                 {
-                    "command": "git.stageSelectedRanges",
-                    "group": "2_git@1",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
-                },
-                {
                     "command": "git.revertSelectedRanges",
                     "group": "2_git@3",
                     "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
@@ -140,11 +120,6 @@
                 {
                     "command": "git.unstageSelectedRanges",
                     "group": "2_git@2",
-                    "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
-                },
-                {
-                    "command": "git.stageSelectedRanges",
-                    "group": "2_git@1",
                     "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 },
                 {

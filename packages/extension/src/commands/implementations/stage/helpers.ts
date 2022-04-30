@@ -1,10 +1,14 @@
-import { Uri, window } from "vscode";
+import { TextDocument, Uri, window } from "vscode";
+import type vsDiff from "vscode-diff";
 import { Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
+import { applyLineChanges } from "../../../staging.js";
 import { grep } from "../../../util/grep.js";
+import { runByRepository } from "../../helpers.js";
 
 export async function categorizeResourceByResolution(
     resources: Resource[],
@@ -76,26 +80,30 @@ export async function stageDeletionConflict(repository: AbstractRepository, uri:
     }
 }
 
-// private async _stageChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
-// 	const modifiedDocument = textEditor.document;
-// 	const modifiedUri = modifiedDocument.uri;
+export async function stageChanges(
+    model: Model,
+    originalDocument: TextDocument,
+    modifiedDocument: TextDocument,
+    changes: vsDiff.ILineChange[],
+): Promise<void> {
+    const modifiedUri = modifiedDocument.uri;
 
-// 	if (modifiedUri.scheme !== 'file') {
-// 		return;
-// 	}
+    if (modifiedUri.scheme !== "file") {
+        throw new Error("Invalid scheme");
+    }
 
-// 	const originalUri = toGitUri(modifiedUri, '~');
-// 	const originalDocument = await workspace.openTextDocument(originalUri);
-// 	const result = applyLineChanges(originalDocument, modifiedDocument, changes);
+    const result = applyLineChanges(originalDocument, modifiedDocument, changes);
 
-// 	await this.runByRepository(
-// 		[modifiedUri],
-// 		async (repository, resources) => {
-// 			for (const resource of resources) {
-// 				await repository.stage(resource, result);
-// 			}
-// 		});
-// }
+    await runByRepository(
+        model,
+        [modifiedUri],
+        async (repository, resources) => {
+            for (const resource of resources) {
+                await repository.stage(resource, result);
+            }
+        },
+    );
+}
 
 // private async _revertChanges(textEditor: TextEditor, changes: LineChange[]): Promise<void> {
 // 	const modifiedDocument = textEditor.document;
