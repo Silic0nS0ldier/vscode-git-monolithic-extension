@@ -2,7 +2,6 @@ filegroup(
     name = 'pnpm_config',
     srcs = [
         'package.json',
-        'silicon-soldier-erase-ts-types-0.1.0.tgz'
     ],
     visibility = ['//third_party/pnpm:node_modules'],
 )
@@ -13,11 +12,4 @@ genrule(
     outs = ['node_modules'],
     output_is_complete = False,
     cmd = 'ln -s "../../third_party/pnpm/$PKG_DIR/node_modules" ./node_modules',
-)
-
-genrule(
-    name = 'foo',
-    deps = [':node_modules'],
-    needs_transitive_deps = True,
-    cmd = '',
 )
