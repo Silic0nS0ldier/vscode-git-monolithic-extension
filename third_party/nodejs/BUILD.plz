@@ -2,10 +2,10 @@
 if CONFIG.OS == 'linux':
     remote_file(
         name = 'nodejs',
-        url = ['https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-x64.tar.gz'],
-        hashes = ['sha256:57e02c27eb5e52f560f72d96240e898cb52818dc9fc50f45478ce39ece38583a'],
+        url = ['https://nodejs.org/dist/v16.16.0/node-v16.16.0-linux-x64.tar.gz'],
+        hashes = ['sha256:c85b16d1a4c259d01be7111ecb0361260627e4fc245004a920521eacb28e50df'],
         extract = True,
-        strip_prefix = 'node-v16.14.2-linux-x64/bin/',
+        strip_prefix = 'node-v16.16.0-linux-x64/bin/',
         exported_files = ['node'],
         visibility = ['PUBLIC'],
     )
@@ -13,10 +13,10 @@ if CONFIG.OS == 'linux':
 if CONFIG.OS == 'darwin':
     remote_file(
         name = 'nodejs',
-        url = ['https://nodejs.org/dist/v16.14.2/node-v16.14.2-darwin-x64.tar.gz'],
-        hashes = ['sha256:d3076ca7fcc7269c8ff9b03fe7d1c277d913a7e84a46a14eff4af7791ff9d055'],
+        url = ['https://nodejs.org/dist/v16.16.0/node-v16.16.0-darwin-x64.tar.gz'],
+        hashes = ['sha256:982edd0fad364ad6e2d72161671544ab9399bd0ca8c726bde3cd07775c4c709a'],
         extract = True,
-        strip_prefix = 'node-v16.14.2-darwin-x64/bin/',
+        strip_prefix = 'node-v16.16.0-darwin-x64/bin/',
         exported_files = ['node'],
         visibility = ['PUBLIC'],
     )
