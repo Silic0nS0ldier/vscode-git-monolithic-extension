@@ -2,8 +2,8 @@
 if CONFIG.OS == 'linux':
     remote_file(
         name = 'pnpm',
-        url = ['https://github.com/pnpm/pnpm/releases/download/v6.32.3/pnpm-linux-x64'],
-        hashes = ['sha256:c95784f8f8190ef574dcd3f08da5e9441c005939a315ce35ee5e66cbb04284c0'],
+        url = ['https://github.com/pnpm/pnpm/releases/download/v7.9.1/pnpm-linux-x64'],
+        hashes = ['sha256:d1beef4238570d01cb9d85aab127ba2df17e9e9e69ce2401eb0f5744caba8836'],
         binary = True,
         out = 'pnpm',
         licences = ['MIT'],
@@ -13,8 +13,8 @@ if CONFIG.OS == 'linux':
 if CONFIG.OS == 'darwin':
     remote_file(
         name = 'pnpm',
-        url = ['https://github.com/pnpm/pnpm/releases/download/v6.32.3/pnpm-macos-x64'],
-        hashes = ['sha256:9a8e6b5b3dfa3c97e92bbfd8df847d25e696c7ba0fe4f3cc532ab48fd7519353'],
+        url = ['https://github.com/pnpm/pnpm/releases/download/v7.9.1/pnpm-macos-x64'],
+        hashes = ['sha256:9b87e3272ebf3b7272fbf3961c84a943cbf78cea643ffe41b15fb24334dbe07a'],
         binary = True,
         out = 'pnpm',
         licences = ['MIT'],
