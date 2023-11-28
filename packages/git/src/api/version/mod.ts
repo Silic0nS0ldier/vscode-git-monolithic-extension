@@ -1,4 +1,4 @@
-import compareVersions from "compare-versions";
+import { compareVersions } from "compare-versions";
 import type { GitContext } from "../../cli/context.js";
 import { ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
 import { isErr, ok, Result, unwrap } from "../../func-result.js";
