@@ -1,0 +1,36 @@
+load("@aspect_bazel_lib//lib:copy_directory.bzl", "copy_directory")
+load("@aspect_bazel_lib//lib:copy_file.bzl", "copy_file")
+load("@aspect_bazel_lib//lib:output_files.bzl", "output_files")
+load("//build_defs/vsce_package:vsce_package.bzl", "vsce_package")
+
+# Copy bundled sources to src/
+output_files(
+    name = "bundle_chunks_ref",
+    target = "//extension:bundle",
+    paths = ["extension/bundle/chunks"],
+)
+copy_directory(
+    name = "copy_bundle_chunks",
+    src = ":bundle_chunks_ref",
+    out = "src/chunks",
+)
+copy_file(
+    name = "copy_bundle_main",
+    src = "//extension:bundle/main.js",
+    out = "src/main.js",
+)
+copy_file(
+    name = "copy_bundle_askpass_main",
+    src = "//extension:bundle/askpass-main.js",
+    out = "src/askpass-main.js",
+)
+
+vsce_package(
+    name = "git_monolithic",
+    srcs = glob(["**"], exclude = ["package.json-off.json", "package.nls.json-off.json", "BUILD.bazel"]) + [
+        ":copy_bundle_chunks",
+        ":copy_bundle_main",
+        ":copy_bundle_askpass_main",
+    ],
+    in_dir = "./",
+)

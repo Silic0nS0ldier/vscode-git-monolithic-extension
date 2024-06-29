@@ -1,9 +1,0 @@
-filegroup(
-    name = 'pnpm_config',
-    srcs = [
-        'package.json',
-        'pnpm-lock.yaml',
-        'pnpm-workspace.yaml',
-    ],
-    visibility = ['//third_party/pnpm:node_modules'],
-)

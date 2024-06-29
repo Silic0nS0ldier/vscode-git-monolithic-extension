@@ -1,7 +1,7 @@
 import type { GitContext } from "../../../cli/context.js";
 import type { ReadToErrors } from "../../../cli/helpers/read-to-string.js";
 import type { Result } from "../../../func-result.js";
-import { ConfigValue, read as baseRead } from "../common/read.js";
+import { type ConfigValue, read as baseRead } from "../common/read.js";
 
 export function read(
     git: GitContext,

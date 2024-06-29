@@ -1,0 +1,76 @@
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@npm//:ava/package_json.bzl", "bin")
+load("//build_defs/rollup_bundle:rollup_bundle.bzl", "rollup_bundle")
+
+npm_link_all_packages(name = "node_modules")
+
+ts_project(
+    name = "lib",
+    srcs = glob(["src/**/*.ts"], exclude = ["src/**/*.test.ts", "src/**/*.stub.ts"]) + ["package.json"],
+    out_dir = "dist",
+    root_dir = "src",
+    deps = [
+        "//:node_modules/@types/node",
+        ":node_modules/@types/vscode",
+        ":node_modules/@vscode/extension-telemetry",
+        ":node_modules/get-stream",
+        ":node_modules/just-debounce",
+        ":node_modules/monolithic-git-interop",
+        ":node_modules/onetime",
+        ":node_modules/throat",
+        ":node_modules/vscode-diff",
+        ":node_modules/vscode-nls",
+        ":node_modules/watcher",
+    ],
+    tsconfig = ":tsconfig",
+    declaration = True,
+)
+
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+    deps = ["//:tsconfig"],
+    visibility = [":__pkg__"],
+)
+
+rollup_bundle(
+    name = "bundle",
+    srcs = [":lib"],
+    entry_points = [
+        "dist/main.js",
+        "dist/askpass-main.js",
+    ],
+    external_modules = [
+        "vscode",
+    ],
+    visibility = ["//extension/vsix:__pkg__"],
+)
+
+# TODO Create vsix with @vscode/vsce
+
+
+ts_project(
+    name = "lib_tests",
+    srcs = glob(["src/**/*.test.ts", "src/**/*.stub.ts"]) + ["package.json"],
+    out_dir = "dist",
+    root_dir = "src",
+    deps = [
+        "//:node_modules/@types/node",
+        "//:node_modules/ava",
+        ":node_modules/get-stream",
+        ":lib",
+    ],
+    tsconfig = ":tsconfig",
+    declaration = True,
+)
+
+bin.ava_test(
+    name = "tests",
+    data = [
+        ":lib_tests",
+        "package.json",
+    ],
+    chdir = package_name(),
+    args = ["-t"],
+)

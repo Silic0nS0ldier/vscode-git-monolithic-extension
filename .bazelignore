@@ -1,0 +1,10 @@
+.git
+
+# node_modules
+build_defs/rollup_bundle/node_modules
+build_defs/vsce_package/node_modules
+extension/node_modules
+node_modules
+packages/build-tools/node_modules
+packages/git/node_modules
+packages/staging-area/node_modules

@@ -1,6 +1,0 @@
-def ts_library(name, srcs):
-    genrule(
-        name = name,
-        srcs = srcs,
-        cmd = '',
-    )

@@ -1,0 +1,105 @@
+diff --git a/dist/types.d.ts b/dist/types.d.ts
+index 819f534ca9cd6121e61dd078a3e618b49a1d77cc..a62b47e41b08bcd4cfab8f96a93aa6b31013b04b 100644
+--- a/dist/types.d.ts
++++ b/dist/types.d.ts
+@@ -1,8 +1,8 @@
+ /// <reference types="node" />
+ import type { FSWatcher, BigIntStats } from 'node:fs';
+ import type { ResultDirectories } from 'tiny-readdir';
+-import type { FSTargetEvent, TargetEvent } from './enums';
+-import type WatcherStats from './watcher_stats';
++import type { FSTargetEvent, TargetEvent } from './enums.js';
++import type WatcherStats from './watcher_stats.js';
+ type Callback = () => void;
+ type Disposer = () => void;
+ type Event = [TargetEvent, Path, Path?];
+diff --git a/dist/utils.d.ts b/dist/utils.d.ts
+index 04221a1368b9bea7e847c6d3a0c56f3de3bb7f85..e1a68991e86bf2cd6622c6197cb15fb3a08c38f9 100644
+--- a/dist/utils.d.ts
++++ b/dist/utils.d.ts
+@@ -3,7 +3,7 @@
+ /// <reference types="node" />
+ /// <reference types="node" />
+ /// <reference types="node" />
+-import type { Callback, Ignore, ReaddirMap, Stats } from './types';
++import type { Callback, Ignore, ReaddirMap, Stats } from './types.js';
+ declare const Utils: {
+     lang: {
+         debounce: <Args extends unknown[]>(fn: import("dettle/dist/types").FN<Args, unknown>, wait?: number | undefined, options?: import("dettle/dist/types").DebounceOptions | undefined) => import("dettle/dist/types").Debounced<Args>;
+diff --git a/dist/watcher.d.ts b/dist/watcher.d.ts
+index 352c3c2d7aea8ff4a52fd788d260553fbebda532..103fc97f9b713e309bfe7b007b00970992ff3698 100644
+--- a/dist/watcher.d.ts
++++ b/dist/watcher.d.ts
+@@ -1,11 +1,11 @@
+ /// <reference types="node" />
+ /// <reference types="node" />
+ import { EventEmitter } from 'node:events';
+-import { TargetEvent } from './enums';
+-import WatcherHandler from './watcher_handler';
+-import WatcherLocker from './watcher_locker';
+-import WatcherPoller from './watcher_poller';
+-import type { Callback, Disposer, Handler, Ignore, Path, PollerConfig, SubwatcherConfig, WatcherOptions, WatcherConfig } from './types';
++import { TargetEvent } from './enums.js';
++import WatcherHandler from './watcher_handler.js';
++import WatcherLocker from './watcher_locker.js';
++import WatcherPoller from './watcher_poller.js';
++import type { Callback, Disposer, Handler, Ignore, Path, PollerConfig, SubwatcherConfig, WatcherOptions, WatcherConfig } from './types.js';
+ declare class Watcher extends EventEmitter {
+     _closed: boolean;
+     _ready: boolean;
+diff --git a/dist/watcher_handler.d.ts b/dist/watcher_handler.d.ts
+index b92ac0aae58471459c8223e3312826adaca9c3c5..ddc06d4f0db082075c0a7ceaf05c236737912df5 100644
+--- a/dist/watcher_handler.d.ts
++++ b/dist/watcher_handler.d.ts
+@@ -1,8 +1,8 @@
+ /// <reference types="node" />
+ /// <reference types="node" />
+-import { FSTargetEvent } from './enums';
+-import type Watcher from './watcher';
+-import type { Event, FSWatcher, Handler, HandlerBatched, Path, WatcherOptions, WatcherConfig } from './types';
++import { FSTargetEvent } from './enums.js';
++import type Watcher from './watcher.js';
++import type { Event, FSWatcher, Handler, HandlerBatched, Path, WatcherOptions, WatcherConfig } from './types.js';
+ declare class WatcherHandler {
+     base?: WatcherHandler;
+     watcher: Watcher;
+diff --git a/dist/watcher_locker.d.ts b/dist/watcher_locker.d.ts
+index 4b948a537fd8011ea0d7aef59c2b2156b8ec3f5d..dd31f714ffa625ba7c9e428853054b87d55cb04e 100644
+--- a/dist/watcher_locker.d.ts
++++ b/dist/watcher_locker.d.ts
+@@ -1,6 +1,6 @@
+-import { TargetEvent } from './enums';
+-import type Watcher from './watcher';
+-import type { Path, LocksAdd, LocksUnlink, LocksPair, LockConfig } from './types';
++import { TargetEvent } from './enums.js';
++import type Watcher from './watcher.js';
++import type { Path, LocksAdd, LocksUnlink, LocksPair, LockConfig } from './types.js';
+ declare class WatcherLocker {
+     _locksAdd: LocksAdd;
+     _locksAddDir: LocksAdd;
+diff --git a/dist/watcher_poller.d.ts b/dist/watcher_poller.d.ts
+index ed1263f9c1e1023ac9b7ba9b81cc395753db384d..a2e2845bb5d8d0733dcafebe21652fc5a10075ad 100644
+--- a/dist/watcher_poller.d.ts
++++ b/dist/watcher_poller.d.ts
+@@ -1,7 +1,7 @@
+-import { FileType, TargetEvent } from './enums';
+-import LazyMapSet from './lazy_map_set';
+-import WatcherStats from './watcher_stats';
+-import type { INO, Path } from './types';
++import { FileType, TargetEvent } from './enums.js';
++import LazyMapSet from './lazy_map_set.js';
++import WatcherStats from './watcher_stats.js';
++import type { INO, Path } from './types.js';
+ declare class WatcherPoller {
+     inos: Partial<Record<TargetEvent, Record<Path, [INO, FileType]>>>;
+     paths: LazyMapSet<INO, Path>;
+diff --git a/dist/watcher_stats.d.ts b/dist/watcher_stats.d.ts
+index 61733034f16a3d4c569b6b2019ce384cb39bf3b1..27ca6d4a1ecb098370dceb2b39b8cde310a23f9c 100644
+--- a/dist/watcher_stats.d.ts
++++ b/dist/watcher_stats.d.ts
+@@ -1,4 +1,4 @@
+-import type { INO, Stats } from './types';
++import type { INO, Stats } from './types.js';
+ declare class WatcherStats {
+     ino: INO;
+     size: number;

@@ -4,7 +4,6 @@
     "description": "An interop for JS to enable scalable Git interactions.",
     "version": "0.0.0",
     "type": "module",
-    "types": "./dist/main.d.ts",
     "exports": {
         "./api/config/global/read": {
             "import": "./dist/api/config/global/read.js",
@@ -80,9 +79,7 @@
         }
     },
     "devDependencies": {
-        "@types/node": "^20.10.0",
-        "@types/which": "^3.0.3",
-        "ava": "workspace:*",
+        "@types/which": "^3.0.4",
         "into-stream": "^8.0.1"
     },
     "dependencies": {

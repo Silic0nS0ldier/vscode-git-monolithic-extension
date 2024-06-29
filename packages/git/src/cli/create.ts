@@ -5,9 +5,9 @@ import {
     ERROR_GENERIC,
     ERROR_NON_ZERO_EXIT,
     ERROR_TIMEOUT,
-    GenericError,
+    type GenericError,
 } from "../errors.js";
-import { err, isErr, ok, Result, unwrap } from "../func-result.js";
+import { err, isErr, ok, type Result, unwrap } from "../func-result.js";
 import type { CLI, CLIResult, PersistentCLIContext } from "./context.js";
 
 export type ChildProcess = {

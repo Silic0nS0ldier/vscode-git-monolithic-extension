@@ -1,0 +1,30 @@
+diff --git a/dist/constants.d.ts b/dist/constants.d.ts
+index 15e11af641dd61acbddd5a4db715e7a3f913f4cb..f344d77f2f6635e339e91bfad592807d199643a0 100644
+--- a/dist/constants.d.ts
++++ b/dist/constants.d.ts
+@@ -1,4 +1,4 @@
+-import type { Callback } from './types';
++import type { Callback } from './types.js';
+ declare const NOOP_PROMISE_LIKE: {
+     then: (fn: Callback) => void;
+ };
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 18cc28247f470df4387caec783a93395d6b3ea02..6677abee450b8eca7d0f681f1d35dc130a4236f1 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -1,4 +1,4 @@
+-import type { Dirent, Options, ResultDirectory, ResultDirectories, Result } from './types';
++import type { Dirent, Options, ResultDirectory, ResultDirectories, Result } from './types.js';
+ declare const readdir: (rootPath: string, options?: Options) => Promise<Result>;
+ export default readdir;
+ export type { Dirent, Options, ResultDirectory, ResultDirectories, Result };
+diff --git a/dist/utils.d.ts b/dist/utils.d.ts
+index cc27e37e8095f59ec5abec77e500d46a08c86ec3..f95ce8231d443ad8662adadf8a4c6798aaeddd93 100644
+--- a/dist/utils.d.ts
++++ b/dist/utils.d.ts
+@@ -1,4 +1,4 @@
+-import type { Callback } from './types';
++import type { Callback } from './types.js';
+ declare const castArray: <T>(value: T | T[]) => T[];
+ declare const isFunction: (value: unknown) => value is Function;
+ declare const makeCounterPromise: () => {

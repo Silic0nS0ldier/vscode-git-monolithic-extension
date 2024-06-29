@@ -3,14 +3,14 @@ import {
     createError,
     ERROR_GIT_NOT_FOUND,
     ERROR_GIT_UNUSABLE,
-    GitNotFoundError,
-    GitUnusableError,
-    TimeoutError,
+    type GitNotFoundError,
+    type GitUnusableError,
+    type TimeoutError,
 } from "../errors.js";
-import { err, isErr, ok, Result, unwrap } from "../func-result.js";
+import { err, isErr, ok, type Result, unwrap } from "../func-result.js";
 import { isMacOS } from "../helpers/platform-matchers.js";
 import type { GitContext, PersistentCLIContext } from "./context.js";
-import { create, SpawnFn } from "./create.js";
+import { create, type SpawnFn } from "./create.js";
 import { readToString } from "./helpers/read-to-string.js";
 
 export type FromPathErrors =

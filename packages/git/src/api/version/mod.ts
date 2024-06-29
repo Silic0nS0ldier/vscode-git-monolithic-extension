@@ -1,7 +1,7 @@
 import { compareVersions } from "compare-versions";
 import type { GitContext } from "../../cli/context.js";
-import { ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
-import { isErr, ok, Result, unwrap } from "../../func-result.js";
+import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
+import { isErr, ok, type Result, unwrap } from "../../func-result.js";
 
 export async function version(git: GitContext): Promise<Result<string, ReadToErrors>> {
     const result = await readToString({ cli: git.cli, cwd: "/" }, ["--version"]);

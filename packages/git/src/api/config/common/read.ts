@@ -1,7 +1,7 @@
 import type { GitContext } from "../../../cli/context.js";
-import { ReadToErrors, readToString } from "../../../cli/helpers/read-to-string.js";
+import { type ReadToErrors, readToString } from "../../../cli/helpers/read-to-string.js";
 import { createError, ERROR_GENERIC } from "../../../errors.js";
-import { err, isErr, ok, Result, unwrap } from "../../../func-result.js";
+import { err, isErr, ok, type Result, unwrap } from "../../../func-result.js";
 
 type Scope = "local" | "worktree" | "global" | "system";
 

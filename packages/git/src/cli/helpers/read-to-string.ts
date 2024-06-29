@@ -1,7 +1,7 @@
-import getStream, { MaxBufferError } from "get-stream";
+import { MaxBufferError, getStreamAsBuffer } from "get-stream";
 import { PassThrough } from "stream";
-import { BufferOverflowError, createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, GenericError } from "../../errors.js";
-import { err, isErr, ok, Result, unwrap } from "../../func-result.js";
+import { type BufferOverflowError, createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, type GenericError } from "../../errors.js";
+import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import type { CLI } from "../context.js";
 
 export type ReadToContext = {
@@ -27,7 +27,7 @@ export async function readToString(context: ReadToContext, args: string[]): Prom
     try {
         const cliAction = context.cli({ cwd: context.cwd, signal: abortController.signal, stdout }, args);
         // Throws on max buffer hit
-        const streamReader = getStream(stdout, { encoding: "utf-8", maxBuffer: 1024 });
+        const streamReader = getStreamAsBuffer(stdout, { maxBuffer: 1024 });
 
         const [streamResult, cliResult] = await Promise.all([streamReader, cliAction]);
 
@@ -35,7 +35,9 @@ export async function readToString(context: ReadToContext, args: string[]): Prom
             throw unwrap(cliResult);
         }
 
-        return ok(streamResult);
+        // Buffer size is capped at 1024, well below the max string length
+        // Conversion to string won't throw.
+        return ok(streamResult.toString("utf-8"));
     } catch (e) {
         abortController.abort();
         if (e instanceof MaxBufferError) {

@@ -1,6 +1,6 @@
 import type { GitContext } from "../../cli/context.js";
-import { ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
-import { isErr, ok, Result, unwrap } from "../../func-result.js";
+import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
+import { isErr, ok, type Result, unwrap } from "../../func-result.js";
 
 export async function gitDir(
     git: GitContext,
