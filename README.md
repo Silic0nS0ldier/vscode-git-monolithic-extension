@@ -6,7 +6,7 @@ See [`./extension/vsix/README.md`](./extension/vsix/README.md) for more details.
 
 ## Building
 
-For development
+For development builds
 ```sh
 bazel build //extension/vsix:git_monolithic --stamp
 ```

@@ -1,0 +1,37 @@
+name: "CI"
+on:
+  push:
+    branches:
+      - main
+  # Pull request
+  pull_request:
+    types:
+      # Newly opened
+      - opened
+      # Updated (excludes change of base branch)
+      - synchronize
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: bazel-contrib/setup-bazel@0.8.5
+        with:
+          bazelisk-cache: true
+          disk-cache: "${{ github.workflow }}-test"
+          repository-cache: true
+      - run: bazel test //...
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: bazel-contrib/setup-bazel@0.8.5
+        with:
+          bazelisk-cache: true
+          disk-cache: "${{ github.workflow }}-build"
+          repository-cache: true
+      - run: bazel build //extension/vsix:git_monolithic --stamp
+      - uses: actions/upload-artifact@v4
+        with:
+          name: git-monolithic-vsix
+          path: .bazel/bin/extension/vsix/git_monolithic.vsix
