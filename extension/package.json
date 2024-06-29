@@ -3,7 +3,7 @@
     "type": "module",
     "dependencies": {
         "@vscode/extension-telemetry": "^0.9.6",
-        "get-stream": "^8.0.1",
+        "get-stream": "^9.0.1",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:*",
         "onetime": "^7.0.0",
