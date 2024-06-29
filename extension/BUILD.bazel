@@ -47,9 +47,6 @@ rollup_bundle(
     visibility = ["//extension/vsix:__pkg__"],
 )
 
-# TODO Create vsix with @vscode/vsce
-
-
 ts_project(
     name = "lib_tests",
     srcs = glob(["src/**/*.test.ts", "src/**/*.stub.ts"]) + ["package.json"],

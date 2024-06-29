@@ -6,9 +6,14 @@ See [`./extension/vsix/README.md`](./extension/vsix/README.md) for more details.
 
 ## Building
 
+For development
 ```sh
-bazel build //extension/vsix:git_monolithic
+bazel build //extension/vsix:git_monolithic --stamp
 ```
+
+For release
+1. Increment version in `extension/vsix/package.json`
+2. `bazel build //extension/vsix:git_monolithic`
 
 ## Terminology
 

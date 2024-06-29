@@ -28,4 +28,5 @@ def vsce_package(name, srcs, in_dir):
         outs = outs,
         chdir = native.package_name(),
         mnemonic = "VscePackage",
+        stamp = -1,
     )

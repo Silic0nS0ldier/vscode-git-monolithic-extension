@@ -25,12 +25,20 @@ copy_file(
     out = "src/askpass-main.js",
 )
 
+# Copy license
+copy_file(
+    name = "copy_license",
+    src = "//:LICENSE",
+    out = "LICENSE",
+)
+
 vsce_package(
     name = "git_monolithic",
     srcs = glob(["**"], exclude = ["package.json-off.json", "package.nls.json-off.json", "BUILD.bazel"]) + [
         ":copy_bundle_chunks",
         ":copy_bundle_main",
         ":copy_bundle_askpass_main",
+        ":copy_license",
     ],
     in_dir = "./",
 )

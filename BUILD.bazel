@@ -8,3 +8,5 @@ ts_config(
     src = "tsconfig.json",
     visibility = ["//visibility:public"],
 )
+
+exports_files(["LICENSE"])

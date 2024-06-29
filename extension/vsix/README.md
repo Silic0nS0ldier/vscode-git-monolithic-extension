@@ -18,9 +18,15 @@ This extension has undergone significant refactoring. While it may be a fork, it
 
 ## IMPORTANT
 
+### `vscode.git`
+
 VSCode assumes it's integrated Git support (implemented as an extension) is the only source control provider for git. To gain any benefit (and avoid confusion) it will need to be disabled.
 
 To disable the integrated extension;
 1. Go to the "Extensions" panel (`ctrl+shift+x`).
 2. Search for `@builtin git`
 3. Disable `Git` (Git SCM Integration).
+
+### Windows + Git `>=2.25`
+
+This extension does not currently support Windows with current versions of Git as logic to handle `rev-parse --show-toplevel` changes have not been ported to the new Git CLI interop package.
