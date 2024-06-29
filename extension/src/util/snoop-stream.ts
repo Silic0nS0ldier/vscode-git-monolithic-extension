@@ -1,4 +1,4 @@
-import { Writable } from "stream";
+import { Writable, Transform } from "stream";
 
 function stringifyChunk(chunk: any, encoding: BufferEncoding): string {
     try {
@@ -21,26 +21,24 @@ function clampLength(str: string): string {
  */
 export function snoopOnStream(stream: NodeJS.WritableStream, log: (msg: string) => void): NodeJS.WritableStream {
     let toLog = "";
-    return new Proxy(stream, {
-        get(target: any, p): any {
-            if (p === "write") {
-                return function write(chunk: any, encoding: BufferEncoding) {
-                    if (toLog.length < 150) {
-                        toLog += stringifyChunk(chunk, encoding);
-                    }
-                    target[p].call(target, ...arguments);
-                };
+
+    const snooper = new Transform({
+        transform(chunk, encoding, callback) {
+            if (toLog.length < 150) {
+                toLog += stringifyChunk(chunk, encoding);
             }
-            if (p === "destroy") {
-                return function destroy() {
-                    const escaped = JSON.stringify(toLog);
-                    log(clampLength(escaped));
-                    target[p].call(target, ...arguments);
-                };
-            }
-            return target[p];
+            callback(null, chunk);
+        },
+        destroy(_error, callback) {
+            const escaped = JSON.stringify(toLog);
+            log(clampLength(escaped));
+            callback();
         },
     });
+
+    snooper.pipe(stream);
+
+    return snooper;
 }
 
 /**

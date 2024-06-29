@@ -12,6 +12,7 @@ import {
     window,
     workspace,
     type WorkspaceFolder,
+    extensions,
 } from "vscode";
 import { registerAPICommands } from "../api/api1.js";
 import { GitExtensionImpl } from "../api/extension.js";
@@ -35,9 +36,27 @@ import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
 
 export async function activate(context: ExtensionContext): Promise<GitExtension> {
-    const outputChannel = window.createOutputChannel("Git");
+    const outputChannel = window.createOutputChannel("Git Monolithic");
 
     outputChannel.appendLine("Monolithic Git for VSCode is starting...");
+
+    {
+        const builtinGitExtension = extensions.getExtension("vscode.git");
+        if (builtinGitExtension) {
+            outputChannel.appendLine("Builtin git extension is enabled, this is not supported.");
+            const result = await window.showErrorMessage(
+                "Builtin git extension is enabled.",
+                {
+                    modal: true,
+                    detail: "The builtin Git (Git SCM Integration) conflicts with Monolithic Git and should be disabled.",
+                },
+                "Show Extension",
+            );
+            if (result === "Show Extension") {
+                commands.executeCommand("workbench.extensions.search", "@builtin git")
+            }
+        }
+    }
 
     const disposables: Disposable[] = [];
     context.subscriptions.push(new Disposable(() => Disposable.from(...disposables).dispose()));

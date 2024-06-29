@@ -44,4 +44,5 @@ await createVSIX({
     cwd: inDir,
     packagePath: outFile,
     updatePackageJson: false,
+    dependencies: false,
 });

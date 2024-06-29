@@ -4,7 +4,7 @@
     "description": "%description%",
     "publisher": "silicon-soldier",
     "license": "MIT",
-    "version": "0.1.14",
+    "version": "0.1.19",
     "engines": {
         "vscode": "^1.90.1"
     },
@@ -2159,7 +2159,7 @@
         ]
     },
     "repository": {
-        "directory": "packages/extension",
+        "directory": "extension",
         "type": "git",
         "url": "https://github.com/Silic0nS0ldier/vscode-git-monolithic-extension"
     }
