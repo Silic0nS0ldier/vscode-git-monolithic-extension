@@ -2,7 +2,7 @@
     "name": "git-monolithic",
     "displayName": "%displayName%",
     "description": "%description%",
-    "publisher": "silicon-soldier",
+    "publisher": "siliconsoldier",
     "license": "MIT",
     "version": "0.1.19",
     "engines": {
