@@ -2,8 +2,8 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.0",
-        "get-stream": "^8.0.1",
+        "@vscode/extension-telemetry": "^0.9.6",
+        "get-stream": "^9.0.1",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:*",
         "onetime": "^7.0.0",
@@ -13,6 +13,6 @@
         "watcher": "^2.3.1"
     },
     "devDependencies": {
-        "@types/vscode": "^1.84.2"
+        "@types/vscode": "^1.90.0"
     }
 }

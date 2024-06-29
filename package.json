@@ -1,7 +1,7 @@
 {
     "private": true,
     "dependencies": {
-        "@types/node": "^20.14.8",
+        "@types/node": "^20.14.9",
         "typescript": "^5.5.2",
         "ava": "^6.1.3"
     },

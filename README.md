@@ -2,6 +2,8 @@
 
 A fork of VSCode's integrated Git support (from 2021-09-08) designed to work better with large repositories that Git is slow to work with.
 
+[Find it on the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=siliconsoldier.git-monolithic)
+
 See [`./extension/vsix/README.md`](./extension/vsix/README.md) for more details.
 
 ## Building
