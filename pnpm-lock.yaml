@@ -48,8 +48,8 @@ importers:
   build_defs/vsce_package:
     dependencies:
       '@vscode/vsce':
-        specifier: ^2.29.0
-        version: 2.29.0
+        specifier: ^2.30.0
+        version: 2.30.0
       cleye:
         specifier: ^1.3.2
         version: 1.3.2
@@ -412,8 +412,8 @@ packages:
   '@vscode/vsce-sign@2.0.4':
     resolution: {integrity: sha512-0uL32egStKYfy60IqnynAChMTbL0oqpqk0Ew0YHiIb+fayuGZWADuIPHWUcY1GCnAA+VgchOPDMxnc2R3XGWEA==}
 
-  '@vscode/vsce@2.29.0':
-    resolution: {integrity: sha512-63+aEO8SpjE6qKiIh2Cqy/P9zC7+USElGwpEdkyPp89xIBDBr5IqeNS3zkD3mp3wZqbvHIpJsCCNu74WQirYCg==}
+  '@vscode/vsce@2.30.0':
+    resolution: {integrity: sha512-MBYpXdCY1SCdc2u/y11kmJuSODKFyZRpeRTQq5p4rSg05QSjSy5pz6h/BGLNdSahgXfKRBATEkjAcJFdJuDz8Q==}
     engines: {node: '>= 16'}
     hasBin: true
 
@@ -2032,7 +2032,7 @@ snapshots:
       '@vscode/vsce-sign-win32-arm64': 2.0.2
       '@vscode/vsce-sign-win32-x64': 2.0.2
 
-  '@vscode/vsce@2.29.0':
+  '@vscode/vsce@2.30.0':
     dependencies:
       '@azure/identity': 4.3.0
       '@vscode/vsce-sign': 2.0.4
