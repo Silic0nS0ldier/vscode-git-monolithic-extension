@@ -83,7 +83,7 @@
         "into-stream": "^8.0.1"
     },
     "dependencies": {
-        "compare-versions": "^6.1.0",
+        "compare-versions": "^6.1.1",
         "get-stream": "^9.0.1",
         "which": "^4.0.0"
     }
