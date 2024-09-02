@@ -5,57 +5,13 @@
     "version": "0.0.0",
     "type": "module",
     "exports": {
-        "./api/config/global/read": {
-            "import": "./dist/api/config/global/read.js",
-            "types": "./dist/api/config/global/read.d.ts"
-        },
-        "./api/config/user/read": {
-            "import": "./dist/api/config/user/read.js",
-            "types": "./dist/api/config/user/read.d.ts"
-        },
-        "./api/repository/config/read": {
-            "import": "./dist/api/repository/config/read.js",
-            "types": "./dist/api/repository/config/read.d.ts"
-        },
-        "./api/repository/remotes/get": {
-            "import": "./dist/api/repository/remotes/get.js",
-            "types": "./dist/api/repository/remotes/get.d.ts"
-        },
-        "./api/repository/find-tracking-branches": {
-            "import": "./dist/api/repository/find-tracking-branches.js",
-            "types": "./dist/api/repository/find-tracking-branches.d.ts"
-        },
-        "./api/repository/ignore/check/parser": {
-            "import": "./dist/api/repository/ignore/check/parser.js",
-            "types": "./dist/api/repository/ignore/check/parser.d.ts"
-        },
         "./api/repository/init": {
             "import": "./dist/api/repository/init/mod.js",
             "types": "./dist/api/repository/init/mod.d.ts"
         },
-        "./api/version": {
-            "import": "./dist/api/version/mod.js",
-            "types": "./dist/api/version/mod.d.ts"
-        },
-        "./api/rev-parse/git-dir": {
-            "import": "./dist/api/rev-parse/git-dir.js",
-            "types": "./dist/api/rev-parse/git-dir.d.ts"
-        },
-        "./api/rev-parse/head": {
-            "import": "./dist/api/rev-parse/head.js",
-            "types": "./dist/api/rev-parse/head.d.ts"
-        },
-        "./api/symbolic-ref/head": {
-            "import": "./dist/api/symbolic-ref/head.js",
-            "types": "./dist/api/symbolic-ref/head.d.ts"
-        },
-        "./api/rev-parse/show-toplevel": {
-            "import": "./dist/api/rev-parse/show-toplevel.js",
-            "types": "./dist/api/rev-parse/show-toplevel.d.ts"
-        },
-        "./api/worktree/config/read": {
-            "import": "./dist/api/worktree/config/read.js",
-            "types": "./dist/api/worktree/config/read.d.ts"
+        "./api/*": {
+            "import": "./dist/api/*.js",
+            "types": "./dist/api/*.d.ts"
         },
         "./cli": {
             "import": "./dist/cli/mod.js",
@@ -80,9 +36,11 @@
     },
     "devDependencies": {
         "@types/which": "^3.0.4",
-        "into-stream": "^8.0.1"
+        "into-stream": "^8.0.1",
+        "ava": "catalog:"
     },
     "dependencies": {
+        "@types/node": "catalog:",
         "compare-versions": "^6.1.1",
         "get-stream": "^9.0.1",
         "which": "^4.0.0"
