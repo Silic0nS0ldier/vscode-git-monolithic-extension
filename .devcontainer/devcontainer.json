@@ -1,7 +1,9 @@
 {
 	"name": "Git monolithic",
-	"build": {
-		"dockerfile": "./Dockerfile"
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"features": {
+		"./feature-bazel": {},
+		"ghcr.io/devcontainers/features/node:1": {}
 	},
 	"customizations": {
 		"vscode": {
