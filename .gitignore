@@ -1,8 +1,9 @@
 # Bazel
 .bazel/
 
-# node_modules
+# node_modules (directory and symlink)
 node_modules/
+node_modules
 
 # pnpm store
 .pnpm-store/

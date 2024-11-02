@@ -7,16 +7,13 @@ bazel build \
     //build_defs/rollup_bundle:node_modules \
     //build_defs/vsce_package:node_modules
 
-echo "Cleaning old node_modules"
-rm -rf ./node_modules
-rm -rf ./packages/git/node_modules
-rm -rf ./extension/node_modules
-rm -rf ./build_defs/rollup_bundle/node_modules
-rm -rf ./build_defs/vsce_package/node_modules
+# Get bazel-bin of last build
+# NOTE This can technically race with other processes, but is fine so long as target platform remains the same
+bazel_bin=$(bazel info bazel-bin)
 
-echo "Copying new node_modules"
-cp -r ./.bazel/bin/node_modules ./
-cp -r ./.bazel/bin/packages/git/node_modules ./packages/git
-cp -r ./.bazel/bin/extension/node_modules ./extension
-cp -r ./.bazel/bin/build_defs/rollup_bundle/node_modules ./build_defs/rollup_bundle
-cp -r ./.bazel/bin/build_defs/vsce_package/node_modules ./build_defs/vsce_package
+echo "Linking node_modules"
+ln --symbolic --no-dereference --force $bazel_bin/node_modules ./node_modules
+ln --symbolic --no-dereference --force $bazel_bin/packages/git/node_modules ./packages/git
+ln --symbolic --no-dereference --force $bazel_bin/extension/node_modules ./extension
+ln --symbolic --no-dereference --force $bazel_bin/build_defs/rollup_bundle/node_modules ./build_defs/rollup_bundle
+ln --symbolic --no-dereference --force $bazel_bin/build_defs/vsce_package/node_modules ./build_defs/vsce_package
