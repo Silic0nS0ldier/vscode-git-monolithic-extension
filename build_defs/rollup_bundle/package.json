@@ -3,7 +3,7 @@
     "type": "module",
     "dependencies": {
         "cleye": "catalog:",
-        "rollup": "^4.21.2",
+        "rollup": "^4.24.3",
         "@rollup/plugin-node-resolve": "^15.2.3",
         "@rollup/plugin-commonjs": "^26.0.1"
     },
