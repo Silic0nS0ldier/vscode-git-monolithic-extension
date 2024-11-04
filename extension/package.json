@@ -3,7 +3,7 @@
     "type": "module",
     "dependencies": {
         "@vscode/extension-telemetry": "^0.9.7",
-        "get-stream": "^9.0.1",
+        "get-stream": "catalog:",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:^",
         "onetime": "^7.0.0",
@@ -13,8 +13,8 @@
         "watcher": "^2.3.1"
     },
     "devDependencies": {
+        "@types/node": "catalog:vscode",
         "@types/vscode": "^1.92.0",
-        "@types/node": "catalog:",
         "ava": "catalog:"
     }
 }

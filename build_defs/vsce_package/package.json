@@ -4,5 +4,8 @@
     "dependencies": {
         "@vscode/vsce": "^3.0.0",
         "cleye": "catalog:"
+    },
+    "devDependencies": {
+        "@types/node": "catalog:"
     }
 }

@@ -17,7 +17,7 @@ ts_project(
     out_dir = "dist",
     root_dir = "src",
     deps = [
-        "//:node_modules/@types/node",
+        ":node_modules/@types/node",
         ":node_modules/@vscode/vsce",
         ":node_modules/cleye",
     ],

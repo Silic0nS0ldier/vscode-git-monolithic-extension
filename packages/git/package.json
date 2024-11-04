@@ -36,13 +36,13 @@
     },
     "devDependencies": {
         "@types/which": "^3.0.4",
-        "into-stream": "^8.0.1",
-        "ava": "catalog:"
+        "ava": "catalog:",
+        "into-stream": "^8.0.1"
     },
     "dependencies": {
-        "@types/node": "catalog:",
+        "@types/node": "catalog:vscode",
         "compare-versions": "^6.1.1",
-        "get-stream": "^9.0.1",
+        "get-stream": "catalog:",
         "which": "^4.0.0"
     }
 }
