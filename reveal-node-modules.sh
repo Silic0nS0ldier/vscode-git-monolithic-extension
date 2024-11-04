@@ -13,7 +13,7 @@ bazel_bin=$(bazel info bazel-bin)
 
 echo "Linking node_modules"
 ln --symbolic --no-dereference --force $bazel_bin/node_modules ./node_modules
-ln --symbolic --no-dereference --force $bazel_bin/packages/git/node_modules ./packages/git
-ln --symbolic --no-dereference --force $bazel_bin/extension/node_modules ./extension
-ln --symbolic --no-dereference --force $bazel_bin/build_defs/rollup_bundle/node_modules ./build_defs/rollup_bundle
-ln --symbolic --no-dereference --force $bazel_bin/build_defs/vsce_package/node_modules ./build_defs/vsce_package
+ln --symbolic --no-dereference --force $bazel_bin/packages/git/node_modules ./packages/git/node_modules
+ln --symbolic --no-dereference --force $bazel_bin/extension/node_modules ./extension/node_modules
+ln --symbolic --no-dereference --force $bazel_bin/build_defs/rollup_bundle/node_modules ./build_defs/rollup_bundle/node_modules
+ln --symbolic --no-dereference --force $bazel_bin/build_defs/vsce_package/node_modules ./build_defs/vsce_package/node_modules
