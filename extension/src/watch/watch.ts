@@ -31,14 +31,24 @@ type Watcher = {
  * @param location
  * @returns
  */
-export function watch(locations: string[], locks: string[], outputChannel: OutputChannel): Watcher {
+export function watch(locations: string[], locks: string[], ignores: string[], outputChannel: OutputChannel): Watcher {
     const onFileChangeEmitter = new EventEmitter<Uri>();
     const watcher = new BaseWatcher(
         [...locations, ...locks],
         {
+            // TODO Check that file limit is not exceeded (10_000_000)
+            //      Use `git ls-files | wc -l` (or similar) to check
             debounce: 500,
             ignoreInitial: true,
             renameDetection: false,
+            recursive: true,
+            ignore(targetPath) {
+                if (ignores.some(i => targetPath === i || targetPath.startsWith(i + '/'))) {
+                    return true;
+                }
+
+                return false;
+            },
         },
         (et, path) => {
             if (locks.some(fs.existsSync)) {
