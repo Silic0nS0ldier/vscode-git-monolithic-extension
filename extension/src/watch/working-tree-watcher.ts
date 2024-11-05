@@ -1,36 +1,45 @@
-import * as fs from "node:fs";
 import path from "node:path";
-import { Disposable, type Event, RelativePattern, Uri, workspace } from "vscode";
-import { anyEvent, filterEvent } from "../util/events.js";
+import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
+import { anyEvent } from "../util/events.js";
+import { watch } from "./watch.js";
 
 export function createWorkingTreeWatcher(
     repoRoot: string,
     dotGit: string,
+    outputChannel: OutputChannel,
 ): { event: Event<Uri> } & Disposable {
-    const indexLockPath = path.join(dotGit, "index.lock");
-    const repoWatcher = workspace.createFileSystemWatcher(new RelativePattern(repoRoot, "**"));
+    const emitter = new EventEmitter<Uri>();
 
-    const onRepoFileChange = anyEvent(
-        repoWatcher.onDidChange,
-        repoWatcher.onDidCreate,
-        repoWatcher.onDidDelete,
+    const rootWatcher = watch(
+        [
+            repoRoot,
+        ],
+        [
+            // Don't propagate events if index being modified
+            path.join(dotGit, "index.lock"),
+            // Or (merge|revert|cherrypick) is in progress
+            // TODO Refreshing during a merge/revert/cherrypick produces a lot of noise and puts
+            //      extra stress on the system. Not ideal but better for large repos.
+            //      Eventually this should be made smarter.
+            path.join(dotGit, "MERGE_HEAD"),
+            path.join(dotGit, "REVERT_HEAD"),
+            path.join(dotGit, "CHERRY_PICK_HEAD"),
+        ],
+        [
+            path.join(dotGit, '.git'),
+            // TODO Cull watched list using `.gitignore` (which will involve recreating the watcher
+            //      in some circumstances) e.g. for `node_modules`
+        ],
+        outputChannel,
     );
 
-    const onWorkingTreeFileChange = filterEvent(
-        onRepoFileChange,
-        uri => {
-            if (/\/\.git($|\/)/.test(uri.path)) {
-                return false;
-            }
-
-            return !fs.existsSync(indexLockPath);
-        },
+    const disposable = Disposable.from(
+        emitter,
+        rootWatcher,
     );
 
     return {
-        dispose(): void {
-            repoWatcher.dispose();
-        },
-        event: onWorkingTreeFileChange,
+        dispose: () => disposable.dispose(),
+        event: anyEvent(rootWatcher.event, emitter.event),
     };
 }

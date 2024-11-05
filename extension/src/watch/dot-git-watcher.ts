@@ -36,6 +36,7 @@ export function createDotGitWatcher(
             path.join(dotGitDir, "REVERT_HEAD"),
             path.join(dotGitDir, "CHERRY_PICK_HEAD"),
         ],
+        [],
         outputChannel,
     );
 
