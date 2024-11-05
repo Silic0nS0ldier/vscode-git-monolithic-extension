@@ -2,24 +2,28 @@ module(name = "vscode_git_monolithic")
 
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
-bazel_dep(name = "aspect_rules_js", version = "3.0.3")
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
-bazel_dep(name = "rules_nodejs", version = "6.7.3")
-bazel_dep(name = "aspect_rules_ts", version = "3.8.7")
+bazel_dep(name = "aspect_rules_js", version = "3.0.3")
 bazel_dep(name = "aspect_rules_lint", version = "2.3.0")
-bazel_dep(name = "rules_multitool", version = "1.11.1")
-bazel_dep(name = "rules_shell", version = "0.6.1")
-bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "aspect_rules_ts", version = "3.8.7")
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "git", version = "2.53.0.bcr.1")
+bazel_dep(name = "llvm", version = "0.6.8")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_multitool", version = "1.11.1")
+bazel_dep(name = "rules_nodejs", version = "6.7.3")
+bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.69.0")
+bazel_dep(name = "rules_rust", version = "0.69.0")
+bazel_dep(name = "rules_shell", version = "0.6.1")
 
 # Force rules_go version to newer version for bazel 9.0.1+ support
 # Addresses `The CcInfo symbol has been removed` errors.
 # Dependency pulled in via
 #   <root> (vscode_git_monolithic@_)
-#   └───aspect_rules_lint@2.3.0 
-#       └───rules_buf@0.5.2 
-#           ├───gazelle@0.34.0 
-#           │   └───rules_go@0.42.0 # 
+#   └───aspect_rules_lint@2.3.0
+#       └───rules_buf@0.5.2
+#           ├───gazelle@0.34.0
+#           │   └───rules_go@0.42.0 #
 #           └───rules_go@0.42.0 #
 # TODO(Silic0nS0ldier): Remove once `rules_buf` updates to a newer `rules_go` version.
 # https://github.com/bufbuild/rules_buf/issues/132
@@ -58,3 +62,23 @@ use_repo(rules_ts_ext, "npm_typescript")
 multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
 multitool.hub(lockfile = "//:multitool.lock.json")
 use_repo(multitool, "multitool")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2024",
+    versions = ["1.94.0"],
+)
+
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//:Cargo.lock",
+    manifests = ["//:Cargo.toml"],
+)
+use_repo(crate, "crates")
+
+register_toolchains(
+    # Required for building with //build_defs/platforms:vscode_ext target platform
+    "//build_defs/rust_wasm_bindgen:toolchain_for_vscode_ext",
+    "@llvm//toolchain:all",
+)
