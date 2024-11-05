@@ -16,6 +16,7 @@ export function createDotGitWatcher(
             // Where we are
             path.join(dotGitDir, "HEAD"),
             // What we are tracking
+            // TODO Watch for 'sharedindex.*'
             path.join(dotGitDir, "index"),
             // Graph of what we know
             path.join(dotGitDir, "refs"),
@@ -24,8 +25,17 @@ export function createDotGitWatcher(
             // How we do things
             path.join(dotGitDir, "config"),
         ],
-        // Don't propagate events if index being modified
-        [path.join(dotGitDir, "index.lock")],
+        [
+            // Don't propagate events if index being modified
+            path.join(dotGitDir, "index.lock"),
+            // Or (merge|revert|cherrypick) is in progress
+            // TODO Refreshing during a merge/revert/cherrypick produces a lot of noise and puts
+            //      extra stress on the system. Not ideal but better for large repos.
+            //      Eventually this should be made smarter.
+            path.join(dotGitDir, "MERGE_HEAD"),
+            path.join(dotGitDir, "REVERT_HEAD"),
+            path.join(dotGitDir, "CHERRY_PICK_HEAD"),
+        ],
         outputChannel,
     );
 
