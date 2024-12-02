@@ -43,6 +43,6 @@
         "@types/node": "catalog:vscode",
         "compare-versions": "^6.1.1",
         "get-stream": "catalog:",
-        "which": "^4.0.0"
+        "which": "^5.0.0"
     }
 }
