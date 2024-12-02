@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.7",
+        "@vscode/extension-telemetry": "^0.9.8",
         "get-stream": "catalog:",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:^",
