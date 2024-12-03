@@ -109,8 +109,8 @@ importers:
         specifier: catalog:vscode
         version: 20.14.11
       '@types/vscode':
-        specifier: ^1.92.0
-        version: 1.92.0
+        specifier: ^1.95.0
+        version: 1.95.0
       ava:
         specifier: 'catalog:'
         version: 6.2.0
@@ -395,8 +395,8 @@ packages:
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
 
-  '@types/vscode@1.92.0':
-    resolution: {integrity: sha512-DcZoCj17RXlzB4XJ7IfKdPTcTGDLYvTOcTNkvtjXWF+K2TlKzHHkBEXNWQRpBIXixNEUgx39cQeTFunY0E2msw==}
+  '@types/vscode@1.95.0':
+    resolution: {integrity: sha512-0LBD8TEiNbet3NvWsmn59zLzOFu/txSlGxnv5yAFHCrhG9WvAnR3IvfHzMOs2aeWqgvNjq9pO99IUw8d3n+unw==}
 
   '@types/which@3.0.4':
     resolution: {integrity: sha512-liyfuo/106JdlgSchJzXEQCVArk0CvevqPote8F8HgWgJ3dRCcTHgJIsLDuee0kxk/mhbInzIZk3QWSZJ8R+2w==}
@@ -2064,7 +2064,7 @@ snapshots:
 
   '@types/resolve@1.20.2': {}
 
-  '@types/vscode@1.92.0': {}
+  '@types/vscode@1.95.0': {}
 
   '@types/which@3.0.4': {}
 
