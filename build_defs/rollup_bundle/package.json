@@ -5,7 +5,7 @@
         "cleye": "catalog:",
         "rollup": "^4.28.0",
         "@rollup/plugin-node-resolve": "^15.2.3",
-        "@rollup/plugin-commonjs": "^26.0.1"
+        "@rollup/plugin-commonjs": "^28.0.1"
     },
     "devDependencies": {
         "@types/node": "catalog:"
