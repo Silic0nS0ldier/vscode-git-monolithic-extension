@@ -31,7 +31,7 @@ type Watcher = {
  * @param location
  * @returns
  */
-export function watch(locations: string[], locks: string[], ignores: string[], outputChannel: OutputChannel): Watcher {
+export function watch(locations: string[], locks: string[], ignores: string[], outputChannel: OutputChannel, id: string): Watcher {
     const onFileChangeEmitter = new EventEmitter<Uri>();
     const watcher = new BaseWatcher(
         [...locations, ...locks],
@@ -59,14 +59,14 @@ export function watch(locations: string[], locks: string[], ignores: string[], o
             // Filter directory events, only files are of interest
             // TODO Do the individual files also get updated?
             if (et !== TargetEventEnum.addDir && et !== TargetEventEnum.unlinkDir && et !== TargetEventEnum.renameDir) {
-                outputChannel.appendLine(`TRACE: watcher event "${et}" "${path}"`);
+                outputChannel.appendLine(`TRACE: ${id} watcher event "${et}" "${path}"`);
                 onFileChangeEmitter.fire(Uri.file(path));
             }
         },
     );
 
     // TODO Use unified logger
-    watcher.on("error", err => outputChannel.appendLine(`Watcher error: ${prettyPrint(err)}`));
+    watcher.on("error", err => outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)}`));
 
     return {
         dispose(): void {

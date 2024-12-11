@@ -26,11 +26,12 @@ export function createWorkingTreeWatcher(
             path.join(dotGit, "CHERRY_PICK_HEAD"),
         ],
         [
-            path.join(dotGit, '.git'),
+            dotGit,
             // TODO Cull watched list using `.gitignore` (which will involve recreating the watcher
             //      in some circumstances) e.g. for `node_modules`
         ],
         outputChannel,
+        "working-tree",
     );
 
     const disposable = Disposable.from(
