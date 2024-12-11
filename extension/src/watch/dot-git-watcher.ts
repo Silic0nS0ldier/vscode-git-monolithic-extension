@@ -16,7 +16,9 @@ export function createDotGitWatcher(
             // Where we are
             path.join(dotGitDir, "HEAD"),
             // What we are tracking
-            // TODO Watch for 'sharedindex.*'
+            // `sharedindex.*` stores the whole index, with `index` a subset of recent changes. As
+            // such `sharedindex.*` does not needed to be watched. Any changes are just `index`
+            // being pruned.
             path.join(dotGitDir, "index"),
             // Graph of what we know
             path.join(dotGitDir, "refs"),
@@ -38,6 +40,7 @@ export function createDotGitWatcher(
         ],
         [],
         outputChannel,
+        "dot-git",
     );
 
     const disposable = Disposable.from(
