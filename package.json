@@ -1,7 +1,7 @@
 {
     "private": true,
     "dependencies": {
-        "typescript": "^5.6.3"
+        "typescript": "^5.7.2"
     },
     "pnpm": {
         "overrides": {
@@ -10,8 +10,7 @@
         },
         "onlyBuiltDependencies": [],
         "patchedDependencies": {
-            "watcher@2.3.1": "patches/watcher@2.3.1.patch",
-            "tiny-readdir@2.7.2": "patches/tiny-readdir@2.7.2.patch"
+            "watcher@2.3.1": "patches/watcher@2.3.1.patch"
         }
     }
 }
