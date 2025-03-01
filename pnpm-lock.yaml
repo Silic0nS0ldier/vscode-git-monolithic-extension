@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@types/node':
-      specifier: ^22.13.5
-      version: 22.13.5
+      specifier: ^22.13.7
+      version: 22.13.7
     ava:
       specifier: ^6.2.0
       version: 6.2.0
@@ -20,8 +20,8 @@ catalogs:
       version: 9.0.1
   vscode:
     '@types/node':
-      specifier: ^20.14.11
-      version: 22.10.7
+      specifier: ^20.17.21
+      version: 20.17.21
 
 overrides:
   minimist@<1.2.6: ^1.2.8
@@ -29,7 +29,7 @@ overrides:
 
 patchedDependencies:
   watcher@2.3.1:
-    hash: 5evhgjyylh56vgzmlkcac5dmwe
+    hash: 97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688
     path: patches/watcher@2.3.1.patch
 
 importers:
@@ -37,8 +37,8 @@ importers:
   .:
     dependencies:
       typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
+        specifier: ^5.8.2
+        version: 5.8.2
 
   build_defs/rollup_bundle:
     dependencies:
@@ -57,7 +57,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.13.5
+        version: 22.13.7
 
   build_defs/vsce_package:
     dependencies:
@@ -70,7 +70,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.13.5
+        version: 22.13.7
 
   extension:
     dependencies:
@@ -100,11 +100,11 @@ importers:
         version: 5.2.0
       watcher:
         specifier: ^2.3.1
-        version: 2.3.1(patch_hash=5evhgjyylh56vgzmlkcac5dmwe)
+        version: 2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688)
     devDependencies:
       '@types/node':
         specifier: catalog:vscode
-        version: 22.10.7
+        version: 20.17.21
       '@types/vscode':
         specifier: ^1.97.0
         version: 1.97.0
@@ -116,7 +116,7 @@ importers:
     dependencies:
       '@types/node':
         specifier: catalog:vscode
-        version: 22.10.7
+        version: 20.17.21
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -389,11 +389,11 @@ packages:
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
-  '@types/node@22.10.7':
-    resolution: {integrity: sha512-V09KvXxFiutGp6B7XkpaDXlNadZxrzajcY50EuoLIpQ6WWYCSvf19lVIazzfIzQvhUN2HjX12spLojTnhuKlGg==}
+  '@types/node@20.17.21':
+    resolution: {integrity: sha512-yw1WZ94lZpdZbpnaF+WRvlN/Sx2EZWe/YZVdK4mC4u02/ql6Ozen8qbRJhOtltOxCg97/kpijhGs5X6STwkvbg==}
 
-  '@types/node@22.13.5':
-    resolution: {integrity: sha512-+lTU0PxZXn0Dr1NBtC7Y8cR21AJr87dLLU953CWA6pMxxv/UDc7jYAY90upcrie1nRcD6XNG5HOYEDtgW5TxAg==}
+  '@types/node@22.13.7':
+    resolution: {integrity: sha512-oU2q+BsQldB9lYxHNp/5aZO+/Bs0Usa74Abo9mAKulz4ahQyXRHK6UVKYIN8KSC8HXwhWSi7b49JnX+txuac0w==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -1618,8 +1618,8 @@ packages:
   typed-rest-client@1.8.11:
     resolution: {integrity: sha512-5UvfMpd1oelmUPRbbaVnq+rHP7ng2cE4qoQkQeAqxRL6PklkxsM0g32/HL0yfvruK6ojQ5x8EE+HF4YV6DtuCA==}
 
-  typescript@5.7.3:
-    resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
+  typescript@5.8.2:
+    resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -1628,6 +1628,9 @@ packages:
 
   underscore@1.13.7:
     resolution: {integrity: sha512-GMXzWtsc57XAtguZgaQViUOzs0KTkk8ojr3/xAxXLITqf/3EMwxC0inyETfDFjH/Krbhuep0HNbbjI9i/q3F3g==}
+
+  undici-types@6.19.8:
+    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
 
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
@@ -2025,11 +2028,11 @@ snapshots:
 
   '@types/estree@1.0.6': {}
 
-  '@types/node@22.10.7':
+  '@types/node@20.17.21':
     dependencies:
-      undici-types: 6.20.0
+      undici-types: 6.19.8
 
-  '@types/node@22.13.5':
+  '@types/node@22.13.7':
     dependencies:
       undici-types: 6.20.0
 
@@ -3318,11 +3321,13 @@ snapshots:
       tunnel: 0.0.6
       underscore: 1.13.7
 
-  typescript@5.7.3: {}
+  typescript@5.8.2: {}
 
   uc.micro@2.1.0: {}
 
   underscore@1.13.7: {}
+
+  undici-types@6.19.8: {}
 
   undici-types@6.20.0: {}
 
@@ -3341,7 +3346,7 @@ snapshots:
 
   vscode-nls@5.2.0: {}
 
-  watcher@2.3.1(patch_hash=5evhgjyylh56vgzmlkcac5dmwe):
+  watcher@2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688):
     dependencies:
       dettle: 1.0.4
       stubborn-fs: 1.2.5
