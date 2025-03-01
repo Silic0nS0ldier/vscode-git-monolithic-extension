@@ -2,18 +2,10 @@ module(name = "vacode_git_monolithic")
 
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
-bazel_dep(name = "aspect_rules_js", version = "2.1.0")
-bazel_dep(name = "aspect_bazel_lib", version = "2.9.3")
-bazel_dep(name = "rules_nodejs", version = "6.3.1")
-bazel_dep(name = "aspect_rules_ts", version = "3.2.1")
-
-# TODO Remove once next Rules NodeJS release is out
-archive_override(
-    module_name = "rules_nodejs",
-    urls = ["https://github.com/bazel-contrib/rules_nodejs/archive/ea47e8d94ec9cd703e7001b212590c35751d2088.tar.gz"],
-    strip_prefix = "rules_nodejs-ea47e8d94ec9cd703e7001b212590c35751d2088",
-    integrity = "",
-)
+bazel_dep(name = "aspect_rules_js", version = "2.2.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.13.0")
+bazel_dep(name = "rules_nodejs", version = "6.3.3")
+bazel_dep(name = "aspect_rules_ts", version = "3.5.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(node_version = "22.11.0")
