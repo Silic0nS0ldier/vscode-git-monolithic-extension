@@ -49,7 +49,7 @@ rollup_bundle(
 
 ts_project(
     name = "lib_tests",
-    srcs = glob(["src/**/*.test.ts", "src/**/*.stub.ts"]) + ["package.json"],
+    srcs = glob(["src/**/*.test.ts"]) + glob(["src/**/*.stub.ts"], allow_empty = True) + ["package.json"],
     out_dir = "dist",
     root_dir = "src",
     deps = [
