@@ -11,14 +11,14 @@ if [[ $ARCH == "arm64" ]]; then
     curl https://github.com/bazelbuild/buildtools/releases/download/v8.0.3/buildifier-linux-arm64 -Lo /usr/local/bin/buildifier
     curl https://github.com/bazelbuild/buildtools/releases/download/v8.0.3/buildozer-linux-arm64 -Lo /usr/local/bin/buildozer
     curl https://github.com/bazelbuild/buildtools/releases/download/v8.0.3/unused_deps-linux-arm64 -Lo /usr/local/bin/unused_deps
-    curl https://github.com/withered-magic/starpls/releases/download/v0.1.20/starpls-linux-aarch64 -Lo /usr/local/bin/starpls
+    curl https://github.com/withered-magic/starpls/releases/download/v0.1.21/starpls-linux-aarch64 -Lo /usr/local/bin/starpls
     curl https://github.com/pnpm/pnpm/releases/download/v9.15.0/pnpm-linux-arm64 -Lo /usr/local/bin/pnpm
 elif [[ $ARCH == "x86_64" ]]; then
     curl https://github.com/bazelbuild/bazelisk/releases/download/v1.25.0/bazelisk-linux-amd64 -Lo /usr/local/bin/bazel
     curl https://github.com/bazelbuild/buildtools/releases/download/v8.0.3/buildifier-linux-amd64 -Lo /usr/local/bin/buildifier
     curl https://github.com/bazelbuild/buildtools/releases/download/v8.0.3/buildozer-linux-amd64 -Lo /usr/local/bin/buildozer
     curl https://github.com/bazelbuild/buildtools/releases/download/v8.0.3/unused_deps-linux-amd64 -Lo /usr/local/bin/unused_deps
-    curl https://github.com/withered-magic/starpls/releases/download/v0.1.20/starpls-linux-amd64 -Lo /usr/local/bin/starpls
+    curl https://github.com/withered-magic/starpls/releases/download/v0.1.21/starpls-linux-amd64 -Lo /usr/local/bin/starpls
     curl https://github.com/pnpm/pnpm/releases/download/v9.15.0/pnpm-linux-x64 -Lo /usr/local/bin/pnpm
 else
     echo "Unknown arch $ARCH"

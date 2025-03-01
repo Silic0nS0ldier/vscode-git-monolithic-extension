@@ -5,7 +5,8 @@
 		"./feature-bazel": {},
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "22.11.0"
-		}
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 	"customizations": {
 		"vscode": {
