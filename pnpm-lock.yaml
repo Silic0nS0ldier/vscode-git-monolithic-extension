@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@types/node':
-      specifier: ^22.13.11
-      version: 22.13.11
+      specifier: ^22.13.14
+      version: 22.13.14
     ava:
       specifier: ^6.2.0
       version: 6.2.0
@@ -57,7 +57,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.13.11
+        version: 22.13.14
 
   build_defs/vsce_package:
     dependencies:
@@ -70,7 +70,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.13.11
+        version: 22.13.14
 
   extension:
     dependencies:
@@ -396,8 +396,8 @@ packages:
   '@types/node@20.17.21':
     resolution: {integrity: sha512-yw1WZ94lZpdZbpnaF+WRvlN/Sx2EZWe/YZVdK4mC4u02/ql6Ozen8qbRJhOtltOxCg97/kpijhGs5X6STwkvbg==}
 
-  '@types/node@22.13.11':
-    resolution: {integrity: sha512-iEUCUJoU0i3VnrCmgoWCXttklWcvoCIx4jzcP22fioIVSdTmjgoEvmAO/QPw6TcS9k5FrNgn4w7q5lGOd1CT5g==}
+  '@types/node@22.13.14':
+    resolution: {integrity: sha512-Zs/Ollc1SJ8nKUAgc7ivOEdIBM8JAKgrqqUYi2J997JuKO7/tpQC+WCetQ1sypiKCQWHdvdg9wBNpUPEWZae7w==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -2069,7 +2069,7 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@22.13.11':
+  '@types/node@22.13.14':
     dependencies:
       undici-types: 6.20.0
 
