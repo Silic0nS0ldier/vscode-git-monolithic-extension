@@ -7,7 +7,7 @@ settings:
 catalogs:
   default:
     '@types/node':
-      specifier: ^22.15.19
+      specifier: ^22.13.11
       version: 22.15.19
     ava:
       specifier: ^6.2.0
@@ -106,8 +106,8 @@ importers:
         specifier: catalog:vscode
         version: 20.17.21
       '@types/vscode':
-        specifier: ^1.99.1
-        version: 1.99.1
+        specifier: ^1.100.0
+        version: 1.100.0
       ava:
         specifier: 'catalog:'
         version: 6.2.0(rollup@4.40.1)
@@ -405,8 +405,8 @@ packages:
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
 
-  '@types/vscode@1.99.1':
-    resolution: {integrity: sha512-cQlqxHZ040ta6ovZXnXRxs3fJiTmlurkIWOfZVcLSZPcm9J4ikFpXuB7gihofGn5ng+kDVma5EmJIclfk0trPQ==}
+  '@types/vscode@1.100.0':
+    resolution: {integrity: sha512-4uNyvzHoraXEeCamR3+fzcBlh7Afs4Ifjs4epINyUX/jvdk0uzLnwiDY35UKDKnkCHP5Nu3dljl2H8lR6s+rQw==}
 
   '@types/which@3.0.4':
     resolution: {integrity: sha512-liyfuo/106JdlgSchJzXEQCVArk0CvevqPote8F8HgWgJ3dRCcTHgJIsLDuee0kxk/mhbInzIZk3QWSZJ8R+2w==}
@@ -2078,7 +2078,7 @@ snapshots:
 
   '@types/resolve@1.20.2': {}
 
-  '@types/vscode@1.99.1': {}
+  '@types/vscode@1.100.0': {}
 
   '@types/which@3.0.4': {}
 
