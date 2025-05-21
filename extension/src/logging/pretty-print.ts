@@ -12,7 +12,7 @@ export async function prettyPrint(value: unknown): Promise<string> {
         const pending = getStreamAsBuffer(stdout, { maxBuffer: 1024 });
         formattingConsole.log(value);
         stdout.end();
-        return (await pending).toString("utf-8");
+        return (await pending).toString("utf-8").trimEnd();
     } catch (e) {
         // Settle for second best
         return JSON.stringify(value, null, 2);

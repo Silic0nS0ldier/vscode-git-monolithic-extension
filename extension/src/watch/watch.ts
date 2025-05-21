@@ -67,7 +67,7 @@ export function watch(locations: string[], locks: string[], ignores: string[], o
 
     // TODO Use unified logger
     watcher.on("error", async err => {
-        outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)} ${err} abc\n${new Error().stack} def`);
+        outputChannel.appendLine(`${id} watcher error: ${await prettyPrint(err)}`);
     });
 
     return {
