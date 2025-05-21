@@ -67,15 +67,7 @@ export function watch(locations: string[], locks: string[], ignores: string[], o
 
     // TODO Use unified logger
     watcher.on("error", async err => {
-        if (typeof err === "string") {
-            if (err.startsWith("[object ") && err.endsWith("]")) {
-                err = "(stringified object detected) " + err
-            }
-        }
-        if (!(err instanceof Error)) {
-            err += "\n" + new Error().stack;
-        }
-        outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)}`);
+        outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)} \n${new Error().stack}`);
     });
 
     return {
