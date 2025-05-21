@@ -26,8 +26,6 @@ type Watcher = {
     event: Event<Uri>;
 } & Disposable;
 
-let errorResolveCounter = 0;
-
 /**
  * Creates an optimised watcher.
  * @param location
@@ -69,17 +67,15 @@ export function watch(locations: string[], locks: string[], ignores: string[], o
 
     // TODO Use unified logger
     watcher.on("error", async err => {
-        const resolveId = err instanceof Promise ? `RESOLVE_${errorResolveCounter++}` : false;
-        outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)}${resolveId ? ` (awaiting result, look for ${resolveId})` : ""}`);
-        if (resolveId) {
-            try {
-                const resolved = await err;
-                outputChannel.appendLine(`${id} ${resolveId} watcher error: ${prettyPrint(resolved)}`);
-            }
-            catch (resolved) {
-                outputChannel.appendLine(`${id} ${resolveId} watcher error: (rejection) ${prettyPrint(resolved)}`);
+        if (typeof err === "string") {
+            if (err.startsWith("[object ") && err.endsWith("]")) {
+                err = "(stringified object detected) " + err
             }
         }
+        if (!(err instanceof Error)) {
+            err += "\n" + new Error().stack;
+        }
+        outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)}`);
     });
 
     return {
