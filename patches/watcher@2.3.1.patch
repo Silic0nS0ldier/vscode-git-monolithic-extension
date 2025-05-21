@@ -47,6 +47,38 @@ index 352c3c2d7aea8ff4a52fd788d260553fbebda532..103fc97f9b713e309bfe7b007b009709
  declare class Watcher extends EventEmitter {
      _closed: boolean;
      _ready: boolean;
+diff --git a/dist/watcher.js b/dist/watcher.js
+index 9aaf77f1685c3bd5a6229955f4265bd6e4891aa8..f03052700fd25bf9e03b7956c61e47584407e754 100644
+--- a/dist/watcher.js
++++ b/dist/watcher.js
+@@ -187,13 +187,25 @@ class Watcher extends EventEmitter {
+                 const watcherOptions = (!options.recursive || (HAS_NATIVE_RECURSION && options.native !== false)) ? options : { ...options, recursive: false }; // Ensuring recursion is explicitly disabled if not available
+                 const watcher = fs.watch(folderPath, watcherOptions);
+                 const watcherConfig = { watcher, handler, options, folderPath, filePath };
+-                const watcherHandler = watcherHandlerLast = await this.watcherAdd(watcherConfig, baseWatcherHandler);
++                const watcherHandler = watcherHandlerLast = await (async () => {
++                    try {
++                        return await this.watcherAdd(watcherConfig, baseWatcherHandler);
++                    } catch (e) {
++                        throw new Error("this.watcherAdd threw", { cause: e });
++                    }
++                })();
+                 const isRoot = this._roots.has(filePath || folderPath);
+                 if (isRoot) {
+                     const parentOptions = { ...options, ignoreInitial: true, recursive: false }; // Ensuring only the parent folder is being watched
+                     const parentFolderPath = path.dirname(folderPath);
+                     const parentFilePath = folderPath;
+-                    await this.watchDirectories([parentFolderPath], parentOptions, handler, parentFilePath, watcherHandler);
++                    await (async () => {
++                        try {
++                            await this.watchDirectories([parentFolderPath], parentOptions, handler, parentFilePath, watcherHandler);
++                        } catch (e) {
++                            throw new Error("this.watchDirectories threw", { cause: e });
++                        }
++                    })();
+                     //TODO: Watch parents recursively with the following code, which requires other things to be changed too though
+                     // while ( true ) {
+                     //   await this.watchDirectories ( [parentFolderPath], parentOptions, handler, parentFilePath, watcherHandler );
 diff --git a/dist/watcher_handler.d.ts b/dist/watcher_handler.d.ts
 index b92ac0aae58471459c8223e3312826adaca9c3c5..ddc06d4f0db082075c0a7ceaf05c236737912df5 100644
 --- a/dist/watcher_handler.d.ts

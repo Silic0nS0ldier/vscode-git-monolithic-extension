@@ -29,7 +29,7 @@ overrides:
 
 patchedDependencies:
   watcher@2.3.1:
-    hash: 97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688
+    hash: 88d368be8ba1b6fd8ec7dd40fa511d21cd0f59ff8b461fb80bff25f79d052930
     path: patches/watcher@2.3.1.patch
 
 importers:
@@ -106,7 +106,7 @@ importers:
         version: 5.2.0
       watcher:
         specifier: ^2.3.1
-        version: 2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688)
+        version: 2.3.1(patch_hash=88d368be8ba1b6fd8ec7dd40fa511d21cd0f59ff8b461fb80bff25f79d052930)
     devDependencies:
       '@types/node':
         specifier: catalog:vscode
@@ -3454,7 +3454,7 @@ snapshots:
 
   vscode-nls@5.2.0: {}
 
-  watcher@2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688):
+  watcher@2.3.1(patch_hash=88d368be8ba1b6fd8ec7dd40fa511d21cd0f59ff8b461fb80bff25f79d052930):
     dependencies:
       dettle: 1.0.4
       stubborn-fs: 1.2.5
