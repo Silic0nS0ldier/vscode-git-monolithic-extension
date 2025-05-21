@@ -380,7 +380,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         } catch (ex) {
             // noop
             this.#outputChannel.appendLine(
-                `Opening repository for path='${repoPath}' failed; ex=${await prettyPrint(ex)}`,
+                `Opening repository for path='${repoPath}' failed; ex=${prettyPrint(ex)}`,
             );
         }
     });

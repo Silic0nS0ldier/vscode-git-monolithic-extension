@@ -62,7 +62,7 @@ class RemoteSourceProviderQuickPick {
         } catch (err) {
             this.#quickpick.items = [{
                 alwaysShow: true,
-                label: i18n.Translations.error(await prettyPrint(err)),
+                label: i18n.Translations.error(prettyPrint(err)),
             }];
             // TODO Follow up, this won't go anywhere useful
             console.error(err);

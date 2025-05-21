@@ -78,7 +78,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
             );
         }
         const changes = diffResult.changes;
-        outputChannel.appendLine(await prettyPrint(changes));
+        outputChannel.appendLine(prettyPrint(changes));
 
         // Convert selections into line changes
         const selectedLines = toLineRanges(selections, current);

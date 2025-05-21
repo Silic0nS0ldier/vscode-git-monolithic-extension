@@ -67,7 +67,7 @@ async function handleError(
         ? rawErr
         : new Error("Error running command", { cause: rawErr as Error });
 
-    outputChannel.appendLine("[ERROR] " + await prettyPrint(err));
+    outputChannel.appendLine("[ERROR] " + prettyPrint(err));
 
     const options: MessageOptions = {
         modal: true,

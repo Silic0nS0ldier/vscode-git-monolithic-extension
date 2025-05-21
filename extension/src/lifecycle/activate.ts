@@ -101,7 +101,7 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
             throw err;
         }
 
-        outputChannel.appendLine("[WARN] " + await prettyPrint(err));
+        outputChannel.appendLine("[WARN] " + prettyPrint(err));
 
         commands.executeCommand("setContext", "git.missing", true);
         warnAboutMissingGit();
