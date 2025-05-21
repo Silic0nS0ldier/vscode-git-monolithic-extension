@@ -66,7 +66,14 @@ export function watch(locations: string[], locks: string[], ignores: string[], o
     );
 
     // TODO Use unified logger
-    watcher.on("error", err => outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)}`));
+    watcher.on("error", err => {
+        let stacktrace = "";
+        if (!(err instanceof Error)) {
+            // Generate stacktrace for non-error types
+            stacktrace = new Error().stack ?? "";
+        }
+        outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)}${stacktrace != "" ? `\n${stacktrace}` : ""}`);
+    });
 
     return {
         dispose(): void {
