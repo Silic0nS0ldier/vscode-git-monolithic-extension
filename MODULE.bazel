@@ -2,13 +2,30 @@ module(name = "vacode_git_monolithic")
 
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
-bazel_dep(name = "aspect_rules_js", version = "2.2.0")
-bazel_dep(name = "aspect_bazel_lib", version = "2.13.0")
-bazel_dep(name = "rules_nodejs", version = "6.3.3")
-bazel_dep(name = "aspect_rules_ts", version = "3.5.0")
+bazel_dep(name = "aspect_rules_js", version = "2.3.7")
+bazel_dep(name = "aspect_bazel_lib", version = "2.16.0")
+bazel_dep(name = "rules_nodejs", version = "6.4.0")
+bazel_dep(name = "aspect_rules_ts", version = "3.6.0")
+
+single_version_override(
+    module_name = "rules_nodejs",
+    patches = ["//:patches/rules_nodejs@6.4.0.patch"],
+    patch_strip = 1,
+)
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
-node.toolchain(node_version = "22.13.0")
+node.toolchain(
+    node_version = "24.0.2",
+    node_versions = {
+        "24.0.2-darwin_arm64": ("node-v24.0.2-darwin-arm64.tar.gz", "node-v24.0.2-darwin-arm64", "dbd43bc96d7754eff03c241888c2cbc1e879bcbbf2f0961fb8e00e9cd3a21526"),
+        "24.0.2-darwin_amd64": ("node-v24.0.2-darwin-x64.tar.gz", "node-v24.0.2-darwin-x64", "b408d41f8e322bcc71fd4d595156b34d4ad03ef149fba26386030c4cf7e2c1e9"),
+        "24.0.2-linux_arm64": ("node-v24.0.2-linux-arm64.tar.xz", "node-v24.0.2-linux-arm64", "16426a7dae665cb87abe8399737248eb9661dd57e5dc99fcf6ded6e36c524525"),
+        "24.0.2-linux_ppc64le": ("node-v24.0.2-linux-ppc64le.tar.xz", "node-v24.0.2-linux-ppc64le", "8fae7a9cc4d909a5dee961ea032336240fcb4902463e5448367862b87daec9b2"),
+        "24.0.2-linux_s390x": ("node-v24.0.2-linux-s390x.tar.xz", "node-v24.0.2-linux-s390x", "0c0b781ac4edbab98c3146de0b645107a275f07ba93b899f469db41268ef0742"),
+        "24.0.2-linux_amd64": ("node-v24.0.2-linux-x64.tar.xz", "node-v24.0.2-linux-x64", "a5da53c8c184111afd324e1ed818c0fb23fe6f0a7d4583d47f41390dd389a027"),
+        "24.0.2-windows_amd64": ("node-v24.0.2-win-x64.zip", "node-v24.0.2-win-x64", "259ca89fced60a5673548b57d0ed8cf813b9f310827b5fdfe042b4a105217b81"),
+    },
+)
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
