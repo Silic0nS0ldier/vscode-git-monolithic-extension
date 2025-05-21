@@ -33,9 +33,7 @@ export function internalSpawn(
 
     const cmd = `git ${args.join(" ")}`;
     try {
-        const child = cp.spawn(gitPath, args, options);
-        log(`PID_${child.pid} [${options.log_mode}] > ${cmd}\n`);
-        return child;
+        return cp.spawn(gitPath, args, options);
     } catch (e) {
         log(`LAUNCH_FAILED > ${cmd}`);
         throw e;

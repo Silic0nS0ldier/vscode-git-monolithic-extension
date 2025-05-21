@@ -1,6 +1,7 @@
 import type * as cp from "node:child_process";
 import { dispose, type IDisposable, toDisposable } from "../util/disposals.js";
 import { cpErrorHandler, GitError } from "./error.js";
+import { err, isErr, ok, unwrap, type Result } from "monolithic-git-interop/util/result";
 
 export interface IExecutionResult<T extends string | Buffer> {
     exitCode: number;
@@ -11,13 +12,13 @@ export interface IExecutionResult<T extends string | Buffer> {
 export async function exec(
     child: cp.ChildProcess,
     abortSignal?: AbortSignal,
-): Promise<IExecutionResult<Buffer>> {
+): Promise<Result<IExecutionResult<Buffer>, unknown>> {
     if (!child.stdout || !child.stderr) {
-        throw new GitError({ message: "Failed to get stdout or stderr from git process." });
+        return err(new GitError({ message: "Failed to get stdout or stderr from git process." }));
     }
 
     if (abortSignal?.aborted) {
-        throw new GitError({ message: "Cancelled" });
+        return err(new GitError({ message: "Cancelled" }));
     }
 
     const disposables: IDisposable[] = [];
@@ -32,25 +33,30 @@ export async function exec(
         disposables.push(toDisposable(() => ee.removeListener(name, fn)));
     };
 
-    let result = Promise.all<any>([
-        new Promise<number>((c, e) => {
-            once(child, "error", cpErrorHandler(e));
-            once(child, "exit", c);
-        }),
-        new Promise<Buffer>(c => {
-            const buffers: Buffer[] = [];
-            on(child.stdout!, "data", (b: Buffer) => buffers.push(b));
-            once(child.stdout!, "close", () => c(Buffer.concat(buffers)));
-        }),
-        new Promise<string>(c => {
-            const buffers: Buffer[] = [];
-            on(child.stderr!, "data", (b: Buffer) => buffers.push(b));
-            once(child.stderr!, "close", () => c(Buffer.concat(buffers).toString("utf8")));
-        }),
-    ]) as Promise<[number, Buffer, string]>;
+    let pendingResult = (
+        Promise.all<any>([
+            new Promise<number>((c, e) => {
+                once(child, "error", cpErrorHandler(e));
+                once(child, "exit", c);
+            }),
+            new Promise<Buffer>(c => {
+                const buffers: Buffer[] = [];
+                on(child.stdout!, "data", (b: Buffer) => buffers.push(b));
+                once(child.stdout!, "close", () => c(Buffer.concat(buffers)));
+            }),
+            new Promise<string>(c => {
+                const buffers: Buffer[] = [];
+                on(child.stderr!, "data", (b: Buffer) => buffers.push(b));
+                once(child.stderr!, "close", () => c(Buffer.concat(buffers).toString("utf8")));
+            }),
+        ]) as Promise<[number, Buffer, string]>
+    ).then(
+        v => ok<[number, Buffer<ArrayBufferLike>, string], unknown>(v),
+        e => err<[number, Buffer<ArrayBufferLike>, string], unknown>(e)
+    ) as Promise<Result<[number, Buffer<ArrayBufferLike>, string], unknown>>;
 
     if (abortSignal) {
-        const cancellationPromise = new Promise<[number, Buffer, string]>((_, e) => {
+        const cancellationPromise = new Promise<Result<[number, Buffer<ArrayBufferLike>, string], unknown>>((r) => {
             abortSignal.addEventListener("abort", () => {
                 try {
                     child.kill();
@@ -58,16 +64,21 @@ export async function exec(
                     // noop
                 }
 
-                e(new GitError({ message: "Cancelled" }));
+                r(err(new GitError({ message: "Cancelled" })));
             });
         });
 
-        result = Promise.race([result, cancellationPromise]);
+        pendingResult = Promise.race([pendingResult, cancellationPromise]);
     }
 
     try {
-        const [exitCode, stdout, stderr] = await result;
-        return { exitCode, stderr, stdout };
+        let result = await pendingResult;
+        if (isErr(result)) {
+            return result;
+        }
+
+        const [exitCode, stdout, stderr] = unwrap(result);
+        return ok({ exitCode, stderr, stdout });
     } finally {
         dispose(disposables);
     }

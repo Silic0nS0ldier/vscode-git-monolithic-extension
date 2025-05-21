@@ -39,17 +39,17 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
         const monitoredContext: GitContext = {
             ...context,
             cli: async (c, a) => {
-                const logId = `CMD_${runCounter++}`;
+                const invocId = `CMD_0_${runCounter++}`;
 
                 // Log input
-                outputChannel.appendLine(`${logId} > git ${a.join(" ")}`);
+                outputChannel.appendLine(`${invocId} > git ${a.join(" ")}`);
 
                 // Log output
-                const stdoutLog = (msg: string): void => outputChannel.appendLine(`${logId} < [STDOUT] ${msg}`);
+                const stdoutLog = (msg: string): void => outputChannel.appendLine(`${invocId} < [STDOUT] ${msg}`);
                 const stdout = c.stdout
                     ? snoopOnStream(c.stdout, stdoutLog)
                     : new SnoopStream(stdoutLog);
-                const stderrLog = (msg: string): void => outputChannel.appendLine(`${logId} < [STDERR] ${msg}`);
+                const stderrLog = (msg: string): void => outputChannel.appendLine(`${invocId} < [STDERR] ${msg}`);
                 const stderr = c.stderr
                     ? snoopOnStream(c.stderr, stderrLog)
                     : new SnoopStream(stderrLog);
@@ -64,9 +64,9 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                 // Log result
                 if (isErr(result)) {
                     const err = unwrap(result);
-                    outputChannel.appendLine(`${logId} < ERROR (${durationStr}) ${err.type.description}`);
+                    outputChannel.appendLine(`${invocId} < ERROR (${durationStr}) ${err.type.description}`);
                 } else {
-                    outputChannel.appendLine(`${logId} < SUCCESS (${durationStr})`);
+                    outputChannel.appendLine(`${invocId} < SUCCESS (${durationStr})`);
                 }
 
                 return result;
