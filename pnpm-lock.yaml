@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@types/node':
-      specifier: ^22.13.11
-      version: 22.15.19
+      specifier: ^22.15.21
+      version: 22.15.21
     ava:
       specifier: ^6.3.0
       version: 6.3.0
@@ -20,8 +20,8 @@ catalogs:
       version: 9.0.1
   vscode:
     '@types/node':
-      specifier: ^20.17.21
-      version: 20.17.21
+      specifier: ^20.17.50
+      version: 20.17.50
 
 overrides:
   minimist@<1.2.6: ^1.2.8
@@ -29,7 +29,7 @@ overrides:
 
 patchedDependencies:
   watcher@2.3.1:
-    hash: 5evhgjyylh56vgzmlkcac5dmwe
+    hash: 97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688
     path: patches/watcher@2.3.1.patch
 
 importers:
@@ -57,12 +57,12 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.15.19
+        version: 22.15.21
 
   build_defs/vsce_package:
     dependencies:
       '@vscode/vsce':
-        specifier: ^3.3.2
+        specifier: '^3.3.2 <3.4.0 '
         version: 3.3.2
       cleye:
         specifier: 'catalog:'
@@ -70,13 +70,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.15.19
+        version: 22.15.21
 
   extension:
     dependencies:
       '@vscode/extension-telemetry':
         specifier: ^0.9.8
-        version: 0.9.8(tslib@2.8.1)
+        version: 0.9.9(tslib@2.8.1)
       get-stream:
         specifier: 'catalog:'
         version: 9.0.1
@@ -100,11 +100,11 @@ importers:
         version: 5.2.0
       watcher:
         specifier: ^2.3.1
-        version: 2.3.1(patch_hash=5evhgjyylh56vgzmlkcac5dmwe)
+        version: 2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688)
     devDependencies:
       '@types/node':
         specifier: catalog:vscode
-        version: 20.17.21
+        version: 20.17.50
       '@types/vscode':
         specifier: ^1.100.0
         version: 1.100.0
@@ -116,7 +116,7 @@ importers:
     dependencies:
       '@types/node':
         specifier: catalog:vscode
-        version: 20.17.21
+        version: 20.17.50
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -174,12 +174,10 @@ packages:
   '@azure/msal-browser@4.8.0':
     resolution: {integrity: sha512-z7kJlMW3IAETyq82LDKJqr++IeOvU728q9lkuTFjEIPUWxnB1OlmuPCF32fYurxOnOnJeFEZxjbEzq8xyP0aag==}
     engines: {node: '>=0.8.0'}
-    deprecated: A bug was identified in msal-browser v4.9.1 that could be production impacting. Please roll back to v4.8.0 or before until a new release is made with the bug fix.
 
   '@azure/msal-common@15.3.0':
     resolution: {integrity: sha512-lh+eZfibGwtQxFnx+mj6cYWn0pwA8tDnn8CBs9P21nC7Uw5YWRwfXaXdVQSMENZ5ojRqR+NzRaucEo4qUvs3pA==}
     engines: {node: '>=0.8.0'}
-    deprecated: A bug was identified in msal-browser v4.9.1 that could be production impacting. Please roll back to v4.8.0 or before until a new release is made with the bug fix.
 
   '@azure/msal-common@15.4.0':
     resolution: {integrity: sha512-reeIUDXt6Xc+FpCBDEbUFQWvJ6SjE0JwsGYIfa3ZCR6Tpzjc9J1v+/InQgfCeJzfTRd7PDJVxI6TSzOmOd7+Ag==}
@@ -396,11 +394,11 @@ packages:
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
 
-  '@types/node@20.17.21':
-    resolution: {integrity: sha512-yw1WZ94lZpdZbpnaF+WRvlN/Sx2EZWe/YZVdK4mC4u02/ql6Ozen8qbRJhOtltOxCg97/kpijhGs5X6STwkvbg==}
+  '@types/node@20.17.50':
+    resolution: {integrity: sha512-Mxiq0ULv/zo1OzOhwPqOA13I81CV/W3nvd3ChtQZRT5Cwz3cr0FKo/wMSsbTqL3EXpaBAEQhva2B8ByRkOIh9A==}
 
-  '@types/node@22.15.19':
-    resolution: {integrity: sha512-3vMNr4TzNQyjHcRZadojpRaD9Ofr6LsonZAoQ+HMUa/9ORTPoxVIw0e0mpqWpdjj8xybyCM+oKOUH2vwFu/oEw==}
+  '@types/node@22.15.21':
+    resolution: {integrity: sha512-EV/37Td6c+MgKAbkcLG6vqZ2zEYHD7bvSrzqqs2RIhbA6w3x+Dqz8MZM3sP6kGTeLrdoOgKZe+Xja7tUB2DNkQ==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -416,8 +414,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@vscode/extension-telemetry@0.9.8':
-    resolution: {integrity: sha512-7YcKoUvmHlIB8QYCE4FNzt3ErHi9gQPhdCM3ZWtpw1bxPT0I+lMdx52KHlzTNoJzQ2NvMX7HyzyDwBEiMgTrWQ==}
+  '@vscode/extension-telemetry@0.9.9':
+    resolution: {integrity: sha512-WG/H+H/JRMPnpbXMufXgXlaeJwKszXfAanOERV/nkXBbYyNw0KR84JjUjSg+TgkzYEF/ttRoHTP6fFZWkXdoDQ==}
     engines: {vscode: ^1.75.0}
 
   '@vscode/vsce-sign-alpine-arm64@2.0.2':
@@ -726,6 +724,15 @@ packages:
 
   debug@4.4.0:
     resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+  debug@4.4.1:
+    resolution: {integrity: sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==}
     engines: {node: '>=6.0'}
     peerDependencies:
       supports-color: '*'
@@ -2053,11 +2060,11 @@ snapshots:
 
   '@types/estree@1.0.7': {}
 
-  '@types/node@20.17.21':
+  '@types/node@20.17.50':
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@22.15.19':
+  '@types/node@22.15.21':
     dependencies:
       undici-types: 6.21.0
 
@@ -2086,7 +2093,7 @@ snapshots:
       - rollup
       - supports-color
 
-  '@vscode/extension-telemetry@0.9.8(tslib@2.8.1)':
+  '@vscode/extension-telemetry@0.9.9(tslib@2.8.1)':
     dependencies:
       '@microsoft/1ds-core-js': 4.3.4(tslib@2.8.1)
       '@microsoft/1ds-post-js': 4.3.4(tslib@2.8.1)
@@ -2456,6 +2463,10 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  debug@4.4.1:
+    dependencies:
+      ms: 2.1.3
+
   decompress-response@6.0.0:
     dependencies:
       mimic-response: 3.1.0
@@ -2710,7 +2721,7 @@ snapshots:
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.3
-      debug: 4.4.0
+      debug: 4.4.1
     transitivePeerDependencies:
       - supports-color
 
@@ -3386,7 +3397,7 @@ snapshots:
 
   vscode-nls@5.2.0: {}
 
-  watcher@2.3.1(patch_hash=5evhgjyylh56vgzmlkcac5dmwe):
+  watcher@2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688):
     dependencies:
       dettle: 1.0.4
       stubborn-fs: 1.2.5
