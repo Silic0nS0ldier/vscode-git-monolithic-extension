@@ -26,7 +26,7 @@ import { Git } from "../git.js";
 import { findGit, type IGit } from "../git/find.js";
 import * as i18n from "../i18n/mod.js";
 import { Model } from "../model.js";
-import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
+import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
 import * as config from "../util/config.js";

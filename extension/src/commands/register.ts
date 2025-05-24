@@ -4,7 +4,7 @@ import type { Model } from "../model.js";
 import { createCommand } from "./create.js";
 import { CommandErrorOutputTextDocumentContentProvider, type ScmCommand } from "./helpers.js";
 
-import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
+import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import * as branch from "./implementations/branch/mod.js";
 import * as checkout from "./implementations/checkout/mod.js";
 import * as cherryPick from "./implementations/cherry-pick.js";
