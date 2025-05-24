@@ -41,5 +41,7 @@ jobs:
         runner: [ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.runner }}
     steps:
-      - run: npm install -g @devcontainers/cli@0
-      - run: devcontainer build --workspace-folder ./
+      - uses: actions/checkout@v4
+      - uses: devcontainers/ci@v0.3
+        with:
+          runCmd: echo "Built successfully"
