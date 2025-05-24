@@ -18,5 +18,8 @@
         "@types/node": "catalog:vscode",
         "@types/vscode": "^1.100.0",
         "ava": "catalog:"
+    },
+    "scripts": {
+        "prepare": "sh ../packages/bazelify-node-modules.sh"
     }
 }
