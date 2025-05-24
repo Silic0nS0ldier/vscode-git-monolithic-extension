@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fs from "node:fs";
+import { inspect } from "node:util";
 import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
 import BaseWatcher from "watcher";
-import { prettyPrint } from "../logging/pretty-print.js";
 
 type TargetEvent = Parameters<BaseWatcher["event"]>[0];
 
@@ -66,7 +66,9 @@ export function watch(locations: string[], locks: string[], ignores: string[], o
     );
 
     // TODO Use unified logger
-    watcher.on("error", err => outputChannel.appendLine(`${id} watcher error: ${prettyPrint(err)}`));
+    watcher.on("error", async err => {
+        outputChannel.appendLine(`${id} watcher error: ${inspect(err)}`);
+    });
 
     return {
         dispose(): void {

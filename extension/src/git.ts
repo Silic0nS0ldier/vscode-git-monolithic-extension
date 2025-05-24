@@ -11,7 +11,9 @@ import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel
 import type { GitContext } from "monolithic-git-interop/cli";
 import type { AllServices } from "monolithic-git-interop/services";
 import { createServices } from "monolithic-git-interop/services/nodejs";
-import { isOk, unwrap } from "monolithic-git-interop/util/result";
+import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
+import { DurationFormat } from "@formatjs/intl-durationformat";
+import { Temporal } from "@js-temporal/polyfill";
 import type * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
 import { exists, promises as fs } from "node:fs";
@@ -232,6 +234,12 @@ export class Git {
     #log(output: string): void {
         this.#onOutputEmitter.emit("log", output);
     }
+
+    // For repository abstraction
+    // TODO Give `Repository` it's own logger
+    log(output: string) {
+        this.#log(output);
+    }
 }
 
 export interface PullOptions {
@@ -239,6 +247,8 @@ export interface PullOptions {
     tags?: boolean;
     readonly abortSignal?: AbortSignal;
 }
+
+let runCounter = 0;
 
 export class Repository {
     #git: Git;
@@ -266,10 +276,6 @@ export class Repository {
 
     stream(args: string[], options: SpawnOptions = {}): cp.ChildProcess {
         return this.git.stream(this.#repositoryRoot, args, options);
-    }
-
-    spawn(args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        return this.git.spawn(args, options);
     }
 
     async config(scope: string, key: string, value: string, options: SpawnOptions = {}): Promise<string> {
@@ -351,13 +357,30 @@ export class Repository {
     }
 
     async buffer(object: string): Promise<Buffer> {
+        const start = Date.now();
         const child = this.stream(["show", "--textconv", object]);
 
         if (!child.stdout) {
             return Promise.reject<Buffer>("Can't open file from git");
         }
 
-        const { exitCode, stdout, stderr } = await exec(child);
+        const pid = child.pid;
+        const invocId = `CMD_2_${runCounter++}`;
+        this.git.log(`${invocId} > (PID = ${pid}) ${child.spawnfile} ${child.spawnargs.join(" ")}`);
+
+        const result = await exec(child);
+
+        const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
+        // TODO Remove ponyfill once VSCode updates to NodeJS v23 or higher
+        const durationStr = new DurationFormat("en", { style: "narrow" }).format(duration);
+
+        if (isErr(result)) {
+            this.git.log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
+            throw unwrap(result);
+        }
+
+        this.git.log(`${invocId} < SUCCESS (PID = ${pid}; Duration = ${durationStr})`);
+        const { exitCode, stdout, stderr } = unwrap(result);
 
         if (exitCode) {
             const err = new GitError({
@@ -572,6 +595,7 @@ export class Repository {
     }
 
     async stage(path: string, data: string): Promise<void> {
+        const start = Date.now();
         const child = this.stream(["hash-object", "--stdin", "-w", "--path", sanitizePath(path)], {
             stdio: [null, null, null],
         });
@@ -580,7 +604,23 @@ export class Repository {
         }
         child.stdin.end(data, "utf8");
 
-        const { exitCode, stdout } = await exec(child);
+        const pid = child.pid;
+        const invocId = `CMD_3_${runCounter++}`;
+        this.git.log(`${invocId} > (PID = ${pid}) ${child.spawnfile} ${child.spawnargs.join(" ")}`);
+
+        const result = await exec(child);
+
+        const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
+        // TODO Remove ponyfill once VSCode updates to NodeJS v23 or higher
+        const durationStr = new DurationFormat("en", { style: "narrow" }).format(duration);
+
+        if (isErr(result)) {
+            this.git.log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
+            throw unwrap(result);
+        }
+
+        this.git.log(`${invocId} < SUCCESS (PID = ${pid}; Duration = ${durationStr})`);
+        const { exitCode, stdout } = unwrap(result);
         const hash = stdout.toString("utf8");
 
         if (exitCode) {

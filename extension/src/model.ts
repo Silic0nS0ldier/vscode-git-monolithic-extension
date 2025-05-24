@@ -5,6 +5,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { inspect } from "node:util";
 import onetime from "onetime";
 import {
     commands,
@@ -34,7 +35,6 @@ import type {
 import type { Askpass } from "./askpass.js";
 import type { Git } from "./git.js";
 import * as i18n from "./i18n/mod.js";
-import { prettyPrint } from "./logging/pretty-print.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
 import type { IPushErrorHandlerRegistry } from "./pushError.js";
@@ -380,7 +380,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         } catch (ex) {
             // noop
             this.#outputChannel.appendLine(
-                `Opening repository for path='${repoPath}' failed; ex=${await prettyPrint(ex)}`,
+                `Opening repository for path='${repoPath}' failed; ex=${inspect(ex)}`,
             );
         }
     });

@@ -1,7 +1,7 @@
 import assert from "node:assert";
+import { inspect } from "node:util";
 import { EndOfLine, type OutputChannel, Uri, window } from "vscode";
 import vsDiff from "vscode-diff";
-import { prettyPrint } from "../../../logging/pretty-print.js";
 import { intersectDiffWithRange, toLineRanges } from "../../../staging.js";
 import type { ScmCommand } from "../../helpers.js";
 import { stageChanges } from "./helpers.js";
@@ -78,7 +78,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
             );
         }
         const changes = diffResult.changes;
-        outputChannel.appendLine(await prettyPrint(changes));
+        outputChannel.appendLine(inspect(changes));
 
         // Convert selections into line changes
         const selectedLines = toLineRanges(selections, current);

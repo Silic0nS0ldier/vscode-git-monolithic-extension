@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { inspect } from "node:util";
 import {
     commands,
     Disposable,
@@ -24,7 +25,6 @@ import { GitFileSystemProvider } from "../fileSystemProvider.js";
 import { Git } from "../git.js";
 import { findGit, type IGit } from "../git/find.js";
 import * as i18n from "../i18n/mod.js";
-import { prettyPrint } from "../logging/pretty-print.js";
 import { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
@@ -101,7 +101,7 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
             throw err;
         }
 
-        outputChannel.appendLine("[WARN] " + await prettyPrint(err));
+        outputChannel.appendLine("[WARN] " + inspect(err));
 
         commands.executeCommand("setContext", "git.missing", true);
         warnAboutMissingGit();
