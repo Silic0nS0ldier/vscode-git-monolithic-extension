@@ -6,7 +6,7 @@ echo "Running install..."
 
 ARCH="$(uname --processor)"
 
-if [[ $ARCH == "arm64" ]]; then
+if [[ $ARCH == "arm64" ]] || [[ $ARCH == "aarch64" ]]; then
     curl https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-arm64 -Lo /usr/local/bin/bazel
     curl https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/buildifier-linux-arm64 -Lo /usr/local/bin/buildifier
     curl https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/buildozer-linux-arm64 -Lo /usr/local/bin/buildozer
