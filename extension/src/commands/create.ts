@@ -1,8 +1,8 @@
 import { commands, type MessageOptions, type OutputChannel, Uri, window, workspace } from "vscode";
+import { inspect } from "node:util";
 import { GitErrorCodes } from "../api/git.js";
 import { GitError } from "../git/error.js";
 import * as i18n from "../i18n/mod.js";
-import { prettyPrint } from "../logging/pretty-print.js";
 import type { Model } from "../model.js";
 import type { TelemetryReporter } from "../package-patches/vscode-extension-telemetry.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
@@ -67,7 +67,7 @@ async function handleError(
         ? rawErr
         : new Error("Error running command", { cause: rawErr as Error });
 
-    outputChannel.appendLine("[ERROR] " + prettyPrint(err));
+    outputChannel.appendLine("[ERROR] " + inspect(err));
 
     const options: MessageOptions = {
         modal: true,

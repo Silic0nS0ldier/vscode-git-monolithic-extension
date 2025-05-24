@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { type QuickPick, type QuickPickItem, window } from "vscode";
+import { inspect } from "node:util";
 import type { RemoteSource, RemoteSourceProvider } from "./api/git.js";
 import * as i18n from "./i18n/mod.js";
-import { prettyPrint } from "./logging/pretty-print.js";
 import type { Model } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
@@ -62,7 +62,7 @@ class RemoteSourceProviderQuickPick {
         } catch (err) {
             this.#quickpick.items = [{
                 alwaysShow: true,
-                label: i18n.Translations.error(prettyPrint(err)),
+                label: i18n.Translations.error(inspect(err)),
             }];
             // TODO Follow up, this won't go anywhere useful
             console.error(err);

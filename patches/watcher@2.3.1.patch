@@ -26,30 +26,6 @@ index 04221a1368b9bea7e847c6d3a0c56f3de3bb7f85..e1a68991e86bf2cd6622c6197cb15fb3
  declare const Utils: {
      lang: {
          debounce: <Args extends unknown[]>(fn: import("dettle/dist/types").FN<Args, unknown>, wait?: number | undefined, options?: import("dettle/dist/types").DebounceOptions | undefined) => import("dettle/dist/types").Debounced<Args>;
-diff --git a/dist/utils.js b/dist/utils.js
-index 359f61e31a6cde7a43eddf878693f72dd8f2e46d..61939e85a82cf1ce96e56c1f1f07a98a964228e4 100644
---- a/dist/utils.js
-+++ b/dist/utils.js
-@@ -22,11 +22,14 @@ const Utils = {
-             return Utils.lang.isArray(x) ? x : [x];
-         },
-         castError: (exception) => {
--            if (Utils.lang.isError(exception))
--                return exception;
--            if (Utils.lang.isString(exception))
--                return new Error(exception);
--            return new Error('Unknown error');
-+            const e = (() => {
-+                if (Utils.lang.isError(exception))
-+                    return exception;
-+                if (Utils.lang.isString(exception))
-+                    return new Error(exception);
-+                return new Error('Unknown error');
-+            })();
-+            return new Error("castError wrapped", { cause: e });
-         },
-         defer: (callback) => {
-             return setTimeout(callback, 0);
 diff --git a/dist/watcher.d.ts b/dist/watcher.d.ts
 index 352c3c2d7aea8ff4a52fd788d260553fbebda532..103fc97f9b713e309bfe7b007b00970992ff3698 100644
 --- a/dist/watcher.d.ts
@@ -71,47 +47,6 @@ index 352c3c2d7aea8ff4a52fd788d260553fbebda532..103fc97f9b713e309bfe7b007b009709
  declare class Watcher extends EventEmitter {
      _closed: boolean;
      _ready: boolean;
-diff --git a/dist/watcher.js b/dist/watcher.js
-index 9aaf77f1685c3bd5a6229955f4265bd6e4891aa8..be31f097797592362498d7e821459354634f1dbc 100644
---- a/dist/watcher.js
-+++ b/dist/watcher.js
-@@ -185,15 +185,33 @@ class Watcher extends EventEmitter {
-                 continue;
-             try {
-                 const watcherOptions = (!options.recursive || (HAS_NATIVE_RECURSION && options.native !== false)) ? options : { ...options, recursive: false }; // Ensuring recursion is explicitly disabled if not available
--                const watcher = fs.watch(folderPath, watcherOptions);
-+                const watcher = (() => {
-+                    try {
-+                        return fs.watch(folderPath, watcherOptions);
-+                    } catch (e) {
-+                        throw new Error("fs.watch threw", { cause: e });
-+                    }
-+                })();
-                 const watcherConfig = { watcher, handler, options, folderPath, filePath };
--                const watcherHandler = watcherHandlerLast = await this.watcherAdd(watcherConfig, baseWatcherHandler);
-+                const watcherHandler = watcherHandlerLast = await (async () => {
-+                    try {
-+                        return await this.watcherAdd(watcherConfig, baseWatcherHandler);
-+                    } catch (e) {
-+                        throw new Error("this.watcherAdd threw", { cause: e });
-+                    }
-+                })();
-                 const isRoot = this._roots.has(filePath || folderPath);
-                 if (isRoot) {
-                     const parentOptions = { ...options, ignoreInitial: true, recursive: false }; // Ensuring only the parent folder is being watched
-                     const parentFolderPath = path.dirname(folderPath);
-                     const parentFilePath = folderPath;
--                    await this.watchDirectories([parentFolderPath], parentOptions, handler, parentFilePath, watcherHandler);
-+                    await (async () => {
-+                        try {
-+                            await this.watchDirectories([parentFolderPath], parentOptions, handler, parentFilePath, watcherHandler);
-+                        } catch (e) {
-+                            throw new Error("this.watchDirectories threw", { cause: e });
-+                        }
-+                    })();
-                     //TODO: Watch parents recursively with the following code, which requires other things to be changed too though
-                     // while ( true ) {
-                     //   await this.watchDirectories ( [parentFolderPath], parentOptions, handler, parentFilePath, watcherHandler );
 diff --git a/dist/watcher_handler.d.ts b/dist/watcher_handler.d.ts
 index b92ac0aae58471459c8223e3312826adaca9c3c5..ddc06d4f0db082075c0a7ceaf05c236737912df5 100644
 --- a/dist/watcher_handler.d.ts
