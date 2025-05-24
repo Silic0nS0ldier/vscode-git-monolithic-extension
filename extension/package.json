@@ -4,7 +4,7 @@
     "dependencies": {
         "@formatjs/intl-durationformat": "^0.7.4",
         "@js-temporal/polyfill": "^0.5.1",
-        "@vscode/extension-telemetry": "^0.9.8",
+        "@vscode/extension-telemetry": "^1.0.0",
         "get-stream": "catalog:",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:^",

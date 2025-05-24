@@ -1,6 +1,6 @@
 import type { Git } from "../../../git.js";
 import type { Model } from "../../../model.js";
-import type { TelemetryReporter } from "../../../package-patches/vscode-extension-telemetry.js";
+import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import type { ScmCommand } from "../../helpers.js";
 import { cloneRepository } from "./helpers.js";
 
