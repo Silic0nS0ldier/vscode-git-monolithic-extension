@@ -10,11 +10,11 @@ import type { RunFn } from "../run.js";
 
 export async function handleLimitHit(
     repoRoot: string,
-    run: RunFn<void> & RunFn<Set<string>>,
+    runRepositoryOperation: RunFn<void> & RunFn<Set<string>>,
     repository: Repository,
     didWarnAboutLimit: Box<boolean>,
 ): Promise<void> {
-    const knownHugeFolderPaths = await findKnownHugeFolderPathsToIgnore(repoRoot, run, repository);
+    const knownHugeFolderPaths = await findKnownHugeFolderPathsToIgnore(repoRoot, runRepositoryOperation, repository);
     const gitWarn = i18n.Translations.tooManyChanges(repoRoot);
     const neverAgain = { title: i18n.Translations.neverAgain() };
 
@@ -32,7 +32,7 @@ export async function handleLimitHit(
             config.legacy().update("ignoreLimitWarning", true, false);
             didWarnAboutLimit.set(true);
         } else if (result === yes) {
-            ignore(run, repository, [Uri.file(folderPath)]);
+            ignore(runRepositoryOperation, repository, [Uri.file(folderPath)]);
         }
     } else {
         const result = await window.showWarningMessage(gitWarn, neverAgain);

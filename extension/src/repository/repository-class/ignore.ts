@@ -6,11 +6,11 @@ import { Operation } from "../Operations.js";
 import type { RunFn } from "./run.js";
 
 export async function ignore(
-    run: RunFn<void>,
+    runRepositoryOperation: RunFn<void>,
     repository: Repository,
     files: Uri[],
 ): Promise<void> {
-    return await run(Operation.Ignore, async () => {
+    return await runRepositoryOperation(Operation.Ignore, async () => {
         const ignoreFile = `${repository.root}${path.sep}.gitignore`;
         const textToAppend = files
             .map(uri => path.relative(repository.root, uri.fsPath).replace(/\\/g, "/"))

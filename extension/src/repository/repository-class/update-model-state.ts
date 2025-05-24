@@ -19,7 +19,7 @@ export async function updateModelState(
     repository: Repository,
     isRepositoryHuge: Box<boolean>,
     didWarnAboutLimit: Box<boolean>,
-    run: RunFn<void> & RunFn<Set<string>>,
+    runRepositoryOperation: RunFn<void> & RunFn<Set<string>>,
     HEAD: Box<Branch | undefined>,
     refs: Box<Ref[]>,
     remotes: Box<Remote[]>,
@@ -35,7 +35,7 @@ export async function updateModelState(
     // TODO Account for potential missing items when limit is hit
     // Could use placeholder like "(empty)"
     // UI currently handles this using a heuristic
-    const { status, didHitLimit } = await repository.getStatusTrackedAndMerge({ ignoreSubmodules });
+    const { status, didHitLimit } = await repository.getStatusTrackedAndMerge({ ignoreSubmodules });//
     const pendingUntrackedStatus = repository.getStatusUntracked();
 
     // const config = workspace.getConfiguration("git");
@@ -45,7 +45,7 @@ export async function updateModelState(
 
     if (didHitLimit && !shouldIgnore && !didWarnAboutLimit.get()) {
         // Deliberately not awaited to keep model update going
-        handleLimitHit(repoRoot, run, repository, didWarnAboutLimit);
+        handleLimitHit(repoRoot, runRepositoryOperation, repository, didWarnAboutLimit);
     }
 
     let newHEAD: Branch | undefined;

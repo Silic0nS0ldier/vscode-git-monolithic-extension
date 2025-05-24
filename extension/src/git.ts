@@ -1186,7 +1186,6 @@ export class Repository {
         }
     }
 
-    // here
     getStatusTrackedAndMerge(
         opts?: { limit?: number; ignoreSubmodules?: boolean },
     ): Promise<{ status: IFileStatus[]; didHitLimit: boolean }> {

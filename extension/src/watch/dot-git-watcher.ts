@@ -21,7 +21,10 @@ export function createDotGitWatcher(
             // being pruned.
             path.join(dotGitDir, "index"),
             // Graph of what we know
-            path.join(dotGitDir, "refs"),
+            // NOTE: Directories are listed individually so ".git/refs/prefetch" (from `git maintenance`) is ignored.
+            path.join(dotGitDir, "refs/heads"),
+            path.join(dotGitDir, "refs/remotes"),
+            path.join(dotGitDir, "refs/tags"),
             // Current commit message
             path.join(dotGitDir, "COMMIT_EDITMSG"),
             // How we do things
