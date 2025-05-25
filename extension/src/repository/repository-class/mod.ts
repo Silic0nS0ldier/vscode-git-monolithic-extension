@@ -134,8 +134,6 @@ export function createRepository(
     const onRunOperationEmitter = new EventEmitter<OperationOptions>();
     const onRunOperation = onRunOperationEmitter.event;
 
-    const didWarnAboutLimit = createBox(config.ignoreLimitWarning());
-
     const submodules = createBox<Submodule[]>([]);
     const rebaseCommit = createRebaseCommitBox(sourceControlUI);
 
@@ -161,9 +159,6 @@ export function createRepository(
     const updateModelState = throat(1, async () => {
         return updateModelStateImpl(
             repository,
-            isRepositoryHuge,
-            didWarnAboutLimit,
-            run,//
             HEAD,
             refs,
             remotes,

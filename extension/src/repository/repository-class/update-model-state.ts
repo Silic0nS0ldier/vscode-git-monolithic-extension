@@ -11,15 +11,10 @@ import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType, type ResourceGroupTypeOptions } from "../ResourceGroupType.js";
 import { getInputTemplate } from "./get-input-template.js";
 import { getRebaseCommit } from "./get-rebase-commit.js";
-import type { RunFn } from "./run.js";
-import { handleLimitHit } from "./update-model-state/handle-limit-hit.js";
 import { pigeonholeFileStatus } from "./update-model-state/pigeonhole-file-status.js";
 
 export async function updateModelState(
     repository: Repository,
-    isRepositoryHuge: Box<boolean>,
-    didWarnAboutLimit: Box<boolean>,
-    runRepositoryOperation: RunFn<void> & RunFn<Set<string>>,
     HEAD: Box<Branch | undefined>,
     refs: Box<Ref[]>,
     remotes: Box<Remote[]>,
@@ -35,18 +30,9 @@ export async function updateModelState(
     // TODO Account for potential missing items when limit is hit
     // Could use placeholder like "(empty)"
     // UI currently handles this using a heuristic
-    const { status, didHitLimit } = await repository.getStatusTrackedAndMerge({ ignoreSubmodules });//
+    const status = await repository.getStatusTrackedAndMerge({ ignoreSubmodules });
     const pendingUntrackedStatus = repository.getStatusUntracked();
-
-    // const config = workspace.getConfiguration("git");
-    const shouldIgnore = config.ignoreLimitWarning();
     const useIcons = !config.decorationsEnabled();
-    isRepositoryHuge.set(didHitLimit);
-
-    if (didHitLimit && !shouldIgnore && !didWarnAboutLimit.get()) {
-        // Deliberately not awaited to keep model update going
-        handleLimitHit(repoRoot, runRepositoryOperation, repository, didWarnAboutLimit);
-    }
 
     let newHEAD: Branch | undefined;
 
