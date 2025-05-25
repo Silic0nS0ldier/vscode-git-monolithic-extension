@@ -1,5 +1,6 @@
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config")
 load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@aspect_rules_js//js:defs.bzl", "js_library")
 
 npm_link_all_packages(name = "node_modules")
 
@@ -9,4 +10,17 @@ ts_config(
     visibility = ["//visibility:public"],
 )
 
-exports_files(["LICENSE"])
+exports_files([
+    "LICENSE",
+    ".shellcheckrc"
+])
+
+js_library(
+    name = "eslintrc",
+    srcs = ["eslint.config.mjs"],
+    deps = [
+        ":node_modules/@eslint/js",
+        ":node_modules/typescript-eslint",
+    ],
+    visibility = ["//build_defs/lint:__pkg__"],
+)

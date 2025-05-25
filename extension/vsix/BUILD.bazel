@@ -1,6 +1,8 @@
 load("@aspect_bazel_lib//lib:copy_directory.bzl", "copy_directory")
 load("@aspect_bazel_lib//lib:copy_file.bzl", "copy_file")
 load("@aspect_bazel_lib//lib:output_files.bzl", "output_files")
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+load("//build_defs/lint:linters.bzl", "shellcheck_test")
 load("//build_defs/vsce_package:vsce_package.bzl", "vsce_package")
 
 # Copy bundled sources to src/
@@ -41,4 +43,17 @@ vsce_package(
         ":copy_license",
     ],
     in_dir = "./",
+)
+
+sh_library(
+    name = "sh-srcs",
+    srcs = [
+        "src/askpass-empty.sh",
+        "src/askpass.sh",
+    ],
+)
+
+shellcheck_test(
+    name = "shellcheck",
+    srcs = [":sh-srcs"],
 )
