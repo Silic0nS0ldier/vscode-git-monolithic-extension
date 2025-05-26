@@ -1,23 +1,4 @@
 {
-	"name": "Git monolithic",
-	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-	"features": {
-		"./feature-bazel": {},
-		"ghcr.io/devcontainers/features/node:1": {
-			"version": "24.0.2"
-		},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"bazelbuild.vscode-bazel"
-			],
-			"settings": {
-				"bazel.enableCodeLens": true,
-				"bazel.lsp.command": "starpls",
-				"bazel.lsp.args": ["server"]
-			}
-		}
-	}
+    "name": "Git monolithic (prebuilt)",
+	"image": "ghcr.io/Silic0nS0ldier/vscode-git-monolithic-extension-devcontainer:fe2cab27d845cb1a6134dcf9c9f978f4e4bf6e638cb539b8b8c740c4c9c0a846"
 }

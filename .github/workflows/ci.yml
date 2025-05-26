@@ -35,13 +35,31 @@ jobs:
         with:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
+  devcontainer-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve-tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve tag
+        id: resolve-tag
+        run: |
+          tag=$(git ls-files .devcontainer/def | xargs sha256sum | cut -d" " -f1 | sha256sum | cut -d" " -f1)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - name: Check tag up-to-date
+        run: grep "${{ steps.resolve-tag.outputs.tag }}" .devcontainer/devcontainer.json
   devcontainer:
     strategy:
       matrix:
         runner: [ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.runner }}
+    needs: [devcontainer-tag]
     steps:
       - uses: actions/checkout@v4
       - uses: devcontainers/ci@v0.3
         with:
+          imageName: ghcr.io/Silic0nS0ldier/vscode-git-monolithic-extension-devcontainer
+          imageTag: ${{ needs.devcontainer-tag.outputs.tag }}
+          configFile: .devcontainer/def/devcontainer.json
           runCmd: echo "Built successfully"
+          push: always
