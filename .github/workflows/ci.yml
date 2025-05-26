@@ -96,6 +96,10 @@ jobs:
           registry: ${{ env.OPT_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull arm
+        run: docker pull ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}@${{ needs.devcontainer-build.outputs.digest-arm }}
+      - name: Pull x86
+        run: docker pull ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}@${{ needs.devcontainer-build.outputs.digest-x86 }}
       - name: Create multi-arch manifest
         run: |
           docker manifest create \
