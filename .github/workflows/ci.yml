@@ -57,7 +57,6 @@ jobs:
       matrix:
         runner: [ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.runner }}
-    needs: [devcontainer-tag]
     permissions:
       packages: write
     outputs:
@@ -74,18 +73,17 @@ jobs:
       - uses: devcontainers/ci@v0.3
         with:
           imageName: ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}
-          imageTag: ${{ needs.devcontainer-tag.outputs.tag }}-${{ runner.arch }}
+          imageTag: ${{ runner.arch }}
           configFile: .devcontainer/def/devcontainer.json
-          #platform: ${{ matrix.runner == 'ubuntu-latest' && 'linux/amd64' || 'linux/arm64' }}
           runCmd: echo "Built successfully"
           push: never
       - name: Resolve digest
         id: resolve-digest
         run: |
-          digest=$(docker images --no-trunc --quiet "${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}:${{ needs.devcontainer-tag.outputs.tag }}-${{ runner.arch }}")
+          digest=$(docker images --no-trunc --quiet "${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}:${{ runner.arch }}")
           echo "digest-${{ matrix.runner == 'ubuntu-latest' && 'x86' || 'arm' }}=$digest" >> "$GITHUB_OUTPUT"
       - name: Push
-        run: docker image push ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}@${{ matrix.runner == 'ubuntu-latest' && steps.resolve-digest.outputs.digest-x86 || steps.resolve-digest.outputs.digest-arm }}
+        run: docker image push ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}:${{ runner.arch }}
   devcontainer-merge:
     runs-on: ubuntu-latest
     needs: [devcontainer-tag, devcontainer-build]
