@@ -7,6 +7,12 @@ settings:
 
 catalogs:
   default:
+    '@formatjs/intl-durationformat':
+      specifier: ^0.7.4
+      version: 0.7.4
+    '@js-temporal/polyfill':
+      specifier: ^0.5.1
+      version: 0.5.1
     '@types/node':
       specifier: ^22.15.21
       version: 22.15.21
@@ -87,10 +93,10 @@ importers:
   extension:
     dependencies:
       '@formatjs/intl-durationformat':
-        specifier: ^0.7.4
+        specifier: 'catalog:'
         version: 0.7.4
       '@js-temporal/polyfill':
-        specifier: ^0.5.1
+        specifier: 'catalog:'
         version: 0.5.1
       '@vscode/extension-telemetry':
         specifier: ^1.0.0
@@ -132,15 +138,18 @@ importers:
 
   packages/git:
     dependencies:
+      '@formatjs/intl-durationformat':
+        specifier: 'catalog:'
+        version: 0.7.4
+      '@js-temporal/polyfill':
+        specifier: 'catalog:'
+        version: 0.5.1
       '@types/node':
         specifier: catalog:vscode
         version: 20.17.50
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
-      get-stream:
-        specifier: 'catalog:'
-        version: 9.0.1
       which:
         specifier: ^5.0.0
         version: 5.0.0
@@ -151,6 +160,9 @@ importers:
       ava:
         specifier: 'catalog:'
         version: 6.3.0(rollup@4.41.0)
+      get-stream:
+        specifier: 'catalog:'
+        version: 9.0.1
       into-stream:
         specifier: ^8.0.1
         version: 8.0.1

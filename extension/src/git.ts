@@ -22,7 +22,7 @@ import { exists, promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { StringDecoder } from "node:string_decoder";
-import type { Progress, Uri } from "vscode";
+import type { OutputChannel, Progress, Uri } from "vscode";
 import {
     type Branch,
     type BranchQuery,
@@ -72,6 +72,7 @@ export interface IGitOptions {
     version: string;
     context: GitContext;
     env?: { [key: string]: string };
+    outputChannel: OutputChannel,
 }
 
 const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";
@@ -101,7 +102,7 @@ export class Git {
         this.version = options.version;
         this.userAgent = options.userAgent;
         this._context = options.context;
-        this.#services = createServices();
+        this.#services = createServices(msg => options.outputChannel.appendLine(msg));
         this.#env = options.env || {};
     }
 

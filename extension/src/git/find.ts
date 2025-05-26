@@ -14,7 +14,7 @@ export interface IGit {
 }
 
 export async function findGit(outputChannel: OutputChannel, hints: string[]): Promise<IGit> {
-    const services = createServices();
+    const services = createServices(msg => outputChannel.appendLine(msg));
 
     const persistentContext: PersistentCLIContext = { env: process.env, timeout: 30_000 };
 
