@@ -3,7 +3,6 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
-  injectWorkspacePackages: true
 
 catalogs:
   default:
@@ -28,11 +27,11 @@ overrides:
   minimist@<1.2.6: ^1.2.8
   semver@<7.6.3: ^7.6.3
 
-packageExtensionsChecksum: sha256-p+WcHHlC1WK0wMbvteIIWFU71ai00z9qunkvMZ9LSk4=
+packageExtensionsChecksum: 3f4df37ee7825d8f0d5f1e1f49e200dd
 
 patchedDependencies:
   watcher@2.3.1:
-    hash: 97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688
+    hash: 5evhgjyylh56vgzmlkcac5dmwe
     path: patches/watcher@2.3.1.patch
 
 importers:
@@ -109,7 +108,7 @@ importers:
         version: 5.2.0
       watcher:
         specifier: ^2.3.1
-        version: 2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688)
+        version: 2.3.1(patch_hash=5evhgjyylh56vgzmlkcac5dmwe)
     devDependencies:
       '@types/node':
         specifier: catalog:vscode
@@ -4124,7 +4123,7 @@ snapshots:
 
   vscode-nls@5.2.0: {}
 
-  watcher@2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688):
+  watcher@2.3.1(patch_hash=5evhgjyylh56vgzmlkcac5dmwe):
     dependencies:
       dettle: 1.0.4
       stubborn-fs: 1.2.5
