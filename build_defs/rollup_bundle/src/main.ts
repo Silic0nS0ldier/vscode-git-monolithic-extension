@@ -72,7 +72,7 @@ try {
         entryFileNames: (chunkInfo) => {
             return chunkInfo.name.replace("dist/", "") + ".js";
         },
-        format: "cjs",
+        format: "esm",
         generatedCode: "es2015",
         // Bazel wants all outputs to be pre-declared, to satisfy this all chunks are put
         // into a single directory that maps to a directory output.
