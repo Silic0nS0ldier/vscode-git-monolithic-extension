@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/Silic0nS0ldier/vscode-git-monolithic-extension-devcontainer
+          imageName: ghcr.io/silic0ns0ldier/vscode-git-monolithic-extension-devcontainer
           imageTag: ${{ needs.devcontainer-tag.outputs.tag }}
           configFile: .devcontainer/def/devcontainer.json
           runCmd: echo "Built successfully"
