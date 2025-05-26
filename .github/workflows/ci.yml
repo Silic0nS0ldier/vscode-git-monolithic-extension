@@ -76,7 +76,7 @@ jobs:
           imageName: ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}
           imageTag: ${{ needs.devcontainer-tag.outputs.tag }}-${{ runner.arch }}
           configFile: .devcontainer/def/devcontainer.json
-          platform: ${{ matrix.runner == 'ubuntu-latest' && 'linux/amd64' || 'linux/arm64' }}
+          #platform: ${{ matrix.runner == 'ubuntu-latest' && 'linux/amd64' || 'linux/arm64' }}
           runCmd: echo "Built successfully"
           push: never
       - name: Resolve digest
