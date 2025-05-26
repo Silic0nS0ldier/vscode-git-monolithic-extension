@@ -1,4 +1,3 @@
-REPO_ROOT="$(git rev-parse --show-toplevel)"
 PACKAGE="$(git rev-parse --show-prefix)"
 PACKAGE="${PACKAGE%/}"
 BAZEL_BIN="$(bazel --quiet info bazel-bin)"

@@ -1,4 +1,4 @@
-import type { SpawnFn } from "../cli/create.js";
+import type { LogFn, SpawnFn } from "../cli/create.js";
 
 export type AllServices = {
     fs: {
@@ -16,4 +16,5 @@ export type AllServices = {
     os: {
         platform: string;
     };
+    log?: LogFn,
 };

@@ -1,3 +1,5 @@
+import { UnreachableError } from "../util/unreachable-error.js";
+
 export function isReadOnly(operation: OperationOptions): boolean {
     switch (operation) {
         case Operation.Blame:
@@ -11,12 +13,49 @@ export function isReadOnly(operation: OperationOptions): boolean {
         case Operation.LogFile:
         case Operation.MergeBase:
         case Operation.Show:
+        case Operation.HashObject:
+        case Operation.GetBranches:
+        case Operation.Status:
             return true;
-        default:
+        case Operation.Add:
+        case Operation.Apply:
+        case Operation.Branch:
+        case Operation.Checkout:
+        case Operation.CheckoutTracking:
+        case Operation.CherryPick:
+        case Operation.Clean:
+        case Operation.Commit:
+        case Operation.Config:// TODO Split to read and write variants
+        case Operation.DeleteBranch:
+        case Operation.DeleteRef:
+        case Operation.DeleteTag:
+        case Operation.Fetch:
+        case Operation.Ignore:
+        case Operation.Merge:
+        case Operation.Move:
+        case Operation.Pull:
+        case Operation.Push:
+        case Operation.Rebase:
+        case Operation.RebaseAbort:
+        case Operation.RebaseContinue:
+        case Operation.Remote:
+        case Operation.Remove:
+        case Operation.RenameBranch:
+        case Operation.Reset:
+        case Operation.RevertFiles:
+        case Operation.SetBranchUpstream:
+        case Operation.Stage:
+        case Operation.Tag:
+        case Operation.Stash:
+        case Operation.SubmoduleUpdate:
+        case Operation.Sync:
             return false;
+        default:
+            throw new UnreachableError(operation);
     }
 }
 
+// TODO This could all use a review, I doubt so many should show progress
 function shouldShowProgress(operation: OperationOptions): boolean {
     switch (operation) {
         case Operation.Fetch:
@@ -24,8 +63,51 @@ function shouldShowProgress(operation: OperationOptions): boolean {
         case Operation.GetObjectDetails:
         case Operation.Show:
             return false;
-        default:
+        case Operation.Blame:
+        case Operation.Diff:
+        case Operation.FindTrackingBranches:
+        case Operation.GetBranch:
+        case Operation.GetCommitTemplate:
+        case Operation.Log:
+        case Operation.LogFile:
+        case Operation.MergeBase:
+        case Operation.HashObject:
+        case Operation.GetBranches:
+        case Operation.Status:
+        case Operation.Add:
+        case Operation.Apply:
+        case Operation.Branch:
+        case Operation.Checkout:
+        case Operation.CheckoutTracking:
+        case Operation.CherryPick:
+        case Operation.Clean:
+        case Operation.Commit:
+        case Operation.Config:
+        case Operation.DeleteBranch:
+        case Operation.DeleteRef:
+        case Operation.DeleteTag:
+        case Operation.Ignore:
+        case Operation.Merge:
+        case Operation.Move:
+        case Operation.Pull:
+        case Operation.Push:
+        case Operation.Rebase:
+        case Operation.RebaseAbort:
+        case Operation.RebaseContinue:
+        case Operation.Remote:
+        case Operation.Remove:
+        case Operation.RenameBranch:
+        case Operation.Reset:
+        case Operation.RevertFiles:
+        case Operation.SetBranchUpstream:
+        case Operation.Stage:
+        case Operation.Tag:
+        case Operation.Stash:
+        case Operation.SubmoduleUpdate:
+        case Operation.Sync:
             return true;
+        default:
+            throw new UnreachableError(operation);
     }
 }
 
@@ -76,7 +158,8 @@ export type OperationOptions =
     | "SubmoduleUpdate"
     | "Sync"
     | "Tag";
-export const Operation: Record<OperationOptions, OperationOptions> = {
+
+export const Operation = {
     Add: "Add",
     Apply: "Apply",
     Blame: "Blame",
@@ -123,7 +206,7 @@ export const Operation: Record<OperationOptions, OperationOptions> = {
     SubmoduleUpdate: "SubmoduleUpdate",
     Sync: "Sync",
     Tag: "Tag",
-};
+} satisfies Record<OperationOptions, OperationOptions>;
 
 export interface Operations {
     isIdle(): boolean;
@@ -168,6 +251,7 @@ export class OperationsImpl implements Operations {
         const operations = this.#operations.keys();
 
         for (const operation of operations) {
+            // TODO Consider refactoring, this is a hot-path and I'm not sure jumptables will reliably kick in here
             if (shouldShowProgress(operation)) {
                 return true;
             }

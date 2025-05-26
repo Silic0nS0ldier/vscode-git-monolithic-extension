@@ -1,6 +1,7 @@
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("//build_defs/lint:linters.bzl", "eslint_test")
 
 npm_link_all_packages(name = "node_modules")
 
@@ -33,4 +34,11 @@ ts_config(
     src = "tsconfig.json",
     deps = ["//:tsconfig"],
     visibility = [":__pkg__"],
+)
+
+eslint_test(
+    name = "eslint",
+    srcs = [
+        ":lib",
+    ],
 )

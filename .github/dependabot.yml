@@ -5,7 +5,7 @@ updates:
     ignore:
       # Need to stay in sync with VSCode (bound to NodeJS version from Electron)
       - dependency-name: "@types/node"
-        update-types: "version-update:semver-major"
+        update-types: ["version-update:semver-major"]
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"

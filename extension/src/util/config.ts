@@ -197,10 +197,6 @@ export function supportCancellation(scope: ConfigurationScope): boolean {
     return getExtensionConfig(scope).get<boolean>("supportCancellation", false);
 }
 
-export function ignoreLimitWarning(): boolean {
-    return getExtensionConfig().get<boolean>("ignoreLimitWarning", false);
-}
-
 export function decorationsEnabled(): boolean {
     return getExtensionConfig().get<boolean>("decorations.enabled", true);
 }

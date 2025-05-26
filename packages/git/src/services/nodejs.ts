@@ -4,8 +4,9 @@ import { spawn } from "child_process";
 import { existsSync as exists } from "fs";
 import which from "which";
 import type { AllServices } from "./mod.js";
+import type { LogFn } from "../cli/create.js";
 
-export function createServices(): AllServices {
+export function createServices(log?: LogFn): AllServices {
     return {
         child_process: {
             spawn,
@@ -20,5 +21,6 @@ export function createServices(): AllServices {
         shell: {
             which,
         },
+        log,
     };
 }

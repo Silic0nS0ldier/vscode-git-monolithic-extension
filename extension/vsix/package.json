@@ -1604,11 +1604,6 @@
                     "description": "%config.ignoreWindowsGit27Warning%",
                     "default": false
                 },
-                "git.ignoreLimitWarning": {
-                    "type": "boolean",
-                    "description": "%config.ignoreLimitWarning%",
-                    "default": false
-                },
                 "git.ignoreRebaseWarning": {
                     "type": "boolean",
                     "description": "%config.ignoreRebaseWarning%",

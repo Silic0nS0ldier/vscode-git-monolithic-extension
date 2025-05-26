@@ -145,6 +145,7 @@ async function createModel(
         userAgent:
             `git/${info.version} (${os.version()} ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
         version: info.version,
+        outputChannel,
     });
     const onOutput = (str: string): void => {
         const lines = str.split(/\r?\n/mg);

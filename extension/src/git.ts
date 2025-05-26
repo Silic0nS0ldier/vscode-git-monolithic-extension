@@ -12,6 +12,8 @@ import type { GitContext } from "monolithic-git-interop/cli";
 import type { AllServices } from "monolithic-git-interop/services";
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
+import { untracked } from "monolithic-git-interop/api/status/untracked";
+import { tracked, type IFileStatus } from "monolithic-git-interop/api/status/tracked";
 import { DurationFormat } from "@formatjs/intl-durationformat";
 import { Temporal } from "@js-temporal/polyfill";
 import type * as cp from "node:child_process";
@@ -20,7 +22,7 @@ import { exists, promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { StringDecoder } from "node:string_decoder";
-import type { Progress, Uri } from "vscode";
+import type { OutputChannel, Progress, Uri } from "vscode";
 import {
     type Branch,
     type BranchQuery,
@@ -41,14 +43,12 @@ import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD }
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
-import type { IFileStatus } from "./git/IFileStatus.js";
 import type { LogFileOptions } from "./git/LogFileOptions.js";
 import { parseGitCommits } from "./git/parseGitCommits.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
 import { type LsFilesElement, parseLsFiles } from "./git/parseLsFiles.js";
 import { type LsTreeElement, parseLsTree } from "./git/parseLsTree.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
-import { getStatusTrackedAndMerge } from "./git/repository-class/get-status.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
@@ -72,6 +72,7 @@ export interface IGitOptions {
     version: string;
     context: GitContext;
     env?: { [key: string]: string };
+    outputChannel: OutputChannel,
 }
 
 const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";
@@ -101,7 +102,7 @@ export class Git {
         this.version = options.version;
         this.userAgent = options.userAgent;
         this._context = options.context;
-        this.#services = createServices();
+        this.#services = createServices(msg => options.outputChannel.appendLine(msg));
         this.#env = options.env || {};
     }
 
@@ -431,19 +432,6 @@ export class Repository {
     async lsfiles(path: string): Promise<LsFilesElement[]> {
         const { stdout } = await this.exec(["ls-files", "--stage", "--", sanitizePath(path)]);
         return parseLsFiles(stdout);
-    }
-
-    async getGitRelativePath(ref: string, relativePath: string): Promise<string> {
-        const relativePathLowercase = relativePath.toLowerCase();
-        const dirname = path.posix.dirname(relativePath) + "/";
-        const elements: { file: string }[] = ref ? await this.lstree(ref, dirname) : await this.lsfiles(dirname);
-        const element = elements.filter(file => file.file.toLowerCase() === relativePathLowercase)[0];
-
-        if (!element) {
-            throw new GitError({ message: "Git relative path not found." });
-        }
-
-        return element.file;
     }
 
     async apply(patch: string, reverse?: boolean): Promise<void> {
@@ -1186,20 +1174,22 @@ export class Repository {
         }
     }
 
-    // here
-    getStatusTrackedAndMerge(
-        opts?: { limit?: number; ignoreSubmodules?: boolean },
-    ): Promise<{ status: IFileStatus[]; didHitLimit: boolean }> {
-        return getStatusTrackedAndMerge(this.stream.bind(this), opts);
+    async getStatusTrackedAndMerge(
+        opts?: { ignoreSubmodules?: boolean },
+    ): Promise<IFileStatus[]> {
+        const result = await tracked(this.#git._context, this.#repositoryRoot, "relative", opts);
+        if (isOk(result)) {
+            return unwrap(result);
+        }
+        throw new Error("Could not find tracked files", { cause: unwrap(result)});
     }
 
     async getStatusUntracked(): Promise<string[]> {
-        const result = await this.exec(["ls-files", "--others", "--exclude-standard"]);
-        if (result.exitCode !== 0) {
-            throw new Error("Could not find untracked files");
+        const result = await untracked(this.#git._context, this.#repositoryRoot, "relative");
+        if (isOk(result)) {
+            return unwrap(result);
         }
-
-        return result.stdout.trim().split("\n").map(f => f.trim()).filter(f => f !== "");
+        throw new Error("Could not find untracked files", { cause: unwrap(result) });
     }
 
     async getHEAD(): Promise<Ref> {

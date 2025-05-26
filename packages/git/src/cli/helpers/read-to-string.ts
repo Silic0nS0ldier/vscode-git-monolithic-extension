@@ -1,5 +1,5 @@
 import { MaxBufferError, getStreamAsBuffer } from "get-stream";
-import { PassThrough } from "stream";
+import { PassThrough } from "node:stream";
 import { type BufferOverflowError, createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, type GenericError } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import type { CLI } from "../context.js";
@@ -32,6 +32,7 @@ export async function readToString(context: ReadToContext, args: string[]): Prom
         const [streamResult, cliResult] = await Promise.all([streamReader, cliAction]);
 
         if (isErr(cliResult)) {
+            // Throwing to use same code path as buffer overflow handling
             throw unwrap(cliResult);
         }
 

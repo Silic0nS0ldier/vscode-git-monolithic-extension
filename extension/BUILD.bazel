@@ -2,6 +2,7 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//extension:ava/package_json.bzl", "bin")
 load("//build_defs/rollup_bundle:rollup_bundle.bzl", "rollup_bundle")
+load("//build_defs/lint:linters.bzl", "eslint_test")
 
 npm_link_all_packages(name = "node_modules")
 
@@ -72,4 +73,12 @@ bin.ava_test(
     ],
     chdir = package_name(),
     args = ["-t"],
+)
+
+eslint_test(
+    name = "eslint",
+    srcs = [
+        ":lib",
+        ":lib_tests",
+    ],
 )
