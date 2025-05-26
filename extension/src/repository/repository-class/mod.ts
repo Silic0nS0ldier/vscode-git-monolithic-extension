@@ -187,7 +187,7 @@ export function createRepository(
         try {
             const result = await retryRun(operation, runOperation);
 
-            if (!isReadOnly(operation)) {
+            if (operation === Operation.Status || !isReadOnly(operation)) {
                 await updateModelState();
             }
 
