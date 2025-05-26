@@ -99,9 +99,9 @@ jobs:
       - name: Create multi-arch manifest
         run: |
           docker manifest create \
-            ${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}:${{ needs.devcontainer-tag.outputs.tag }} \
+            ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}:${{ needs.devcontainer-tag.outputs.tag }} \
             --amend ${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}@${{ needs.devcontainer-build.outputs.digest-arm }} \
             --amend ${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}@${{ needs.devcontainer-build.outputs.digest-x86 }}
       - name: Push
-        run: docker image push ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}:${{ needs.devcontainer-tag.outputs.tag }}
+        run: docker manifest push ${{ env.OPT_REGISTRY }}/${{ env.OPT_NAMESPACE }}/${{ env.OPT_IMAGE }}:${{ needs.devcontainer-tag.outputs.tag }}
 
