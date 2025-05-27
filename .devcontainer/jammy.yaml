@@ -1,0 +1,23 @@
+# Anytime this file is changed, the lockfile needs to be regenerated.
+# To generate the noble.lock.json run the following command
+#   bazel run @jammy//:lock
+version: 1
+
+sources:
+  - channel: jammy main
+    url: https://snapshot.ubuntu.com/ubuntu/20250522T153726Z
+  - channel: jammy-security main
+    url: https://snapshot.ubuntu.com/ubuntu/20250522T153726Z
+  - channel: jammy-updates main
+    url: https://snapshot.ubuntu.com/ubuntu/20250522T153726Z
+  - channel: jammy main
+    url: https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z
+
+archs:
+  - "amd64"
+  - "arm64"
+
+packages:
+  - moby-cli
+  - moby-buildx
+  - moby-engine

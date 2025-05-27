@@ -6,6 +6,7 @@ pkg_tar(
     srcs = [
         "@multitool//tools/bazelisk",
     ],
+    extension = "tar.gz",
     package_dir = "/usr/local/bin",
     symlinks = {
         "bazel": "bazelisk",
@@ -19,6 +20,7 @@ pkg_tar(
         "@multitool//tools/buildozer",
         "@multitool//tools/unused_deps",
     ],
+    extension = "tar.gz",
     package_dir = "/usr/local/bin",
 )
 
@@ -27,6 +29,7 @@ pkg_tar(
     srcs = [
         "@multitool//tools/starpls",
     ],
+    extension = "tar.gz",
     package_dir = "/usr/local/bin",
 )
 
@@ -39,6 +42,7 @@ pkg_tar(
         },
         no_match_error = "nodejs_layer only supports linux_amd64 and linux_arm64 platforms",
     ),
+    extension = "tar.gz",
     package_dir = "/usr/local/bin",
 )
 
@@ -47,35 +51,50 @@ pkg_tar(
     srcs = [
         "@multitool//tools/pnpm",
     ],
+    extension = "tar.gz",
     package_dir = "/usr/local/bin",
 )
 
 oci_image(
     name = "devcontainer",
     base = "@devcontainer_base_ubuntu",
-    tars = [
-        ":bazelisk_layer",
-        ":buildtools_layer",
-        ":starpls_layer",
-        ":nodejs_layer",
-        ":pnpm_layer",
-    ],
     labels = {
         "devcontainer.metadata": json.encode([{
             "customizations": {
                 "vscode": {
                     "extensions": [
                         "bazelbuild.vscode-bazel",
+                        "ms-azuretools.vscode-docker",
+                        "github.vscode-github-actions",
                     ],
                     "settings": {
                         "bazel.enableCodeLens": True,
                         "bazel.lsp.command": "starpls",
                         "bazel.lsp.args": ["server"],
-                    }
-                }
-            }
+                    },
+                },
+            },
+            "mounts": [
+                {
+                    "source": "dind-var-lib-docker-${devcontainerId}",
+                    "target": "/var/lib/docker",
+                    "type": "volume",
+                },
+            ],
+            "privileged": True,
+            "containerEnv": {
+                "DOCKER_BUILDKIT": "1",
+            },
         }]),
     },
+    tars = [
+        ":bazelisk_layer",
+        ":buildtools_layer",
+        ":starpls_layer",
+        ":nodejs_layer",
+        ":pnpm_layer",
+        "@jammy",
+    ],
 )
 
 oci_image_index(
