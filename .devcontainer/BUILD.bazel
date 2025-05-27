@@ -96,4 +96,5 @@ oci_load(
 oci_push(
     name = "devcontainer_push",
     image = ":devcontainer_multiarch",
+    repository = "ghcr.io/silic0ns0ldier/vscode-git-monolithic-extension/devcontainer",
 )
