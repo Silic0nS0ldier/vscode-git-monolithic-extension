@@ -90,7 +90,7 @@ oci_image_index(
 oci_load(
     name = "devcontainer_load",
     image = ":devcontainer",
-    repo_tags = ["testing:latest"],
+    repo_tags = ["silic0ns0ldier/vscode-git-monolithic-extension/devcontainer:dev"],
 )
 
 oci_push(
