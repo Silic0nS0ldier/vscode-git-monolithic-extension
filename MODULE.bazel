@@ -9,11 +9,15 @@ bazel_dep(name = "aspect_rules_ts", version = "3.6.0")
 bazel_dep(name = "aspect_rules_lint", version = "1.4.2")
 bazel_dep(name = "rules_multitool", version = "1.3.0")
 bazel_dep(name = "rules_shell", version = "0.4.1")
+bazel_dep(name = "rules_oci", version = "2.2.6")
+bazel_dep(name = "platforms", version = "0.0.11")
+bazel_dep(name = "rules_pkg", version = "1.1.0")
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
 
 single_version_override(
     module_name = "rules_nodejs",
-    patches = ["//:patches/rules_nodejs@6.4.0.patch"],
     patch_strip = 1,
+    patches = ["//:patches/rules_nodejs@6.4.0.patch"],
 )
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
@@ -29,6 +33,14 @@ node.toolchain(
         "24.0.2-windows_amd64": ("node-v24.0.2-win-x64.zip", "node-v24.0.2-win-x64", "259ca89fced60a5673548b57d0ed8cf813b9f310827b5fdfe042b4a105217b81"),
     },
 )
+use_repo(node, "nodejs_linux_amd64", "nodejs_linux_arm64")
+
+pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
+pnpm.pnpm(
+    pnpm_version = "10.11.0",
+    pnpm_version_integrity = "sha512-ZUBYP0HMX2KOs9l3Ps7oAvT575kjzEW2mJD7R5kdSwkpZGlOw6T3OKQgyRijMwYsi5JdMS9C5PDCY+tgNVH5dw==",
+)
+use_repo(pnpm, "pnpm")
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
@@ -36,9 +48,6 @@ npm.npm_translate_lock(
     pnpm_lock = "//:pnpm-lock.yaml",
 )
 use_repo(npm, "npm")
-
-pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
-use_repo(pnpm, "pnpm")
 
 rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
 rules_ts_ext.deps(
@@ -49,3 +58,15 @@ use_repo(rules_ts_ext, "npm_typescript")
 multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
 multitool.hub(lockfile = "//:multitool.lock.json")
 use_repo(multitool, "multitool")
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "devcontainer_base_ubuntu",
+    digest = "sha256:e6cac7682e119650eb1d55f403d4f27febee89782ec7eaea2b9100b2c543c39c",
+    image = "mcr.microsoft.com/devcontainers/base",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+)
+use_repo(oci, "devcontainer_base_ubuntu", "devcontainer_base_ubuntu_linux_amd64", "devcontainer_base_ubuntu_linux_arm64")

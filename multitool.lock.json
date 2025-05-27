@@ -1,5 +1,91 @@
 {
   "$schema": "https://raw.githubusercontent.com/theoremlp/rules_multitool/main/lockfile.schema.json",
+  "bazelisk": {
+    "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-arm64",
+        "sha256": "54f85ef4c23393f835252cc882e5fea596e8ef3c4c2056b059f8067cd19f0351",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-amd64",
+        "sha256": "6539c12842ad76966f3d493e8f80d67caa84ec4a000e220d5459833c967c12bc",
+        "os": "linux",
+        "cpu": "x86_64"
+      }
+    ]
+  },
+  "buildifier": {
+    "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/buildifier-linux-arm64",
+        "sha256": "c624a833bfa64d3a457ef0235eef0dbda03694768aab33f717a7ffd3f803d272",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/buildifier-linux-amd64",
+        "sha256": "3e79e6c0401b5f36f8df4dfc686127255d25c7eddc9599b8779b97b7ef4cdda7",
+        "os": "linux",
+        "cpu": "x86_64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/buildifier-darwin-arm64",
+        "sha256": "e08381a3ed1d59c0a17d1cee1d4e7684c6ce1fc3b5cfa1bd92a5fe978b38b47d",
+        "os": "macos",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/buildifier-darwin-amd64",
+        "sha256": "309b3c3bfcc4b1533d5f7f796adbd266235cfb6f01450f3e37423527d209a309",
+        "os": "macos",
+        "cpu": "x86_64"
+      }
+    ]
+  },
+  "buildozer": {
+    "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/buildozer-linux-arm64",
+        "sha256": "a9f38f2781de41526ce934866cb79b8b5b59871c96853dc5a1aee26f4c5976bb",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/buildozer-linux-amd64",
+        "sha256": "0e54770aa6148384d1edde39ef20e10d2c57e8c09dd42f525e100f51b0b77ae1",
+        "os": "linux",
+        "cpu": "x86_64"
+      }
+    ]
+  },
+  "pnpm": {
+    "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/pnpm/pnpm/releases/download/v10.11.0/pnpm-linux-arm64",
+        "sha256": "fd030b0566a70862ae06102316ed16bde0a7f953130551923c8bc11bb2a8ed87",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/pnpm/pnpm/releases/download/v10.11.0/pnpm-linux-x64",
+        "sha256": "fb28f89021562a8b251d8b34485a0b560683f096af17a0793139df6b4f3c4d5a",
+        "os": "linux",
+        "cpu": "x86_64"
+      }
+    ]
+  },
   "shellcheck": {
     "binaries": [
       {
@@ -17,21 +103,41 @@
         "sha256": "6c881ab0698e4e6ea235245f22832860544f17ba386442fe7e9d629f8cbedf87",
         "os": "linux",
         "cpu": "x86_64"
-      },
+      }
+    ]
+  },
+  "starpls": {
+    "binaries": [
       {
-        "kind": "archive",
-        "url": "https://github.com/koalaman/shellcheck/releases/download/v0.10.0/shellcheck-v0.10.0.darwin.aarch64.tar.xz",
-        "file": "shellcheck-v0.10.0/shellcheck",
-        "sha256": "bbd2f14826328eee7679da7221f2bc3afb011f6a928b848c80c321f6046ddf81",
-        "os": "macos",
+        "kind": "file",
+        "url": "https://github.com/withered-magic/starpls/releases/download/v0.1.21/starpls-linux-aarch64",
+        "sha256": "488c87365d0ee07acdb40df9eb5369e113ad7d96c0f8ec12fea8c80e9e12e781",
+        "os": "linux",
         "cpu": "arm64"
       },
       {
-        "kind": "archive",
-        "url": "https://github.com/koalaman/shellcheck/releases/download/v0.10.0/shellcheck-v0.10.0.darwin.x86_64.tar.xz",
-        "file": "shellcheck-v0.10.0/shellcheck",
-        "sha256": "ef27684f23279d112d8ad84e0823642e43f838993bbb8c0963db9b58a90464c2",
-        "os": "macos",
+        "kind": "file",
+        "url": "https://github.com/withered-magic/starpls/releases/download/v0.1.21/starpls-linux-amd64",
+        "sha256": "45692ecb9d94a19a15b1e7b240acdff5702f78cd22188dac41e1879cb8bdcdcf",
+        "os": "linux",
+        "cpu": "x86_64"
+      }
+    ]
+  },
+  "unused_deps": {
+    "binaries": [
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/unused_deps-linux-arm64",
+        "sha256": "93f41edecfbd9ce211fe42c6bc1c3e34eadf4bdbfdc7af82a19af8da8bad9303",
+        "os": "linux",
+        "cpu": "arm64"
+      },
+      {
+        "kind": "file",
+        "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.2.0/unused_deps-linux-amd64",
+        "sha256": "ed24ce31085bb59d095e3eb0d143ff8448767fc04e18362568302bb6d365abea",
+        "os": "linux",
         "cpu": "x86_64"
       }
     ]
