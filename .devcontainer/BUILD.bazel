@@ -55,6 +55,15 @@ pkg_tar(
     package_dir = "/usr/local/bin",
 )
 
+pkg_tar(
+    name = "multitool_layer",
+    srcs = [
+        "@multitool//tools/multitool",
+    ],
+    extension = "tar.gz",
+    package_dir = "/usr/local/bin",
+)
+
 oci_image(
     name = "devcontainer",
     base = "@devcontainer_base_ubuntu",
@@ -93,6 +102,7 @@ oci_image(
         ":starpls_layer",
         ":nodejs_layer",
         ":pnpm_layer",
+        ":multitool_layer",
         "@jammy",
     ],
 )
