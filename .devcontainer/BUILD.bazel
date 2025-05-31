@@ -1,0 +1,129 @@
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_load", "oci_push")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+pkg_tar(
+    name = "bazelisk_layer",
+    srcs = [
+        "@multitool//tools/bazelisk",
+    ],
+    extension = "tar.gz",
+    package_dir = "/usr/local/bin",
+    symlinks = {
+        "bazel": "bazelisk",
+    },
+)
+
+pkg_tar(
+    name = "buildtools_layer",
+    srcs = [
+        "@multitool//tools/buildifier",
+        "@multitool//tools/buildozer",
+        "@multitool//tools/unused_deps",
+    ],
+    extension = "tar.gz",
+    package_dir = "/usr/local/bin",
+)
+
+pkg_tar(
+    name = "starpls_layer",
+    srcs = [
+        "@multitool//tools/starpls",
+    ],
+    extension = "tar.gz",
+    package_dir = "/usr/local/bin",
+)
+
+pkg_tar(
+    name = "nodejs_layer",
+    srcs = select(
+        {
+            "//build_defs/config_settings:linux_amd64": ["@nodejs_linux_amd64//:node"],
+            "//build_defs/config_settings:linux_arm64": ["@nodejs_linux_arm64//:node"],
+        },
+        no_match_error = "nodejs_layer only supports linux_amd64 and linux_arm64 platforms",
+    ),
+    extension = "tar.gz",
+    package_dir = "/usr/local/bin",
+)
+
+pkg_tar(
+    name = "pnpm_layer",
+    srcs = [
+        "@multitool//tools/pnpm",
+    ],
+    extension = "tar.gz",
+    package_dir = "/usr/local/bin",
+)
+
+pkg_tar(
+    name = "multitool_layer",
+    srcs = [
+        "@multitool//tools/multitool",
+    ],
+    extension = "tar.gz",
+    package_dir = "/usr/local/bin",
+)
+
+oci_image(
+    name = "devcontainer",
+    base = "@devcontainer_base_ubuntu",
+    labels = {
+        "devcontainer.metadata": json.encode([{
+            "customizations": {
+                "vscode": {
+                    "extensions": [
+                        "bazelbuild.vscode-bazel",
+                        "ms-azuretools.vscode-docker",
+                        "github.vscode-github-actions",
+                    ],
+                    "settings": {
+                        "bazel.enableCodeLens": True,
+                        "bazel.lsp.command": "starpls",
+                        "bazel.lsp.args": ["server"],
+                    },
+                },
+            },
+            "mounts": [
+                {
+                    "source": "dind-var-lib-docker-${devcontainerId}",
+                    "target": "/var/lib/docker",
+                    "type": "volume",
+                },
+            ],
+            "privileged": True,
+            "containerEnv": {
+                "DOCKER_BUILDKIT": "1",
+            },
+        }]),
+    },
+    tars = [
+        ":bazelisk_layer",
+        ":buildtools_layer",
+        ":starpls_layer",
+        ":nodejs_layer",
+        ":pnpm_layer",
+        ":multitool_layer",
+        "@jammy",
+    ],
+)
+
+oci_image_index(
+    name = "devcontainer_multiarch",
+    images = [":devcontainer"],
+    platforms = [
+        "//build_defs/platforms:linux_amd64",
+        "//build_defs/platforms:linux_arm64",
+    ],
+)
+
+oci_load(
+    name = "devcontainer_load",
+    image = ":devcontainer",
+    repo_tags = ["silic0ns0ldier/vscode-git-monolithic-extension/devcontainer:dev"],
+)
+
+oci_push(
+    name = "devcontainer_push",
+    image = ":devcontainer_multiarch",
+    repository = "ghcr.io/silic0ns0ldier/vscode-git-monolithic-extension/devcontainer",
+)

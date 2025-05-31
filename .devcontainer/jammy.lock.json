@@ -1,0 +1,413 @@
+{
+	"packages": [
+		{
+			"arch": "amd64",
+			"dependencies": [
+				{
+					"key": "libc6_2.35-0ubuntu3.9_amd64",
+					"name": "libc6",
+					"version": "2.35-0ubuntu3.9"
+				},
+				{
+					"key": "libcrypt1_1-4.4.27-1_amd64",
+					"name": "libcrypt1",
+					"version": "1:4.4.27-1"
+				},
+				{
+					"key": "libgcc-s1_12.3.0-1ubuntu1_22.04_amd64",
+					"name": "libgcc-s1",
+					"version": "12.3.0-1ubuntu1~22.04"
+				},
+				{
+					"key": "gcc-12-base_12.3.0-1ubuntu1_22.04_amd64",
+					"name": "gcc-12-base",
+					"version": "12.3.0-1ubuntu1~22.04"
+				}
+			],
+			"key": "moby-cli_28.1.1-ubuntu22.04u1_amd64",
+			"name": "moby-cli",
+			"sha256": "63f3aaa21ac4742af5c8fc5a12bdd99aec058435c9206500cf0f643596b920f0",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-cli/moby-cli_28.1.1-ubuntu22.04u1_amd64.deb"
+			],
+			"version": "28.1.1-ubuntu22.04u1"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "libc6_2.35-0ubuntu3.9_amd64",
+			"name": "libc6",
+			"sha256": "58b9b9b125fc6ceea07c9deff66172255584be3ff009967ebf23237c0e993701",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/g/glibc/libc6_2.35-0ubuntu3.9_amd64.deb"
+			],
+			"version": "2.35-0ubuntu3.9"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "libcrypt1_1-4.4.27-1_amd64",
+			"name": "libcrypt1",
+			"sha256": "3fa566e9f861a08736cbc5a97562d9d6e4f0c00450fbeafcb6d7583423b04a98",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/libx/libxcrypt/libcrypt1_4.4.27-1_amd64.deb"
+			],
+			"version": "1:4.4.27-1"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "libgcc-s1_12.3.0-1ubuntu1_22.04_amd64",
+			"name": "libgcc-s1",
+			"sha256": "8ca7b573446d22ef46a97b4ec537c38acc8653f76391127253040acc7b74af5f",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/g/gcc-12/libgcc-s1_12.3.0-1ubuntu1~22.04_amd64.deb"
+			],
+			"version": "12.3.0-1ubuntu1~22.04"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "gcc-12-base_12.3.0-1ubuntu1_22.04_amd64",
+			"name": "gcc-12-base",
+			"sha256": "80a1f5df097af3978f7df2808006ca77197865e5eb7a923712aee6876e7a14cb",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/g/gcc-12/gcc-12-base_12.3.0-1ubuntu1~22.04_amd64.deb"
+			],
+			"version": "12.3.0-1ubuntu1~22.04"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [
+				{
+					"key": "libc6_2.35-0ubuntu3.9_amd64",
+					"name": "libc6",
+					"version": "2.35-0ubuntu3.9"
+				},
+				{
+					"key": "libcrypt1_1-4.4.27-1_amd64",
+					"name": "libcrypt1",
+					"version": "1:4.4.27-1"
+				},
+				{
+					"key": "libgcc-s1_12.3.0-1ubuntu1_22.04_amd64",
+					"name": "libgcc-s1",
+					"version": "12.3.0-1ubuntu1~22.04"
+				},
+				{
+					"key": "gcc-12-base_12.3.0-1ubuntu1_22.04_amd64",
+					"name": "gcc-12-base",
+					"version": "12.3.0-1ubuntu1~22.04"
+				}
+			],
+			"key": "moby-buildx_0.23.0-ubuntu22.04u1_amd64",
+			"name": "moby-buildx",
+			"sha256": "c55220ee66c2b39b5c852d3a19d35686e7392e2650f6f7487447e7c30ac044f0",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-buildx/moby-buildx_0.23.0-ubuntu22.04u1_amd64.deb"
+			],
+			"version": "0.23.0-ubuntu22.04u1"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [
+				{
+					"key": "moby-tini_0.19.0-ubuntu22.04u1_amd64",
+					"name": "moby-tini",
+					"version": "0.19.0-ubuntu22.04u1"
+				},
+				{
+					"key": "moby-runc_1.1.15-ubuntu22.04u1_amd64",
+					"name": "moby-runc",
+					"version": "1.1.15-ubuntu22.04u1"
+				},
+				{
+					"key": "libseccomp2_2.5.3-2ubuntu3_22.04.1_amd64",
+					"name": "libseccomp2",
+					"version": "2.5.3-2ubuntu3~22.04.1"
+				},
+				{
+					"key": "libc6_2.35-0ubuntu3.9_amd64",
+					"name": "libc6",
+					"version": "2.35-0ubuntu3.9"
+				},
+				{
+					"key": "libcrypt1_1-4.4.27-1_amd64",
+					"name": "libcrypt1",
+					"version": "1:4.4.27-1"
+				},
+				{
+					"key": "libgcc-s1_12.3.0-1ubuntu1_22.04_amd64",
+					"name": "libgcc-s1",
+					"version": "12.3.0-1ubuntu1~22.04"
+				},
+				{
+					"key": "gcc-12-base_12.3.0-1ubuntu1_22.04_amd64",
+					"name": "gcc-12-base",
+					"version": "12.3.0-1ubuntu1~22.04"
+				},
+				{
+					"key": "moby-containerd_1.7.27-ubuntu22.04u1_amd64",
+					"name": "moby-containerd",
+					"version": "1.7.27-ubuntu22.04u1"
+				}
+			],
+			"key": "moby-engine_28.1.1-ubuntu22.04u1_amd64",
+			"name": "moby-engine",
+			"sha256": "dbfa202d5fec93464456f64e24942f66e3642dc77e3014f909444f11f9672bac",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-engine/moby-engine_28.1.1-ubuntu22.04u1_amd64.deb"
+			],
+			"version": "28.1.1-ubuntu22.04u1"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "moby-tini_0.19.0-ubuntu22.04u1_amd64",
+			"name": "moby-tini",
+			"sha256": "b492e0f4bdb3882cbad9e11c75769e2e0806bd66d4cb60bdfa00d3a63af666c2",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-tini/moby-tini_0.19.0-ubuntu22.04u1_amd64.deb"
+			],
+			"version": "0.19.0-ubuntu22.04u1"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "moby-runc_1.1.15-ubuntu22.04u1_amd64",
+			"name": "moby-runc",
+			"sha256": "49c1671049027c71b94a1a37386d8017c4ad6861e40b5da01ae1a10af13a3968",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-runc/moby-runc_1.1.15-ubuntu22.04u1_amd64.deb"
+			],
+			"version": "1.1.15-ubuntu22.04u1"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "libseccomp2_2.5.3-2ubuntu3_22.04.1_amd64",
+			"name": "libseccomp2",
+			"sha256": "25c63fd46d24f518f362c47c429b6918182875b0c58f7e2742aaa2d1e545bbac",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/libs/libseccomp/libseccomp2_2.5.3-2ubuntu3~22.04.1_amd64.deb"
+			],
+			"version": "2.5.3-2ubuntu3~22.04.1"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "moby-containerd_1.7.27-ubuntu22.04u1_amd64",
+			"name": "moby-containerd",
+			"sha256": "b0ab1245127743ecb48db0c13cb041472d8816db216181931c9d6864c696f6b2",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-containerd/moby-containerd_1.7.27-ubuntu22.04u1_amd64.deb"
+			],
+			"version": "1.7.27-ubuntu22.04u1"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [
+				{
+					"key": "libc6_2.35-0ubuntu3.9_arm64",
+					"name": "libc6",
+					"version": "2.35-0ubuntu3.9"
+				},
+				{
+					"key": "libcrypt1_1-4.4.27-1_arm64",
+					"name": "libcrypt1",
+					"version": "1:4.4.27-1"
+				},
+				{
+					"key": "libgcc-s1_12.3.0-1ubuntu1_22.04_arm64",
+					"name": "libgcc-s1",
+					"version": "12.3.0-1ubuntu1~22.04"
+				},
+				{
+					"key": "gcc-12-base_12.3.0-1ubuntu1_22.04_arm64",
+					"name": "gcc-12-base",
+					"version": "12.3.0-1ubuntu1~22.04"
+				}
+			],
+			"key": "moby-cli_28.1.1-ubuntu22.04u1_arm64",
+			"name": "moby-cli",
+			"sha256": "6cb2d6c4def564328589f309d0062a4e6ab80921f4da2ab6f2d915b1435a3952",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-cli/moby-cli_28.1.1-ubuntu22.04u1_arm64.deb"
+			],
+			"version": "28.1.1-ubuntu22.04u1"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "libc6_2.35-0ubuntu3.9_arm64",
+			"name": "libc6",
+			"sha256": "6b89cb1e561bf0ae1259bddf0ff31b21b26cff9faa0dcc77dba9bd311e606bcd",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/g/glibc/libc6_2.35-0ubuntu3.9_arm64.deb"
+			],
+			"version": "2.35-0ubuntu3.9"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "libcrypt1_1-4.4.27-1_arm64",
+			"name": "libcrypt1",
+			"sha256": "fb5f8d59de95bbb118a635e83e2a92077e13c6d297980dae3119df057bf88111",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/libx/libxcrypt/libcrypt1_4.4.27-1_arm64.deb"
+			],
+			"version": "1:4.4.27-1"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "libgcc-s1_12.3.0-1ubuntu1_22.04_arm64",
+			"name": "libgcc-s1",
+			"sha256": "07eb923f1d1b4353aca6b3a9a409dbd37fd245627e33379486a17d3a2ef4615b",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/g/gcc-12/libgcc-s1_12.3.0-1ubuntu1~22.04_arm64.deb"
+			],
+			"version": "12.3.0-1ubuntu1~22.04"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "gcc-12-base_12.3.0-1ubuntu1_22.04_arm64",
+			"name": "gcc-12-base",
+			"sha256": "1a67cbe6c00a96c0154c4bea2a2db79f216d16320d91cfcc162a2ee5d231241d",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/g/gcc-12/gcc-12-base_12.3.0-1ubuntu1~22.04_arm64.deb"
+			],
+			"version": "12.3.0-1ubuntu1~22.04"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [
+				{
+					"key": "libc6_2.35-0ubuntu3.9_arm64",
+					"name": "libc6",
+					"version": "2.35-0ubuntu3.9"
+				},
+				{
+					"key": "libcrypt1_1-4.4.27-1_arm64",
+					"name": "libcrypt1",
+					"version": "1:4.4.27-1"
+				},
+				{
+					"key": "libgcc-s1_12.3.0-1ubuntu1_22.04_arm64",
+					"name": "libgcc-s1",
+					"version": "12.3.0-1ubuntu1~22.04"
+				},
+				{
+					"key": "gcc-12-base_12.3.0-1ubuntu1_22.04_arm64",
+					"name": "gcc-12-base",
+					"version": "12.3.0-1ubuntu1~22.04"
+				}
+			],
+			"key": "moby-buildx_0.23.0-ubuntu22.04u1_arm64",
+			"name": "moby-buildx",
+			"sha256": "0bf2b6652d693cc98678ed332a63bf8a9618a60209171062af987c12436b93ce",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-buildx/moby-buildx_0.23.0-ubuntu22.04u1_arm64.deb"
+			],
+			"version": "0.23.0-ubuntu22.04u1"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [
+				{
+					"key": "moby-tini_0.19.0-ubuntu22.04u1_arm64",
+					"name": "moby-tini",
+					"version": "0.19.0-ubuntu22.04u1"
+				},
+				{
+					"key": "moby-runc_1.1.15-ubuntu22.04u1_arm64",
+					"name": "moby-runc",
+					"version": "1.1.15-ubuntu22.04u1"
+				},
+				{
+					"key": "libseccomp2_2.5.3-2ubuntu3_22.04.1_arm64",
+					"name": "libseccomp2",
+					"version": "2.5.3-2ubuntu3~22.04.1"
+				},
+				{
+					"key": "libc6_2.35-0ubuntu3.9_arm64",
+					"name": "libc6",
+					"version": "2.35-0ubuntu3.9"
+				},
+				{
+					"key": "libcrypt1_1-4.4.27-1_arm64",
+					"name": "libcrypt1",
+					"version": "1:4.4.27-1"
+				},
+				{
+					"key": "libgcc-s1_12.3.0-1ubuntu1_22.04_arm64",
+					"name": "libgcc-s1",
+					"version": "12.3.0-1ubuntu1~22.04"
+				},
+				{
+					"key": "gcc-12-base_12.3.0-1ubuntu1_22.04_arm64",
+					"name": "gcc-12-base",
+					"version": "12.3.0-1ubuntu1~22.04"
+				},
+				{
+					"key": "moby-containerd_1.7.27-ubuntu22.04u1_arm64",
+					"name": "moby-containerd",
+					"version": "1.7.27-ubuntu22.04u1"
+				}
+			],
+			"key": "moby-engine_28.1.1-ubuntu22.04u1_arm64",
+			"name": "moby-engine",
+			"sha256": "5d1964df5884615868b08bab7f425f82084c5c252c153b584a9cb2ced202223a",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-engine/moby-engine_28.1.1-ubuntu22.04u1_arm64.deb"
+			],
+			"version": "28.1.1-ubuntu22.04u1"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "moby-tini_0.19.0-ubuntu22.04u1_arm64",
+			"name": "moby-tini",
+			"sha256": "c5d8d594948cbc43b27617fefdabf92b903f924eb904cb5661bc16be9bd96bd3",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-tini/moby-tini_0.19.0-ubuntu22.04u1_arm64.deb"
+			],
+			"version": "0.19.0-ubuntu22.04u1"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "moby-runc_1.1.15-ubuntu22.04u1_arm64",
+			"name": "moby-runc",
+			"sha256": "280933c3085bf0376e0560419eed44db8e49d784133a4bf951662bf4302076ae",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-runc/moby-runc_1.1.15-ubuntu22.04u1_arm64.deb"
+			],
+			"version": "1.1.15-ubuntu22.04u1"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "libseccomp2_2.5.3-2ubuntu3_22.04.1_arm64",
+			"name": "libseccomp2",
+			"sha256": "cb80384b14df6cb3aec3e2cdc704f379310c8ef311aef5ae780a1aaed7ba0cf1",
+			"urls": [
+				"https://snapshot.ubuntu.com/ubuntu/20250522T153726Z/pool/main/libs/libseccomp/libseccomp2_2.5.3-2ubuntu3~22.04.1_arm64.deb"
+			],
+			"version": "2.5.3-2ubuntu3~22.04.1"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "moby-containerd_1.7.27-ubuntu22.04u1_arm64",
+			"name": "moby-containerd",
+			"sha256": "be80d7714a6020f12040e5afcdd57fb3bee5233f657cebbc02f9d8afa11d9aa3",
+			"urls": [
+				"https://packages.microsoft.com/snapshot/ubuntu/22.04/prod/20250522T153726Z/pool/main/m/moby-containerd/moby-containerd_1.7.27-ubuntu22.04u1_arm64.deb"
+			],
+			"version": "1.7.27-ubuntu22.04u1"
+		}
+	],
+	"version": 1
+}
