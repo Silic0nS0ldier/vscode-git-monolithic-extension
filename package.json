@@ -3,7 +3,7 @@
     "__": "Mitigation for dependabot updating to much at once, see https://github.com/dependabot/dependabot-core/issues/11246#issuecomment-2925393082",
     "packageManager": "pnpm@10.8.1",
     "dependencies": {
-        "@eslint/js": "^9.27.0",
+        "@eslint/js": "^9.28.0",
         "eslint": "^9.28.0",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.32.1"
