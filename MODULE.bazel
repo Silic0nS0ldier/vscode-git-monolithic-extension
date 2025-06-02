@@ -3,10 +3,10 @@ module(name = "vacode_git_monolithic")
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
 bazel_dep(name = "aspect_rules_js", version = "2.3.7")
-bazel_dep(name = "aspect_bazel_lib", version = "2.16.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.17.1")
 bazel_dep(name = "rules_nodejs", version = "6.4.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.6.0")
-bazel_dep(name = "aspect_rules_lint", version = "1.4.2")
+bazel_dep(name = "aspect_rules_lint", version = "1.4.4")
 bazel_dep(name = "rules_multitool", version = "1.3.0")
 bazel_dep(name = "rules_shell", version = "0.4.1")
 
@@ -18,15 +18,15 @@ single_version_override(
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
-    node_version = "24.0.2",
+    node_version = "24.1.0",
     node_versions = {
-        "24.0.2-darwin_arm64": ("node-v24.0.2-darwin-arm64.tar.gz", "node-v24.0.2-darwin-arm64", "dbd43bc96d7754eff03c241888c2cbc1e879bcbbf2f0961fb8e00e9cd3a21526"),
-        "24.0.2-darwin_amd64": ("node-v24.0.2-darwin-x64.tar.gz", "node-v24.0.2-darwin-x64", "b408d41f8e322bcc71fd4d595156b34d4ad03ef149fba26386030c4cf7e2c1e9"),
-        "24.0.2-linux_arm64": ("node-v24.0.2-linux-arm64.tar.xz", "node-v24.0.2-linux-arm64", "16426a7dae665cb87abe8399737248eb9661dd57e5dc99fcf6ded6e36c524525"),
-        "24.0.2-linux_ppc64le": ("node-v24.0.2-linux-ppc64le.tar.xz", "node-v24.0.2-linux-ppc64le", "8fae7a9cc4d909a5dee961ea032336240fcb4902463e5448367862b87daec9b2"),
-        "24.0.2-linux_s390x": ("node-v24.0.2-linux-s390x.tar.xz", "node-v24.0.2-linux-s390x", "0c0b781ac4edbab98c3146de0b645107a275f07ba93b899f469db41268ef0742"),
-        "24.0.2-linux_amd64": ("node-v24.0.2-linux-x64.tar.xz", "node-v24.0.2-linux-x64", "a5da53c8c184111afd324e1ed818c0fb23fe6f0a7d4583d47f41390dd389a027"),
-        "24.0.2-windows_amd64": ("node-v24.0.2-win-x64.zip", "node-v24.0.2-win-x64", "259ca89fced60a5673548b57d0ed8cf813b9f310827b5fdfe042b4a105217b81"),
+    "24.1.0-darwin_arm64": ("node-v24.1.0-darwin-arm64.tar.gz", "node-v24.1.0-darwin-arm64", "d474192c55b9f54ead37310dfab54431b9ba841fb8abdf8ca800e7a227afc1fb"),
+    "24.1.0-darwin_amd64": ("node-v24.1.0-darwin-x64.tar.gz", "node-v24.1.0-darwin-x64", "cdb47a43209c2fa4b6d9ccf7b71e59096448d172d0034aa213284f8931ef0946"),
+    "24.1.0-linux_arm64": ("node-v24.1.0-linux-arm64.tar.xz", "node-v24.1.0-linux-arm64", "ff5a3a68781794a473f59a727f35314723785eff6f48aaf983361fadf0eadf36"),
+    "24.1.0-linux_ppc64le": ("node-v24.1.0-linux-ppc64le.tar.xz", "node-v24.1.0-linux-ppc64le", "04fa3da93d7e81151ad604b402068d5fc4e8b330c2b65514b86065fccd910f83"),
+    "24.1.0-linux_s390x": ("node-v24.1.0-linux-s390x.tar.xz", "node-v24.1.0-linux-s390x", "f01c53d1ba0e7f39ad170a4bb5be3be428e732a27753bb7049e9bde0b058ff35"),
+    "24.1.0-linux_amd64": ("node-v24.1.0-linux-x64.tar.xz", "node-v24.1.0-linux-x64", "76b77c43f97a7c4cf60917e24c5e212faaf8ca664e433759ef98d12f268b6b49"),
+    "24.1.0-windows_amd64": ("node-v24.1.0-win-x64.zip", "node-v24.1.0-win-x64", "81d6774f5c1581c7ddd32fb25cf6138f68755dfbb245025d05a249aafa35ea9d"),
     },
 )
 
