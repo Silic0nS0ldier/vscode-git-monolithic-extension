@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@vscode/vsce": "^3.4.2",
+        "@vscode/vsce": "^3.5.0",
         "cleye": "catalog:"
     },
     "devDependencies": {
