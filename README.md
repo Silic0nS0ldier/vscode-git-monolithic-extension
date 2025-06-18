@@ -24,8 +24,6 @@ For release
 
 ## The List
 
-- `pnpm patch ...` is not working with the workflow in this repo.
-  https://github.com/pnpm/pnpm/issues/8257
 - `watcher` package type issues.
   https://github.com/fabiospampinato/watcher/issues/33
 - ava tests should emit JUnit output

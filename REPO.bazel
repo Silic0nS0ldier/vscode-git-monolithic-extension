@@ -1,4 +1,5 @@
 ignore_directories([
     "**/node_modules",
     ".git",
+    ".pnpm-store",
 ])
