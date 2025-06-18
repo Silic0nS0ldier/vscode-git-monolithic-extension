@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@rollup/plugin-commonjs": "^28.0.5",
+        "@rollup/plugin-commonjs": "^28.0.6",
         "@rollup/plugin-node-resolve": "^16.0.1",
         "cleye": "catalog:",
         "rollup": "^4.43.0"

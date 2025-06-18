@@ -1,12 +1,12 @@
 {
     "private": true,
-    "__": "Mitigation for dependabot updating to much at once, see https://github.com/dependabot/dependabot-core/issues/11246#issuecomment-2925393082",
-    "packageManager": "pnpm@10.8.1",
+    "__": "For dependabot",
+    "packageManager": "pnpm@10.12.1",
     "dependencies": {
         "@eslint/js": "^9.29.0",
         "eslint": "^9.29.0",
         "typescript": "^5.8.3",
-        "typescript-eslint": "^8.34.0"
+        "typescript-eslint": "^8.34.1"
     },
     "pnpm": {
         "overrides": {
