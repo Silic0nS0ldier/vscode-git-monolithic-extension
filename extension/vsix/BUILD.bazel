@@ -3,27 +3,30 @@ load("@aspect_bazel_lib//lib:copy_file.bzl", "copy_file")
 load("@aspect_bazel_lib//lib:output_files.bzl", "output_files")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
 load("//build_defs/lint:linters.bzl", "shellcheck_test")
-load("//build_defs/vsce_package:vsce_package.bzl", "vsce_package")
+load("//build_defs/vsix_package:vsix_package.bzl", "vsix_package")
 
 # Copy bundled sources to src/
 output_files(
     name = "bundle_chunks_ref",
+    paths = ["extension/bundle_/chunks"],
     target = "//extension:bundle",
-    paths = ["extension/bundle/chunks"],
 )
+
 copy_directory(
     name = "copy_bundle_chunks",
     src = ":bundle_chunks_ref",
     out = "src/chunks",
 )
+
 copy_file(
     name = "copy_bundle_main",
-    src = "//extension:bundle/main.js",
+    src = "//extension:bundle_/main.js",
     out = "src/main.js",
 )
+
 copy_file(
     name = "copy_bundle_askpass_main",
-    src = "//extension:bundle/askpass-main.js",
+    src = "//extension:bundle_/askpass-main.js",
     out = "src/askpass-main.js",
 )
 
@@ -34,22 +37,33 @@ copy_file(
     out = "LICENSE",
 )
 
-vsce_package(
+vsix_package(
     name = "git_monolithic",
-    srcs = glob(["**"], exclude = ["package.json-off.json", "package.nls.json-off.json", "BUILD.bazel"]) + [
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "package.json-off.json",
+            "package.nls.json-off.json",
+            "BUILD.bazel",
+        ],
+    ) + [
+        ":copy_bundle_askpass_main",
         ":copy_bundle_chunks",
         ":copy_bundle_main",
-        ":copy_bundle_askpass_main",
         ":copy_license",
     ],
     in_dir = "./",
+    target_compatible_with = [
+        "@platforms//cpu:all",
+        "@platforms//os:none",
+    ],
 )
 
 sh_library(
     name = "sh-srcs",
     srcs = [
-        "src/askpass-empty.sh",
         "src/askpass.sh",
+        "src/askpass-empty.sh",
     ],
 )
 

@@ -76,7 +76,7 @@ importers:
         specifier: 'catalog:'
         version: 24.0.3
 
-  build_defs/vsce_package:
+  build_defs/vsix_package:
     dependencies:
       '@vscode/vsce':
         specifier: ^3.5.0

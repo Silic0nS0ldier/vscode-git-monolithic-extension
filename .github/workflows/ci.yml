@@ -30,7 +30,7 @@ jobs:
           bazelisk-cache: true
           disk-cache: "${{ github.workflow }}-build"
           repository-cache: true
-      - run: bazel build //extension/vsix:git_monolithic --stamp
+      - run: bazel build //extension/vsix:git_monolithic --stamp --platforms=//build_defs/platforms:vscode_ext
       - uses: actions/upload-artifact@v4
         with:
           name: git-monolithic-vsix
