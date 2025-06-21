@@ -10,12 +10,12 @@ See [`./extension/vsix/README.md`](./extension/vsix/README.md) for more details.
 
 For development builds
 ```sh
-bazel build //extension/vsix:git_monolithic --stamp
+bazel build //extension/vsix:git_monolithic --stamp --platforms=//build_defs/platforms:vscode_ext
 ```
 
 For release
 1. Increment version in `extension/vsix/package.json`
-2. `bazel build //extension/vsix:git_monolithic`
+2. `bazel build //extension/vsix:git_monolithic --platforms=//build_defs/platforms:vscode_ext`
 
 ## Terminology
 
