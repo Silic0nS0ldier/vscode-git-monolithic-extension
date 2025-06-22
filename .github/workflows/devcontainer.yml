@@ -1,5 +1,12 @@
 name: "Dev Container Publish"
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      # Newly opened
+      - opened
+      # Updated (excludes change of base branch)
+      - synchronize
 env:
   OPT_REGISTRY: ghcr.io
   OPT_NAMESPACE: silic0ns0ldier
