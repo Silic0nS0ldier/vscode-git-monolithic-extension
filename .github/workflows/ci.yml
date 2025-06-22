@@ -56,19 +56,15 @@ jobs:
           script: |
             const fs = require('fs');
             const versionsData = JSON.parse(process.env.VERSIONS_DATA);
-            console.log(`Versions data: ${JSON.stringify(versionsData)}`);
             const devcontainerJson = fs.readFileSync('.devcontainer/devcontainer.json', 'utf8');
             const devcontainer = JSON.parse(devcontainerJson);
             const devcontainerTag = "sha256:" + devcontainer.image.split(':')[1];
-            console.log(`Devcontainer tag to check: ${devcontainerTag}`);
-            for (const versionData in versionsData) {
-              console.log(`Version data: ${JSON.stringify(versionData)}`);
-              console.log(`Checking version: ${versionData.name}`);
+            for (const versionData of versionsData) {
               if (versionData.name === devcontainerTag) {
-                console.log(`Devcontainer image exists: ${devcontainerTag}`);
+                console.info(`Devcontainer image exists: ${devcontainerTag}`);
                 return;
               }
             }
-            console.log(`Devcontainer image does not exist: ${devcontainerTag}`);
-            console.log("'Dev Container Push' workflow needs to be triggered.");
+            console.error(`Devcontainer image does not exist: ${devcontainerTag}`);
+            console.error("'Dev Container Push' workflow needs to be triggered.");
             process.exit(1);
