@@ -43,9 +43,7 @@ jobs:
       - uses: octokit/request-action@v2.x
         id: get_versions
         with:
-          route: GET /users/{owner}/packages/container/vscode-git-monolithic-extension/devcontainer/versions
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.event.repository.name }}
+          route: GET /users/Silic0nS0ldier/packages/container/vscode-git-monolithic-extension/devcontainer/versions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: echo "${{ steps.get_versions.outputs.data }}"
