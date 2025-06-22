@@ -10,12 +10,12 @@ See [`./extension/vsix/README.md`](./extension/vsix/README.md) for more details.
 
 For development builds
 ```sh
-bazel build //extension/vsix:git_monolithic --stamp
+bazel build //extension/vsix:git_monolithic --stamp --platforms=//build_defs/platforms:vscode_ext
 ```
 
 For release
 1. Increment version in `extension/vsix/package.json`
-2. `bazel build //extension/vsix:git_monolithic`
+2. `bazel build //extension/vsix:git_monolithic --platforms=//build_defs/platforms:vscode_ext`
 
 ## Terminology
 
@@ -24,8 +24,6 @@ For release
 
 ## The List
 
-- `pnpm patch ...` is not working with the workflow in this repo.
-  https://github.com/pnpm/pnpm/issues/8257
 - `watcher` package type issues.
   https://github.com/fabiospampinato/watcher/issues/33
 - ava tests should emit JUnit output
