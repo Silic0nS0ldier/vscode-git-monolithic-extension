@@ -104,7 +104,7 @@ oci_image(
         ":layer_nodejs",
         ":layer_pnpm",
         ":layer_multitool",
-        "@layers_apt_ubuntu_jammy",
+        #"@layers_apt_ubuntu_jammy",
     ],
 )
 

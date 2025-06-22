@@ -58,7 +58,7 @@ jobs:
             const versionsData = JSON.parse(process.env.VERSIONS_DATA);
             const devcontainerJson = fs.readFileSync('.devcontainer/devcontainer.json', 'utf8');
             const devcontainer = JSON.parse(devcontainerJson);
-            const devcontainerTag = "sha256:" + devcontainer.image.split(':')[1];
+            const devcontainerTag = devcontainer.image.split('@')[1];
             for (const versionData of versionsData) {
               if (versionData.name === devcontainerTag) {
                 console.info(`Devcontainer image exists: ${devcontainerTag}`);
