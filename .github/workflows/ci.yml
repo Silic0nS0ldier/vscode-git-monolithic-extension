@@ -40,6 +40,7 @@ jobs:
     permissions:
       packages: read
     steps:
+      - uses: actions/checkout@v4
       - uses: octokit/request-action@v2.x
         id: get_versions
         with:
@@ -48,4 +49,22 @@ jobs:
           pkg_name: vscode-git-monolithic-extension/devcontainer
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: echo "${{ steps.get_versions.outputs.data }}"
+      - uses: actions/github-script@v7
+        env:
+          VERSIONS_DATA: ${{ fromJson(steps.get_versions.outputs.data) }}
+        with:
+          script: |
+            const fs = require('fs');
+            const versionsData = JSON.parse(process.env.VERSIONS_DATA);
+            const devcontainerJson = fs.readFileSync('.devcontainer/devcontainer.json', 'utf8');
+            const devcontainer = JSON.parse(devcontainerJson);
+            const devcontainerSha256 = "sha256:" + devcontainer.image.split(':')[1];
+            for (const versionData in versionsData) {
+              if (versionData.name === devcontainerSha256) {
+                console.log(`Devcontainer image exists: ${devcontainerSha256}`);
+                return;
+              }
+            }
+            console.log(`Devcontainer image does not exist: ${devcontainerSha256}`);
+            console.log("'Dev Container Push' workflow needs to be triggered.");
+            process.exit(1);
