@@ -36,6 +36,7 @@ jobs:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
   devconatiner-pushed:
+    runs-on: ubuntu-latest
     permissions:
       packages: read
     steps:
