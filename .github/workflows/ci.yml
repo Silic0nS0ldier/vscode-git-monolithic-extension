@@ -35,3 +35,16 @@ jobs:
         with:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
+  devconatiner-pushed:
+    permissions:
+      packages: read
+    steps:
+      - uses: octokit/request-action@v2.x
+        id: get_versions
+        with:
+          route: GET /users/{owner}/packages/container/vscode-git-monolithic-extension/devcontainer/versions
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: echo "${{ steps.get_versions.outputs.data }}"

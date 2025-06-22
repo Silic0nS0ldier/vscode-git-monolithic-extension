@@ -74,8 +74,8 @@ use_repo(oci, "devcontainer_base_ubuntu", "devcontainer_base_ubuntu_linux_amd64"
 
 apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
 apt.install(
-    name = "jammy",
-    manifest = "//.devcontainer:jammy.yaml",
-    lock = "//.devcontainer:jammy.lock.json",
+    name = "layers_apt_ubuntu_jammy",
+    manifest = "//.devcontainer:apt.yaml",
+    lock = "//.devcontainer:apt.lock.json",
 )
-use_repo(apt, "jammy")
+use_repo(apt, "layers_apt_ubuntu_jammy")

@@ -1,6 +1,6 @@
 {
 	"name": "Git monolithic",
-	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"image": "ghcr.io/silic0ns0ldier/vscode-git-monolithic-extension/devcontainer:403be363e329516047e1b886bc70124ba67969fe080b2a55a0276f4f41621283",
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	}

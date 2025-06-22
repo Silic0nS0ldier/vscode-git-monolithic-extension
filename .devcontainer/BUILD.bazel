@@ -1,8 +1,9 @@
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_load", "oci_push")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@aspect_rules_js//js:defs.bzl", "js_test")
 
 pkg_tar(
-    name = "bazelisk_layer",
+    name = "layer_bazelisk",
     srcs = [
         "@multitool//tools/bazelisk",
     ],
@@ -14,7 +15,7 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "buildtools_layer",
+    name = "layer_buildtools",
     srcs = [
         "@multitool//tools/buildifier",
         "@multitool//tools/buildozer",
@@ -25,7 +26,7 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "starpls_layer",
+    name = "layer_starpls",
     srcs = [
         "@multitool//tools/starpls",
     ],
@@ -34,20 +35,20 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "nodejs_layer",
+    name = "layer_nodejs",
     srcs = select(
         {
-            "//build_defs/config_settings:linux_amd64": ["@nodejs_linux_amd64//:node"],
-            "//build_defs/config_settings:linux_arm64": ["@nodejs_linux_arm64//:node"],
+            "//build_defs/config_settings:linux_amd64": ["@nodejs_linux_amd64//:node_bin"],
+            "//build_defs/config_settings:linux_arm64": ["@nodejs_linux_arm64//:node_bin"],
         },
-        no_match_error = "nodejs_layer only supports linux_amd64 and linux_arm64 platforms",
+        no_match_error = "layer_nodejs only supports linux_amd64 and linux_arm64 platforms",
     ),
     extension = "tar.gz",
     package_dir = "/usr/local/bin",
 )
 
 pkg_tar(
-    name = "pnpm_layer",
+    name = "layer_pnpm",
     srcs = [
         "@multitool//tools/pnpm",
     ],
@@ -56,7 +57,7 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "multitool_layer",
+    name = "layer_multitool",
     srcs = [
         "@multitool//tools/multitool",
     ],
@@ -65,7 +66,7 @@ pkg_tar(
 )
 
 oci_image(
-    name = "devcontainer",
+    name = "single_platform",
     base = "@devcontainer_base_ubuntu",
     labels = {
         "devcontainer.metadata": json.encode([{
@@ -97,19 +98,19 @@ oci_image(
         }]),
     },
     tars = [
-        ":bazelisk_layer",
-        ":buildtools_layer",
-        ":starpls_layer",
-        ":nodejs_layer",
-        ":pnpm_layer",
-        ":multitool_layer",
-        "@jammy",
+        ":layer_bazelisk",
+        ":layer_buildtools",
+        ":layer_starpls",
+        ":layer_nodejs",
+        ":layer_pnpm",
+        ":layer_multitool",
+        "@layers_apt_ubuntu_jammy",
     ],
 )
 
 oci_image_index(
-    name = "devcontainer_multiarch",
-    images = [":devcontainer"],
+    name = "multi_platform",
+    images = [":single_platform"],
     platforms = [
         "//build_defs/platforms:linux_amd64",
         "//build_defs/platforms:linux_arm64",
@@ -117,13 +118,23 @@ oci_image_index(
 )
 
 oci_load(
-    name = "devcontainer_load",
-    image = ":devcontainer",
+    name = "load",
+    image = ":single_platform",
     repo_tags = ["silic0ns0ldier/vscode-git-monolithic-extension/devcontainer:dev"],
 )
 
 oci_push(
-    name = "devcontainer_push",
-    image = ":devcontainer_multiarch",
+    name = "push",
+    image = ":multi_platform",
     repository = "ghcr.io/silic0ns0ldier/vscode-git-monolithic-extension/devcontainer",
+)
+
+js_test(
+    name = "check",
+    entry_point = "devcontainer-check.mjs",
+    chdir = package_name(),
+    data = [
+        "devcontainer.json",
+        ":multi_platform.digest",
+    ]
 )

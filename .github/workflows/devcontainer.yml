@@ -1,0 +1,25 @@
+name: "Dev Container Publish"
+on: workflow_dispatch
+env:
+  OPT_REGISTRY: ghcr.io
+  OPT_NAMESPACE: silic0ns0ldier
+  OPT_IMAGE: vscode-git-monolithic-extension/devcontainer
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bazel-contrib/setup-bazel@0.15.0
+        with:
+          bazelisk-cache: true
+          disk-cache: "${{ github.workflow }}"
+          repository-cache: true
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3.4.0
+        with:
+          registry: ${{ env.OPT_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: bazel run //.devcontainer:push
