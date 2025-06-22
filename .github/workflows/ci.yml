@@ -51,7 +51,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/github-script@v7
         env:
-          VERSIONS_DATA: ${{ toJson(steps.get_versions.outputs.data) }}
+          VERSIONS_DATA: ${{ steps.get_versions.outputs.data }}
         with:
           script: |
             const fs = require('fs');
