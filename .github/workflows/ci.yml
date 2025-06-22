@@ -56,11 +56,13 @@ jobs:
           script: |
             const fs = require('fs');
             const versionsData = JSON.parse(process.env.VERSIONS_DATA);
+            console.log(`Versions data: ${JSON.stringify(versionsData)}`);
             const devcontainerJson = fs.readFileSync('.devcontainer/devcontainer.json', 'utf8');
             const devcontainer = JSON.parse(devcontainerJson);
             const devcontainerTag = "sha256:" + devcontainer.image.split(':')[1];
             console.log(`Devcontainer tag to check: ${devcontainerTag}`);
             for (const versionData in versionsData) {
+              console.log(`Version data: ${JSON.stringify(versionData)}`);
               console.log(`Checking version: ${versionData.name}`);
               if (versionData.name === devcontainerTag) {
                 console.log(`Devcontainer image exists: ${devcontainerTag}`);
