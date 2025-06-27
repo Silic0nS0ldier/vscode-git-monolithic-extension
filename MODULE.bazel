@@ -2,12 +2,12 @@ module(name = "vacode_git_monolithic")
 
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
-bazel_dep(name = "aspect_rules_js", version = "2.3.7")
+bazel_dep(name = "aspect_rules_js", version = "2.3.8")
 bazel_dep(name = "aspect_bazel_lib", version = "2.19.4")
 bazel_dep(name = "rules_nodejs", version = "6.4.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.6.0")
 bazel_dep(name = "aspect_rules_lint", version = "1.4.4")
-bazel_dep(name = "rules_multitool", version = "1.3.0")
+bazel_dep(name = "rules_multitool", version = "1.5.0")
 bazel_dep(name = "rules_shell", version = "0.5.0")
 bazel_dep(name = "platforms", version = "1.0.0")
 
@@ -19,15 +19,15 @@ single_version_override(
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
-    node_version = "24.2.0",
-    node_versions = {
-        "24.2.0-darwin_arm64": ("node-v24.2.0-darwin-arm64.tar.gz", "node-v24.2.0-darwin-arm64", "d35c21bb80dbf0d774d670b6b51b9467dd6a92581884ba78f29b09c3b50c9dee"),
-        "24.2.0-darwin_amd64": ("node-v24.2.0-darwin-x64.tar.gz", "node-v24.2.0-darwin-x64", "d839ef904d7305f429d45288a8b0b43b095e9797dbbcf3bd67b0c8712066b7a3"),
-        "24.2.0-linux_arm64": ("node-v24.2.0-linux-arm64.tar.xz", "node-v24.2.0-linux-arm64", "cd4f25d2f05d0750159a209915267af6f9970ade4702a8810641120404bf54ee"),
-        "24.2.0-linux_ppc64le": ("node-v24.2.0-linux-ppc64le.tar.xz", "node-v24.2.0-linux-ppc64le", "0cf16bb128f4ce6b035e51ee08d0f87da83afc4bd903ff79dbe18036e9d757af"),
-        "24.2.0-linux_s390x": ("node-v24.2.0-linux-s390x.tar.xz", "node-v24.2.0-linux-s390x", "dcccc61bb8c7fa59bf5f39cd9d6ad25d7141ea4cfe19e628985b82690513fd46"),
-        "24.2.0-linux_amd64": ("node-v24.2.0-linux-x64.tar.xz", "node-v24.2.0-linux-x64", "91a0794f4dbc94bc4a9296139ed9101de21234982bae2b325e37ebd3462273e5"),
-        "24.2.0-windows_amd64": ("node-v24.2.0-win-x64.zip", "node-v24.2.0-win-x64", "9427c71b19d05f1905f151f1e67fcd535a4f671d66358dbf5b934a49c371e500"),
+    node_version = "24.3.0",
+    node_repositories = {
+        "24.3.0-darwin_arm64": ("node-v24.3.0-darwin-arm64.tar.gz", "node-v24.3.0-darwin-arm64", "fee91aa5febeda47ef9f6c0afd2f2bcd3dacb0e656c29de0b5274e0ea1ca3565"),
+        "24.3.0-darwin_amd64": ("node-v24.3.0-darwin-x64.tar.gz", "node-v24.3.0-darwin-x64", "0c065ffa4e53b1a172ab9cd8ca08ae141b187aca8a07403c6856a7b8d0024804"),
+        "24.3.0-linux_arm64": ("node-v24.3.0-linux-arm64.tar.xz", "node-v24.3.0-linux-arm64", "9729d0ecc69fad6591e4e19b46854881e8cc9d865cf03fc951a8abc567854f5e"),
+        "24.3.0-linux_ppc64le": ("node-v24.3.0-linux-ppc64le.tar.xz", "node-v24.3.0-linux-ppc64le", "88a3f44fed8105bd74eee678933cfcf2c1c4ea0828b60e76a9c6ca687195a889"),
+        "24.3.0-linux_s390x": ("node-v24.3.0-linux-s390x.tar.xz", "node-v24.3.0-linux-s390x", "ae3660a75a2c13db674ef4b906739eb4c0aafdaa6b8f7e72cf4a5b3af61052ba"),
+        "24.3.0-linux_amd64": ("node-v24.3.0-linux-x64.tar.xz", "node-v24.3.0-linux-x64", "a962afadaa8b94bae8bff87ddd6c11f7aae621032424ef05c0a4fe2537fa4de0"),
+        "24.3.0-windows_amd64": ("node-v24.3.0-win-x64.zip", "node-v24.3.0-win-x64", "c0c8efbca1b57e5b074bbdf7cef1ccca40979d6b46e5bcadaad5d4b07cbb3b10"),
     },
 )
 

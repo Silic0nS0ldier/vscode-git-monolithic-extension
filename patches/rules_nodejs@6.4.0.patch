@@ -1,40 +1,126 @@
-From 36434c48d527f2513f4c6bf4ddd1c264534ce441 Mon Sep 17 00:00:00 2001
-From: Peter Woodman <peter.woodman@mongodb.com>
-Date: Sun, 10 Nov 2024 15:25:23 -0500
-Subject: [PATCH] bzlmod: allow custom node_repositories definitions
-https://github.com/bazel-contrib/rules_nodejs/pull/3802
+From 823e460027f726fc897aa21601fef3312cd2ccba Mon Sep 17 00:00:00 2001
+From: Jason Bedard <jason+github@jbedard.ca>
+Date: Thu, 26 Jun 2025 13:20:07 -0700
+Subject: [PATCH] feat: add bzlmod node_repositories support (#3843)
 
+Close #3781
 ---
- nodejs/extensions.bzl | 6 ++++++
- 1 file changed, 6 insertions(+)
+ e2e/nodejs_host/BUILD.bazel     |  3 +++
+ e2e/nodejs_host/MODULE.bazel    | 21 +++++++++++++++++++++
+ e2e/nodejs_host/WORKSPACE.bazel | 15 +++++++++++++++
+ nodejs/extensions.bzl           | 10 ++++++++++
+ 4 files changed, 49 insertions(+)
 
+diff --git a/e2e/nodejs_host/BUILD.bazel b/e2e/nodejs_host/BUILD.bazel
+index c158d7ff5f..243ef126ba 100644
+--- a/e2e/nodejs_host/BUILD.bazel
++++ b/e2e/nodejs_host/BUILD.bazel
+@@ -20,6 +20,7 @@
+         "nodejs",
+         "node16",
+         "node16_nvmrc",
++        "node17_custom",
+     ]
+ ]
+ 
+@@ -64,5 +65,7 @@
+         ("node16", "npx", []),
+         ("node16_nvmrc", "npm", []),
+         ("node16_nvmrc", "npx", []),
++        ("node17_custom", "npm", []),
++        ("node17_custom", "npx", []),
+     ]
+ ]
+diff --git a/e2e/nodejs_host/MODULE.bazel b/e2e/nodejs_host/MODULE.bazel
+index 32ce136a7a..439f8e41c1 100644
+--- a/e2e/nodejs_host/MODULE.bazel
++++ b/e2e/nodejs_host/MODULE.bazel
+@@ -20,6 +20,20 @@ node.toolchain(
+     name = "node16_nvmrc",
+     node_version_from_nvmrc = "//:.nvmrc",
+ )
++node.toolchain(
++    name = "node17_custom",
++    node_repositories = {
++        "17.0.1.custom-darwin_arm64": ("node-v17.0.1-darwin-arm64.tar.gz", "node-v17.0.1-darwin-arm64", "b49c65be9112f7e5de4e39f4f01e541ee73b3d28d3e2bbd3ea85a86952d0dc2d"),
++        "17.0.1.custom-darwin_amd64": ("node-v17.0.1-darwin-x64.tar.gz", "node-v17.0.1-darwin-x64", "0dfe6f904f3f20652e3d34c60885b790603f120d5d51a53031355827a4eaf6a9"),
++        "17.0.1.custom-linux_arm64": ("node-v17.0.1-linux-arm64.tar.xz", "node-v17.0.1-linux-arm64", "6cbd83ba5778a1af740a152839026cbd068610ec6e5ebf67739e546eba426171"),
++        "17.0.1.custom-linux_ppc64le": ("node-v17.0.1-linux-ppc64le.tar.xz", "node-v17.0.1-linux-ppc64le", "3f5665b92bce8c81caf35d1b0e10f59594499c8e5afeb8a12e101dd7dc62e6ed"),
++        "17.0.1.custom-linux_s390x": ("node-v17.0.1-linux-s390x.tar.xz", "node-v17.0.1-linux-s390x", "df8c44e3f10c14924a2b78530a6dd9e08557bc6694bc6342f18cd4fbdca30dfb"),
++        "17.0.1.custom-linux_amd64": ("node-v17.0.1-linux-x64.tar.xz", "node-v17.0.1-linux-x64", "30484910d6a25c96902f329c1fdfb753ddff9bf8c65a6e5ec5c818bac8135953"),
++        "17.0.1.custom-windows_amd64": ("node-v17.0.1-win-x64.zip", "node-v17.0.1-win-x64", "0b644e2499018884027a0fe5e0e159a18acd33e500c63a89898ba687189f7337"),
++    },
++    node_urls = ["https://nodejs.org/dist/v17.0.1/{filename}"],
++    node_version = "17.0.1.custom",
++)
+ 
+ # FIXME(6.0): a repo rule with name=foo should create a repo named @foo, not @foo_toolchains
+ use_repo(
+@@ -38,6 +52,13 @@ use_repo(
+     "node16_nvmrc_windows_amd64",
+     "node16_toolchains",
+     "node16_windows_amd64",
++    "node17_custom",
++    "node17_custom_darwin_amd64",
++    "node17_custom_darwin_arm64",
++    "node17_custom_linux_amd64",
++    "node17_custom_linux_arm64",
++    "node17_custom_toolchains",
++    "node17_custom_windows_amd64",
+     "nodejs",
+     "nodejs_darwin_amd64",
+     "nodejs_darwin_arm64",
+diff --git a/e2e/nodejs_host/WORKSPACE.bazel b/e2e/nodejs_host/WORKSPACE.bazel
+index 734048290d..095b315ce8 100644
+--- a/e2e/nodejs_host/WORKSPACE.bazel
++++ b/e2e/nodejs_host/WORKSPACE.bazel
+@@ -21,6 +21,21 @@ nodejs_register_toolchains(
+     node_version_from_nvmrc = "//:.nvmrc",
+ )
+ 
++nodejs_register_toolchains(
++    name = "node17_custom",
++    node_repositories = {
++        "17.0.1.custom-darwin_arm64": ("node-v17.0.1-darwin-arm64.tar.gz", "node-v17.0.1-darwin-arm64", "b49c65be9112f7e5de4e39f4f01e541ee73b3d28d3e2bbd3ea85a86952d0dc2d"),
++        "17.0.1.custom-darwin_amd64": ("node-v17.0.1-darwin-x64.tar.gz", "node-v17.0.1-darwin-x64", "0dfe6f904f3f20652e3d34c60885b790603f120d5d51a53031355827a4eaf6a9"),
++        "17.0.1.custom-linux_arm64": ("node-v17.0.1-linux-arm64.tar.xz", "node-v17.0.1-linux-arm64", "6cbd83ba5778a1af740a152839026cbd068610ec6e5ebf67739e546eba426171"),
++        "17.0.1.custom-linux_ppc64le": ("node-v17.0.1-linux-ppc64le.tar.xz", "node-v17.0.1-linux-ppc64le", "3f5665b92bce8c81caf35d1b0e10f59594499c8e5afeb8a12e101dd7dc62e6ed"),
++        "17.0.1.custom-linux_s390x": ("node-v17.0.1-linux-s390x.tar.xz", "node-v17.0.1-linux-s390x", "df8c44e3f10c14924a2b78530a6dd9e08557bc6694bc6342f18cd4fbdca30dfb"),
++        "17.0.1.custom-linux_amd64": ("node-v17.0.1-linux-x64.tar.xz", "node-v17.0.1-linux-x64", "30484910d6a25c96902f329c1fdfb753ddff9bf8c65a6e5ec5c818bac8135953"),
++        "17.0.1.custom-windows_amd64": ("node-v17.0.1-win-x64.zip", "node-v17.0.1-win-x64", "0b644e2499018884027a0fe5e0e159a18acd33e500c63a89898ba687189f7337"),
++    },
++    node_urls = ["https://nodejs.org/dist/v17.0.1/{filename}"],
++    node_version = "17.0.1.custom",
++)
++
+ http_archive(
+     name = "bazel_skylib",
+     sha256 = "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
 diff --git a/nodejs/extensions.bzl b/nodejs/extensions.bzl
-index 10dd5c7b45..4342861d3a 100644
+index 10dd5c7b45..48589af8a6 100644
 --- a/nodejs/extensions.bzl
 +++ b/nodejs/extensions.bzl
-@@ -1,5 +1,6 @@
- "extensions for bzlmod"
- 
-+load("//nodejs/private:node_versions.bzl", "NODE_VERSIONS")
- load(
-     ":repositories.bzl",
-     "DEFAULT_NODE_REPOSITORY",
-@@ -47,6 +48,7 @@ def _toolchain_extension(module_ctx):
-         nodejs_register_toolchains(
-             name = k,
+@@ -49,6 +49,7 @@ def _toolchain_extension(module_ctx):
              node_version = v.node_version,
-+            node_repositories = v.node_versions,
              node_version_from_nvmrc = v.node_version_from_nvmrc,
              node_urls = v.node_urls,
++            node_repositories = v.node_repositories,
              include_headers = v.include_headers,
-@@ -62,6 +64,10 @@ _ATTRS = {
-         doc = "Version of the Node.js interpreter",
-         default = DEFAULT_NODE_VERSION,
+             register = False,
+         )
+@@ -84,6 +85,15 @@ This setting creates a dependency on a c++ toolchain.
+  """,
+         default = [DEFAULT_NODE_URL],
      ),
-+    "node_versions": attr.string_list_dict(
-+        doc = "Overrides to the default list of Node.js versions to download.",
-+        default = NODE_VERSIONS,
++    "node_repositories": attr.string_list_dict(
++        doc = """Custom list of node repositories to use
++
++A dictionary mapping Node.js versions to sets of hosts and their corresponding (filename, strip_prefix, sha256) tuples.
++You should list a node binary for every platform users have, likely Mac, Windows, and Linux.
++
++By default, if this attribute has no items, we'll use a list of all public Node.js releases.
++""",
 +    ),
-     "node_version_from_nvmrc": attr.label(
-         allow_single_file = True,
-         doc = """The .nvmrc file containing the version of Node.js to use.
+ }
+ 
+ node = module_extension(
