@@ -10,6 +10,8 @@ bazel_dep(name = "aspect_rules_lint", version = "1.5.1")
 bazel_dep(name = "rules_multitool", version = "1.6.0")
 bazel_dep(name = "rules_shell", version = "0.5.0")
 bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_rust", version = "0.61.0")
+bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.61.0")
 
 single_version_override(
     module_name = "rules_nodejs",
@@ -50,3 +52,22 @@ use_repo(rules_ts_ext, "npm_typescript")
 multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
 multitool.hub(lockfile = "//:multitool.lock.json")
 use_repo(multitool, "multitool")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2024",
+    versions = [ "1.88.0" ],
+)
+
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//:Cargo.lock",
+    manifests = [
+        "//:Cargo.toml",
+        "//extension/wasm:Cargo.toml",
+    ],
+)
+use_repo(crate, "crates")
+
+

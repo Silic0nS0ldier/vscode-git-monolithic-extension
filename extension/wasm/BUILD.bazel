@@ -1,0 +1,21 @@
+load("@rules_rust//rust:defs.bzl", "rust_shared_library")
+load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen", "rust_wasm_bindgen_test")
+load("@crates//:defs.bzl", "all_crate_deps")
+
+rust_shared_library(
+    name = "wasm_lib",
+    srcs = glob(["src/**"]),
+    edition = "2024",
+    target_compatible_with = ["@platforms//cpu:wasm32", "@platforms//os:none"],
+    deps = all_crate_deps(normal = True),
+)
+
+rust_wasm_bindgen(
+    name = "wasm",
+    wasm_file = ":wasm_lib",
+)
+
+rust_wasm_bindgen_test(
+    name = "wasm_test",
+    wasm = ":wasm",
+)
