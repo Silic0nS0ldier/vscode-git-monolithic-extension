@@ -7,3 +7,6 @@ node_modules
 
 # pnpm store
 .pnpm-store/
+
+# Cargo
+target/
