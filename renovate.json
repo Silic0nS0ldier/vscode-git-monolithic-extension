@@ -12,5 +12,6 @@
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*.*?_VERSION=(?<currentValue>.*)"
       ]
     }
-  ]
+  ],
+  "rangeStrategy": "bump"
 }
