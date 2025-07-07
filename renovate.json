@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "rangeStrategy": "bump",
   "customManagers": [
     {
       "description": "Bazel devcontainer feature",
@@ -13,5 +14,23 @@
       ]
     }
   ],
-  "rangeStrategy": "bump"
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["pnpm.catalog.vscode"],
+      "matchDepNames": ["@types/node"],
+      "enabled": false,
+      "description": "@types/node needs to be kept in sync with VSCode minimum version."
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchDepNames": [
+        "@eslint/js",
+        "eslint",
+        "typescript-eslint"
+      ],
+      "groupName": "eslint",
+      "description": "Update ESLint packages together, since they release at the same time."
+    }
+  ]
 }
