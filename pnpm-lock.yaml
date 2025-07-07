@@ -12,9 +12,6 @@ catalogs:
     '@js-temporal/polyfill':
       specifier: ^0.5.1
       version: 0.5.1
-    '@types/node':
-      specifier: ^22.15.34
-      version: 22.15.34
     ava:
       specifier: ^6.4.0
       version: 6.4.0
@@ -24,10 +21,6 @@ catalogs:
     get-stream:
       specifier: ^9.0.1
       version: 9.0.1
-  vscode:
-    '@types/node':
-      specifier: ^22.15.33
-      version: 22.15.33
 
 overrides:
   minimist@<1.2.6: ^1.2.8
@@ -74,7 +67,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.15.34
+        version: 22.16.0
 
   build_defs/vsix_package:
     dependencies:
@@ -87,7 +80,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.15.34
+        version: 22.16.0
 
   extension:
     dependencies:
@@ -127,7 +120,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: catalog:vscode
-        version: 22.15.33
+        version: 22.16.0
       '@types/vscode':
         specifier: ^1.101.0
         version: 1.101.0
@@ -145,7 +138,7 @@ importers:
         version: 0.5.1
       '@types/node':
         specifier: catalog:vscode
-        version: 22.15.33
+        version: 22.16.0
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -612,11 +605,8 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/node@22.15.33':
-    resolution: {integrity: sha512-wzoocdnnpSxZ+6CjW4ADCK1jVmd1S/J3ArNWfn8FDDQtRm8dkDg7TA+mvek2wNrfCgwuZxqEOiB9B1XCJ6+dbw==}
-
-  '@types/node@22.15.34':
-    resolution: {integrity: sha512-8Y6E5WUupYy1Dd0II32BsWAx5MWdcnRd8L84Oys3veg1YrYtNtzgO4CFhiBg6MDSjk7Ay36HYOnU7/tuOzIzcw==}
+  '@types/node@22.16.0':
+    resolution: {integrity: sha512-B2egV9wALML1JCpv3VQoQ+yesQKAmNMBIAY7OteVrikcOcAkWm+dGL6qpeCktPjAv6N1JLnhbNiqS35UpFyBsQ==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2937,11 +2927,7 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/node@22.15.33':
-    dependencies:
-      undici-types: 6.21.0
-
-  '@types/node@22.15.34':
+  '@types/node@22.16.0':
     dependencies:
       undici-types: 6.21.0
 
