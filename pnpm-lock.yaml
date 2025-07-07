@@ -31,7 +31,7 @@ catalogs:
 
 overrides:
   minimist@<1.2.6: ^1.2.8
-  semver@<7.6.3: ^7.6.3
+  semver@<7.6.3: ^7.7.2
 
 packageExtensionsChecksum: sha256-p+WcHHlC1WK0wMbvteIIWFU71ai00z9qunkvMZ9LSk4=
 
