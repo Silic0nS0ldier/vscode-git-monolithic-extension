@@ -13,8 +13,8 @@ catalogs:
       specifier: ^0.5.1
       version: 0.5.1
     '@types/node':
-      specifier: ^22.16.0
-      version: 22.16.0
+      specifier: ^22.16.1
+      version: 22.16.1
     ava:
       specifier: ^6.4.0
       version: 6.4.0
@@ -74,7 +74,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.16.0
+        version: 22.16.1
 
   build_defs/vsix_package:
     dependencies:
@@ -87,7 +87,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 22.16.0
+        version: 22.16.1
 
   extension:
     dependencies:
@@ -614,6 +614,9 @@ packages:
 
   '@types/node@22.16.0':
     resolution: {integrity: sha512-B2egV9wALML1JCpv3VQoQ+yesQKAmNMBIAY7OteVrikcOcAkWm+dGL6qpeCktPjAv6N1JLnhbNiqS35UpFyBsQ==}
+
+  '@types/node@22.16.1':
+    resolution: {integrity: sha512-oaNE4MzsA6uO7HcsjUvqzz19lYIRsV6I1Dc6iOvgwYYDiOeF7/9b2E/PE0UW2ccwpgWPVUedjltYXQXVKFd4EA==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2935,6 +2938,10 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/node@22.16.0':
+    dependencies:
+      undici-types: 6.21.0
+
+  '@types/node@22.16.1':
     dependencies:
       undici-types: 6.21.0
 
