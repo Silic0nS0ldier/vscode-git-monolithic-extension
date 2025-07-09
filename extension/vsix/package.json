@@ -4,7 +4,7 @@
     "description": "%description%",
     "publisher": "siliconsoldier",
     "license": "MIT",
-    "version": "0.1.22",
+    "version": "0.2.0",
     "engines": {
         "vscode": "^1.101.2"
     },
