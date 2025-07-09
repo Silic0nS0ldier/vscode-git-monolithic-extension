@@ -3,6 +3,13 @@ import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-strin
 import { createError, ERROR_GENERIC } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 
+// https://www.npmjs.com/package/@rollup/plugin-wasm
+import wasm, { from_str_radix } from "./wasm.wasm";
+import wasmInit from "./wasm.js";
+
+await wasmInit(await wasm());
+from_str_radix("777", 8);
+
 const pattern = /^(?<perm>\d{6}).*$/;
 
 // From https://stackoverflow.com/a/60128480
@@ -31,7 +38,19 @@ export async function hasExecutableBit(
     }
 
     const perm = matches.groups!.perm as string;
-    const permNum = parseInt(perm, 8);
+
+    let permNum = (() => {
+        try {
+            return ok(from_str_radix(perm, 8));
+        } catch (e) {
+            return err(createError(ERROR_GENERIC, `Could not parse permission octal: "${perm}"`));
+        }
+    })();
+
+    if (isErr(permNum)) {
+        return permNum;
+    }
+    //...
 
     if (Number.isNaN(permNum)) {
         return err(createError(ERROR_GENERIC, `Could not parse permission octal: "${perm}"`));
