@@ -8,6 +8,7 @@
     {
       "description": "Bazel devcontainer feature",
       "customType": "regex",
+      "depTypeTemplate": "devcontainer.feature.bazel",
       "managerFilePatterns": [".devcontainer/feature-bazel/install.sh"],
       "matchStrings": [
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*.*?_VERSION=(?<currentValue>.*)"
@@ -31,6 +32,12 @@
       ],
       "groupName": "eslint",
       "description": "Update ESLint packages together, since they release at the same time."
+    },
+    {
+      "matchManagers": ["regex", "npm"],
+      "matchDepNames": ["pnpm", "pnpm/pnpm"],
+      "groupName": "pnpm",
+      "description": "Update all pnpm package manager references together."
     }
   ]
 }
