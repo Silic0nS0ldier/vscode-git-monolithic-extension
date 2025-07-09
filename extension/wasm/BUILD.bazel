@@ -13,6 +13,7 @@ rust_shared_library(
 rust_wasm_bindgen(
     name = "wasm",
     wasm_file = ":wasm_lib",
+    target = "web",
 )
 
 rust_wasm_bindgen_test(
