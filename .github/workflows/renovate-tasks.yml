@@ -12,5 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Required to have correct ref for git-auto-commit-action
+          ref: ${{ github.head_ref }}
       - run: bazel mod deps --lockfile_mode=update
       - uses: stefanzweifel/git-auto-commit-action@v6
