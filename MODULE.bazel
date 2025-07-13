@@ -71,4 +71,7 @@ crate.from_cargo(
 )
 use_repo(crate, "crates")
 
-
+register_toolchains(
+    # Required for building with //build_defs/platforms:vscode_ext target platform
+    "//build_defs/rust_wasm_bindgen:toolchain_for_vscode_ext",
+)
