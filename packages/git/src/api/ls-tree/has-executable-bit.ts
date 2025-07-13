@@ -2,13 +2,7 @@ import type { GitContext } from "../../cli/context.js";
 import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
 import { createError, ERROR_GENERIC } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
-
-// https://www.npmjs.com/package/@rollup/plugin-wasm
-import wasm, { from_str_radix } from "./wasm.wasm";
-import wasmInit from "./wasm.js";
-
-await wasmInit(await wasm());
-from_str_radix("777", 8);
+import { from_str_radix } from "monolithic-git-wasm";
 
 const pattern = /^(?<perm>\d{6}).*$/;
 
@@ -39,24 +33,10 @@ export async function hasExecutableBit(
 
     const perm = matches.groups!.perm as string;
 
-    let permNum = (() => {
-        try {
-            return ok(from_str_radix(perm, 8));
-        } catch (e) {
-            return err(createError(ERROR_GENERIC, `Could not parse permission octal: "${perm}"`));
-        }
-    })();
-
-    if (isErr(permNum)) {
-        return permNum;
-    }
-    //...
-
-    if (Number.isNaN(permNum)) {
+    try {
+        const permNum = from_str_radix(perm, 8);
+        return ok(!!(permNum & execBitmask));
+    } catch (e) {
         return err(createError(ERROR_GENERIC, `Could not parse permission octal: "${perm}"`));
     }
-
-    console.log(permNum, execBitmask)
-
-    return ok(!!(permNum & execBitmask));
 }
