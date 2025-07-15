@@ -10,6 +10,10 @@ bazel_dep(name = "aspect_rules_lint", version = "1.6.0")
 bazel_dep(name = "rules_multitool", version = "1.9.0")
 bazel_dep(name = "rules_shell", version = "0.6.0")
 bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_itest", version = "0.0.36")
+bazel_dep(name = "rules_oci", version = "2.2.6")
+bazel_dep(name = "download_utils", version = "1.0.1")
+bazel_dep(name = "bazel_skylib", version = "1.8.1")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
@@ -44,3 +48,30 @@ use_repo(rules_ts_ext, "npm_typescript")
 multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitool")
 multitool.hub(lockfile = "//:multitool.lock.json")
 use_repo(multitool, "multitool")
+
+download_file = use_repo_rule("@download_utils//download/file:defs.bzl", "download_file")
+download_file(
+    name = "runc",
+    urls = ["https://github.com/opencontainers/runc/releases/download/v1.3.0/runc.amd64"],
+    output = "runc",
+    executable = True,
+    integrity = "sha256-AomGUWq1ZGNw7c6YHfLY6KjRIYjer4NxQqAglwAK4vI="
+)
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "openvscode_server",
+    digest = "sha256:8f0fb92ed942f3d3047cd534046aa391bdeee39bb2b604b391825ff385d03ab3",
+    image = "docker.io/gitpod/openvscode-server",
+    tag = "1.101.2",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+)
+use_repo(
+    oci,
+    "openvscode_server",
+    "openvscode_server_linux_amd64",
+    "openvscode_server_linux_arm64",
+)

@@ -1,0 +1,14 @@
+load("@rules_itest//private:itest.bzl", "itest_service")
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+
+native_binary(
+    name = "runc",
+    src = "@runc//:runc",
+)
+
+# TODO VSCode server container running with runc
+itest_service(
+    name = "vscode_server",
+    exe = ":runc",
+    args = [],
+)
