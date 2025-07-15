@@ -1,0 +1,35 @@
+load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@rules_itest//:itest.bzl", "itest_service")
+load("@rules_oci_runtime//lib:defs.bzl", "runc_binary")
+
+npm_link_all_packages(name = "node_modules")
+
+runc_binary(
+    name = "openvscode_server",
+    image = "@openvscode_server",
+)
+
+itest_service(
+    name = "openvscode_server_service",
+    args = [
+        "--port",
+        "8080",
+    ],
+    exe = ":openvscode_server",
+)
+
+runc_binary(
+    name = "browserless_chromium",
+    image = "@browserless_chromium",
+)
+
+itest_service(
+    name = "browserless_chromium_service",
+    # NOTE: Port is always 3000, cannot currently be configured (relies on networking like docker's port mapping)
+    args = [],
+    exe = ":browserless_chromium",
+)
+
+# TODO Implement integration test
+# TODO Workflow for test recording (https://playwright.dev/docs/codegen)
+# TODO Implement automatic screenshot capture (for extension README)

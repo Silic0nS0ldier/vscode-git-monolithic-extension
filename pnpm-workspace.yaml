@@ -2,6 +2,7 @@ packages:
   - packages/*
   - build_defs/*
   - extension
+  - integration_tests
 
 allowBuilds: 
   '@vscode/vsce-sign': false

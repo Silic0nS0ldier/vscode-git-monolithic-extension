@@ -9,6 +9,7 @@ bazel_dep(name = "aspect_rules_ts", version = "3.9.2")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
 bazel_dep(name = "llvm", version = "0.8.14")
 bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "rules_itest", version = "0.0.58")
 bazel_dep(name = "rules_multitool", version = "1.11.1")
 bazel_dep(name = "rules_nodejs", version = "6.7.5")
 bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.72.0")
@@ -246,7 +247,38 @@ oci.pull(
         "linux/arm64",
     ],
 )
-use_repo(oci, "devcontainers_base_ubuntu", "devcontainers_base_ubuntu_linux_amd64", "devcontainers_base_ubuntu_linux_arm64")
+oci.pull(
+    name = "openvscode_server",
+    digest = "sha256:8f0fb92ed942f3d3047cd534046aa391bdeee39bb2b604b391825ff385d03ab3",
+    image = "docker.io/gitpod/openvscode-server",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+    tag = "1.101.2",
+)
+oci.pull(
+    name = "browserless_chromium",
+    digest = "sha256:eeac26dc8da5bad6ff321acc3692d614da9ffc95ba0df7af944ded6649787ce5",
+    image = "ghcr.io/browserless/chromium",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+    tag = "v2.34.1",
+)
+use_repo(
+    oci,
+    "browserless_chromium",
+    "browserless_chromium_linux_amd64",
+    "browserless_chromium_linux_arm64",
+    "devcontainers_base_ubuntu",
+    "devcontainers_base_ubuntu_linux_amd64",
+    "devcontainers_base_ubuntu_linux_arm64",
+    "openvscode_server",
+    "openvscode_server_linux_amd64",
+    "openvscode_server_linux_arm64",
+)
 
 http_archive(
     name = "dotslash_amd64",
