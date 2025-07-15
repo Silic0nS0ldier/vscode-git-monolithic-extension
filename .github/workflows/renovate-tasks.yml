@@ -7,6 +7,7 @@ on:
       - MODULE.bazel
 jobs:
   renovate_tasks:
+    if: github.actor == 'renovate[bot]'
     permissions:
       contents: write
     runs-on: ubuntu-latest

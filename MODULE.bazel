@@ -1,4 +1,4 @@
-module(name = "vacode_git_monolithic")
+module(name = "vscode_git_monolithic")
 
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
