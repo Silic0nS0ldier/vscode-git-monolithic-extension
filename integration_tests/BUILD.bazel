@@ -7,6 +7,8 @@ native_binary(
 )
 
 # TODO VSCode server container running with runc
+# This is insufficient, a script will be necessary to properly set up the environment
+# and run the server.
 itest_service(
     name = "vscode_server",
     exe = ":runc",
