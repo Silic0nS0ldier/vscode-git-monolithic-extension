@@ -118,4 +118,5 @@ export type AbstractRepository = {
     readonly syncTooltip: string;
     readonly tag: (name: string, message?: string) => Promise<void>;
     readonly whenIdleAndFocused: () => Promise<void>;
+    readonly fileHasExecutableBit: (filePath: string, commit_ish?: string) => Promise<boolean>;
 } & Disposable;

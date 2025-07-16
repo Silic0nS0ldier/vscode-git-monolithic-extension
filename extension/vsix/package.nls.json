@@ -171,6 +171,7 @@
     "config.showCommitInput": "Controls whether to show the commit input in the Git source control panel.",
     "config.terminalAuthentication": "Controls whether to enable VS Code to be the authentication handler for git processes spawned in the integrated terminal. Note: terminals need to be restarted to pick up a change in this setting.",
     "config.useCommitInputAsStashMessage": "Controls whether to use the message from the commit input box as the default stash message.",
+    "config.inlayHints.filePermissions": "Controls whether to show file permission inlay hints in the editor. Inlay will appear in executable files and non-executable files starting with a shebang (e.g. `#!/usr/bin/env bash`).",
     "submenu.explorer": "Git",
     "submenu.commit": "Commit",
     "submenu.commit.amend": "Amend",
