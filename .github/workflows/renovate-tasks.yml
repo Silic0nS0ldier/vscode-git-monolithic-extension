@@ -16,5 +16,6 @@ jobs:
         with:
           # Required to have correct ref for git-auto-commit-action
           ref: ${{ github.head_ref }}
+      - run: node ./.github/workflows/update_bazel_nodejs.mjs ./.devcontainer/devcontainer.json ./MODULE.bazel
       - run: bazel mod deps --lockfile_mode=update
       - uses: stefanzweifel/git-auto-commit-action@v6
