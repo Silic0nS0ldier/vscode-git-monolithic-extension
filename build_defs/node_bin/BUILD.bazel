@@ -1,0 +1,6 @@
+load(":select_node_binary.bzl", "select_node_binary")
+
+select_node_binary(
+    name = "node",
+    visibility = ["//visibility:public"],
+)

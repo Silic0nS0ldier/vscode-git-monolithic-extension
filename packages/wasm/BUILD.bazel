@@ -1,0 +1,70 @@
+load("@aspect_rules_js//npm:defs.bzl", "npm_package")
+load("@rules_rust//rust:defs.bzl", "rust_shared_library")
+load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen", "rust_wasm_bindgen_test")
+load("@crates//:defs.bzl", "all_crate_deps")
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
+
+rust_shared_library(
+    name = "wasm_lib",
+    srcs = glob(["src/**"]),
+    edition = "2024",
+    target_compatible_with = ["@platforms//cpu:wasm32", "@platforms//os:none"],
+    deps = all_crate_deps(normal = True),
+)
+
+rust_wasm_bindgen(
+    name = "wasm",
+    wasm_file = ":wasm_lib",
+    target = "web",
+)
+
+rust_wasm_bindgen_test(
+    name = "wasm_test",
+    wasm = ":wasm",
+)
+
+# Creates a JS file containing WASM encoded as a base64 string.
+run_binary(
+    name = "wasm_portable",
+    tool = "//build_defs/node_bin:node",
+    args = [
+        "--input-type=module",
+        "--eval",
+        """
+        import fs from "fs";
+        import assert from "assert";
+
+        const srcs = "$(locations :wasm)".split(" ");
+        // Locate wasm_bg.wasm file
+        const wasmPath = srcs.find((p) => p.endsWith("wasm_bg.wasm"));
+        assert(wasmPath, "wasm_bg.wasm not found");
+        // Locate wasm.js file
+        const jsPath = srcs.find((p) => p.endsWith("wasm.js"));
+        assert(jsPath, "wasm.js not found");
+        // Locate wasm.d.ts file
+        const dtsPath = srcs.find((p) => p.endsWith("wasm.d.ts"));
+        assert(dtsPath, "wasm.d.ts not found");
+
+        // Read and encode wasm
+        const wasmBuf = fs.readFileSync(wasmPath);
+        const wasmBase64 = wasmBuf.toString("base64");
+
+        // Generate all-in-one JS
+        const jsStr = fs.readFileSync(jsPath, "utf-8");
+        const addon = `\\ninitSync(Buffer.from(\\n"${wasmBase64}",\\n"base64"));\\n`;
+        fs.writeFileSync("$(location :mod.js)", jsStr + addon);
+
+        // Copy types
+        fs.cpSync(dtsPath, "$(location :mod.d.ts)");
+        """,
+    ],
+    srcs = [":wasm"],
+    outs = ["mod.d.ts", "mod.js"],
+    visibility = ["//packages/git:__pkg__"]
+)
+
+npm_package(
+    name = "pkg",
+    srcs = [":wasm_portable", "package.json"],
+    visibility = ["//visibility:public"],
+)

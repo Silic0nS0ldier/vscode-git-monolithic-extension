@@ -27,6 +27,7 @@ ts_project(
         ":node_modules/compare-versions",
         ":node_modules/get-stream",
         ":node_modules/which",
+        ":node_modules/monolithic-git-wasm",
     ],
     tsconfig = ":tsconfig",
     declaration = True,

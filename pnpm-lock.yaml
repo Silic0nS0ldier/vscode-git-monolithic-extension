@@ -149,6 +149,9 @@ importers:
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
+      monolithic-git-wasm:
+        specifier: 'workspace:'
+        version: link:../wasm
       which:
         specifier: ^5.0.0
         version: 5.0.0
@@ -165,6 +168,8 @@ importers:
       into-stream:
         specifier: ^8.0.1
         version: 8.0.1
+
+  packages/wasm: {}
 
 packages:
 

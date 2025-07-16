@@ -8,6 +8,10 @@ function getExtensionConfig(scope?: ConfigurationScope): WorkspaceConfiguration 
     return workspace.getConfiguration("git", scope ?? null);
 }
 
+function getExtensionConfigNew(): WorkspaceConfiguration {
+    return workspace.getConfiguration("git-monolithic");
+}
+
 /**
  * @deprecated
  */
@@ -223,4 +227,8 @@ export function path(): string | string[] | null {
 
 export function showPushSuccessNotification(): boolean {
     return getExtensionConfig().get<boolean>("showPushSuccessNotification", false);
+}
+
+export function inlayHintsForFilePermissions(): boolean {
+    return getExtensionConfigNew().get<boolean>("inlayHints.filePermissions", true);
 }

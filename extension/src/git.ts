@@ -14,6 +14,7 @@ import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
 import { tracked, type IFileStatus } from "monolithic-git-interop/api/status/tracked";
+import { hasExecutableBit } from "monolithic-git-interop/api/ls-tree/has-executable-bit";
 import { DurationFormat } from "@formatjs/intl-durationformat";
 import { Temporal } from "@js-temporal/polyfill";
 import type * as cp from "node:child_process";
@@ -1481,6 +1482,16 @@ export class Repository {
 
             throw err;
         }
+    }
+
+    async fileHasExecutableBit(filePath: string, commit_ish?: string): Promise<boolean> {
+        const result = await hasExecutableBit(this.#git._context, this.#repositoryRoot, filePath, commit_ish ?? 'HEAD');
+
+        if (isOk(result)) {
+            return unwrap(result);
+        }
+
+        throw unwrap(result);
     }
 }
 

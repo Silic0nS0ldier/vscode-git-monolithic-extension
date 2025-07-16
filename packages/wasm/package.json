@@ -1,0 +1,9 @@
+{
+    "private": true,
+    "name": "monolithic-git-wasm",
+    "type": "module",
+    "exports": {
+        "import": "./mod.js",
+        "types": "./mod.d.ts"
+    }
+}

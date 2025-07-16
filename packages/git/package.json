@@ -45,6 +45,10 @@
         "@js-temporal/polyfill": "catalog:",
         "@types/node": "catalog:vscode",
         "compare-versions": "^6.1.1",
-        "which": "^5.0.0"
+        "which": "^5.0.0",
+        "monolithic-git-wasm": "workspace:"
+    },
+    "scripts": {
+        "prepare": "sh ../bazelify-node-modules.sh"
     }
 }

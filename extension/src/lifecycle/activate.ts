@@ -14,6 +14,7 @@ import {
     workspace,
     type WorkspaceFolder,
     extensions,
+    languages,
 } from "vscode";
 import { registerAPICommands } from "../api/api1.js";
 import { GitExtensionImpl } from "../api/extension.js";
@@ -34,6 +35,7 @@ import { toDisposable } from "../util/disposals.js";
 import { eventToPromise, filterEvent } from "../util/events.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
+import { createInlayHintsProvider } from "../ui/inlay-hints-provider.js";
 
 export async function activate(context: ExtensionContext): Promise<GitExtension> {
     const outputChannel = window.createOutputChannel("Git Monolithic");
@@ -93,6 +95,9 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
 
     try {
         const model = await createModel(context, outputChannel, telemetryReporter, disposables);
+        const inlayHintsProvider = createInlayHintsProvider(model, outputChannel);
+        languages.registerInlayHintsProvider({ scheme: "file" }, inlayHintsProvider);
+        languages.registerInlayHintsProvider({ scheme: "git" }, inlayHintsProvider);
         const result = new GitExtensionImpl(model);
         context.subscriptions.push(registerAPICommands(result));
         return result;
