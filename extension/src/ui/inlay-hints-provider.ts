@@ -51,8 +51,17 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 return [];
             }
             
-            const isExecutable = await repository.fileHasExecutableBit(filePath, ref);
+            const isExecutable = await (async () => {
+                try {
+                    return await repository.fileHasExecutableBit(filePath, ref);
+                } catch (error) {
+                    outputChannel.appendLine(`Error checking executable bit for ${filePath}: ${error}`);
+                    throw error;
+                }
+            })();
             const hasShebang = document.getText(SHEBANG_RANGE) === "#!";
+
+            outputChannel.appendLine(`Executable? ${isExecutable}, Shebang? ${hasShebang}`);
 
             if (hasShebang && !isExecutable) {
                 // If the file has a shebang but is not executable.
@@ -78,6 +87,7 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 }];
             }
 
+            outputChannel.appendLine("No inlay hints to provide for this file.");
             return [];
         },
         // resolveInlayHint(hint, token) {
