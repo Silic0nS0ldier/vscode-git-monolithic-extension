@@ -40,8 +40,8 @@ for (const k in mapping) {
 const moduleBazelContent = await fs.readFile(moduleBazelArg, "utf-8");
 const updatedModuleBazelContent = moduleBazelContent.replace(/node\.toolchain\(.*},\n\)/s, `\
 node.toolchain(
-    version = "${nodejsVersion}",
-    artifacts = {
+    node_version = "${nodejsVersion}",
+    node_repositories = {
         ${Array.from(processed.entries())
             .map(([key, [artifactName, artifactDir, artifactSha]]) => `"${key}": ("${artifactName}", "${artifactDir}", "${artifactSha}"),`)
             .join("\n        ")}
