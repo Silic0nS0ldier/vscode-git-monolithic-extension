@@ -95,7 +95,7 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
 
     try {
         const model = await createModel(context, outputChannel, telemetryReporter, disposables);
-        const inlayHintsProvider = createInlayHintsProvider(model);
+        const inlayHintsProvider = createInlayHintsProvider(model, outputChannel);
         languages.registerInlayHintsProvider({ scheme: "file" }, inlayHintsProvider);
         languages.registerInlayHintsProvider({ scheme: "git" }, inlayHintsProvider);
         const result = new GitExtensionImpl(model);
