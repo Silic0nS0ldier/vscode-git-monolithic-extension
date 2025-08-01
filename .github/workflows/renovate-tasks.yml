@@ -5,6 +5,7 @@ on:
       - synchronize
     paths:
       - MODULE.bazel
+      - .devcontainer/devcontainer.json
 jobs:
   renovate_tasks:
     if: github.actor == 'renovate[bot]'
