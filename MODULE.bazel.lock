@@ -168,8 +168,8 @@
     "https://bcr.bazel.build/modules/rules_nodejs/5.8.2/MODULE.bazel": "6bc03c8f37f69401b888023bf511cb6ee4781433b0cb56236b2e55a21e3a026a",
     "https://bcr.bazel.build/modules/rules_nodejs/6.2.0/MODULE.bazel": "ec27907f55eb34705adb4e8257952162a2d4c3ed0f0b3b4c3c1aad1fac7be35e",
     "https://bcr.bazel.build/modules/rules_nodejs/6.3.0/MODULE.bazel": "45345e4aba35dd6e4701c1eebf5a4e67af4ed708def9ebcdc6027585b34ee52d",
-    "https://bcr.bazel.build/modules/rules_nodejs/6.4.0/MODULE.bazel": "ce1fe1795222521d4b4494df58583a06f3bd6dd5d0d9409ea481fcab0e86f852",
-    "https://bcr.bazel.build/modules/rules_nodejs/6.4.0/source.json": "3e3e8ad75b171b0b67c84fbe624c6d5b0a87b11f0bda17b4050eca95297ae040",
+    "https://bcr.bazel.build/modules/rules_nodejs/6.5.0/MODULE.bazel": "546d0cf79f36f9f6e080816045f97234b071c205f4542e3351bd4424282a8810",
+    "https://bcr.bazel.build/modules/rules_nodejs/6.5.0/source.json": "ac075bc5babebc25a0adc88ee885f2c8d8520d141f6e139ba9dfa0eedb5be908",
     "https://bcr.bazel.build/modules/rules_pkg/0.7.0/MODULE.bazel": "df99f03fc7934a4737122518bb87e667e62d780b610910f0447665a7e2be62dc",
     "https://bcr.bazel.build/modules/rules_pkg/1.0.1/MODULE.bazel": "5b1df97dbc29623bccdf2b0dcd0f5cb08e2f2c9050aab1092fd39a41e82686ff",
     "https://bcr.bazel.build/modules/rules_pkg/1.0.1/source.json": "bd82e5d7b9ce2d31e380dd9f50c111d678c3bdaca190cb76b0e1c71b05e1ba8a",
@@ -774,8 +774,8 @@
     },
     "@@rules_nodejs+//nodejs:extensions.bzl%node": {
       "general": {
-        "bzlTransitiveDigest": "XI6/pqGDRznq27ouCDosPWSKphJjxozoaBfslwWt6ow=",
-        "usagesDigest": "JDGjP9J6InE7AKRaA8OhaPBkHYFDe8u1ekpBgFQFWoM=",
+        "bzlTransitiveDigest": "hdICB1K7PX7oWtO8oksVTBDNt6xxiNERpcO4Yxoa0Gc=",
+        "usagesDigest": "HoXfwRN3+t4Kl89umJ0oC/NztopqmRlgFKhy+YFWzbE=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1121,6 +1121,55 @@
               "node_version": "24.5.0",
               "include_headers": false,
               "platform": "windows_amd64"
+            }
+          },
+          "nodejs_windows_arm64": {
+            "repoRuleId": "@@rules_nodejs+//nodejs:repositories.bzl%_nodejs_repositories",
+            "attributes": {
+              "node_download_auth": {},
+              "node_repositories": {
+                "24.5.0-darwin_arm64": [
+                  "node-v24.5.0-darwin-arm64.tar.xz",
+                  "node-v24.5.0-darwin-arm64",
+                  "8b6379059b3347a9d0335dd682b0ec9eb7888e1a9c8b23483d3dd2c32e744420"
+                ],
+                "24.5.0-darwin_amd64": [
+                  "node-v24.5.0-darwin-x64.tar.xz",
+                  "node-v24.5.0-darwin-x64",
+                  "f6b4f0086c045fd19a23bb8310d7364f5a2e6c35ae6b3931fda40dc25cfc1830"
+                ],
+                "24.5.0-linux_arm64": [
+                  "node-v24.5.0-linux-arm64.tar.xz",
+                  "node-v24.5.0-linux-arm64",
+                  "313367534186a8551d68b39fbc2a6cc36638e583fb5dc75dcf5da3c6582bff3b"
+                ],
+                "24.5.0-linux_ppc64le": [
+                  "node-v24.5.0-linux-ppc64le.tar.xz",
+                  "node-v24.5.0-linux-ppc64le",
+                  "4baa8b2116f45b9d40742e878c9bc14170e04ffee0439dfa5210871e49169c67"
+                ],
+                "24.5.0-linux_s390x": [
+                  "node-v24.5.0-linux-s390x.tar.xz",
+                  "node-v24.5.0-linux-s390x",
+                  "bda973039e220aaab405eb41c601a3157d6bc5a8dd656e35aa79005ee45cb507"
+                ],
+                "24.5.0-linux_amd64": [
+                  "node-v24.5.0-linux-x64.tar.xz",
+                  "node-v24.5.0-linux-x64",
+                  "32edb1f2aeaf8ea0d484af33bf3b5d8330d7d33c9cd8c70f811b8a643822e613"
+                ],
+                "24.5.0-windows_amd64": [
+                  "node-v24.5.0-win-x64.zip",
+                  "node-v24.5.0-win-x64",
+                  "c6a5714108caa81bc71e3859c18f449a8f456e275946c0d429e2d7120b03d20e"
+                ]
+              },
+              "node_urls": [
+                "https://nodejs.org/dist/v{version}/{filename}"
+              ],
+              "node_version": "24.5.0",
+              "include_headers": false,
+              "platform": "windows_arm64"
             }
           },
           "nodejs": {
