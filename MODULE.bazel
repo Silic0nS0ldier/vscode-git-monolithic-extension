@@ -11,12 +11,6 @@ bazel_dep(name = "rules_multitool", version = "1.8.0")
 bazel_dep(name = "rules_shell", version = "0.5.1")
 bazel_dep(name = "platforms", version = "1.0.0")
 
-single_version_override(
-    module_name = "rules_nodejs",
-    patches = ["//:patches/rules_nodejs@6.4.0.patch"],
-    patch_strip = 1,
-)
-
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
     node_version = "24.5.0",
