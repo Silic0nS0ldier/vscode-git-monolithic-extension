@@ -13,7 +13,7 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Required to have correct ref for git-auto-commit-action
           ref: ${{ github.head_ref }}
