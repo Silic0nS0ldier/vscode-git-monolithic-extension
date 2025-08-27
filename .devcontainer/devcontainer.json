@@ -1,6 +1,7 @@
 {
 	"name": "Git monolithic",
 	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"privileged": true,
 	"features": {
 		"./feature-bazel": {},
 		"ghcr.io/devcontainers/features/node:1": {
