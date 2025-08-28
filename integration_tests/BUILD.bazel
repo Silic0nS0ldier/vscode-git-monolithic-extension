@@ -26,7 +26,7 @@ native_binary(
 sh_binary(
     name = "run-container",
     srcs = ["run-container.sh"],
-    data = [":runc", ":openvscode_server"],
+    data = [":runc", ":openvscode_server", "@undocker"],
     use_bash_launcher = True,
     visibility = ["//visibility:public"],
 )
