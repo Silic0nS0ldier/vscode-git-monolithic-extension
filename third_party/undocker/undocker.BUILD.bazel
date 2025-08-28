@@ -1,0 +1,21 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_binary(
+    name = "undocker",
+    srcs = ["main.go"],
+    deps = [":undocker_rootfs"],
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "undocker_rootfs",
+    srcs = glob(["rootfs/*.go"], exclude = ["rootfs/*_test.go"]),
+    importpath = "git.jakstys.lt/motiejus/undocker/rootfs",
+    deps = [":undocker_rootfs_tarfs"],
+)
+
+go_library(
+    name = "undocker_rootfs_tarfs",
+    srcs = glob(["rootfs/internal/tartest/*.go"], exclude = ["rootfs/internal/tartest/*_test.go"]),
+    importpath = "git.jakstys.lt/motiejus/undocker/rootfs/internal/tartest",
+)

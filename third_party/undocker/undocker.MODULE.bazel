@@ -1,0 +1,10 @@
+# https://git.jakstys.lt/motiejus/undocker.git
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "undocker",
+    urls = ["https://git.jakstys.lt/motiejus/undocker/archive/v1.2.3.tar.gz"],
+    integrity = "sha256-VGFF7OjOHmv94llGpMajZbydqwowh7XBYOE2NOq3+OA=",
+    strip_prefix = "undocker",
+    build_file = "//:third_party/undocker/undocker.BUILD.bazel",
+)
