@@ -14,6 +14,8 @@ bazel_dep(name = "rules_itest", version = "0.0.36")
 bazel_dep(name = "rules_oci", version = "2.2.6")
 bazel_dep(name = "download_utils", version = "1.0.1")
 bazel_dep(name = "bazel_skylib", version = "1.8.1")
+bazel_dep(name = "rules_go", version = "0.57.0")
+#bazel_dep(name = "gazelle", version = "0.45.0")
 
 # Apply patch to rules_oci
 single_version_override(
@@ -82,3 +84,5 @@ use_repo(
     "openvscode_server_linux_amd64",
     "openvscode_server_linux_arm64",
 )
+
+include("//:third_party/undocker/undocker.MODULE.bazel")
