@@ -26,7 +26,7 @@ $runc_path spec --rootless
 echo "Creating rootfs..."
 mkdir rootfs
 
-undocker_path=$(rlocation "+_repo_rules2+undocker/undocker_/undocker")
+undocker_path=$(rlocation "undocker/undocker_/undocker")
 
 # pipe files to rootfs
 # TODO Avoid the need for a temporary file, it hurts performance
