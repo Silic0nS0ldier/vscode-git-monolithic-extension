@@ -12,7 +12,7 @@ BAZELISK_VERSION="v1.27.0"
 # renovate: datasource=github-tags depName=bazelbuild/buildtools
 BUILDTOOLS_VERSION="v8.2.1"
 # renovate: datasource=github-tags depName=withered-magic/starpls
-STARPLS_VERSION="v0.1.21"
+STARPLS_VERSION="v0.1.22"
 # renovate: datasource=github-tags depName=pnpm/pnpm
 PNPM_VERSION="v10.15.0"
 
