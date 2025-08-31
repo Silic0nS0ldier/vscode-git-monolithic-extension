@@ -1,34 +1,9 @@
+load("@rules_runc//runc:defs.bzl", "runc_binary")
 load("@rules_itest//private:itest.bzl", "itest_service")
-load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
-load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
-load("@rules_oci//oci:defs.bzl", "oci_load")
 
-# Mocks `cli load --import` command from docker and podman
-# Writing image files to rootfs directory instead of a local registry
-sh_binary(
-    name = "rootfs_factory",
-    srcs = ["rootfs-factory.sh"],
-)
-
-oci_load(
-    name = "openvscode_server",
+runc_binary(
+    name = "container",
     image = "@openvscode_server",
-    repo_tags = ["latest"],
-    loader = ":rootfs_factory",
-    format = "docker",
-)
-
-native_binary(
-    name = "runc",
-    src = "@runc//:runc",
-)
-
-sh_binary(
-    name = "run-container",
-    srcs = ["run-container.sh"],
-    data = [":runc", ":openvscode_server", "@undocker"],
-    use_bash_launcher = True,
-    visibility = ["//visibility:public"],
 )
 
 # TODO VSCode server container running with runc

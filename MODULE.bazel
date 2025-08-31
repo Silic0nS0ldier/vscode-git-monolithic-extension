@@ -12,21 +12,24 @@ bazel_dep(name = "rules_shell", version = "0.6.0")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_itest", version = "0.0.36")
 bazel_dep(name = "rules_oci", version = "2.2.6")
-bazel_dep(name = "download_utils", version = "1.0.1")
 bazel_dep(name = "bazel_skylib", version = "1.8.1")
-bazel_dep(name = "rules_go", version = "0.57.0")
-#bazel_dep(name = "gazelle", version = "0.45.0")
+bazel_dep(name = "rules_runc")
+archive_override(
+    module_name = "rules_runc",
+    integrity = "sha256-53pjL8ZNqxnpc4mTS5QKXBgdiKBsOFGFngtcIv29I5Y=",
+    strip_prefix = "bazel-rules-runc-main",
+    urls = ["https://github.com/Silic0nS0ldier/bazel-rules-runc/archive/refs/heads/main.tar.gz"],
+)
 
 # Apply patch to rules_oci
 single_version_override(
     module_name = "rules_oci",
-    patches = ["//:patches/rules_oci_flexible_loader.patch"],
     patch_strip = 1,
+    patches = ["//:patches/rules_oci_flexible_loader.patch"],
 )
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
-    node_version = "24.7.0",
     node_repositories = {
         "24.7.0-darwin_arm64": ("node-v24.7.0-darwin-arm64.tar.xz", "node-v24.7.0-darwin-arm64", "861ae19f855a592b0b39d9701fba69c2c42eafa5986b8094c1f7deaca165b3c4"),
         "24.7.0-darwin_amd64": ("node-v24.7.0-darwin-x64.tar.xz", "node-v24.7.0-darwin-x64", "3db45b8cc33a6ccac4c79be069c8fd5a735b55ed2e6da138dbed4bcce82f93aa"),
@@ -36,6 +39,7 @@ node.toolchain(
         "24.7.0-linux_amd64": ("node-v24.7.0-linux-x64.tar.xz", "node-v24.7.0-linux-x64", "2fb405154d017f04d21b3d2273cc1cdfa824cfeffbd4225976454d06d5e381a4"),
         "24.7.0-windows_amd64": ("node-v24.7.0-win-x64.zip", "node-v24.7.0-win-x64", "093fe5787ef2656c347b98aa3f9c106946c2b35de61456c307e4786e0d05d4ba"),
     },
+    node_version = "24.7.0",
 )
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
@@ -58,25 +62,16 @@ multitool = use_extension("@rules_multitool//multitool:extension.bzl", "multitoo
 multitool.hub(lockfile = "//:multitool.lock.json")
 use_repo(multitool, "multitool")
 
-download_file = use_repo_rule("@download_utils//download/file:defs.bzl", "download_file")
-download_file(
-    name = "runc",
-    urls = ["https://github.com/opencontainers/runc/releases/download/v1.3.0/runc.amd64"],
-    output = "runc",
-    executable = True,
-    integrity = "sha256-AomGUWq1ZGNw7c6YHfLY6KjRIYjer4NxQqAglwAK4vI="
-)
-
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "openvscode_server",
     digest = "sha256:8f0fb92ed942f3d3047cd534046aa391bdeee39bb2b604b391825ff385d03ab3",
     image = "docker.io/gitpod/openvscode-server",
-    tag = "1.101.2",
     platforms = [
         "linux/amd64",
         "linux/arm64",
     ],
+    tag = "1.101.2",
 )
 use_repo(
     oci,
@@ -84,5 +79,3 @@ use_repo(
     "openvscode_server_linux_amd64",
     "openvscode_server_linux_arm64",
 )
-
-include("//:third_party/undocker/undocker.MODULE.bazel")
