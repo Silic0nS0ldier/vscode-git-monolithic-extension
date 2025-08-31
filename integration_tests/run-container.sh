@@ -22,6 +22,19 @@ cd "$runc_root"
 echo "Creating configuration..."
 $runc_path spec --rootless
 
+# update with image configuration
+manifest_json=$(tar -x --to-stdout -f "$tar_file" manifest.json)
+# TODO bring jq in via Bazel
+config_path=$(echo "$manifest_json" | jq -r '.[0].Config')
+config_json=$(tar -x --to-stdout -f "$tar_file" "$config_path")
+# `config.User` -> process.user, `config.ExposedPorts` -> ??, `config.Env` -> process.env, `config.Entrypoint` -> process.args, `config.Cmd` -> ++process.args, `config.WorkingDir` -> process.cwd
+cat "$runc_root/config.json" | jq --argjson u "$config_json" '
+    .root.readonly = false |
+    .process.env = $u.config.Env |
+    .process.args = $u.config.Entrypoint + ($u.config.Cmd // []) |
+    .process.cwd = $u.config.WorkingDir
+' > "$runc_root/config.json"
+
 # create rootfs directory
 echo "Creating rootfs..."
 mkdir rootfs
