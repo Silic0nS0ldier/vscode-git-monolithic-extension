@@ -808,7 +808,7 @@
     "@@rules_nodejs+//nodejs:extensions.bzl%node": {
       "general": {
         "bzlTransitiveDigest": "hdICB1K7PX7oWtO8oksVTBDNt6xxiNERpcO4Yxoa0Gc=",
-        "usagesDigest": "MnwJeVCIAabpW4HdPOu5ZEecOI86yq2uhmTgJ5ayCr8=",
+        "usagesDigest": "yGlpbYPFaiGOhlComiOY014HOlRvvI5Y/cP0MYL2+oY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1230,7 +1230,7 @@
     "@@rules_oci+//oci:extensions.bzl%oci": {
       "general": {
         "bzlTransitiveDigest": "MObYeJgeRukG0C/KOeHNd02huv38P3KnpPsNX1OgrI4=",
-        "usagesDigest": "lBhgFRUJiuK2ljJCKeFpmgZqN+1cWueaHJfQxnMfztM=",
+        "usagesDigest": "FPwi7OAcS+vy1SH+gXH8Z6wP87Jb5sdZzUighO5KI0Q=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1275,6 +1275,49 @@
                 "@@platforms//cpu:arm64": "@openvscode_server_linux_arm64"
               },
               "bzlmod_repository": "openvscode_server",
+              "reproducible": true
+            }
+          },
+          "browserless_chromium_linux_amd64": {
+            "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_pull",
+            "attributes": {
+              "www_authenticate_challenges": {},
+              "scheme": "https",
+              "registry": "ghcr.io",
+              "repository": "browserless/chromium",
+              "identifier": "sha256:eeac26dc8da5bad6ff321acc3692d614da9ffc95ba0df7af944ded6649787ce5",
+              "platform": "linux/amd64",
+              "target_name": "browserless_chromium_linux_amd64",
+              "bazel_tags": []
+            }
+          },
+          "browserless_chromium_linux_arm64": {
+            "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_pull",
+            "attributes": {
+              "www_authenticate_challenges": {},
+              "scheme": "https",
+              "registry": "ghcr.io",
+              "repository": "browserless/chromium",
+              "identifier": "sha256:eeac26dc8da5bad6ff321acc3692d614da9ffc95ba0df7af944ded6649787ce5",
+              "platform": "linux/arm64",
+              "target_name": "browserless_chromium_linux_arm64",
+              "bazel_tags": []
+            }
+          },
+          "browserless_chromium": {
+            "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_alias",
+            "attributes": {
+              "target_name": "browserless_chromium",
+              "www_authenticate_challenges": {},
+              "scheme": "https",
+              "registry": "ghcr.io",
+              "repository": "browserless/chromium",
+              "identifier": "sha256:eeac26dc8da5bad6ff321acc3692d614da9ffc95ba0df7af944ded6649787ce5",
+              "platforms": {
+                "@@platforms//cpu:x86_64": "@browserless_chromium_linux_amd64",
+                "@@platforms//cpu:arm64": "@browserless_chromium_linux_arm64"
+              },
+              "bzlmod_repository": "browserless_chromium",
               "reproducible": true
             }
           },
@@ -1396,7 +1439,10 @@
           "explicitRootModuleDirectDeps": [
             "openvscode_server",
             "openvscode_server_linux_amd64",
-            "openvscode_server_linux_arm64"
+            "openvscode_server_linux_arm64",
+            "browserless_chromium",
+            "browserless_chromium_linux_amd64",
+            "browserless_chromium_linux_arm64"
           ],
           "explicitRootModuleDirectDevDeps": [],
           "useAllRepos": "NO",
