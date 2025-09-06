@@ -2,6 +2,7 @@ packages:
   - packages/*
   - build_defs/*
   - extension
+  - integration_tests
 
 catalog:
   '@formatjs/intl-durationformat': ^0.7.4
