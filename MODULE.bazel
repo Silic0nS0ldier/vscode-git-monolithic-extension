@@ -13,15 +13,15 @@ bazel_dep(name = "platforms", version = "1.0.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
-    node_version = "24.7.0",
+    node_version = "24.8.0",
     node_repositories = {
-        "24.7.0-darwin_arm64": ("node-v24.7.0-darwin-arm64.tar.xz", "node-v24.7.0-darwin-arm64", "861ae19f855a592b0b39d9701fba69c2c42eafa5986b8094c1f7deaca165b3c4"),
-        "24.7.0-darwin_amd64": ("node-v24.7.0-darwin-x64.tar.xz", "node-v24.7.0-darwin-x64", "3db45b8cc33a6ccac4c79be069c8fd5a735b55ed2e6da138dbed4bcce82f93aa"),
-        "24.7.0-linux_arm64": ("node-v24.7.0-linux-arm64.tar.xz", "node-v24.7.0-linux-arm64", "3c238d671b2cc2e1c62b8b068c346b9830708f90df1e4a37305f4a5c2bb230b8"),
-        "24.7.0-linux_ppc64le": ("node-v24.7.0-linux-ppc64le.tar.xz", "node-v24.7.0-linux-ppc64le", "8a38b0def911a00ea25daff682fe9f7a3f67fb52e5b4aeff68b6d91b0753ea9a"),
-        "24.7.0-linux_s390x": ("node-v24.7.0-linux-s390x.tar.xz", "node-v24.7.0-linux-s390x", "40cb413fb1d4a123be721c51ed3f8ea208d01e4566b6a6e5acc5d30fb7cf38ef"),
-        "24.7.0-linux_amd64": ("node-v24.7.0-linux-x64.tar.xz", "node-v24.7.0-linux-x64", "2fb405154d017f04d21b3d2273cc1cdfa824cfeffbd4225976454d06d5e381a4"),
-        "24.7.0-windows_amd64": ("node-v24.7.0-win-x64.zip", "node-v24.7.0-win-x64", "093fe5787ef2656c347b98aa3f9c106946c2b35de61456c307e4786e0d05d4ba"),
+        "24.8.0-darwin_arm64": ("node-v24.8.0-darwin-arm64.tar.xz", "node-v24.8.0-darwin-arm64", "dfe6f85f52f5971e3873e2305294417091b57b56394709a8d5d6ad3f2a5fa480"),
+        "24.8.0-darwin_amd64": ("node-v24.8.0-darwin-x64.tar.xz", "node-v24.8.0-darwin-x64", "4e3fb475c0ab90109e83fc31ce994c76067ac9a92ca68e95eceece72c92ffa2b"),
+        "24.8.0-linux_arm64": ("node-v24.8.0-linux-arm64.tar.xz", "node-v24.8.0-linux-arm64", "323e6bc34bfe82a21f42d9eb94d9a2b6c8082d8c03cb510cf2f95dd1dcaa1531"),
+        "24.8.0-linux_ppc64le": ("node-v24.8.0-linux-ppc64le.tar.xz", "node-v24.8.0-linux-ppc64le", "0ca68fc43fe09e18c57e8c64e9f1b24f0643be87d30f6816bd842c8a4d2d6cae"),
+        "24.8.0-linux_s390x": ("node-v24.8.0-linux-s390x.tar.xz", "node-v24.8.0-linux-s390x", "9c8cd3ac0b52fcb900424d94669b53ddc204e658fffbf11b3c6f94f93b068ffb"),
+        "24.8.0-linux_amd64": ("node-v24.8.0-linux-x64.tar.xz", "node-v24.8.0-linux-x64", "2598641d188b41793930917f1a99a81c9615856b4205d408a44ab676c1acbb3d"),
+        "24.8.0-windows_amd64": ("node-v24.8.0-win-x64.zip", "node-v24.8.0-win-x64", "970ecc121a16f546174b6a870215ca4cc0de33f8a616b42c16c8c02e66b07d05"),
     },
 )
 
