@@ -38,7 +38,7 @@
         "@types/which": "^3.0.4",
         "ava": "catalog:",
         "get-stream": "catalog:",
-        "into-stream": "^8.0.1"
+        "into-stream": "^9.0.0"
     },
     "dependencies": {
         "@formatjs/intl-durationformat": "catalog:",
