@@ -163,8 +163,8 @@ importers:
         specifier: 'catalog:'
         version: 9.0.1
       into-stream:
-        specifier: ^8.0.1
-        version: 8.0.1
+        specifier: ^9.0.0
+        version: 9.0.0
 
 packages:
 
@@ -1445,9 +1445,9 @@ packages:
   ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
 
-  into-stream@8.0.1:
-    resolution: {integrity: sha512-Vp2df7Utjs/1/sv0Vlj2X4u2e2yaCrcMd4T9u0D9B36XvxIOBHA2JIZTXCp2TPCa7w/ebwWVkXhbp9At1wJ0zg==}
-    engines: {node: '>=16'}
+  into-stream@9.0.0:
+    resolution: {integrity: sha512-0cHFlRvRr8nxUf0kipkPQSYQ3WCrwG95zX76o9S2Vdmw02ZFh3oD3qsVv9vVTzD0hA96sXS414UfxeYh35yTrg==}
+    engines: {node: '>=20'}
 
   irregular-plurals@3.5.0:
     resolution: {integrity: sha512-1ANGLZ+Nkv1ptFb2pa8oG8Lem4krflKuX/gINiHJHjJUKaJHk/SXk5x6K3J+39/p0h1RQ2saROclJJ+QLvETCQ==}
@@ -3898,7 +3898,7 @@ snapshots:
   ini@1.3.8:
     optional: true
 
-  into-stream@8.0.1: {}
+  into-stream@9.0.0: {}
 
   irregular-plurals@3.5.0: {}
 
