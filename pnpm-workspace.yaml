@@ -13,4 +13,4 @@ catalog:
 
 catalogs:
   vscode:
-    '@types/node': ^22.16.0
+    '@types/node': ^22.18.6
