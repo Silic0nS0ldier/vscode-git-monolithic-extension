@@ -4,7 +4,7 @@ packages:
   - extension
 
 catalog:
-  '@formatjs/intl-durationformat': ^0.7.5
+  '@formatjs/intl-durationformat': ^0.7.6
   '@js-temporal/polyfill': ^0.5.1
   '@types/node': ^24.7.0
   ava: ^6.4.1
