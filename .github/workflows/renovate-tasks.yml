@@ -19,4 +19,4 @@ jobs:
           ref: ${{ github.head_ref }}
       - run: node ./.github/workflows/update_bazel_nodejs.mjs ./.devcontainer/devcontainer.json ./MODULE.bazel
       - run: bazel mod deps --lockfile_mode=update
-      - uses: stefanzweifel/git-auto-commit-action@v6
+      - uses: stefanzweifel/git-auto-commit-action@v7
