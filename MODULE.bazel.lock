@@ -29,8 +29,8 @@
     "https://bcr.bazel.build/modules/aspect_rules_js/2.6.2/MODULE.bazel": "ed2a871f4ab8fbde0cab67c425745069d84ea64b64313fa1a2954017326511f5",
     "https://bcr.bazel.build/modules/aspect_rules_js/2.6.2/source.json": "59933fb8ddabd9740a3c12ff5552f06f2b8d68c3633883c681c757bf227c3763",
     "https://bcr.bazel.build/modules/aspect_rules_lint/0.12.0/MODULE.bazel": "e767c5dbfeb254ec03275a7701b5cfde2c4d2873676804bc7cb27ddff3728fed",
-    "https://bcr.bazel.build/modules/aspect_rules_lint/1.10.1/MODULE.bazel": "7cab4b60a47f2c3c42c1b70014f2012d4edbc753b7c3792d2c03874b48d88c4b",
-    "https://bcr.bazel.build/modules/aspect_rules_lint/1.10.1/source.json": "17c01b03a97c7b3b0948a38e683878085bc5013a9c1fa27ed844047b6d11f1b3",
+    "https://bcr.bazel.build/modules/aspect_rules_lint/1.10.2/MODULE.bazel": "a4e49c029f1e2b3d7c412c45f10e03ab5cc80f9a579737868554044b03c90365",
+    "https://bcr.bazel.build/modules/aspect_rules_lint/1.10.2/source.json": "82465c804422f39e7a7dddeaf05857dafbe308e54312c2ebd8508c22b22f5e6f",
     "https://bcr.bazel.build/modules/aspect_rules_ts/3.7.0/MODULE.bazel": "5aace216caf88638950ef061245d23c36f57c8359e56e97f02a36f70bb09c50f",
     "https://bcr.bazel.build/modules/aspect_rules_ts/3.7.0/source.json": "4a8115ea69dd796353232ff27a7e93e6d7d1ad43bea1eb33c6bd3acfa656bf2e",
     "https://bcr.bazel.build/modules/aspect_tools_telemetry/0.2.6/MODULE.bazel": "cafb8781ad591bc57cc765dca5fefab08cf9f65af363d162b79d49205c7f8af7",
@@ -420,7 +420,7 @@
     "@@aspect_tools_telemetry+//:extension.bzl%telemetry": {
       "general": {
         "bzlTransitiveDigest": "gA7tPEdJXhskzPIEUxjX9IdDrM6+WjfbgXJ8Ez47umk=",
-        "usagesDigest": "l6qzjhIUQjGujLdUqoPTm18oGXqm24/nk1919k/1lBM=",
+        "usagesDigest": "vbHq4uYuYJN0vLNkGEW0ebOxyEWSu26lzYofp/cuTZ4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -431,7 +431,7 @@
               "deps": {
                 "aspect_rules_js": "2.6.2",
                 "aspect_rules_ts": "3.7.0",
-                "aspect_rules_lint": "1.10.1",
+                "aspect_rules_lint": "1.10.2",
                 "aspect_tools_telemetry": "0.2.8"
               }
             }
