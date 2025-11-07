@@ -79,8 +79,8 @@ importers:
   build_defs/vsix_package:
     dependencies:
       '@vscode/vsce':
-        specifier: ^3.6.2
-        version: 3.6.2
+        specifier: ^3.7.0
+        version: 3.7.0
       cleye:
         specifier: 'catalog:'
         version: 1.3.4
@@ -740,8 +740,8 @@ packages:
   '@vscode/vsce-sign@2.0.7':
     resolution: {integrity: sha512-cz0GFW8qCxpypOy3y509u26K1FIPMlDIHBwGmDyvEbgoma2v3y5YIHHuijr8zCYBp9kzCCOJd28s/0PG7cA7ew==}
 
-  '@vscode/vsce@3.6.2':
-    resolution: {integrity: sha512-gvBfarWF+Ii20ESqjA3dpnPJpQJ8fFJYtcWtjwbRADommCzGg1emtmb34E+DKKhECYvaVyAl+TF9lWS/3GSPvg==}
+  '@vscode/vsce@3.7.0':
+    resolution: {integrity: sha512-LY9r2T4joszRjz4d92ZPl6LTBUPS4IWH9gG/3JUv+1QyBJrveZlcVISuiaq0EOpmcgFh0GgVgKD4rD/21Tu8sA==}
     engines: {node: '>= 20'}
     hasBin: true
 
@@ -3092,7 +3092,7 @@ snapshots:
       '@vscode/vsce-sign-win32-arm64': 2.0.6
       '@vscode/vsce-sign-win32-x64': 2.0.6
 
-  '@vscode/vsce@3.6.2':
+  '@vscode/vsce@3.7.0':
     dependencies:
       '@azure/identity': 4.12.0
       '@secretlint/node': 10.2.2
