@@ -116,8 +116,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       vscode-diff:
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^3.0.1
+        version: 3.0.1
       vscode-nls:
         specifier: ^5.2.0
         version: 5.2.0
@@ -2273,8 +2273,8 @@ packages:
     resolution: {integrity: sha512-Ck0EJbAGxHwprkzFO966t4/5QkRuzh+/I1RxhLgUKKwEn+Cd8NwM60mE3AqBZg5gYODoXW0EFsQvbZjRlvdqbg==}
     engines: {node: '>=4'}
 
-  vscode-diff@2.1.1:
-    resolution: {integrity: sha512-S2BwZbrQCk4N6FqgYQQPlQ44OZKZNcS2VwhMj4xU8QvixXN9GeNQnN7/7XHFbwrs6h5BiLADDcERTrKvfWeG9g==}
+  vscode-diff@3.0.1:
+    resolution: {integrity: sha512-0rRDmIuGsuQMIIhbWsILSMxG4k5x8unNvkD7P+yn5cA7O6bKg28P/dhvgABRvP5ksYmGE9UKHonk/Z4PBMdojA==}
 
   vscode-nls@5.2.0:
     resolution: {integrity: sha512-RAaHx7B14ZU04EU31pT+rKz2/zSl7xMsfIZuo8pd+KZO6PXtQmpevpq3vxvWNcrGbdmhM/rr5Uw5Mz+NBfhVng==}
@@ -4698,7 +4698,7 @@ snapshots:
 
   version-range@4.15.0: {}
 
-  vscode-diff@2.1.1: {}
+  vscode-diff@3.0.1: {}
 
   vscode-nls@5.2.0: {}
 
