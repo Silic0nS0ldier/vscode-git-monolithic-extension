@@ -24,51 +24,77 @@ const TargetEventEnum: Record<TargetEvent, string> = {
 
 type Watcher = {
     event: Event<Uri>;
+    refresh: () => void;
 } & Disposable;
 
 /**
- * Creates an optimised watcher.
- * @param location
- * @returns
+ * Creates an optimised watcher that signals _something_ changed in the given locations.
+ * Excess events (such as those occurring while locks are present) are suppressed.
  */
-export function watch(locations: string[], locks: string[], ignores: string[], outputChannel: OutputChannel, id: string): Watcher {
+export function watch(
+    locations: string[],
+    locks: string[],
+    ignoreFn: (path: string) => boolean,
+    important: string[],
+    outputChannel: OutputChannel,
+    id: string,
+): Watcher {
     const onFileChangeEmitter = new EventEmitter<Uri>();
-    const watcher = new BaseWatcher(
-        [...locations, ...locks],
-        {
-            // TODO Check that file limit is not exceeded (10_000_000)
-            //      Use `git ls-files | wc -l` (or similar) to check
-            debounce: 500,
-            ignoreInitial: true,
-            renameDetection: false,
-            recursive: true,
-            ignore(targetPath) {
-                if (ignores.some(i => targetPath === i || targetPath.startsWith(i + '/'))) {
-                    return true;
-                }
 
-                return false;
+    function createWatcher() {
+        const lockEvents = new Map<string, keyof typeof TargetEventEnum>();
+        let watcher = new BaseWatcher(
+            [...locations, ...locks],
+            {
+                // TODO Check that file limit is not exceeded (10_000_000)
+                //      Use `git ls-files | wc -l` (or similar) to check
+                debounce: 500,
+                ignoreInitial: true,
+                renameDetection: false,
+                recursive: true,
+                ignore: ignoreFn,
             },
-        },
-        (et, path) => {
-            if (locks.some(fs.existsSync)) {
-                // Lock exists, don't propagate changes
-                return;
-            }
+            (et, path) => {
+                if (locks.some(fs.existsSync)) {
+                    // Lock exists, don't propagate changes
+                    if (lockEvents.size === 0 && isWatchableEvent(et)) {
+                        lockEvents.set(path, et);
+                    } else if (important.includes(path) && isWatchableEvent(et)) {
+                        // Important file changed while lock present, remember it
+                        lockEvents.set(path, et);
+                    }
+                    return;
+                }
+    
+                if (lockEvents.size > 0) {
+                    // Locks gone, fire remembered events
+                    outputChannel.appendLine(`TRACE: ${id} watcher releasing ${lockEvents.size} important events`);
+                    for (const [recallPath, recallEt] of lockEvents) {
+                        outputChannel.appendLine(`TRACE: ${id} watcher recalled event "${recallEt}" "${recallPath}"`);
+                        onFileChangeEmitter.fire(Uri.file(recallPath));
+                    }
+                    lockEvents.clear();
+                }
+    
+                // Filter directory events, only files are of interest
+                // TODO Do the individual files also get updated?
+                if (isWatchableEvent(et)) {
+                    outputChannel.appendLine(`TRACE: ${id} watcher event "${et}" "${path}"`);
+                    onFileChangeEmitter.fire(Uri.file(path));
+                }
+            },
+        );
+    
+        // TODO Use unified logger
+        watcher.on("error", async err => {
+            outputChannel.appendLine(`${id} watcher error: ${inspect(err)}`);
+        });
 
-            // Filter directory events, only files are of interest
-            // TODO Do the individual files also get updated?
-            if (et !== TargetEventEnum.addDir && et !== TargetEventEnum.unlinkDir && et !== TargetEventEnum.renameDir) {
-                outputChannel.appendLine(`TRACE: ${id} watcher event "${et}" "${path}"`);
-                onFileChangeEmitter.fire(Uri.file(path));
-            }
-        },
-    );
+        return watcher;
+    }
 
-    // TODO Use unified logger
-    watcher.on("error", async err => {
-        outputChannel.appendLine(`${id} watcher error: ${inspect(err)}`);
-    });
+    let watcher = createWatcher();
+
 
     return {
         dispose(): void {
@@ -76,5 +102,27 @@ export function watch(locations: string[], locks: string[], ignores: string[], o
             watcher.close();
         },
         event: onFileChangeEmitter.event,
+        refresh() {
+            if (watcher.isClosed()) {
+                outputChannel.appendLine(`TRACE: ${id} watcher refresh requested but watcher is closed, skipping refresh\n${new Error().stack}`);
+                return;
+            }
+            watcher.close();
+            watcher = createWatcher();
+        },
+    };
+}
+
+function isWatchableEvent(event: keyof typeof TargetEventEnum): boolean {
+    return event !== TargetEventEnum.addDir && event !== TargetEventEnum.unlinkDir && event !== TargetEventEnum.renameDir
+}
+
+export function createIgnoreFnFromList(ignoreList: string[]): (path: string) => boolean {
+    return function ignoreFn(targetPath: string): boolean {
+        if (ignoreList.some(i => targetPath === i || targetPath.startsWith(i + '/'))) {
+            return true;
+        }
+
+        return false;
     };
 }

@@ -3,14 +3,14 @@ import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "v
 import { anyEvent } from "../util/events.js";
 import { watch } from "./watch.js";
 
+// Watch specific files for meaningful git events
+// This is a lot more efficient then watching everything, and avoids workarounds for aids like watchman as an fsmonitor
 export function createDotGitWatcher(
     dotGitDir: string,
     outputChannel: OutputChannel,
 ): { event: Event<Uri> } & Disposable {
     const emitter = new EventEmitter<Uri>();
 
-    // Watch specific files for meaningful git events
-    // This is a lot more efficient then watching everything, and avoids workarounds for aids like watchman as an fsmonitor
     const rootWatcher = watch(
         [
             // Where we are
@@ -41,6 +41,7 @@ export function createDotGitWatcher(
             path.join(dotGitDir, "REVERT_HEAD"),
             path.join(dotGitDir, "CHERRY_PICK_HEAD"),
         ],
+        () => false,
         [],
         outputChannel,
         "dot-git",
