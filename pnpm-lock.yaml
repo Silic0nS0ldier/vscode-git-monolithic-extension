@@ -152,6 +152,9 @@ importers:
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
+      get-stream:
+        specifier: 'catalog:'
+        version: 9.0.1
       which:
         specifier: ^6.0.0
         version: 6.0.0
@@ -162,9 +165,6 @@ importers:
       ava:
         specifier: 'catalog:'
         version: 6.4.1(rollup@4.55.1)
-      get-stream:
-        specifier: 'catalog:'
-        version: 9.0.1
       into-stream:
         specifier: ^9.0.0
         version: 9.0.0

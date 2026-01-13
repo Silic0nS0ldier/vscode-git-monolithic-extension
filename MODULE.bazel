@@ -2,7 +2,7 @@ module(name = "vscode_git_monolithic")
 
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
-bazel_dep(name = "aspect_rules_js", version = "2.8.0")
+bazel_dep(name = "aspect_rules_js", version = "2.9.1")
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
 bazel_dep(name = "rules_nodejs", version = "6.6.2")
 bazel_dep(name = "aspect_rules_ts", version = "3.8.1")
@@ -13,7 +13,6 @@ bazel_dep(name = "platforms", version = "1.0.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
-    node_version = "24.12.0",
     node_repositories = {
         "24.12.0-darwin_arm64": ("node-v24.12.0-darwin-arm64.tar.xz", "node-v24.12.0-darwin-arm64", "4db2a7842267d4d99e35284289b241c43465b08a28ece4fcb6a9460ce7e4c68c"),
         "24.12.0-darwin_amd64": ("node-v24.12.0-darwin-x64.tar.xz", "node-v24.12.0-darwin-x64", "1e4d54f706e0a3613d6415ffe2ccdfd4095d3483971dbbaa4ff909fac5fc211c"),
@@ -23,6 +22,7 @@ node.toolchain(
         "24.12.0-linux_amd64": ("node-v24.12.0-linux-x64.tar.xz", "node-v24.12.0-linux-x64", "bdebee276e58d0ef5448f3d5ac12c67daa963dd5e0a9bb621a53d1cefbc852fd"),
         "24.12.0-windows_amd64": ("node-v24.12.0-win-x64.zip", "node-v24.12.0-win-x64", "9c125f61ae947b52e779095830f9cac267846a043ef7192183c84016aaad2812"),
     },
+    node_version = "24.12.0",
 )
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")

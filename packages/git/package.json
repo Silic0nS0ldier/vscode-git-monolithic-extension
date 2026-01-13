@@ -37,7 +37,6 @@
     "devDependencies": {
         "@types/which": "^3.0.4",
         "ava": "catalog:",
-        "get-stream": "catalog:",
         "into-stream": "^9.0.0"
     },
     "dependencies": {
@@ -45,6 +44,7 @@
         "@js-temporal/polyfill": "catalog:",
         "@types/node": "catalog:vscode",
         "compare-versions": "^6.1.1",
+        "get-stream": "catalog:",
         "which": "^6.0.0"
     }
 }
