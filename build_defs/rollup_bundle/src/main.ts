@@ -58,6 +58,14 @@ const bundle = await (async () => {
                 commonjs(),
             ],
             external: externalModules,
+            onwarn: (warning, defaultHandler) => {
+                if (warning.code === "UNRESOLVED_IMPORT") {
+                    console.error(warning.message);
+                    console.error(`ID: ${warning.id}`);
+                    process.exit(1);
+                }
+                defaultHandler(warning);
+            }
         });
     } catch (e) {
         console.error(e);
