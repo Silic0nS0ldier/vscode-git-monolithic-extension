@@ -217,7 +217,7 @@ export function createRepository(
     });
     const eventuallyUpdateWhenIdleAndWait = debounce(updateWhenIdleAndWait, 1000);
 
-    function onFileChangeHandler(_uri: Uri): void {
+    function onFileChangeHandler(): void {
         const autorefresh = config.autoRefresh();
 
         if (!autorefresh) {
