@@ -38,7 +38,7 @@ for (const k in mapping) {
 }
 
 const moduleBazelContent = await fs.readFile(moduleBazelArg, "utf-8");
-const updatedModuleBazelContent = moduleBazelContent.replace(/node\.toolchain\(.*",\n\)/s, `\
+const updatedModuleBazelContent = moduleBazelContent.replace(/node\.toolchain\(.*node_version\s=\s"\d+\.\d+\.\d+",\n\)/s, `\
 node.toolchain(
     node_repositories = {
         ${Array.from(processed.entries())
