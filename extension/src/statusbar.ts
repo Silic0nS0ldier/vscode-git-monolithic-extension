@@ -34,7 +34,7 @@ class CheckoutStatusBar {
 
         return {
             arguments: [this.#repository.sourceControlUI.sourceControl],
-            command: "git.checkout",
+            command: "git_monolithic.checkout",
             title,
             tooltip: i18n.Translations.checkout(),
         };
@@ -151,7 +151,7 @@ class SyncStatusBar {
 
             return {
                 arguments: [this.#repository.sourceControlUI.sourceControl],
-                command: "git.publish",
+                command: "git_monolithic.publish",
                 title: `$(cloud-upload)`,
                 tooltip,
             };
@@ -171,11 +171,11 @@ class SyncStatusBar {
 
                 const rebaseWhenSync = config.rebaseWhenSync(Uri.file(this.#repository.root));
 
-                command = rebaseWhenSync ? "git.syncRebase" : "git.sync";
+                command = rebaseWhenSync ? "git_monolithic.syncRebase" : "git_monolithic.sync";
                 tooltip = this.#repository.syncTooltip;
             } else {
                 icon = "$(cloud-upload)";
-                command = "git.publish";
+                command = "git_monolithic.publish";
                 tooltip = i18n.Translations.publishChanges();
             }
         } else {

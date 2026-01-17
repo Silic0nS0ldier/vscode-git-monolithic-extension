@@ -24,7 +24,7 @@ export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): 
     const sourceControl = scm.createSourceControl("git", "Git", rootUri);
     sourceControl.acceptInputCommand = {
         arguments: [sourceControl],
-        command: "git.commit",
+        command: "git_monolithic.commit",
         title: i18n.Translations.commit(),
     };
     sourceControl.quickDiffProvider = quickDiffProvider;

@@ -30,7 +30,7 @@ export class GitProtocolHandler implements UriHandler {
             this.#outputChannel.appendLine("[WARN] Failed to open URI: " + uri.toString());
         }
 
-        commands.executeCommand("git.clone", data.url);
+        commands.executeCommand("git_monolithic.clone", data.url);
     }
 
     dispose(): void {

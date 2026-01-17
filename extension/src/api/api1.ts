@@ -429,12 +429,12 @@ function getStatus(status: StatusOptions): string {
 export function registerAPICommands(extension: GitExtensionImpl): Disposable {
     const disposables: Disposable[] = [];
 
-    disposables.push(commands.registerCommand("git.api.getRepositories", () => {
+    disposables.push(commands.registerCommand("git_monolithic.api.getRepositories", () => {
         const api = extension.getAPI(1);
         return api.repositories.map(r => r.rootUri.toString());
     }));
 
-    disposables.push(commands.registerCommand("git.api.getRepositoryState", (uri: string) => {
+    disposables.push(commands.registerCommand("git_monolithic.api.getRepositoryState", (uri: string) => {
         const api = extension.getAPI(1);
         const repository = api.getRepository(Uri.parse(uri));
 
@@ -464,7 +464,7 @@ export function registerAPICommands(extension: GitExtensionImpl): Disposable {
         };
     }));
 
-    disposables.push(commands.registerCommand("git.api.getRemoteSources", (opts?: PickRemoteSourceOptions) => {
+    disposables.push(commands.registerCommand("git_monolithic.api.getRemoteSources", (opts?: PickRemoteSourceOptions) => {
         if (!extension.model) {
             return;
         }
