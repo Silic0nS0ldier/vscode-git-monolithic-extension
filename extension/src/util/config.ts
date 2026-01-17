@@ -240,3 +240,11 @@ export function path(): string | string[] | null {
 export function showPushSuccessNotification(): boolean {
     return getExtensionConfig().get<boolean>("showPushSuccessNotification", false);
 }
+
+export function detectSubmodules(scope: ConfigurationScope): boolean {
+    return getExtensionConfig(scope).get<boolean>("detectSubmodules", true);
+}
+
+export function detectSubmodulesLimit(scope: ConfigurationScope): number {
+    return getExtensionConfig(scope).get<number>("detectSubmodulesLimit", 10);
+}

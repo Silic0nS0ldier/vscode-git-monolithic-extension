@@ -92,7 +92,7 @@ export function registerCommands(
         return commands.registerCommand(commandId, command);
     });
 
-    disposables.push(workspace.registerTextDocumentContentProvider("git-output", commandErrors));
+    disposables.push(workspace.registerTextDocumentContentProvider("gitm-output", commandErrors));
 
     return Disposable.from(...disposables);
 }
