@@ -6,9 +6,9 @@
 import { type Event, EventEmitter } from "vscode";
 import type { Model } from "../model.js";
 import { ApiImpl } from "./api1.js";
-import type { API, GitExtension } from "./git.js";
+import type { API } from "./git.js";
 
-export class GitExtensionImpl implements GitExtension {
+export class GitExtensionImpl {
     enabled: boolean = false;
 
     #onDidChangeEnablementEmitter = new EventEmitter<boolean>();
