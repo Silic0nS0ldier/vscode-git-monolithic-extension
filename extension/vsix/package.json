@@ -476,67 +476,67 @@
             "commandPalette": [
                 {
                     "command": "git.stageSelectedRanges",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.setLogLevel",
-                    "when": "config.git.enabled && !git.missing"
+                    "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
                     "command": "git.clone",
-                    "when": "config.git.enabled && !git.missing"
+                    "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
                     "command": "git.cloneRecursive",
-                    "when": "config.git.enabled && !git.missing"
+                    "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
                     "command": "git.init",
-                    "when": "config.git.enabled && !git.missing"
+                    "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
                     "command": "git.openRepository",
-                    "when": "config.git.enabled && !git.missing"
+                    "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
                     "command": "git.close",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.refresh",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.openFile",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.openHEADFile",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.openChange",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && resourcePath in git.changedResources"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && resourcePath in git.changedResources"
                 },
                 {
                     "command": "git.stage",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stageAll",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stageAllTracked",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stageAllUntracked",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stageAllMerge",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.openFile2",
@@ -544,99 +544,99 @@
                 },
                 {
                     "command": "git.unstage",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.unstageAll",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.clean",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.cleanAll",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.cleanAllTracked",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.cleanAllUntracked",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.rename",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && resourceScheme == file"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && resourceScheme == file"
                 },
                 {
                     "command": "git.commit",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitStaged",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitEmpty",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitStagedSigned",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitStagedAmend",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitAll",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitAllSigned",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitAllAmend",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.rebaseAbort",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && gitRebaseInProgress"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && gitRebaseInProgress"
                 },
                 {
                     "command": "git.commitNoVerify",
-                    "when": "config.git.enabled && !git.missing && config.git.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitStagedNoVerify",
-                    "when": "config.git.enabled && !git.missing && config.git.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitEmptyNoVerify",
-                    "when": "config.git.enabled && !git.missing && config.git.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitStagedSignedNoVerify",
-                    "when": "config.git.enabled && !git.missing && config.git.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitStagedAmendNoVerify",
-                    "when": "config.git.enabled && !git.missing && config.git.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitAllNoVerify",
-                    "when": "config.git.enabled && !git.missing && config.git.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitAllSignedNoVerify",
-                    "when": "config.git.enabled && !git.missing && config.git.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.commitAllAmendNoVerify",
-                    "when": "config.git.enabled && !git.missing && config.git.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.restoreCommitTemplate",
@@ -648,155 +648,155 @@
                 },
                 {
                     "command": "git.undoCommit",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.checkout",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.branch",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.branchFrom",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.deleteBranch",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.renameBranch",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.cherryPick",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pull",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pullFrom",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pullRebase",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.merge",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.rebase",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.createTag",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.deleteTag",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.fetch",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.fetchPrune",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.fetchAll",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.push",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pushForce",
-                    "when": "config.git.enabled && !git.missing && config.git.allowForcePush && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowForcePush && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pushTo",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pushToForce",
-                    "when": "config.git.enabled && !git.missing && config.git.allowForcePush && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowForcePush && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pushWithTags",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pushWithTagsForce",
-                    "when": "config.git.enabled && !git.missing && config.git.allowForcePush && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowForcePush && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.pushTags",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.addRemote",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.removeRemote",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.sync",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.syncRebase",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.publish",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.showOutput",
-                    "when": "config.git.enabled"
+                    "when": "config.git_monolithic.enabled"
                 },
                 {
                     "command": "git.ignore",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stashIncludeUntracked",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stash",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stashPop",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stashPopLatest",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stashApply",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stashApplyLatest",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
                     "command": "git.stashDrop",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 }
             ],
             "scm/title": [
@@ -1035,12 +1035,12 @@
                 },
                 {
                     "command": "git.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == merge && config.git.showInlineOpenFileAction && config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == merge && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == merge && config.git.showInlineOpenFileAction && !config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == merge && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
@@ -1075,12 +1075,12 @@
                 },
                 {
                     "command": "git.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == index && config.git.showInlineOpenFileAction && config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == index && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == index && config.git.showInlineOpenFileAction && !config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == index && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
@@ -1120,12 +1120,12 @@
                 },
                 {
                     "command": "git.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == tracked && config.git.showInlineOpenFileAction && config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == tracked && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == tracked && config.git.showInlineOpenFileAction && !config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == tracked && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
@@ -1175,12 +1175,12 @@
                 },
                 {
                     "command": "git.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == untracked && config.git.showInlineOpenFileAction && config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == untracked && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == untracked && config.git.showInlineOpenFileAction && !config.git.openDiffOnClick",
+                    "when": "scmProvider == git && scmResourceGroup == untracked && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
@@ -1193,29 +1193,29 @@
                 {
                     "command": "git.stageSelectedRanges",
                     "group": "2_git@1",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 },
                 {
                     "command": "git.openFile",
                     "group": "navigation",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 },
                 {
                     "command": "git.openFile",
                     "group": "navigation",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInNotebookTextDiffEditor && resourceScheme =~ /^git$|^file$/"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInNotebookTextDiffEditor && resourceScheme =~ /^git$|^file$/"
                 },
                 {
                     "command": "git.openChange",
                     "group": "navigation",
-                    "when": "config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && !isInDiffEditor && resourceScheme == file && resourcePath in git.changedResources"
+                    "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && !isInDiffEditor && resourceScheme == file && resourcePath in git.changedResources"
                 }
             ],
             "editor/context": [
                 {
                     "command": "git.stageSelectedRanges",
                     "group": "2_git@1",
-                    "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
+                    "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 }
             ],
             "git.commit": [
@@ -1242,17 +1242,17 @@
                 {
                     "command": "git.commitNoVerify",
                     "group": "1_commit@6",
-                    "when": "config.git.allowNoVerifyCommit"
+                    "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
                     "command": "git.commitStagedNoVerify",
                     "group": "1_commit@7",
-                    "when": "config.git.allowNoVerifyCommit"
+                    "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
                     "command": "git.commitAllNoVerify",
                     "group": "1_commit@8",
-                    "when": "config.git.allowNoVerifyCommit"
+                    "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
                     "command": "git.commitStagedAmend",
@@ -1265,12 +1265,12 @@
                 {
                     "command": "git.commitStagedAmendNoVerify",
                     "group": "2_amend@3",
-                    "when": "config.git.allowNoVerifyCommit"
+                    "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
                     "command": "git.commitAllAmendNoVerify",
                     "group": "2_amend@4",
-                    "when": "config.git.allowNoVerifyCommit"
+                    "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
                     "command": "git.commitStagedSigned",
@@ -1283,12 +1283,12 @@
                 {
                     "command": "git.commitStagedSignedNoVerify",
                     "group": "3_signoff@3",
-                    "when": "config.git.allowNoVerifyCommit"
+                    "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
                     "command": "git.commitAllSignedNoVerify",
                     "group": "3_signoff@4",
-                    "when": "config.git.allowNoVerifyCommit"
+                    "when": "config.git_monolithic.allowNoVerifyCommit"
                 }
             ],
             "git.changes": [
@@ -1333,7 +1333,7 @@
                 },
                 {
                     "command": "git.pushForce",
-                    "when": "config.git.allowForcePush",
+                    "when": "config.git_monolithic.allowForcePush",
                     "group": "3_push@2"
                 },
                 {
@@ -1342,7 +1342,7 @@
                 },
                 {
                     "command": "git.pushToForce",
-                    "when": "config.git.allowForcePush",
+                    "when": "config.git_monolithic.allowForcePush",
                     "group": "3_push@4"
                 },
                 {
@@ -1472,13 +1472,13 @@
         "configuration": {
             "title": "Git Monolithic",
             "properties": {
-                "git-monolithic.enabled": {
+                "git_monolithic.enabled": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.enabled%",
                     "default": true
                 },
-                "git-monolithic.path": {
+                "git_monolithic.path": {
                     "type": [
                         "string",
                         "null",
@@ -1488,7 +1488,7 @@
                     "default": null,
                     "scope": "machine"
                 },
-                "git-monolithic.autoRepositoryDetection": {
+                "git_monolithic.autoRepositoryDetection": {
                     "type": [
                         "boolean",
                         "string"
@@ -1508,12 +1508,12 @@
                     "description": "%config.autoRepositoryDetection%",
                     "default": true
                 },
-                "git-monolithic.autorefresh": {
+                "git_monolithic.autorefresh": {
                     "type": "boolean",
                     "description": "%config.autorefresh%",
                     "default": true
                 },
-                "git-monolithic.autofetch": {
+                "git_monolithic.autofetch": {
                     "type": [
                         "boolean",
                         "string"
@@ -1530,28 +1530,28 @@
                         "usesOnlineServices"
                     ]
                 },
-                "git-monolithic.autofetchPeriod": {
+                "git_monolithic.autofetchPeriod": {
                     "type": "number",
                     "scope": "resource",
                     "markdownDescription": "%config.autofetchPeriod%",
                     "default": 180
                 },
-                "git-monolithic.branchValidationRegex": {
+                "git_monolithic.branchValidationRegex": {
                     "type": "string",
                     "description": "%config.branchValidationRegex%",
                     "default": ""
                 },
-                "git-monolithic.branchWhitespaceChar": {
+                "git_monolithic.branchWhitespaceChar": {
                     "type": "string",
                     "description": "%config.branchWhitespaceChar%",
                     "default": "-"
                 },
-                "git-monolithic.confirmSync": {
+                "git_monolithic.confirmSync": {
                     "type": "boolean",
                     "description": "%config.confirmSync%",
                     "default": true
                 },
-                "git-monolithic.countBadge": {
+                "git_monolithic.countBadge": {
                     "type": "string",
                     "enum": [
                         "all",
@@ -1567,7 +1567,7 @@
                     "default": "all",
                     "scope": "resource"
                 },
-                "git-monolithic.checkoutType": {
+                "git_monolithic.checkoutType": {
                     "type": "array",
                     "items": {
                         "type": "string",
@@ -1590,27 +1590,27 @@
                         "tags"
                     ]
                 },
-                "git-monolithic.ignoreLegacyWarning": {
+                "git_monolithic.ignoreLegacyWarning": {
                     "type": "boolean",
                     "description": "%config.ignoreLegacyWarning%",
                     "default": false
                 },
-                "git-monolithic.ignoreMissingGitWarning": {
+                "git_monolithic.ignoreMissingGitWarning": {
                     "type": "boolean",
                     "description": "%config.ignoreMissingGitWarning%",
                     "default": false
                 },
-                "git-monolithic.ignoreWindowsGit27Warning": {
+                "git_monolithic.ignoreWindowsGit27Warning": {
                     "type": "boolean",
                     "description": "%config.ignoreWindowsGit27Warning%",
                     "default": false
                 },
-                "git-monolithic.ignoreRebaseWarning": {
+                "git_monolithic.ignoreRebaseWarning": {
                     "type": "boolean",
                     "description": "%config.ignoreRebaseWarning%",
                     "default": false
                 },
-                "git-monolithic.defaultCloneDirectory": {
+                "git_monolithic.defaultCloneDirectory": {
                     "type": [
                         "string",
                         "null"
@@ -1619,13 +1619,13 @@
                     "scope": "machine",
                     "description": "%config.defaultCloneDirectory%"
                 },
-                "git-monolithic.enableSmartCommit": {
+                "git_monolithic.enableSmartCommit": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.enableSmartCommit%",
                     "default": false
                 },
-                "git-monolithic.smartCommitChanges": {
+                "git_monolithic.smartCommitChanges": {
                     "type": "string",
                     "enum": [
                         "all",
@@ -1639,42 +1639,42 @@
                     "description": "%config.smartCommitChanges%",
                     "default": "all"
                 },
-                "git-monolithic.suggestSmartCommit": {
+                "git_monolithic.suggestSmartCommit": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.suggestSmartCommit%",
                     "default": true
                 },
-                "git-monolithic.enableCommitSigning": {
+                "git_monolithic.enableCommitSigning": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.enableCommitSigning%",
                     "default": false
                 },
-                "git-monolithic.confirmEmptyCommits": {
+                "git_monolithic.confirmEmptyCommits": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.confirmEmptyCommits%",
                     "default": true
                 },
-                "git-monolithic.decorations.enabled": {
+                "git_monolithic.decorations.enabled": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.decorations.enabled%"
                 },
-                "git-monolithic.enableStatusBarSync": {
+                "git_monolithic.enableStatusBarSync": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.enableStatusBarSync%",
                     "scope": "resource"
                 },
-                "git-monolithic.followTagsWhenSync": {
+                "git_monolithic.followTagsWhenSync": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.followTagsWhenSync%"
                 },
-                "git-monolithic.promptToSaveFilesBeforeStash": {
+                "git_monolithic.promptToSaveFilesBeforeStash": {
                     "type": "string",
                     "enum": [
                         "always",
@@ -1690,7 +1690,7 @@
                     "default": "always",
                     "description": "%config.promptToSaveFilesBeforeStash%"
                 },
-                "git-monolithic.promptToSaveFilesBeforeCommit": {
+                "git_monolithic.promptToSaveFilesBeforeCommit": {
                     "type": "string",
                     "enum": [
                         "always",
@@ -1706,7 +1706,7 @@
                     "default": "always",
                     "description": "%config.promptToSaveFilesBeforeCommit%"
                 },
-                "git-monolithic.postCommitCommand": {
+                "git_monolithic.postCommitCommand": {
                     "type": "string",
                     "enum": [
                         "none",
@@ -1722,7 +1722,7 @@
                     "scope": "resource",
                     "default": "none"
                 },
-                "git-monolithic.openAfterClone": {
+                "git_monolithic.openAfterClone": {
                     "type": "string",
                     "enum": [
                         "always",
@@ -1739,17 +1739,17 @@
                     "default": "prompt",
                     "description": "%config.openAfterClone%"
                 },
-                "git-monolithic.showInlineOpenFileAction": {
+                "git_monolithic.showInlineOpenFileAction": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.showInlineOpenFileAction%"
                 },
-                "git-monolithic.showPushSuccessNotification": {
+                "git_monolithic.showPushSuccessNotification": {
                     "type": "boolean",
                     "description": "%config.showPushSuccessNotification%",
                     "default": false
                 },
-                "git-monolithic.inputValidation": {
+                "git_monolithic.inputValidation": {
                     "type": "string",
                     "enum": [
                         "always",
@@ -1759,12 +1759,12 @@
                     "default": "warn",
                     "description": "%config.inputValidation%"
                 },
-                "git-monolithic.inputValidationLength": {
+                "git_monolithic.inputValidationLength": {
                     "type": "number",
                     "default": 72,
                     "description": "%config.inputValidationLength%"
                 },
-                "git-monolithic.inputValidationSubjectLength": {
+                "git_monolithic.inputValidationSubjectLength": {
                     "type": [
                         "number",
                         "null"
@@ -1772,31 +1772,31 @@
                     "default": 50,
                     "description": "%config.inputValidationSubjectLength%"
                 },
-                "git-monolithic.detectSubmodules": {
+                "git_monolithic.detectSubmodules": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.detectSubmodules%"
                 },
-                "git-monolithic.detectSubmodulesLimit": {
+                "git_monolithic.detectSubmodulesLimit": {
                     "type": "number",
                     "scope": "resource",
                     "default": 10,
                     "description": "%config.detectSubmodulesLimit%"
                 },
-                "git-monolithic.alwaysSignOff": {
+                "git_monolithic.alwaysSignOff": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.alwaysSignOff%"
                 },
-                "git-monolithic.ignoreSubmodules": {
+                "git_monolithic.ignoreSubmodules": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.ignoreSubmodules%"
                 },
-                "git-monolithic.ignoredRepositories": {
+                "git_monolithic.ignoredRepositories": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1805,7 +1805,7 @@
                     "scope": "window",
                     "description": "%config.ignoredRepositories%"
                 },
-                "git-monolithic.scanRepositories": {
+                "git_monolithic.scanRepositories": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1814,80 +1814,80 @@
                     "scope": "resource",
                     "description": "%config.scanRepositories%"
                 },
-                "git-monolithic.showProgress": {
+                "git_monolithic.showProgress": {
                     "type": "boolean",
                     "description": "%config.showProgress%",
                     "default": true,
                     "scope": "resource"
                 },
-                "git-monolithic.rebaseWhenSync": {
+                "git_monolithic.rebaseWhenSync": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.rebaseWhenSync%"
                 },
-                "git-monolithic.fetchOnPull": {
+                "git_monolithic.fetchOnPull": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.fetchOnPull%"
                 },
-                "git-monolithic.pruneOnFetch": {
+                "git_monolithic.pruneOnFetch": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.pruneOnFetch%"
                 },
-                "git-monolithic.pullTags": {
+                "git_monolithic.pullTags": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.pullTags%"
                 },
-                "git-monolithic.autoStash": {
+                "git_monolithic.autoStash": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.autoStash%"
                 },
-                "git-monolithic.allowForcePush": {
+                "git_monolithic.allowForcePush": {
                     "type": "boolean",
                     "default": false,
                     "description": "%config.allowForcePush%"
                 },
-                "git-monolithic.useForcePushWithLease": {
+                "git_monolithic.useForcePushWithLease": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.useForcePushWithLease%"
                 },
-                "git-monolithic.confirmForcePush": {
+                "git_monolithic.confirmForcePush": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.confirmForcePush%"
                 },
-                "git-monolithic.allowNoVerifyCommit": {
+                "git_monolithic.allowNoVerifyCommit": {
                     "type": "boolean",
                     "default": false,
                     "description": "%config.allowNoVerifyCommit%"
                 },
-                "git-monolithic.confirmNoVerifyCommit": {
+                "git_monolithic.confirmNoVerifyCommit": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.confirmNoVerifyCommit%"
                 },
-                "git-monolithic.openDiffOnClick": {
+                "git_monolithic.openDiffOnClick": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.openDiffOnClick%"
                 },
-                "git-monolithic.supportCancellation": {
+                "git_monolithic.supportCancellation": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.supportCancellation%"
                 },
-                "git-monolithic.branchSortOrder": {
+                "git_monolithic.branchSortOrder": {
                     "type": "string",
                     "enum": [
                         "committerdate",
@@ -1896,30 +1896,30 @@
                     "default": "committerdate",
                     "description": "%config.branchSortOrder%"
                 },
-                "git-monolithic.requireGitUserConfig": {
+                "git_monolithic.requireGitUserConfig": {
                     "type": "boolean",
                     "description": "%config.requireGitUserConfig%",
                     "default": true
                 },
-                "git-monolithic.showCommitInput": {
+                "git_monolithic.showCommitInput": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.showCommitInput%"
                 },
-                "git-monolithic.terminalAuthentication": {
+                "git_monolithic.terminalAuthentication": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.terminalAuthentication%"
                 },
-                "git-monolithic.useCommitInputAsStashMessage": {
+                "git_monolithic.useCommitInputAsStashMessage": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.useCommitInputAsStashMessage%"
                 },
-                "git-monolithic.githubAuthentication": {
+                "git_monolithic.githubAuthentication": {
                     "deprecationMessage": "This setting is now deprecated, please use `github.gitAuthentication` instead."
                 }
             }

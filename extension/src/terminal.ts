@@ -31,5 +31,5 @@ export function registerTerminalEnvironmentManager(
         }
     }
 
-    return filterEvent(workspace.onDidChangeConfiguration, e => e.affectsConfiguration("git"))(refresh);
+    return filterEvent(workspace.onDidChangeConfiguration, e => config.affected(e))(refresh);
 }

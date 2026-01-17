@@ -3,13 +3,17 @@ import { type ConfigurationChangeEvent, type ConfigurationScope, workspace, type
 // TODO Consolidate SSOT for config
 
 function getExtensionConfig(scope?: ConfigurationScope): WorkspaceConfiguration {
-    return workspace.getConfiguration("git-monolithic", scope ?? null);
+    return workspace.getConfiguration("git_monolithic", scope ?? null);
 }
 
 function makeAffectedCheck(section: string): (e: ConfigurationChangeEvent, scope?: ConfigurationScope) => boolean {
-    return function affected(e, scope?: ConfigurationScope) {
-        return e.affectsConfiguration(section, scope);
+    return function affected(e, scope) {
+        return e.affectsConfiguration("git_monolithic." + section, scope);
     };
+}
+
+export function affected(e: ConfigurationChangeEvent, scope?: ConfigurationScope): boolean {
+    return e.affectsConfiguration("git_monolithic", scope);
 }
 
 /**
