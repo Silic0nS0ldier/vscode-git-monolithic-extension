@@ -1,7 +1,7 @@
 import { Uri } from "vscode";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as config from "../../../util/config.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function stageAll(repository: AbstractRepository): Promise<void> {
@@ -18,7 +18,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.stageAll",
+        commandId: makeCommandId("stageAll"),
         method: stageAll,
         options: {
             repository: true,

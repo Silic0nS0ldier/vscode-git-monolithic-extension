@@ -1,6 +1,6 @@
 import { Status } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function stageAllUntracked(repository: AbstractRepository): Promise<void> {
@@ -15,7 +15,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.stageAllUntracked",
+        commandId: makeCommandId("stageAllUntracked"),
         method: stageAllUntracked,
         options: {
             repository: true,

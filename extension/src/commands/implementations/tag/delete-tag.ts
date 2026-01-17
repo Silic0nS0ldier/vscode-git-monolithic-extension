@@ -2,7 +2,7 @@ import { type QuickPickItem, window } from "vscode";
 import { type Ref, RefType } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function deleteTag(repository: AbstractRepository): Promise<void> {
@@ -25,7 +25,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.deleteTag",
+        commandId: makeCommandId("deleteTag"),
         method: deleteTag,
         options: {
             repository: true,

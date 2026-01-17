@@ -2,7 +2,7 @@ import * as os from "node:os";
 import { Uri, window } from "vscode";
 import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(
     model: Model,
@@ -29,7 +29,7 @@ export function createCommand(
     }
 
     return {
-        commandId: "git.openRepository",
+        commandId: makeCommandId("openRepository"),
         method: openRepository,
         options: {
             repository: false,

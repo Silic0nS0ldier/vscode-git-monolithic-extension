@@ -1,7 +1,7 @@
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { sync as syncFn } from "./helper.js";
 
 export async function sync(repository: AbstractRepository, model: Model): Promise<void> {
@@ -22,7 +22,7 @@ export function createCommand(model: Model): ScmCommand {
     }
 
     return {
-        commandId: "git.sync",
+        commandId: makeCommandId("sync"),
         method: syncFn,
         options: {
             repository: true,

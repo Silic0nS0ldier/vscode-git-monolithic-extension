@@ -3,7 +3,7 @@ import { inspect } from "node:util";
 import { EndOfLine, type OutputChannel, Uri, window } from "vscode";
 import vsDiff from "vscode-diff";
 import { intersectDiffWithRange, toLineRanges } from "../../../staging.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { stageChanges } from "./helpers.js";
 import type { Model } from "../../../model.js";
 
@@ -96,7 +96,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
     }
 
     return {
-        commandId: "git.stageSelectedRanges",
+        commandId: makeCommandId("stageSelectedRanges"),
         method: stageSelectedRanges,
         options: {
             diff: true,

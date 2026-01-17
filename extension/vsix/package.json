@@ -30,443 +30,443 @@
     "contributes": {
         "commands": [
             {
-                "command": "git.stageSelectedRanges",
+                "command": "git_monolithic.stageSelectedRanges",
                 "title": "%command.stageSelectedRanges%",
                 "category": "Git"
             },
             {
-                "command": "git.setLogLevel",
+                "command": "git_monolithic.setLogLevel",
                 "title": "%command.setLogLevel%",
                 "category": "Git"
             },
             {
-                "command": "git.clone",
+                "command": "git_monolithic.clone",
                 "title": "%command.clone%",
                 "category": "Git"
             },
             {
-                "command": "git.cloneRecursive",
+                "command": "git_monolithic.cloneRecursive",
                 "title": "%command.cloneRecursive%",
                 "category": "Git"
             },
             {
-                "command": "git.init",
+                "command": "git_monolithic.init",
                 "title": "%command.init%",
                 "category": "Git",
                 "icon": "$(add)"
             },
             {
-                "command": "git.openRepository",
+                "command": "git_monolithic.openRepository",
                 "title": "%command.openRepository%",
                 "category": "Git"
             },
             {
-                "command": "git.close",
+                "command": "git_monolithic.close",
                 "title": "%command.close%",
                 "category": "Git"
             },
             {
-                "command": "git.refresh",
+                "command": "git_monolithic.refresh",
                 "title": "%command.refresh%",
                 "category": "Git",
                 "icon": "$(refresh)"
             },
             {
-                "command": "git.openChange",
+                "command": "git_monolithic.openChange",
                 "title": "%command.openChange%",
                 "category": "Git",
                 "icon": "$(compare-changes)"
             },
             {
-                "command": "git.openAllChanges",
+                "command": "git_monolithic.openAllChanges",
                 "title": "%command.openAllChanges%",
                 "category": "Git"
             },
             {
-                "command": "git.openFile",
+                "command": "git_monolithic.openFile",
                 "title": "%command.openFile%",
                 "category": "Git",
                 "icon": "$(go-to-file)"
             },
             {
-                "command": "git.openFile2",
+                "command": "git_monolithic.openFile2",
                 "title": "%command.openFile%",
                 "category": "Git",
                 "icon": "$(go-to-file)"
             },
             {
-                "command": "git.openHEADFile",
+                "command": "git_monolithic.openHEADFile",
                 "title": "%command.openHEADFile%",
                 "category": "Git"
             },
             {
-                "command": "git.stage",
+                "command": "git_monolithic.stage",
                 "title": "%command.stage%",
                 "category": "Git",
                 "icon": "$(add)"
             },
             {
-                "command": "git.stageAll",
+                "command": "git_monolithic.stageAll",
                 "title": "%command.stageAll%",
                 "category": "Git",
                 "icon": "$(add)"
             },
             {
-                "command": "git.stageAllTracked",
+                "command": "git_monolithic.stageAllTracked",
                 "title": "%command.stageAllTracked%",
                 "category": "Git",
                 "icon": "$(add)"
             },
             {
-                "command": "git.stageAllUntracked",
+                "command": "git_monolithic.stageAllUntracked",
                 "title": "%command.stageAllUntracked%",
                 "category": "Git",
                 "icon": "$(add)"
             },
             {
-                "command": "git.stageAllMerge",
+                "command": "git_monolithic.stageAllMerge",
                 "title": "%command.stageAllMerge%",
                 "category": "Git",
                 "icon": "$(add)"
             },
             {
-                "command": "git.unstage",
+                "command": "git_monolithic.unstage",
                 "title": "%command.unstage%",
                 "category": "Git",
                 "icon": "$(remove)"
             },
             {
-                "command": "git.unstageAll",
+                "command": "git_monolithic.unstageAll",
                 "title": "%command.unstageAll%",
                 "category": "Git",
                 "icon": "$(remove)"
             },
             {
-                "command": "git.clean",
+                "command": "git_monolithic.clean",
                 "title": "%command.clean%",
                 "category": "Git",
                 "icon": "$(discard)"
             },
             {
-                "command": "git.cleanAll",
+                "command": "git_monolithic.cleanAll",
                 "title": "%command.cleanAll%",
                 "category": "Git",
                 "icon": "$(discard)"
             },
             {
-                "command": "git.cleanAllTracked",
+                "command": "git_monolithic.cleanAllTracked",
                 "title": "%command.cleanAllTracked%",
                 "category": "Git",
                 "icon": "$(discard)"
             },
             {
-                "command": "git.cleanAllUntracked",
+                "command": "git_monolithic.cleanAllUntracked",
                 "title": "%command.cleanAllUntracked%",
                 "category": "Git",
                 "icon": "$(discard)"
             },
             {
-                "command": "git.rename",
+                "command": "git_monolithic.rename",
                 "title": "%command.rename%",
                 "category": "Git",
                 "icon": "$(discard)"
             },
             {
-                "command": "git.commit",
+                "command": "git_monolithic.commit",
                 "title": "%command.commit%",
                 "category": "Git",
                 "icon": "$(check)"
             },
             {
-                "command": "git.commitStaged",
+                "command": "git_monolithic.commitStaged",
                 "title": "%command.commitStaged%",
                 "category": "Git"
             },
             {
-                "command": "git.commitEmpty",
+                "command": "git_monolithic.commitEmpty",
                 "title": "%command.commitEmpty%",
                 "category": "Git"
             },
             {
-                "command": "git.commitStagedSigned",
+                "command": "git_monolithic.commitStagedSigned",
                 "title": "%command.commitStagedSigned%",
                 "category": "Git"
             },
             {
-                "command": "git.commitStagedAmend",
+                "command": "git_monolithic.commitStagedAmend",
                 "title": "%command.commitStagedAmend%",
                 "category": "Git"
             },
             {
-                "command": "git.commitAll",
+                "command": "git_monolithic.commitAll",
                 "title": "%command.commitAll%",
                 "category": "Git"
             },
             {
-                "command": "git.commitAllSigned",
+                "command": "git_monolithic.commitAllSigned",
                 "title": "%command.commitAllSigned%",
                 "category": "Git"
             },
             {
-                "command": "git.commitAllAmend",
+                "command": "git_monolithic.commitAllAmend",
                 "title": "%command.commitAllAmend%",
                 "category": "Git"
             },
             {
-                "command": "git.commitNoVerify",
+                "command": "git_monolithic.commitNoVerify",
                 "title": "%command.commitNoVerify%",
                 "category": "Git",
                 "icon": "$(check)"
             },
             {
-                "command": "git.commitStagedNoVerify",
+                "command": "git_monolithic.commitStagedNoVerify",
                 "title": "%command.commitStagedNoVerify%",
                 "category": "Git"
             },
             {
-                "command": "git.commitEmptyNoVerify",
+                "command": "git_monolithic.commitEmptyNoVerify",
                 "title": "%command.commitEmptyNoVerify%",
                 "category": "Git"
             },
             {
-                "command": "git.commitStagedSignedNoVerify",
+                "command": "git_monolithic.commitStagedSignedNoVerify",
                 "title": "%command.commitStagedSignedNoVerify%",
                 "category": "Git"
             },
             {
-                "command": "git.commitStagedAmendNoVerify",
+                "command": "git_monolithic.commitStagedAmendNoVerify",
                 "title": "%command.commitStagedAmendNoVerify%",
                 "category": "Git"
             },
             {
-                "command": "git.commitAllNoVerify",
+                "command": "git_monolithic.commitAllNoVerify",
                 "title": "%command.commitAllNoVerify%",
                 "category": "Git"
             },
             {
-                "command": "git.commitAllSignedNoVerify",
+                "command": "git_monolithic.commitAllSignedNoVerify",
                 "title": "%command.commitAllSignedNoVerify%",
                 "category": "Git"
             },
             {
-                "command": "git.commitAllAmendNoVerify",
+                "command": "git_monolithic.commitAllAmendNoVerify",
                 "title": "%command.commitAllAmendNoVerify%",
                 "category": "Git"
             },
             {
-                "command": "git.restoreCommitTemplate",
+                "command": "git_monolithic.restoreCommitTemplate",
                 "title": "%command.restoreCommitTemplate%",
                 "category": "Git"
             },
             {
-                "command": "git.undoCommit",
+                "command": "git_monolithic.undoCommit",
                 "title": "%command.undoCommit%",
                 "category": "Git"
             },
             {
-                "command": "git.checkout",
+                "command": "git_monolithic.checkout",
                 "title": "%command.checkout%",
                 "category": "Git"
             },
             {
-                "command": "git.checkoutDetached",
+                "command": "git_monolithic.checkoutDetached",
                 "title": "%command.checkoutDetached%",
                 "category": "Git"
             },
             {
-                "command": "git.branch",
+                "command": "git_monolithic.branch",
                 "title": "%command.branch%",
                 "category": "Git"
             },
             {
-                "command": "git.branchFrom",
+                "command": "git_monolithic.branchFrom",
                 "title": "%command.branchFrom%",
                 "category": "Git"
             },
             {
-                "command": "git.deleteBranch",
+                "command": "git_monolithic.deleteBranch",
                 "title": "%command.deleteBranch%",
                 "category": "Git"
             },
             {
-                "command": "git.renameBranch",
+                "command": "git_monolithic.renameBranch",
                 "title": "%command.renameBranch%",
                 "category": "Git"
             },
             {
-                "command": "git.merge",
+                "command": "git_monolithic.merge",
                 "title": "%command.merge%",
                 "category": "Git"
             },
             {
-                "command": "git.rebase",
+                "command": "git_monolithic.rebase",
                 "title": "%command.rebase%",
                 "category": "Git"
             },
             {
-                "command": "git.createTag",
+                "command": "git_monolithic.createTag",
                 "title": "%command.createTag%",
                 "category": "Git"
             },
             {
-                "command": "git.deleteTag",
+                "command": "git_monolithic.deleteTag",
                 "title": "%command.deleteTag%",
                 "category": "Git"
             },
             {
-                "command": "git.fetch",
+                "command": "git_monolithic.fetch",
                 "title": "%command.fetch%",
                 "category": "Git"
             },
             {
-                "command": "git.fetchPrune",
+                "command": "git_monolithic.fetchPrune",
                 "title": "%command.fetchPrune%",
                 "category": "Git"
             },
             {
-                "command": "git.fetchAll",
+                "command": "git_monolithic.fetchAll",
                 "title": "%command.fetchAll%",
                 "category": "Git"
             },
             {
-                "command": "git.pull",
+                "command": "git_monolithic.pull",
                 "title": "%command.pull%",
                 "category": "Git"
             },
             {
-                "command": "git.pullRebase",
+                "command": "git_monolithic.pullRebase",
                 "title": "%command.pullRebase%",
                 "category": "Git"
             },
             {
-                "command": "git.pullFrom",
+                "command": "git_monolithic.pullFrom",
                 "title": "%command.pullFrom%",
                 "category": "Git"
             },
             {
-                "command": "git.push",
+                "command": "git_monolithic.push",
                 "title": "%command.push%",
                 "category": "Git"
             },
             {
-                "command": "git.pushForce",
+                "command": "git_monolithic.pushForce",
                 "title": "%command.pushForce%",
                 "category": "Git"
             },
             {
-                "command": "git.pushTo",
+                "command": "git_monolithic.pushTo",
                 "title": "%command.pushTo%",
                 "category": "Git"
             },
             {
-                "command": "git.pushToForce",
+                "command": "git_monolithic.pushToForce",
                 "title": "%command.pushToForce%",
                 "category": "Git"
             },
             {
-                "command": "git.pushTags",
+                "command": "git_monolithic.pushTags",
                 "title": "%command.pushTags%",
                 "category": "Git"
             },
             {
-                "command": "git.pushWithTags",
+                "command": "git_monolithic.pushWithTags",
                 "title": "%command.pushFollowTags%",
                 "category": "Git"
             },
             {
-                "command": "git.pushWithTagsForce",
+                "command": "git_monolithic.pushWithTagsForce",
                 "title": "%command.pushFollowTagsForce%",
                 "category": "Git"
             },
             {
-                "command": "git.cherryPick",
+                "command": "git_monolithic.cherryPick",
                 "title": "%command.cherryPick%",
                 "category": "Git"
             },
             {
-                "command": "git.addRemote",
+                "command": "git_monolithic.addRemote",
                 "title": "%command.addRemote%",
                 "category": "Git"
             },
             {
-                "command": "git.removeRemote",
+                "command": "git_monolithic.removeRemote",
                 "title": "%command.removeRemote%",
                 "category": "Git"
             },
             {
-                "command": "git.sync",
+                "command": "git_monolithic.sync",
                 "title": "%command.sync%",
                 "category": "Git"
             },
             {
-                "command": "git.syncRebase",
+                "command": "git_monolithic.syncRebase",
                 "title": "%command.syncRebase%",
                 "category": "Git"
             },
             {
-                "command": "git.publish",
+                "command": "git_monolithic.publish",
                 "title": "%command.publish%",
                 "category": "Git"
             },
             {
-                "command": "git.showOutput",
+                "command": "git_monolithic.showOutput",
                 "title": "%command.showOutput%",
                 "category": "Git"
             },
             {
-                "command": "git.ignore",
+                "command": "git_monolithic.ignore",
                 "title": "%command.ignore%",
                 "category": "Git"
             },
             {
-                "command": "git.revealInExplorer",
+                "command": "git_monolithic.revealInExplorer",
                 "title": "%command.revealInExplorer%",
                 "category": "Git"
             },
             {
-                "command": "git.stashIncludeUntracked",
+                "command": "git_monolithic.stashIncludeUntracked",
                 "title": "%command.stashIncludeUntracked%",
                 "category": "Git"
             },
             {
-                "command": "git.stash",
+                "command": "git_monolithic.stash",
                 "title": "%command.stash%",
                 "category": "Git"
             },
             {
-                "command": "git.stashPop",
+                "command": "git_monolithic.stashPop",
                 "title": "%command.stashPop%",
                 "category": "Git"
             },
             {
-                "command": "git.stashPopLatest",
+                "command": "git_monolithic.stashPopLatest",
                 "title": "%command.stashPopLatest%",
                 "category": "Git"
             },
             {
-                "command": "git.stashApply",
+                "command": "git_monolithic.stashApply",
                 "title": "%command.stashApply%",
                 "category": "Git"
             },
             {
-                "command": "git.stashApplyLatest",
+                "command": "git_monolithic.stashApplyLatest",
                 "title": "%command.stashApplyLatest%",
                 "category": "Git"
             },
             {
-                "command": "git.stashDrop",
+                "command": "git_monolithic.stashDrop",
                 "title": "%command.stashDrop%",
                 "category": "Git"
             },
             {
-                "command": "git.rebaseAbort",
+                "command": "git_monolithic.rebaseAbort",
                 "title": "%command.rebaseAbort%",
                 "category": "Git"
             }
         ],
         "keybindings": [
             {
-                "command": "git.stageSelectedRanges",
+                "command": "git_monolithic.stageSelectedRanges",
                 "key": "ctrl+k ctrl+alt+s",
                 "mac": "cmd+k cmd+alt+s",
                 "when": "isInDiffEditor"
@@ -475,358 +475,358 @@
         "menus": {
             "commandPalette": [
                 {
-                    "command": "git.stageSelectedRanges",
+                    "command": "git_monolithic.stageSelectedRanges",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.setLogLevel",
+                    "command": "git_monolithic.setLogLevel",
                     "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
-                    "command": "git.clone",
+                    "command": "git_monolithic.clone",
                     "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
-                    "command": "git.cloneRecursive",
+                    "command": "git_monolithic.cloneRecursive",
                     "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
-                    "command": "git.init",
+                    "command": "git_monolithic.init",
                     "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
-                    "command": "git.openRepository",
+                    "command": "git_monolithic.openRepository",
                     "when": "config.git_monolithic.enabled && !git.missing"
                 },
                 {
-                    "command": "git.close",
+                    "command": "git_monolithic.close",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.refresh",
+                    "command": "git_monolithic.refresh",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.openFile",
+                    "command": "git_monolithic.openFile",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.openHEADFile",
+                    "command": "git_monolithic.openHEADFile",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && resourcePath in git.changedResources"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stageAll",
+                    "command": "git_monolithic.stageAll",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stageAllTracked",
+                    "command": "git_monolithic.stageAllTracked",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stageAllUntracked",
+                    "command": "git_monolithic.stageAllUntracked",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stageAllMerge",
+                    "command": "git_monolithic.stageAllMerge",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.openFile2",
+                    "command": "git_monolithic.openFile2",
                     "when": "false"
                 },
                 {
-                    "command": "git.unstage",
+                    "command": "git_monolithic.unstage",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.unstageAll",
+                    "command": "git_monolithic.unstageAll",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.cleanAll",
+                    "command": "git_monolithic.cleanAll",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.cleanAllTracked",
+                    "command": "git_monolithic.cleanAllTracked",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.cleanAllUntracked",
+                    "command": "git_monolithic.cleanAllUntracked",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.rename",
+                    "command": "git_monolithic.rename",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && resourceScheme == file"
                 },
                 {
-                    "command": "git.commit",
+                    "command": "git_monolithic.commit",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitStaged",
+                    "command": "git_monolithic.commitStaged",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitEmpty",
+                    "command": "git_monolithic.commitEmpty",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitStagedSigned",
+                    "command": "git_monolithic.commitStagedSigned",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitStagedAmend",
+                    "command": "git_monolithic.commitStagedAmend",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitAll",
+                    "command": "git_monolithic.commitAll",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitAllSigned",
+                    "command": "git_monolithic.commitAllSigned",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitAllAmend",
+                    "command": "git_monolithic.commitAllAmend",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.rebaseAbort",
+                    "command": "git_monolithic.rebaseAbort",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && gitRebaseInProgress"
                 },
                 {
-                    "command": "git.commitNoVerify",
+                    "command": "git_monolithic.commitNoVerify",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitStagedNoVerify",
+                    "command": "git_monolithic.commitStagedNoVerify",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitEmptyNoVerify",
+                    "command": "git_monolithic.commitEmptyNoVerify",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitStagedSignedNoVerify",
+                    "command": "git_monolithic.commitStagedSignedNoVerify",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitStagedAmendNoVerify",
+                    "command": "git_monolithic.commitStagedAmendNoVerify",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitAllNoVerify",
+                    "command": "git_monolithic.commitAllNoVerify",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitAllSignedNoVerify",
+                    "command": "git_monolithic.commitAllSignedNoVerify",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.commitAllAmendNoVerify",
+                    "command": "git_monolithic.commitAllAmendNoVerify",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowNoVerifyCommit && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.restoreCommitTemplate",
+                    "command": "git_monolithic.restoreCommitTemplate",
                     "when": "false"
                 },
                 {
-                    "command": "git.revealInExplorer",
+                    "command": "git_monolithic.revealInExplorer",
                     "when": "false"
                 },
                 {
-                    "command": "git.undoCommit",
+                    "command": "git_monolithic.undoCommit",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.checkout",
+                    "command": "git_monolithic.checkout",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.branch",
+                    "command": "git_monolithic.branch",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.branchFrom",
+                    "command": "git_monolithic.branchFrom",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.deleteBranch",
+                    "command": "git_monolithic.deleteBranch",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.renameBranch",
+                    "command": "git_monolithic.renameBranch",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.cherryPick",
+                    "command": "git_monolithic.cherryPick",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pull",
+                    "command": "git_monolithic.pull",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pullFrom",
+                    "command": "git_monolithic.pullFrom",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pullRebase",
+                    "command": "git_monolithic.pullRebase",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.merge",
+                    "command": "git_monolithic.merge",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.rebase",
+                    "command": "git_monolithic.rebase",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.createTag",
+                    "command": "git_monolithic.createTag",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.deleteTag",
+                    "command": "git_monolithic.deleteTag",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.fetch",
+                    "command": "git_monolithic.fetch",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.fetchPrune",
+                    "command": "git_monolithic.fetchPrune",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.fetchAll",
+                    "command": "git_monolithic.fetchAll",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.push",
+                    "command": "git_monolithic.push",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pushForce",
+                    "command": "git_monolithic.pushForce",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowForcePush && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pushTo",
+                    "command": "git_monolithic.pushTo",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pushToForce",
+                    "command": "git_monolithic.pushToForce",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowForcePush && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pushWithTags",
+                    "command": "git_monolithic.pushWithTags",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pushWithTagsForce",
+                    "command": "git_monolithic.pushWithTagsForce",
                     "when": "config.git_monolithic.enabled && !git.missing && config.git_monolithic.allowForcePush && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.pushTags",
+                    "command": "git_monolithic.pushTags",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.addRemote",
+                    "command": "git_monolithic.addRemote",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.removeRemote",
+                    "command": "git_monolithic.removeRemote",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.sync",
+                    "command": "git_monolithic.sync",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.syncRebase",
+                    "command": "git_monolithic.syncRebase",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.publish",
+                    "command": "git_monolithic.publish",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.showOutput",
+                    "command": "git_monolithic.showOutput",
                     "when": "config.git_monolithic.enabled"
                 },
                 {
-                    "command": "git.ignore",
+                    "command": "git_monolithic.ignore",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stashIncludeUntracked",
+                    "command": "git_monolithic.stashIncludeUntracked",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stash",
+                    "command": "git_monolithic.stash",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stashPop",
+                    "command": "git_monolithic.stashPop",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stashPopLatest",
+                    "command": "git_monolithic.stashPopLatest",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stashApply",
+                    "command": "git_monolithic.stashApply",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stashApplyLatest",
+                    "command": "git_monolithic.stashApplyLatest",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 },
                 {
-                    "command": "git.stashDrop",
+                    "command": "git_monolithic.stashDrop",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0"
                 }
             ],
             "scm/title": [
                 {
-                    "command": "git.commit",
+                    "command": "git_monolithic.commit",
                     "group": "navigation",
                     "when": "scmProvider == git"
                 },
                 {
-                    "command": "git.refresh",
+                    "command": "git_monolithic.refresh",
                     "group": "navigation",
                     "when": "scmProvider == git"
                 },
                 {
-                    "command": "git.pull",
+                    "command": "git_monolithic.pull",
                     "group": "1_header@1",
                     "when": "scmProvider == git"
                 },
                 {
-                    "command": "git.push",
+                    "command": "git_monolithic.push",
                     "group": "1_header@2",
                     "when": "scmProvider == git"
                 },
                 {
-                    "command": "git.clone",
+                    "command": "git_monolithic.clone",
                     "group": "1_header@3",
                     "when": "scmProvider == git"
                 },
                 {
-                    "command": "git.checkout",
+                    "command": "git_monolithic.checkout",
                     "group": "1_header@4",
                     "when": "scmProvider == git"
                 },
@@ -866,575 +866,575 @@
                     "when": "scmProvider == git"
                 },
                 {
-                    "command": "git.showOutput",
+                    "command": "git_monolithic.showOutput",
                     "group": "3_footer",
                     "when": "scmProvider == git"
                 }
             ],
             "scm/sourceControl": [
                 {
-                    "command": "git.close",
+                    "command": "git_monolithic.close",
                     "group": "navigation",
                     "when": "scmProvider == git"
                 }
             ],
             "scm/resourceGroup/context": [
                 {
-                    "command": "git.stageAllMerge",
+                    "command": "git_monolithic.stageAllMerge",
                     "when": "scmProvider == git && scmResourceGroup == merge",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.stageAllMerge",
+                    "command": "git_monolithic.stageAllMerge",
                     "when": "scmProvider == git && scmResourceGroup == merge",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.unstageAll",
+                    "command": "git_monolithic.unstageAll",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.unstageAll",
+                    "command": "git_monolithic.unstageAll",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.cleanAllTracked",
+                    "command": "git_monolithic.cleanAllTracked",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.stageAllTracked",
+                    "command": "git_monolithic.stageAllTracked",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.cleanAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
-                    "group": "inline@2"
-                },
-                {
-                    "command": "git.stageAllTracked",
+                    "command": "git_monolithic.cleanAllTracked",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.cleanAllUntracked",
+                    "command": "git_monolithic.stageAllTracked",
+                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "git_monolithic.cleanAllUntracked",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.stageAllUntracked",
+                    "command": "git_monolithic.stageAllUntracked",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.cleanAllUntracked",
+                    "command": "git_monolithic.cleanAllUntracked",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.stageAllUntracked",
+                    "command": "git_monolithic.stageAllUntracked",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "inline@2"
                 }
             ],
             "scm/resourceFolder/context": [
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == merge",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == merge",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.unstage",
+                    "command": "git_monolithic.unstage",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.unstage",
+                    "command": "git_monolithic.unstage",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.ignore",
+                    "command": "git_monolithic.ignore",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification@3"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.ignore",
+                    "command": "git_monolithic.ignore",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "1_modification@3"
                 }
             ],
             "scm/resourceState/context": [
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == merge",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.openFile",
+                    "command": "git_monolithic.openFile",
                     "when": "scmProvider == git && scmResourceGroup == merge",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == merge",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.revealInExplorer",
+                    "command": "git_monolithic.revealInExplorer",
                     "when": "scmProvider == git && scmResourceGroup == merge",
                     "group": "2_view"
                 },
                 {
-                    "command": "git.openFile2",
+                    "command": "git_monolithic.openFile2",
                     "when": "scmProvider == git && scmResourceGroup == merge && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "when": "scmProvider == git && scmResourceGroup == merge && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.openFile",
+                    "command": "git_monolithic.openFile",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.openHEADFile",
+                    "command": "git_monolithic.openHEADFile",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.unstage",
+                    "command": "git_monolithic.unstage",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.unstage",
+                    "command": "git_monolithic.unstage",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.revealInExplorer",
+                    "command": "git_monolithic.revealInExplorer",
                     "when": "scmProvider == git && scmResourceGroup == index",
                     "group": "2_view"
                 },
                 {
-                    "command": "git.openFile2",
+                    "command": "git_monolithic.openFile2",
                     "when": "scmProvider == git && scmResourceGroup == index && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "when": "scmProvider == git && scmResourceGroup == index && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.openHEADFile",
+                    "command": "git_monolithic.openHEADFile",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.openFile",
+                    "command": "git_monolithic.openFile",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.openFile2",
+                    "command": "git_monolithic.openFile2",
                     "when": "scmProvider == git && scmResourceGroup == tracked && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "when": "scmProvider == git && scmResourceGroup == tracked && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
-                    "command": "git.ignore",
+                    "command": "git_monolithic.ignore",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "1_modification@3"
                 },
                 {
-                    "command": "git.revealInExplorer",
+                    "command": "git_monolithic.revealInExplorer",
                     "when": "scmProvider == git && scmResourceGroup == tracked",
                     "group": "2_view"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.openHEADFile",
+                    "command": "git_monolithic.openHEADFile",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.openFile",
+                    "command": "git_monolithic.openFile",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "navigation"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "scmProvider == git && scmResourceGroup == untracked && !gitFreshRepository",
                     "group": "1_modification"
                 },
                 {
-                    "command": "git.clean",
+                    "command": "git_monolithic.clean",
                     "when": "scmProvider == git && scmResourceGroup == untracked && !gitFreshRepository",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.stage",
+                    "command": "git_monolithic.stage",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "inline@2"
                 },
                 {
-                    "command": "git.openFile2",
+                    "command": "git_monolithic.openFile2",
                     "when": "scmProvider == git && scmResourceGroup == untracked && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "when": "scmProvider == git && scmResourceGroup == untracked && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
-                    "command": "git.ignore",
+                    "command": "git_monolithic.ignore",
                     "when": "scmProvider == git && scmResourceGroup == untracked",
                     "group": "1_modification@3"
                 }
             ],
             "editor/title": [
                 {
-                    "command": "git.stageSelectedRanges",
+                    "command": "git_monolithic.stageSelectedRanges",
                     "group": "2_git@1",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 },
                 {
-                    "command": "git.openFile",
+                    "command": "git_monolithic.openFile",
                     "group": "navigation",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 },
                 {
-                    "command": "git.openFile",
+                    "command": "git_monolithic.openFile",
                     "group": "navigation",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInNotebookTextDiffEditor && resourceScheme =~ /^git$|^file$/"
                 },
                 {
-                    "command": "git.openChange",
+                    "command": "git_monolithic.openChange",
                     "group": "navigation",
                     "when": "config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && !isInDiffEditor && resourceScheme == file && resourcePath in git.changedResources"
                 }
             ],
             "editor/context": [
                 {
-                    "command": "git.stageSelectedRanges",
+                    "command": "git_monolithic.stageSelectedRanges",
                     "group": "2_git@1",
                     "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git_monolithic.enabled && !git.missing && gitOpenRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 }
             ],
             "git.commit": [
                 {
-                    "command": "git.commit",
+                    "command": "git_monolithic.commit",
                     "group": "1_commit@1"
                 },
                 {
-                    "command": "git.commitStaged",
+                    "command": "git_monolithic.commitStaged",
                     "group": "1_commit@2"
                 },
                 {
-                    "command": "git.commitAll",
+                    "command": "git_monolithic.commitAll",
                     "group": "1_commit@3"
                 },
                 {
-                    "command": "git.undoCommit",
+                    "command": "git_monolithic.undoCommit",
                     "group": "1_commit@4"
                 },
                 {
-                    "command": "git.rebaseAbort",
+                    "command": "git_monolithic.rebaseAbort",
                     "group": "1_commit@5"
                 },
                 {
-                    "command": "git.commitNoVerify",
+                    "command": "git_monolithic.commitNoVerify",
                     "group": "1_commit@6",
                     "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
-                    "command": "git.commitStagedNoVerify",
+                    "command": "git_monolithic.commitStagedNoVerify",
                     "group": "1_commit@7",
                     "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
-                    "command": "git.commitAllNoVerify",
+                    "command": "git_monolithic.commitAllNoVerify",
                     "group": "1_commit@8",
                     "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
-                    "command": "git.commitStagedAmend",
+                    "command": "git_monolithic.commitStagedAmend",
                     "group": "2_amend@1"
                 },
                 {
-                    "command": "git.commitAllAmend",
+                    "command": "git_monolithic.commitAllAmend",
                     "group": "2_amend@2"
                 },
                 {
-                    "command": "git.commitStagedAmendNoVerify",
+                    "command": "git_monolithic.commitStagedAmendNoVerify",
                     "group": "2_amend@3",
                     "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
-                    "command": "git.commitAllAmendNoVerify",
+                    "command": "git_monolithic.commitAllAmendNoVerify",
                     "group": "2_amend@4",
                     "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
-                    "command": "git.commitStagedSigned",
+                    "command": "git_monolithic.commitStagedSigned",
                     "group": "3_signoff@1"
                 },
                 {
-                    "command": "git.commitAllSigned",
+                    "command": "git_monolithic.commitAllSigned",
                     "group": "3_signoff@2"
                 },
                 {
-                    "command": "git.commitStagedSignedNoVerify",
+                    "command": "git_monolithic.commitStagedSignedNoVerify",
                     "group": "3_signoff@3",
                     "when": "config.git_monolithic.allowNoVerifyCommit"
                 },
                 {
-                    "command": "git.commitAllSignedNoVerify",
+                    "command": "git_monolithic.commitAllSignedNoVerify",
                     "group": "3_signoff@4",
                     "when": "config.git_monolithic.allowNoVerifyCommit"
                 }
             ],
             "git.changes": [
                 {
-                    "command": "git.stageAll",
+                    "command": "git_monolithic.stageAll",
                     "group": "changes@1"
                 },
                 {
-                    "command": "git.unstageAll",
+                    "command": "git_monolithic.unstageAll",
                     "group": "changes@2"
                 },
                 {
-                    "command": "git.cleanAll",
+                    "command": "git_monolithic.cleanAll",
                     "group": "changes@3"
                 }
             ],
             "git.pullpush": [
                 {
-                    "command": "git.sync",
+                    "command": "git_monolithic.sync",
                     "group": "1_sync@1"
                 },
                 {
-                    "command": "git.syncRebase",
+                    "command": "git_monolithic.syncRebase",
                     "when": "gitState == idle",
                     "group": "1_sync@2"
                 },
                 {
-                    "command": "git.pull",
+                    "command": "git_monolithic.pull",
                     "group": "2_pull@1"
                 },
                 {
-                    "command": "git.pullRebase",
+                    "command": "git_monolithic.pullRebase",
                     "group": "2_pull@2"
                 },
                 {
-                    "command": "git.pullFrom",
+                    "command": "git_monolithic.pullFrom",
                     "group": "2_pull@3"
                 },
                 {
-                    "command": "git.push",
+                    "command": "git_monolithic.push",
                     "group": "3_push@1"
                 },
                 {
-                    "command": "git.pushForce",
+                    "command": "git_monolithic.pushForce",
                     "when": "config.git_monolithic.allowForcePush",
                     "group": "3_push@2"
                 },
                 {
-                    "command": "git.pushTo",
+                    "command": "git_monolithic.pushTo",
                     "group": "3_push@3"
                 },
                 {
-                    "command": "git.pushToForce",
+                    "command": "git_monolithic.pushToForce",
                     "when": "config.git_monolithic.allowForcePush",
                     "group": "3_push@4"
                 },
                 {
-                    "command": "git.fetch",
+                    "command": "git_monolithic.fetch",
                     "group": "4_fetch@1"
                 },
                 {
-                    "command": "git.fetchPrune",
+                    "command": "git_monolithic.fetchPrune",
                     "group": "4_fetch@2"
                 },
                 {
-                    "command": "git.fetchAll",
+                    "command": "git_monolithic.fetchAll",
                     "group": "4_fetch@3"
                 }
             ],
             "git.branch": [
                 {
-                    "command": "git.merge",
+                    "command": "git_monolithic.merge",
                     "group": "branch@1"
                 },
                 {
-                    "command": "git.rebase",
+                    "command": "git_monolithic.rebase",
                     "group": "branch@2"
                 },
                 {
-                    "command": "git.branch",
+                    "command": "git_monolithic.branch",
                     "group": "branch@3"
                 },
                 {
-                    "command": "git.branchFrom",
+                    "command": "git_monolithic.branchFrom",
                     "group": "branch@4"
                 },
                 {
-                    "command": "git.renameBranch",
+                    "command": "git_monolithic.renameBranch",
                     "group": "branch@5"
                 },
                 {
-                    "command": "git.deleteBranch",
+                    "command": "git_monolithic.deleteBranch",
                     "group": "branch@6"
                 },
                 {
-                    "command": "git.publish",
+                    "command": "git_monolithic.publish",
                     "group": "branch@7"
                 }
             ],
             "git.remotes": [
                 {
-                    "command": "git.addRemote",
+                    "command": "git_monolithic.addRemote",
                     "group": "remote@1"
                 },
                 {
-                    "command": "git.removeRemote",
+                    "command": "git_monolithic.removeRemote",
                     "group": "remote@2"
                 }
             ],
             "git.stash": [
                 {
-                    "command": "git.stash",
+                    "command": "git_monolithic.stash",
                     "group": "stash@1"
                 },
                 {
-                    "command": "git.stashIncludeUntracked",
+                    "command": "git_monolithic.stashIncludeUntracked",
                     "group": "stash@2"
                 },
                 {
-                    "command": "git.stashApplyLatest",
+                    "command": "git_monolithic.stashApplyLatest",
                     "group": "stash@3"
                 },
                 {
-                    "command": "git.stashApply",
+                    "command": "git_monolithic.stashApply",
                     "group": "stash@4"
                 },
                 {
-                    "command": "git.stashPopLatest",
+                    "command": "git_monolithic.stashPopLatest",
                     "group": "stash@5"
                 },
                 {
-                    "command": "git.stashPop",
+                    "command": "git_monolithic.stashPop",
                     "group": "stash@6"
                 },
                 {
-                    "command": "git.stashDrop",
+                    "command": "git_monolithic.stashDrop",
                     "group": "stash@7"
                 }
             ],
             "git.tags": [
                 {
-                    "command": "git.createTag",
+                    "command": "git_monolithic.createTag",
                     "group": "tags@1"
                 },
                 {
-                    "command": "git.deleteTag",
+                    "command": "git_monolithic.deleteTag",
                     "group": "tags@2"
                 }
             ]

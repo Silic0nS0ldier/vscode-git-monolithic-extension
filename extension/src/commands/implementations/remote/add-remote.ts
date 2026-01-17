@@ -3,7 +3,7 @@ import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import { pickRemoteSource } from "../../../remoteSource.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export async function addRemote(
     model: Model,
@@ -52,7 +52,7 @@ export function createCommand(
     }
 
     return {
-        commandId: "git.addRemote",
+        commandId: makeCommandId("addRemote"),
         method: addRemoteFn,
         options: {
             repository: true,

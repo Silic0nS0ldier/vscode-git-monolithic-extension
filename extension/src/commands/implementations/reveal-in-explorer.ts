@@ -1,6 +1,6 @@
 import { commands, Uri } from "vscode";
 import type { Resource } from "../../repository/Resource.js";
-import type { ScmCommand } from "../helpers.js";
+import { makeCommandId, type ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function revealInExplorer(resourceState: Resource): Promise<void> {
@@ -16,7 +16,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.revealInExplorer",
+        commandId: makeCommandId("revealInExplorer"),
         method: revealInExplorer,
         options: {},
     };

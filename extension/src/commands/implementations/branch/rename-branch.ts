@@ -3,7 +3,7 @@ import { GitErrorCodes } from "../../../api/git.js";
 import { GitError } from "../../../git/error.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { promptForBranchName } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
@@ -37,7 +37,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.renameBranch",
+        commandId: makeCommandId("renameBranch"),
         method: renameBranch,
         options: {
             repository: true,

@@ -2,7 +2,7 @@ import { type OutputChannel, Uri } from "vscode";
 import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
 
 export function createCommand(
@@ -37,7 +37,7 @@ export function createCommand(
     }
 
     return {
-        commandId: "git.unstage",
+        commandId: makeCommandId("unstage"),
         method: unstage,
         options: {},
     };

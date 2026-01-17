@@ -3,7 +3,7 @@ import { type Branch, type Ref, RefType } from "../../api/git.js";
 import * as i18n from "../../i18n/mod.js";
 import type { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
 import * as config from "../../util/config.js";
-import type { ScmCommand } from "../helpers.js";
+import { makeCommandId, type ScmCommand } from "../helpers.js";
 
 class MergeItem implements QuickPickItem {
     get label(): string {
@@ -45,7 +45,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.merge",
+        commandId: makeCommandId("merge"),
         method: merge,
         options: {
             repository: true,

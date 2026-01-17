@@ -118,3 +118,7 @@ export class CommandErrorOutputTextDocumentContentProvider implements TextDocume
         return this.#items.get(uri.path);
     }
 }
+
+export function makeCommandId(command: string): string {
+    return "git_monolithic." + command;
+}

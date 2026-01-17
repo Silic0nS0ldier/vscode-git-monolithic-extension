@@ -4,7 +4,7 @@ import { GitError } from "../../../git/error.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { isExpectedError } from "../../../util/is-expected-error.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { branch } from "../branch/helpers.js";
 import { CreateBranchFromItem, CreateBranchItem } from "../branch/quick-pick.js";
 import { cleanAll } from "../clean/clean-all.js";
@@ -95,7 +95,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.checkout",
+        commandId: makeCommandId("checkout"),
         method: checkoutFn,
         options: {
             repository: true,

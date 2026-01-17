@@ -4,7 +4,7 @@ import type { RemoteSourceProvider } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { addRemote as addRemoteFn } from "../remote/add-remote.js";
 import { AddRemoteItem } from "./quick-pick.js";
 
@@ -87,7 +87,7 @@ export function createCommand(model: Model): ScmCommand {
     }
 
     return {
-        commandId: "git.publish",
+        commandId: makeCommandId("publish"),
         method: publishFn,
         options: {
             repository: true,

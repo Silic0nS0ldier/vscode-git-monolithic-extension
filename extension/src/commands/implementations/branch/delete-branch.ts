@@ -4,7 +4,7 @@ import { GitError } from "../../../git/error.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { isExpectedError } from "../../../util/is-expected-error.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 class BranchDeleteItem implements QuickPickItem {
     get #shortCommit(): string {
@@ -73,7 +73,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.deleteBranch",
+        commandId: makeCommandId("deleteBranch"),
         method: deleteBranch,
         options: {
             repository: true,

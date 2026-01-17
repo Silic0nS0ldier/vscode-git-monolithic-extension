@@ -3,7 +3,7 @@ import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { Resource } from "../../../repository/Resource.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
@@ -44,7 +44,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.stageAllMerge",
+        commandId: makeCommandId("stageAllMerge"),
         method: stageAllMerge,
         options: {
             repository: true,

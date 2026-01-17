@@ -1,8 +1,7 @@
 import { type OutputChannel, Uri } from "vscode";
 import type { Model } from "../../model.js";
 import { Resource } from "../../repository/Resource.js";
-import type { ScmCommand } from "../helpers.js";
-import { getSCMResource, runByRepository } from "../helpers.js";
+import { getSCMResource, makeCommandId, runByRepository, type ScmCommand } from "../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
     async function ignore(...resourceStates: Resource[]): Promise<void> {
@@ -33,7 +32,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
     }
 
     return {
-        commandId: "git.ignore",
+        commandId: makeCommandId("ignore"),
         method: ignore,
         options: {},
     };

@@ -3,7 +3,7 @@ import { commands, type OutputChannel, type TextDocumentShowOptions, Uri, window
 import * as i18n from "../../../../i18n/mod.js";
 import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
-import type { ScmCommand } from "../../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
@@ -42,7 +42,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
     }
 
     return {
-        commandId: "git.openHEADFile",
+        commandId: makeCommandId("openHEADFile"),
         method: openHEADFile,
         options: {},
     };

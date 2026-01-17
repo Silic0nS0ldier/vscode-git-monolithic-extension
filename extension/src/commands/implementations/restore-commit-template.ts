@@ -1,5 +1,5 @@
 import type { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../helpers.js";
+import { makeCommandId, type ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function restoreCommitTemplate(repository: AbstractRepository): Promise<void> {
@@ -7,7 +7,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.restoreCommitTemplate",
+        commandId: makeCommandId("restoreCommitTemplate"),
         method: restoreCommitTemplate,
         options: {
             repository: true,

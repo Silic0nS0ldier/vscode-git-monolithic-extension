@@ -1,5 +1,5 @@
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { createStash } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
@@ -8,7 +8,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.stashIncludeUntracked",
+        commandId: makeCommandId("stashIncludeUntracked"),
         method: stashIncludeUntracked,
         options: {
             repository: true,

@@ -4,8 +4,7 @@ import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import type { ScmCommand } from "../../helpers.js";
-import { getSCMResource, runByRepository } from "../../helpers.js";
+import { getSCMResource, makeCommandId, runByRepository, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
     async function clean(...resourceStates: Resource[]): Promise<void> {
@@ -74,7 +73,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
     }
 
     return {
-        commandId: "git.clean",
+        commandId: makeCommandId("clean"),
         method: clean,
         options: {},
     };
