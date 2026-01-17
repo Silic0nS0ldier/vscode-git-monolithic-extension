@@ -19,7 +19,9 @@ export function createRebaseCommitBox(
             }
 
             rebaseCommit = newRebaseCommit;
-            commands.executeCommand("setContext", "gitRebaseInProgress", !!rebaseCommit);
+            // TODO This is an anti-pattern as rebases can be initiated outside of this extension (by git)
+            // And likewise rebases can be externally completed.
+            commands.executeCommand("setContext", "git_monolithic.context.rebaseInProgress", !!rebaseCommit);
         },
     };
 }

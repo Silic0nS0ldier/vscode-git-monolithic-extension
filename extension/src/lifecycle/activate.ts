@@ -103,7 +103,7 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
 
         outputChannel.appendLine("[WARN] " + inspect(err));
 
-        commands.executeCommand("setContext", "git.missing", true);
+        commands.executeCommand("setContext", "git_monolithic.context.missing", true);
         warnAboutMissingGit();
 
         const result = new GitExtensionImpl();
@@ -164,7 +164,7 @@ async function createModel(
     const onRepository = async (): Promise<void> =>
         void await commands.executeCommand<unknown>(
             "setContext",
-            "gitOpenRepositoryCount",
+            "git_monolithic.context.openRepositoryCount",
             `${model.repositories.length}`,
         );
     model.onDidOpenRepository(onRepository, null, disposables);
