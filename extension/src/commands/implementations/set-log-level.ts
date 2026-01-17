@@ -1,7 +1,7 @@
 import { type OutputChannel, type QuickPickItem, window } from "vscode";
 import * as i18n from "../../i18n/mod.js";
 import { Log, LogLevel, type LogLevelOptions } from "../../logging/log.js";
-import type { ScmCommand } from "../helpers.js";
+import { makeCommandId, type ScmCommand } from "../helpers.js";
 
 type LogLevelQuickPickOption = {
     logLevel: LogLevelOptions;
@@ -40,7 +40,7 @@ export function createCommand(
     }
 
     return {
-        commandId: "git.setLogLevel",
+        commandId: makeCommandId("setLogLevel"),
         method: setLogLevel,
         options: {},
     };

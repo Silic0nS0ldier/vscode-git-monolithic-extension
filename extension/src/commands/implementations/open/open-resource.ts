@@ -1,6 +1,6 @@
 import type { Model } from "../../../model.js";
 import type { Resource } from "../../../repository/Resource.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(
     model: Model,
@@ -16,7 +16,7 @@ export function createCommand(
     }
 
     return {
-        commandId: "git.openResource",
+        commandId: makeCommandId("openResource"),
         method: openResource,
         options: {},
     };

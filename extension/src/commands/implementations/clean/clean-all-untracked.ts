@@ -1,6 +1,6 @@
 import { Status } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
@@ -23,7 +23,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.cleanAllUntracked",
+        commandId: makeCommandId("cleanAllUntracked"),
         method: cleanAllUntracked,
         options: {
             repository: true,

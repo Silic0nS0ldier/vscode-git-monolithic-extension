@@ -1,7 +1,7 @@
 import { window } from "vscode";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export async function stashPopLatest(repository: AbstractRepository): Promise<void> {
     const stashes = await repository.getStashes();
@@ -16,7 +16,7 @@ export async function stashPopLatest(repository: AbstractRepository): Promise<vo
 
 export function createCommand(): ScmCommand {
     return {
-        commandId: "git.stashPopLatest",
+        commandId: makeCommandId("stashPopLatest"),
         method: stashPopLatest,
         options: {
             repository: true,

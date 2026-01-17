@@ -3,7 +3,7 @@ import { commands, Uri, window, workspace, type WorkspaceFolder } from "vscode";
 import type { Git } from "../../git.js";
 import * as i18n from "../../i18n/mod.js";
 import type { Model } from "../../model.js";
-import type { ScmCommand } from "../helpers.js";
+import { makeCommandId, type ScmCommand } from "../helpers.js";
 
 export function createCommand(
     git: Git,
@@ -113,7 +113,7 @@ export function createCommand(
     }
 
     return {
-        commandId: "git.init",
+        commandId: makeCommandId("init"),
         method: init,
         options: {},
     };

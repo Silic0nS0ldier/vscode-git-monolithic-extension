@@ -1,7 +1,7 @@
 import type { Git } from "../../../git.js";
 import type { Model } from "../../../model.js";
 import type { TelemetryReporter } from "@vscode/extension-telemetry";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { cloneRepository } from "./helpers.js";
 
 export function createCommand(model: Model, telemetryReporter: TelemetryReporter, git: Git): ScmCommand {
@@ -10,7 +10,7 @@ export function createCommand(model: Model, telemetryReporter: TelemetryReporter
     }
 
     return {
-        commandId: "git.cloneRecursive",
+        commandId: makeCommandId("cloneRecursive"),
         method: cloneRecursive,
         options: {},
     };

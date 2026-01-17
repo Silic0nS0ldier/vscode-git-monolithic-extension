@@ -1,7 +1,7 @@
 import { window } from "vscode";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function removeRemote(repository: AbstractRepository): Promise<string | void> {
@@ -25,7 +25,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.removeRemote",
+        commandId: makeCommandId("removeRemote"),
         method: removeRemote,
         options: {
             repository: true,

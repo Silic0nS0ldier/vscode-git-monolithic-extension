@@ -1,6 +1,6 @@
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { push, PushType } from "./helpers.js";
 
 export function createCommand(model: Model): ScmCommand {
@@ -21,7 +21,7 @@ export function createCommand(model: Model): ScmCommand {
     }
 
     return {
-        commandId: "git.pushTo",
+        commandId: makeCommandId("pushTo"),
         method: pushTo,
         options: {
             repository: true,

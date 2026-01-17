@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { Uri, window } from "vscode";
 import type { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../helpers.js";
+import { makeCommandId, type ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function rename(repository: AbstractRepository, fromUri: Uri | undefined): Promise<void> {
@@ -27,7 +27,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.rename",
+        commandId: makeCommandId("rename"),
         method: rename,
         options: {
             repository: true,

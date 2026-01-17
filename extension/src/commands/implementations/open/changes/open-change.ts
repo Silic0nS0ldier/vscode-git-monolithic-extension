@@ -1,7 +1,7 @@
 import { type OutputChannel, type SourceControlResourceState, Uri } from "vscode";
 import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
-import type { ScmCommand } from "../../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
@@ -37,7 +37,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
     }
 
     return {
-        commandId: "git.openChange",
+        commandId: makeCommandId("openChange"),
         method: openChange,
         options: {},
     };

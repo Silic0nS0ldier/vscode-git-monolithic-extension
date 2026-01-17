@@ -12,7 +12,7 @@ import { Status } from "../../../../api/git.js";
 import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
 import { fromGitUri, isGitUri } from "../../../../uri.js";
-import type { ScmCommand } from "../../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
 export async function openFile(
@@ -92,7 +92,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
     }
 
     return {
-        commandId: "git.openFile",
+        commandId: makeCommandId("openFile"),
         method: openFileFn,
         options: {},
     };

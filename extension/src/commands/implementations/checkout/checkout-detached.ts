@@ -1,5 +1,5 @@
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import type { ScmCommand } from "../../helpers.js";
+import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { checkout } from "./checkout.js";
 
 export function createCommand(): ScmCommand {
@@ -8,7 +8,7 @@ export function createCommand(): ScmCommand {
     }
 
     return {
-        commandId: "git.checkoutDetached",
+        commandId: makeCommandId("checkoutDetached"),
         method: checkoutDetached,
         options: {
             repository: true,
