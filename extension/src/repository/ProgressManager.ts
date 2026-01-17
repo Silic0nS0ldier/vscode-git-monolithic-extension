@@ -13,7 +13,7 @@ export class ProgressManager {
         this.#repository = repository;
         const onDidChange = filterEvent(
             workspace.onDidChangeConfiguration,
-            e => e.affectsConfiguration("git", Uri.file(this.#repository.root)),
+            e => config.affected(e, Uri.file(this.#repository.root)),
         );
         onDidChange(_ => this.#updateEnablement());
         this.#updateEnablement();

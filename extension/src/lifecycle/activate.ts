@@ -77,7 +77,7 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
     const enabled = config.enabled();
 
     if (!enabled) {
-        const onConfigChange = filterEvent(workspace.onDidChangeConfiguration, e => e.affectsConfiguration("git"));
+        const onConfigChange = filterEvent(workspace.onDidChangeConfiguration, e => config.affected(e));
         const onEnabled = filterEvent(
             onConfigChange,
             () => config.enabled(),

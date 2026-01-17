@@ -1,11 +1,19 @@
-import { type ConfigurationScope, workspace, type WorkspaceConfiguration } from "vscode";
+import { type ConfigurationChangeEvent, type ConfigurationScope, workspace, type WorkspaceConfiguration } from "vscode";
 
 // TODO Consolidate SSOT for config
-// TODO Consolidate remaining references
-// - .affectsConfiguration
 
 function getExtensionConfig(scope?: ConfigurationScope): WorkspaceConfiguration {
-    return workspace.getConfiguration("git", scope ?? null);
+    return workspace.getConfiguration("git_monolithic", scope ?? null);
+}
+
+function makeAffectedCheck(section: string): (e: ConfigurationChangeEvent, scope?: ConfigurationScope) => boolean {
+    return function affected(e, scope) {
+        return e.affectsConfiguration("git_monolithic." + section, scope);
+    };
+}
+
+export function affected(e: ConfigurationChangeEvent, scope?: ConfigurationScope): boolean {
+    return e.affectsConfiguration("git_monolithic", scope);
 }
 
 /**
@@ -34,6 +42,7 @@ export function ignoredRepositories(): string[] {
 export function enableStatusBarSync(scope: ConfigurationScope): boolean {
     return getExtensionConfig(scope).get<boolean>("enableStatusBarSync", true);
 }
+enableStatusBarSync.affected = makeAffectedCheck("enableStatusBarSync")
 
 export function rebaseWhenSync(scope: ConfigurationScope): string {
     return getExtensionConfig(scope).get<string>("rebaseWhenSync", "");
@@ -152,6 +161,7 @@ export function showProgress(scope: ConfigurationScope): boolean {
 export function openDiffOnClick(scope: ConfigurationScope): boolean {
     return getExtensionConfig(scope).get<boolean>("openDiffOnClick", true);
 }
+openDiffOnClick.affected = makeAffectedCheck("openDiffOnClick");
 
 export function ignoreRebaseWarning(): boolean {
     return getExtensionConfig().get<boolean>("ignoreRebaseWarning", false);
@@ -172,6 +182,7 @@ export function autoStash(scope: ConfigurationScope): boolean {
 export function countBadge(scope: ConfigurationScope): "all" | "tracked" | "off" {
     return getExtensionConfig(scope).get<"all" | "tracked" | "off">("countBadge", "all");
 }
+countBadge.affected = makeAffectedCheck("countBadge");
 
 export function autoRefresh(): boolean {
     return getExtensionConfig().get<boolean>("autorefresh", true);
@@ -180,6 +191,7 @@ export function autoRefresh(): boolean {
 export function showCommitInput(scope: ConfigurationScope): boolean {
     return getExtensionConfig(scope).get<boolean>("showCommitInput", true);
 }
+showCommitInput.affected = makeAffectedCheck("showCommitInput");
 
 export function fetchOnPull(scope: ConfigurationScope): boolean {
     return getExtensionConfig(scope).get<boolean>("fetchOnPull", false);
@@ -200,18 +212,22 @@ export function supportCancellation(scope: ConfigurationScope): boolean {
 export function decorationsEnabled(): boolean {
     return getExtensionConfig().get<boolean>("decorations.enabled", true);
 }
+decorationsEnabled.affected = makeAffectedCheck("decorations.enabled");
 
 export function branchSortOrder(): "alphabetically" | "committerdate" {
     return getExtensionConfig().get<"alphabetically" | "committerdate">("branchSortOrder", "committerdate");
 }
+branchSortOrder.affected = makeAffectedCheck("branchSortOrder")
 
 export function ignoreSubmodules(scope: ConfigurationScope): boolean {
     return getExtensionConfig(scope).get<boolean>("ignoreSubmodules", false);
 }
+ignoreSubmodules.affected = makeAffectedCheck("ignoreSubmodules")
 
 export function autoFetch(scope: ConfigurationScope): boolean | "all" {
     return getExtensionConfig(scope).get<boolean | "all">("autofetch", false);
 }
+autoFetch.affected = makeAffectedCheck("autofetch");
 
 export function autoFetchPeriod(scope: ConfigurationScope): number {
     return getExtensionConfig(scope).get<number>("autofetchPeriod", 3 /** minutes */ * 60);

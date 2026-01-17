@@ -281,7 +281,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         // NOTE This is imperfect as individual repositories may have their own configuration
         // Considered an acceptable trade off as continuely refreshing based on all config changes
         // is expensive
-        if (!e.affectsConfiguration("git")) {
+        if (!config.affected(e)) {
             return;
         }
 
