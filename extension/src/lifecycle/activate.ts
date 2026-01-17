@@ -61,7 +61,7 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
     const disposables: Disposable[] = [];
     context.subscriptions.push(new Disposable(() => Disposable.from(...disposables).dispose()));
 
-    commands.registerCommand("git.showOutput", () => outputChannel.show());
+    commands.registerCommand("git_monolithic.showOutput", () => outputChannel.show());
     disposables.push(outputChannel);
 
     // Repoter disabled, for now
