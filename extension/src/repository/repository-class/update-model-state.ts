@@ -120,7 +120,7 @@ export async function updateModelState(
     // Update context key with changed resources
     commands.executeCommand(
         "setContext",
-        "git.changedResources",
+        "git_monolithic.context.changedResources",
         [...merge, ...index, ...tracked, ...untracked].map(r => r.state.resourceUri.fsPath.toString()),
     );
 

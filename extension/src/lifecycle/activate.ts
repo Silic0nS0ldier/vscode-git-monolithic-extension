@@ -164,7 +164,7 @@ async function createModel(
     const onRepository = async (): Promise<void> =>
         void await commands.executeCommand<unknown>(
             "setContext",
-            "gitOpenRepositoryCount",
+            "git_monolithic.context.openRepositoryCount",
             `${model.repositories.length}`,
         );
     model.onDidOpenRepository(onRepository, null, disposables);

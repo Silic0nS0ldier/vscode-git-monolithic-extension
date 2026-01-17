@@ -122,7 +122,8 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     setState(state: State): void {
         this.#state = state;
         this.#onDidChangeStateEmitter.fire(state);
-        commands.executeCommand("setContext", "git.state", state);
+        // TODO Unused context key, remove in future
+        commands.executeCommand("setContext", "git_monolithic.context.state", state);
     }
 
     isInitialized = onetime(async () => {
