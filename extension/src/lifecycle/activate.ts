@@ -103,7 +103,7 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
 
         outputChannel.appendLine("[WARN] " + inspect(err));
 
-        commands.executeCommand("setContext", "git.missing", true);
+        commands.executeCommand("setContext", "git_monolithic.context.missing", true);
         warnAboutMissingGit();
 
         const result = new GitExtensionImpl();
