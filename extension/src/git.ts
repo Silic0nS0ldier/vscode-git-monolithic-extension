@@ -56,6 +56,7 @@ import { Limiter, splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
 import { LineStream } from "./util/stream-by-line.js";
 import * as Versions from "./util/versions.js";
+import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
@@ -216,20 +217,12 @@ export class Git {
         return await this.#exec(args, { cwd, ...options, log_mode: "buffer" });
     }
 
-    async exec2(args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
-        return await this.#exec(args, { ...options, log_mode: "buffer" });
-    }
-
     stream(cwd: string, args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        return this.spawn(args, { cwd, ...options, log_mode: "stream" });
+        return internalSpawn(this.path, this.#env, this.#log.bind(this), args, { cwd, ...options, log_mode: "stream" });
     }
 
     async #exec(args: string[], options: SpawnOptions): Promise<IExecutionResult<string>> {
         return internalExec(this.path, this.#env, this.#log.bind(this), args, options);
-    }
-
-    spawn(args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        return internalSpawn(this.path, this.#env, this.#log.bind(this), args, options);
     }
 
     #log(output: string): void {
@@ -279,35 +272,12 @@ export class Repository {
         return this.git.stream(this.#repositoryRoot, args, options);
     }
 
-    async config(scope: string, key: string, value: string, options: SpawnOptions = {}): Promise<string> {
-        const args = ["config"];
-
-        if (scope) {
-            args.push("--" + scope);
-        }
-
-        args.push(key, value);
-
-        const result = await this.exec(args, options);
-        return result.stdout.trim();
+    async config(key: string, value: string): Promise<void> {
+        return await setConfig(this, key, value);
     }
 
-    async getConfigs(scope: string): Promise<{ key: string; value: string }[]> {
-        const args = ["config"];
-
-        if (scope) {
-            args.push("--" + scope);
-        }
-
-        args.push("-l");
-
-        const result = await this.exec(args);
-        const lines = result.stdout.trim().split(/\r|\r\n|\n/);
-
-        return lines.map(entry => {
-            const equalsIndex = entry.indexOf("=");
-            return { key: entry.substring(0, equalsIndex), value: entry.substring(equalsIndex + 1) };
-        });
+    async getConfigs(): Promise<{ key: string; value: string }[]> {
+        return await getAllConfig(this);
     }
 
     async log(options?: LogOptions): Promise<Commit[]> {
@@ -742,7 +712,7 @@ export class Repository {
         }
 
         try {
-            await this.exec(["config", "--get-all", "user.name"]);
+            await getConfig(this, "user.name");
         } catch (err) {
             const gitErr = new GitError({}, { cause: new AggregateError([commitErr, err]) });
             gitErr.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
@@ -750,7 +720,7 @@ export class Repository {
         }
 
         try {
-            await this.exec(["config", "--get-all", "user.email"]);
+            await getConfig(this, "user.email");
         } catch (err) {
             const gitErr = new GitError({}, { cause: new AggregateError([commitErr, err]) });
             gitErr.gitErrorCode = GitErrorCodes.NoUserEmailConfigured;
