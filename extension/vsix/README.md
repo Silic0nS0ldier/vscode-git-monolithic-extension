@@ -4,7 +4,9 @@ A fork of VSCode's integrated Git support (from 2021-09-08) designed to work bet
 
 It brings the following improvements;
 
-- Greatly optimised watcher implementation. When there is a flood of changes (e.g. pulling in new changes, changing branches) it will wait for idle before triggering a refresh.
+- Greatly optimised watcher implementation.
+  - When there is a flood of changes (e.g. pulling in new changes, changing branches) it will wait for idle before triggering a refresh.
+  - Basic `.gitignore` support. ([`Microsoft/vscode#62725`](https://github.com/Microsoft/vscode/issues/62725))
 - Souce control panel has a "grace period" where when files change it will turn gray for a time before actually changing, to prevent misclicks (e.g. due to refresh slowness).
 - In the extension log, command logging (started and output) includes the PID to enable correlation.
 - The `too many active changes` warning does not block refreshing the source control view.
