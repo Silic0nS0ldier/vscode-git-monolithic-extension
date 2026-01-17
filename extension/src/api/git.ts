@@ -286,26 +286,6 @@ export interface API {
     registerPushErrorHandler(handler: PushErrorHandler): Disposable;
 }
 
-/**
- * Public API of extension.
- */
-export interface GitExtension {
-    readonly enabled: boolean;
-    readonly onDidChangeEnablement: Event<boolean>;
-
-    /**
-     * Returns a specific API version.
-     *
-     * Throws error if git extension is disabled. You can listed to the
-     * [GitExtension.onDidChangeEnablement](#GitExtension.onDidChangeEnablement) event
-     * to know when the extension becomes enabled/disabled.
-     *
-     * @param version Version number.
-     * @returns API instance
-     */
-    getAPI(version: 1): API;
-}
-
 export type GitErrorCodesOptions =
     | "AuthenticationFailed"
     | "BadConfigFile"

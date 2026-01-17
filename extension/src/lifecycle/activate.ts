@@ -17,7 +17,6 @@ import {
 } from "vscode";
 import { registerAPICommands } from "../api/api1.js";
 import { GitExtensionImpl } from "../api/extension.js";
-import type { GitExtension } from "../api/git.js";
 import { Askpass } from "../askpass.js";
 import { registerCommands } from "../commands/register.js";
 import { addDecorations } from "../decorationProvider.js";
@@ -35,7 +34,7 @@ import { eventToPromise, filterEvent } from "../util/events.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
 
-export async function activate(context: ExtensionContext): Promise<GitExtension> {
+export async function activate(context: ExtensionContext): Promise<void> {
     const outputChannel = window.createOutputChannel("Git Monolithic");
 
     outputChannel.appendLine("Monolithic Git for VSCode is starting...");
@@ -88,14 +87,12 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
             result.model = await createModel(context, outputChannel, telemetryReporter, disposables)
         );
         context.subscriptions.push(registerAPICommands(result));
-        return result;
     }
 
     try {
         const model = await createModel(context, outputChannel, telemetryReporter, disposables);
         const result = new GitExtensionImpl(model);
         context.subscriptions.push(registerAPICommands(result));
-        return result;
     } catch (err) {
         if (!isExpectedError(err, Error, e => /Git installation not found/.test(e.message))) {
             throw err;
@@ -108,7 +105,6 @@ export async function activate(context: ExtensionContext): Promise<GitExtension>
 
         const result = new GitExtensionImpl();
         context.subscriptions.push(registerAPICommands(result));
-        return result;
     }
 }
 
