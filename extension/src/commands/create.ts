@@ -85,7 +85,7 @@ async function handleError(
             choices.set(showCommandOutputChoice, async () => {
                 const timestamp = new Date().getTime();
                 // TODO Hard coded URL may break in the future
-                const uri = Uri.parse(`git-output:/git-error-${timestamp}`);
+                const uri = Uri.parse(`gitm-output:/git-error-${timestamp}`);
 
                 let command = "git";
 

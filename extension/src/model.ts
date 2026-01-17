@@ -401,13 +401,9 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             this.#onDidChangeOriginalResourceEmitter.fire({ repository, uri })
         );
 
-        const shouldDetectSubmodules = workspace
-            .getConfiguration("git", Uri.file(repository.root))
-            .get<boolean>("detectSubmodules") as boolean;
+        const shouldDetectSubmodules = config.detectSubmodules(Uri.file(repository.root));
 
-        const submodulesLimit = workspace
-            .getConfiguration("git", Uri.file(repository.root))
-            .get<number>("detectSubmodulesLimit") as number;
+        const submodulesLimit = config.detectSubmodulesLimit(Uri.file(repository.root));
 
         const checkForSubmodules = (): void => {
             if (!shouldDetectSubmodules) {
@@ -516,7 +512,7 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         if (normalisedHint instanceof Uri) {
             let resourcePath: string;
 
-            if (normalisedHint.scheme === "git") {
+            if (normalisedHint.scheme === "gitm") {
                 resourcePath = fromGitUri(normalisedHint).path;
             } else {
                 resourcePath = normalisedHint.fsPath;

@@ -48,6 +48,6 @@ export function toGitUri(uri: Uri, ref: string, options: GitUriOptions = {}): Ur
     return uri.with({
         path,
         query: JSON.stringify(params),
-        scheme: "git",
+        scheme: "gitm",
     });
 }

@@ -803,389 +803,389 @@
                 {
                     "command": "git_monolithic.commit",
                     "group": "navigation",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "command": "git_monolithic.refresh",
                     "group": "navigation",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "command": "git_monolithic.pull",
                     "group": "1_header@1",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "command": "git_monolithic.push",
                     "group": "1_header@2",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "command": "git_monolithic.clone",
                     "group": "1_header@3",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "command": "git_monolithic.checkout",
                     "group": "1_header@4",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "submenu": "git.commit",
                     "group": "2_main@1",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "submenu": "git.changes",
                     "group": "2_main@2",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "submenu": "git.pullpush",
                     "group": "2_main@3",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "submenu": "git.branch",
                     "group": "2_main@4",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "submenu": "git.remotes",
                     "group": "2_main@5",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "submenu": "git.stash",
                     "group": "2_main@6",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "submenu": "git.tags",
                     "group": "2_main@7",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 },
                 {
                     "command": "git_monolithic.showOutput",
                     "group": "3_footer",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 }
             ],
             "scm/sourceControl": [
                 {
                     "command": "git_monolithic.close",
                     "group": "navigation",
-                    "when": "scmProvider == git"
+                    "when": "scmProvider == gitm"
                 }
             ],
             "scm/resourceGroup/context": [
                 {
                     "command": "git_monolithic.stageAllMerge",
-                    "when": "scmProvider == git && scmResourceGroup == merge",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.stageAllMerge",
-                    "when": "scmProvider == git && scmResourceGroup == merge",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.unstageAll",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.unstageAll",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.cleanAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.stageAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.cleanAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.stageAllTracked",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.cleanAllUntracked",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.stageAllUntracked",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.cleanAllUntracked",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.stageAllUntracked",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "inline@2"
                 }
             ],
             "scm/resourceFolder/context": [
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == merge",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == merge",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.unstage",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.unstage",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.clean",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.clean",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.ignore",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "1_modification@3"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.clean",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.clean",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.ignore",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "1_modification@3"
                 }
             ],
             "scm/resourceState/context": [
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == merge",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.openFile",
-                    "when": "scmProvider == git && scmResourceGroup == merge",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == merge",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.revealInExplorer",
-                    "when": "scmProvider == git && scmResourceGroup == merge",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge",
                     "group": "2_view"
                 },
                 {
                     "command": "git_monolithic.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == merge && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git_monolithic.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == merge && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
+                    "when": "scmProvider == gitm && scmResourceGroup == merge && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git_monolithic.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.openFile",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.openHEADFile",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.unstage",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.unstage",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.revealInExplorer",
-                    "when": "scmProvider == git && scmResourceGroup == index",
+                    "when": "scmProvider == gitm && scmResourceGroup == index",
                     "group": "2_view"
                 },
                 {
                     "command": "git_monolithic.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == index && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
+                    "when": "scmProvider == gitm && scmResourceGroup == index && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git_monolithic.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == index && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
+                    "when": "scmProvider == gitm && scmResourceGroup == index && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git_monolithic.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.openHEADFile",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.openFile",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.clean",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.clean",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == tracked && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git_monolithic.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == tracked && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git_monolithic.ignore",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "1_modification@3"
                 },
                 {
                     "command": "git_monolithic.revealInExplorer",
-                    "when": "scmProvider == git && scmResourceGroup == tracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == tracked",
                     "group": "2_view"
                 },
                 {
                     "command": "git_monolithic.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.openHEADFile",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.openFile",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "navigation"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.clean",
-                    "when": "scmProvider == git && scmResourceGroup == untracked && !gitFreshRepository",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked && !gitFreshRepository",
                     "group": "1_modification"
                 },
                 {
                     "command": "git_monolithic.clean",
-                    "when": "scmProvider == git && scmResourceGroup == untracked && !gitFreshRepository",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked && !gitFreshRepository",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.stage",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "inline@2"
                 },
                 {
                     "command": "git_monolithic.openFile2",
-                    "when": "scmProvider == git && scmResourceGroup == untracked && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked && config.git_monolithic.showInlineOpenFileAction && config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git_monolithic.openChange",
-                    "when": "scmProvider == git && scmResourceGroup == untracked && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked && config.git_monolithic.showInlineOpenFileAction && !config.git_monolithic.openDiffOnClick",
                     "group": "inline@1"
                 },
                 {
                     "command": "git_monolithic.ignore",
-                    "when": "scmProvider == git && scmResourceGroup == untracked",
+                    "when": "scmProvider == gitm && scmResourceGroup == untracked",
                     "group": "1_modification@3"
                 }
             ],

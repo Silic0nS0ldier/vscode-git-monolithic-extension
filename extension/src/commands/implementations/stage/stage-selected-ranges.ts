@@ -50,7 +50,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
 
         // Find editor with older state
         const olderStateEditors = visibleEditors.filter(e => {
-            return (e.document.uri.scheme === "git")
+            return (e.document.uri.scheme === "gitm")
                 && (e.document.uri.fsPath === fileUri.fsPath);
         });
         if (olderStateEditors.length > 1) {

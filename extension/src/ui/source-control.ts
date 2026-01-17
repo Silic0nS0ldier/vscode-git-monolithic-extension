@@ -21,7 +21,7 @@ import type { Box } from "../util/box.js";
 export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): SourceControlUIGroup & Disposable {
     const rootUri = Uri.file(repoRoot);
 
-    const sourceControl = scm.createSourceControl("git", "Git", rootUri);
+    const sourceControl = scm.createSourceControl("gitm", "Git", rootUri);
     sourceControl.acceptInputCommand = {
         arguments: [sourceControl],
         command: "git_monolithic.commit",
