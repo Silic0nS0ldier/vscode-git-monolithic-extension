@@ -184,7 +184,7 @@ export function addDecorations(model: Model): Disposable {
 
     const onEnablementChange = filterEvent(
         workspace.onDidChangeConfiguration,
-        e => e.affectsConfiguration("git.decorations.enabled"),
+        e => config.decorationsEnabled.affected(e),
     );
 
     function onDidCloseRepository(repository: AbstractRepository): void {

@@ -11,8 +11,8 @@
     "extensionKind": [
         "workspace"
     ],
-    "enableApiProposals": false,
     "categories": [
+        "SCM Providers",
         "Other"
     ],
     "activationEvents": [
@@ -1470,15 +1470,15 @@
             }
         ],
         "configuration": {
-            "title": "Git",
+            "title": "Git Monolithic",
             "properties": {
-                "git.enabled": {
+                "git-monolithic.enabled": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.enabled%",
                     "default": true
                 },
-                "git.path": {
+                "git-monolithic.path": {
                     "type": [
                         "string",
                         "null",
@@ -1488,7 +1488,7 @@
                     "default": null,
                     "scope": "machine"
                 },
-                "git.autoRepositoryDetection": {
+                "git-monolithic.autoRepositoryDetection": {
                     "type": [
                         "boolean",
                         "string"
@@ -1508,12 +1508,12 @@
                     "description": "%config.autoRepositoryDetection%",
                     "default": true
                 },
-                "git.autorefresh": {
+                "git-monolithic.autorefresh": {
                     "type": "boolean",
                     "description": "%config.autorefresh%",
                     "default": true
                 },
-                "git.autofetch": {
+                "git-monolithic.autofetch": {
                     "type": [
                         "boolean",
                         "string"
@@ -1530,28 +1530,28 @@
                         "usesOnlineServices"
                     ]
                 },
-                "git.autofetchPeriod": {
+                "git-monolithic.autofetchPeriod": {
                     "type": "number",
                     "scope": "resource",
                     "markdownDescription": "%config.autofetchPeriod%",
                     "default": 180
                 },
-                "git.branchValidationRegex": {
+                "git-monolithic.branchValidationRegex": {
                     "type": "string",
                     "description": "%config.branchValidationRegex%",
                     "default": ""
                 },
-                "git.branchWhitespaceChar": {
+                "git-monolithic.branchWhitespaceChar": {
                     "type": "string",
                     "description": "%config.branchWhitespaceChar%",
                     "default": "-"
                 },
-                "git.confirmSync": {
+                "git-monolithic.confirmSync": {
                     "type": "boolean",
                     "description": "%config.confirmSync%",
                     "default": true
                 },
-                "git.countBadge": {
+                "git-monolithic.countBadge": {
                     "type": "string",
                     "enum": [
                         "all",
@@ -1567,7 +1567,7 @@
                     "default": "all",
                     "scope": "resource"
                 },
-                "git.checkoutType": {
+                "git-monolithic.checkoutType": {
                     "type": "array",
                     "items": {
                         "type": "string",
@@ -1590,27 +1590,27 @@
                         "tags"
                     ]
                 },
-                "git.ignoreLegacyWarning": {
+                "git-monolithic.ignoreLegacyWarning": {
                     "type": "boolean",
                     "description": "%config.ignoreLegacyWarning%",
                     "default": false
                 },
-                "git.ignoreMissingGitWarning": {
+                "git-monolithic.ignoreMissingGitWarning": {
                     "type": "boolean",
                     "description": "%config.ignoreMissingGitWarning%",
                     "default": false
                 },
-                "git.ignoreWindowsGit27Warning": {
+                "git-monolithic.ignoreWindowsGit27Warning": {
                     "type": "boolean",
                     "description": "%config.ignoreWindowsGit27Warning%",
                     "default": false
                 },
-                "git.ignoreRebaseWarning": {
+                "git-monolithic.ignoreRebaseWarning": {
                     "type": "boolean",
                     "description": "%config.ignoreRebaseWarning%",
                     "default": false
                 },
-                "git.defaultCloneDirectory": {
+                "git-monolithic.defaultCloneDirectory": {
                     "type": [
                         "string",
                         "null"
@@ -1619,13 +1619,13 @@
                     "scope": "machine",
                     "description": "%config.defaultCloneDirectory%"
                 },
-                "git.enableSmartCommit": {
+                "git-monolithic.enableSmartCommit": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.enableSmartCommit%",
                     "default": false
                 },
-                "git.smartCommitChanges": {
+                "git-monolithic.smartCommitChanges": {
                     "type": "string",
                     "enum": [
                         "all",
@@ -1639,42 +1639,42 @@
                     "description": "%config.smartCommitChanges%",
                     "default": "all"
                 },
-                "git.suggestSmartCommit": {
+                "git-monolithic.suggestSmartCommit": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.suggestSmartCommit%",
                     "default": true
                 },
-                "git.enableCommitSigning": {
+                "git-monolithic.enableCommitSigning": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.enableCommitSigning%",
                     "default": false
                 },
-                "git.confirmEmptyCommits": {
+                "git-monolithic.confirmEmptyCommits": {
                     "type": "boolean",
                     "scope": "resource",
                     "description": "%config.confirmEmptyCommits%",
                     "default": true
                 },
-                "git.decorations.enabled": {
+                "git-monolithic.decorations.enabled": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.decorations.enabled%"
                 },
-                "git.enableStatusBarSync": {
+                "git-monolithic.enableStatusBarSync": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.enableStatusBarSync%",
                     "scope": "resource"
                 },
-                "git.followTagsWhenSync": {
+                "git-monolithic.followTagsWhenSync": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.followTagsWhenSync%"
                 },
-                "git.promptToSaveFilesBeforeStash": {
+                "git-monolithic.promptToSaveFilesBeforeStash": {
                     "type": "string",
                     "enum": [
                         "always",
@@ -1690,7 +1690,7 @@
                     "default": "always",
                     "description": "%config.promptToSaveFilesBeforeStash%"
                 },
-                "git.promptToSaveFilesBeforeCommit": {
+                "git-monolithic.promptToSaveFilesBeforeCommit": {
                     "type": "string",
                     "enum": [
                         "always",
@@ -1706,7 +1706,7 @@
                     "default": "always",
                     "description": "%config.promptToSaveFilesBeforeCommit%"
                 },
-                "git.postCommitCommand": {
+                "git-monolithic.postCommitCommand": {
                     "type": "string",
                     "enum": [
                         "none",
@@ -1722,7 +1722,7 @@
                     "scope": "resource",
                     "default": "none"
                 },
-                "git.openAfterClone": {
+                "git-monolithic.openAfterClone": {
                     "type": "string",
                     "enum": [
                         "always",
@@ -1739,17 +1739,17 @@
                     "default": "prompt",
                     "description": "%config.openAfterClone%"
                 },
-                "git.showInlineOpenFileAction": {
+                "git-monolithic.showInlineOpenFileAction": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.showInlineOpenFileAction%"
                 },
-                "git.showPushSuccessNotification": {
+                "git-monolithic.showPushSuccessNotification": {
                     "type": "boolean",
                     "description": "%config.showPushSuccessNotification%",
                     "default": false
                 },
-                "git.inputValidation": {
+                "git-monolithic.inputValidation": {
                     "type": "string",
                     "enum": [
                         "always",
@@ -1759,12 +1759,12 @@
                     "default": "warn",
                     "description": "%config.inputValidation%"
                 },
-                "git.inputValidationLength": {
+                "git-monolithic.inputValidationLength": {
                     "type": "number",
                     "default": 72,
                     "description": "%config.inputValidationLength%"
                 },
-                "git.inputValidationSubjectLength": {
+                "git-monolithic.inputValidationSubjectLength": {
                     "type": [
                         "number",
                         "null"
@@ -1772,31 +1772,31 @@
                     "default": 50,
                     "description": "%config.inputValidationSubjectLength%"
                 },
-                "git.detectSubmodules": {
+                "git-monolithic.detectSubmodules": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.detectSubmodules%"
                 },
-                "git.detectSubmodulesLimit": {
+                "git-monolithic.detectSubmodulesLimit": {
                     "type": "number",
                     "scope": "resource",
                     "default": 10,
                     "description": "%config.detectSubmodulesLimit%"
                 },
-                "git.alwaysSignOff": {
+                "git-monolithic.alwaysSignOff": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.alwaysSignOff%"
                 },
-                "git.ignoreSubmodules": {
+                "git-monolithic.ignoreSubmodules": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.ignoreSubmodules%"
                 },
-                "git.ignoredRepositories": {
+                "git-monolithic.ignoredRepositories": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1805,7 +1805,7 @@
                     "scope": "window",
                     "description": "%config.ignoredRepositories%"
                 },
-                "git.scanRepositories": {
+                "git-monolithic.scanRepositories": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1814,80 +1814,80 @@
                     "scope": "resource",
                     "description": "%config.scanRepositories%"
                 },
-                "git.showProgress": {
+                "git-monolithic.showProgress": {
                     "type": "boolean",
                     "description": "%config.showProgress%",
                     "default": true,
                     "scope": "resource"
                 },
-                "git.rebaseWhenSync": {
+                "git-monolithic.rebaseWhenSync": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.rebaseWhenSync%"
                 },
-                "git.fetchOnPull": {
+                "git-monolithic.fetchOnPull": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.fetchOnPull%"
                 },
-                "git.pruneOnFetch": {
+                "git-monolithic.pruneOnFetch": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.pruneOnFetch%"
                 },
-                "git.pullTags": {
+                "git-monolithic.pullTags": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.pullTags%"
                 },
-                "git.autoStash": {
+                "git-monolithic.autoStash": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.autoStash%"
                 },
-                "git.allowForcePush": {
+                "git-monolithic.allowForcePush": {
                     "type": "boolean",
                     "default": false,
                     "description": "%config.allowForcePush%"
                 },
-                "git.useForcePushWithLease": {
+                "git-monolithic.useForcePushWithLease": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.useForcePushWithLease%"
                 },
-                "git.confirmForcePush": {
+                "git-monolithic.confirmForcePush": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.confirmForcePush%"
                 },
-                "git.allowNoVerifyCommit": {
+                "git-monolithic.allowNoVerifyCommit": {
                     "type": "boolean",
                     "default": false,
                     "description": "%config.allowNoVerifyCommit%"
                 },
-                "git.confirmNoVerifyCommit": {
+                "git-monolithic.confirmNoVerifyCommit": {
                     "type": "boolean",
                     "default": true,
                     "description": "%config.confirmNoVerifyCommit%"
                 },
-                "git.openDiffOnClick": {
+                "git-monolithic.openDiffOnClick": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.openDiffOnClick%"
                 },
-                "git.supportCancellation": {
+                "git-monolithic.supportCancellation": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.supportCancellation%"
                 },
-                "git.branchSortOrder": {
+                "git-monolithic.branchSortOrder": {
                     "type": "string",
                     "enum": [
                         "committerdate",
@@ -1896,30 +1896,30 @@
                     "default": "committerdate",
                     "description": "%config.branchSortOrder%"
                 },
-                "git.requireGitUserConfig": {
+                "git-monolithic.requireGitUserConfig": {
                     "type": "boolean",
                     "description": "%config.requireGitUserConfig%",
                     "default": true
                 },
-                "git.showCommitInput": {
+                "git-monolithic.showCommitInput": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.showCommitInput%"
                 },
-                "git.terminalAuthentication": {
+                "git-monolithic.terminalAuthentication": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": true,
                     "description": "%config.terminalAuthentication%"
                 },
-                "git.useCommitInputAsStashMessage": {
+                "git-monolithic.useCommitInputAsStashMessage": {
                     "type": "boolean",
                     "scope": "resource",
                     "default": false,
                     "description": "%config.useCommitInputAsStashMessage%"
                 },
-                "git.githubAuthentication": {
+                "git-monolithic.githubAuthentication": {
                     "deprecationMessage": "This setting is now deprecated, please use `github.gitAuthentication` instead."
                 }
             }

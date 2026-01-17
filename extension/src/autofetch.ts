@@ -98,7 +98,7 @@ export class AutoFetcher {
     }
 
     #onConfiguration(e?: ConfigurationChangeEvent): void {
-        if (e !== undefined && !e.affectsConfiguration("git.autofetch")) {
+        if (e !== undefined && !config.autoFetch.affected(e)) {
             return;
         }
 

@@ -275,9 +275,9 @@ export function createRepository(
 
     filterEvent(
         workspace.onDidChangeConfiguration,
-        e => e.affectsConfiguration("git.branchSortOrder", rootUri)
-            || e.affectsConfiguration("git.ignoreSubmodules", rootUri)
-            || e.affectsConfiguration("git.openDiffOnClick", rootUri),
+        e => config.branchSortOrder.affected(e, rootUri)
+            || config.ignoreSubmodules.affected(e, rootUri)
+            || config.openDiffOnClick.affected(e, rootUri),
     )(updateModelState, null, disposables);
 
     const updateInputBoxVisibility = (): void => {
@@ -286,7 +286,7 @@ export function createRepository(
 
     const onConfigListenerForInputBoxVisibility = filterEvent(
         workspace.onDidChangeConfiguration,
-        e => e.affectsConfiguration("git.showCommitInput", rootUri),
+        e => config.showCommitInput.affected(e, rootUri),
     );
     onConfigListenerForInputBoxVisibility(updateInputBoxVisibility, null, disposables);
     updateInputBoxVisibility();
@@ -659,7 +659,7 @@ export function createRepository(
 
     const onDidChangeCountBadge = filterEvent(
         workspace.onDidChangeConfiguration,
-        e => e.affectsConfiguration("git.countBadge", rootUri),
+        e => config.countBadge.affected(e, rootUri),
     );
     onDidChangeCountBadge(setCountBadge, null, disposables);
     setCountBadge();

@@ -97,7 +97,7 @@ class SyncStatusBar {
 
         const onEnablementChange = filterEvent(
             workspace.onDidChangeConfiguration,
-            e => e.affectsConfiguration("git.enableStatusBarSync"),
+            e => config.enableStatusBarSync.affected(e),
         );
         onEnablementChange(this.#updateEnablement, this, this.#disposables);
         this.#updateEnablement();
