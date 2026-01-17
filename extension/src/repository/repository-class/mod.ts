@@ -34,7 +34,7 @@ import { commit as commitImpl } from "./commit.js";
 import { createRebaseCommitBox } from "./createRebaseCommitBox.js";
 import { createStateBox } from "./createStateBox.js";
 import { fetch as fetchImpl } from "./fetch.js";
-import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConfig } from "./get-config.js";
+import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConfig } from "./config.js";
 import { getInputTemplate as getInputTemplateImpl } from "./get-input-template.js";
 import { headLabel as headLabelImpl } from "./head-label.js";
 import { ignore as ignoreImpl } from "./ignore.js";
@@ -571,7 +571,7 @@ export function createRepository(
             return run(Operation.SetBranchUpstream, () => repository.setBranchUpstream(name, upstream));
         },
         setConfig(key, value) {
-            return run(Operation.Config, () => repository.config("local", key, value));
+            return run(Operation.Config, () => repository.config(key, value));
         },
         sourceControlUI,
         stage(resource, contents) {
