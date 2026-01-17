@@ -831,37 +831,37 @@
                     "when": "scmProvider == git"
                 },
                 {
-                    "submenu": "git.commit",
+                    "submenu": "git_monolithic.commit",
                     "group": "2_main@1",
                     "when": "scmProvider == git"
                 },
                 {
-                    "submenu": "git.changes",
+                    "submenu": "git_monolithic.changes",
                     "group": "2_main@2",
                     "when": "scmProvider == git"
                 },
                 {
-                    "submenu": "git.pullpush",
+                    "submenu": "git_monolithic.pullpush",
                     "group": "2_main@3",
                     "when": "scmProvider == git"
                 },
                 {
-                    "submenu": "git.branch",
+                    "submenu": "git_monolithic.branch",
                     "group": "2_main@4",
                     "when": "scmProvider == git"
                 },
                 {
-                    "submenu": "git.remotes",
+                    "submenu": "git_monolithic.remotes",
                     "group": "2_main@5",
                     "when": "scmProvider == git"
                 },
                 {
-                    "submenu": "git.stash",
+                    "submenu": "git_monolithic.stash",
                     "group": "2_main@6",
                     "when": "scmProvider == git"
                 },
                 {
-                    "submenu": "git.tags",
+                    "submenu": "git_monolithic.tags",
                     "group": "2_main@7",
                     "when": "scmProvider == git"
                 },
@@ -1218,7 +1218,7 @@
                     "when": "isInDiffRightEditor && !isInEmbeddedDiffEditor && config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0 && isInDiffEditor && resourceScheme =~ /^git$|^file$/"
                 }
             ],
-            "git.commit": [
+            "git_monolithic.commit": [
                 {
                     "command": "git_monolithic.commit",
                     "group": "1_commit@1"
@@ -1291,7 +1291,7 @@
                     "when": "config.git_monolithic.allowNoVerifyCommit"
                 }
             ],
-            "git.changes": [
+            "git_monolithic.changes": [
                 {
                     "command": "git_monolithic.stageAll",
                     "group": "changes@1"
@@ -1305,7 +1305,7 @@
                     "group": "changes@3"
                 }
             ],
-            "git.pullpush": [
+            "git_monolithic.pullpush": [
                 {
                     "command": "git_monolithic.sync",
                     "group": "1_sync@1"
@@ -1358,7 +1358,7 @@
                     "group": "4_fetch@3"
                 }
             ],
-            "git.branch": [
+            "git_monolithic.branch": [
                 {
                     "command": "git_monolithic.merge",
                     "group": "branch@1"
@@ -1388,7 +1388,7 @@
                     "group": "branch@7"
                 }
             ],
-            "git.remotes": [
+            "git_monolithic.remotes": [
                 {
                     "command": "git_monolithic.addRemote",
                     "group": "remote@1"
@@ -1398,7 +1398,7 @@
                     "group": "remote@2"
                 }
             ],
-            "git.stash": [
+            "git_monolithic.stash": [
                 {
                     "command": "git_monolithic.stash",
                     "group": "stash@1"
@@ -1428,7 +1428,7 @@
                     "group": "stash@7"
                 }
             ],
-            "git.tags": [
+            "git_monolithic.tags": [
                 {
                     "command": "git_monolithic.createTag",
                     "group": "tags@1"
@@ -1441,31 +1441,31 @@
         },
         "submenus": [
             {
-                "id": "git.commit",
+                "id": "git_monolithic.commit",
                 "label": "%submenu.commit%"
             },
             {
-                "id": "git.changes",
+                "id": "git_monolithic.changes",
                 "label": "%submenu.changes%"
             },
             {
-                "id": "git.pullpush",
+                "id": "git_monolithic.pullpush",
                 "label": "%submenu.pullpush%"
             },
             {
-                "id": "git.branch",
+                "id": "git_monolithic.branch",
                 "label": "%submenu.branch%"
             },
             {
-                "id": "git.remotes",
+                "id": "git_monolithic.remotes",
                 "label": "%submenu.remotes%"
             },
             {
-                "id": "git.stash",
+                "id": "git_monolithic.stash",
                 "label": "%submenu.stash%"
             },
             {
-                "id": "git.tags",
+                "id": "git_monolithic.tags",
                 "label": "%submenu.tags%"
             }
         ],
