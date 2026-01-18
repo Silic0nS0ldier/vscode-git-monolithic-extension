@@ -22,12 +22,9 @@ This extension has undergone significant refactoring. While it may be a fork, it
 
 ### `vscode.git`
 
-VSCode assumes it's integrated Git support (implemented as an extension) is the only source control provider for git. To gain any benefit (and avoid confusion) it will need to be disabled.
+VSCode's builtin git support and Git Monolithic cannot be used together.
 
-To disable the integrated extension;
-1. Go to the "Extensions" panel (`ctrl+shift+x`).
-2. Search for `@builtin git`
-3. Disable `Git` (Git SCM Integration).
+This extension will be disabled when `git.enabled = true`.
 
 ### Windows + Git `>=2.25`
 

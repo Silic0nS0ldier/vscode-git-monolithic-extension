@@ -13,7 +13,6 @@ import {
     window,
     workspace,
     type WorkspaceFolder,
-    extensions,
 } from "vscode";
 import { registerAPICommands } from "../api/api1.js";
 import { GitExtensionImpl } from "../api/extension.js";
@@ -39,24 +38,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
     outputChannel.appendLine("Monolithic Git for VSCode is starting...");
 
-    {
-        const builtinGitExtension = extensions.getExtension("vscode.git");
-        if (builtinGitExtension) {
-            outputChannel.appendLine("Builtin git extension is enabled, this is not supported.");
-            const result = await window.showErrorMessage(
-                "Builtin git extension is enabled.",
-                {
-                    modal: true,
-                    detail: "The builtin Git (Git SCM Integration) conflicts with Monolithic Git and should be disabled.",
-                },
-                "Show Extension",
-            );
-            if (result === "Show Extension") {
-                commands.executeCommand("workbench.extensions.search", "@builtin git")
-            }
-        }
-    }
-
     const disposables: Disposable[] = [];
     context.subscriptions.push(new Disposable(() => Disposable.from(...disposables).dispose()));
 
@@ -73,13 +54,15 @@ export async function activate(context: ExtensionContext): Promise<void> {
     });
     deactivateTasks.push(() => telemetryReporter.dispose());
 
+    // TODO Recommend user disables built-in Git extension if repository is massive
     const enabled = config.enabled();
+    const builtinEnabled = config.builtinGitEnabled();
 
-    if (!enabled) {
-        const onConfigChange = filterEvent(workspace.onDidChangeConfiguration, e => config.affected(e));
+    if (!enabled || builtinEnabled) {
+        const onConfigChange = filterEvent(workspace.onDidChangeConfiguration, e => config.affected(e) || config.builtinGitEnabled.affected(e));
         const onEnabled = filterEvent(
             onConfigChange,
-            () => config.enabled(),
+            () => config.enabled() && !config.builtinGitEnabled(),
         );
         const result = new GitExtensionImpl();
 

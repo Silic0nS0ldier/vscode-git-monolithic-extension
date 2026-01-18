@@ -2,11 +2,23 @@ import {
     type ConfigurationChangeEvent,
     type ConfigurationScope,
     type ConfigurationTarget,
+    extensions,
     workspace,
     type WorkspaceConfiguration,
 } from "vscode";
 
 // TODO Consolidate SSOT for config
+
+export function builtinGitEnabled(): boolean {
+    const builtinGitExtension = extensions.getExtension("vscode.git");
+    if (!builtinGitExtension) {
+        return false;
+    }
+    return workspace.getConfiguration("git").get<boolean>("enabled", true);
+}
+builtinGitEnabled.affected = function (e: ConfigurationChangeEvent, scope?: ConfigurationScope): boolean {
+    return e.affectsConfiguration("git.enabled", scope);
+}
 
 function getExtensionConfig(scope?: ConfigurationScope): WorkspaceConfiguration {
     return workspace.getConfiguration("git_monolithic", scope ?? null);
