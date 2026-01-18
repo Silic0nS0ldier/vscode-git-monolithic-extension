@@ -4,39 +4,25 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, Disposable, type Event, type SourceControlInputBox, Uri } from "vscode";
-import type { Model } from "../model.js";
-import { pickRemoteSource, type PickRemoteSourceOptions } from "../remoteSource.js";
+import { type Event, type SourceControlInputBox, Uri } from "vscode";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../repository/Resource.js";
-import { toGitUri } from "../uri.js";
 import { mapEvent } from "../util/events.js";
-import type { GitExtensionImpl } from "./extension.js";
 import {
-    type API,
-    type APIState,
     type Branch,
     type BranchQuery,
     type Change,
     type Commit,
     type CommitOptions,
-    type CredentialsProvider,
     type FetchOptions,
     type ForcePushModeOptions,
-    type Git,
     type InputBox,
     type LogOptions,
-    type PublishEvent,
-    type PushErrorHandler,
     type Ref,
-    RefType,
-    type RefTypeOptions,
     type Remote,
-    type RemoteSourceProvider,
     type Repository,
     type RepositoryState,
     type RepositoryUIState,
-    Status,
     type StatusOptions,
     type Submodule,
 } from "./git.js";
@@ -54,7 +40,7 @@ class ApiInputBox implements InputBox {
     }
 }
 
-export class ApiChange implements Change {
+class ApiChange implements Change {
     get uri(): Uri {
         return this.#resource.state.resourceUri;
     }
@@ -75,7 +61,7 @@ export class ApiChange implements Change {
     }
 }
 
-export class ApiRepositoryState implements RepositoryState {
+class ApiRepositoryState implements RepositoryState {
     get HEAD(): Branch | undefined {
         return this.#repository.HEAD;
     }
@@ -112,7 +98,7 @@ export class ApiRepositoryState implements RepositoryState {
     }
 }
 
-export class ApiRepositoryUIState implements RepositoryUIState {
+class ApiRepositoryUIState implements RepositoryUIState {
     get selected(): boolean {
         return false;
         // return this._sourceControl.selected;
@@ -291,186 +277,4 @@ export class ApiRepository implements Repository {
     commit(message: string, opts?: CommitOptions): Promise<void> {
         return this.#repository.commit(message, opts);
     }
-}
-
-export class ApiGit implements Git {
-    get path(): string {
-        return this.#model.git.path;
-    }
-    #model: Model;
-    constructor(model: Model) {
-        this.#model = model;
-    }
-}
-
-export class ApiImpl implements API {
-    readonly git: ApiGit;
-
-    get state(): APIState {
-        return this.#model.state;
-    }
-
-    get onDidChangeState(): Event<APIState> {
-        return this.#model.onDidChangeState;
-    }
-
-    get onDidPublish(): Event<PublishEvent> {
-        return this.#model.onDidPublish;
-    }
-
-    get onDidOpenRepository(): Event<Repository> {
-        return mapEvent(this.#model.onDidOpenRepository, r => new ApiRepository(r));
-    }
-
-    get onDidCloseRepository(): Event<Repository> {
-        return mapEvent(this.#model.onDidCloseRepository, r => new ApiRepository(r));
-    }
-
-    get repositories(): Repository[] {
-        return this.#model.repositories.map(r => new ApiRepository(r));
-    }
-
-    toGitUri(uri: Uri, ref: string): Uri {
-        return toGitUri(uri, ref);
-    }
-
-    getRepository(uri: Uri): Repository | null {
-        const result = this.#model.getRepository(uri);
-        return result ? new ApiRepository(result) : null;
-    }
-
-    async init(root: Uri): Promise<Repository | null> {
-        const path = root.fsPath;
-        await this.#model.git.init(path);
-        await this.#model.openRepository(path);
-        return this.getRepository(root) || null;
-    }
-
-    async openRepository(root: Uri): Promise<Repository | null> {
-        await this.#model.openRepository(root.fsPath);
-        return this.getRepository(root) || null;
-    }
-
-    registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable {
-        return this.#model.registerRemoteSourceProvider(provider);
-    }
-
-    registerCredentialsProvider(provider: CredentialsProvider): Disposable {
-        return this.#model.registerCredentialsProvider(provider);
-    }
-
-    registerPushErrorHandler(handler: PushErrorHandler): Disposable {
-        return this.#model.registerPushErrorHandler(handler);
-    }
-
-    #model: Model;
-
-    constructor(model: Model) {
-        this.#model = model;
-        this.git = new ApiGit(this.#model);
-    }
-}
-
-function getRefType(type: RefTypeOptions): string {
-    switch (type) {
-        case RefType.Head:
-            return "Head";
-        case RefType.RemoteHead:
-            return "RemoteHead";
-        case RefType.Tag:
-            return "Tag";
-    }
-
-    return "unknown";
-}
-
-function getStatus(status: StatusOptions): string {
-    switch (status) {
-        case Status.INDEX_MODIFIED:
-            return "INDEX_MODIFIED";
-        case Status.INDEX_ADDED:
-            return "INDEX_ADDED";
-        case Status.INDEX_DELETED:
-            return "INDEX_DELETED";
-        case Status.INDEX_RENAMED:
-            return "INDEX_RENAMED";
-        case Status.INDEX_COPIED:
-            return "INDEX_COPIED";
-        case Status.MODIFIED:
-            return "MODIFIED";
-        case Status.DELETED:
-            return "DELETED";
-        case Status.UNTRACKED:
-            return "UNTRACKED";
-        case Status.IGNORED:
-            return "IGNORED";
-        case Status.INTENT_TO_ADD:
-            return "INTENT_TO_ADD";
-        case Status.ADDED_BY_US:
-            return "ADDED_BY_US";
-        case Status.ADDED_BY_THEM:
-            return "ADDED_BY_THEM";
-        case Status.DELETED_BY_US:
-            return "DELETED_BY_US";
-        case Status.DELETED_BY_THEM:
-            return "DELETED_BY_THEM";
-        case Status.BOTH_ADDED:
-            return "BOTH_ADDED";
-        case Status.BOTH_DELETED:
-            return "BOTH_DELETED";
-        case Status.BOTH_MODIFIED:
-            return "BOTH_MODIFIED";
-    }
-
-    return "UNKNOWN";
-}
-
-// TODO This may not be needed
-export function registerAPICommands(extension: GitExtensionImpl): Disposable {
-    const disposables: Disposable[] = [];
-
-    disposables.push(commands.registerCommand("git_monolithic.api.getRepositories", () => {
-        const api = extension.getAPI(1);
-        return api.repositories.map(r => r.rootUri.toString());
-    }));
-
-    disposables.push(commands.registerCommand("git_monolithic.api.getRepositoryState", (uri: string) => {
-        const api = extension.getAPI(1);
-        const repository = api.getRepository(Uri.parse(uri));
-
-        if (!repository) {
-            return null;
-        }
-
-        const state = repository.state;
-
-        const ref = (ref: Ref | undefined) => (ref && { ...ref, type: getRefType(ref.type) });
-        const change = (change: Change) => ({
-            originalUri: change.originalUri.toString(),
-            renameUri: change.renameUri?.toString(),
-            status: getStatus(change.status),
-            uri: change.uri.toString(),
-        });
-
-        return {
-            HEAD: ref(state.HEAD),
-            indexChanges: state.indexChanges.map(change),
-            mergeChanges: state.mergeChanges.map(change),
-            rebaseCommit: state.rebaseCommit,
-            refs: state.refs.map(ref),
-            remotes: state.remotes,
-            submodules: state.submodules,
-            workingTreeChanges: state.workingTreeChanges.map(change),
-        };
-    }));
-
-    disposables.push(commands.registerCommand("git_monolithic.api.getRemoteSources", (opts?: PickRemoteSourceOptions) => {
-        if (!extension.model) {
-            return;
-        }
-
-        return pickRemoteSource(extension.model, opts as any);
-    }));
-
-    return Disposable.from(...disposables);
 }
