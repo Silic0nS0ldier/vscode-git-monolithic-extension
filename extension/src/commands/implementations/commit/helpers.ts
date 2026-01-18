@@ -86,11 +86,10 @@ async function smartCommit(
         const never = i18n.Translations.never();
         const pick = await window.showWarningMessage(message, { modal: true }, yes, always, never);
 
-        const legacyConfig = config.legacy(repositoryUri);
         if (pick === always) {
-            legacyConfig.update("enableSmartCommit", true, true);
+            await config.enableSmartCommit.update(true, true, repositoryUri);
         } else if (pick === never) {
-            legacyConfig.update("suggestSmartCommit", false, true);
+            await config.suggestSmartCommit.update(false, true, repositoryUri);
             return false;
         } else if (pick !== yes) {
             return false; // do not commit on cancel
@@ -150,8 +149,7 @@ async function smartCommit(
             const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
             if (pick === neverAgain) {
-                const legacyConfig = config.legacy(repositoryUri);
-                legacyConfig.update("confirmNoVerifyCommit", false, true);
+                await config.confirmNoVerifyCommit.update(false, true, repositoryUri);
             } else if (pick !== yes) {
                 return false;
             }
@@ -243,8 +241,7 @@ export async function commitEmpty(
         const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
         if (pick === neverAgain) {
-            const legacyConfig = config.legacy(root);
-            await legacyConfig.update("confirmEmptyCommits", false, true);
+            await config.confirmEmptyCommits.update(false, true, root);
         } else if (pick !== yes) {
             return;
         }

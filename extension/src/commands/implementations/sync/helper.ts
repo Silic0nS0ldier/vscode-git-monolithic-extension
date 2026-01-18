@@ -46,7 +46,7 @@ export async function sync(
         const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
         if (pick === neverAgain) {
-            await config.legacy().update("confirmSync", false, true);
+            await config.confirmSync.update(false, true);
         } else if (pick !== yes) {
             return;
         }

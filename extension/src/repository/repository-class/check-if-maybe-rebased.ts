@@ -54,7 +54,7 @@ export async function checkIfMaybeRebased(
     }
 
     if (result === always) {
-        await config.legacy().update("ignoreRebaseWarning", true, true);
+        await config.ignoreRebaseWarning.update(true, true);
 
         return true;
     }

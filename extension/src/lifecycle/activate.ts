@@ -214,7 +214,7 @@ async function warnAboutMissingGit(): Promise<void> {
         // TODO Address hard coded URL
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
-        await config.legacy().update("ignoreMissingGitWarning", true, true);
+        await config.ignoreMissingGitWarning.update(true, true);
     }
 }
 
@@ -267,7 +267,7 @@ async function checkGitv1(info: IGit): Promise<void> {
         // TODO Repeated
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
-        await config.legacy().update("ignoreLegacyWarning", true, true);
+        await config.ignoreLegacyWarning.update(true, true);
     }
 }
 
@@ -294,6 +294,6 @@ async function checkGitWindows(info: IGit): Promise<void> {
         // TODO Repeated
         commands.executeCommand("vscode.open", Uri.parse("https://git-scm.com/"));
     } else if (choice === neverShowAgain) {
-        await config.legacy().update("ignoreWindowsGit27Warning", true, true);
+        await config.ignoreWindowsGit27Warning.update(true, true);
     }
 }

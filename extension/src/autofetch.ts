@@ -90,8 +90,7 @@ export class AutoFetcher {
         }
 
         if (result === yesMsg) {
-            const gitConfig = config.legacy(Uri.file(this.#repository.root));
-            gitConfig.update("autofetch", true, ConfigurationTarget.Global);
+            await config.autoFetch.update(true, ConfigurationTarget.Global, Uri.file(this.#repository.root));
         }
 
         this.#globalState.update(AutoFetcher.#DidInformUser, true);
