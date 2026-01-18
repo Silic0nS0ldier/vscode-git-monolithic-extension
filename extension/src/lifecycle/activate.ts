@@ -29,7 +29,7 @@ import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
 import * as config from "../util/config.js";
 import { toDisposable } from "../util/disposals.js";
-import { eventToPromise, filterEvent } from "../util/events.js";
+import { filterEvent } from "../util/events.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
 
@@ -52,30 +52,68 @@ export async function activate(context: ExtensionContext): Promise<void> {
             return () => {};
         },
     });
-    deactivateTasks.push(() => telemetryReporter.dispose());
+    
+    const result = new GitExtensionImpl();
 
     // TODO Recommend user disables built-in Git extension if repository is massive
-    const enabled = config.enabled();
-    const builtinEnabled = config.builtinGitEnabled();
+    let extensionEnablementState: boolean = config.enabled() && !config.builtinGitEnabled();
 
-    if (!enabled || builtinEnabled) {
-        const onConfigChange = filterEvent(workspace.onDidChangeConfiguration, e => config.affected(e) || config.builtinGitEnabled.affected(e));
-        const onEnabled = filterEvent(
-            onConfigChange,
-            () => config.enabled() && !config.builtinGitEnabled(),
-        );
-        const result = new GitExtensionImpl();
+    // Serialize config change processing to prevent race conditions
+    let configChangeQueue = Promise.resolve();
+    
+    const onConfigChange = filterEvent(workspace.onDidChangeConfiguration, e => config.affected(e) || config.builtinGitEnabled.affected(e));
+    onConfigChange(() => {
+        const lastQueue = configChangeQueue;
+        async function handleConfigChange() {
+            // Wait for previous task to complete
+            await lastQueue.catch(() => { /* Ignore errors from previous task */ });
 
-        eventToPromise(onEnabled).then(async () =>
-            result.model = await createModel(context, outputChannel, telemetryReporter, disposables)
-        );
-        context.subscriptions.push(registerAPICommands(result));
+            try {
+                let newState = config.enabled() && !config.builtinGitEnabled();
+    
+                if (newState === extensionEnablementState) {
+                    return;
+                }
+    
+                extensionEnablementState = newState;
+    
+                if (extensionEnablementState) {
+                    outputChannel.appendLine("Config changed, activating Git Monolithic extension...");
+                    await enableExtension(result, context, outputChannel, telemetryReporter);
+                } else {
+                    outputChannel.appendLine("Config changed, deactivating Git Monolithic extension...");
+                    disableExtension(result);
+                }
+            } catch (err) {
+                outputChannel.appendLine(`[ERROR] Failed to process config change: ${inspect(err)}`);
+            }
+
+            // Running of disposals does not handle async tasks and behaviour around errors is unknown
+            // To reduce the risk of incomplete disposals (which can prevent re-activation) we wait a few seconds
+            await new Promise<void>(c => setTimeout(() => c(), 5000));
+        }
+
+        configChangeQueue = handleConfigChange();
+    })
+
+    if (extensionEnablementState) {
+        outputChannel.appendLine("Activating Git Monolithic extension...");
+        await enableExtension(result, context, outputChannel, telemetryReporter);
     }
 
+    context.subscriptions.push(registerAPICommands(result));
+
+    deactivateTasks.push(() => telemetryReporter.dispose());
+    deactivateTasks.push(async () => await disableExtension(result));
+}
+
+let modelDisposable: Disposable | undefined;
+
+async function enableExtension(ext: GitExtensionImpl, context: ExtensionContext, outputChannel: OutputChannel, telemetryReporter: TelemetryReporter): Promise<void> {
     try {
-        const model = await createModel(context, outputChannel, telemetryReporter, disposables);
-        const result = new GitExtensionImpl(model);
-        context.subscriptions.push(registerAPICommands(result));
+        const [model, disposable] = await createModel(context, outputChannel, telemetryReporter);
+        ext.model = model;
+        modelDisposable = disposable;
     } catch (err) {
         if (!isExpectedError(err, Error, e => /Git installation not found/.test(e.message))) {
             throw err;
@@ -85,18 +123,21 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
         commands.executeCommand("setContext", "git_monolithic.context.missing", true);
         warnAboutMissingGit();
-
-        const result = new GitExtensionImpl();
-        context.subscriptions.push(registerAPICommands(result));
     }
+}
+
+function disableExtension(ext: GitExtensionImpl): void {
+    ext.model = undefined;
+    modelDisposable?.dispose();
+    modelDisposable = undefined;
 }
 
 async function createModel(
     context: ExtensionContext,
     outputChannel: OutputChannel,
     telemetryReporter: TelemetryReporter,
-    disposables: Disposable[],
-): Promise<Model> {
+): Promise<[Model, Disposable]> {
+    const disposables: Disposable[] = [];
     const pathValue = config.path();
     let pathHints = Array.isArray(pathValue) ? pathValue : pathValue ? [pathValue] : [];
 
@@ -160,12 +201,11 @@ async function createModel(
         new GitFileSystemProvider(model),
         addDecorations(model),
         new GitProtocolHandler(outputChannel),
-        // new GitTimelineProvider(model, cc)
     );
 
     checkGitVersion(info);
 
-    return model;
+    return [model, Disposable.from(...disposables)];
 }
 
 async function warnAboutMissingGit(): Promise<void> {

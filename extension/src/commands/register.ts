@@ -73,26 +73,29 @@ export function registerCommands(
 
     const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
 
-    const disposables = cmds.map(({ commandId, method, options }) => {
-        const command = createCommand(
-            model,
-            telemetryReporter,
-            outputChannel,
-            commandErrors,
-            commandId,
-            method,
-            options,
-        );
+    const disposables: Disposable[] = [];
+    
+    try {
+        for (const { commandId, method, options } of cmds) {
+            const command = createCommand(
+                model,
+                telemetryReporter,
+                outputChannel,
+                commandErrors,
+                commandId,
+                method,
+                options,
+            );
 
-        // if (options.diff) {
-        // 	return commands.registerDiffInformationCommand(commandId, command);
-        // } else {
-        // 	return commands.registerCommand(commandId, command);
-        // }
-        return commands.registerCommand(commandId, command);
-    });
+            disposables.push(commands.registerCommand(commandId, command));
+        }
 
-    disposables.push(workspace.registerTextDocumentContentProvider("gitm-output", commandErrors));
+        disposables.push(workspace.registerTextDocumentContentProvider("gitm-output", commandErrors));
+    } catch (err) {
+        // Cleanup: dispose all successfully registered commands before re-throwing
+        Disposable.from(...disposables).dispose();
+        throw err;
+    }
 
     return Disposable.from(...disposables);
 }

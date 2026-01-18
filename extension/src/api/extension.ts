@@ -33,13 +33,6 @@ export class GitExtensionImpl {
         return this.#model;
     }
 
-    constructor(model?: Model) {
-        if (model) {
-            this.enabled = true;
-            this.#model = model;
-        }
-    }
-
     getAPI(version: number): API {
         if (!this.#model) {
             throw new Error("Git model not found");
