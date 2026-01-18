@@ -72,8 +72,7 @@ export async function push(repository: AbstractRepository, pushOptions: PushOpti
             const pick = await window.showWarningMessage(message, { modal: true }, yes, neverAgain);
 
             if (pick === neverAgain) {
-                const legacyConfig = config.legacy(repositoryUri);
-                legacyConfig.update("confirmForcePush", false, true);
+                await config.confirmForcePush.update(false, true, repositoryUri);
             } else if (pick !== yes) {
                 return;
             }
