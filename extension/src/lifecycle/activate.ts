@@ -14,7 +14,6 @@ import {
     workspace,
     type WorkspaceFolder,
 } from "vscode";
-import { registerAPICommands } from "../api/api1.js";
 import { GitExtensionImpl } from "../api/extension.js";
 import { Askpass } from "../askpass.js";
 import { registerCommands } from "../commands/register.js";
@@ -101,10 +100,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
         await enableExtension(result, context, outputChannel, telemetryReporter);
     }
 
-    context.subscriptions.push(registerAPICommands(result));
-
     deactivateTasks.push(() => telemetryReporter.dispose());
-    deactivateTasks.push(async () => await disableExtension(result));
+    deactivateTasks.push(async () => disableExtension(result));
 }
 
 let modelDisposable: Disposable | undefined;
