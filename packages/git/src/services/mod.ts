@@ -5,7 +5,7 @@ export type AllServices = {
         exists: (path: string) => boolean;
     };
     shell: {
-        which: (cmd: string, options: { path: string; pathExt: string }) => Promise<string>;
+        which: (cmd: string, options: { path: string; pathExt?: string, nothrow: true }) => Promise<string|null>;
     };
     child_process: {
         spawn: SpawnFn;

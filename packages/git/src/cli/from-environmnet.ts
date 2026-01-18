@@ -15,7 +15,7 @@ export type FromEnvironmentServices = {
         exists: (path: string) => boolean;
     };
     shell: {
-        which: (cmd: string, options: { path: string; pathExt: string }) => Promise<string>;
+        which: (cmd: string, options: { path: string; pathExt?: string, nothrow: true }) => Promise<string|null>;
     };
     child_process: {
         spawn: SpawnFn;
@@ -36,25 +36,25 @@ export async function fromEnvironment(
     cliContext: PersistentCLIContext,
     services: FromEnvironmentServices,
 ): Promise<Result<GitContext, FromEnvironmentErrors>> {
-    try {
-        const gitBin = isWindows(services.os.platform)
-            ? "git.exe"
-            : "git";
-        // TODO Fix types in DT so we can use nothrow
-        const gitPath = await services.shell.which(gitBin, {
-            path: services.process.env.path ?? "",
-            pathExt: services.process.env.pathExt ?? "",
-        });
-        return await fromPath(gitPath, cliContext, services);
-    } catch {
-        // Last chance, try common locations
-        const gitPath = await findGitFromCommonLocations(services);
-        if (gitPath) {
-            return await fromPath(gitPath, cliContext, services);
-        }
+    const gitBin = isWindows(services.os.platform)
+        ? "git.exe"
+        : "git";
+    let gitPath: string|null|false = await services.shell.which(gitBin, {
+        path: services.process.env.PATH ?? "",
+        pathExt: services.process.env.PATHEXT ?? undefined,
+        nothrow: true,
+    });
 
-        return err(createError(ERROR_GIT_NOT_FOUND));
+    if (!gitPath) {
+        // Last chance, try common locations
+        gitPath = await findGitFromCommonLocations(services);
     }
+    
+    if (gitPath) {
+        return await fromPath(gitPath, cliContext, services);
+    }
+
+    return err(createError(ERROR_GIT_NOT_FOUND));
 }
 
 type FindGitFromCommonLocationsServices = {
