@@ -8,7 +8,7 @@ echo "Running install..."
 ARCH="$(uname --processor)"
 
 # renovate: datasource=github-tags depName=bazelbuild/bazelisk
-BAZELISK_VERSION="v1.28.0"
+BAZELISK_VERSION="v1.28.1"
 # renovate: datasource=github-tags depName=bazelbuild/buildtools
 BUILDTOOLS_VERSION="v8.2.1"
 # renovate: datasource=github-tags depName=withered-magic/starpls
