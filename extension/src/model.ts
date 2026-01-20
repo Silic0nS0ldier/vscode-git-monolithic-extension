@@ -24,28 +24,22 @@ import {
     workspace,
     type WorkspaceFoldersChangeEvent,
 } from "vscode";
-import { ApiRepository } from "./api/api1.js";
 import type {
     APIState as State,
     CredentialsProvider,
-    PublishEvent,
-    PushErrorHandler,
-    RemoteSourceProvider,
 } from "./api/git.js";
 import type { Askpass } from "./askpass.js";
 import type { Git } from "./git.js";
 import * as i18n from "./i18n/mod.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import { throat } from "./package-patches/throat.js";
-import type { IPushErrorHandlerRegistry } from "./pushError.js";
-import type { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { isAbstractRepository } from "./repository/repository-class/isAbstractRepository.js";
 import { createRepository } from "./repository/repository-class/mod.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
 import { fromGitUri } from "./uri.js";
 import * as config from "./util/config.js";
-import { dispose, toDisposable } from "./util/disposals.js";
+import { dispose } from "./util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "./util/events.js";
 import { isDescendant, pathEquals } from "./util/paths.js";
 
@@ -83,7 +77,7 @@ interface OpenRepository extends Disposable {
     repository: AbstractRepository;
 }
 
-export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRegistry {
+export class Model {
     #onDidOpenRepositoryEmitter = new EventEmitter<AbstractRepository>();
     readonly onDidOpenRepository: Event<AbstractRepository> = this.#onDidOpenRepositoryEmitter.event;
 
@@ -107,13 +101,6 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
     #onDidChangeStateEmitter = new EventEmitter<State>();
     readonly onDidChangeState = this.#onDidChangeStateEmitter.event;
 
-    #onDidPublishEmitter = new EventEmitter<PublishEvent>();
-    readonly onDidPublish = this.#onDidPublishEmitter.event;
-
-    firePublishEvent(repository: AbstractRepository, branch?: string): void {
-        this.#onDidPublishEmitter.fire({ branch: branch, repository: new ApiRepository(repository) });
-    }
-
     #state: State = "uninitialized";
     get state(): State {
         return this.#state;
@@ -133,16 +120,6 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
 
         await eventToPromise(filterEvent(this.onDidChangeState, s => s === "initialized"));
     });
-
-    #remoteSourceProviders = new Set<RemoteSourceProvider>();
-
-    #onDidAddRemoteSourceProviderEmitter = new EventEmitter<RemoteSourceProvider>();
-    readonly onDidAddRemoteSourceProvider = this.#onDidAddRemoteSourceProviderEmitter.event;
-
-    #onDidRemoveRemoteSourceProviderEmitter = new EventEmitter<RemoteSourceProvider>();
-    readonly onDidRemoveRemoteSourceProvider = this.#onDidRemoveRemoteSourceProviderEmitter.event;
-
-    #pushErrorHandlers = new Set<PushErrorHandler>();
 
     #disposables: Disposable[] = [];
     readonly #askpass: Askpass;
@@ -370,8 +347,6 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
             const dotGit = await this.git.getRepositoryDotGit(repositoryRoot);
             const repository = createRepository(
                 this.git.open(repositoryRoot, dotGit),
-                this,
-                this,
                 this.#globalState,
                 this.#outputChannel,
             );
@@ -575,31 +550,8 @@ export class Model implements IRemoteSourceProviderRegistry, IPushErrorHandlerRe
         return undefined;
     }
 
-    registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable {
-        this.#remoteSourceProviders.add(provider);
-        this.#onDidAddRemoteSourceProviderEmitter.fire(provider);
-
-        return toDisposable(() => {
-            this.#remoteSourceProviders.delete(provider);
-            this.#onDidRemoveRemoteSourceProviderEmitter.fire(provider);
-        });
-    }
-
     registerCredentialsProvider(provider: CredentialsProvider): Disposable {
         return this.#askpass.registerCredentialsProvider(provider);
-    }
-
-    getRemoteProviders(): RemoteSourceProvider[] {
-        return [...this.#remoteSourceProviders.values()];
-    }
-
-    registerPushErrorHandler(handler: PushErrorHandler): Disposable {
-        this.#pushErrorHandlers.add(handler);
-        return toDisposable(() => this.#pushErrorHandlers.delete(handler));
-    }
-
-    getPushErrorHandlers(): PushErrorHandler[] {
-        return [...this.#pushErrorHandlers];
     }
 
     dispose(): void {

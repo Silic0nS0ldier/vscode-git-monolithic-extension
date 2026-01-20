@@ -1,7 +1,6 @@
 import type { Branch, ForcePushModeOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import { throat } from "../../package-patches/throat.js";
-import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import { Operation } from "../Operations.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 import { pushInternal } from "./push-internal.js";
@@ -11,7 +10,6 @@ export const push = throat(1, async (
     run: RunFn<void>,
     repository: Repository,
     finalRepository: AbstractRepository,
-    pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     head: Branch,
     forcePushMode?: ForcePushModeOptions,
 ) => {
@@ -29,7 +27,6 @@ export const push = throat(1, async (
             pushInternal(
                 repository,
                 finalRepository,
-                pushErrorHandlerRegistry,
                 remote,
                 branch,
                 undefined,

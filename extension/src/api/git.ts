@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Disposable, Event, ProviderResult, Uri } from "vscode";
-import type { GitError } from "../git/error.js";
 export type { ProviderResult } from "vscode";
 
 export interface Git {
@@ -251,15 +250,6 @@ export interface CredentialsProvider {
     getCredentials(host: Uri): ProviderResult<Credentials>;
 }
 
-export interface PushErrorHandler {
-    handlePushError(
-        repository: Repository,
-        remote: Remote,
-        refspec: string,
-        error: GitError,
-    ): Promise<boolean>;
-}
-
 export type APIState = "uninitialized" | "initialized";
 
 export interface PublishEvent {
@@ -270,7 +260,6 @@ export interface PublishEvent {
 export interface API {
     readonly state: APIState;
     readonly onDidChangeState: Event<APIState>;
-    readonly onDidPublish: Event<PublishEvent>;
     readonly git: Git;
     readonly repositories: Repository[];
     readonly onDidOpenRepository: Event<Repository>;
@@ -283,7 +272,6 @@ export interface API {
 
     registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable;
     registerCredentialsProvider(provider: CredentialsProvider): Disposable;
-    registerPushErrorHandler(handler: PushErrorHandler): Disposable;
 }
 
 export type GitErrorCodesOptions =

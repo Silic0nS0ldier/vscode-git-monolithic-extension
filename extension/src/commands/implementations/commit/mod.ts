@@ -1,4 +1,3 @@
-import type { Model } from "../../../model.js";
 import type { ScmCommand } from "../../helpers.js";
 import * as commitAllAmendNoVerify from "./commit-all-amend-no-verify.js";
 import * as commitAllAmend from "./commit-all-amend.js";
@@ -17,23 +16,23 @@ import * as commitStagedSigned from "./commit-staged-signed.js";
 import * as commitStaged from "./commit-staged.js";
 import * as commit from "./commit.js";
 
-export function createCommands(model: Model): ScmCommand[] {
+export function createCommands(): ScmCommand[] {
     return [
-        commit.createCommand(model),
-        commitAll.createCommand(model),
-        commitAllAmend.createCommand(model),
-        commitAllAmendNoVerify.createCommand(model),
-        commitAllNoVerify.createCommand(model),
-        commitAllSigned.createCommand(model),
-        commitAllSignedNoVerify.createCommand(model),
-        commitEmpty.createCommand(model),
-        commitEmptyNoVerify.createCommand(model),
-        commitNoVerify.createCommand(model),
-        commitStaged.createCommand(model),
-        commitStagedAmend.createCommand(model),
-        commitStagedAmendNoVerify.createCommand(model),
-        commitStagedNoVerify.createCommand(model),
-        commitStagedSigned.createCommand(model),
-        commitStagedSignedNoVerify.createCommand(model),
+        commit.createCommand(),
+        commitAll.createCommand(),
+        commitAllAmend.createCommand(),
+        commitAllAmendNoVerify.createCommand(),
+        commitAllNoVerify.createCommand(),
+        commitAllSigned.createCommand(),
+        commitAllSignedNoVerify.createCommand(),
+        commitEmpty.createCommand(),
+        commitEmptyNoVerify.createCommand(),
+        commitNoVerify.createCommand(),
+        commitStaged.createCommand(),
+        commitStagedAmend.createCommand(),
+        commitStagedAmendNoVerify.createCommand(),
+        commitStagedNoVerify.createCommand(),
+        commitStagedSigned.createCommand(),
+        commitStagedSignedNoVerify.createCommand(),
     ];
 }

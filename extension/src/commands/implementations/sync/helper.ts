@@ -1,6 +1,5 @@
 import { window } from "vscode";
 import * as i18n from "../../../i18n/mod.js";
-import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as config from "../../../util/config.js";
 import { publish } from "../publish/publish.js";
@@ -8,7 +7,6 @@ import { publish } from "../publish/publish.js";
 export async function sync(
     repository: AbstractRepository,
     rebase: boolean,
-    model: Model,
 ): Promise<void> {
     const HEAD = repository.HEAD;
 
@@ -23,7 +21,6 @@ export async function sync(
 
         if (pick === yes) {
             await publish(
-                model,
                 repository,
             );
         }

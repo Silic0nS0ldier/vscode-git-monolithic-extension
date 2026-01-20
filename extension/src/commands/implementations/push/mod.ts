@@ -1,4 +1,3 @@
-import type { Model } from "../../../model.js";
 import type { ScmCommand } from "../../helpers.js";
 import * as pushForce from "./push-force.js";
 import * as pushTags from "./push-tags.js";
@@ -8,14 +7,14 @@ import * as pushWithTagsForce from "./push-with-tags-force.js";
 import * as pushWithTags from "./push-with-tags.js";
 import * as push from "./push.js";
 
-export function createCommands(model: Model): ScmCommand[] {
+export function createCommands(): ScmCommand[] {
     return [
-        push.createCommand(model),
-        pushForce.createCommand(model),
-        pushTags.createCommand(model),
-        pushTo.createCommand(model),
-        pushToForce.createCommand(model),
-        pushWithTags.createCommand(model),
-        pushWithTagsForce.createCommand(model),
+        push.createCommand(),
+        pushForce.createCommand(),
+        pushTags.createCommand(),
+        pushTo.createCommand(),
+        pushToForce.createCommand(),
+        pushWithTags.createCommand(),
+        pushWithTagsForce.createCommand(),
     ];
 }

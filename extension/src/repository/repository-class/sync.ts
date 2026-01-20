@@ -1,7 +1,6 @@
 import type { Branch, Remote } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import { throat } from "../../package-patches/throat.js";
-import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 import type { RunFn } from "./run.js";
@@ -15,7 +14,6 @@ export const sync = throat(1, (
     HEAD: Branch | undefined,
     remotes: Remote[],
     finalRepository: AbstractRepository,
-    pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     head: Branch,
 ) => syncInternal(
     run,
@@ -25,7 +23,6 @@ export const sync = throat(1, (
     HEAD,
     remotes,
     finalRepository,
-    pushErrorHandlerRegistry,
     head,
     false,
 ));
