@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { type Command, Disposable, type Event, EventEmitter, Uri, workspace } from "vscode";
-import type { Branch, RemoteSourceProvider } from "./api/git.js";
+import type { Branch } from "./api/git.js";
 import * as i18n from "./i18n/mod.js";
-import type { IRemoteSourceProviderRegistry } from "./remoteProvider.js";
 import { Operation } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import * as config from "./util/config.js";
@@ -50,7 +49,6 @@ interface SyncStatusBarState {
     readonly isSyncRunning: boolean;
     readonly hasRemotes: boolean;
     readonly HEAD: Branch | undefined;
-    readonly remoteSourceProviders: RemoteSourceProvider[];
 }
 
 class SyncStatusBar {
@@ -70,30 +68,20 @@ class SyncStatusBar {
     }
 
     #repository: AbstractRepository;
-    #remoteSourceProviderRegistry: IRemoteSourceProviderRegistry;
 
     constructor(
         repository: AbstractRepository,
-        remoteSourceProviderRegistry: IRemoteSourceProviderRegistry,
     ) {
         this.#repository = repository;
-        this.#remoteSourceProviderRegistry = remoteSourceProviderRegistry;
         this.#stateStore = {
             HEAD: undefined,
             enabled: true,
             hasRemotes: false,
-            isSyncRunning: false,
-            remoteSourceProviders: this.#remoteSourceProviderRegistry.getRemoteProviders()
-                .filter(p => !!p.publishRepository),
+            isSyncRunning: false
         };
 
         this.#repository.onDidChangeStatus(this.#onDidGitStatusChange, this, this.#disposables);
         this.#repository.onDidChangeOperations(this.#onDidChangeOperations, this, this.#disposables);
-
-        anyEvent(
-            this.#remoteSourceProviderRegistry.onDidAddRemoteSourceProvider,
-            this.#remoteSourceProviderRegistry.onDidRemoveRemoteSourceProvider,
-        )(this.#onDidChangeRemoteSourceProviders, this, this.#disposables);
 
         const onEnablementChange = filterEvent(
             workspace.onDidChangeConfiguration,
@@ -125,36 +113,13 @@ class SyncStatusBar {
         };
     }
 
-    #onDidChangeRemoteSourceProviders(): void {
-        this.#state = {
-            ...this.#state,
-            remoteSourceProviders: this.#remoteSourceProviderRegistry.getRemoteProviders()
-                .filter(p => !!p.publishRepository),
-        };
-    }
-
     get command(): Command | undefined {
         if (!this.#state.enabled) {
             return;
         }
 
         if (!this.#state.hasRemotes) {
-            if (this.#state.remoteSourceProviders.length === 0) {
-                return;
-            }
-
-            const tooltip = i18n.Translations.publishTo(
-                this.#state.remoteSourceProviders.length === 1
-                    ? this.#state.remoteSourceProviders[0].name
-                    : undefined,
-            );
-
-            return {
-                arguments: [this.#repository.sourceControlUI.sourceControl],
-                command: "git_monolithic.publish",
-                title: `$(cloud-upload)`,
-                tooltip,
-            };
+            return;
         }
 
         const HEAD = this.#state.HEAD;
@@ -209,8 +174,8 @@ export class StatusBarCommands {
     #checkoutStatusBar: CheckoutStatusBar;
     #disposables: Disposable[] = [];
 
-    constructor(repository: AbstractRepository, remoteSourceProviderRegistry: IRemoteSourceProviderRegistry) {
-        this.#syncStatusBar = new SyncStatusBar(repository, remoteSourceProviderRegistry);
+    constructor(repository: AbstractRepository) {
+        this.#syncStatusBar = new SyncStatusBar(repository);
         this.#checkoutStatusBar = new CheckoutStatusBar(repository);
         this.onDidChange = anyEvent(this.#syncStatusBar.onDidChange, this.#checkoutStatusBar.onDidChange);
     }

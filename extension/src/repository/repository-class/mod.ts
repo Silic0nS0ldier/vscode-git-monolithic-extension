@@ -7,8 +7,6 @@ import type { Submodule } from "../../git/Submodule.js";
 import * as i18n from "../../i18n/mod.js";
 import { debounce } from "../../package-patches/just-debounce.js";
 import { throat } from "../../package-patches/throat.js";
-import type { IPushErrorHandlerRegistry } from "../../pushError.js";
-import type { IRemoteSourceProviderRegistry } from "../../remoteProvider.js";
 import { StatusBarCommands } from "../../statusbar.js";
 import { create as createSourceControlUI } from "../../ui/source-control.js";
 import { toGitUri } from "../../uri.js";
@@ -53,8 +51,6 @@ import { updateModelState as updateModelStateImpl } from "./update-model-state.j
 
 export function createRepository(
     repository: BaseRepository,
-    remoteSourceProviderRegistry: IRemoteSourceProviderRegistry,
-    pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     globalState: Memento,
     outputChannel: OutputChannel,
 ): AbstractRepository {
@@ -482,7 +478,7 @@ export function createRepository(
             return pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, HEAD.get(), head);
         },
         push(head, forcePushMode) {
-            return pushImpl(run, repository, finalRepository, pushErrorHandlerRegistry, head, forcePushMode);
+            return pushImpl(run, repository, finalRepository, head, forcePushMode);
         },
         pushFollowTags(remote, forcePushMode) {
             return run(
@@ -491,7 +487,6 @@ export function createRepository(
                     pushInternal(
                         repository,
                         finalRepository,
-                        pushErrorHandlerRegistry,
                         remote,
                         undefined,
                         false,
@@ -507,7 +502,6 @@ export function createRepository(
                     pushInternal(
                         repository,
                         finalRepository,
-                        pushErrorHandlerRegistry,
                         remote,
                         undefined,
                         false,
@@ -524,7 +518,6 @@ export function createRepository(
                     pushInternal(
                         repository,
                         finalRepository,
-                        pushErrorHandlerRegistry,
                         remote,
                         name,
                         setUpstream,
@@ -590,7 +583,6 @@ export function createRepository(
                 HEAD.get(),
                 remotes.get(),
                 finalRepository,
-                pushErrorHandlerRegistry,
                 head,
             );
         },
@@ -608,7 +600,6 @@ export function createRepository(
                     HEAD.get(),
                     remotes.get(),
                     finalRepository,
-                    pushErrorHandlerRegistry,
                     head,
                     true,
                 ),
@@ -645,7 +636,7 @@ export function createRepository(
         disposables,
     );
 
-    const statusBar = new StatusBarCommands(finalRepository, remoteSourceProviderRegistry);
+    const statusBar = new StatusBarCommands(finalRepository);
     disposables.push(statusBar);
     statusBar.onDidChange(
         () => sourceControlUI.sourceControl.statusBarCommands = statusBar.commands,

@@ -1,7 +1,6 @@
 import { Uri, window, workspace } from "vscode";
 import { type CommitOptions, Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
-import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as config from "../../../util/config.js";
 import { isDescendant, pathEquals } from "../../../util/paths.js";
@@ -11,7 +10,6 @@ import { sync } from "../sync/sync.js";
 async function smartCommit(
     repository: AbstractRepository,
     getCommitMessage: () => Promise<string | undefined>,
-    model: Model,
     opts?: CommitOptions,
 ): Promise<boolean> {
     const repositoryUri = Uri.file(repository.root);
@@ -176,12 +174,11 @@ async function smartCommit(
 
     switch (postCommitCommand) {
         case "push":
-            await push(repository, { pushType: PushType.Push, silent: true }, model);
+            await push(repository, { pushType: PushType.Push, silent: true });
             break;
         case "sync":
             await sync(
                 repository,
-                model,
             );
             break;
     }
@@ -191,7 +188,6 @@ async function smartCommit(
 
 export async function commitWithAnyInput(
     repository: AbstractRepository,
-    model: Model,
     opts?: CommitOptions,
 ): Promise<void> {
     const message = repository.sourceControlUI.sourceControl.inputBox.value;
@@ -219,7 +215,7 @@ export async function commitWithAnyInput(
         return _message;
     };
 
-    const didCommit = await smartCommit(repository, getCommitMessage, model, opts);
+    const didCommit = await smartCommit(repository, getCommitMessage, opts);
 
     if (message && didCommit) {
         repository.sourceControlUI.sourceControl.inputBox.value = await repository.getInputTemplate();
@@ -228,7 +224,6 @@ export async function commitWithAnyInput(
 
 export async function commitEmpty(
     repository: AbstractRepository,
-    model: Model,
     noVerify?: boolean,
 ): Promise<void> {
     const root = Uri.file(repository.root);
@@ -247,5 +242,5 @@ export async function commitEmpty(
         }
     }
 
-    await commitWithAnyInput(repository, model, { empty: true, noVerify });
+    await commitWithAnyInput(repository, { empty: true, noVerify });
 }

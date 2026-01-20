@@ -384,11 +384,6 @@
                 "category": "Git"
             },
             {
-                "command": "git_monolithic.addRemote",
-                "title": "%command.addRemote%",
-                "category": "Git"
-            },
-            {
                 "command": "git_monolithic.removeRemote",
                 "title": "%command.removeRemote%",
                 "category": "Git"
@@ -740,10 +735,6 @@
                 },
                 {
                     "command": "git_monolithic.pushTags",
-                    "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"
-                },
-                {
-                    "command": "git_monolithic.addRemote",
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"
                 },
                 {
@@ -1389,10 +1380,6 @@
                 }
             ],
             "git_monolithic.remotes": [
-                {
-                    "command": "git_monolithic.addRemote",
-                    "group": "remote@1"
-                },
                 {
                     "command": "git_monolithic.removeRemote",
                     "group": "remote@2"

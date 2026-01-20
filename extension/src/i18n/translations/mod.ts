@@ -661,10 +661,6 @@ export function noRebase(): string {
     return localize("no rebase", "No rebase in progress.");
 }
 
-export function addRemote(): string {
-    return localize("addremote", "Add Remote");
-}
-
 export function noRemotesToPush(): string {
     return localize("no remotes to push", "Your repository has no remotes configured to push to.");
 }
@@ -709,6 +705,10 @@ export function addRemote2(): string {
 
 export function noRemotesToPublish(): string {
     return localize("no remotes to publish", "Your repository has no remotes configured to publish to.");
+}
+
+export function selectRemoteToPublish(): string {
+    return localize("select remote to publish", "Select a remote to publish to.");
 }
 
 export function openRepository(): string {

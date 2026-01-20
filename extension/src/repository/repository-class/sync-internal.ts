@@ -3,7 +3,6 @@ import { ProgressLocation, type ProgressOptions, Uri, window } from "vscode";
 import type { Branch, Remote } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import * as i18n from "../../i18n/mod.js";
-import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import { fromCancellationToken } from "../../util/abort-signal-adapters.js";
 import * as config from "../../util/config.js";
@@ -22,7 +21,6 @@ export async function syncInternal(
     HEAD: Branch | undefined,
     remotes: Remote[],
     finalRepository: AbstractRepository,
-    pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     head: Branch,
     rebase: boolean,
 ): Promise<void> {
@@ -83,7 +81,6 @@ export async function syncInternal(
                     await pushInternal(
                         repository,
                         finalRepository,
-                        pushErrorHandlerRegistry,
                         remoteName,
                         pushBranch,
                         false,

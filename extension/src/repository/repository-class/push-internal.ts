@@ -1,14 +1,10 @@
-import { ApiRepository } from "../../api/api1.js";
 import type { ForcePushModeOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
-import { GitError } from "../../git/error.js";
-import type { IPushErrorHandlerRegistry } from "../../pushError.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 
 export async function pushInternal(
     repository: Repository,
     finalRepository: AbstractRepository,
-    pushErrorHandlerRegistry: IPushErrorHandlerRegistry,
     remote?: string,
     refspec?: string,
     setUpstream: boolean = false,
@@ -23,19 +19,10 @@ export async function pushInternal(
             throw err;
         }
 
-        const repository = new ApiRepository(finalRepository);
-        const remoteObj = repository.state.remotes.find(r => r.name === remote);
+        const remoteObj = finalRepository.remotes.find(r => r.name === remote);
 
         if (!remoteObj) {
             throw err;
-        }
-
-        if (err instanceof GitError) {
-            for (const handler of pushErrorHandlerRegistry.getPushErrorHandlers()) {
-                if (await handler.handlePushError(repository, remoteObj, refspec, err)) {
-                    return;
-                }
-            }
         }
 
         throw err;

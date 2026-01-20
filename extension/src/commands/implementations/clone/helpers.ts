@@ -3,9 +3,7 @@ import { commands, ProgressLocation, Uri, window, workspace } from "vscode";
 import type { Git } from "../../../git.js";
 import { GitError } from "../../../git/error.js";
 import * as i18n from "../../../i18n/mod.js";
-import type { Model } from "../../../model.js";
 import type { TelemetryReporter } from "@vscode/extension-telemetry";
-import { pickRemoteSource } from "../../../remoteSource.js";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
 import * as config from "../../../util/config.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
@@ -18,7 +16,6 @@ const PostCloneAction: Record<PostCloneActionOptions, PostCloneActionOptions> = 
 };
 
 export async function cloneRepository(
-    model: Model,
     telemetryReporter: TelemetryReporter,
     git: Git,
     url?: string,
@@ -27,12 +24,6 @@ export async function cloneRepository(
 ): Promise<void> {
     let normalisedUrl = url;
     let normalisedParentPath = parentPath;
-    if (!normalisedUrl || typeof normalisedUrl !== "string") {
-        normalisedUrl = await pickRemoteSource(model, {
-            providerLabel: provider => i18n.Translations.cloneFrom(provider.name),
-            urlLabel: i18n.Translations.cloneUrl(),
-        });
-    }
 
     if (!normalisedUrl) {
         /* __GDPR__
