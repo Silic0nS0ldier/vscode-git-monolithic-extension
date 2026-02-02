@@ -10,7 +10,7 @@ ARCH="$(uname --processor)"
 # renovate: datasource=github-tags depName=bazelbuild/bazelisk
 BAZELISK_VERSION="v1.28.1"
 # renovate: datasource=github-tags depName=bazelbuild/buildtools
-BUILDTOOLS_VERSION="v8.2.1"
+BUILDTOOLS_VERSION="v8.5.1"
 # renovate: datasource=github-tags depName=withered-magic/starpls
 STARPLS_VERSION="v0.1.22"
 # renovate: datasource=github-tags depName=pnpm/pnpm
