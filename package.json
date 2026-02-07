@@ -30,6 +30,12 @@
                 "dependencies": {
                     "@secretlint/secretlint-formatter-sarif": "^10.2.2"
                 }
+            },
+            "eslint": {
+                "//": "chalk added as workaround for https://github.com/aspect-build/rules_lint/issues/752",
+                "dependencies": {
+                    "chalk": "^4.0.0"
+                }
             }
         }
     }
