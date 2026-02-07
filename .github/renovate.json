@@ -9,7 +9,9 @@
       "description": "Bazel devcontainer feature",
       "customType": "regex",
       "depTypeTemplate": "devcontainer.feature.bazel",
-      "managerFilePatterns": [".devcontainer/feature-bazel/install.sh"],
+      "managerFilePatterns": [
+        ".devcontainer/feature-bazel/install.sh"
+      ],
       "matchStrings": [
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*.*?_VERSION=\"(?<currentValue>.*)\""
       ]
@@ -17,14 +19,22 @@
   ],
   "packageRules": [
     {
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["pnpm.catalog.vscode"],
-      "matchDepNames": ["@types/node"],
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
+        "pnpm.catalog.vscode"
+      ],
+      "matchDepNames": [
+        "@types/node"
+      ],
       "enabled": false,
       "description": "@types/node needs to be kept in sync with VSCode minimum version."
     },
     {
-      "matchManagers": ["npm"],
+      "matchManagers": [
+        "npm"
+      ],
       "matchDepNames": [
         "@eslint/js",
         "eslint",
@@ -34,8 +44,14 @@
       "description": "Update ESLint packages together, since they release at the same time."
     },
     {
-      "matchManagers": ["regex", "npm"],
-      "matchDepNames": ["pnpm", "pnpm/pnpm"],
+      "matchManagers": [
+        "custom.regex",
+        "npm"
+      ],
+      "matchDepNames": [
+        "pnpm",
+        "pnpm/pnpm"
+      ],
       "groupName": "pnpm",
       "description": "Update all pnpm package manager references together."
     }
