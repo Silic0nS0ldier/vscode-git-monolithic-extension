@@ -1,4 +1,5 @@
 import path from "node:path";
+import util from "node:util";
 import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
 import { diffLines, type ChangeObject } from "diff";
 import { indexState } from "monolithic-git-interop/api-opaque/index-state";
@@ -47,7 +48,7 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
         const result = await indexState(this.#gitContext, this.#repositoryPath);
 
         if (isErr(result)) {
-            this.#outputChannel.appendLine(`Failed to read git index: ${unwrap(result)}`);
+            this.#outputChannel.appendLine(`Failed to read git index: ${util.inspect(unwrap(result))}`);
             this.fire(data);
             return;
         }
@@ -82,7 +83,7 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
                 super.fire(data);
             }
         } catch (err) {
-            this.#outputChannel.appendLine(`Failed to diff git index: ${err}`);
+            this.#outputChannel.appendLine(`Failed to diff git index: ${util.inspect(err)}`);
             super.fire(data);
             return;
         }
