@@ -17,6 +17,7 @@ ts_project(
         ":node_modules/@types/node",
         ":node_modules/@types/vscode",
         ":node_modules/@vscode/extension-telemetry",
+        ":node_modules/diff",
         ":node_modules/get-stream",
         ":node_modules/ignore",
         ":node_modules/just-debounce",
