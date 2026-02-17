@@ -26,7 +26,7 @@ export async function readToBuffer(context: ReadToContext, args: string[], maxBu
 
     // Read response
     try {
-        const cliAction = context.cli({ cwd: context.cwd, signal: abortController.signal, stdout }, args);
+        const cliAction = context.cli({ cwd: context.cwd, signal: abortController.signal, stdout, timeout: 1_000 }, args);
         // Throws on max buffer hit
         const streamReader = getStreamAsBuffer(stdout, { maxBuffer });
 
