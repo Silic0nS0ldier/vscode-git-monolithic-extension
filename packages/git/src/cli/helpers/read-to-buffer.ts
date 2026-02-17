@@ -7,6 +7,7 @@ import type { CLI } from "../context.js";
 export type ReadToContext = {
     cli: CLI;
     cwd: string;
+    timeout?: number;
 };
 
 export type ReadToErrors =
@@ -26,7 +27,7 @@ export async function readToBuffer(context: ReadToContext, args: string[], maxBu
 
     // Read response
     try {
-        const cliAction = context.cli({ cwd: context.cwd, signal: abortController.signal, stdout, timeout: 1_000 }, args);
+        const cliAction = context.cli({ cwd: context.cwd, signal: abortController.signal, stdout, timeout: context.timeout }, args);
         // Throws on max buffer hit
         const streamReader = getStreamAsBuffer(stdout, { maxBuffer });
 

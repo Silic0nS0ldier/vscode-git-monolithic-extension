@@ -15,7 +15,7 @@ export async function indexState(
     cwd: string,
 ): Promise<Result<Buffer, ReadToErrors>>{
     return await readToBuffer(
-        { cli: git.cli, cwd},
+        { cli: git.cli, cwd, timeout: 1_000 },
         ["ls-files", "--format=%(objectmode)␟%(objecttype)␟%(objectname)␟%(objectsize)␟%(stage)␟%(path)"],
         Infinity,
     );
