@@ -48,11 +48,13 @@ import { syncLabel as syncLabelImpl } from "./sync-label.js";
 import { syncTooltip as syncTooltipImpl } from "./sync-tooltip.js";
 import { sync as syncImpl } from "./sync.js";
 import { updateModelState as updateModelStateImpl } from "./update-model-state.js";
+import type { GitContext } from "monolithic-git-interop/cli";
 
 export function createRepository(
     repository: BaseRepository,
     globalState: Memento,
     outputChannel: OutputChannel,
+    gitContext: GitContext,
 ): AbstractRepository {
     const disposables: Disposable[] = [];
     const repoRoot = repository.root;
@@ -62,7 +64,7 @@ export function createRepository(
     disposables.push(workingTreeWatcher);
     const onWorkingTreeFileChange = workingTreeWatcher.event;
 
-    const dotGitFileWatcher = createDotGitWatcher(dotGit, outputChannel);
+    const dotGitFileWatcher = createDotGitWatcher(dotGit, repoRoot, outputChannel, gitContext);
     disposables.push(dotGitFileWatcher);
     const onDotGitFileChange = dotGitFileWatcher.event;
 

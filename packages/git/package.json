@@ -13,6 +13,10 @@
             "import": "./dist/api/*.js",
             "types": "./dist/api/*.d.ts"
         },
+        "./api-opaque/*": {
+            "import": "./dist/api-opaque/*.js",
+            "types": "./dist/api-opaque/*.d.ts"
+        },
         "./cli": {
             "import": "./dist/cli/mod.js",
             "types": "./dist/cli/mod.d.ts"

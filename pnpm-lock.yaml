@@ -100,6 +100,9 @@ importers:
       '@vscode/extension-telemetry':
         specifier: ^1.5.0
         version: 1.5.0(tslib@2.8.1)
+      diff:
+        specifier: ^8.0.3
+        version: 8.0.3
       get-stream:
         specifier: 'catalog:'
         version: 9.0.1
@@ -1100,6 +1103,10 @@ packages:
 
   dettle@1.0.5:
     resolution: {integrity: sha512-ZVyjhAJ7sCe1PNXEGveObOH9AC8QvMga3HJIghHawtG7mE4K5pW9nz/vDGAr/U7a3LWgdOzEE7ac9MURnyfaTA==}
+
+  diff@8.0.3:
+    resolution: {integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==}
+    engines: {node: '>=0.3.1'}
 
   dom-serializer@2.0.0:
     resolution: {integrity: sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg==}
@@ -3490,6 +3497,8 @@ snapshots:
   detect-libc@2.1.1: {}
 
   dettle@1.0.5: {}
+
+  diff@8.0.3: {}
 
   dom-serializer@2.0.0:
     dependencies:
