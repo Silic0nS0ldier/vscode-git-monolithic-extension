@@ -11,6 +11,7 @@ export type CLIContext = {
     readonly timeout?: number;
     /** @todo Use native types once VSCode at NodeJS 15. */
     readonly signal?: AbortSignal;
+    readonly onSpawn?: (pid: number) => void;
 };
 
 export type CLIErrors =
