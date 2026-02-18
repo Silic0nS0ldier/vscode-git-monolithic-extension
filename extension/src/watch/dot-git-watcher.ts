@@ -1,39 +1,18 @@
 import path from "node:path";
-import util from "node:util";
+import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
-import { diffLines, type ChangeObject } from "diff";
-import { indexState } from "monolithic-git-interop/api-opaque/index-state";
 import { watch } from "./watch.js";
-import type { GitContext } from "monolithic-git-interop/cli";
-import { isErr, unwrap } from "monolithic-git-interop/util/result";
-
-function renderChangeObject(change: ChangeObject<string>) {
-    if (change.added) {
-        return `+ ${change.value}`;
-    }
-    if (change.removed) {
-        return `- ${change.value}`;
-    }
-    return `  ${change.value}`;
-}
 
 class DotGitEventEmitter extends EventEmitter<Uri> {
-    /**
-     * Tracks the last known state of the git index to allow monitoring _exactly_ what changes
-     * caused an event (e.g. metadata vs. content changes).
-     */
-    lastGitIndex: Buffer|null = null;
+    #lastGitIndexDigest: string|null = null;
     #gitIndexPath: string;
-    #repositoryPath: string;
-    #gitContext: GitContext;
     #outputChannel: OutputChannel;
 
-    constructor(dotGitDir: string, repositoryPath: string, outputChannel: OutputChannel, gitContext: GitContext) {
+    constructor(dotGitDir: string, outputChannel: OutputChannel) {
         super();
         this.#gitIndexPath = path.join(dotGitDir, "index");
-        this.#repositoryPath = repositoryPath;
         this.#outputChannel = outputChannel;
-        this.#gitContext = gitContext;
     }
 
     override fire(data: Uri): void {
@@ -45,48 +24,17 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
     }
 
     async #maybeFireIndexChange(data: Uri): Promise<void> {
-        const result = await indexState(this.#gitContext, this.#repositoryPath);
+        const currentIndexBuffer = await fs.readFile(this.#gitIndexPath);
+        const currentIndexDigest = crypto.hash("SHA-1", currentIndexBuffer);
 
-        if (isErr(result)) {
-            this.#outputChannel.appendLine(`Failed to read git index: ${util.inspect(unwrap(result))}`);
-            this.fire(data);
+        if (currentIndexDigest === this.#lastGitIndexDigest) {
+            // Index content most likely unchanged
+            this.#outputChannel.appendLine("Index file content appears unchanged, skipping event.");
             return;
         }
 
-        const newIndex = unwrap(result);
-        const oldIndex = this.lastGitIndex;
-
-        if (oldIndex == null) {
-            this.lastGitIndex = newIndex;
-            this.#outputChannel.appendLine("Initial index state recorded");
-            super.fire(data);
-            return;
-        }
-
-        try {
-            const diff = diffLines(oldIndex.toString('utf-8'), newIndex.toString('utf-8'));
-            if (diff.length > 0) {
-                this.#outputChannel.appendLine(`Git index changed with ${diff.length} diff entries`);
-                for (const entry of diff.slice(0, 10)) {
-                    this.#outputChannel.appendLine(renderChangeObject(entry));
-                }
-                if (diff.length > 10) {
-                    this.#outputChannel.appendLine(`... and ${diff.length - 10} more entries`);
-                }
-                super.fire(data);
-            } else if (oldIndex.equals(newIndex)) {
-                // Ideally this won't be needed, but has been included out an abundance of caution while `jsdiff` is vetted.
-                // TODO(Silic0nS0ldier): Remove once confidence in `jsdiff` is established.
-                this.#outputChannel.appendLine("Git index changed but inspected content is identical");
-            } else {
-                this.#outputChannel.appendLine("Git index changed but content comparison is inconclusive");
-                super.fire(data);
-            }
-        } catch (err) {
-            this.#outputChannel.appendLine(`Failed to diff git index: ${util.inspect(err)}`);
-            super.fire(data);
-            return;
-        }
+        this.#lastGitIndexDigest = currentIndexDigest;
+        super.fire(data);
     }
 }
 
@@ -94,9 +42,7 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
 // This is a lot more efficient then watching everything, and avoids workarounds for aids like watchman as an fsmonitor
 export function createDotGitWatcher(
     dotGitDir: string,
-    repositoryPath: string,
     outputChannel: OutputChannel,
-    gitContext: GitContext,
 ): { event: Event<Uri> } & Disposable {
     const rootWatcher = watch(
         [
@@ -134,7 +80,7 @@ export function createDotGitWatcher(
         "dot-git",
     );
 
-    const emitter = new DotGitEventEmitter(dotGitDir, repositoryPath, outputChannel, gitContext);
+    const emitter = new DotGitEventEmitter(dotGitDir, outputChannel);
     const disposable = Disposable.from(rootWatcher, emitter);
 
     rootWatcher.event((uri) => emitter.fire(uri));

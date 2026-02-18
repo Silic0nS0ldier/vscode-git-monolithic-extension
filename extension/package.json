@@ -5,7 +5,6 @@
         "@formatjs/intl-durationformat": "catalog:",
         "@js-temporal/polyfill": "catalog:",
         "@vscode/extension-telemetry": "^1.5.0",
-        "diff": "^8.0.3",
         "get-stream": "catalog:",
         "ignore": "^7.0.5",
         "just-debounce": "^1.1.0",
