@@ -1,7 +1,42 @@
 import path from "node:path";
+import fs from "node:fs/promises";
+import crypto from "node:crypto";
 import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
-import { anyEvent } from "../util/events.js";
 import { watch } from "./watch.js";
+
+class DotGitEventEmitter extends EventEmitter<Uri> {
+    #lastGitIndexDigest: string|null = null;
+    #gitIndexPath: string;
+    #outputChannel: OutputChannel;
+
+    constructor(dotGitDir: string, outputChannel: OutputChannel) {
+        super();
+        this.#gitIndexPath = path.join(dotGitDir, "index");
+        this.#outputChannel = outputChannel;
+    }
+
+    override fire(data: Uri): void {
+        if (data.fsPath === this.#gitIndexPath) {
+            this.#maybeFireIndexChange(data);
+            return;
+        }
+        super.fire(data);
+    }
+
+    async #maybeFireIndexChange(data: Uri): Promise<void> {
+        const currentIndexBuffer = await fs.readFile(this.#gitIndexPath);
+        const currentIndexDigest = crypto.hash("SHA-1", currentIndexBuffer);
+
+        if (currentIndexDigest === this.#lastGitIndexDigest) {
+            // Index content most likely unchanged
+            this.#outputChannel.appendLine("Index file content appears unchanged, skipping event.");
+            return;
+        }
+
+        this.#lastGitIndexDigest = currentIndexDigest;
+        super.fire(data);
+    }
+}
 
 // Watch specific files for meaningful git events
 // This is a lot more efficient then watching everything, and avoids workarounds for aids like watchman as an fsmonitor
@@ -9,8 +44,6 @@ export function createDotGitWatcher(
     dotGitDir: string,
     outputChannel: OutputChannel,
 ): { event: Event<Uri> } & Disposable {
-    const emitter = new EventEmitter<Uri>();
-
     const rootWatcher = watch(
         [
             // Where we are
@@ -47,13 +80,13 @@ export function createDotGitWatcher(
         "dot-git",
     );
 
-    const disposable = Disposable.from(
-        emitter,
-        rootWatcher,
-    );
+    const emitter = new DotGitEventEmitter(dotGitDir, outputChannel);
+    const disposable = Disposable.from(rootWatcher, emitter);
+
+    rootWatcher.event((uri) => emitter.fire(uri));
 
     return {
         dispose: () => disposable.dispose(),
-        event: anyEvent(rootWatcher.event, emitter.event),
+        event: emitter.event,
     };
 }
