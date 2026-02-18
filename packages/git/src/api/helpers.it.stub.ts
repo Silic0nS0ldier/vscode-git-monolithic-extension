@@ -22,22 +22,29 @@ export const gitCtx = await (async () => {
 
 export async function tempGitRepo(initialCommit: boolean = false) {
     const repoPath = await fs.mkdtemp(path.join(os.tmpdir(), "git-interop-test"));
-    const result = await init(gitCtx, repoPath);
-    if (isErr(result)) {
-        throw unwrap(result);
-    }
-
-    if (initialCommit) {
-        const commitResult = await gitCtx.cli({ cwd: repoPath }, ["commit", "--allow-empty", "-m", "Initial commit"]);
-        if (isErr(commitResult)) {
-            throw unwrap(commitResult);
+    try {
+        const result = await init(gitCtx, repoPath);
+        if (isErr(result)) {
+            throw unwrap(result);
         }
-    }
 
-    return {
-        path: repoPath,
-        async [Symbol.asyncDispose]() {
-            await fs.rm(repoPath, { recursive: true, force: true });
-        },
-    };
+        if (initialCommit) {
+            // TODO This code path is broken and thrown error reveals little
+            const commitResult = await gitCtx.cli({ cwd: repoPath }, ["commit", "--allow-empty", "-m", "Initial commit"]);
+            if (isErr(commitResult)) {
+                throw unwrap(commitResult);
+            }
+        }
+
+        return {
+            path: repoPath,
+            async [Symbol.asyncDispose]() {
+                await fs.rm(repoPath, { recursive: true, force: true });
+            },
+        };
+    } catch (error) {
+        // Clean up the directory if initialization fails
+        await fs.rm(repoPath, { recursive: true, force: true });
+        throw error;
+    }
 }

@@ -3,6 +3,7 @@ load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//packages/git:ava/package_json.bzl", "bin")
 load("//build_defs/lint:linters.bzl", "eslint_test")
+load("@aspect_rules_js//js:defs.bzl", "js_test")
 
 npm_link_all_packages(name = "node_modules")
 
@@ -87,20 +88,28 @@ ts_project(
     deps = [
         ":lib",
         ":node_modules/@bazel/runfiles",
-        ":node_modules/ava",
-        ":node_modules/into-stream",
     ],
 )
 
-bin.ava_test(
+test_suite(
     name = "integration_tests",
-    chdir = package_name(),
-    data = [
-        "package.json",
-        ":lib_integration_tests",
-        "@git",
-    ],
+    tests = [":integration_tests_" + str(i) for i, _ in enumerate(glob(["src/**/*.it.test.ts"]))],
 )
+
+[
+    js_test(
+        name = "integration_tests_" + str(i),
+        data = [
+            "package.json",
+            ":lib_integration_tests",
+            "@git",
+        ],
+        entry_point = s.replace("src/", "dist/").replace(".ts", ".js"),
+        args = [
+            "--test",
+        ]
+    ) for i, s in enumerate(glob(["src/**/*.it.test.ts"]))
+]
 
 eslint_test(
     name = "eslint",

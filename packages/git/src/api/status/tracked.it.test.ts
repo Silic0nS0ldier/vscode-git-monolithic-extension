@@ -1,23 +1,22 @@
-import test from "ava";
+import test from "node:test";
+import assert from "node:assert";
 import { isErr, unwrap } from "../../func-result.js";
-import { inspect } from "node:util";
 import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
 import { tracked } from "./tracked.js";
 import path from "node:path";
 import fs from "node:fs/promises";
 
-test(tracked.name + " - relative - empty", async t => {
+test(tracked.name + " - relative - empty", async () => {
     await using repo = await tempGitRepo();
     const result = await tracked(gitCtx, repo.path, "relative");
     if (isErr(result)) {
-        t.fail(`Expected tracked to succeed, but it failed with: ${inspect(unwrap(result))}`);
-        return;
+        throw unwrap(result);
     }
     const statuses = unwrap(result);
-    t.deepEqual(statuses, []);
+    assert.deepStrictEqual(statuses, []);
 });
 
-test(tracked.name + " - relative - basic case", async t => {
+test(tracked.name + " - relative - basic case", async () => {
     await using repo = await tempGitRepo();
 
     // Create some tracked files
@@ -27,15 +26,13 @@ test(tracked.name + " - relative - basic case", async t => {
     await fs.writeFile(file2, "Hello, again!");
     const addResult = await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
     if (isErr(addResult)) {
-        t.fail(`Failed to add files: ${inspect(unwrap(addResult))}`);
-        return;
+        throw unwrap(addResult);
     }
 
     const result = await tracked(gitCtx, repo.path, "relative");
     if (isErr(result)) {
-        t.fail(`Expected tracked to succeed, but it failed with: ${inspect(unwrap(result))}`);
-        return;
+        throw unwrap(result);
     }
     const statuses = unwrap(result);
-    t.deepEqual(statuses.map(s => s.path).sort(), ["file1.txt", "file2.txt"]);
+    assert.deepStrictEqual(statuses.map(s => s.path).sort(), ["file1.txt", "file2.txt"]);
 });

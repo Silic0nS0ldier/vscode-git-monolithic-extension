@@ -1,16 +1,15 @@
-import test from "ava";
+import test from "node:test";
+import assert from "node:assert";
 import { isErr, unwrap } from "../../func-result.js";
-import { inspect } from "node:util";
 import { tempGitRepo, gitCtx, services } from "../helpers.it.stub.js";
 import { showToplevel } from "./show-toplevel.js";
 
-test(showToplevel.name, async t => {
+test(showToplevel.name, async () => {
     await using repo = await tempGitRepo();
     const result = await showToplevel(gitCtx, repo.path, services);
     if (isErr(result)) {
-        t.fail(`Expected showToplevel to succeed, but it failed with: ${inspect(unwrap(result))}`);
-        return;
+        throw unwrap(result);
     }
     const topLevelPath = unwrap(result);
-    t.is(topLevelPath, repo.path);
+    assert.strictEqual(topLevelPath, repo.path);
 });

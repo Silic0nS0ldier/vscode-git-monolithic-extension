@@ -1,23 +1,22 @@
-import test from "ava";
+import test from "node:test";
+import assert from "node:assert";
 import { isErr, unwrap } from "../../func-result.js";
-import { inspect } from "node:util";
 import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { untracked } from "./untracked.js";
 
-test(untracked.name + " - relative - empty", async t => {
+test(untracked.name + " - relative - empty", async () => {
     await using repo = await tempGitRepo();
     const result = await untracked(gitCtx, repo.path, "relative");
     if (isErr(result)) {
-        t.fail(`Expected untracked to succeed, but it failed with: ${inspect(unwrap(result))}`);
-        return;
+        throw unwrap(result);
     }
     const statuses = unwrap(result);
-    t.deepEqual(statuses, []);
+    assert.deepStrictEqual(statuses, []);
 });
 
-test(untracked.name + " - relative - basic case", async t => {
+test(untracked.name + " - relative - basic case", async () => {
     await using repo = await tempGitRepo();
 
     // Create some untracked files
@@ -28,9 +27,8 @@ test(untracked.name + " - relative - basic case", async t => {
 
     const result = await untracked(gitCtx, repo.path, "relative");
     if (isErr(result)) {
-        t.fail(`Expected untracked to succeed, but it failed with: ${inspect(unwrap(result))}`);
-        return;
+        throw unwrap(result);
     }
     const statuses = unwrap(result);
-    t.deepEqual(statuses.sort(), ["file1.txt", "file2.txt"]);
+    assert.deepStrictEqual(statuses.sort(), ["file1.txt", "file2.txt"]);
 });
