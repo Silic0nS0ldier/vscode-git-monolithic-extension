@@ -1,6 +1,4 @@
 import type { Readable } from "node:stream";
-import { DurationFormat } from "@formatjs/intl-durationformat";
-import { Temporal } from "@js-temporal/polyfill";
 import {
     createError,
     ERROR_CANCELLED,
@@ -39,10 +37,7 @@ export type CreateServices = {
     process: {
         env: NodeJS.ProcessEnv;
     };
-    log?: LogFn,
 };
-
-let createCounter = 4;
 
 /**
  * Creates a wrapper around the git CLI.
@@ -51,10 +46,7 @@ let createCounter = 4;
  * @param persistentContext Persistent context for CLI. Provides a mechanism for bound control and monitoring.
  */
 export function create(executablePath: string, persistentContext: PersistentCLIContext, services: CreateServices): CLI {
-    const baseInvocId = `CMD_${createCounter++}`;
-    let runCounter = 0;
     return async function cli(context, args) {
-        const invocId = `${baseInvocId}_${runCounter++}`;
 
         // Compose environment variables
         const env = {
@@ -71,7 +63,6 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
             executablePath,
         };
 
-        const start = Date.now();
         const cpRes = ((): Result<ChildProcess, GenericError> => {
             try {
                 return ok(services.child_process.spawn(executablePath, args, { cwd, env, stdio: "pipe" }));
@@ -86,7 +77,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
 
         const cp = unwrap(cpRes);
         const pid = cp.pid;
-        services.log?.(`${invocId} > (PID = ${pid}) ${executablePath} ${args.join(" ")}`);
+        context.onSpawn?.(pid ?? -1);
 
         if (context.stdout) {
             cp.stdout.pipe(context.stdout);
@@ -120,12 +111,8 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
 
         // NOTE onExit must come last, unit tests rely on this (they are time optimised)
         const result = await Promise.race([onTimeout, onError, onAbort, onExit]);
-        const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
-        // TODO Remove ponyfill once VSCode updates to NodeJS v23 or higher
-        const durationStr = new DurationFormat("en", { style: "narrow" }).format(duration);
 
         if (isErr(result)) {
-            services.log?.(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
             // End process
             if (cp.connected) {
                 // TODO monitor for errors killing
@@ -138,11 +125,9 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         const exitstate = unwrap(result);
         
         if (exitstate.code !== 0) {
-            services.log?.(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
             return err(createError(ERROR_NON_ZERO_EXIT, { cmdContext, exitstate }));
         }
         
-        services.log?.(`${invocId} < SUCCESS (PID = ${pid}; Duration = ${durationStr})`);
         return ok(void 0);
     };
 }

@@ -38,24 +38,37 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
         const context = unwrap(result);
         const monitoredContext: GitContext = {
             ...context,
-            cli: async (c, a) => {
+            cli: async (cliContext, args) => {
                 const invocId = `CMD_0_${runCounter++}`;
 
                 // Log input
-                outputChannel.appendLine(`${invocId} > git ${a.join(" ")}`);
+                outputChannel.appendLine(`${invocId} > git ${args.join(" ")}`);
 
                 // Log output
                 const stdoutLog = (msg: string): void => outputChannel.appendLine(`${invocId} < [STDOUT] ${msg}`);
-                const stdout = c.stdout
-                    ? snoopOnStream(c.stdout, stdoutLog)
+                const stdout = cliContext.stdout
+                    ? snoopOnStream(cliContext.stdout, stdoutLog)
                     : new SnoopStream(stdoutLog);
                 const stderrLog = (msg: string): void => outputChannel.appendLine(`${invocId} < [STDERR] ${msg}`);
-                const stderr = c.stderr
-                    ? snoopOnStream(c.stderr, stderrLog)
+                const stderr = cliContext.stderr
+                    ? snoopOnStream(cliContext.stderr, stderrLog)
                     : new SnoopStream(stderrLog);
 
+                let pid: number = -1;
+                const onSpawn = (spawnPid: number): void => {
+                    pid = spawnPid;
+                    cliContext.onSpawn?.(spawnPid);
+                }
+
                 const start = Date.now();
-                const result = await context.cli({ ...c, stderr, stdout }, a);
+                const result = await context.cli(
+                    {
+                        ...cliContext,
+                        stderr,
+                        stdout,
+                        onSpawn,
+                    }, 
+                    args,);
 
                 const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
                 // TODO Remove ponyfill once VSCode updates to NodeJS v23 or higher
@@ -64,9 +77,9 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                 // Log result
                 if (isErr(result)) {
                     const err = unwrap(result);
-                    outputChannel.appendLine(`${invocId} < ERROR (${durationStr}) ${err.type.description}`);
+                    outputChannel.appendLine(`${invocId} < ERROR (PID = ${pid}, Duration = ${durationStr}) ${err.type.description}`);
                 } else {
-                    outputChannel.appendLine(`${invocId} < SUCCESS (${durationStr})`);
+                    outputChannel.appendLine(`${invocId} < SUCCESS (PID = ${pid}, Duration = ${durationStr})`);
                 }
 
                 return result;
