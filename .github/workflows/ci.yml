@@ -21,6 +21,15 @@ jobs:
           disk-cache: "${{ github.workflow }}-test"
           repository-cache: true
       - run: bazel test //...
+        id: test
+        continue-on-error: true
+      - uses: actions/upload-artifact@v6
+        if: steps.test.outcome == 'failure'
+        with:
+          name: test-logs
+          path: .bazel/testlogs/**/test.log
+      - run: exit 1
+        if: steps.test.outcome == 'failure'
   build:
     runs-on: ubuntu-latest
     steps:
