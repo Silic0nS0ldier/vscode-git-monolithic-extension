@@ -349,7 +349,6 @@ export class Model {
                 this.git.open(repositoryRoot, dotGit),
                 this.#globalState,
                 this.#outputChannel,
-                this.git._context
             );
 
             this.#open(repository);
