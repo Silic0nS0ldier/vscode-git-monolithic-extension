@@ -10,6 +10,7 @@ bazel_dep(name = "aspect_rules_lint", version = "2.1.0")
 bazel_dep(name = "rules_multitool", version = "1.11.1")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "git", version = "2.53.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(

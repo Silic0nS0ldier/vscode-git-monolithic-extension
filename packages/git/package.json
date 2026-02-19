@@ -35,6 +35,7 @@
         }
     },
     "devDependencies": {
+        "@bazel/runfiles": "^6.5.0",
         "@types/which": "^3.0.4",
         "ava": "catalog:",
         "into-stream": "^9.1.0"
