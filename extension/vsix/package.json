@@ -6,7 +6,7 @@
     "license": "MIT",
     "version": "0.3.0",
     "engines": {
-        "vscode": "^1.109.4"
+        "vscode": "^1.109.5"
     },
     "extensionKind": [
         "workspace"
