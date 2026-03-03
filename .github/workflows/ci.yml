@@ -23,7 +23,7 @@ jobs:
       - run: bazel test //...
         id: test
         continue-on-error: true
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: steps.test.outcome == 'failure'
         with:
           name: test-logs
@@ -40,7 +40,7 @@ jobs:
           disk-cache: "${{ github.workflow }}-build"
           repository-cache: true
       - run: bazel build //extension/vsix:git_monolithic --stamp --platforms=//build_defs/platforms:vscode_ext
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
