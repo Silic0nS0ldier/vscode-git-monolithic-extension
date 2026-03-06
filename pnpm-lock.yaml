@@ -19,8 +19,8 @@ catalogs:
       specifier: ^7.0.0
       version: 7.0.0
     cleye:
-      specifier: ^2.2.1
-      version: 2.2.1
+      specifier: ^2.3.0
+      version: 2.3.0
     get-stream:
       specifier: ^9.0.1
       version: 9.0.1
@@ -67,7 +67,7 @@ importers:
         version: 16.0.3(rollup@4.59.0)
       cleye:
         specifier: 'catalog:'
-        version: 2.2.1
+        version: 2.3.0
       rollup:
         specifier: ^4.59.0
         version: 4.59.0
@@ -83,7 +83,7 @@ importers:
         version: 3.7.1
       cleye:
         specifier: 'catalog:'
-        version: 2.2.1
+        version: 2.3.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -973,8 +973,8 @@ packages:
   ci-parallel-vars@1.0.1:
     resolution: {integrity: sha512-uvzpYrpmidaoxvIQHM+rKSrigjOe9feHYbw4uOI2gdfe1C3xIlxO+kVXq83WQWNniTf8bAxVpy+cQeFQsMERKg==}
 
-  cleye@2.2.1:
-    resolution: {integrity: sha512-eZzJGlG3N6+IsKV+297HIRS2fyRsLMOrx62hGUmmcyOtP/I+L7JVeSKZH49WZUdVB8NoaZOUvq01363I/PHJiA==}
+  cleye@2.3.0:
+    resolution: {integrity: sha512-hnROLVsAA8JQo8W65/khA90gPvZ0ymuZqWwQcBpHrrmpIDD2CLvB7HdqAeA0Odxf7RpJLS5Zor0ujlPOXx4IBQ==}
 
   cli-truncate@5.1.1:
     resolution: {integrity: sha512-SroPvNHxUnk+vIW/dOSfNqdy1sPEFkrTk6TUtqLCnBlo3N7TNYYkzzN7uSD6+jVjrdO4+p8nH7JzH6cIvUem6A==}
@@ -2235,8 +2235,8 @@ packages:
     resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
     engines: {node: '>=16'}
 
-  type-flag@4.0.3:
-    resolution: {integrity: sha512-YA09cL07U7hSV+/doSfKl+RkIZ2olCnevZsVgAuyBUG3h2ROf9Oh2vmbq5Rf26aA9/qu9RtStuc7ap5PC6k/vw==}
+  type-flag@4.1.0:
+    resolution: {integrity: sha512-I/K5a1jUhdFgzM3L7413akxQRzUYq4sCbef6bMAe6SrIvIdFxGZFJys5M1SiY0d0VrAjZjY4LQzppuTaLHMvSQ==}
 
   typed-rest-client@1.8.11:
     resolution: {integrity: sha512-5UvfMpd1oelmUPRbbaVnq+rHP7ng2cE4qoQkQeAqxRL6PklkxsM0g32/HL0yfvruK6ojQ5x8EE+HF4YV6DtuCA==}
@@ -3385,10 +3385,10 @@ snapshots:
 
   ci-parallel-vars@1.0.1: {}
 
-  cleye@2.2.1:
+  cleye@2.3.0:
     dependencies:
       terminal-columns: 2.0.0
-      type-flag: 4.0.3
+      type-flag: 4.1.0
 
   cli-truncate@5.1.1:
     dependencies:
@@ -4669,7 +4669,7 @@ snapshots:
 
   type-fest@4.41.0: {}
 
-  type-flag@4.0.3: {}
+  type-flag@4.1.0: {}
 
   typed-rest-client@1.8.11:
     dependencies:
