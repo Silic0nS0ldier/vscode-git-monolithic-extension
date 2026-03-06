@@ -19,5 +19,11 @@
 				"bazel.lsp.args": ["server"]
 			}
 		}
+	},
+	"initializeCommand": {
+		"gh-cli-auth": "gh auth token > .git/__gh_token"
+	},
+	"postStartCommand": {
+		"gh-cli-auth": "gh auth login --with-token < .git/__gh_token"
 	}
 }
