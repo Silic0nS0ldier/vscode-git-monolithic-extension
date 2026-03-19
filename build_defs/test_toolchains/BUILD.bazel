@@ -1,0 +1,9 @@
+# rust_wasm_bindgen_test uses a transition that breaks under Bazel 9+
+# This is a workaround.
+toolchain(
+    name = "wasm32_test_toolchain",
+    toolchain = "@bazel_tools//tools/test:empty_toolchain",
+    toolchain_type = "@bazel_tools//tools/test:default_test_toolchain_type",
+    target_compatible_with = ["@platforms//cpu:wasm32", "@platforms//os:none"],
+    visibility = ["//visibility:private"],
+)

@@ -81,4 +81,5 @@ register_toolchains(
     # Required for building with //build_defs/platforms:vscode_ext target platform
     "//build_defs/rust_wasm_bindgen:toolchain_for_vscode_ext",
     "@llvm//toolchain:all",
+    "//build_defs/test_toolchains:wasm32_test_toolchain",
 )
