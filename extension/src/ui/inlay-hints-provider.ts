@@ -78,7 +78,7 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 }];
             }
 
-            if (isExecutable && !hasShebang) {
+            if (isExecutable) {
                 // If the file is executable and does not have a shebang.
                 // This is unusual, so we provide a hint.
                 outputChannel.appendLine("File is executable but has no shebang.");

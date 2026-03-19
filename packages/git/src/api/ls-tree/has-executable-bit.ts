@@ -9,6 +9,10 @@ const pattern = /^(?<perm>\d{6}).*$/;
 // From https://stackoverflow.com/a/60128480
 const execBitmask = 0o111;
 
+// TODO add variants for
+// - staged, `git ls-tree HEAD foo`
+// - working tree, check file permissions directly
+// - specific commit, `git ls-tree <commit-ish> foo`, covered here
 export async function hasExecutableBit(
     git: GitContext,
     cwd: string,
