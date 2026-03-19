@@ -9,7 +9,7 @@ import fs from "node:fs/promises";
 test(hasExecutableBit.name, async () => {
     await using repo = await tempGitRepo(true);
 
-    async function assertHasExecutableBit(filePath: string, commit_ish: string, expected: boolean) {
+    async function assertHasExecutableBit(filePath: string, commit_ish: string, expected: boolean | undefined) {
         const result = await hasExecutableBit(gitCtx, repo.path, filePath, commit_ish);
         if (isErr(result)) {
             throw unwrap(result);
@@ -29,8 +29,8 @@ test(hasExecutableBit.name, async () => {
     await fs.chmod(nonExecFilePath, 0o644); // rw-r--r--
 
     // Untracked
-    await assertHasExecutableBit("executable.sh", "HEAD", false);
-    await assertHasExecutableBit("non_executable.txt", "HEAD", false);
+    await assertHasExecutableBit("executable.sh", "HEAD", undefined);
+    await assertHasExecutableBit("non_executable.txt", "HEAD", undefined);
 
     // Commit the files
     await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
@@ -41,5 +41,5 @@ test(hasExecutableBit.name, async () => {
     await assertHasExecutableBit("non_executable.txt", "HEAD", false);
 
     // Non-existent file
-    await assertHasExecutableBit("nonexistent.txt", "HEAD", false);
+    await assertHasExecutableBit("nonexistent.txt", "HEAD", undefined);
 });

@@ -1458,7 +1458,24 @@ export class Repository {
         const result = await hasExecutableBit(this.#git._context, this.#repositoryRoot, filePath, commit_ish ?? 'HEAD');
 
         if (isOk(result)) {
-            return unwrap(result);
+            const gitHasExecBit = unwrap(result);
+
+            if (gitHasExecBit === undefined && !commit_ish) {
+                // If the file doesn't exist at HEAD, we can check the working tree for the exec bit
+                try {
+                    const stats = await fs.stat(path.join(this.#repositoryRoot, filePath));
+                    return (stats.mode & 0o111) !== 0;
+                } catch (err) {
+                    if (err instanceof Error && /ENOENT/.test(err.message)) {
+                        // If the file doesn't exist in the working tree either, we can return false
+                        return false;
+                    }
+
+                    throw err;
+                }
+            }
+
+            return gitHasExecBit;
         }
 
         throw unwrap(result);
