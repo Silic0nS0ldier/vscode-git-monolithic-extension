@@ -24,8 +24,9 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
         onDidChangeInlayHints: onChangedEmitter.event,
         async provideInlayHints(document, range, _token) {
             outputChannel.appendLine(`Providing inlay hints for document: ${document.uri.toString()}`);
-            if (!inlayFilePermissions) {
-                outputChannel.appendLine("Inlay hints for file permissions are disabled in the configuration.");
+            const hasShebang = document.getText(SHEBANG_RANGE) === "#!";
+            if (!inlayFilePermissions && !hasShebang) {
+                outputChannel.appendLine("Inlay hints for file permissions are disabled in the configuration and the file has no shebang.");
                 return [];
             }
 
@@ -62,7 +63,6 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                     throw error;
                 }
             })();
-            const hasShebang = document.getText(SHEBANG_RANGE) === "#!";
 
             outputChannel.appendLine(`Executable? ${isExecutable}, Shebang? ${hasShebang}`);
 
