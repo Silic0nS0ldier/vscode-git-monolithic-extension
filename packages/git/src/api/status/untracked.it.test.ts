@@ -32,3 +32,23 @@ test(untracked.name + " - relative - basic case", async () => {
     const statuses = unwrap(result);
     assert.deepStrictEqual(statuses.sort(), ["file1.txt", "file2.txt"]);
 });
+
+test(untracked.name + " - relative - many files", async () => {
+    await using repo = await tempGitRepo();
+
+    // Create many untracked files
+    const fileCount = 1000;
+    const fileNames = [];
+    for (let i = 0; i < fileCount; i++) {
+        const fileName = `file${i}.txt`;
+        fileNames.push(fileName);
+        await fs.writeFile(path.join(repo.path, fileName), `Content of ${fileName}`);
+    }
+
+    const result = await untracked(gitCtx, repo.path, "relative");
+    if (isErr(result)) {
+        throw unwrap(result);
+    }
+    const statuses = unwrap(result);
+    assert.deepStrictEqual(statuses.sort(), fileNames.sort());
+});

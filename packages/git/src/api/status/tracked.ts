@@ -4,14 +4,14 @@ import type { GitContext } from "../../cli/context.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import { createError, ERROR_GENERIC, type GenericError } from "../../errors.js";
 
-export type UntrackedErrors = GenericError;
+export type TrackedErrors = GenericError;
 
 export async function tracked(
     git: GitContext,
     cwd: string,
     pathFormat: "relative"|"absolute",
     opts?: { ignoreSubmodules?: boolean },
-): Promise<Result<IFileStatus[], UntrackedErrors>> {
+): Promise<Result<IFileStatus[], TrackedErrors>> {
     if (pathFormat === "absolute") {
         throw new Error("Not implemented");
     }
