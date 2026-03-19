@@ -1475,7 +1475,7 @@ export class Repository {
                 }
             }
 
-            return gitHasExecBit;
+            return !!gitHasExecBit;
         }
 
         throw unwrap(result);

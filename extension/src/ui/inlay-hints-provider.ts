@@ -9,16 +9,19 @@ const SHEBANG_RANGE = new Range(0, 0, 0, 2);
 export function createInlayHintsProvider(model: Model, outputChannel: OutputChannel): InlayHintsProvider {
     outputChannel.appendLine("Creating inlay hints provider...");
     let inlayFilePermissions = inlayHintsForFilePermissions();
-    const onConfigurationChangedEmitter = new EventEmitter<void>();
+    const onChangedEmitter = new EventEmitter<void>();
     workspace.onDidChangeConfiguration(event => {
         if (event.affectsConfiguration("git-monolithic.inlayHints.filePermissions")) {
             inlayFilePermissions = inlayHintsForFilePermissions();
-            onConfigurationChangedEmitter.fire();
+            onChangedEmitter.fire();
         }
+    });
+    model.onDidChangeOriginalResource(() => {
+        onChangedEmitter.fire();
     });
 
     return {
-        onDidChangeInlayHints: onConfigurationChangedEmitter.event,
+        onDidChangeInlayHints: onChangedEmitter.event,
         async provideInlayHints(document, range, _token) {
             outputChannel.appendLine(`Providing inlay hints for document: ${document.uri.toString()}`);
             if (!inlayFilePermissions) {
@@ -68,7 +71,7 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 // This is usually a mistake, so we provide a hint.
                 outputChannel.appendLine("File has shebang but is not executable.");
                 return [{
-                    label: "-e",
+                    label: "-x",
                     position: START_POSITION,
                     paddingRight: true,
                     tooltip: "This file has a shebang but is not marked as executable.",
@@ -90,9 +93,5 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
             outputChannel.appendLine("No inlay hints to provide for this file.");
             return [];
         },
-        // resolveInlayHint(hint, token) {
-        //     // Example implementation: return the hint as is
-        //     return hint;
-        // }
     };
 }
