@@ -25,6 +25,11 @@ export async function hasExecutableBit(
     }
 
     const output = unwrap(result).trim();
+    if (output === "") {
+        // No output means the file doesn't exist at the given commit-ish, so we can return false
+        return ok(false);
+    }
+
     const matches = pattern.exec(output);
 
     if (matches == null) {

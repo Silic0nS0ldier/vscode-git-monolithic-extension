@@ -28,8 +28,21 @@ export async function tempGitRepo(initialCommit: boolean = false) {
             throw unwrap(result);
         }
 
+        // Set up user config for commits
+        const configResult = await gitCtx.cli({ cwd: repoPath }, [
+            "config", "user.name", "Test User",
+        ]);
+        if (isErr(configResult)) {
+            throw unwrap(configResult);
+        }
+        const emailConfigResult = await gitCtx.cli({ cwd: repoPath }, [
+            "config", "user.email", "test@example.com",
+        ]);
+        if (isErr(emailConfigResult)) {
+            throw unwrap(emailConfigResult);
+        }
+
         if (initialCommit) {
-            // TODO This code path is broken and thrown error reveals little
             const commitResult = await gitCtx.cli({ cwd: repoPath }, ["commit", "--allow-empty", "-m", "Initial commit"]);
             if (isErr(commitResult)) {
                 throw unwrap(commitResult);
