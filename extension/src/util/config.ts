@@ -105,3 +105,4 @@ export const showPushSuccessNotification = createConfigOption<boolean>("showPush
 export const detectSubmodules = createConfigOption<boolean>("detectSubmodules", true);
 export const detectSubmodulesLimit = createConfigOption<number>("detectSubmodulesLimit", 10);
 export const confirmForcePush = createConfigOption<boolean>("confirmForcePush", true);
+export const inlayHintsForFilePermissions = createConfigOption<boolean>("inlayHints.filePermissions", true);

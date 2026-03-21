@@ -1908,6 +1908,11 @@
                 },
                 "git_monolithic.githubAuthentication": {
                     "deprecationMessage": "This setting is now deprecated, please use `github.gitAuthentication` instead."
+                },
+                "git-monolithic.inlayHints.filePermissions": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.inlayHints.filePermissions%"
                 }
             }
         },

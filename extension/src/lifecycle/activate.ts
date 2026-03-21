@@ -13,6 +13,7 @@ import {
     window,
     workspace,
     type WorkspaceFolder,
+    languages,
 } from "vscode";
 import { GitExtensionImpl } from "../api/extension.js";
 import { Askpass } from "../askpass.js";
@@ -31,6 +32,7 @@ import { toDisposable } from "../util/disposals.js";
 import { filterEvent } from "../util/events.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
+import { createInlayHintsProvider } from "../ui/inlay-hints-provider.js";
 
 export async function activate(context: ExtensionContext): Promise<void> {
     const outputChannel = window.createOutputChannel("Git Monolithic");
@@ -104,13 +106,16 @@ export async function activate(context: ExtensionContext): Promise<void> {
     deactivateTasks.push(async () => disableExtension(result));
 }
 
-let modelDisposable: Disposable | undefined;
+let extensionDisposable: Disposable | undefined;
 
 async function enableExtension(ext: GitExtensionImpl, context: ExtensionContext, outputChannel: OutputChannel, telemetryReporter: TelemetryReporter): Promise<void> {
     try {
-        const [model, disposable] = await createModel(context, outputChannel, telemetryReporter);
+        const [model, modelDisposable] = await createModel(context, outputChannel, telemetryReporter);
         ext.model = model;
-        modelDisposable = disposable;
+        const inlayHintsProvider = createInlayHintsProvider(model, outputChannel);
+        const fileInlayDisposable = languages.registerInlayHintsProvider({ scheme: "file" }, inlayHintsProvider);
+
+        extensionDisposable = Disposable.from(modelDisposable, fileInlayDisposable);
     } catch (err) {
         if (!isExpectedError(err, Error, e => /Git installation not found/.test(e.message))) {
             throw err;
@@ -125,8 +130,8 @@ async function enableExtension(ext: GitExtensionImpl, context: ExtensionContext,
 
 function disableExtension(ext: GitExtensionImpl): void {
     ext.model = undefined;
-    modelDisposable?.dispose();
-    modelDisposable = undefined;
+    extensionDisposable?.dispose();
+    extensionDisposable = undefined;
 }
 
 async function createModel(

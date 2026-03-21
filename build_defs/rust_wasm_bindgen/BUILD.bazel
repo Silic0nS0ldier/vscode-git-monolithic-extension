@@ -1,0 +1,16 @@
+load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen_toolchain")
+
+rust_wasm_bindgen_toolchain(
+    name = "toolchain_impl_for_vscode_ext",
+    wasm_bindgen_cli = "@rules_rust_wasm_bindgen//3rdparty:wasm_bindgen_cli",
+)
+
+toolchain(
+    name = "toolchain_for_vscode_ext",
+    toolchain = "toolchain_impl_for_vscode_ext",
+    toolchain_type = "@rules_rust_wasm_bindgen//:toolchain_type",
+    target_compatible_with = [
+        "@platforms//cpu:all",
+        "@platforms//os:none",
+    ],
+)
