@@ -1,4 +1,4 @@
-import type { Readable } from "node:stream";
+import { Writable, type Readable } from "node:stream";
 import {
     createError,
     ERROR_CANCELLED,
@@ -61,6 +61,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
             cwd,
             env,
             executablePath,
+            stderrTail: "",
         };
 
         const cpRes = ((): Result<ChildProcess, GenericError> => {
@@ -82,6 +83,17 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         if (context.stdout) {
             cp.stdout.pipe(context.stdout);
         }
+
+        const stderrMonitorStream = new Writable({
+            write(chunk, _encoding, cb) {
+                cmdContext.stderrTail += chunk.toString("utf-8");
+                if (cmdContext.stderrTail.length > 1024) {
+                    cmdContext.stderrTail = cmdContext.stderrTail.slice(-1024);
+                }
+                cb();
+            }
+        });
+        cp.stderr.pipe(stderrMonitorStream);
         if (context.stderr) {
             cp.stderr.pipe(context.stderr);
         }

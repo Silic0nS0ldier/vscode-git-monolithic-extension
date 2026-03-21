@@ -2,7 +2,7 @@ import { MaxBufferError, getStreamAsBuffer } from "get-stream";
 import { PassThrough } from "node:stream";
 import { type BufferOverflowError, createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, type GenericError } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
-import type { CLI } from "../context.js";
+import type { CLI, CLIErrors } from "../context.js";
 
 export type ReadToContext = {
     cli: CLI;
@@ -12,7 +12,8 @@ export type ReadToContext = {
 
 export type ReadToErrors =
     | GenericError
-    | BufferOverflowError;
+    | BufferOverflowError
+    | CLIErrors;
 
 /**
  * Helper which reads CLI output (stdout) and returns the resulting buffer.

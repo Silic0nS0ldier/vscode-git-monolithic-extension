@@ -1,20 +1,16 @@
 import test from "node:test";
 import assert from "node:assert";
-import { isErr, unwrap } from "../../func-result.js";
 import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
 import { hasExecutableBitInIndex } from "./has-executable-bit.js";
 import path from "node:path";
 import fs from "node:fs/promises";
+import { unwrapOk } from "../../errors.js";
 
 test(hasExecutableBitInIndex.name, async () => {
     await using repo = await tempGitRepo(true);
     
     async function assertHasExecutableBit(filePath: string, expected: boolean | undefined) {
-        const result = await hasExecutableBitInIndex(gitCtx, repo.path, filePath);
-        if (isErr(result)) {
-            throw unwrap(result);
-        }
-        const hasExecBit = unwrap(result);
+        const hasExecBit = unwrapOk(await hasExecutableBitInIndex(gitCtx, repo.path, filePath));
         assert.strictEqual(hasExecBit, expected, `Expected "${filePath}" to have executable bit: ${expected}`);
     }
 

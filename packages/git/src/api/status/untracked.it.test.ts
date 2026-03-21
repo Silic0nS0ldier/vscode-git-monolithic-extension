@@ -1,18 +1,14 @@
 import test from "node:test";
 import assert from "node:assert";
-import { isErr, unwrap } from "../../func-result.js";
 import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { untracked } from "./untracked.js";
+import { unwrapOk } from "../../errors.js";
 
 test(untracked.name + " - relative - empty", async () => {
     await using repo = await tempGitRepo();
-    const result = await untracked(gitCtx, repo.path, "relative");
-    if (isErr(result)) {
-        throw unwrap(result);
-    }
-    const statuses = unwrap(result);
+    const statuses = unwrapOk(await untracked(gitCtx, repo.path, "relative"));
     assert.deepStrictEqual(statuses, []);
 });
 
@@ -25,11 +21,7 @@ test(untracked.name + " - relative - basic case", async () => {
     await fs.writeFile(file1, "Hello, world!");
     await fs.writeFile(file2, "Hello, again!");
 
-    const result = await untracked(gitCtx, repo.path, "relative");
-    if (isErr(result)) {
-        throw unwrap(result);
-    }
-    const statuses = unwrap(result);
+    const statuses = unwrapOk(await untracked(gitCtx, repo.path, "relative"));
     assert.deepStrictEqual(statuses.sort(), ["file1.txt", "file2.txt"]);
 });
 
@@ -45,10 +37,6 @@ test(untracked.name + " - relative - many files", async () => {
         await fs.writeFile(path.join(repo.path, fileName), `Content of ${fileName}`);
     }
 
-    const result = await untracked(gitCtx, repo.path, "relative");
-    if (isErr(result)) {
-        throw unwrap(result);
-    }
-    const statuses = unwrap(result);
+    const statuses = unwrapOk(await untracked(gitCtx, repo.path, "relative"));
     assert.deepStrictEqual(statuses.sort(), fileNames.sort());
 });

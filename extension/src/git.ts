@@ -14,6 +14,8 @@ import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
 import { tracked, type IFileStatus } from "monolithic-git-interop/api/status/tracked";
+import { show } from "monolithic-git-interop/api/show";
+import * as gitErrors from "monolithic-git-interop/errors"
 import { DurationFormat } from "@formatjs/intl-durationformat";
 import { Temporal } from "@js-temporal/polyfill";
 import type * as cp from "node:child_process";
@@ -22,7 +24,7 @@ import { exists, promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { StringDecoder } from "node:string_decoder";
-import type { OutputChannel, Progress, Uri } from "vscode";
+import type { OutputChannel, Progress } from "vscode";
 import {
     type Branch,
     type BranchQuery,
@@ -43,7 +45,6 @@ import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD }
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
-import type { LogFileOptions } from "./git/LogFileOptions.js";
 import { parseGitCommits } from "./git/parseGitCommits.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
 import { type LsFilesElement, parseLsFiles } from "./git/parseLsFiles.js";
@@ -57,6 +58,7 @@ import { isExpectedError } from "./util/is-expected-error.js";
 import { LineStream } from "./util/stream-by-line.js";
 import * as Versions from "./util/versions.js";
 import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
+import { unwrapOk } from "monolithic-git-interop/errors";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
@@ -116,13 +118,7 @@ export class Git {
     }
 
     async init(repository: string): Promise<void> {
-        const result = await init(this._context, repository);
-
-        if (isOk(result)) {
-            return;
-        }
-
-        throw unwrap(result);
+        return unwrapOk(await init(this._context, repository));
     }
 
     async clone(url: string, options: ICloneOptions, abortSignal?: AbortSignal): Promise<string> {
@@ -194,23 +190,11 @@ export class Git {
     }
 
     async getRepositoryRoot(repositoryPath: string): Promise<string> {
-        const result = await showToplevel(this._context, repositoryPath, this.#services);
-
-        if (isOk(result)) {
-            return unwrap(result);
-        }
-
-        throw unwrap(result);
+        return unwrapOk(await showToplevel(this._context, repositoryPath, this.#services));
     }
 
     async getRepositoryDotGit(repositoryPath: string): Promise<string> {
-        const result = await gitDir(this._context, repositoryPath);
-
-        if (isOk(result)) {
-            return unwrap(result);
-        }
-
-        throw unwrap(result);
+        return unwrapOk(await gitDir(this._context, repositoryPath));
     }
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
@@ -244,6 +228,9 @@ export interface PullOptions {
 
 let runCounter = 0;
 
+// TODO All logic here needs to be split across the following locations;
+// - extension/src/repository/repository-class/mod.ts (business logic)
+// - monolithic-git-interop (git interactions)
 export class Repository {
     #git: Git;
     #repositoryRoot: string;
@@ -296,77 +283,24 @@ export class Repository {
         return parseGitCommits(result.stdout);
     }
 
-    async logFile(uri: Uri, options?: LogFileOptions): Promise<Commit[]> {
-        const args = ["log", `--format=${COMMIT_FORMAT}`, "-z"];
-
-        if (options?.maxEntries && !options?.reverse) {
-            args.push(`-n${options.maxEntries}`);
-        }
-
-        if (options?.hash) {
-            // If we are reversing, we must add a range (with HEAD) because we are using --ancestry-path for better reverse walking
-            if (options?.reverse) {
-                args.push("--reverse", "--ancestry-path", `${options.hash}..HEAD`);
-            } else {
-                args.push(options.hash);
-            }
-        }
-
-        if (options?.sortByAuthorDate) {
-            args.push("--author-date-order");
-        }
-
-        args.push("--", uri.fsPath);
-
-        const result = await this.exec(args);
-        if (result.exitCode) {
-            // No file history, e.g. a new file or untracked
-            return [];
-        }
-
-        return parseGitCommits(result.stdout);
-    }
-
     async buffer(object: string): Promise<Buffer> {
-        const start = Date.now();
-        const child = this.stream(["show", "--textconv", object]);
-
-        if (!child.stdout) {
-            return Promise.reject<Buffer>("Can't open file from git");
-        }
-
-        const pid = child.pid;
-        const invocId = `CMD_2_${runCounter++}`;
-        this.git.log(`${invocId} > (PID = ${pid}) ${child.spawnfile} ${child.spawnargs.join(" ")}`);
-
-        const result = await exec(child);
-
-        const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
-        // TODO Remove ponyfill once VSCode updates to NodeJS v23 or higher
-        const durationStr = new DurationFormat("en", { style: "narrow" }).format(duration);
+        const result = await show(this.#git._context, this.#repositoryRoot, object);
 
         if (isErr(result)) {
-            this.git.log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
-            throw unwrap(result);
-        }
-
-        this.git.log(`${invocId} < SUCCESS (PID = ${pid}; Duration = ${durationStr})`);
-        const { exitCode, stdout, stderr } = unwrap(result);
-
-        if (exitCode) {
-            const err = new GitError({
-                exitCode,
+            const error = unwrap(result);
+            const gitError = new GitError({
                 message: "Could not show object.",
             });
-
-            if (/exists on disk, but not in/.test(stderr)) {
-                err.gitErrorCode = GitErrorCodes.WrongCase;
+            if (error.type === gitErrors.ERROR_NON_ZERO_EXIT) {
+                // TODO(Silic0nS0ldier): Rework error types to surface typed cause chains.
+                const exitCode: number | undefined = (error.cause as { exitState?: { code: number } })?.exitState?.code ?? undefined;
+                gitError.exitCode = exitCode;
             }
-
-            return Promise.reject<Buffer>(err);
+            this.git.log(`Failed to get object ${object}: ${unwrap(result)}`);
+            throw gitError;
         }
 
-        return stdout;
+        return unwrap(result);
     }
 
     async getObjectDetails(treeish: string, path: string): Promise<{ mode: string; object: string; size: number }> {
@@ -1167,14 +1101,12 @@ export class Repository {
     }
 
     async findTrackingBranches(upstreamBranch: string): Promise<Branch[]> {
-        const result = await findTrackingBranches(this.#git._context, this.#repositoryRoot);
-        if (isOk(result)) {
-            return unwrap(result).trim().split("\n")
-                .map(line => line.trim().split("\0"))
-                .filter(([_, upstream]) => upstream === upstreamBranch)
-                .map(([ref]) => ({ name: ref, type: RefType.Head } as Branch));
-        }
-        throw unwrap(result);
+        const result = unwrapOk(await findTrackingBranches(this.#git._context, this.#repositoryRoot));
+
+        return result.trim().split("\n")
+            .map(line => line.trim().split("\0"))
+            .filter(([_, upstream]) => upstream === upstreamBranch)
+            .map(([ref]) => ({ name: ref, type: RefType.Head } as Branch));
     }
 
     async getRefs(
@@ -1240,41 +1172,36 @@ export class Repository {
     }
 
     async getRemotes(): Promise<Remote[]> {
-        const result = await getRemotes(this.#git._context, this.#repositoryRoot);
+        const data = unwrapOk(await getRemotes(this.#git._context, this.#repositoryRoot));
 
-        if (isOk(result)) {
-            const data = unwrap(result);
-            const lines = data.trim().split("\n").filter(l => !!l);
-            const remotes: MutableRemote[] = [];
+        const lines = data.trim().split("\n").filter(l => !!l);
+        const remotes: MutableRemote[] = [];
 
-            for (const line of lines) {
-                const parts = line.split(/\s/);
-                const [name, url, type] = parts;
+        for (const line of lines) {
+            const parts = line.split(/\s/);
+            const [name, url, type] = parts;
 
-                let remote = remotes.find(r => r.name === name);
+            let remote = remotes.find(r => r.name === name);
 
-                if (!remote) {
-                    remote = { isReadOnly: false, name };
-                    remotes.push(remote);
-                }
-
-                if (/fetch/i.test(type)) {
-                    remote.fetchUrl = url;
-                } else if (/push/i.test(type)) {
-                    remote.pushUrl = url;
-                } else {
-                    remote.fetchUrl = url;
-                    remote.pushUrl = url;
-                }
-
-                // https://github.com/microsoft/vscode/issues/45271
-                remote.isReadOnly = remote.pushUrl === undefined || remote.pushUrl === "no_push";
+            if (!remote) {
+                remote = { isReadOnly: false, name };
+                remotes.push(remote);
             }
 
-            return remotes;
+            if (/fetch/i.test(type)) {
+                remote.fetchUrl = url;
+            } else if (/push/i.test(type)) {
+                remote.pushUrl = url;
+            } else {
+                remote.fetchUrl = url;
+                remote.pushUrl = url;
+            }
+
+            // https://github.com/microsoft/vscode/issues/45271
+            remote.isReadOnly = remote.pushUrl === undefined || remote.pushUrl === "no_push";
         }
 
-        throw unwrap(result);
+        return remotes;
     }
 
     async getBranch(name: string): Promise<Branch> {
