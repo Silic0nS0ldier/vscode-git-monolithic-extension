@@ -5,15 +5,14 @@ import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import { from_str_radix } from "monolithic-git-wasm";
 import { matchPermissionDigits, permHasExecutableBit } from "../../helpers/permission-digits.js";
 
-export async function hasExecutableBit(
+export async function hasExecutableBitInIndex(
     git: GitContext,
     cwd: string,
     filePath: string,
-    commit_ish: string,
-): Promise<Result<boolean|undefined, ReadToErrors>> {
+): Promise<Result<boolean | undefined, ReadToErrors>> {
     const result = await readToString(
         { cli: git.cli, cwd },
-        ["ls-tree", commit_ish, filePath],
+        ["ls-files", "--stage", "--", filePath],
     );
 
     if (isErr(result)) {
@@ -21,8 +20,8 @@ export async function hasExecutableBit(
     }
 
     const output = unwrap(result).trim();
-    if (output === "") {
-        // No output means the file doesn't exist at the given commit-ish, so we return undefined
+    if (!output) {
+        // Not in index
         return ok(undefined);
     }
 

@@ -1,0 +1,50 @@
+import test from "ava";
+import intoStream from "into-stream";
+import { isOk, ok, unwrap } from "../../func-result.js";
+import { hasExecutableBitInIndex } from "./has-executable-bit.js";
+import type { GitContext } from "../../cli/context.js";
+
+test("Non-executable file", async t => {
+    const gitContext: GitContext = {
+        cli: async (context) => {
+            if (context.stdout) {
+                intoStream("100644 db4eff851028003f9df7747b2ad58622b307bb6a 0    MODULE.bazel").pipe(context.stdout);
+            }
+            return ok(void 0);
+        },
+        path: "",
+        version: "UNSET",
+    };
+    const res = await hasExecutableBitInIndex(
+        gitContext,
+        "/fake",
+        "foo",
+    );
+    t.true(isOk(res));
+    if (isOk(res)) {
+        t.is(unwrap(res), false);
+    }
+});
+
+test("Executable file", async t => {
+    const gitContext: GitContext = {
+        cli: async (context) => {
+            if (context.stdout) {
+                intoStream("100755 db4eff851028003f9df7747b2ad58622b307bb6a 0    MODULE.bazel").pipe(context.stdout);
+            }
+            return ok(void 0);
+        },
+        path: "",
+        version: "UNSET",
+    };
+    const res = await hasExecutableBitInIndex(
+        gitContext,
+        "/fake",
+        "foo",
+    );
+    t.true(isOk(res));
+    if (isOk(res)) {
+        t.is(unwrap(res), true);
+    }
+});
+

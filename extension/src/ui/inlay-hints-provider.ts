@@ -1,5 +1,5 @@
+import * as fs from "node:fs/promises";
 import { type InlayHintsProvider, Position, Range, workspace, EventEmitter, type OutputChannel } from "vscode";
-import { fromGitUri, isGitUri } from "../uri.js";
 import { inlayHintsForFilePermissions } from "../util/config.js";
 import type { Model } from "../model.js";
 
@@ -11,7 +11,7 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
     let inlayFilePermissions = inlayHintsForFilePermissions();
     const onChangedEmitter = new EventEmitter<void>();
     workspace.onDidChangeConfiguration(event => {
-        if (event.affectsConfiguration("git-monolithic.inlayHints.filePermissions")) {
+        if (inlayHintsForFilePermissions.affected(event)) {
             inlayFilePermissions = inlayHintsForFilePermissions();
             onChangedEmitter.fire();
         }
@@ -25,8 +25,8 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
         async provideInlayHints(document, range, _token) {
             outputChannel.appendLine(`Providing inlay hints for document: ${document.uri.toString()}`);
             const hasShebang = document.getText(SHEBANG_RANGE) === "#!";
-            if (!inlayFilePermissions && !hasShebang) {
-                outputChannel.appendLine("Inlay hints for file permissions are disabled in the configuration and the file has no shebang.");
+            if (!inlayFilePermissions) {
+                outputChannel.appendLine("Inlay hints for file permissions are disabled in the configuration.");
                 return [];
             }
 
@@ -36,31 +36,27 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 return [];
             }
 
-            // Resolve file path and commit-ish
-            const { filePath, ref } = (() => {
-                if (isGitUri(document.uri)) {
-                    const gitUriParams = fromGitUri(document.uri);
-                    if (gitUriParams.submoduleOf) {
-                        // does this need special handling?
-                    }
-                    return { filePath: document.uri.fsPath, ref: gitUriParams.ref };
-                } else {
-                    // Take file path and use 'HEAD' as commit-ish
-                    return { filePath: document.uri.fsPath, ref: 'HEAD' };
-                }
-            })();
-
-            const repository = model.getRepository(filePath);
-            if (!repository) {
+            // TODO Add support for specific commits and staged files
+            //      APIs already defined in monolithic-git-interop, just need to pick the
+            //      appropriate one based on state.
+            if (document.uri.scheme !== "file") {
+                outputChannel.appendLine(`Document scheme ${document.uri.scheme} is not supported.`);
                 return [];
             }
-            
+
+            const filePath = document.uri.fsPath;
+
             const isExecutable = await (async () => {
                 try {
-                    return await repository.fileHasExecutableBit(filePath, ref);
-                } catch (error) {
-                    outputChannel.appendLine(`Error checking executable bit for ${filePath}: ${error}`);
-                    throw error;
+                    const stats = await fs.stat(filePath);
+                    return !!(stats.mode & 0o111);
+                } catch (err) {
+                    if (err instanceof Error && /ENOENT/.test(err.message)) {
+                        outputChannel.appendLine(`File ${filePath} does not exist on disk.`);
+                    } else {
+                        outputChannel.appendLine(`Error checking file permissions for ${filePath}: ${err}`);
+                    }
+                    return false;
                 }
             })();
 
@@ -78,9 +74,10 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 }];
             }
 
-            if (isExecutable) {
-                // If the file is executable and does not have a shebang.
-                // This is unusual, so we provide a hint.
+            if (hasShebang || isExecutable) {
+                // If the file has a shebang or is executable.
+                // This is usually a mistake for non-shebang files.
+                // For shebang files, it's good to see a visual confirmation.
                 outputChannel.appendLine("File is executable but has no shebang.");
                 return [{
                     label: "+x",

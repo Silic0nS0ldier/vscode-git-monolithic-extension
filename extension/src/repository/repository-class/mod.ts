@@ -611,9 +611,6 @@ export function createRepository(
             return run(Operation.Tag, () => repository.tag(name, message));
         },
         whenIdleAndFocused,
-        fileHasExecutableBit(filePath, commit_ish) {
-            return repository.fileHasExecutableBit(filePath, commit_ish);
-        },
     };
 
     // Don't allow auto-fetch in untrusted workspaces

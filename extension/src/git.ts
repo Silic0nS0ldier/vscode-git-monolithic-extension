@@ -14,7 +14,6 @@ import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
 import { tracked, type IFileStatus } from "monolithic-git-interop/api/status/tracked";
-import { hasExecutableBit } from "monolithic-git-interop/api/ls-tree/has-executable-bit";
 import { DurationFormat } from "@formatjs/intl-durationformat";
 import { Temporal } from "@js-temporal/polyfill";
 import type * as cp from "node:child_process";
@@ -1452,48 +1451,6 @@ export class Repository {
 
             throw err;
         }
-    }
-
-    /**
-     * Checks if a file has the executable bit set.
-     * @param filePath Absolute path to the file to check for the executable bit.
-     *     Can include `file://` protocol.
-     * @param commit_ish Optional commit-ish to check the executable bit at.
-     *     TODO more docs
-     * @returns True if file is executable or false if not (or does not exist at all).
-     */
-    async fileHasExecutableBit(filePath: string, commit_ish?: string): Promise<boolean> {
-        // TODO Need to handle;
-        // - specific commit
-        // - staged change
-        // - working tree
-        const relativePath = path.relative(this.#repositoryRoot, filePath);
-
-        const result = await hasExecutableBit(this.#git._context, this.#repositoryRoot, relativePath, commit_ish ?? 'HEAD');
-
-        if (isOk(result)) {
-            const gitHasExecBit = unwrap(result);
-
-            if (gitHasExecBit === undefined && !commit_ish) {
-                // If the file doesn't exist at HEAD, we can check the working tree for the exec bit
-                this.#git.log(`Checking executable bit for ${filePath} in working tree since it doesn't exist at HEAD`);
-                try {
-                    const stats = await fs.stat(path.join(this.#repositoryRoot, filePath));
-                    return !!(stats.mode & 0o111);
-                } catch (err) {
-                    if (err instanceof Error && /ENOENT/.test(err.message)) {
-                        // If the file doesn't exist in the working tree either, we can return false
-                        return false;
-                    }
-
-                    throw err;
-                }
-            }
-
-            return !!gitHasExecBit;
-        }
-
-        throw unwrap(result);
     }
 }
 

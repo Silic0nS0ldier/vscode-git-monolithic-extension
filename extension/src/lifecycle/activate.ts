@@ -114,9 +114,8 @@ async function enableExtension(ext: GitExtensionImpl, context: ExtensionContext,
         ext.model = model;
         const inlayHintsProvider = createInlayHintsProvider(model, outputChannel);
         const fileInlayDisposable = languages.registerInlayHintsProvider({ scheme: "file" }, inlayHintsProvider);
-        const gitInlayDisposable = languages.registerInlayHintsProvider({ scheme: "git" }, inlayHintsProvider);
 
-        extensionDisposable = Disposable.from(modelDisposable, fileInlayDisposable, gitInlayDisposable);
+        extensionDisposable = Disposable.from(modelDisposable, fileInlayDisposable);
     } catch (err) {
         if (!isExpectedError(err, Error, e => /Git installation not found/.test(e.message))) {
             throw err;
