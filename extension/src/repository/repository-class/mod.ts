@@ -438,10 +438,6 @@ export function createRepository(
         log(options) {
             return run(Operation.Log, () => repository.log(options));
         },
-        logFile(uri, options) {
-            // TODO: This probably needs per-uri granularity
-            return run(Operation.LogFile, () => repository.logFile(uri, options));
-        },
         merge(ref) {
             return run(Operation.Merge, () => repository.merge(ref));
         },

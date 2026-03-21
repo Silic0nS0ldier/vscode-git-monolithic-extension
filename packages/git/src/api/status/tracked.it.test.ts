@@ -5,14 +5,11 @@ import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
 import { tracked } from "./tracked.js";
 import path from "node:path";
 import fs from "node:fs/promises";
+import { unwrapOk } from "../../errors.js";
 
 test(tracked.name + " - relative - empty", async () => {
     await using repo = await tempGitRepo();
-    const result = await tracked(gitCtx, repo.path, "relative");
-    if (isErr(result)) {
-        throw unwrap(result);
-    }
-    const statuses = unwrap(result);
+    const statuses = unwrapOk(await tracked(gitCtx, repo.path, "relative"));
     assert.deepStrictEqual(statuses, []);
 });
 
@@ -26,13 +23,9 @@ test(tracked.name + " - relative - basic case", async () => {
     await fs.writeFile(file2, "Hello, again!");
     const addResult = await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
     if (isErr(addResult)) {
-        throw unwrap(addResult);
+        throw unwrap(addResult)._error;
     }
 
-    const result = await tracked(gitCtx, repo.path, "relative");
-    if (isErr(result)) {
-        throw unwrap(result);
-    }
-    const statuses = unwrap(result);
+    const statuses = unwrapOk(await tracked(gitCtx, repo.path, "relative"));
     assert.deepStrictEqual(statuses.map(s => s.path).sort(), ["file1.txt", "file2.txt"]);
 });

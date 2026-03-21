@@ -1,7 +1,10 @@
-type ErrorShape<TSymbol> = {
+import { isErr, unwrap, type Result } from "./func-result.js";
+
+export type ErrorShape<TSymbol> = {
     readonly cause?: unknown;
     readonly type: TSymbol;
-    readonly unstableStack: unknown;
+    /** Throwable representation of this error. */
+    readonly _error: Error;
 };
 
 export const ERROR_GIT_NOT_FOUND = Symbol("GIT_NOT_FOUND");
@@ -26,16 +29,25 @@ export const ERROR_BUFFER_OVERFLOW = Symbol("ERROR_BUFFER_OVERFLOW");
 export type BufferOverflowError = ErrorShape<typeof ERROR_BUFFER_OVERFLOW>;
 
 export function createError<TSymbol>(type: TSymbol, cause?: unknown): ErrorShape<TSymbol> {
-    let unstableStack;
-    try {
-        throw new Error();
-    } catch (e) {
-        unstableStack = (e as Error).stack as string ?? "";
-        unstableStack = unstableStack.split("\n").slice(2).join("\n");
+    let errorCause: unknown = cause;
+    if (cause != null && typeof cause === "object" && "_error" in cause) {
+        errorCause = cause._error;
     }
+    const error = new Error(String(type), { cause: errorCause });
     return {
         cause,
         type,
-        unstableStack,
+        _error: error,
     };
+}
+
+export function unwrapOk<TOk, TErr>(value: Result<TOk, TErr>): TOk {
+    if (isErr(value)) {
+        const error = unwrap(value);
+        if (error != null && typeof error === "object" && "_error" in error) {
+            throw error._error;
+        }
+        throw error;
+    }
+    return unwrap(value);
 }

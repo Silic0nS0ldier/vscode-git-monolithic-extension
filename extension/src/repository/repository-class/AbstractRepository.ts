@@ -10,7 +10,6 @@ import type {
     Remote,
 } from "../../api/git.js";
 import type { Commit } from "../../git/Commit.js";
-import type { LogFileOptions } from "../../git/LogFileOptions.js";
 import type { Stash } from "../../git/Stash.js";
 import type { Submodule } from "../../git/Submodule.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
@@ -71,7 +70,6 @@ export type AbstractRepository = {
     readonly HEAD: Branch | undefined;
     readonly headLabel: string;
     readonly log: (options?: LogOptions) => Promise<Commit[]>;
-    readonly logFile: (uri: Uri, options?: LogFileOptions) => Promise<Commit[]>;
     readonly merge: (ref: string) => Promise<void>;
     readonly move: (from: string, to: string) => Promise<void>;
     readonly onDidChangeOperations: Event<OperationOptions | OperationResult>;

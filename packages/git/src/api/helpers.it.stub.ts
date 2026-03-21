@@ -7,17 +7,14 @@ import type { PersistentCLIContext } from "../cli/mod.js";
 import { createServices } from "../services/nodejs.js";
 import { isErr, unwrap } from "../func-result.js";
 import { init } from "./repository/init/mod.js";
+import { unwrapOk } from "../errors.js";
 
 export const services = createServices();
 
 export const gitCtx = await (async () => {
     const gitPath = runfiles.resolve("git/git");
     const persistentContext: PersistentCLIContext = { env: process.env, timeout: 5_000 };
-    const result = await fromPath(gitPath, persistentContext, services);
-    if (isErr(result)) {
-        throw unwrap(result);
-    }
-    return unwrap(result);
+    return unwrapOk(await fromPath(gitPath, persistentContext, services));
 })();
 
 export async function tempGitRepo(initialCommit: boolean = false) {
@@ -25,7 +22,7 @@ export async function tempGitRepo(initialCommit: boolean = false) {
     try {
         const result = await init(gitCtx, repoPath);
         if (isErr(result)) {
-            throw unwrap(result);
+            throw unwrap(result)._error;
         }
 
         // Set up user config for commits
@@ -33,19 +30,19 @@ export async function tempGitRepo(initialCommit: boolean = false) {
             "config", "user.name", "Test User",
         ]);
         if (isErr(configResult)) {
-            throw unwrap(configResult);
+            throw unwrap(configResult)._error;
         }
         const emailConfigResult = await gitCtx.cli({ cwd: repoPath }, [
             "config", "user.email", "test@example.com",
         ]);
         if (isErr(emailConfigResult)) {
-            throw unwrap(emailConfigResult);
+            throw unwrap(emailConfigResult)._error;
         }
 
         if (initialCommit) {
             const commitResult = await gitCtx.cli({ cwd: repoPath }, ["commit", "--allow-empty", "-m", "Initial commit"]);
             if (isErr(commitResult)) {
-                throw unwrap(commitResult);
+                throw unwrap(commitResult)._error;
             }
         }
 

@@ -308,8 +308,7 @@ export type GitErrorCodesOptions =
     | "RepositoryNotFound"
     | "StashConflict"
     | "UnknownPath"
-    | "UnmergedChanges"
-    | "WrongCase";
+    | "UnmergedChanges";
 export const GitErrorCodes: Record<GitErrorCodesOptions, GitErrorCodesOptions> = {
     AuthenticationFailed: "AuthenticationFailed",
     BadConfigFile: "BadConfigFile",
@@ -345,5 +344,4 @@ export const GitErrorCodes: Record<GitErrorCodesOptions, GitErrorCodesOptions> =
     StashConflict: "StashConflict",
     UnknownPath: "UnknownPath",
     UnmergedChanges: "UnmergedChanges",
-    WrongCase: "WrongCase",
 };

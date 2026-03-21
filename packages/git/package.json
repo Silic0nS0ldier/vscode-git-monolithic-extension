@@ -32,6 +32,10 @@
         "./util/result": {
             "import": "./dist/func-result.js",
             "types": "./dist/func-result.d.ts"
+        },
+        "./errors": {
+            "import": "./dist/errors.js",
+            "types": "./dist/errors.d.ts"
         }
     },
     "devDependencies": {
