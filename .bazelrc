@@ -3,5 +3,9 @@ common --symlink_prefix=.bazel/
 common --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
 common --@aspect_rules_ts//ts:default_to_tsc_transpiler
 
+common --@rules_rust//rust/settings:pipelined_compilation=true
+
 # Address the `unable to find library -lgcc_s` error when using @llvm's C/C++ toolchains with `@rules_rust`.
 common --@llvm//config:experimental_stub_libgcc_s=True
+
+build:release --compilation_mode=opt

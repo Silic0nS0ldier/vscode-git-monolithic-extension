@@ -7,7 +7,6 @@ const START_POSITION = new Position(0, 0);
 const SHEBANG_RANGE = new Range(0, 0, 0, 2);
 
 export function createInlayHintsProvider(model: Model, outputChannel: OutputChannel): InlayHintsProvider {
-    outputChannel.appendLine("Creating inlay hints provider...");
     let inlayFilePermissions = inlayHintsForFilePermissions();
     const onChangedEmitter = new EventEmitter<void>();
     workspace.onDidChangeConfiguration(event => {
@@ -16,6 +15,8 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
             onChangedEmitter.fire();
         }
     });
+    // TODO `onDidChangeOriginalResource` appears to be bugged (cyclic reference?)
+    //      and will need to be fixed.
     model.onDidChangeOriginalResource(() => {
         onChangedEmitter.fire();
     });
@@ -23,7 +24,6 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
     return {
         onDidChangeInlayHints: onChangedEmitter.event,
         async provideInlayHints(document, range, _token) {
-            outputChannel.appendLine(`Providing inlay hints for document: ${document.uri.toString()}`);
             const hasShebang = document.getText(SHEBANG_RANGE) === "#!";
             if (!inlayFilePermissions) {
                 outputChannel.appendLine("Inlay hints for file permissions are disabled in the configuration.");
@@ -32,7 +32,6 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
 
             if (!range.start.isEqual(START_POSITION)) {
                 // Only support execbit inlay hint for now, which is always at the start of the document
-                outputChannel.appendLine("Range beyond document start.");
                 return [];
             }
 
@@ -60,12 +59,9 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 }
             })();
 
-            outputChannel.appendLine(`Executable? ${isExecutable}, Shebang? ${hasShebang}`);
-
             if (hasShebang && !isExecutable) {
                 // If the file has a shebang but is not executable.
                 // This is usually a mistake, so we provide a hint.
-                outputChannel.appendLine("File has shebang but is not executable.");
                 return [{
                     label: "-x",
                     position: START_POSITION,
@@ -78,7 +74,6 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 // If the file has a shebang or is executable.
                 // This is usually a mistake for non-shebang files.
                 // For shebang files, it's good to see a visual confirmation.
-                outputChannel.appendLine("File is executable but has no shebang.");
                 return [{
                     label: "+x",
                     position: START_POSITION,
@@ -87,7 +82,6 @@ export function createInlayHintsProvider(model: Model, outputChannel: OutputChan
                 }];
             }
 
-            outputChannel.appendLine("No inlay hints to provide for this file.");
             return [];
         },
     };
