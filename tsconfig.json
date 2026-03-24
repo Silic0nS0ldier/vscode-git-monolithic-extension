@@ -6,7 +6,6 @@
         "exactOptionalPropertyTypes": false,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
-        "verbatimModuleSyntax": true,
         "isolatedModules": true,
         "lib": [
             "DOM",
@@ -22,7 +21,11 @@
         "skipLibCheck": true,
         "strict": true,
         "target": "ES2022",
+        "types": [
+            "node"
+        ],
         "useDefineForClassFields": true,
-        "useUnknownInCatchVariables": true
+        "useUnknownInCatchVariables": true,
+        "verbatimModuleSyntax": true
     }
 }
