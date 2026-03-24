@@ -351,7 +351,7 @@
           "REPO_MAPPING:,npm aspect_rules_js++npm+npm",
           "REPO_MAPPING:aspect_rules_ts+,aspect_rules_ts aspect_rules_ts+",
           "REPO_MAPPING:aspect_rules_ts+,bazel_tools bazel_tools",
-          "FILE:@@aspect_rules_js++npm+npm//typescript/resolved.json c6a30f3c4db82c1c8df9b9e9bedda9ff2fc8698d265569c1c92d1b6761ad157b"
+          "FILE:@@aspect_rules_js++npm+npm//typescript/resolved.json 2a0279a01dafdb19e1a5eed6a8c9399f342b5cbe57218e90b07adbeba29e0e09"
         ],
         "generatedRepoSpecs": {
           "npm_typescript": {
