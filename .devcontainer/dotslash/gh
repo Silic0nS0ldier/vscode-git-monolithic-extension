@@ -1,0 +1,30 @@
+#!/usr/bin/env dotslash
+{
+  "name": "gh",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 14296784,
+      "hash": "blake3",
+      "digest": "3946dd6596d9c17f53c314cf6c2282a9c380ad2e72a0695e5b51af8cc0382f16",
+      "format": "tar.gz",
+      "path": "gh_2.92.0_linux_amd64/bin/gh",
+      "providers": [
+        {
+          "url": "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 13002970,
+      "hash": "blake3",
+      "digest": "63e5cbae9d50559e212f647bcc162d393e5d2fa00d0ea627958c03854f40a680",
+      "format": "tar.gz",
+      "path": "gh_2.92.0_linux_arm64/bin/gh",
+      "providers": [
+        {
+          "url": "https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_arm64.tar.gz"
+        }
+      ]
+    }
+  }
+}

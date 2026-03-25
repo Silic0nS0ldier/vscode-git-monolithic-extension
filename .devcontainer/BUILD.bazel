@@ -1,0 +1,88 @@
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index")
+load("@tar.bzl", "mutate", "tar")
+
+# TODO where should tags be added on a multi-arch image?
+
+tar(
+    name = "dotslash",
+    srcs = select({
+        "@platforms//cpu:x86_64": ["@dotslash_amd64//:dotslash"],
+        "@platforms//cpu:aarch64": ["@dotslash_arm64//:dotslash"],
+    }),
+    mutate = mutate(
+        package_dir = "usr/bin",
+    ),
+)
+
+tar(
+    name = "dotslash_stubs",
+    srcs = [
+        "dotslash/bazel",
+        "dotslash/buildifier",
+        "dotslash/buildozer",
+        "dotslash/gh",
+        "dotslash/node",
+        "dotslash/pnpm",
+        "dotslash/rustup",
+        "dotslash/starpls",
+        "dotslash/unused-deps",
+    ],
+    mutate = mutate(
+        package_dir = "usr/bin",
+        strip_prefix = ".devcontainer/dotslash",
+    ),
+)
+
+tar(
+    name = "rustup_symlinks",
+    mtree = [
+        "usr uid=0 gid=0 mode=0755 time=1672560000 type=dir",
+        "usr/bin uid=0 gid=0 mode=0755 time=1672560000 type=dir",
+        "usr/bin/cargo uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/cargo-clippy uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/cargo-fmt uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/cargo-miri uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/clippy-driver uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/rust-analyzer uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/rust-gdb uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/rust-lldb uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/rustc uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/rustdoc uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+        "usr/bin/rustfmt uid=0 gid=0 mode=0755 time=1672560000 type=link link=rustup",
+    ],
+)
+
+oci_image(
+    name = "image",
+    base = "@devcontainers_base_ubuntu",
+    tars = [
+        ":dotslash",
+        ":dotslash_stubs",
+        ":rustup_symlinks",
+    ],
+)
+
+oci_image_index(
+    name = "image_index",
+    images = [":image"],
+    platforms = [
+        ":linux_amd64",
+        ":linux_arm64",
+    ],
+)
+
+platform(
+    name = "linux_amd64",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)
+
+platform(
+    name = "linux_arm64",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+    ],
+)
