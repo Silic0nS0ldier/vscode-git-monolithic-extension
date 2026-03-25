@@ -1,0 +1,8 @@
+[package]
+name = "rust_wasm_bindgen_toolchain"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wasm-bindgen-cli = { workspace = true }
+wasm-bindgen-test = { workspace = true }
