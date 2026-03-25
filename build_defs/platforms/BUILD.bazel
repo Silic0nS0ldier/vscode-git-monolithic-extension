@@ -1,8 +1,0 @@
-# Platform representing the VSCode extension host.
-platform(
-    name = "vscode_ext",
-    constraint_values = [
-        "@platforms//cpu:all",
-        "@platforms//os:none",
-    ],
-)

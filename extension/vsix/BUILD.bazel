@@ -53,10 +53,6 @@ vsix_package(
         ":copy_license",
     ],
     in_dir = "./",
-    target_compatible_with = [
-        "@platforms//cpu:all",
-        "@platforms//os:none",
-    ],
 )
 
 sh_library(
