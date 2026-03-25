@@ -27,6 +27,6 @@
 		"gh-cli-auth": "gh auth token > .git/__gh_token || true"
 	},
 	"postStartCommand": {
-		"gh-cli-auth": "gh auth login --with-token < .git/__gh_token || true"
+		"gh-cli-auth": "test -s .git/__gh_token && gh auth login --with-token < .git/__gh_token || true"
 	}
 }
