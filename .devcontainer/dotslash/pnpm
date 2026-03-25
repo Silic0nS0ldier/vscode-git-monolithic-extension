@@ -1,0 +1,30 @@
+#!/usr/bin/env dotslash
+{
+  "name": "pnpm",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 50975875,
+      "hash": "sha256",
+      "digest": "bdb1db01bf0f757495405a59a09c5c287f315889dc98d3b14bc374b9fe43a0bf",
+      "format": "tar.gz",
+      "path": "pnpm",
+      "providers": [
+        {
+          "url": "https://github.com/pnpm/pnpm/releases/download/v11.17.0/pnpm-linux-x64.tar.gz"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 51247006,
+      "hash": "sha256",
+      "digest": "730d17de742a3efbb020ba91d7acfc0456c6ba6ad1cd8eb49f4c229fe9f504d3",
+      "format": "tar.gz",
+      "path": "pnpm",
+      "providers": [
+        {
+          "url": "https://github.com/pnpm/pnpm/releases/download/v11.17.0/pnpm-linux-arm64.tar.gz"
+        }
+      ]
+    }
+  }
+}

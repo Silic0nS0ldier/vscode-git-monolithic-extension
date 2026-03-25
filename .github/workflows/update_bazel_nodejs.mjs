@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { tools } from "../../.devcontainer/dotslash-tools.mjs";
 
 const mapping = {
     "darwin_arm64": "darwin-arm64.tar.xz",
@@ -10,14 +11,8 @@ const mapping = {
     "windows_amd64": "win-x64.zip",
 };
 
-const installShPathArg = process.argv[2];
-const moduleBazelArg = process.argv[3];
-const installShContent = await fs.readFile(installShPathArg, "utf-8");
-const nodeVersionMatch = installShContent.match(/^NODE_VERSION="v(.+)"$/m);
-if (!nodeVersionMatch) {
-    throw new Error("Could not find NODE_VERSION in install.sh");
-}
-const nodejsVersion = nodeVersionMatch[1];
+const moduleBazelArg = process.argv[2];
+const nodejsVersion = tools.node.version.replace(/^v/, "");
 
 const res = await fetch(`https://nodejs.org/dist/v${nodejsVersion}/SHASUMS256.txt`);
 const text = await res.text();

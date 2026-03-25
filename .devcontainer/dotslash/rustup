@@ -1,0 +1,28 @@
+#!/usr/bin/env dotslash
+{
+  "name": "rustup",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 20838840,
+      "hash": "sha256",
+      "digest": "4acc9acc76d5079515b46346a485974457b5a79893cfb01112423c89aeb5aa10",
+      "path": "rustup",
+      "providers": [
+        {
+          "url": "https://static.rust-lang.org/rustup/archive/1.29.0/x86_64-unknown-linux-gnu/rustup-init"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 19502880,
+      "hash": "sha256",
+      "digest": "9732d6c5e2a098d3521fca8145d826ae0aaa067ef2385ead08e6feac88fa5792",
+      "path": "rustup",
+      "providers": [
+        {
+          "url": "https://static.rust-lang.org/rustup/archive/1.29.0/aarch64-unknown-linux-gnu/rustup-init"
+        }
+      ]
+    }
+  }
+}
