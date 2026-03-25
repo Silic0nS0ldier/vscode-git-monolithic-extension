@@ -15,6 +15,7 @@ bazel_dep(name = "rules_nodejs", version = "6.7.3")
 bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.69.0")
 bazel_dep(name = "rules_rust", version = "0.69.0")
 bazel_dep(name = "rules_shell", version = "0.7.1")
+bazel_dep(name = "rules_oci", version = "2.3.0")
 
 # Force rules_go version to newer version for bazel 9.0.1+ support
 # Addresses `The CcInfo symbol has been removed` errors.
@@ -82,6 +83,7 @@ crate.annotation(
 use_repo(crate, "crates")
 
 rust_wasm_bindgen_ext = use_extension("@rules_rust_wasm_bindgen//:extensions.bzl", "rust_ext")
+
 # NOTE Many of these are unused, their inclusion is necessary to suppress Bazel warnings.
 use_repo(
     rust_wasm_bindgen_ext,
@@ -129,3 +131,16 @@ register_toolchains(
     "@llvm//toolchain:all",
     "//build_defs/test_toolchains:wasm32_test_toolchain",
 )
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "devcontainers_base_ubuntu",
+    digest = "sha256:4bcb1b466771b1ba1ea110e2a27daea2f6093f9527fb75ee59703ec89b5561cb",
+    # Follows latest LTS release
+    image = "mcr.microsoft.com/devcontainers/base:ubuntu",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+)
+use_repo(oci, "devcontainers_base_ubuntu", "devcontainers_base_ubuntu_linux_amd64", "devcontainers_base_ubuntu_linux_arm64")

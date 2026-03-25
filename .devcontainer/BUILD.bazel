@@ -1,0 +1,34 @@
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index")
+
+# TODO add nodejs, gh-cli, rustup, bazel feature binaries
+# TODO where should tags be added on a multi-arch image?
+
+oci_image(
+    name = "image",
+    base = "@devcontainers_base_ubuntu",
+)
+
+oci_image_index(
+    name = "image_index",
+    images = [":image"],
+    platforms = [
+        ":linux_amd64",
+        ":linux_arm64",
+    ],
+)
+
+platform(
+    name = "linux_amd64",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)
+
+platform(
+    name = "linux_arm64",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+    ],
+)
