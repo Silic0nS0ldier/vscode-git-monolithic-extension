@@ -22,9 +22,15 @@ if (Object.keys(argv.unknownFlags).length > 0) {
     process.exit(1);
 }
 
+const execroot = process.env.JS_BINARY__EXECROOT;
+if (!execroot) {
+    console.error("JS_BINARY__EXECROOT is not set.");
+    process.exit(1);
+}
+
 const inDir = (() => {
     if (argv.flags.inDir) {
-        return argv.flags.inDir;
+        return path.join(execroot, argv.flags.inDir);
     } else {
         console.log("Input directory must be specified.");
         argv.showHelp();
@@ -34,7 +40,7 @@ const inDir = (() => {
 
 const outFile = (() => {
     if (argv.flags.outFile) {
-        return argv.flags.outFile;
+        return path.join(execroot, argv.flags.outFile);
     } else {
         console.log("Output file must be specified.");
         argv.showHelp();
@@ -45,11 +51,7 @@ const outFile = (() => {
 const version = (() => {
     const pkg = JSON.parse(fs.readFileSync(path.join(inDir, "package.json"), "utf-8"));
     if (process.env.BAZEL_VOLATILE_STATUS_FILE) {
-        if (!process.env.JS_BINARY__EXECROOT) {
-            console.error("JS_BINARY__EXECROOT is not set.");
-            process.exit(1);
-        }
-        const volatileStatusContent = fs.readFileSync(path.join(process.env.JS_BINARY__EXECROOT, process.env.BAZEL_VOLATILE_STATUS_FILE), "utf-8");
+        const volatileStatusContent = fs.readFileSync(path.join(execroot, process.env.BAZEL_VOLATILE_STATUS_FILE), "utf-8");
         const match = volatileStatusContent.match(/BUILD_TIMESTAMP (\d+)/);
         if (!match) {
             console.error("BUILD_TIMESTAMP not found in BAZEL_VOLATILE_STATUS_FILE.");
