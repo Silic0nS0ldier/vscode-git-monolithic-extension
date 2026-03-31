@@ -6,6 +6,6 @@ members = [
 ]
 
 [workspace.dependencies]
-wasm-bindgen = "=0.2.115"
-wasm-bindgen-cli = "=0.2.115"
-wasm-bindgen-test = "0.3.65"
+wasm-bindgen = "=0.2.116"
+wasm-bindgen-cli = "=0.2.116"
+wasm-bindgen-test = "0.3.66"
