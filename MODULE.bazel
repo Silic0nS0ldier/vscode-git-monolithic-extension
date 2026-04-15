@@ -14,7 +14,7 @@ bazel_dep(name = "rules_multitool", version = "1.11.1")
 bazel_dep(name = "rules_nodejs", version = "6.7.4")
 bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.69.0")
 bazel_dep(name = "rules_rust", version = "0.69.0")
-bazel_dep(name = "rules_shell", version = "0.7.1")
+bazel_dep(name = "rules_shell", version = "0.8.0")
 
 # Force rules_go version to newer version for bazel 9.0.1+ support
 # Addresses `The CcInfo symbol has been removed` errors.
