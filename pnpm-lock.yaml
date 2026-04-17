@@ -19,8 +19,8 @@ catalogs:
       specifier: ^7.0.0
       version: 7.0.0
     cleye:
-      specifier: ^2.3.0
-      version: 2.3.0
+      specifier: ^2.5.0
+      version: 2.5.0
     get-stream:
       specifier: ^9.0.1
       version: 9.0.1
@@ -67,7 +67,7 @@ importers:
         version: 16.0.3(rollup@4.60.1)
       cleye:
         specifier: 'catalog:'
-        version: 2.3.0
+        version: 2.5.0
       rollup:
         specifier: ^4.60.1
         version: 4.60.1
@@ -83,7 +83,7 @@ importers:
         version: 3.9.0
       cleye:
         specifier: 'catalog:'
-        version: 2.3.0
+        version: 2.5.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -975,8 +975,8 @@ packages:
   ci-parallel-vars@1.0.1:
     resolution: {integrity: sha512-uvzpYrpmidaoxvIQHM+rKSrigjOe9feHYbw4uOI2gdfe1C3xIlxO+kVXq83WQWNniTf8bAxVpy+cQeFQsMERKg==}
 
-  cleye@2.3.0:
-    resolution: {integrity: sha512-hnROLVsAA8JQo8W65/khA90gPvZ0ymuZqWwQcBpHrrmpIDD2CLvB7HdqAeA0Odxf7RpJLS5Zor0ujlPOXx4IBQ==}
+  cleye@2.5.0:
+    resolution: {integrity: sha512-/XR+/9Qg2ojiGb5i63H3ZAUoPeD8pxZjAqhrt2yJW/ia7noGcFw3b6BL94XeYRK55MaD1lDMi8tYRUH1MS0ipg==}
 
   cli-truncate@5.1.1:
     resolution: {integrity: sha512-SroPvNHxUnk+vIW/dOSfNqdy1sPEFkrTk6TUtqLCnBlo3N7TNYYkzzN7uSD6+jVjrdO4+p8nH7JzH6cIvUem6A==}
@@ -3328,7 +3328,7 @@ snapshots:
 
   ci-parallel-vars@1.0.1: {}
 
-  cleye@2.3.0:
+  cleye@2.5.0:
     dependencies:
       terminal-columns: 2.0.0
       type-flag: 4.1.0
