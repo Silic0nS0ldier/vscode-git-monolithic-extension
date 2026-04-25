@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@formatjs/intl-durationformat':
-      specifier: ^0.10.4
-      version: 0.10.4
+      specifier: ^0.10.5
+      version: 0.10.5
     '@js-temporal/polyfill':
       specifier: ^0.5.1
       version: 0.5.1
@@ -93,7 +93,7 @@ importers:
     dependencies:
       '@formatjs/intl-durationformat':
         specifier: 'catalog:'
-        version: 0.10.4
+        version: 0.10.5
       '@js-temporal/polyfill':
         specifier: 'catalog:'
         version: 0.5.1
@@ -142,7 +142,7 @@ importers:
     dependencies:
       '@formatjs/intl-durationformat':
         specifier: 'catalog:'
-        version: 0.10.4
+        version: 0.10.5
       '@js-temporal/polyfill':
         specifier: 'catalog:'
         version: 0.5.1
@@ -282,11 +282,11 @@ packages:
   '@formatjs/fast-memoize@3.1.2':
     resolution: {integrity: sha512-vPnriihkfK0lzoQGaXq+qXH23VsYyansRTkTgo2aTG0k1NjLFyZimFVdfj4C9JkSE5dm7CEngcQ5TTc1yAyBfQ==}
 
-  '@formatjs/intl-durationformat@0.10.4':
-    resolution: {integrity: sha512-SUS4xT3GX43/thXTZojOXMNMB1zUIlLC+3mdyJga7evrgV4jvmgycX9bXfmMNDu7c2TC9gnXySUpUcxMghZrKg==}
+  '@formatjs/intl-durationformat@0.10.5':
+    resolution: {integrity: sha512-BGrUBBkyBtZuXwr2gOeOZvsZ9mSQ94i0O0NQIS4ebfAkBKcA4s0OlWF4eb6eQP5U4KSoXetRpvp3hHO5a/MqAg==}
 
-  '@formatjs/intl-localematcher@0.8.3':
-    resolution: {integrity: sha512-pHUjWb9NuhnMs8+PxQdzBtZRFJHlGhrURGAbm6Ltwl82BFajeuiIR3jblSa7ia3r62rXe/0YtVpUG3xWr5bFCA==}
+  '@formatjs/intl-localematcher@0.8.4':
+    resolution: {integrity: sha512-J51dAnynnqJdVUEXidHoIWn+qYve+yNQEgmFk9Dyfr3p0okzm+5QhQ+9QmsMz08+BeWTVpc1HadIiLfZmRYbAQ==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2506,11 +2506,11 @@ snapshots:
 
   '@formatjs/fast-memoize@3.1.2': {}
 
-  '@formatjs/intl-durationformat@0.10.4':
+  '@formatjs/intl-durationformat@0.10.5':
     dependencies:
-      '@formatjs/intl-localematcher': 0.8.3
+      '@formatjs/intl-localematcher': 0.8.4
 
-  '@formatjs/intl-localematcher@0.8.3':
+  '@formatjs/intl-localematcher@0.8.4':
     dependencies:
       '@formatjs/fast-memoize': 3.1.2
 
