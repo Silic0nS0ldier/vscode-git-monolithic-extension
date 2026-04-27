@@ -7,7 +7,7 @@ catalog:
   '@formatjs/intl-durationformat': ^0.10.5
   '@js-temporal/polyfill': ^0.5.1
   '@types/node': ^24.12.2
-  ava: ^7.0.0
+  ava: ^8.0.0
   cleye: ^2.6.0
   get-stream: ^9.0.1
 
