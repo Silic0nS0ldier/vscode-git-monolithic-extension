@@ -45,10 +45,11 @@ import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD }
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
+import { log as gitLog } from "monolithic-git-interop/api/log/mod";
+import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
+import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
 import { parseGitCommits } from "./git/parseGitCommits.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
-import { type LsFilesElement, parseLsFiles } from "./git/parseLsFiles.js";
-import { type LsTreeElement, parseLsTree } from "./git/parseLsTree.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
@@ -268,19 +269,16 @@ export class Repository {
     }
 
     async log(options?: LogOptions): Promise<Commit[]> {
-        const maxEntries = options?.maxEntries ?? 32;
-        const args = ["log", `-n${maxEntries}`, `--format=${COMMIT_FORMAT}`, "-z", "--"];
-        if (options?.path) {
-            args.push(options.path);
+        const result = await gitLog(this.#git._context, this.#repositoryRoot, options);
+        if (isErr(result)) {
+            const error = unwrap(result);
+            if (error.type === gitErrors.ERROR_NON_ZERO_EXIT) {
+                // An empty repo
+                return [];
+            }
+            throw error._error;
         }
-
-        const result = await this.exec(args);
-        if (result.exitCode) {
-            // An empty repo
-            return [];
-        }
-
-        return parseGitCommits(result.stdout);
+        return unwrap(result);
     }
 
     async buffer(object: string): Promise<Buffer> {
@@ -328,14 +326,12 @@ export class Repository {
         return { mode, object, size: parseInt(size) };
     }
 
-    async lstree(treeish: string, path: string): Promise<LsTreeElement[]> {
-        const { stdout } = await this.exec(["ls-tree", "-l", treeish, "--", sanitizePath(path)]);
-        return parseLsTree(stdout);
+    async lstree(treeish: string, path: string): Promise<LsTreeEntry[]> {
+        return unwrapOk(await lsTree(this.#git._context, this.#repositoryRoot, treeish, sanitizePath(path)));
     }
 
-    async lsfiles(path: string): Promise<LsFilesElement[]> {
-        const { stdout } = await this.exec(["ls-files", "--stage", "--", sanitizePath(path)]);
-        return parseLsFiles(stdout);
+    async lsfiles(path: string): Promise<LsFilesEntry[]> {
+        return unwrapOk(await lsFiles(this.#git._context, this.#repositoryRoot, sanitizePath(path)));
     }
 
     async apply(patch: string, reverse?: boolean): Promise<void> {
