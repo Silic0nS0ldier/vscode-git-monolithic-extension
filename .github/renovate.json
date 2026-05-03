@@ -54,6 +54,34 @@
       ],
       "groupName": "pnpm",
       "description": "Update all pnpm package manager references together."
+    },
+    {
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDepNames": [
+        "nodejs/node"
+      ],
+      "allowedVersions": "/^v\\d*[02468]\\./",
+      "description": "Only update NodeJS to LTS (even major) versions."
+    },
+    {
+      "matchManagers": [
+        "custom.regex",
+        "npm"
+      ],
+      "matchDepNames": [
+        "nodejs/node",
+        "@types/node"
+      ],
+      "excludeDepTypes": [
+        "pnpm.catalog.vscode"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "nodejs",
+      "description": "Update NodeJS and @types/node major versions together to keep them in sync."
     }
   ]
 }
