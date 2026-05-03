@@ -6,7 +6,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import * as config from "../../../util/config.js";
 import { publish } from "../publish/publish.js";
 
-export type PushTypeOptions = "Push" | "PushFollowTags" | "PushTags" | "PushTo";
+type PushTypeOptions = "Push" | "PushFollowTags" | "PushTags" | "PushTo";
 export const PushType: Record<PushTypeOptions, PushTypeOptions> = {
     Push: "Push",
     PushFollowTags: "PushFollowTags",
@@ -14,7 +14,7 @@ export const PushType: Record<PushTypeOptions, PushTypeOptions> = {
     PushTo: "PushTo",
 };
 
-export interface PushOptions {
+interface PushOptions {
     pushType: PushTypeOptions;
     forcePush?: boolean;
     silent?: boolean;

@@ -6,11 +6,6 @@ export function fireEvent<T>(event: Event<T>): Event<T> {
         event(_ => (listener as any).call(thisArgs), null, disposables);
 }
 
-export function mapEvent<I, O>(event: Event<I>, map: (i: I) => O): Event<O> {
-    return (listener: (e: O) => any, thisArgs?: any, disposables?: Disposable[]) =>
-        event(i => listener.call(thisArgs, map(i)), null, disposables);
-}
-
 export function filterEvent<T>(event: Event<T>, filter: (e: T) => boolean): Event<T> {
     return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) =>
         event(e => filter(e) && listener.call(thisArgs, e), null, disposables);

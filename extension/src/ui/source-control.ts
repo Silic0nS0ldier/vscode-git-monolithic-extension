@@ -73,7 +73,7 @@ export type SourceControlUIGroup = {
     readonly untrackedGroup: SourceControlResourceGroupUI;
 };
 
-export type SourceControlUI = {
+type SourceControlUI = {
     readonly inputBox: SourceControlInputBox;
     count: number;
     statusBarCommands: Command[];

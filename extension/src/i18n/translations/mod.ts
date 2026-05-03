@@ -134,14 +134,6 @@ export function checkout(): string {
     return localize("checkout", "Checkout branch/tag...");
 }
 
-export function publishTo(remoteName?: string): string {
-    if (remoteName) {
-        return localize("publish to", "Publish to {0}", remoteName);
-    }
-
-    return localize("publish to...", "Publish to...");
-}
-
 export function publishChanges(): string {
     return localize("publish changes", "Publish Changes");
 }
@@ -176,22 +168,6 @@ export function gitTitleUntracked(fileName: string): string {
 
 export function open(): string {
     return localize("open", "Open");
-}
-
-export function tooManyChanges(repoRoot: string): string {
-    return localize(
-        "huge",
-        "The git repository at '{0}' has too many active changes, only a subset of Git features will be enabled.",
-        repoRoot,
-    );
-}
-
-export function neverAgain(): string {
-    return localize("neveragain", "Don't Show Again");
-}
-
-export function addKnown(folderName: string): string {
-    return localize("add known", "Would you like to add '{0}' to .gitignore?", folderName);
 }
 
 export function syncChanges(): string {
@@ -354,40 +330,8 @@ export function bothModified(): string {
     return localize("both modified", "Conflict: Both Modified");
 }
 
-export function typeToSearch(): string {
-    return localize("type to search", "Repository name (type to search)");
-}
-
-export function typeToFilter(): string {
-    return localize("type to filter", "Repository name");
-}
-
-export function noneFound(): string {
-    return localize("none found", "No remote repositories found.");
-}
-
-export function error(err: string): string {
-    return localize("error", "$(error) Error: {0}", err);
-}
-
-export function pickUrl(): string {
-    return localize("pick url", "Choose a URL to clone from.");
-}
-
 export function branchName(): string {
     return localize("branch name", "Branch name");
-}
-
-export function provideUrl(): string {
-    return localize("provide url", "Provide repository URL");
-}
-
-export function provideUrlOrPick(): string {
-    return localize("provide url or pick", "Provide repository URL or pick a repository source.");
-}
-
-export function url(): string {
-    return localize("url", "URL");
 }
 
 // TODO Too specific in purpose for its name
@@ -629,40 +573,12 @@ export function removeRemote(): string {
     return localize("remove remote", "Pick a remote to remove");
 }
 
-export function addRemoteFrom(remoteName: string): string {
-    return localize("add remote from", "Add remote from {0}", remoteName);
-}
-
-export function addRemoteFromLabel(): string {
-    return localize("add remote from label", "Add remote from URL");
-}
-
-export function remoteName(): string {
-    return localize("remote name", "Remote name");
-}
-
-export function provideRemoteName(): string {
-    return localize("provide remote name", "Please provide a remote name");
-}
-
-export function remoteNameFormatInvalid(): string {
-    return localize("remote name format invalid", "Remote name format invalid");
-}
-
-export function remoteAlreadyExists(remoteName: string): string {
-    return localize("remote already exists", "Remote '{0}' already exists.", remoteName);
-}
-
 export function selectRebaseTarget(): string {
     return localize("select a branch to rebase onto", "Select a branch to rebase onto");
 }
 
 export function noRebase(): string {
     return localize("no rebase", "No rebase in progress.");
-}
-
-export function noRemotesToPush(): string {
-    return localize("no remotes to push", "Your repository has no remotes configured to push to.");
 }
 
 export function forcePushNotAllowed(): string {
@@ -683,10 +599,6 @@ export function noBranch(): string {
     return localize("nobranch", "Please check out a branch to push to a remote.");
 }
 
-export function pickRemote(branchName: string): string {
-    return localize("pick remote", "Pick a remote to publish the branch '{0}' to:", branchName);
-}
-
 export function noRemotesToPull(): string {
     return localize("no remotes to pull", "Your repository has no remotes configured to pull from.");
 }
@@ -697,10 +609,6 @@ export function pickRemotePull(): string {
 
 export function pickBranchPull(): string {
     return localize("pick branch pull", "Pick a branch to pull from");
-}
-
-export function addRemote2(): string {
-    return localize("add remote", "Add a new remote...");
 }
 
 export function noRemotesToPublish(): string {
@@ -857,14 +765,6 @@ export function confirmEmptyCommit(): string {
 
 export function yesNeverAgain(): string {
     return localize("yes never again", "Yes, Don't Show Again");
-}
-
-export function cloneFrom(remoteName: string): string {
-    return localize("clonefrom", "Clone from {0}", remoteName);
-}
-
-export function cloneUrl(): string {
-    return localize("repourl", "Clone from URL");
 }
 
 export function selectRepositoryFolder(): string {
