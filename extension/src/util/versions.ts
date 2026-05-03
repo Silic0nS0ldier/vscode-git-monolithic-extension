@@ -1,6 +1,6 @@
 type VersionComparisonResult = -1 | 0 | 1;
 
-export interface Version {
+interface Version {
     major: number;
     minor: number;
     patch: number;
@@ -36,7 +36,7 @@ export function compare(v1: string | Version, v2: string | Version): VersionComp
     return 0;
 }
 
-export function from(
+function from(
     major: string | number,
     minor: string | number,
     patch?: string | number,

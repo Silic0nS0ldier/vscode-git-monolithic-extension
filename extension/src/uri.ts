@@ -5,7 +5,7 @@
 
 import type { Uri } from "vscode";
 
-export interface GitUriParams {
+interface GitUriParams {
     path: string;
     ref: string;
     submoduleOf?: string;
@@ -19,7 +19,7 @@ export function fromGitUri(uri: Uri): GitUriParams {
     return JSON.parse(uri.query);
 }
 
-export interface GitUriOptions {
+interface GitUriOptions {
     replaceFileExtension?: boolean;
     submoduleOf?: string;
 }

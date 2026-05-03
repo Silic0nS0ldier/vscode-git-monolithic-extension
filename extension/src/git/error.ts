@@ -15,7 +15,7 @@ export function cpErrorHandler(cb: (reason?: any) => void): (reason?: any) => vo
     };
 }
 
-export interface IGitErrorData {
+interface IGitErrorData {
     error?: Error;
     message?: string;
     stdout?: string;

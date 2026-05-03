@@ -85,7 +85,7 @@ export function toLineRanges(selections: readonly Selection[], textDocument: Tex
     return result;
 }
 
-export function getModifiedRange(textDocument: TextDocument, diff: vsDiff.ILineChange): Range {
+function getModifiedRange(textDocument: TextDocument, diff: vsDiff.ILineChange): Range {
     if (diff.modifiedEndLineNumber === 0) {
         if (diff.modifiedStartLineNumber === 0) {
             return new Range(

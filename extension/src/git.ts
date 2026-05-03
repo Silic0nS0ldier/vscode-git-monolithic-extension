@@ -70,7 +70,7 @@ interface MutableRemote extends Remote {
     isReadOnly: boolean;
 }
 
-export interface IGitOptions {
+interface IGitOptions {
     gitPath: string;
     userAgent: string;
     version: string;
@@ -81,7 +81,7 @@ export interface IGitOptions {
 
 const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";
 
-export interface ICloneOptions {
+interface ICloneOptions {
     readonly parentPath: string;
     readonly progress: Progress<{ increment: number }>;
     readonly recursive?: boolean;
@@ -221,7 +221,7 @@ export class Git {
     }
 }
 
-export interface PullOptions {
+interface PullOptions {
     unshallow?: boolean;
     tags?: boolean;
     readonly abortSignal?: AbortSignal;

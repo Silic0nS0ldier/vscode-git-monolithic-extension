@@ -128,7 +128,7 @@ export function resolveChangeCommand(resource: Resource): Command {
     }
 }
 
-export function resolveFileCommand(resource: Resource): Command {
+function resolveFileCommand(resource: Resource): Command {
     return {
         arguments: [resource.state.resourceUri],
         command: "vscode.open",
