@@ -1,42 +1,11 @@
 {
     "private": true,
-    "packageManager": "pnpm@10.33.2",
+    "packageManager": "pnpm@11.0.4",
     "dependencies": {
         "@eslint/js": "^10.0.1",
         "eslint": "^10.3.0",
         "typescript": "^6.0.3",
         "typescript-eslint": "^8.59.1"
-    },
-    "pnpm": {
-        "overrides": {
-            "minimist@<1.2.6": "^1.2.8",
-            "semver@<7.6.3": "^7.7.4"
-        },
-        "onlyBuiltDependencies": [],
-        "patchedDependencies": {
-            "watcher@2.3.1": "patches/watcher@2.3.1.patch"
-        },
-        "packageExtensions": {
-            "@secretlint/resolver": {
-                "dependencies": {
-                    "@secretlint/secretlint-rule-basicauth": "^10.2.2",
-                    "@secretlint/secretlint-rule-no-dotenv": "^10.2.2",
-                    "@secretlint/secretlint-rule-npm": "^10.2.2",
-                    "@secretlint/secretlint-rule-preset-recommend": "^10.2.2",
-                    "@secretlint/secretlint-rule-privatekey": "^10.2.2"
-                }
-            },
-            "@textlint/resolver": {
-                "dependencies": {
-                    "@secretlint/secretlint-formatter-sarif": "^10.2.2"
-                }
-            },
-            "eslint": {
-                "//": "chalk added as workaround for https://github.com/aspect-build/rules_lint/issues/752",
-                "dependencies": {
-                    "chalk": "^4.0.0"
-                }
-            }
-        }
     }
 }
+
