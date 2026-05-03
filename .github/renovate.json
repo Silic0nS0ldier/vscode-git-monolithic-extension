@@ -74,9 +74,6 @@
         "nodejs/node",
         "@types/node"
       ],
-      "excludeDepTypes": [
-        "pnpm.catalog.vscode"
-      ],
       "matchUpdateTypes": [
         "major"
       ],
