@@ -17,7 +17,7 @@
     },
     "devDependencies": {
         "@types/node": "catalog:vscode",
-        "@types/vscode": "^1.116.0",
+        "@types/vscode": "^1.118.0",
         "ava": "catalog:"
     },
     "scripts": {
