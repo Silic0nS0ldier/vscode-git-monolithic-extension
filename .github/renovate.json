@@ -23,6 +23,16 @@
         "npm"
       ],
       "matchDepTypes": [
+        "pnpm.overrides"
+      ],
+      "enabled": false,
+      "description": "Overrides are managed manually for security and/or workaround reasons."
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "matchDepTypes": [
         "pnpm.catalog.vscode"
       ],
       "matchDepNames": [
