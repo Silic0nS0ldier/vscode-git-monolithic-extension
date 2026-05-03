@@ -3,14 +3,29 @@ packages:
   - build_defs/*
   - extension
 
+allowBuilds: { '@vscode/vsce-sign': false, keytar: false }
+
+catalog:
+  '@formatjs/intl-durationformat': ^0.10.7
+  '@js-temporal/polyfill': ^0.5.1
+  '@types/node': ^24.12.2
+  ava: ^8.0.0
+  cleye: ^2.6.0
+  get-stream: ^9.0.1
+
+catalogs:
+  vscode:
+    '@types/node': ^22.18.6
+
 overrides:
   "minimist@<1.2.6": "^1.2.8"
   "semver@<7.6.3": "^7.7.4"
-
-allowBuilds: {}
-
-patchedDependencies:
-  "watcher@2.3.1": "patches/watcher@2.3.1.patch"
+  "picomatch@<2.3.2": "2.3.2"
+  "picomatch@>=4.0.0 <4.0.4": "4.0.4"
+  "brace-expansion@<1.1.13": "1.1.14"
+  "brace-expansion@>=4.0.0 <5.0.5": "5.0.5"
+  "lodash@<4.17.24": "4.18.1"
+  "@azure/identity": "4.13.1"
 
 packageExtensions:
   "@secretlint/resolver":
@@ -28,14 +43,5 @@ packageExtensions:
     dependencies:
       "chalk": "^4.0.0"
 
-catalog:
-  '@formatjs/intl-durationformat': ^0.10.7
-  '@js-temporal/polyfill': ^0.5.1
-  '@types/node': ^24.12.2
-  ava: ^8.0.0
-  cleye: ^2.6.0
-  get-stream: ^9.0.1
-
-catalogs:
-  vscode:
-    '@types/node': ^22.18.6
+patchedDependencies:
+  "watcher@2.3.1": "patches/watcher@2.3.1.patch"
