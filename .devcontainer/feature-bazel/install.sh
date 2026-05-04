@@ -14,7 +14,7 @@ BUILDTOOLS_VERSION="v8.5.1"
 # renovate: datasource=github-tags depName=withered-magic/starpls
 STARPLS_VERSION="v0.1.22"
 # renovate: datasource=github-tags depName=pnpm/pnpm
-PNPM_VERSION="v11.0.4"
+PNPM_VERSION="v11.0.5"
 # renovate: datasource=github-tags depName=nodejs/node
 NODE_VERSION="v24.15.0"
 
