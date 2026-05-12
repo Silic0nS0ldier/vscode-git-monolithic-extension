@@ -1,6 +1,6 @@
 {
     "private": true,
-    "packageManager": "pnpm@11.1.0",
+    "packageManager": "pnpm@11.1.1",
     "dependencies": {
         "@eslint/js": "^10.0.1",
         "eslint": "^10.3.0",
