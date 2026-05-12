@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@formatjs/intl-durationformat':
-      specifier: ^0.10.8
-      version: 0.10.8
+      specifier: ^0.10.9
+      version: 0.10.9
     '@js-temporal/polyfill':
       specifier: ^0.5.1
       version: 0.5.1
@@ -97,7 +97,7 @@ importers:
     dependencies:
       '@formatjs/intl-durationformat':
         specifier: 'catalog:'
-        version: 0.10.8
+        version: 0.10.9
       '@js-temporal/polyfill':
         specifier: 'catalog:'
         version: 0.5.1
@@ -146,7 +146,7 @@ importers:
     dependencies:
       '@formatjs/intl-durationformat':
         specifier: 'catalog:'
-        version: 0.10.8
+        version: 0.10.9
       '@js-temporal/polyfill':
         specifier: 'catalog:'
         version: 0.5.1
@@ -283,17 +283,17 @@ packages:
     resolution: {integrity: sha512-rZAP3aVgB9ds9KOeUSL+zZ21hPmo8dh6fnIFwRQj5EAZl9gzR7wxYbYXYysAM8CTqGmUGyp2S4kUdV17MnGuWQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@formatjs/bigdecimal@0.2.3':
-    resolution: {integrity: sha512-d7LpumdsbHueHdlVMos2yROIumyisUJNlFAk3PpN/5YcnXhWnkYmeiaQnOjqmmGx8BbaphoIyaF2CPus3cownw==}
+  '@formatjs/bigdecimal@0.2.4':
+    resolution: {integrity: sha512-lQ0S33FRGRYimSKKy7siaDAZAwvOGZsbpx5/lzDvLldj7GqJISPntS0JjYzf8S+B4HjYrY1EkCcZFj8vV9fuYg==}
 
-  '@formatjs/fast-memoize@3.1.4':
-    resolution: {integrity: sha512-Lbke1aOrsygKKR09Ux0NrZgbTqpDmiwXOgzyDOJ8Owr1zd5qOKTauf62hH+Seeku3ju77rHWH9I5SfX2CN0vuA==}
+  '@formatjs/fast-memoize@3.1.5':
+    resolution: {integrity: sha512-KLi3fan6WnCHmigd9pmEEN8Hid0v4wiFBW576M/d07KMWYecf1CvyMI3n34vCmHT4AoVqG2n702kiHbXjzZX2A==}
 
-  '@formatjs/intl-durationformat@0.10.8':
-    resolution: {integrity: sha512-1Crir41n1kMTVejBg7tkLfBRSWm7p1y+Bt4Nyny1DtxH41/+q2qZ2vSyTiQEdKbvSvmt0WG/gInFrMsK8lx1/A==}
+  '@formatjs/intl-durationformat@0.10.9':
+    resolution: {integrity: sha512-iGUTNmGFR1QzzShzLE+uX6ShyBUsucGDm4Ujd4+8MYqS7E5PXAS59LAkKw1EoxCaYlIs8mPaqFBisK1ttWOJ9Q==}
 
-  '@formatjs/intl-localematcher@0.8.6':
-    resolution: {integrity: sha512-AZRgUxj0q93lyF7Z5lFS85bLINXuBLX4R3tCKicO6fSWo6cvh9GQfoR3B1WlsqQwefZ1QORTivhInx7gM6HUzQ==}
+  '@formatjs/intl-localematcher@0.8.7':
+    resolution: {integrity: sha512-1R/ljfRKG1fUhKG4F0lUmrEKPkr/PlHqbgQ8xeYQYYunXu5/0+vbQeeVgGAgydp13Tq+S1X5Qjn6L90hijXjHg==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -2517,18 +2517,18 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@formatjs/bigdecimal@0.2.3': {}
+  '@formatjs/bigdecimal@0.2.4': {}
 
-  '@formatjs/fast-memoize@3.1.4': {}
+  '@formatjs/fast-memoize@3.1.5': {}
 
-  '@formatjs/intl-durationformat@0.10.8':
+  '@formatjs/intl-durationformat@0.10.9':
     dependencies:
-      '@formatjs/bigdecimal': 0.2.3
-      '@formatjs/intl-localematcher': 0.8.6
+      '@formatjs/bigdecimal': 0.2.4
+      '@formatjs/intl-localematcher': 0.8.7
 
-  '@formatjs/intl-localematcher@0.8.6':
+  '@formatjs/intl-localematcher@0.8.7':
     dependencies:
-      '@formatjs/fast-memoize': 3.1.4
+      '@formatjs/fast-memoize': 3.1.5
 
   '@humanfs/core@0.19.2':
     dependencies:
