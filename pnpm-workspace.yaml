@@ -6,7 +6,7 @@ packages:
 allowBuilds: { '@vscode/vsce-sign': false, keytar: false }
 
 catalog:
-  '@formatjs/intl-durationformat': ^0.10.10
+  '@formatjs/intl-durationformat': ^0.10.11
   '@js-temporal/polyfill': ^0.5.1
   '@types/node': ^24.12.2
   ava: ^8.0.0
