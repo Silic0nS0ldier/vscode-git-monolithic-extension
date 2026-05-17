@@ -16,8 +16,8 @@ catalogs:
       specifier: ^24.12.4
       version: 24.12.4
     ava:
-      specifier: ^8.0.0
-      version: 8.0.0
+      specifier: ^8.0.1
+      version: 8.0.1
     cleye:
       specifier: ^2.6.0
       version: 2.6.0
@@ -140,7 +140,7 @@ importers:
         version: 1.120.0
       ava:
         specifier: 'catalog:'
-        version: 8.0.0(rollup@4.60.4)
+        version: 8.0.1(rollup@4.60.4)
 
   packages/git:
     dependencies:
@@ -174,7 +174,7 @@ importers:
         version: 3.0.4
       ava:
         specifier: 'catalog:'
-        version: 8.0.0(rollup@4.60.4)
+        version: 8.0.1(rollup@4.60.4)
       into-stream:
         specifier: ^9.1.0
         version: 9.1.0
@@ -243,6 +243,10 @@ packages:
 
   '@bazel/runfiles@6.5.0':
     resolution: {integrity: sha512-RzahvqTkfpY2jsDxo8YItPX+/iZ6hbiikw1YhE0bA9EKBR5Og8Pa6FHn9PO9M0zaXRVsr0GFQLKbB/0rzy9SzA==}
+
+  '@cto.af/wtf8@0.0.5':
+    resolution: {integrity: sha512-LfUFi+Vv4eDzj+XAtR89e3wwjXA/NZjUSwU5NhwbBrLecxPaBYFy3exCuc1j+D4UZeOVdqlsl8G7LmOt18V0tg==}
+    engines: {node: '>=20'}
 
   '@eslint-community/eslint-utils@4.9.1':
     resolution: {integrity: sha512-phrYmNiYppR7znFEdqgfWHXR6NCkZEK7hwWDHZUjit/2/U0r6XvkDl0SYnoM51Hq7FhCGdLDT6zxCCOY1hexsQ==}
@@ -875,9 +879,9 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  ava@8.0.0:
-    resolution: {integrity: sha512-KMUyT3LcnZ/5ipDAqnTGn6PQUvr1Jk4dex3v7ieQrGaMlAblfIpMLwK56HfPcObvJEzyhCWXfZjbM98FeAy0oQ==}
-    engines: {node: ^22.20 || ^24.12 || >=25}
+  ava@8.0.1:
+    resolution: {integrity: sha512-YlwwL5HX2EJRE75e2LR8nio8lKAJ702sFbv0QYnhzngAjyo9wB+Xg4JZh5f432khlWfVD5OQ93rrRopEXJptpg==}
+    engines: {node: ^22.20 || ^24.12 || >=26}
     hasBin: true
     peerDependencies:
       '@ava/typescript': '*'
@@ -953,8 +957,8 @@ packages:
     resolution: {integrity: sha512-kfzR4zzQtAE9PC7CzZsjl3aBNbXWuXiSeOCdLcPpBfGW8YuCqQHcRPFDbr/BPVmd3EEPVpuFzLyuT/cUhPr4OQ==}
     engines: {node: '>=12.20'}
 
-  cbor@10.0.12:
-    resolution: {integrity: sha512-exQDevYd7ZQLP4moMQcZkKCVZsXLAtUSflObr3xTh4xzFIv/xBCdvCd6L259kQOUP2kcTC0jvC6PpZIf/WmRXA==}
+  cbor2@2.3.0:
+    resolution: {integrity: sha512-76WB3hq8BoaGkMkBVJ27fW5LJU+qqDLEpgRNCG/SYKhODWXpVPOTD4UcUto3IEzYLA52nsvbhb0wabhHDn3qXg==}
     engines: {node: '>=20'}
 
   chalk@4.1.2:
@@ -1787,10 +1791,6 @@ packages:
     resolution: {integrity: sha512-kVIOdynrF2CRodHZeP/97Rh1syTUHBNiw17hUCIVhlhEsWlfJm19MuO56s4MdKbr22xWx6mzMnNAgXzVlIYM9Q==}
     engines: {node: '>=18'}
 
-  nofilter@3.1.0:
-    resolution: {integrity: sha512-l2NNj07e9afPnhAhvgVrCD/oy2Ai1yfLpuo3EpiO1jFTsB4sFz6oIfAfSZyQzVpkZQ9xS8ZS5g1jCBgq4Hwo0g==}
-    engines: {node: '>=12.19'}
-
   nopt@8.1.0:
     resolution: {integrity: sha512-ieGu42u/Qsa4TFktmaKEwM6MQH0pOWnaB3htzh0JRtx84+Mebc0cbZYN5bC+6WTZ4+77xrL9Pn5m7CV6VIkV7A==}
     engines: {node: ^18.17.0 || >=20.5.0}
@@ -2478,6 +2478,8 @@ snapshots:
   '@babel/helper-validator-identifier@7.27.1': {}
 
   '@bazel/runfiles@6.5.0': {}
+
+  '@cto.af/wtf8@0.0.5': {}
 
   '@eslint-community/eslint-utils@4.9.1(eslint@10.4.0)':
     dependencies:
@@ -3184,7 +3186,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  ava@8.0.0(rollup@4.60.4):
+  ava@8.0.1(rollup@4.60.4):
     dependencies:
       '@vercel/nft': 1.5.0(rollup@4.60.4)
       acorn: 8.16.0
@@ -3193,7 +3195,7 @@ snapshots:
       arrgv: 1.0.2
       arrify: 3.0.0
       callsites: 4.2.0
-      cbor: 10.0.12
+      cbor2: 2.3.0
       chalk: 5.6.2
       chunkd: 2.0.1
       ci-info: 4.4.0
@@ -3303,9 +3305,9 @@ snapshots:
 
   callsites@4.2.0: {}
 
-  cbor@10.0.12:
+  cbor2@2.3.0:
     dependencies:
-      nofilter: 3.1.0
+      '@cto.af/wtf8': 0.0.5
 
   chalk@4.1.2:
     dependencies:
@@ -4107,8 +4109,6 @@ snapshots:
     dependencies:
       '@types/sarif': 2.1.7
       fs-extra: 11.3.2
-
-  nofilter@3.1.0: {}
 
   nopt@8.1.0:
     dependencies:
