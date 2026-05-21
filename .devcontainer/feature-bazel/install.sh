@@ -13,8 +13,8 @@ BAZELISK_VERSION="v1.29.0"
 BUILDTOOLS_VERSION="v8.5.1"
 # renovate: datasource=github-tags depName=withered-magic/starpls
 STARPLS_VERSION="v0.1.22"
-# renovate: datasource=github-tags depName=pnpm/pnpm
-PNPM_VERSION="v11.1.2"
+# renovate: datasource=npm depName=pnpm
+PNPM_VERSION="11.1.2"
 # renovate: datasource=github-tags depName=nodejs/node
 NODE_VERSION="v24.15.0"
 
@@ -24,7 +24,7 @@ if [[ $ARCH == "arm64" ]] || [[ $ARCH == "aarch64" ]]; then
     curl "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/buildozer-linux-arm64" -Lo /usr/local/bin/buildozer
     curl "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/unused_deps-linux-arm64" -Lo /usr/local/bin/unused_deps
     curl "https://github.com/withered-magic/starpls/releases/download/${STARPLS_VERSION}/starpls-linux-aarch64" -Lo /usr/local/bin/starpls
-    curl "https://github.com/pnpm/pnpm/releases/download/${PNPM_VERSION}/pnpm-linux-arm64.tar.gz" -Lo /tmp/pnpm.tar.gz
+    curl "https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linux-arm64.tar.gz" -Lo /tmp/pnpm.tar.gz
     curl "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-arm64.tar.xz" -Lo /tmp/node.tar.xz
 elif [[ $ARCH == "x86_64" ]]; then
     curl "https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-linux-amd64" -Lo /usr/local/bin/bazel
@@ -32,7 +32,7 @@ elif [[ $ARCH == "x86_64" ]]; then
     curl "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/buildozer-linux-amd64" -Lo /usr/local/bin/buildozer
     curl "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/unused_deps-linux-amd64" -Lo /usr/local/bin/unused_deps
     curl "https://github.com/withered-magic/starpls/releases/download/${STARPLS_VERSION}/starpls-linux-amd64" -Lo /usr/local/bin/starpls
-    curl "https://github.com/pnpm/pnpm/releases/download/${PNPM_VERSION}/pnpm-linux-x64.tar.gz" -Lo /tmp/pnpm.tar.gz
+    curl "https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linux-x64.tar.gz" -Lo /tmp/pnpm.tar.gz
     curl "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz" -Lo /tmp/node.tar.xz
 else
     echo "Unknown arch $ARCH"

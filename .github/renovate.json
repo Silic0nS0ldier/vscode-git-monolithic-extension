@@ -59,8 +59,7 @@
         "npm"
       ],
       "matchDepNames": [
-        "pnpm",
-        "pnpm/pnpm"
+        "pnpm"
       ],
       "groupName": "pnpm",
       "description": "Update all pnpm package manager references together."
