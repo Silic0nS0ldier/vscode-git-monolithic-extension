@@ -50,7 +50,7 @@
         "@types/node": "catalog:vscode",
         "compare-versions": "^6.1.1",
         "get-stream": "catalog:",
-        "monolithic-git-wasm": "workspace:",
+        "monolithic-git-wasm": "workspace:^",
         "which": "^7.0.0"
     },
     "scripts": {
