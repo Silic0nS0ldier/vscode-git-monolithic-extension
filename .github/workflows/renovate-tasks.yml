@@ -17,6 +17,23 @@ jobs:
         with:
           # Required to have correct ref for git-auto-commit-action
           ref: ${{ github.head_ref }}
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelrc: |
+            common --color=yes
+            common --curses=no
+            common --show_progress_rate_limit=5
+          cache-save: false
+          bazelisk-cache: true
+          repository-cache: |
+            - build_defs/rust_wasm_bindgen/Cargo.toml
+            - Cargo.lock
+            - Cargo.toml
+            - MODULE.bazel
+            - MODULE.bazel.lock
+            - multitool.lock.json
+            - packages/wasm/Cargo.toml
+            - pnpm-lock.yaml
       - run: node ./.github/workflows/update_bazel_nodejs.mjs ./.devcontainer/feature-bazel/install.sh ./MODULE.bazel
       - run: bazel mod deps --lockfile_mode=update
       - uses: stefanzweifel/git-auto-commit-action@v7

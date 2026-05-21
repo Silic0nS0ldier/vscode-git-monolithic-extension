@@ -17,9 +17,23 @@ jobs:
       - uses: actions/checkout@v6
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
+          bazelrc: |
+            common --color=yes
+            common --curses=no
+            common --show_progress_rate_limit=5
+            common --lockfile_mode=error
+          cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
           disk-cache: "${{ github.workflow }}-test"
-          repository-cache: true
+          repository-cache: |
+            - build_defs/rust_wasm_bindgen/Cargo.toml
+            - Cargo.lock
+            - Cargo.toml
+            - MODULE.bazel
+            - MODULE.bazel.lock
+            - multitool.lock.json
+            - packages/wasm/Cargo.toml
+            - pnpm-lock.yaml
       - run: bazel test //...
         id: test
         continue-on-error: true
