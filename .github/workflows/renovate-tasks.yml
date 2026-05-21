@@ -5,13 +5,13 @@ on:
       - synchronize
     paths:
       - MODULE.bazel
-      - .devcontainer/devcontainer.json
+      - .devcontainer/feature-bazel/install.sh
 jobs:
   renovate_tasks:
     if: github.actor == 'renovate[bot]'
     permissions:
       contents: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
         with:
