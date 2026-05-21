@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@formatjs/intl-durationformat':
-      specifier: ^0.10.11
-      version: 0.10.11
+      specifier: ^0.10.12
+      version: 0.10.12
     '@js-temporal/polyfill':
       specifier: ^0.5.1
       version: 0.5.1
@@ -97,7 +97,7 @@ importers:
     dependencies:
       '@formatjs/intl-durationformat':
         specifier: 'catalog:'
-        version: 0.10.11
+        version: 0.10.12
       '@js-temporal/polyfill':
         specifier: 'catalog:'
         version: 0.5.1
@@ -146,7 +146,7 @@ importers:
     dependencies:
       '@formatjs/intl-durationformat':
         specifier: 'catalog:'
-        version: 0.10.11
+        version: 0.10.12
       '@js-temporal/polyfill':
         specifier: 'catalog:'
         version: 0.5.1
@@ -293,8 +293,8 @@ packages:
   '@formatjs/fast-memoize@3.1.5':
     resolution: {integrity: sha512-KLi3fan6WnCHmigd9pmEEN8Hid0v4wiFBW576M/d07KMWYecf1CvyMI3n34vCmHT4AoVqG2n702kiHbXjzZX2A==}
 
-  '@formatjs/intl-durationformat@0.10.11':
-    resolution: {integrity: sha512-DLSEJXRO4VS+s/zD6xg3rliJlfKVFIUbOxn2EMaYcWAcMHlByhfzSoFrZ2DZRyizjb8GYr8pd94XiA0AAC6Ikg==}
+  '@formatjs/intl-durationformat@0.10.12':
+    resolution: {integrity: sha512-k9LXUGERtAKoav1my1JIfMZY++ifg/2+7zAjFCUu+tPP2PEfN2N0shdZ9hddHMbaD0icr2iAVT8zleLNf70W8A==}
 
   '@formatjs/intl-localematcher@0.8.8':
     resolution: {integrity: sha512-pBr2hVKWvkHVnfXegW+53NT9U2uaVQCc+EgzLPCCwXqBA3nvM5fPbK9IcJlNjV+NMKGyZ2F3ZSG78iGdxAAqbA==}
@@ -2519,7 +2519,7 @@ snapshots:
 
   '@formatjs/fast-memoize@3.1.5': {}
 
-  '@formatjs/intl-durationformat@0.10.11':
+  '@formatjs/intl-durationformat@0.10.12':
     dependencies:
       '@formatjs/bigdecimal': 0.2.5
       '@formatjs/intl-localematcher': 0.8.8
