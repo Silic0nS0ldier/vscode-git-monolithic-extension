@@ -10,12 +10,14 @@ const mapping = {
     "windows_amd64": "win-x64.zip",
 };
 
-const devcontainerPathArg = process.argv[2];
+const installShPathArg = process.argv[2];
 const moduleBazelArg = process.argv[3];
-const devcontainerJson = JSON.parse(
-    await fs.readFile(`${devcontainerPathArg}`, "utf-8")
-);
-const nodejsVersion = devcontainerJson.features["ghcr.io/devcontainers/features/node:1"].version;
+const installShContent = await fs.readFile(installShPathArg, "utf-8");
+const nodeVersionMatch = installShContent.match(/^NODE_VERSION="v(.+)"$/m);
+if (!nodeVersionMatch) {
+    throw new Error("Could not find NODE_VERSION in install.sh");
+}
+const nodejsVersion = nodeVersionMatch[1];
 
 const res = await fetch(`https://nodejs.org/dist/v${nodejsVersion}/SHASUMS256.txt`);
 const text = await res.text();
