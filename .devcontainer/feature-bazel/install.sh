@@ -5,7 +5,7 @@ set -eax
 
 echo "Running install..."
 
-ARCH="$(uname --processor)"
+ARCH="$(uname --machine)"
 
 # renovate: datasource=github-tags depName=bazelbuild/bazelisk
 BAZELISK_VERSION="v1.29.0"
