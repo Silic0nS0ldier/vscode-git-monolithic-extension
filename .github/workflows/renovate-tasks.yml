@@ -22,6 +22,7 @@ jobs:
           bazelrc: |
             common --color=yes
             common --curses=no
+            common --show_progress_rate_limit=5
           cache-save: false
           bazelisk-cache: true
           repository-cache: |
