@@ -22,6 +22,7 @@ jobs:
           bazelrc: |
             common --color=yes
             common --curses=no
+          cache-save: false
           bazelisk-cache: true
           repository-cache: |
             - build_defs/rust_wasm_bindgen/Cargo.toml

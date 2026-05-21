@@ -21,6 +21,7 @@ jobs:
             common --color=yes
             common --curses=no
             common --lockfile_mode=error
+          cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
           disk-cache: "${{ github.workflow }}-test"
           repository-cache: |
