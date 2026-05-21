@@ -19,6 +19,7 @@ jobs:
         with:
           bazelrc: |
             common --color=yes
+            common --curses=no
             common --lockfile_mode=error
           bazelisk-cache: true
           disk-cache: "${{ github.workflow }}-test"
