@@ -3,14 +3,7 @@ module(name = "vscode_git_monolithic")
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
-bazel_dep(name = "aspect_rules_js", version = "3.0.3")
-# For pnpm v11 support
-archive_override(
-    module_name = "aspect_rules_js",
-    urls = ["https://github.com/aspect-build/rules_js/archive/401406a1984917e4d17a1596b5c0dbced0927ff4.tar.gz"],
-    strip_prefix = "rules_js-401406a1984917e4d17a1596b5c0dbced0927ff4",
-    integrity = "sha256-/qXNoACOY5FtBoSyq+LmUYVyMBlZ4Z6l4luTFHsBU9M=",
-)
+bazel_dep(name = "aspect_rules_js", version = "3.1.2")
 bazel_dep(name = "aspect_rules_lint", version = "2.6.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.8.10")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
@@ -22,19 +15,21 @@ bazel_dep(name = "rules_nodejs", version = "6.7.4")
 bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.70.0")
 bazel_dep(name = "rules_rust", version = "0.70.0")
 bazel_dep(name = "rules_shell", version = "0.8.0")
+bazel_dep(name = "rules_oci", version = "2.3.0")
+bazel_dep(name = "tar.bzl", version = "0.10.4")
 
 # Force rules_go version to newer version for bazel 9.0.1+ support
 # Addresses `The CcInfo symbol has been removed` errors.
 # Dependency pulled in via
-#   <root> (vscode_git_monolithic@_)
-#   └───aspect_rules_lint@2.3.0
-#       └───rules_buf@0.5.2
-#           ├───gazelle@0.34.0
-#           │   └───rules_go@0.42.0 #
-#           └───rules_go@0.42.0 #
-# TODO(Silic0nS0ldier): Remove once `rules_buf` updates to a newer `rules_go` version.
-# https://github.com/bufbuild/rules_buf/issues/132
-bazel_dep(name = "rules_go", version = "0.60.0")
+# <root> (vscode_git_monolithic@_)
+# └───aspect_rules_lint@2.6.0 
+#     └───rules_buf@0.5.2 
+#         ├───gazelle@0.34.0 
+#         │   └───rules_go@0.42.0 # 
+#         └───rules_go@0.42.0 #
+# TODO(Silic0nS0ldier): Remove once `aspect_rules_lint` updates to a newer `rules_buf` version.
+# https://github.com/bufbuild/rules_buf/commit/592765779fc307e8ceccbbb35e7a2298aefc5ab5
+bazel_dep(name = "rules_buf", version = "0.5.4")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
@@ -89,6 +84,7 @@ crate.annotation(
 use_repo(crate, "crates")
 
 rust_wasm_bindgen_ext = use_extension("@rules_rust_wasm_bindgen//:extensions.bzl", "rust_ext")
+
 # NOTE Many of these are unused, their inclusion is necessary to suppress Bazel warnings.
 use_repo(
     rust_wasm_bindgen_ext,
@@ -135,4 +131,37 @@ register_toolchains(
     "//build_defs/rust_wasm_bindgen:toolchain",
     "@llvm//toolchain:all",
     "//build_defs/test_toolchains:wasm32_test_toolchain",
+)
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "devcontainers_base_ubuntu",
+    digest = "sha256:4bcb1b466771b1ba1ea110e2a27daea2f6093f9527fb75ee59703ec89b5561cb",
+    # Follows latest LTS release
+    image = "mcr.microsoft.com/devcontainers/base:ubuntu",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+)
+use_repo(oci, "devcontainers_base_ubuntu", "devcontainers_base_ubuntu_linux_amd64", "devcontainers_base_ubuntu_linux_arm64")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "dotslash_amd64",
+    build_file_content = """
+exports_files(["dotslash"])
+    """,
+    sha256 = "7400dd0dbdf05d3be4e604b62807eb1bcbaa0d1bced010d30746243759e0ac03",
+    urls = ["https://github.com/facebook/dotslash/releases/download/v0.5.9/dotslash-ubuntu-22.04.x86_64.tar.gz"],
+)
+
+http_archive(
+    name = "dotslash_arm64",
+    build_file_content = """
+exports_files(["dotslash"])
+    """,
+    sha256 = "66030e17dc45386e13cca37b72eef78522c4940605a4fb10c977e1ee5b6f1170",
+    urls = ["https://github.com/facebook/dotslash/releases/download/v0.5.9/dotslash-ubuntu-22.04.aarch64.tar.gz"],
 )

@@ -1,0 +1,28 @@
+#!/usr/bin/env dotslash
+{
+  "name": "bazel",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 6914232,
+      "hash": "blake3",
+      "digest": "c14e2840efd5b2bc851a65ece052979b4cddabdc5be2f6153987f6239975f837",
+      "path": "bazel",
+      "providers": [
+        {
+          "url": "https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-amd64"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 6553784,
+      "hash": "blake3",
+      "digest": "0f1c5fdcf165a85b9d2dccb40a3b1f15320d818e269382b1c2d250e357fe096e",
+      "path": "bazel",
+      "providers": [
+        {
+          "url": "https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-arm64"
+        }
+      ]
+    }
+  }
+}

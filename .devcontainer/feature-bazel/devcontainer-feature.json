@@ -1,7 +1,0 @@
-{
-    "name": "Bazel plus DX",
-    "id": "bazel",
-    "version": "1.0.0",
-    "description": "Things for Bazel",
-    "installsAfter": []
-}

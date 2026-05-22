@@ -1,0 +1,30 @@
+#!/usr/bin/env dotslash
+{
+  "name": "node",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 33195056,
+      "hash": "blake3",
+      "digest": "ce5f1e9f322fbf4f0684b2cef69386288739fedcabcfbfc3acc7e254c5c62d1c",
+      "format": "tar.xz",
+      "path": "node-v26.2.0-linux-x64/bin/node",
+      "providers": [
+        {
+          "url": "https://nodejs.org/dist/v26.2.0/node-v26.2.0-linux-x64.tar.xz"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 32223044,
+      "hash": "blake3",
+      "digest": "e391fe4fc275ac4b0ca96ee3f81249db905fc519963cc3a70161141f4363d654",
+      "format": "tar.xz",
+      "path": "node-v26.2.0-linux-arm64/bin/node",
+      "providers": [
+        {
+          "url": "https://nodejs.org/dist/v26.2.0/node-v26.2.0-linux-arm64.tar.xz"
+        }
+      ]
+    }
+  }
+}

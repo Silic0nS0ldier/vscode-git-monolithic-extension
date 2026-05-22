@@ -1,0 +1,28 @@
+#!/usr/bin/env dotslash
+{
+  "name": "buildozer",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 7687171,
+      "hash": "blake3",
+      "digest": "7deb57ac584dc64a1d8a6d3dcbc27ce4baf78a877565e95f6208855296fb3db9",
+      "path": "buildozer",
+      "providers": [
+        {
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.5.1/buildozer-linux-amd64"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 7406448,
+      "hash": "blake3",
+      "digest": "429f30574074e779e67be9765c42ce4be896996d1698ab2293cc64c8ba6bd987",
+      "path": "buildozer",
+      "providers": [
+        {
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.5.1/buildozer-linux-arm64"
+        }
+      ]
+    }
+  }
+}

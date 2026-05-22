@@ -1,0 +1,28 @@
+#!/usr/bin/env dotslash
+{
+  "name": "unused-deps",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 6915659,
+      "hash": "blake3",
+      "digest": "93677898620833362bf018af99a741cdd92b93a6fb50123e1e257b11a5a52b53",
+      "path": "unused-deps",
+      "providers": [
+        {
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.5.1/unused-deps-linux-amd64"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 6672944,
+      "hash": "blake3",
+      "digest": "b94c6959d0f4f892a685d71e1eced6ebc952cadb264204247767f1d6093a4425",
+      "path": "unused-deps",
+      "providers": [
+        {
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v8.5.1/unused-deps-linux-arm64"
+        }
+      ]
+    }
+  }
+}
