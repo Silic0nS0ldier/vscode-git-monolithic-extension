@@ -11,10 +11,41 @@ on:
       # Updated (excludes change of base branch)
       - synchronize
 jobs:
-  build_and_test:
-    runs-on: ubuntu-latest
+  renovate_tasks:
+    if: github.actor == 'renovate[bot]'
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    outputs:
+      commit_hash: ${{ steps.get_commit.outputs.COMMIT_HASH }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Required to have correct ref for git-auto-commit-action
+          ref: ${{ github.head_ref }}
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelrc: |
+            common --color=yes
+            common --curses=no
+            common --show_progress_rate_limit=5
+          cache-save: false
+          bazelisk-cache: true
+          # Repo cache not worth it here, very little to fetch.
+          repository-cache: false
+      - run: node ./.github/workflows/update_bazel_nodejs.mjs ./.devcontainer/feature-bazel/install.sh ./MODULE.bazel
+      - run: bazel mod deps --lockfile_mode=update
+      - uses: stefanzweifel/git-auto-commit-action@v7
+      - id: get_commit
+        run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+  build_and_test:
+    runs-on: ubuntu-24.04
+    if: ${{ !cancelled() }}
+    needs: renovate_tasks
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -55,10 +86,14 @@ jobs:
   devcontainer:
     strategy:
       matrix:
-        runner: [ubuntu-latest, ubuntu-24.04-arm]
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
     runs-on: ${{ matrix.runner }}
+    if: ${{ !cancelled() }}
+    needs: renovate_tasks
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - uses: devcontainers/ci@v0.3
         with:
           runCmd: echo "Built successfully"
