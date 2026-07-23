@@ -6,7 +6,7 @@
         "@js-temporal/polyfill": "catalog:",
         "@vscode/extension-telemetry": "^1.5.2",
         "get-stream": "catalog:",
-        "ignore": "^7.0.5",
+        "ignore": "^7.0.6",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:^",
         "onetime": "^8.0.0",
