@@ -4,13 +4,15 @@ module(name = "vscode_git_monolithic")
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
 bazel_dep(name = "aspect_rules_js", version = "3.0.3")
+
 # For pnpm v11 support
 archive_override(
     module_name = "aspect_rules_js",
-    urls = ["https://github.com/aspect-build/rules_js/archive/401406a1984917e4d17a1596b5c0dbced0927ff4.tar.gz"],
-    strip_prefix = "rules_js-401406a1984917e4d17a1596b5c0dbced0927ff4",
     integrity = "sha256-/qXNoACOY5FtBoSyq+LmUYVyMBlZ4Z6l4luTFHsBU9M=",
+    strip_prefix = "rules_js-401406a1984917e4d17a1596b5c0dbced0927ff4",
+    urls = ["https://github.com/aspect-build/rules_js/archive/401406a1984917e4d17a1596b5c0dbced0927ff4.tar.gz"],
 )
+
 bazel_dep(name = "aspect_rules_lint", version = "2.7.2")
 bazel_dep(name = "aspect_rules_ts", version = "3.9.2")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
@@ -19,8 +21,8 @@ bazel_dep(name = "llvm", version = "0.8.14")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_multitool", version = "1.11.1")
 bazel_dep(name = "rules_nodejs", version = "6.7.5")
-bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.70.0")
-bazel_dep(name = "rules_rust", version = "0.70.0")
+bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.71.3")
+bazel_dep(name = "rules_rust", version = "0.71.3")
 bazel_dep(name = "rules_shell", version = "0.8.0")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
@@ -76,6 +78,7 @@ crate.annotation(
 use_repo(crate, "crates")
 
 rust_wasm_bindgen_ext = use_extension("@rules_rust_wasm_bindgen//:extensions.bzl", "rust_ext")
+
 # NOTE Many of these are unused, their inclusion is necessary to suppress Bazel warnings.
 use_repo(
     rust_wasm_bindgen_ext,
@@ -110,9 +113,9 @@ use_repo(
     "geckodriver_win64",
     "rrwbd",
     "rrwbd__serde_json-1.0.145",
-    "rrwbd__wasm-bindgen-0.2.105",
-    "rrwbd__wasm-bindgen-cli-0.2.105",
-    "rrwbd__wasm-bindgen-test-0.3.55",
+    "rrwbd__wasm-bindgen-0.2.121",
+    "rrwbd__wasm-bindgen-cli-0.2.121",
+    "rrwbd__wasm-bindgen-test-0.3.71",
     "safaridriver",
 )
 
