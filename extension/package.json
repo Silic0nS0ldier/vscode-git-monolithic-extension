@@ -2,7 +2,6 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@formatjs/intl-durationformat": "catalog:",
         "@js-temporal/polyfill": "catalog:",
         "@vscode/extension-telemetry": "^1.5.2",
         "get-stream": "catalog:",

@@ -16,7 +16,7 @@ bazel build //extension/vsix:git_monolithic \
 
 For release
 1. Increment version in `extension/vsix/package.json`
-2. ```
+2. ```sh
    bazel build //extension/vsix:git_monolithic \
      --config=release
    ```

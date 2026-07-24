@@ -3,7 +3,6 @@ import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
 import type { OutputChannel } from "vscode";
-import { DurationFormat } from "@formatjs/intl-durationformat";
 import { Temporal } from "@js-temporal/polyfill";
 import { snoopOnStream, SnoopStream } from "../util/snoop-stream.js";
 
@@ -71,8 +70,7 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                     args,);
 
                 const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
-                // TODO Remove ponyfill once VSCode updates to NodeJS v23 or higher
-                const durationStr = new DurationFormat("en", { style: "narrow" }).format(duration);
+                const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
 
                 // Log result
                 if (isErr(result)) {
