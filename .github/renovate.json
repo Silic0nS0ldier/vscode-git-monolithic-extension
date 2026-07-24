@@ -88,6 +88,17 @@
       ],
       "groupName": "nodejs",
       "description": "Update NodeJS and @types/node major versions together to keep them in sync."
+    },
+    {
+      "matchManagers": [
+        "bazel"
+      ],
+      "matchDepNames": [
+        "rules_rust",
+        "rules_rust_wasm_bindgen"
+      ],
+      "groupName": "rules_rust",
+      "description": "Update rules_rust and rules_rust_wasm_bindgen together, as they need to be kept in sync."
     }
   ]
 }
