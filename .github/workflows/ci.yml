@@ -19,7 +19,7 @@ jobs:
     outputs:
       commit_hash: ${{ steps.get_commit.outputs.COMMIT_HASH }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Required to have correct ref for git-auto-commit-action
           ref: ${{ github.head_ref }}
@@ -43,7 +43,7 @@ jobs:
     if: ${{ !cancelled() }}
     needs: renovate_tasks
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - uses: bazel-contrib/setup-bazel@0.19.0
@@ -91,7 +91,7 @@ jobs:
     if: ${{ !cancelled() }}
     needs: renovate_tasks
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - uses: devcontainers/ci@v0.3
