@@ -9,7 +9,7 @@
         "isolatedModules": true,
         "lib": [
             "DOM",
-            "ES2022"
+            "ES2025"
         ],
         "module": "NodeNext",
         "moduleResolution": "NodeNext",

@@ -16,7 +16,6 @@ import { untracked } from "monolithic-git-interop/api/status/untracked";
 import { tracked, type IFileStatus } from "monolithic-git-interop/api/status/tracked";
 import { show } from "monolithic-git-interop/api/show";
 import * as gitErrors from "monolithic-git-interop/errors"
-import { DurationFormat } from "@formatjs/intl-durationformat";
 import { Temporal } from "@js-temporal/polyfill";
 import type * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
@@ -499,8 +498,7 @@ export class Repository {
         const result = await exec(child);
 
         const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
-        // TODO Remove ponyfill once VSCode updates to NodeJS v23 or higher
-        const durationStr = new DurationFormat("en", { style: "narrow" }).format(duration);
+        const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
 
         if (isErr(result)) {
             this.git.log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);

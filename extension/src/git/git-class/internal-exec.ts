@@ -1,4 +1,3 @@
-import { DurationFormat } from "@formatjs/intl-durationformat";
 import { Temporal } from "@js-temporal/polyfill";
 import { isErr, unwrap } from "monolithic-git-interop/util/result";
 import { getGitErrorCode, GitError } from "../error.js";
@@ -35,9 +34,8 @@ export async function internalExec(
 
     const execResult = await exec(child, options.abortSignal);
 
-    const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
-    // TODO Remove ponyfill once VSCode updates to NodeJS v23 or higher
-    const durationStr = new DurationFormat("en", { style: "narrow" }).format(duration);
+    const duration = Temporal.Duration.from({ milliseconds: Date.now() - start });
+    const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
 
     if (isErr(execResult)) {
         log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
