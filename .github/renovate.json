@@ -91,7 +91,7 @@
     },
     {
       "matchManagers": [
-        "bazel"
+        "bazel-module"
       ],
       "matchDepNames": [
         "rules_rust",
