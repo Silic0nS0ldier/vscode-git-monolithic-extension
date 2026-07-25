@@ -3,7 +3,12 @@ packages:
   - build_defs/*
   - extension
 
-allowBuilds: { '@vscode/vsce-sign': false, keytar: false }
+allowBuilds: 
+  '@vscode/vsce-sign': false
+  core-js-pure: false
+  dtrace-provider: false
+  keytar: false
+  re2: false
 
 catalog:
   '@js-temporal/polyfill': ^0.5.1

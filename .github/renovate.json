@@ -19,6 +19,9 @@
   ],
   "packageRules": [
     {
+      "matchDatasources": [
+        "*"
+      ],
       "minimumReleaseAge": "3 days",
       "description": "Wait 3 days before updating. Safeguard against supply chain attacks and (for npm) unpublishing of packages."
     },
