@@ -13,6 +13,10 @@ const argv = cli({
             type: String,
             placeholder: '<file>',
         },
+        verbose: {
+            type: Boolean,
+            description: 'Show vsce output',
+        },
     },
 });
 
@@ -64,10 +68,43 @@ const version = (() => {
     }
 })();
 
-await createVSIX({
-    cwd: inDir,
-    packagePath: outFile,
-    updatePackageJson: false,
-    dependencies: false,
-    version,
-});
+function createOutputCapture() {
+    const captured: Buffer[] = [];
+    const origStdoutWrite = process.stdout.write;
+    const origStderrWrite = process.stderr.write;
+    process.stdout.write = (chunk: any) => { captured.push(Buffer.from(chunk)); return true; };
+    process.stderr.write = (chunk: any) => { captured.push(Buffer.from(chunk)); return true; };
+    return {
+        replay() {
+            const stderr = origStderrWrite.bind(process.stderr);
+            for (const buf of captured) {
+                stderr(buf);
+            }
+        },
+        restore() {
+            process.stdout.write = origStdoutWrite;
+            process.stderr.write = origStderrWrite;
+        },
+    };
+}
+
+function createNoopCapture() {
+    return { replay() {}, restore() {} };
+}
+
+const output = argv.flags.verbose ? createNoopCapture() : createOutputCapture();
+
+try {
+    await createVSIX({
+        cwd: inDir,
+        packagePath: outFile,
+        updatePackageJson: false,
+        dependencies: false,
+        version,
+    });
+} catch (e) {
+    output.replay();
+    throw e;
+} finally {
+    output.restore();
+}

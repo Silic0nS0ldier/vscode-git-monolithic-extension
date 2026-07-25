@@ -28,14 +28,17 @@ def _vsix_package_impl(ctx):
     )
 
     out = ctx.actions.declare_file("%s.vsix" % ctx.label.name)
+    arguments = [
+        "--in-dir",
+        inputs_dir.path,
+        "--out-file",
+        out.path,
+    ]
+    if ctx.attr.verbose:
+        arguments.append("--verbose")
     ctx.actions.run(
         executable = ctx.executable._packaging_tool,
-        arguments = [
-            "--in-dir",
-            inputs_dir.path,
-            "--out-file",
-            out.path,
-        ],
+        arguments = arguments,
         env = {
             "BAZEL_BINDIR": ctx.bin_dir.path,
         },
@@ -56,6 +59,10 @@ vsix_package = rule(
         "in_dir": attr.string(
             mandatory = True,
             doc = "The directory containing the extension to package.",
+        ),
+        "verbose": attr.bool(
+            default = False,
+            doc = "Show vsce output.",
         ),
         "_packaging_tool": attr.label(
             default = Label(":bin"),
