@@ -1,22 +1,18 @@
 import type { Branch, Remote } from "../../api/git.js";
 import * as i18n from "../../i18n/mod.js";
+import { getSyncStatus } from "./sync-status.js";
 
 export function syncTooltip(
-    HEAD: Branch | undefined,
+    head: Branch | undefined,
     remotes: Remote[],
 ): string {
-    if (
-        !HEAD
-        || !HEAD.name
-        || !HEAD.commit
-        || !HEAD.upstream
-        || !(HEAD.ahead || HEAD.behind)
-    ) {
+    const status = getSyncStatus(head, remotes);
+
+    if (!status) {
         return i18n.Translations.syncChanges();
     }
 
-    const remoteName = HEAD && HEAD.remote || HEAD.upstream.remote;
-    const remote = remotes.find(r => r.name === remoteName);
+    const { HEAD, remote } = status;
 
     // TODO Revisit the strange nullability here
     if ((remote && remote.isReadOnly) || !HEAD.ahead) {
