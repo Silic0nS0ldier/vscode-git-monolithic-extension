@@ -1,29 +1,16 @@
-import { type OutputChannel, Uri } from "vscode";
+import { type OutputChannel } from "vscode";
 import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
-import { getSCMResource, runByRepository } from "../../helpers.js";
+import { normaliseResourceStates, runByRepository } from "../../helpers.js";
 
 export function createCommand(
     outputChannel: OutputChannel,
     model: Model,
 ): ScmCommand {
     async function unstage(...resourceStates: Resource[]): Promise<void> {
-        let normalisedResourceStates = resourceStates.filter(s => !!s);
-
-        if (
-            normalisedResourceStates.length === 0
-            || (normalisedResourceStates[0] && !(normalisedResourceStates[0].state.resourceUri instanceof Uri))
-        ) {
-            const resource = getSCMResource(model, outputChannel);
-
-            if (!resource) {
-                return;
-            }
-
-            normalisedResourceStates = [resource];
-        }
+        const normalisedResourceStates = normaliseResourceStates(model, outputChannel, resourceStates);
 
         const scmResources = normalisedResourceStates
             .filter(s => s instanceof Resource && s.state.resourceGroupType === ResourceGroupType.Index) as Resource[];
