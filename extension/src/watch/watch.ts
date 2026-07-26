@@ -25,14 +25,20 @@ const TargetEventEnum: Record<TargetEvent, string> = {
 type Watcher = {
     event: Event<Uri>;
     refresh: () => void;
+    suspend: () => SuspendHandle;
 } & Disposable;
+
+/** Handle returned by `Watcher.suspend()`; on dispose the suspend is released. */
+export type SuspendHandle = {
+    readonly [Symbol.dispose]: () => void;
+};
 
 /**
  * Creates an optimised watcher that signals _something_ changed in the given locations.
  * Excess events (such as those occurring while locks are present) are suppressed.
  */
 export function watch(
-    locations: string[],
+    locations: [string, ...string[]],
     locks: string[],
     ignoreFn: (path: string) => boolean,
     important: string[],
@@ -40,10 +46,12 @@ export function watch(
     id: string,
 ): Watcher {
     const onFileChangeEmitter = new EventEmitter<Uri>();
+    let suspendCount = 0;
+    let disposed = false;
 
     function createWatcher() {
         const lockEvents = new Map<string, keyof typeof TargetEventEnum>();
-        let watcher = new BaseWatcher(
+        const watcher = new BaseWatcher(
             [...locations, ...locks],
             {
                 // TODO Check that file limit is not exceeded (10_000_000)
@@ -86,7 +94,7 @@ export function watch(
         );
     
         // TODO Use unified logger
-        watcher.on("error", async err => {
+        watcher.on("error", err => {
             outputChannel.appendLine(`${id} watcher error: ${inspect(err)}`);
         });
 
@@ -95,20 +103,77 @@ export function watch(
 
     let watcher = createWatcher();
 
+    function release(): void {
+        if (disposed) {
+            outputChannel.appendLine(`WARN: ${id} watcher suspend handle disposed after watcher was disposed\n${new Error().stack}`);
+            return;
+        }
+        if (suspendCount === 0) {
+            outputChannel.appendLine(`WARN: ${id} watcher suspend handle disposed with no active suspend\n${new Error().stack}`);
+            return;
+        }
+        suspendCount--;
+        if (suspendCount > 0) {
+            return;
+        }
+
+        outputChannel.appendLine(`TRACE: ${id} watcher resuming, re-creating underlying watcher`);
+        watcher = createWatcher();
+        // Fire a single synthetic event so consumers refresh their view.
+        onFileChangeEmitter.fire(Uri.file(locations[0]));
+    }
 
     return {
         dispose(): void {
+            disposed = true;
             onFileChangeEmitter.dispose();
-            watcher.close();
+            if (!watcher.isClosed()) {
+                watcher.close();
+            }
         },
         event: onFileChangeEmitter.event,
         refresh() {
+            if (disposed) {
+                outputChannel.appendLine(`WARN: ${id} watcher refresh() called after dispose\n${new Error().stack}`);
+                return;
+            }
+            if (suspendCount > 0) {
+                // Watcher is intentionally closed. The resume path always recreates
+                // (which picks up any updated ignore rules), so an explicit refresh
+                // here would be redundant and wasteful.
+                outputChannel.appendLine(`TRACE: ${id} watcher refresh requested while suspended; will be applied by resume`);
+                return;
+            }
             if (watcher.isClosed()) {
                 outputChannel.appendLine(`TRACE: ${id} watcher refresh requested but watcher is closed, skipping refresh\n${new Error().stack}`);
                 return;
             }
             watcher.close();
             watcher = createWatcher();
+        },
+        suspend(): SuspendHandle {
+            if (disposed) {
+                outputChannel.appendLine(`WARN: ${id} watcher suspend() called after dispose\n${new Error().stack}`);
+                // Return an inert handle so `using` at the callsite is still well-formed.
+                return { [Symbol.dispose]: () => {} };
+            }
+            suspendCount++;
+            if (suspendCount === 1) {
+                outputChannel.appendLine(`TRACE: ${id} watcher suspending, closing underlying watcher`);
+                if (!watcher.isClosed()) {
+                    watcher.close();
+                }
+            }
+            let released = false;
+            return {
+                [Symbol.dispose]: () => {
+                    if (released) {
+                        return;
+                    }
+                    released = true;
+                    release();
+                },
+            };
         },
     };
 }

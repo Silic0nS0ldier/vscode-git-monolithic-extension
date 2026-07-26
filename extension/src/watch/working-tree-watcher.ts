@@ -3,13 +3,13 @@ import fs from "node:fs";
 import { inspect } from "node:util";
 import { Disposable, type Event, type OutputChannel, Uri } from "vscode";
 import ignore from "ignore";
-import { createIgnoreFnFromList, watch } from "./watch.js";
+import { createIgnoreFnFromList, type SuspendHandle, watch } from "./watch.js";
 
 export function createWorkingTreeWatcher(
     repoRoot: string,
     dotGit: string,
     outputChannel: OutputChannel,
-): { event: Event<Uri> } & Disposable {
+): { event: Event<Uri>; suspend: () => SuspendHandle } & Disposable {
     const rootGitIgnorePath = path.join(repoRoot, ".gitignore");
     let rootGitIgnoreFn: ignore.Ignore = loadGitIgnore(rootGitIgnorePath, outputChannel);
 

@@ -55,6 +55,64 @@ export function isReadOnly(operation: OperationOptions): boolean {
     }
 }
 
+/**
+ * Does this operation potentially rewrite large portions of the working tree?
+ */
+export function causesLargeWorkingTreeChanges(operation: OperationOptions): boolean {
+    switch (operation) {
+        case Operation.Apply:
+        case Operation.Checkout:
+        case Operation.CheckoutTracking:
+        case Operation.CherryPick:
+        case Operation.Clean:
+        case Operation.Merge:
+        case Operation.Pull:
+        case Operation.Rebase:
+        case Operation.RebaseAbort:
+        case Operation.RebaseContinue:
+        case Operation.Reset:
+        case Operation.RevertFiles:
+        case Operation.Stash:
+        case Operation.SubmoduleUpdate:
+        case Operation.Sync:
+            return true;
+        case Operation.Add:
+        case Operation.Blame:
+        case Operation.Branch:
+        case Operation.CheckIgnore:
+        case Operation.Commit:
+        case Operation.Config:
+        case Operation.DeleteBranch:
+        case Operation.DeleteRef:
+        case Operation.DeleteTag:
+        case Operation.Diff:
+        case Operation.Fetch:
+        case Operation.FindTrackingBranches:
+        case Operation.GetBranch:
+        case Operation.GetBranches:
+        case Operation.GetCommitTemplate:
+        case Operation.GetObjectDetails:
+        case Operation.HashObject:
+        case Operation.Ignore:
+        case Operation.Log:
+        case Operation.LogFile:
+        case Operation.MergeBase:
+        case Operation.Move:
+        case Operation.Push:
+        case Operation.Remote:
+        case Operation.Remove:
+        case Operation.RenameBranch:
+        case Operation.SetBranchUpstream:
+        case Operation.Show:
+        case Operation.Stage:
+        case Operation.Status:
+        case Operation.Tag:
+            return false;
+        default:
+            throw new UnreachableError(operation);
+    }
+}
+
 // TODO This could all use a review, I doubt so many should show progress
 function shouldShowProgress(operation: OperationOptions): boolean {
     switch (operation) {
