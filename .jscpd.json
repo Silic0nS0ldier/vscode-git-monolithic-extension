@@ -1,0 +1,25 @@
+{
+    "minTokens": 120,
+    "minLines": 5,
+    "format": [
+        "typescript",
+        "javascript",
+        "rust"
+    ],
+    "ignore": [
+        "**/node_modules/**",
+        "**/target/**",
+        "**/.bazel/**",
+        "**/.pnpm-store/**",
+        "**/dist/**",
+        "extension/vsix/languages/**",
+        "extension/vsix/syntaxes/**",
+        "extension/vsix/resources/**",
+        "extension/src/typings/**"
+    ],
+    "reporters": [
+        "console"
+    ],
+    "threshold": 5,
+    "absolute": false
+}
