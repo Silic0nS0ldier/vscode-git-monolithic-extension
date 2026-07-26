@@ -18,6 +18,18 @@ copy_directory(
     out = "src/chunks",
 )
 
+output_files(
+    name = "bundle_assets_ref",
+    paths = ["extension/bundle_/assets"],
+    target = "//extension:bundle",
+)
+
+copy_directory(
+    name = "copy_bundle_assets",
+    src = ":bundle_assets_ref",
+    out = "src/assets",
+)
+
 copy_file(
     name = "copy_bundle_main",
     src = "//extension:bundle_/main.js",
@@ -48,6 +60,7 @@ vsix_package(
         ],
     ) + [
         ":copy_bundle_askpass_main",
+        ":copy_bundle_assets",
         ":copy_bundle_chunks",
         ":copy_bundle_main",
         ":copy_license",

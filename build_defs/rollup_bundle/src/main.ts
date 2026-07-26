@@ -2,6 +2,7 @@ import { cli } from "cleye";
 import { rollup } from "rollup";
 import commonjs__ from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
+import { wasmSourcePhasePlugin } from "./wasm-source-phase-plugin.js";
 
 // Work around https://github.com/rollup/plugins/issues/1662
 const commonjs = commonjs__ as unknown as typeof commonjs__.default;
@@ -54,6 +55,7 @@ const bundle = await (async () => {
         return await rollup({
             input: entryPoints,
             plugins: [
+                wasmSourcePhasePlugin(),
                 nodeResolve(),
                 commonjs(),
             ],
@@ -82,9 +84,11 @@ try {
         },
         format: "esm",
         generatedCode: "es2015",
-        // Bazel wants all outputs to be pre-declared, to satisfy this all chunks are put
-        // into a single directory that maps to a directory output.
+        // Bazel wants all outputs to be pre-declared, so chunks and assets
+        // are each written into a single fixed directory that maps to a
+        // directory output.
         chunkFileNames: "chunks/[name].js",
+        assetFileNames: "assets/[name][extname]",
     });
     await bundle.close();
 } catch (e) {
