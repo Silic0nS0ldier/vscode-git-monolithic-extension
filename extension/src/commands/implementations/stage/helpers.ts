@@ -1,5 +1,5 @@
 import { type TextDocument, Uri, window } from "vscode";
-import type vsDiff from "vscode-diff";
+import type { ILineChange } from "vscode-diff/dist/vs/editor/common/diff/legacyLinesDiffComputer.js";
 import { Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
@@ -84,7 +84,7 @@ export async function stageChanges(
     model: Model,
     originalDocument: TextDocument,
     modifiedDocument: TextDocument,
-    changes: vsDiff.ILineChange[],
+    changes: ILineChange[],
 ): Promise<void> {
     const modifiedUri = modifiedDocument.uri;
 

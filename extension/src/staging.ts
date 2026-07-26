@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Range, type Selection, type TextDocument } from "vscode";
-import type vsDiff from "vscode-diff";
+import type { ILineChange } from "vscode-diff/dist/vs/editor/common/diff/legacyLinesDiffComputer.js";
 
-export function applyLineChanges(original: TextDocument, modified: TextDocument, diffs: vsDiff.ILineChange[]): string {
+export function applyLineChanges(original: TextDocument, modified: TextDocument, diffs: ILineChange[]): string {
     const result: string[] = [];
     let currentLine = 0;
 
@@ -85,7 +85,7 @@ export function toLineRanges(selections: readonly Selection[], textDocument: Tex
     return result;
 }
 
-function getModifiedRange(textDocument: TextDocument, diff: vsDiff.ILineChange): Range {
+function getModifiedRange(textDocument: TextDocument, diff: ILineChange): Range {
     if (diff.modifiedEndLineNumber === 0) {
         if (diff.modifiedStartLineNumber === 0) {
             return new Range(
@@ -113,9 +113,9 @@ function getModifiedRange(textDocument: TextDocument, diff: vsDiff.ILineChange):
 
 export function intersectDiffWithRange(
     textDocument: TextDocument,
-    diff: vsDiff.ILineChange,
+    diff: ILineChange,
     range: Range,
-): vsDiff.ILineChange | null {
+): ILineChange | null {
     const modifiedRange = getModifiedRange(textDocument, diff);
     const intersection = range.intersection(modifiedRange);
 

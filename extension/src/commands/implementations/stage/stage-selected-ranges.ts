@@ -1,7 +1,10 @@
 import assert from "node:assert";
 import { inspect } from "node:util";
 import { EndOfLine, type OutputChannel, Uri, window } from "vscode";
-import vsDiff from "vscode-diff";
+import {
+    DiffComputer,
+    type ILineChange,
+} from "vscode-diff/dist/vs/editor/common/diff/legacyLinesDiffComputer.js";
 import { intersectDiffWithRange, toLineRanges } from "../../../staging.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { stageChanges } from "./helpers.js";
@@ -64,7 +67,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
         // Use VSCode diff algorithm to obtain line changes
         const currentLines = current.getText().split(getEOLChar(current.eol));
         const baseLines = base.getText().split(getEOLChar(base.eol));
-        const diffComputer = new vsDiff.DiffComputer(baseLines, currentLines, {
+        const diffComputer = new DiffComputer(baseLines, currentLines, {
             maxComputationTime: 0,
             shouldComputeCharChanges: true,
             shouldIgnoreTrimWhitespace: false,
@@ -84,12 +87,12 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
         const selectedLines = toLineRanges(selections, current);
         const selectedChanges = changes
             .map(diff =>
-                selectedLines.reduce<vsDiff.ILineChange | null>(
+                selectedLines.reduce<ILineChange | null>(
                     (result, range) => result || intersectDiffWithRange(current, diff, range),
                     null,
                 )
             )
-            .filter(d => !!d) as vsDiff.ILineChange[];
+            .filter(d => !!d) as ILineChange[];
 
         // Stage
         await stageChanges(model, base, current, selectedChanges);
