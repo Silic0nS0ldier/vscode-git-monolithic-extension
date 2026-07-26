@@ -1,9 +1,9 @@
-import { type OutputChannel, type TextDocumentContentProvider, Uri, window } from "vscode";
+import { type OutputChannel, type TextDocument, type TextDocumentContentProvider, Uri, window, workspace } from "vscode";
 import type { Model } from "../model.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../repository/Resource.js";
 import { fromGitUri, isGitUri } from "../uri.js";
-import { pathEquals } from "../util/paths.js";
+import { isDescendant, pathEquals } from "../util/paths.js";
 
 export async function runByRepository(
     model: Model,
@@ -150,4 +150,35 @@ export class CommandErrorOutputTextDocumentContentProvider implements TextDocume
 
 export function makeCommandId(command: string): string {
     return "git_monolithic." + command;
+}
+
+/**
+ * Collects the dirty text documents that belong to the given repository and
+ * that the user would want to be prompted about before committing or
+ * stashing.
+ *
+ * When the caller only cares about staged changes (either explicitly, or
+ * because there already are staged changes in the repository), the returned
+ * list is limited to documents matching a staged resource.
+ */
+export function getDocumentsToSaveBeforeChange(
+    repository: AbstractRepository,
+    promptSetting: "always" | "staged" | "never",
+): TextDocument[] {
+    let documents = workspace.textDocuments
+        .filter(d => !d.isUntitled && d.isDirty && isDescendant(repository.root, d.uri.fsPath));
+
+    if (
+        promptSetting === "staged"
+        || repository.sourceControlUI.stagedGroup.resourceStates.get().length > 0
+    ) {
+        documents = documents
+            .filter(d =>
+                repository.sourceControlUI.stagedGroup.resourceStates.get().some(s =>
+                    pathEquals(s.state.resourceUri.fsPath, d.uri.fsPath)
+                )
+            );
+    }
+
+    return documents;
 }

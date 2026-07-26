@@ -1,9 +1,9 @@
-import { Uri, window, workspace } from "vscode";
+import { Uri, window } from "vscode";
 import type { Stash } from "../../../git/Stash.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as config from "../../../util/config.js";
-import { isDescendant, pathEquals } from "../../../util/paths.js";
+import { getDocumentsToSaveBeforeChange } from "../../helpers.js";
 
 export async function createStash(repository: AbstractRepository, includeUntracked = false): Promise<void> {
     const noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.get().length === 0
@@ -19,20 +19,7 @@ export async function createStash(repository: AbstractRepository, includeUntrack
     const promptToSaveFilesBeforeStashing = config.promptToSaveFilesBeforeStash(Uri.file(repository.root));
 
     if (promptToSaveFilesBeforeStashing !== "never") {
-        let documents = workspace.textDocuments
-            .filter(d => !d.isUntitled && d.isDirty && isDescendant(repository.root, d.uri.fsPath));
-
-        if (
-            promptToSaveFilesBeforeStashing === "staged"
-            || repository.sourceControlUI.stagedGroup.resourceStates.get().length > 0
-        ) {
-            documents = documents
-                .filter(d =>
-                    repository.sourceControlUI.stagedGroup.resourceStates.get().some(s =>
-                        pathEquals(s.state.resourceUri.fsPath, d.uri.fsPath)
-                    )
-                );
-        }
+        const documents = getDocumentsToSaveBeforeChange(repository, promptToSaveFilesBeforeStashing);
 
         if (documents.length > 0) {
             const message = i18n.Translations.unsavedStashFiles(documents);
