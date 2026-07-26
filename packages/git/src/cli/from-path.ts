@@ -9,8 +9,14 @@ import {
 } from "../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../func-result.js";
 import { isMacOS } from "../helpers/platform-matchers.js";
+import type {
+    ChildProcessService,
+    FsService,
+    OsService,
+    ProcessService,
+} from "../services/mod.js";
 import type { GitContext, PersistentCLIContext } from "./context.js";
-import { create, type SpawnFn } from "./create.js";
+import { create } from "./create.js";
 import { readToString } from "./helpers/read-to-string.js";
 
 export type FromPathErrors =
@@ -18,20 +24,11 @@ export type FromPathErrors =
     | TimeoutError
     | GitUnusableError;
 
-export type FromPathServices = {
-    fs: {
-        exists: (path: string) => boolean;
-    };
-    child_process: {
-        spawn: SpawnFn;
-    };
-    process: {
-        env: NodeJS.ProcessEnv;
-    };
-    os: {
-        platform: string;
-    };
-};
+export type FromPathServices =
+    & FsService
+    & ChildProcessService
+    & ProcessService
+    & OsService;
 
 /**
  * Creates git context from path.
@@ -70,17 +67,10 @@ export async function fromPath(
 
 export const darwinBuiltinGitPath = "/usr/bin/git";
 
-type IsGitExoticServices = {
-    child_process: {
-        spawn: SpawnFn;
-    };
-    process: {
-        env: NodeJS.ProcessEnv;
-    };
-    os: {
-        platform: string;
-    };
-};
+type IsGitExoticServices =
+    & ChildProcessService
+    & ProcessService
+    & OsService;
 
 /**
  * Checks git path for any exotic behaviours that will make it unsuitable for use.

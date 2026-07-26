@@ -3,13 +3,10 @@ import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-strin
 import { createError, ERROR_GENERIC } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import { isWindows } from "../../helpers/platform-matchers.js";
+import type { OsService } from "../../services/mod.js";
 import { trySemverCheck } from "../version/mod.js";
 
-type ShowToplevelServices = {
-    os: {
-        platform: string;
-    };
-};
+type ShowToplevelServices = OsService;
 
 export async function showToplevel(
     git: GitContext,

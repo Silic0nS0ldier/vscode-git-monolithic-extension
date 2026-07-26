@@ -8,6 +8,7 @@ import {
     type GenericError,
 } from "../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../func-result.js";
+import type { ChildProcessService, ProcessService } from "../services/mod.js";
 import type { CLI, CLIResult, PersistentCLIContext } from "./context.js";
 
 export type ChildProcess = {
@@ -30,14 +31,9 @@ export type LogFn = (
     msg: string,
 ) => void;
 
-export type CreateServices = {
-    child_process: {
-        spawn: SpawnFn;
-    };
-    process: {
-        env: NodeJS.ProcessEnv;
-    };
-};
+export type CreateServices =
+    & ChildProcessService
+    & ProcessService;
 
 /**
  * Creates a wrapper around the git CLI.

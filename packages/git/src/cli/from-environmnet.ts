@@ -1,8 +1,14 @@
 import { createError, ERROR_GIT_NOT_FOUND, type GitNotFoundError, type GitUnusableError, type TimeoutError } from "../errors.js";
 import { err, type Result } from "../func-result.js";
 import { isMacOS, isWindows } from "../helpers/platform-matchers.js";
+import type {
+    ChildProcessService,
+    FsService,
+    OsService,
+    ProcessService,
+    ShellService,
+} from "../services/mod.js";
 import type { GitContext, PersistentCLIContext } from "./context.js";
-import type { SpawnFn } from "./create.js";
 import { darwinBuiltinGitPath, fromPath } from "./from-path.js";
 
 export type FromEnvironmentErrors =
@@ -10,23 +16,12 @@ export type FromEnvironmentErrors =
     | TimeoutError
     | GitUnusableError;
 
-export type FromEnvironmentServices = {
-    fs: {
-        exists: (path: string) => boolean;
-    };
-    shell: {
-        which: (cmd: string, options: { path: string; pathExt?: string, nothrow: true }) => Promise<string|null>;
-    };
-    child_process: {
-        spawn: SpawnFn;
-    };
-    process: {
-        env: NodeJS.ProcessEnv;
-    };
-    os: {
-        platform: string;
-    };
-};
+export type FromEnvironmentServices =
+    & FsService
+    & ShellService
+    & ChildProcessService
+    & ProcessService
+    & OsService;
 
 /**
  * Creates git context from environment (e.g. `PATH` and well known locations).
@@ -57,20 +52,11 @@ export async function fromEnvironment(
     return err(createError(ERROR_GIT_NOT_FOUND));
 }
 
-type FindGitFromCommonLocationsServices = {
-    fs: {
-        exists: (path: string) => boolean;
-    };
-    child_process: {
-        spawn: SpawnFn;
-    };
-    process: {
-        env: NodeJS.ProcessEnv;
-    };
-    os: {
-        platform: string;
-    };
-};
+type FindGitFromCommonLocationsServices =
+    & FsService
+    & ChildProcessService
+    & ProcessService
+    & OsService;
 
 /**
  * Searches for git in common locations.
