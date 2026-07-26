@@ -19,7 +19,7 @@ import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
 import type { OperationResult } from "../OperationResult.js";
-import { isReadOnly, Operation, type OperationOptions } from "../Operations.js";
+import { causesLargeWorkingTreeChanges, isReadOnly, Operation, type OperationOptions } from "../Operations.js";
 import { OperationsImpl } from "../Operations.js";
 import { ProgressManager } from "../ProgressManager.js";
 import { RepositoryState, type RepositoryStateOptions } from "../RepositoryState.js";
@@ -176,6 +176,10 @@ export function createRepository(
         }
 
         let error: unknown = null;
+
+        const shouldPauseWatchers = causesLargeWorkingTreeChanges(operation);
+        using _workingTreeSuspend = shouldPauseWatchers ? workingTreeWatcher.suspend() : null;
+        using _dotGitSuspend = shouldPauseWatchers ? dotGitFileWatcher.suspend() : null;
 
         operations.start(operation);
         onRunOperationEmitter.fire(operation);

@@ -2,7 +2,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
-import { watch } from "./watch.js";
+import { type SuspendHandle, watch } from "./watch.js";
 
 class DotGitEventEmitter extends EventEmitter<Uri> {
     #lastGitIndexDigest: string|null = null;
@@ -43,7 +43,7 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
 export function createDotGitWatcher(
     dotGitDir: string,
     outputChannel: OutputChannel,
-): { event: Event<Uri> } & Disposable {
+): { event: Event<Uri>; suspend: () => SuspendHandle } & Disposable {
     const rootWatcher = watch(
         [
             // Where we are
@@ -88,5 +88,6 @@ export function createDotGitWatcher(
     return {
         dispose: () => disposable.dispose(),
         event: emitter.event,
+        suspend: () => rootWatcher.suspend(),
     };
 }
