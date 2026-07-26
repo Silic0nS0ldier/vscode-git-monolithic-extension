@@ -1,25 +1,19 @@
 import type { Branch, Remote } from "../../api/git.js";
+import { getSyncStatus } from "./sync-status.js";
 
 export function syncLabel(
     HEAD: Branch | undefined,
     remotes: Remote[],
 ): string {
-    if (
-        !HEAD
-        || !HEAD.name
-        || !HEAD.commit
-        || !HEAD.upstream
-        || !(HEAD.ahead || HEAD.behind)
-    ) {
+    const status = getSyncStatus(HEAD, remotes);
+
+    if (!status) {
         return "";
     }
 
-    const remoteName = HEAD && HEAD.remote || HEAD.upstream.remote;
-    const remote = remotes.find(r => r.name === remoteName);
-
-    if (remote && remote.isReadOnly) {
-        return `${HEAD.behind}↓`;
+    if (status.remote && status.remote.isReadOnly) {
+        return `${status.HEAD.behind}↓`;
     }
 
-    return `${HEAD.behind}↓ ${HEAD.ahead}↑`;
+    return `${status.HEAD.behind}↓ ${status.HEAD.ahead}↑`;
 }
