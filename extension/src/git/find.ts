@@ -3,7 +3,7 @@ import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
 import type { OutputChannel } from "vscode";
-import { Temporal } from "@js-temporal/polyfill";
+import { fromFields } from "temporal-polyfill/fns/Duration";
 import { snoopOnStream, SnoopStream } from "../util/snoop-stream.js";
 
 export interface IGit {
@@ -69,7 +69,7 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                     }, 
                     args,);
 
-                const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
+                const duration = fromFields({ milliseconds: Date.now() - start })
                 const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
 
                 // Log result

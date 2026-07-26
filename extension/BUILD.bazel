@@ -12,7 +12,7 @@ ts_project(
     out_dir = "dist",
     root_dir = "src",
     deps = [
-        ":node_modules/@js-temporal/polyfill",
+        ":node_modules/temporal-polyfill",
         ":node_modules/@types/node",
         ":node_modules/@types/vscode",
         ":node_modules/@vscode/extension-telemetry",

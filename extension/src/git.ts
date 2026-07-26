@@ -16,7 +16,7 @@ import { untracked } from "monolithic-git-interop/api/status/untracked";
 import { tracked, type IFileStatus } from "monolithic-git-interop/api/status/tracked";
 import { show } from "monolithic-git-interop/api/show";
 import * as gitErrors from "monolithic-git-interop/errors"
-import { Temporal } from "@js-temporal/polyfill";
+import { fromFields } from "temporal-polyfill/fns/Duration";
 import type * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
 import { exists, promises as fs } from "node:fs";
@@ -497,7 +497,7 @@ export class Repository {
 
         const result = await exec(child);
 
-        const duration = Temporal.Duration.from({ milliseconds: Date.now() - start })
+        const duration = fromFields({ milliseconds: Date.now() - start })
         const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
 
         if (isErr(result)) {

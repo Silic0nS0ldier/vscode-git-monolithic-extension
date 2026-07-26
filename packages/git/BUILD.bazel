@@ -32,7 +32,7 @@ ts_project(
     root_dir = "src",
     tsconfig = ":tsconfig",
     deps = [
-        ":node_modules/@js-temporal/polyfill",
+        ":node_modules/temporal-polyfill",
         ":node_modules/@types/node",
         ":node_modules/@types/which",
         ":node_modules/compare-versions",

@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@js-temporal/polyfill": "catalog:",
+        "temporal-polyfill": "catalog:",
         "@vscode/extension-telemetry": "^1.5.2",
         "get-stream": "catalog:",
         "ignore": "^7.0.6",
