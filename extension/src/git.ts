@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";

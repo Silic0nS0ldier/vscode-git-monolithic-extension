@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import { type Command, Disposable, type Event, EventEmitter, Uri, workspace } from "vscode";
 import type { Branch } from "./api/git.js";
 import * as i18n from "./i18n/mod.js";

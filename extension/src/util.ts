@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 export function* splitInChunks(array: string[], maxChunkLength: number): IterableIterator<string[]> {
     let current: string[] = [];
     let length = 0;

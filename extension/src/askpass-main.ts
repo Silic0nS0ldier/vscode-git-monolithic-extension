@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import * as fs from "node:fs";
 import * as i18n from "./i18n/mod.js";
 import { IPCClient } from "./ipc/ipcClient.js";

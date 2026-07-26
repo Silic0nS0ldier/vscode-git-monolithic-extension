@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { inspect } from "node:util";

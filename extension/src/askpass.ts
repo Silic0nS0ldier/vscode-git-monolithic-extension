@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Disposable, type InputBoxOptions, type OutputChannel, Uri, window } from "vscode";
