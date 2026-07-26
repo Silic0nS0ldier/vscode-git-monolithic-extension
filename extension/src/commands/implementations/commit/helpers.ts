@@ -1,9 +1,9 @@
-import { Uri, window, workspace } from "vscode";
+import { Uri, window } from "vscode";
 import { type CommitOptions, Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as config from "../../../util/config.js";
-import { isDescendant, pathEquals } from "../../../util/paths.js";
+import { getDocumentsToSaveBeforeChange } from "../../helpers.js";
 import { push, PushType } from "../push/helpers.js";
 import { sync } from "../sync/sync.js";
 
@@ -29,20 +29,7 @@ async function smartCommit(
     let noUnstagedChanges = repository.sourceControlUI.trackedGroup.resourceStates.get().length === 0;
 
     if (promptToSaveFilesBeforeCommit !== "never") {
-        let documents = workspace.textDocuments
-            .filter(d => !d.isUntitled && d.isDirty && isDescendant(repository.root, d.uri.fsPath));
-
-        if (
-            promptToSaveFilesBeforeCommit === "staged"
-            || repository.sourceControlUI.stagedGroup.resourceStates.get().length > 0
-        ) {
-            documents = documents
-                .filter(d =>
-                    repository.sourceControlUI.stagedGroup.resourceStates.get().some(s =>
-                        pathEquals(s.state.resourceUri.fsPath, d.uri.fsPath)
-                    )
-                );
-        }
+        const documents = getDocumentsToSaveBeforeChange(repository, promptToSaveFilesBeforeCommit);
 
         if (documents.length > 0) {
             const message = i18n.Translations.unsavedCommitFiles(documents);
