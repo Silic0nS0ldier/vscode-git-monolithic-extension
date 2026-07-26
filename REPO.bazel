@@ -1,6 +1,7 @@
 ignore_directories([
-    "**/node_modules",
+    ".bazel",
     ".git",
     ".pnpm-store",
+    "**/node_modules",
     "target",
 ])

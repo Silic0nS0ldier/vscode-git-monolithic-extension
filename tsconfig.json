@@ -20,7 +20,7 @@
         "noUnusedParameters": true,
         "skipLibCheck": true,
         "strict": true,
-        "target": "ES2022",
+        "target": "ESNext",
         "types": [
             "node"
         ],
