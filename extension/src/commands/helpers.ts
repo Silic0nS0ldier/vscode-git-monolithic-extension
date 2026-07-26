@@ -52,6 +52,35 @@ export async function runByRepository(
     }
 }
 
+/**
+ * Filters out falsy entries and, if the remaining list is empty or does not
+ * start with a resource that has a proper `Uri` (e.g. when the command was
+ * invoked from a keybinding rather than the SCM tree), falls back to the
+ * SCM resource associated with the active text editor.
+ */
+export function normaliseResourceStates(
+    model: Model,
+    outputChannel: OutputChannel,
+    resourceStates: readonly Resource[],
+): Resource[] {
+    const normalised = resourceStates.filter((s): s is Resource => !!s);
+
+    if (
+        normalised.length === 0
+        || (normalised[0] && !(normalised[0].state.resourceUri instanceof Uri))
+    ) {
+        const resource = getSCMResource(model, outputChannel);
+
+        if (!resource) {
+            return [];
+        }
+
+        return [resource];
+    }
+
+    return normalised;
+}
+
 export function getSCMResource(
     model: Model,
     outputChannel: OutputChannel,
