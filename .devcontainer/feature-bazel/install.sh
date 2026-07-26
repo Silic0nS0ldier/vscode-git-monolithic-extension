@@ -17,6 +17,8 @@ STARPLS_VERSION="v0.1.22"
 PNPM_VERSION="11.17.0"
 # renovate: datasource=github-tags depName=nodejs/node
 NODE_VERSION="v26.5.0"
+# renovate: datasource=github-releases depName=kucherenko/jscpd
+JSCPD_VERSION="v5.0.12"
 
 if [[ $ARCH == "arm64" ]] || [[ $ARCH == "aarch64" ]]; then
     curl "https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-linux-arm64" -Lo /usr/local/bin/bazel
@@ -26,6 +28,7 @@ if [[ $ARCH == "arm64" ]] || [[ $ARCH == "aarch64" ]]; then
     curl "https://github.com/withered-magic/starpls/releases/download/${STARPLS_VERSION}/starpls-linux-aarch64" -Lo /usr/local/bin/starpls
     curl "https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linux-arm64.tar.gz" -Lo /tmp/pnpm.tar.gz
     curl "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-arm64.tar.xz" -Lo /tmp/node.tar.xz
+    curl "https://github.com/kucherenko/jscpd/releases/download/${JSCPD_VERSION}/jscpd-linux-arm64-gnu.tar.gz" -Lo /tmp/jscpd.tar.gz
 elif [[ $ARCH == "x86_64" ]]; then
     curl "https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-linux-amd64" -Lo /usr/local/bin/bazel
     curl "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/buildifier-linux-amd64" -Lo /usr/local/bin/buildifier
@@ -34,6 +37,7 @@ elif [[ $ARCH == "x86_64" ]]; then
     curl "https://github.com/withered-magic/starpls/releases/download/${STARPLS_VERSION}/starpls-linux-amd64" -Lo /usr/local/bin/starpls
     curl "https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linux-x64.tar.gz" -Lo /tmp/pnpm.tar.gz
     curl "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz" -Lo /tmp/node.tar.xz
+    curl "https://github.com/kucherenko/jscpd/releases/download/${JSCPD_VERSION}/jscpd-linux-x64-gnu.tar.gz" -Lo /tmp/jscpd.tar.gz
 else
     echo "Unknown arch $ARCH"
     exit 1
@@ -51,6 +55,10 @@ tar -xf /tmp/node.tar.xz -C /usr/local/node --strip-components=1
 rm /tmp/node.tar.xz
 ln -s /usr/local/node/bin/node /usr/local/bin/node
 
+# jscpd installation
+tar -xzf /tmp/jscpd.tar.gz -C /usr/local/bin
+rm /tmp/jscpd.tar.gz
+
 chmod +x \
     /usr/local/bin/bazel \
     /usr/local/bin/buildifier \
@@ -58,4 +66,5 @@ chmod +x \
     /usr/local/bin/unused_deps \
     /usr/local/bin/starpls \
     /usr/local/bin/pnpm \
-    /usr/local/bin/node
+    /usr/local/bin/node \
+    /usr/local/bin/jscpd

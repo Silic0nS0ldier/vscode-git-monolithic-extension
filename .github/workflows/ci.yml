@@ -97,3 +97,22 @@ jobs:
       - uses: devcontainers/ci@v0.3
         with:
           runCmd: echo "Built successfully"
+  jscpd:
+    runs-on: ubuntu-24.04
+    if: ${{ !cancelled() }}
+    needs: renovate_tasks
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
+      - name: Install jscpd
+        run: |
+          set -euo pipefail
+          VERSION=$(grep -oP '^JSCPD_VERSION="\Kv[0-9.]+' ./.devcontainer/feature-bazel/install.sh)
+          echo "Installing jscpd ${VERSION}"
+          curl -fsSL "https://github.com/kucherenko/jscpd/releases/download/${VERSION}/jscpd-linux-x64-gnu.tar.gz" -o /tmp/jscpd.tar.gz
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf /tmp/jscpd.tar.gz -C "$HOME/.local/bin"
+          chmod +x "$HOME/.local/bin/jscpd"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: jscpd .
