@@ -34,11 +34,15 @@ def _rollup_bundle(name, srcs, entry_points, external_modules, **kwargs):
         args = args,
         srcs = srcs,
         outs = outs,
-        out_dirs = ["%s_/chunks" % name],
+        out_dirs = [
+            "%s_/chunks" % name,
+            "%s_/assets" % name,
+        ],
         chdir = native.package_name(),
         mnemonic = "RollupBundle",
         # Removes an intermediary `_js_library` target that may fail to find toolchains
         use_execroot_entry_point = False,
+        silent_on_success = False,
         **clean_kwargs
     )
 
