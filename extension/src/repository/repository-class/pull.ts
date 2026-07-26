@@ -4,6 +4,7 @@ import { throat } from "../../package-patches/throat.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import { pullFrom } from "./pull-from.js";
 import type { RunFn } from "./run.js";
+import { getUpstreamRemoteAndBranch } from "./upstream.js";
 
 export const pull = throat(1, (
     run: RunFn<void> & RunFn<boolean>,
@@ -14,13 +15,7 @@ export const pull = throat(1, (
     head?: Branch,
     unshallow?: boolean,
 ) => {
-    let remote: string | undefined;
-    let branch: string | undefined;
-
-    if (head && head.name && head.upstream) {
-        remote = head.upstream.remote;
-        branch = `${head.upstream.name}`;
-    }
+    const { remote, branch } = getUpstreamRemoteAndBranch(head);
 
     return pullFrom(run, repoRoot, repository, HEAD, sourceControlUI, false, remote, branch, unshallow);
 });
