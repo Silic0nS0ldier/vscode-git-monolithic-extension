@@ -1,4 +1,4 @@
-import { Temporal } from "@js-temporal/polyfill";
+import { fromFields } from "temporal-polyfill/fns/Duration";
 import { isErr, unwrap } from "monolithic-git-interop/util/result";
 import { getGitErrorCode, GitError } from "../error.js";
 import { exec, type IExecutionResult } from "../exec.js";
@@ -34,7 +34,7 @@ export async function internalExec(
 
     const execResult = await exec(child, options.abortSignal);
 
-    const duration = Temporal.Duration.from({ milliseconds: Date.now() - start });
+    const duration = fromFields({ milliseconds: Date.now() - start });
     const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
 
     if (isErr(execResult)) {
