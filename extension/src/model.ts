@@ -1,4 +1,5 @@
 import * as fs from "node:fs";
+import * as fsp from "node:fs/promises";
 import * as path from "node:path";
 import { inspect } from "node:util";
 import onetime from "onetime";
@@ -171,7 +172,7 @@ export class Model {
 
         await Promise.all((workspace.workspaceFolders || []).map(async folder => {
             const root = folder.uri.fsPath;
-            const children = await new Promise<string[]>((c, e) => fs.readdir(root, (err, r) => err ? e(err) : c(r)));
+            const children = await fsp.readdir(root);
             const subfolders = new Set(children.filter(child => child !== ".git").map(child => path.join(root, child)));
 
             const scanPaths = workspace.isTrusted
