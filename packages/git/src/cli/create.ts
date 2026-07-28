@@ -95,20 +95,25 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         }
 
         // TODO Ensure all promises resolve so that everything can be GCed
-        // TODO Clear timeout, handle Infinity (timeout will trigger immediately)
-        const onTimeout = new Promise<CLIResult>(resolve =>
-            void setTimeout(
-                () => resolve(err(createError(ERROR_TIMEOUT, cmdContext))),
-                context.timeout ?? persistentContext.timeout,
-            )
-        );
-        const onAbort = new Promise<CLIResult>(resolve => {
-            if (context.signal) {
-                if (context.signal.aborted) {
-                    return resolve(err(createError(ERROR_CANCELLED, cmdContext)));
-                }
-                context.signal.onabort = (): void => void resolve(err(createError(ERROR_CANCELLED, cmdContext)));
+        const timeoutMs = context.timeout ?? persistentContext.timeout;
+        const timeoutSignal = Number.isFinite(timeoutMs) ? AbortSignal.timeout(timeoutMs) : undefined;
+        const externalSignal = context.signal;
+
+        if (externalSignal?.aborted) {
+            if (cp.connected) {
+                cp.kill();
             }
+            return err(createError(ERROR_CANCELLED, cmdContext));
+        }
+
+        const signals = [timeoutSignal, externalSignal].filter((s): s is AbortSignal => s !== undefined);
+        const abortSignal = signals.length > 0 ? AbortSignal.any(signals) : undefined;
+
+        const onAbort = new Promise<CLIResult>(resolve => {
+            abortSignal?.addEventListener("abort", () => {
+                const cause = timeoutSignal?.aborted ? ERROR_TIMEOUT : ERROR_CANCELLED;
+                resolve(err(createError(cause, cmdContext)));
+            }, { once: true });
         });
         const onError = new Promise<CLIResult>(resolve =>
             void cp.once("error", (error) => resolve(err(createError(ERROR_GENERIC, { cmdContext, error }))))
@@ -118,7 +123,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         );
 
         // NOTE onExit must come last, unit tests rely on this (they are time optimised)
-        const result = await Promise.race([onTimeout, onError, onAbort, onExit]);
+        const result = await Promise.race([onAbort, onError, onExit]);
 
         if (isErr(result)) {
             // End process
