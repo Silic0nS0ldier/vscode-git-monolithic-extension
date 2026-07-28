@@ -1115,6 +1115,9 @@ export class Repository {
 
         if (opts?.pattern) {
             args.push(opts.pattern);
+        } else {
+            // Constrain to the ref namespaces the parser below actually understands.
+            args.push("refs/heads", "refs/remotes", "refs/tags");
         }
 
         if (opts?.contains) {
