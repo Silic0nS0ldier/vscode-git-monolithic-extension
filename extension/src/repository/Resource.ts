@@ -40,6 +40,7 @@ export function createResource(
 
     return new Resource(
         normalisedResourceUri,
+        resourceUri,
         repoRoot,
         submodules,
         sourceControlUI,
@@ -284,6 +285,7 @@ export class Resource implements SourceControlResourceState {
 
     constructor(
         normalisedResourceUri: () => Uri,
+        originalResourceUri: Uri,
         repoRoot: string,
         submodules: Submodule[],
         sourceControlUI: SourceControlUIGroup,
@@ -313,7 +315,7 @@ export class Resource implements SourceControlResourceState {
                 await commands.executeCommand<void>(command.command, ...(command.arguments || []));
             },
             get original(): Uri {
-                return self.resourceUri;
+                return originalResourceUri;
             },
             get renameResourceUri(): Uri | undefined {
                 return renameResourceUri_;
