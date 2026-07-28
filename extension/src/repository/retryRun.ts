@@ -1,6 +1,6 @@
+import { setTimeout as timeout } from "node:timers/promises";
 import { GitErrorCodes } from "../api/git.js";
 import { GitError } from "../git/error.js";
-import { timeout } from "../util/timeout.js";
 import { Operation, type OperationOptions } from "./Operations.js";
 
 function isOperationRetrySafe(err: GitError, operation: OperationOptions): boolean {
