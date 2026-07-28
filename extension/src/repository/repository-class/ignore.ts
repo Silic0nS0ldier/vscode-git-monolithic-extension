@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import { access } from "node:fs/promises";
 import path from "node:path";
 import { Uri, window, workspace, WorkspaceEdit } from "vscode";
 import type { Repository } from "../../git.js";
@@ -16,8 +16,12 @@ export async function ignore(
             .map(uri => path.relative(repository.root, uri.fsPath).replace(/\\/g, "/"))
             .join("\n");
 
-        // TODO Deal with this deprecation in a sane way (VSCode is already safe here)
-        const document = await new Promise(c => fs.exists(ignoreFile, c))
+        // TOCTOU race: another process could create or delete .gitignore between
+        // this check and the subsequent openTextDocument call. VS Code has no
+        // single API that opens the file if present or an untitled buffer otherwise,
+        // so the check is unavoidable.
+        const ignoreFileExists = await access(ignoreFile).then(() => true, () => false);
+        const document = ignoreFileExists
             ? await workspace.openTextDocument(ignoreFile)
             : await workspace.openTextDocument(Uri.file(ignoreFile).with({ scheme: "untitled" }));
 
