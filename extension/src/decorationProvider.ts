@@ -21,7 +21,8 @@ import * as config from "./util/config.js";
 import { dispose as disposeHelper } from "./util/disposals.js";
 import { anyEvent, filterEvent, fireEvent } from "./util/events.js";
 import { isExpectedError } from "./util/is-expected-error.js";
-import { PromiseSource } from "./util/promise-source.js";
+
+type DecorationResolvers = PromiseWithResolvers<FileDecoration | undefined>;
 
 class GitIgnoreDecorationProvider implements FileDecorationProvider {
     static #Decoration: FileDecoration = { color: new ThemeColor("gitDecoration.ignoredResourceForeground") };
@@ -29,7 +30,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
     readonly onDidChangeFileDecorations: Event<undefined>;
     #queue = new Map<
         string,
-        { repository: AbstractRepository; queue: Map<string, PromiseSource<FileDecoration | undefined>> }
+        { repository: AbstractRepository; queue: Map<string, DecorationResolvers> }
     >();
     #disposables: Disposable[] = [];
     #model: Model;
@@ -56,19 +57,19 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
         let queueItem = this.#queue.get(repository.root);
 
         if (!queueItem) {
-            queueItem = { queue: new Map<string, PromiseSource<FileDecoration | undefined>>(), repository };
+            queueItem = { queue: new Map<string, DecorationResolvers>(), repository };
             this.#queue.set(repository.root, queueItem);
         }
 
-        let promiseSource = queueItem.queue.get(uri.fsPath);
+        let resolvers = queueItem.queue.get(uri.fsPath);
 
-        if (!promiseSource) {
-            promiseSource = new PromiseSource();
-            queueItem.queue.set(uri.fsPath, promiseSource);
+        if (!resolvers) {
+            resolvers = Promise.withResolvers<FileDecoration | undefined>();
+            queueItem.queue.set(uri.fsPath, resolvers);
             this.#checkIgnoreSoon();
         }
 
-        return await promiseSource.promise;
+        return await resolvers.promise;
     }
 
     #checkIgnoreSoon = debounce(() => {
@@ -79,8 +80,8 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
             const paths = [...item.queue.keys()];
 
             item.repository.checkIgnore(paths).then(ignoreSet => {
-                for (const [path, promiseSource] of item.queue.entries()) {
-                    promiseSource.resolve(ignoreSet.has(path) ? GitIgnoreDecorationProvider.#Decoration : undefined);
+                for (const [path, resolvers] of item.queue.entries()) {
+                    resolvers.resolve(ignoreSet.has(path) ? GitIgnoreDecorationProvider.#Decoration : undefined);
                 }
             }, err => {
                 if (!isExpectedError(err, GitError, e => e.gitErrorCode === GitErrorCodes.IsInSubmodule)) {
@@ -88,8 +89,8 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
                     console.error(err);
                 }
 
-                for (const [, promiseSource] of item.queue.entries()) {
-                    promiseSource.reject(err);
+                for (const [, resolvers] of item.queue.entries()) {
+                    resolvers.reject(err);
                 }
             });
         }
