@@ -3,6 +3,7 @@ import * as fs from "node:fs";
 import * as http from "node:http";
 import * as os from "node:os";
 import * as path from "node:path";
+import { json } from "node:stream/consumers";
 import type { Disposable } from "vscode";
 import { toDisposable } from "../util/disposals.js";
 
@@ -95,17 +96,12 @@ class IPCServer implements IIPCServer, Disposable {
             return;
         }
 
-        const chunks: Buffer[] = [];
-        req.on("data", d => chunks.push(d));
-        req.on("end", () => {
-            const request = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-            handler.handle(request).then(result => {
-                res.writeHead(200);
-                res.end(JSON.stringify(result));
-            }, () => {
-                res.writeHead(500);
-                res.end();
-            });
+        json(req).then(request => handler.handle(request)).then(result => {
+            res.writeHead(200);
+            res.end(JSON.stringify(result));
+        }, () => {
+            res.writeHead(500);
+            res.end();
         });
     }
 
