@@ -1,4 +1,5 @@
 import type * as cp from "node:child_process";
+import { buffer, text } from "node:stream/consumers";
 import { dispose, type IDisposable, toDisposable } from "../util/disposals.js";
 import { cpErrorHandler, GitError } from "./error.js";
 import { err, isErr, ok, unwrap, type Result } from "monolithic-git-interop/util/result";
@@ -28,27 +29,14 @@ export async function exec(
         disposables.push(toDisposable(() => ee.removeListener(name, fn)));
     };
 
-    const on = (ee: NodeJS.EventEmitter, name: string, fn: (...args: any[]) => void): void => {
-        ee.on(name, fn);
-        disposables.push(toDisposable(() => ee.removeListener(name, fn)));
-    };
-
     let pendingResult = (
         Promise.all<any>([
             new Promise<number>((c, e) => {
                 once(child, "error", cpErrorHandler(e));
                 once(child, "exit", c);
             }),
-            new Promise<Buffer>(c => {
-                const buffers: Buffer[] = [];
-                on(child.stdout!, "data", (b: Buffer) => buffers.push(b));
-                once(child.stdout!, "close", () => c(Buffer.concat(buffers)));
-            }),
-            new Promise<string>(c => {
-                const buffers: Buffer[] = [];
-                on(child.stderr!, "data", (b: Buffer) => buffers.push(b));
-                once(child.stderr!, "close", () => c(Buffer.concat(buffers).toString("utf8")));
-            }),
+            buffer(child.stdout),
+            text(child.stderr),
         ]) as Promise<[number, Buffer, string]>
     ).then(
         v => ok<[number, Buffer<ArrayBufferLike>, string], unknown>(v),
