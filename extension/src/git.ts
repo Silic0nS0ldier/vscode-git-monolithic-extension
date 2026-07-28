@@ -14,7 +14,7 @@ import * as gitErrors from "monolithic-git-interop/errors"
 import { fromFields } from "temporal-polyfill/fns/Duration";
 import type * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
-import { exists, promises as fs } from "node:fs";
+import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { StringDecoder } from "node:string_decoder";
@@ -117,18 +117,28 @@ export class Git {
     }
 
     async clone(url: string, options: ICloneOptions, abortSignal?: AbortSignal): Promise<string> {
-        let baseFolderName = decodeURI(url).replace(/[\/]+$/, "").replace(/^.*[\/\\]/, "").replace(/\.git$/, "")
+        const baseFolderName = decodeURI(url).replace(/[\/]+$/, "").replace(/^.*[\/\\]/, "").replace(/\.git$/, "")
             || "repository";
-        let folderName = baseFolderName;
-        let folderPath = path.join(options.parentPath, folderName);
-        let count = 1;
 
-        while (count < 20 && await new Promise(c => exists(folderPath, c))) {
-            folderName = `${baseFolderName}-${count++}`;
-            folderPath = path.join(options.parentPath, folderName);
-        }
-
+        // Ensure the parent exists first
         await fs.mkdir(options.parentPath, { recursive: true });
+
+        // Reserve a non-colliding folder name by atomically creating the candidate directory.
+        let folderPath = "";
+        for (let attempt = 0; attempt < 20; attempt++) {
+            const candidate = attempt === 0
+                ? baseFolderName
+                : `${baseFolderName}-${attempt}`;
+            folderPath = path.join(options.parentPath, candidate);
+            try {
+                await fs.mkdir(folderPath);
+                break;
+            } catch (err) {
+                if ((err as NodeJS.ErrnoException).code !== "EEXIST" || attempt === 19) {
+                    throw err;
+                }
+            }
+        }
 
         const onSpawn = (child: cp.ChildProcess): void => {
             if (!child.stderr) {
@@ -173,6 +183,14 @@ export class Git {
                 onSpawn,
             });
         } catch (err) {
+            // Best-effort cleanup of the directory we reserved.
+            // If clone failed without cleaning up, we leave it for investigation.
+            try {
+                await fs.rmdir(folderPath);
+            } catch {
+                // Swallow: surfacing this would mask the real clone failure.
+            }
+
             if (err instanceof GitError && err.stderr) {
                 err.stderr = err.stderr.replace(/^Cloning.+$/m, "").trim();
                 err.stderr = err.stderr.replace(/^ERROR:\s+/, "").trim();
