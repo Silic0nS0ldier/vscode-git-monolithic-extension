@@ -114,6 +114,10 @@ class IPCServer implements IIPCServer, Disposable {
         this.#server.close();
 
         if (this.#ipcHandlePath && process.platform !== "win32") {
+            // VS Code's Disposable contract is synchronous — the extension host does
+            // not await returned promises. A sync unlink guarantees the socket file
+            // is removed before shutdown completes; an unawaited fsp.unlink could
+            // race with process exit and leak the file.
             fs.unlinkSync(this.#ipcHandlePath);
         }
     }
