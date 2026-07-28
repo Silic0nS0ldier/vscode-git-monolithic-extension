@@ -154,8 +154,7 @@ async function createModel(
     const info = await findGit(outputChannel, pathHints);
     outputChannel.appendLine(i18n.Translations.usingGit(info.version, info.path));
 
-    // TODO Migrate to context.storageUri
-    const askpass = await Askpass.create(outputChannel, context.storagePath);
+    const askpass = await Askpass.create(outputChannel);
     disposables.push(askpass);
 
     const environment = askpass.getEnv();

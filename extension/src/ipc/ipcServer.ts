@@ -1,4 +1,4 @@
-import * as crypto from "node:crypto";
+import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import * as http from "node:http";
 import * as os from "node:os";
@@ -23,18 +23,9 @@ export interface IIPCHandler {
     handle(request: any): Promise<any>;
 }
 
-export async function createIPCServer(context?: string): Promise<IIPCServer> {
+export async function createIPCServer(): Promise<IIPCServer> {
     const server = http.createServer();
-    const hash = crypto.createHash("sha1");
-
-    if (!context) {
-        const buffer = await new Promise<Buffer>((c, e) => crypto.randomBytes(20, (err, buf) => err ? e(err) : c(buf)));
-        hash.update(buffer);
-    } else {
-        hash.update(context);
-    }
-
-    const ipcHandlePath = getIPCHandlePath(hash.digest("hex").substr(0, 10));
+    const ipcHandlePath = getIPCHandlePath(randomUUID().replaceAll("-", "").slice(0, 10));
 
     if (process.platform !== "win32") {
         try {
