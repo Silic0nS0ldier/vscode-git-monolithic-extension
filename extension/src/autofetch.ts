@@ -1,3 +1,4 @@
+import { setTimeout } from "node:timers/promises";
 import {
     type ConfigurationChangeEvent,
     ConfigurationTarget,
@@ -152,7 +153,7 @@ export class AutoFetcher {
 
             const period = config.autoFetchPeriod(Uri.file(this.#repository.root))
                 * 1000;
-            const timeout = new Promise(c => setTimeout(c, period));
+            const timeout = setTimeout(period);
             const whenDisabled = eventToPromise(filterEvent(this.#onDidChange, enabled => !enabled));
 
             await Promise.race([timeout, whenDisabled]);
