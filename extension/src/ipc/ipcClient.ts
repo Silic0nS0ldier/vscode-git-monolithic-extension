@@ -1,4 +1,5 @@
 import * as http from "node:http";
+import { json } from "node:stream/consumers";
 
 export class IPCClient {
     #ipcHandlePath: string;
@@ -27,9 +28,7 @@ export class IPCClient {
                     return e(new Error(`Bad status code: ${res.statusCode}`));
                 }
 
-                const chunks: Buffer[] = [];
-                res.on("data", d => chunks.push(d));
-                res.on("end", () => c(JSON.parse(Buffer.concat(chunks).toString("utf8"))));
+                json(res).then(c, e);
             });
 
             req.on("error", err => e(err));
