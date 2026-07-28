@@ -1,8 +1,8 @@
 import type * as cp from "node:child_process";
+import { once } from "node:events";
 import { buffer, text } from "node:stream/consumers";
-import { dispose, type IDisposable, toDisposable } from "../util/disposals.js";
 import { cpErrorHandler, GitError } from "./error.js";
-import { err, isErr, ok, unwrap, type Result } from "monolithic-git-interop/util/result";
+import { err, ok, type Result } from "monolithic-git-interop/util/result";
 
 export interface IExecutionResult<T extends string | Buffer> {
     exitCode: number;
@@ -22,52 +22,46 @@ export async function exec(
         return err(new GitError({ message: "Cancelled" }));
     }
 
-    const disposables: IDisposable[] = [];
+    // Internal signal used to detach the abort listener below once the work has
+    // finished, so we do not leak a listener onto a longer-lived external abort
+    // signal after this call returns.
+    const cleanup = new AbortController();
 
-    const once = (ee: NodeJS.EventEmitter, name: string, fn: (...args: any[]) => void): void => {
-        ee.once(name, fn);
-        disposables.push(toDisposable(() => ee.removeListener(name, fn)));
-    };
-
-    let pendingResult = (
-        Promise.all<any>([
-            new Promise<number>((c, e) => {
-                once(child, "error", cpErrorHandler(e));
-                once(child, "exit", c);
-            }),
-            buffer(child.stdout),
-            text(child.stderr),
-        ]) as Promise<[number, Buffer, string]>
-    ).then(
-        v => ok<[number, Buffer<ArrayBufferLike>, string], unknown>(v),
-        e => err<[number, Buffer<ArrayBufferLike>, string], unknown>(e)
-    ) as Promise<Result<[number, Buffer<ArrayBufferLike>, string], unknown>>;
-
-    if (abortSignal) {
-        const cancellationPromise = new Promise<Result<[number, Buffer<ArrayBufferLike>, string], unknown>>((r) => {
-            abortSignal.addEventListener("abort", () => {
-                try {
-                    child.kill();
-                } catch (err) {
-                    // noop
-                }
-
-                r(err(new GitError({ message: "Cancelled" })));
-            });
-        });
-
-        pendingResult = Promise.race([pendingResult, cancellationPromise]);
-    }
+    // Kill the child when the caller aborts. The child's natural "exit" event
+    // fires as a consequence, resolving the promise below — no separate
+    // cancellation racer is required.
+    abortSignal?.addEventListener("abort", () => {
+        try {
+            child.kill();
+        } catch {
+            // noop
+        }
+    }, { once: true, signal: cleanup.signal });
 
     try {
-        let result = await pendingResult;
-        if (isErr(result)) {
-            return result;
+        // `events.once` auto-removes its listener when the event fires; whichever
+        // of "exit" or "error" loses the race leaves at most a single dangling
+        // listener that is cleaned up when the ChildProcess is GC'd.
+        const onExit = (once(child, "exit") as Promise<[number | null]>)
+            .then(([code]) => code ?? 0);
+        const onError = once(child, "error")
+            .then(([e]) => new Promise<number>((_, reject) => cpErrorHandler(reject)(e)));
+        const runningChild = Promise.race<number>([onExit, onError]);
+
+        const [exitCode, stdout, stderr] = await Promise.all([
+            runningChild,
+            buffer(child.stdout),
+            text(child.stderr),
+        ]);
+
+        if (abortSignal?.aborted) {
+            return err(new GitError({ message: "Cancelled" }));
         }
 
-        const [exitCode, stdout, stderr] = unwrap(result);
         return ok({ exitCode, stderr, stdout });
+    } catch (e) {
+        return err(e);
     } finally {
-        dispose(disposables);
+        cleanup.abort();
     }
 }
