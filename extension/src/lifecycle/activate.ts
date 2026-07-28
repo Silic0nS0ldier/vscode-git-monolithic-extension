@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { setTimeout } from "node:timers/promises";
 import { inspect } from "node:util";
 import {
     commands,
@@ -91,7 +92,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
             // Running of disposals does not handle async tasks and behaviour around errors is unknown
             // To reduce the risk of incomplete disposals (which can prevent re-activation) we wait a few seconds
-            await new Promise<void>(c => setTimeout(() => c(), 5000));
+            await setTimeout(5000);
         }
 
         configChangeQueue = handleConfigChange();
