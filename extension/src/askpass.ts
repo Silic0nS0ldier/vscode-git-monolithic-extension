@@ -15,9 +15,9 @@ export class Askpass implements IIPCHandler {
     #credentialsProviders = new Set<CredentialsProvider>();
     #ipc?: IIPCServer;
 
-    static async create(outputChannel: OutputChannel, context?: string): Promise<Askpass> {
+    static async create(outputChannel: OutputChannel): Promise<Askpass> {
         try {
-            return new Askpass(await createIPCServer(context));
+            return new Askpass(await createIPCServer());
         } catch (err) {
             outputChannel.appendLine(`[error] Failed to create git askpass IPC: ${err}`);
             return new Askpass();
