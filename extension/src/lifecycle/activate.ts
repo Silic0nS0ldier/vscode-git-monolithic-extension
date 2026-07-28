@@ -1,4 +1,4 @@
-import * as fs from "node:fs";
+import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { setTimeout } from "node:timers/promises";
@@ -252,9 +252,7 @@ async function isGitRepository(folder: WorkspaceFolder): Promise<boolean> {
     const dotGit = path.join(folder.uri.fsPath, ".git");
 
     try {
-        const dotGitStat = await new Promise<fs.Stats>((c, e) =>
-            fs.stat(dotGit, (err, stat) => err ? e(err) : c(stat))
-        );
+        const dotGitStat = await fsp.stat(dotGit);
         return dotGitStat.isDirectory();
     } catch (err) {
         return false;
