@@ -116,3 +116,24 @@ jobs:
           chmod +x "$HOME/.local/bin/jscpd"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - run: jscpd .
+  dprint:
+    runs-on: ubuntu-24.04
+    if: ${{ !cancelled() }}
+    needs: renovate_tasks
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
+      - name: Install rustfmt
+        run: rustup component add rustfmt
+      - name: Install dprint
+        run: |
+          set -euo pipefail
+          VERSION=$(grep -oP '^DPRINT_VERSION="\K[0-9.]+' ./.devcontainer/feature-bazel/install.sh)
+          echo "Installing dprint ${VERSION}"
+          curl -fsSL "https://github.com/dprint/dprint/releases/download/${VERSION}/dprint-x86_64-unknown-linux-gnu.zip" -o /tmp/dprint.zip
+          mkdir -p "$HOME/.local/bin"
+          unzip -o /tmp/dprint.zip -d "$HOME/.local/bin" dprint
+          chmod +x "$HOME/.local/bin/dprint"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: dprint check

@@ -19,6 +19,8 @@ PNPM_VERSION="11.17.0"
 NODE_VERSION="v26.5.0"
 # renovate: datasource=github-releases depName=kucherenko/jscpd
 JSCPD_VERSION="v5.0.12"
+# renovate: datasource=github-releases depName=dprint/dprint
+DPRINT_VERSION="0.55.2"
 
 if [[ $ARCH == "arm64" ]] || [[ $ARCH == "aarch64" ]]; then
     curl "https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-linux-arm64" -Lo /usr/local/bin/bazel
@@ -29,6 +31,7 @@ if [[ $ARCH == "arm64" ]] || [[ $ARCH == "aarch64" ]]; then
     curl "https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linux-arm64.tar.gz" -Lo /tmp/pnpm.tar.gz
     curl "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-arm64.tar.xz" -Lo /tmp/node.tar.xz
     curl "https://github.com/kucherenko/jscpd/releases/download/${JSCPD_VERSION}/jscpd-linux-arm64-gnu.tar.gz" -Lo /tmp/jscpd.tar.gz
+    curl "https://github.com/dprint/dprint/releases/download/${DPRINT_VERSION}/dprint-aarch64-unknown-linux-gnu.zip" -Lo /tmp/dprint.zip
 elif [[ $ARCH == "x86_64" ]]; then
     curl "https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-linux-amd64" -Lo /usr/local/bin/bazel
     curl "https://github.com/bazelbuild/buildtools/releases/download/${BUILDTOOLS_VERSION}/buildifier-linux-amd64" -Lo /usr/local/bin/buildifier
@@ -38,6 +41,7 @@ elif [[ $ARCH == "x86_64" ]]; then
     curl "https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linux-x64.tar.gz" -Lo /tmp/pnpm.tar.gz
     curl "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz" -Lo /tmp/node.tar.xz
     curl "https://github.com/kucherenko/jscpd/releases/download/${JSCPD_VERSION}/jscpd-linux-x64-gnu.tar.gz" -Lo /tmp/jscpd.tar.gz
+    curl "https://github.com/dprint/dprint/releases/download/${DPRINT_VERSION}/dprint-x86_64-unknown-linux-gnu.zip" -Lo /tmp/dprint.zip
 else
     echo "Unknown arch $ARCH"
     exit 1
@@ -59,6 +63,10 @@ ln -s /usr/local/node/bin/node /usr/local/bin/node
 tar -xzf /tmp/jscpd.tar.gz -C /usr/local/bin
 rm /tmp/jscpd.tar.gz
 
+# dprint installation
+unzip -o /tmp/dprint.zip -d /usr/local/bin dprint
+rm /tmp/dprint.zip
+
 chmod +x \
     /usr/local/bin/bazel \
     /usr/local/bin/buildifier \
@@ -67,4 +75,5 @@ chmod +x \
     /usr/local/bin/starpls \
     /usr/local/bin/pnpm \
     /usr/local/bin/node \
-    /usr/local/bin/jscpd
+    /usr/local/bin/jscpd \
+    /usr/local/bin/dprint
