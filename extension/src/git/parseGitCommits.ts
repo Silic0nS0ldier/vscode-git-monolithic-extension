@@ -25,7 +25,7 @@ export function parseGitCommits(data: string): Commit[] {
 
         [, ref, authorName, authorEmail, authorDate, commitDate, parents, message] = match;
 
-        if (message[message.length - 1] === "\n") {
+        if (message.at(-1) === "\n") {
             message = message.substr(0, message.length - 1);
         }
 

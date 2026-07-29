@@ -77,7 +77,7 @@ export class LineStream extends stream.Transform {
             lines.shift();
         }
 
-        this.#lastChunkEndedWithCR = str[str.length - 1] == "\r";
+        this.#lastChunkEndedWithCR = str.at(-1) == "\r";
         this.#lineBuffer = this.#lineBuffer.concat(lines);
         this.#pushBuffer(1, done);
     }

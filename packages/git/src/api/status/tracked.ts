@@ -103,7 +103,7 @@ class GitStatusParser {
         entry.path = raw.substring(i, lastIndex);
 
         // If path ends with slash, it must be a nested git repo
-        if (entry.path[entry.path.length - 1] !== "/") {
+        if (entry.path.at(-1) !== "/") {
             this.#result.push(entry);
         }
 
