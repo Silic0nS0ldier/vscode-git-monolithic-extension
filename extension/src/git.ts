@@ -1,3 +1,4 @@
+import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { log as gitLog } from "monolithic-git-interop/api/log/mod";
 import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
 import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
@@ -751,17 +752,18 @@ export class Repository {
     async clean(paths: string[]): Promise<void> {
         const limited = throat(5);
         const promises: Promise<unknown>[] = [];
-        const args = ["clean", "-f", "-q"];
 
         for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
-            promises.push(limited(() => this.exec([...args, "--", ...chunk])));
+            promises.push(limited(async () => {
+                unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, chunk, { quiet: true }));
+            }));
         }
 
         await Promise.all(promises);
     }
 
     async undo(): Promise<void> {
-        await this.exec(["clean", "-fd"]);
+        unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, [], { directories: true }));
 
         try {
             await this.exec(["checkout", "--", "."]);
