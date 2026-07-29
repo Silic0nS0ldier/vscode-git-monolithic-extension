@@ -1,7 +1,7 @@
-import { cli } from "cleye";
-import { rollup } from "rollup";
 import commonjs__ from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
+import { cli } from "cleye";
+import { rollup } from "rollup";
 import { wasmSourcePhasePlugin } from "./wasm-source-phase-plugin.js";
 
 // Work around https://github.com/rollup/plugins/issues/1662
@@ -19,8 +19,8 @@ const argv = cli({
         },
         outDir: {
             type: String,
-            placeholder: '<dir>',
-        }
+            placeholder: "<dir>",
+        },
     },
 });
 
@@ -67,7 +67,7 @@ const bundle = await (async () => {
                     process.exit(1);
                 }
                 defaultHandler(warning);
-            }
+            },
         });
     } catch (e) {
         console.error(e);

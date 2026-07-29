@@ -18,7 +18,7 @@ export async function publish(repository: AbstractRepository): Promise<void> {
         await repository.pushTo(remotes[0].name, branchName, true);
         return;
     }
-    
+
     const remoteNames = remotes.map((remote) => remote.name);
     const selected = await window.showQuickPick(remoteNames, {
         placeHolder: i18n.Translations.selectRemoteToPublish(),

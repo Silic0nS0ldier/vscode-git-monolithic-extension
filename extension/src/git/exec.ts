@@ -1,8 +1,8 @@
+import { err, ok, type Result } from "monolithic-git-interop/util/result";
 import type * as cp from "node:child_process";
 import { once } from "node:events";
 import { buffer, text } from "node:stream/consumers";
 import { cpErrorHandler, GitError } from "./error.js";
-import { err, ok, type Result } from "monolithic-git-interop/util/result";
 
 export interface IExecutionResult<T extends string | Buffer> {
     exitCode: number;

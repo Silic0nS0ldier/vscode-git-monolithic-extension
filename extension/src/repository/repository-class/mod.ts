@@ -1,4 +1,14 @@
-import { Disposable, EventEmitter, type Memento, type OutputChannel, type QuickDiffProvider, Uri, window, workspace } from "vscode";
+import { setTimeout as timeout } from "node:timers/promises";
+import {
+    Disposable,
+    EventEmitter,
+    type Memento,
+    type OutputChannel,
+    type QuickDiffProvider,
+    Uri,
+    window,
+    workspace,
+} from "vscode";
 import { type Branch, GitErrorCodes, type Ref, RefType, type Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import type { Repository as BaseRepository } from "../../git.js";
@@ -13,7 +23,6 @@ import { toGitUri } from "../../uri.js";
 import { createBox } from "../../util/box.js";
 import * as config from "../../util/config.js";
 import { dispose } from "../../util/disposals.js";
-import { setTimeout as timeout } from "node:timers/promises";
 import { anyEvent, eventToPromise, filterEvent } from "../../util/events.js";
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
@@ -29,10 +38,10 @@ import { buffer as bufferImpl } from "./buffer.js";
 import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
 import { clean as cleanImpl } from "./clean.js";
 import { commit as commitImpl } from "./commit.js";
+import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConfig } from "./config.js";
 import { createRebaseCommitBox } from "./createRebaseCommitBox.js";
 import { createStateBox } from "./createStateBox.js";
 import { fetch as fetchImpl } from "./fetch.js";
-import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConfig } from "./config.js";
 import { getInputTemplate as getInputTemplateImpl } from "./get-input-template.js";
 import { headLabel as headLabelImpl } from "./head-label.js";
 import { ignore as ignoreImpl } from "./ignore.js";

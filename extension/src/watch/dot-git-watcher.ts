@@ -1,11 +1,11 @@
-import path from "node:path";
-import fs from "node:fs/promises";
 import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
 import { type SuspendHandle, watch } from "./watch.js";
 
 class DotGitEventEmitter extends EventEmitter<Uri> {
-    #lastGitIndexDigest: string|null = null;
+    #lastGitIndexDigest: string | null = null;
     #gitIndexPath: string;
     #outputChannel: OutputChannel;
 

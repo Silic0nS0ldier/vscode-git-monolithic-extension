@@ -1,5 +1,5 @@
-import { fromFields } from "temporal-polyfill/fns/Duration";
 import { isErr, unwrap } from "monolithic-git-interop/util/result";
+import { fromFields } from "temporal-polyfill/fns/Duration";
 import { getGitErrorCode, GitError } from "../error.js";
 import { exec, type IExecutionResult } from "../exec.js";
 import type { SpawnOptions } from "../SpawnOptions.js";

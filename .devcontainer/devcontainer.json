@@ -1,29 +1,29 @@
 {
-	"name": "Git monolithic",
-	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-	"features": {
-		"./feature-bazel": {},
-		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/devcontainers/features/rust:1": {
-			"version": "1.95.0"
-		}
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"bazelbuild.vscode-bazel"
-			],
-			"settings": {
-				"bazel.enableCodeLens": true,
-				"bazel.lsp.command": "starpls",
-				"bazel.lsp.args": ["server"]
-			}
-		}
-	},
-	"initializeCommand": {
-		"gh-cli-auth": "gh auth token > .git/__gh_token || true"
-	},
-	"postStartCommand": {
-		"gh-cli-auth": "test -s .git/__gh_token && gh auth login --with-token < .git/__gh_token || true"
-	}
+    "name": "Git monolithic",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "./feature-bazel": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/rust:1": {
+            "version": "1.95.0"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bazelbuild.vscode-bazel"
+            ],
+            "settings": {
+                "bazel.enableCodeLens": true,
+                "bazel.lsp.command": "starpls",
+                "bazel.lsp.args": ["server"]
+            }
+        }
+    },
+    "initializeCommand": {
+        "gh-cli-auth": "gh auth token > .git/__gh_token || true"
+    },
+    "postStartCommand": {
+        "gh-cli-auth": "test -s .git/__gh_token && gh auth login --with-token < .git/__gh_token || true"
+    }
 }

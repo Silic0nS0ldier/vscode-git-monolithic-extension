@@ -1,14 +1,11 @@
 import assert from "node:assert";
 import { inspect } from "node:util";
 import { EndOfLine, type OutputChannel, Uri, window } from "vscode";
-import {
-    DiffComputer,
-    type ILineChange,
-} from "vscode-diff/dist/vs/editor/common/diff/legacyLinesDiffComputer.js";
+import { DiffComputer, type ILineChange } from "vscode-diff/dist/vs/editor/common/diff/legacyLinesDiffComputer.js";
+import type { Model } from "../../../model.js";
 import { intersectDiffWithRange, toLineRanges } from "../../../staging.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { stageChanges } from "./helpers.js";
-import type { Model } from "../../../model.js";
 
 function getEOLChar(eol: EndOfLine): string {
     switch (eol) {

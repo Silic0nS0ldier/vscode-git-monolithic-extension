@@ -1,4 +1,4 @@
-import { isErr, unwrap, type Result } from "./func-result.js";
+import { isErr, type Result, unwrap } from "./func-result.js";
 
 export type ErrorShape<TSymbol> = {
     readonly cause?: unknown;

@@ -8,11 +8,12 @@ test("Basic case", async t => {
         {
             cli: async (context) => {
                 if (context.stdout) {
-                    intoStream([
-                        "packages/git/src/api/status/tracked.test.ts",
-                        "packages/git/src/api/status/untracked.test.ts",
-
-                    ].join("\0") + "\0").pipe(context.stdout);
+                    intoStream(
+                        [
+                            "packages/git/src/api/status/tracked.test.ts",
+                            "packages/git/src/api/status/untracked.test.ts",
+                        ].join("\0") + "\0",
+                    ).pipe(context.stdout);
                 }
                 return ok(void 0);
             },
@@ -20,7 +21,7 @@ test("Basic case", async t => {
             version: "VERSION",
         },
         "/cwd",
-        "relative"
+        "relative",
     );
     t.true(isOk(res));
     if (isOk(res)) {

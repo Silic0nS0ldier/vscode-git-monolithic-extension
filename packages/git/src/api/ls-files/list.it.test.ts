@@ -1,10 +1,10 @@
-import test from "node:test";
 import assert from "node:assert";
-import path from "node:path";
 import fs from "node:fs/promises";
-import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
-import { lsFiles } from "./list.js";
+import path from "node:path";
+import test from "node:test";
 import { unwrapOk } from "../../errors.js";
+import { gitCtx, tempGitRepo } from "../helpers.it.stub.js";
+import { lsFiles } from "./list.js";
 
 test(lsFiles.name + " - staged file", async () => {
     await using repo = await tempGitRepo(true);

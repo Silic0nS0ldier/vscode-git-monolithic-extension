@@ -16,7 +16,7 @@ test("Basic case", async t => {
             version: "VERSION",
         },
         "/cwd",
-        "relative"
+        "relative",
     );
     t.true(isOk(res));
     if (isOk(res)) {

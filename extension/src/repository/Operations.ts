@@ -25,7 +25,7 @@ export function isReadOnly(operation: OperationOptions): boolean {
         case Operation.CherryPick:
         case Operation.Clean:
         case Operation.Commit:
-        case Operation.Config:// TODO Split to read and write variants
+        case Operation.Config: // TODO Split to read and write variants
         case Operation.DeleteBranch:
         case Operation.DeleteRef:
         case Operation.DeleteTag:

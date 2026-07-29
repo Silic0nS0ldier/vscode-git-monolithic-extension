@@ -1,21 +1,21 @@
-import fs from "node:fs";
-import { cli } from "cleye";
 import { createVSIX } from "@vscode/vsce";
+import { cli } from "cleye";
+import fs from "node:fs";
 import path from "node:path";
 
 const argv = cli({
     flags: {
         inDir: {
             type: String,
-            placeholder: '<dir>',
+            placeholder: "<dir>",
         },
         outFile: {
             type: String,
-            placeholder: '<file>',
+            placeholder: "<file>",
         },
         verbose: {
             type: Boolean,
-            description: 'Show vsce output',
+            description: "Show vsce output",
         },
     },
 });
@@ -55,7 +55,10 @@ const outFile = (() => {
 const version = (() => {
     const pkg = JSON.parse(fs.readFileSync(path.join(inDir, "package.json"), "utf-8"));
     if (process.env.BAZEL_VOLATILE_STATUS_FILE) {
-        const volatileStatusContent = fs.readFileSync(path.join(execroot, process.env.BAZEL_VOLATILE_STATUS_FILE), "utf-8");
+        const volatileStatusContent = fs.readFileSync(
+            path.join(execroot, process.env.BAZEL_VOLATILE_STATUS_FILE),
+            "utf-8",
+        );
         const match = volatileStatusContent.match(/BUILD_TIMESTAMP (\d+)/);
         if (!match) {
             console.error("BUILD_TIMESTAMP not found in BAZEL_VOLATILE_STATUS_FILE.");
@@ -72,8 +75,14 @@ function createOutputCapture() {
     const captured: Buffer[] = [];
     const origStdoutWrite = process.stdout.write;
     const origStderrWrite = process.stderr.write;
-    process.stdout.write = (chunk: any) => { captured.push(Buffer.from(chunk)); return true; };
-    process.stderr.write = (chunk: any) => { captured.push(Buffer.from(chunk)); return true; };
+    process.stdout.write = (chunk: any) => {
+        captured.push(Buffer.from(chunk));
+        return true;
+    };
+    process.stderr.write = (chunk: any) => {
+        captured.push(Buffer.from(chunk));
+        return true;
+    };
     return {
         replay() {
             const stderr = origStderrWrite.bind(process.stderr);

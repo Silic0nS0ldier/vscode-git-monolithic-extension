@@ -48,9 +48,9 @@ export async function read(
 }
 
 export type ConfigEntry = {
-    from: Scope,
-    key: string,
-    value: string,
+    from: Scope;
+    key: string;
+    value: string;
 };
 
 export async function readAll(
@@ -82,7 +82,7 @@ export async function readAll(
             from,
             key,
             value,
-        })
+        });
     }
 
     return ok(entries);

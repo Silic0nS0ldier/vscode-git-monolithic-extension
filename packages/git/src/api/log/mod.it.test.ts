@@ -1,10 +1,10 @@
-import test from "node:test";
 import assert from "node:assert";
-import path from "node:path";
 import fs from "node:fs/promises";
-import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
-import { log } from "./mod.js";
+import path from "node:path";
+import test from "node:test";
 import { unwrapOk } from "../../errors.js";
+import { gitCtx, tempGitRepo } from "../helpers.it.stub.js";
+import { log } from "./mod.js";
 
 test(log.name + " - initial commit", async () => {
     await using repo = await tempGitRepo(true);

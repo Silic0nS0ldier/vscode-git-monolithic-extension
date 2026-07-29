@@ -8,7 +8,7 @@ export type FsService = {
 
 export type ShellService = {
     shell: {
-        which: (cmd: string, options: { path: string; pathExt?: string, nothrow: true }) => Promise<string|null>;
+        which: (cmd: string, options: { path: string; pathExt?: string; nothrow: true }) => Promise<string | null>;
     };
 };
 
@@ -31,7 +31,7 @@ export type OsService = {
 };
 
 export type LogService = {
-    log?: LogFn,
+    log?: LogFn;
 };
 
 export type AllServices =

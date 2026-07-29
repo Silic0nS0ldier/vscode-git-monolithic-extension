@@ -1,14 +1,16 @@
 import test from "ava";
 import intoStream from "into-stream";
+import type { GitContext } from "../../cli/context.js";
 import { isOk, ok, unwrap } from "../../func-result.js";
 import { lsTree } from "./list.js";
-import type { GitContext } from "../../cli/context.js";
 
 test("Single file entry", async t => {
     const gitContext: GitContext = {
         cli: async (context) => {
             if (context.stdout) {
-                intoStream("100644 blob db4eff851028003f9df7747b2ad58622b307bb6a      42    README.md").pipe(context.stdout);
+                intoStream("100644 blob db4eff851028003f9df7747b2ad58622b307bb6a      42    README.md").pipe(
+                    context.stdout,
+                );
             }
             return ok(void 0);
         },
@@ -52,7 +54,9 @@ test("Executable file entry", async t => {
     const gitContext: GitContext = {
         cli: async (context) => {
             if (context.stdout) {
-                intoStream("100755 blob abc123def456abc123def456abc123def456abc1234       0    script.sh").pipe(context.stdout);
+                intoStream("100755 blob abc123def456abc123def456abc123def456abc1234       0    script.sh").pipe(
+                    context.stdout,
+                );
             }
             return ok(void 0);
         },

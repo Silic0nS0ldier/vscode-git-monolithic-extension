@@ -14,8 +14,8 @@ export async function promptForBranchName(defaultName?: string, initialValue?: s
                 /^\.|\/\.|\.\.|~|\^|:|\/$|\.lock$|\.lock\/|\\|\*|\s|^\s*$|\.$|\[|\]$/g,
                 branchWhitespaceChar,
             )
-            : // TODO Wouldn't this be an empty string?
-                name;
+            // TODO Wouldn't this be an empty string?
+            : name;
 
     const rawBranchName = defaultName || await window.showInputBox({
         ignoreFocusOut: true,

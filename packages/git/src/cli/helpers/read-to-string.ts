@@ -1,7 +1,5 @@
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
-import {
-    readToBuffer, type ReadToContext, type ReadToErrors
-} from "./read-to-buffer.js";
+import { readToBuffer, type ReadToContext, type ReadToErrors } from "./read-to-buffer.js";
 
 // Aliases for easier usage.
 export type { ReadToContext, ReadToErrors };

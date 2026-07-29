@@ -1,10 +1,10 @@
-import { commands, type MessageOptions, type OutputChannel, Uri, window, workspace } from "vscode";
+import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import { inspect } from "node:util";
+import { commands, type MessageOptions, type OutputChannel, Uri, window, workspace } from "vscode";
 import { GitErrorCodes } from "../api/git.js";
 import { GitError } from "../git/error.js";
 import * as i18n from "../i18n/mod.js";
 import type { Model } from "../model.js";
-import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import type { CommandErrorOutputTextDocumentContentProvider, ScmCommandOptions } from "./helpers.js";
 

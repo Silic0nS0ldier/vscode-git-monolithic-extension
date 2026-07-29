@@ -1,13 +1,13 @@
-import { createError, ERROR_GIT_NOT_FOUND, type GitNotFoundError, type GitUnusableError, type TimeoutError } from "../errors.js";
+import {
+    createError,
+    ERROR_GIT_NOT_FOUND,
+    type GitNotFoundError,
+    type GitUnusableError,
+    type TimeoutError,
+} from "../errors.js";
 import { err, type Result } from "../func-result.js";
 import { isMacOS, isWindows } from "../helpers/platform-matchers.js";
-import type {
-    ChildProcessService,
-    FsService,
-    OsService,
-    ProcessService,
-    ShellService,
-} from "../services/mod.js";
+import type { ChildProcessService, FsService, OsService, ProcessService, ShellService } from "../services/mod.js";
 import type { GitContext, PersistentCLIContext } from "./context.js";
 import { darwinBuiltinGitPath, fromPath } from "./from-path.js";
 
@@ -34,7 +34,7 @@ export async function fromEnvironment(
     const gitBin = isWindows(services.os.platform)
         ? "git.exe"
         : "git";
-    let gitPath: string|null|false = await services.shell.which(gitBin, {
+    let gitPath: string | null | false = await services.shell.which(gitBin, {
         path: services.process.env.PATH ?? "",
         pathExt: services.process.env.PATHEXT ?? undefined,
         nothrow: true,
@@ -44,7 +44,7 @@ export async function fromEnvironment(
         // Last chance, try common locations
         gitPath = await findGitFromCommonLocations(services);
     }
-    
+
     if (gitPath) {
         return await fromPath(gitPath, cliContext, services);
     }

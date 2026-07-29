@@ -72,7 +72,7 @@ class SyncStatusBar {
             HEAD: undefined,
             enabled: true,
             hasRemotes: false,
-            isSyncRunning: false
+            isSyncRunning: false,
         };
 
         this.#repository.onDidChangeStatus(this.#onDidGitStatusChange, this, this.#disposables);

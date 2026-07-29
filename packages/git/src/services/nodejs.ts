@@ -3,8 +3,8 @@
 import { spawn } from "child_process";
 import { existsSync as exists } from "fs";
 import which from "which";
-import type { AllServices } from "./mod.js";
 import type { LogFn } from "../cli/create.js";
+import type { AllServices } from "./mod.js";
 
 export function createServices(log?: LogFn): AllServices {
     return {

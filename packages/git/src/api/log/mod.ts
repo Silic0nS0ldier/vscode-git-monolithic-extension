@@ -1,8 +1,8 @@
+import { from_str_radix } from "monolithic-git-wasm";
 import type { GitContext } from "../../cli/context.js";
 import { readToBuffer, type ReadToErrors } from "../../cli/helpers/read-to-buffer.js";
 import { createError, ERROR_GENERIC } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
-import { from_str_radix } from "monolithic-git-wasm";
 
 /** Format string for `git log`. Fields: hash, author name, author email, author date (unix), commit date (unix), parents, body. */
 const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";

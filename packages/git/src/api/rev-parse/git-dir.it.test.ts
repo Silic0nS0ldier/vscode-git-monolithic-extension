@@ -1,9 +1,9 @@
-import test from "node:test"
-import path from "node:path";
 import assert from "node:assert";
-import { gitDir } from "./git-dir.js";
-import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
+import path from "node:path";
+import test from "node:test";
 import { unwrapOk } from "../../errors.js";
+import { gitCtx, tempGitRepo } from "../helpers.it.stub.js";
+import { gitDir } from "./git-dir.js";
 
 test(gitDir.name, async () => {
     await using repo = await tempGitRepo();

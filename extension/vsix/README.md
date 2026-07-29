@@ -13,6 +13,7 @@ It brings the following improvements;
 - When a section of the source control panel approaches the display limit (5000, triggers at 500 in a given section), `(too many files)` will appear in that section to indicate that files may be missing.
 
 Staging of selected source is supported, but limited vs. the builtin implemenation as the API surface has not been marked as stable. That means;
+
 - It will only work if one instance of a given file diff is open.
 - Unstaging a selection is not supported.
 

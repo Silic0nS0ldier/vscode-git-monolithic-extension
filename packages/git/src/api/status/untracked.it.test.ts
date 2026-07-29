@@ -1,10 +1,10 @@
-import test from "node:test";
 import assert from "node:assert";
-import { tempGitRepo, gitCtx } from "../helpers.it.stub.js";
-import path from "node:path";
 import fs from "node:fs/promises";
-import { untracked } from "./untracked.js";
+import path from "node:path";
+import test from "node:test";
 import { unwrapOk } from "../../errors.js";
+import { gitCtx, tempGitRepo } from "../helpers.it.stub.js";
+import { untracked } from "./untracked.js";
 
 test(untracked.name + " - relative - empty", async () => {
     await using repo = await tempGitRepo();

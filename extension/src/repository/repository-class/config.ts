@@ -1,9 +1,9 @@
-import { read as readConfig, readAll as readAllConfig, type ConfigEntry } from "monolithic-git-interop/api/config/read";
+import { type ConfigEntry, read as readConfig, readAll as readAllConfig } from "monolithic-git-interop/api/config/read";
 import { write as writeConfig } from "monolithic-git-interop/api/config/write";
+import { unwrapOk } from "monolithic-git-interop/errors";
 import type { Repository } from "../../git.js";
 import { Operation } from "../Operations.js";
 import type { RunFn } from "./run.js";
-import { unwrapOk } from "monolithic-git-interop/errors";
 
 export function getConfigs(
     run: RunFn<{ key: string; value: string }[]>,

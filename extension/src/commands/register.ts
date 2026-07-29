@@ -74,7 +74,7 @@ export function registerCommands(
     const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
 
     const disposables: Disposable[] = [];
-    
+
     try {
         for (const { commandId, method, options } of cmds) {
             const command = createCommand(

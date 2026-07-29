@@ -26,7 +26,7 @@ const artifacts = new Map(
     lines.map(line => {
         const [sha, filename] = line.split(/\s+/);
         return [filename, sha];
-    })
+    }),
 );
 
 const processed = new Map();
@@ -40,13 +40,20 @@ for (const k in mapping) {
 }
 
 const moduleBazelContent = await fs.readFile(moduleBazelArg, "utf-8");
-const updatedModuleBazelContent = moduleBazelContent.replace(/node\.toolchain\(.*node_version\s=\s"\d+\.\d+\.\d+",\n\)/s, `\
+const updatedModuleBazelContent = moduleBazelContent.replace(
+    /node\.toolchain\(.*node_version\s=\s"\d+\.\d+\.\d+",\n\)/s,
+    `\
 node.toolchain(
     node_repositories = {
-        ${Array.from(processed.entries())
-            .map(([key, [artifactName, artifactDir, artifactSha]]) => `"${key}": ("${artifactName}", "${artifactDir}", "${artifactSha}"),`)
-            .join("\n        ")}
+        ${
+        Array.from(processed.entries())
+            .map(([key, [artifactName, artifactDir, artifactSha]]) =>
+                `"${key}": ("${artifactName}", "${artifactDir}", "${artifactSha}"),`
+            )
+            .join("\n        ")
+    }
     },
     node_version = "${nodejsVersion}",
-)`);
+)`,
+);
 await fs.writeFile(moduleBazelArg, updatedModuleBazelContent, "utf-8");

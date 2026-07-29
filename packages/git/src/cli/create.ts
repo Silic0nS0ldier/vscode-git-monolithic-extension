@@ -1,4 +1,4 @@
-import { Writable, type Readable } from "node:stream";
+import { type Readable, Writable } from "node:stream";
 import {
     createError,
     ERROR_CANCELLED,
@@ -43,7 +43,6 @@ export type CreateServices =
  */
 export function create(executablePath: string, persistentContext: PersistentCLIContext, services: CreateServices): CLI {
     return async function cli(context, args) {
-
         // Compose environment variables
         const env = {
             ...services.process.env,
@@ -87,7 +86,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
                     cmdContext.stderrTail = cmdContext.stderrTail.slice(-1024);
                 }
                 cb();
-            }
+            },
         });
         cp.stderr.pipe(stderrMonitorStream);
         if (context.stderr) {
@@ -136,11 +135,11 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         }
 
         const exitstate = unwrap(result);
-        
+
         if (exitstate.code !== 0) {
             return err(createError(ERROR_NON_ZERO_EXIT, { cmdContext, exitstate }));
         }
-        
+
         return ok(void 0);
     };
 }

@@ -16,9 +16,9 @@ export function builtinGitEnabled(): boolean {
     }
     return workspace.getConfiguration("git").get<boolean>("enabled", true);
 }
-builtinGitEnabled.affected = function (e: ConfigurationChangeEvent, scope?: ConfigurationScope): boolean {
+builtinGitEnabled.affected = function(e: ConfigurationChangeEvent, scope?: ConfigurationScope): boolean {
     return e.affectsConfiguration("git.enabled", scope);
-}
+};
 
 function getExtensionConfig(scope?: ConfigurationScope): WorkspaceConfiguration {
     return workspace.getConfiguration("git_monolithic", scope ?? null);
@@ -27,7 +27,11 @@ function getExtensionConfig(scope?: ConfigurationScope): WorkspaceConfiguration 
 type ConfigOption<T> = {
     (scope?: ConfigurationScope): T;
     affected: (e: ConfigurationChangeEvent, scope?: ConfigurationScope) => boolean;
-    update: ((value: T, configurationTarget?: boolean | ConfigurationTarget, scope?: ConfigurationScope) => Thenable<void>);
+    update: (
+        value: T,
+        configurationTarget?: boolean | ConfigurationTarget,
+        scope?: ConfigurationScope,
+    ) => Thenable<void>;
 };
 
 function createConfigOption<T>(section: string, defaultValue: T): ConfigOption<T> {
@@ -37,7 +41,11 @@ function createConfigOption<T>(section: string, defaultValue: T): ConfigOption<T
     getter.affected = (e: ConfigurationChangeEvent, scope?: ConfigurationScope): boolean => {
         return e.affectsConfiguration("git_monolithic." + section, scope);
     };
-    getter.update = (value: T, configurationTarget?: boolean | ConfigurationTarget, scope?: ConfigurationScope): Thenable<void> => {
+    getter.update = (
+        value: T,
+        configurationTarget?: boolean | ConfigurationTarget,
+        scope?: ConfigurationScope,
+    ): Thenable<void> => {
         return getExtensionConfig(scope).update(section, value, configurationTarget);
     };
     return getter;
@@ -48,7 +56,10 @@ export function affected(e: ConfigurationChangeEvent, scope?: ConfigurationScope
 }
 
 export const enabled = createConfigOption<boolean>("enabled", true);
-export const autoRepositoryDetection = createConfigOption<boolean | "subFolders" | "openEditors">("autoRepositoryDetection", true);
+export const autoRepositoryDetection = createConfigOption<boolean | "subFolders" | "openEditors">(
+    "autoRepositoryDetection",
+    true,
+);
 export const scanRepositories = createConfigOption<string[]>("scanRepositories", []);
 export const ignoredRepositories = createConfigOption<string[]>("ignoredRepositories", []);
 export const enableStatusBarSync = createConfigOption<boolean>("enableStatusBarSync", true);
@@ -57,9 +68,15 @@ export const terminalAuthentication = createConfigOption<boolean>("terminalAuthe
 export const checkoutType = createConfigOption<string | string[]>("checkoutType", []);
 export const branchWhitespaceChar = createConfigOption<string>("branchWhitespaceChar", "");
 export const branchValidationRegex = createConfigOption<string>("branchValidationRegex", "");
-export const openAfterClone = createConfigOption<"always" | "alwaysNewWindow" | "whenNoFolderOpen" | "prompt">("openAfterClone", "prompt");
+export const openAfterClone = createConfigOption<"always" | "alwaysNewWindow" | "whenNoFolderOpen" | "prompt">(
+    "openAfterClone",
+    "prompt",
+);
 export const defaultCloneDirectory = createConfigOption<string>("defaultCloneDirectory", "~/");
-export const promptToSaveFilesBeforeCommit = createConfigOption<"always" | "staged" | "never">("promptToSaveFilesBeforeCommit", "always");
+export const promptToSaveFilesBeforeCommit = createConfigOption<"always" | "staged" | "never">(
+    "promptToSaveFilesBeforeCommit",
+    "always",
+);
 export const enableSmartCommit = createConfigOption<boolean>("enableSmartCommit", false);
 export const enableCommitSigning = createConfigOption<boolean>("enableCommitSigning", false);
 export const suggestSmartCommit = createConfigOption<boolean>("suggestSmartCommit", false);
@@ -76,7 +93,10 @@ export const postCommitCommand = createConfigOption<"none" | "push" | "sync">("p
 export const confirmEmptyCommits = createConfigOption<boolean>("confirmEmptyCommits", true);
 export const allowForcePush = createConfigOption<boolean>("allowForcePush", false);
 export const useForcePushWithLease = createConfigOption<boolean>("useForcePushWithLease", true);
-export const promptToSaveFilesBeforeStash = createConfigOption<"always" | "staged" | "never">("promptToSaveFilesBeforeStash", "always");
+export const promptToSaveFilesBeforeStash = createConfigOption<"always" | "staged" | "never">(
+    "promptToSaveFilesBeforeStash",
+    "always",
+);
 export const useCommitInputAsStashMessage = createConfigOption<boolean>("useCommitInputAsStashMessage", false);
 export const confirmSync = createConfigOption<boolean>("confirmSync", false);
 export const ignoreMissingGitWarning = createConfigOption<boolean>("ignoreMissingGitWarning", false);
@@ -96,7 +116,10 @@ export const pullTags = createConfigOption<boolean>("pullTags", true);
 export const followTagsWhenSync = createConfigOption<boolean>("followTagsWhenSync", false);
 export const supportCancellation = createConfigOption<boolean>("supportCancellation", false);
 export const decorationsEnabled = createConfigOption<boolean>("decorations.enabled", true);
-export const branchSortOrder = createConfigOption<"alphabetically" | "committerdate">("branchSortOrder", "committerdate");
+export const branchSortOrder = createConfigOption<"alphabetically" | "committerdate">(
+    "branchSortOrder",
+    "committerdate",
+);
 export const ignoreSubmodules = createConfigOption<boolean>("ignoreSubmodules", false);
 export const autoFetch = createConfigOption<boolean | "all">("autofetch", false);
 export const autoFetchPeriod = createConfigOption<number>("autofetchPeriod", 3 /** minutes */ * 60);

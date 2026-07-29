@@ -20,10 +20,7 @@ import {
     workspace,
     type WorkspaceFoldersChangeEvent,
 } from "vscode";
-import type {
-    APIState as State,
-    CredentialsProvider,
-} from "./api/git.js";
+import type { APIState as State, CredentialsProvider } from "./api/git.js";
 import type { Askpass } from "./askpass.js";
 import type { Git } from "./git.js";
 import * as i18n from "./i18n/mod.js";

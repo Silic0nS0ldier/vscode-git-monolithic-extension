@@ -9,12 +9,7 @@ import {
 } from "../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../func-result.js";
 import { isMacOS } from "../helpers/platform-matchers.js";
-import type {
-    ChildProcessService,
-    FsService,
-    OsService,
-    ProcessService,
-} from "../services/mod.js";
+import type { ChildProcessService, FsService, OsService, ProcessService } from "../services/mod.js";
 import type { GitContext, PersistentCLIContext } from "./context.js";
 import { create } from "./create.js";
 import { readToString } from "./helpers/read-to-string.js";
