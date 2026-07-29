@@ -75,9 +75,7 @@ export function toLineRanges(selections: readonly Selection[], textDocument: Tex
         return [l, ...result];
     }, [] as Range[]);
 
-    result.reverse();
-
-    return result;
+    return result.toReversed();
 }
 
 function getModifiedRange(textDocument: TextDocument, diff: ILineChange): Range {
