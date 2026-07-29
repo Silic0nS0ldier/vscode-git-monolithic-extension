@@ -45,7 +45,7 @@ importers:
         specifier: ^10.8.0
         version: 10.8.0(supports-color@7.2.0)
       renovate:
-        specifier: ^43.281.0
+        specifier: ^43.281.1
         version: 43.285.4(supports-color@7.2.0)(typanion@3.14.0)
       typescript:
         specifier: npm:@typescript/typescript6@^6.0.2
@@ -3247,10 +3247,6 @@ packages:
     resolution: {integrity: sha512-tkAQEw8ysMzmkhgw8k+1U/iPhWNhykKnSk4Rd5zLoPJCuJaGRPo6YposrZgaxHKzDHdDWWZvE/Sk7hsL2X/CpQ==}
     engines: {node: '>=18'}
 
-  p-map@7.0.5:
-    resolution: {integrity: sha512-e8vJF4XdVkzqqSHguEMz41mQO1wKwxKm5ENrUJQUu9kLDCtn83cxbyHZcszr4QC5zEA7WffRRC4gsTecC7J9oA==}
-    engines: {node: '>=18'}
-
   p-map@7.0.6:
     resolution: {integrity: sha512-I4Prw6ivkd6p8PiYR1tXASOAOBzIJwu0TB7fqaX0c/8c3QAehNYmX57EijyGGGBt3c/BIowGwV03RVBtXvHEVg==}
     engines: {node: '>=18'}
@@ -6028,7 +6024,7 @@ snapshots:
       minipass-collect: 2.0.1
       minipass-flush: 1.0.7
       minipass-pipeline: 1.2.4
-      p-map: 7.0.5
+      p-map: 7.0.6
       ssri: 13.0.1
 
   cacheable-lookup@5.0.4: {}
@@ -7782,8 +7778,6 @@ snapshots:
   p-map@6.0.0: {}
 
   p-map@7.0.4: {}
-
-  p-map@7.0.5: {}
 
   p-map@7.0.6: {}
 
