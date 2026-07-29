@@ -491,7 +491,7 @@ export class Model {
 
             outer:
             for (
-                const liveRepository of this.#openRepositories.sort((a, b) =>
+                const liveRepository of this.#openRepositories.toSorted((a, b) =>
                     b.repository.root.length - a.repository.root.length
                 )
             ) {
