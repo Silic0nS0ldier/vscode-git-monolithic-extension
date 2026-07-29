@@ -143,9 +143,6 @@ importers:
       monolithic-git-wasm:
         specifier: workspace:^
         version: link:../wasm
-      temporal-polyfill:
-        specifier: 'catalog:'
-        version: 1.0.1
       which:
         specifier: ^7.0.0
         version: 7.0.0

@@ -11,7 +11,7 @@ import type { ChildProcessService, FsService, OsService, ProcessService, ShellSe
 import type { GitContext, PersistentCLIContext } from "./context.js";
 import { darwinBuiltinGitPath, fromPath } from "./from-path.js";
 
-export type FromEnvironmentErrors =
+type FromEnvironmentErrors =
     | GitNotFoundError
     | TimeoutError
     | GitUnusableError;

@@ -45,7 +45,6 @@
         "into-stream": "^9.1.0"
     },
     "dependencies": {
-        "temporal-polyfill": "catalog:",
         "@types/node": "catalog:vscode",
         "compare-versions": "^6.1.1",
         "get-stream": "catalog:",
