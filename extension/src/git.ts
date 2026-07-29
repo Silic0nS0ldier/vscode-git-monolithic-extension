@@ -1,3 +1,4 @@
+import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { log as gitLog } from "monolithic-git-interop/api/log/mod";
 import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
 import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
@@ -48,7 +49,6 @@ import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
-import { throat } from "./package-patches/throat.js";
 import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
 import { splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
@@ -749,19 +749,11 @@ export class Repository {
     }
 
     async clean(paths: string[]): Promise<void> {
-        const limited = throat(5);
-        const promises: Promise<unknown>[] = [];
-        const args = ["clean", "-f", "-q"];
-
-        for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
-            promises.push(limited(() => this.exec([...args, "--", ...chunk])));
-        }
-
-        await Promise.all(promises);
+        unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, paths, { quiet: true }));
     }
 
     async undo(): Promise<void> {
-        await this.exec(["clean", "-fd"]);
+        unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, [], { directories: true }));
 
         try {
             await this.exec(["checkout", "--", "."]);
