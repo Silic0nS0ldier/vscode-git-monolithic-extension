@@ -17,7 +17,6 @@ import { EventEmitter } from "node:events";
 import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { StringDecoder } from "node:string_decoder";
 import type { OutputChannel, Progress } from "vscode";
 import {
     type Branch,
@@ -51,7 +50,6 @@ import type { Submodule } from "./git/Submodule.js";
 import { throat } from "./package-patches/throat.js";
 import { splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
-import { LineStream } from "./util/stream-by-line.js";
 import * as Versions from "./util/versions.js";
 import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
 import { unwrapOk } from "monolithic-git-interop/errors";
@@ -146,14 +144,10 @@ export class Git {
                 return;
             }
 
-            const decoder = new StringDecoder("utf8");
-            const lineStream = new LineStream({ encoding: "utf8" });
-            child.stderr.on("data", (buffer: Buffer) => lineStream.write(decoder.write(buffer)));
-
             let totalProgress = 0;
             let previousProgress = 0;
 
-            lineStream.on("data", (line: string) => {
+            const onLine = (line: string): void => {
                 let match: RegExpMatchArray | null = null;
 
                 if (match = /Counting objects:\s*(\d+)%/i.exec(line)) {
@@ -170,6 +164,21 @@ export class Git {
                     options.progress.report({ increment: totalProgress - previousProgress });
                     previousProgress = totalProgress;
                 }
+            };
+
+            // `git clone --progress` uses bare `\r` (no `\n`) to redraw the
+            // "Receiving objects" and "Resolving deltas" progress lines in
+            // place, so we split on any of `\r\n`, `\r`, or `\n`.
+            child.stderr.setEncoding("utf8");
+            let buffer = "";
+            child.stderr.on("data", (chunk: string) => {
+                buffer += chunk;
+                const parts = buffer.split(/\r\n|[\r\n]/);
+                buffer = parts.pop() ?? "";
+                for (const line of parts) if (line.length > 0) onLine(line);
+            });
+            child.stderr.on("end", () => {
+                if (buffer.length > 0) onLine(buffer);
             });
         };
 
