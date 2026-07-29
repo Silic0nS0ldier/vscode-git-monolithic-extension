@@ -21,6 +21,8 @@ NODE_VERSION="v26.5.0"
 JSCPD_VERSION="v5.0.12"
 # renovate: datasource=github-releases depName=dprint/dprint
 DPRINT_VERSION="0.55.2"
+# renovate: datasource=npm depName=knip
+KNIP_VERSION="6.29.0"
 
 if [[ $ARCH == "arm64" ]] || [[ $ARCH == "aarch64" ]]; then
     curl "https://github.com/bazelbuild/bazelisk/releases/download/${BAZELISK_VERSION}/bazelisk-linux-arm64" -Lo /usr/local/bin/bazel
@@ -66,6 +68,19 @@ rm /tmp/jscpd.tar.gz
 # dprint installation
 unzip -o /tmp/dprint.zip -d /usr/local/bin dprint
 rm /tmp/dprint.zip
+
+# knip installation (npm package, installed globally via pnpm)
+# pnpm's global shim uses $0-relative paths, so a plain symlink into /usr/local/bin
+# would break; wrap it in a tiny exec script instead.
+export PNPM_HOME=/usr/local/pnpm-global
+mkdir -p "$PNPM_HOME/bin"
+export PATH="$PNPM_HOME/bin:$PATH"
+/usr/local/bin/pnpm add -g "knip@${KNIP_VERSION}"
+cat > /usr/local/bin/knip <<EOF
+#!/bin/sh
+exec "$PNPM_HOME/bin/knip" "\$@"
+EOF
+chmod +x /usr/local/bin/knip
 
 chmod +x \
     /usr/local/bin/bazel \
