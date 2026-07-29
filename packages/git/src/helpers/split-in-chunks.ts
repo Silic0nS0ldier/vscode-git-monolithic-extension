@@ -7,7 +7,7 @@
  * arguments (subcommand, flags), environment inheritance, and any per-arg
  * quoting overhead.
  */
-export const MAX_CLI_LENGTH = 30000;
+const MAX_CLI_LENGTH = 30000;
 
 /**
  * Splits `values` into successive chunks whose combined character length does
