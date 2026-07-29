@@ -1,6 +1,6 @@
+import type { IFileStatus } from "monolithic-git-interop/api/status/tracked";
 import path from "node:path";
 import { Uri } from "vscode";
-import type { IFileStatus } from "monolithic-git-interop/api/status/tracked";
 import { Status, type StatusOptions } from "../../../api/git.js";
 import type { Resource } from "../../Resource.js";
 import { ResourceGroupType, type ResourceGroupTypeOptions } from "../../ResourceGroupType.js";

@@ -1,9 +1,9 @@
+import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import * as os from "node:os";
 import { commands, ProgressLocation, Uri, window, workspace } from "vscode";
 import type { Git } from "../../../git.js";
 import { GitError } from "../../../git/error.js";
 import * as i18n from "../../../i18n/mod.js";
-import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import { fromCancellationToken } from "../../../util/abort-signal-adapters.js";
 import * as config from "../../../util/config.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";

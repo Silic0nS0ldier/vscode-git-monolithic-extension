@@ -1,4 +1,4 @@
-import { Writable, Transform } from "stream";
+import { Transform, Writable } from "stream";
 
 function stringifyChunk(chunk: any, encoding: BufferEncoding): string {
     try {

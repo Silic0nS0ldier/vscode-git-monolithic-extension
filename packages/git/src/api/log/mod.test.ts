@@ -1,8 +1,8 @@
 import test from "ava";
 import intoStream from "into-stream";
+import type { GitContext } from "../../cli/context.js";
 import { isOk, ok, unwrap } from "../../func-result.js";
 import { log } from "./mod.js";
-import type { GitContext } from "../../cli/context.js";
 
 const HASH = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 
@@ -63,9 +63,8 @@ test("Commit with parent", async t => {
 
 test("Two commits", async t => {
     const HASH2 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-    const raw =
-        `${HASH}\nAlice\nalice@example.com\n1000000000\n1000000001\n\nFirst\n\0` +
-        `${HASH2}\nBob\nbob@example.com\n1000000002\n1000000003\n${HASH}\nSecond\n\0`;
+    const raw = `${HASH}\nAlice\nalice@example.com\n1000000000\n1000000001\n\nFirst\n\0`
+        + `${HASH2}\nBob\nbob@example.com\n1000000002\n1000000003\n${HASH}\nSecond\n\0`;
 
     const gitContext: GitContext = {
         cli: async (context) => {

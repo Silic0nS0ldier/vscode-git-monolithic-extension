@@ -1,15 +1,15 @@
 import { PassThrough } from "node:stream";
-import { finished } from "node:stream/promises"
+import { finished } from "node:stream/promises";
 import type { GitContext } from "../../cli/context.js";
-import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import { createError, ERROR_GENERIC, type GenericError } from "../../errors.js";
+import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 
 export type TrackedErrors = GenericError;
 
 export async function tracked(
     git: GitContext,
     cwd: string,
-    pathFormat: "relative"|"absolute",
+    pathFormat: "relative" | "absolute",
     opts?: { ignoreSubmodules?: boolean },
 ): Promise<Result<IFileStatus[], TrackedErrors>> {
     if (pathFormat === "absolute") {

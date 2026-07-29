@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
-import { type InlayHintsProvider, Position, Range, workspace, EventEmitter, type OutputChannel } from "vscode";
-import { inlayHintsForFilePermissions } from "../util/config.js";
+import { EventEmitter, type InlayHintsProvider, type OutputChannel, Position, Range, workspace } from "vscode";
 import type { Model } from "../model.js";
+import { inlayHintsForFilePermissions } from "../util/config.js";
 
 const START_POSITION = new Position(0, 0);
 const SHEBANG_RANGE = new Range(0, 0, 0, 2);

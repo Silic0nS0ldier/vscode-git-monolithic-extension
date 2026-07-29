@@ -1,3 +1,4 @@
+import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -8,13 +9,13 @@ import {
     Disposable,
     env,
     type ExtensionContext,
+    languages,
     type OutputChannel,
     Uri,
     version as vscodeVersion,
     window,
     workspace,
     type WorkspaceFolder,
-    languages,
 } from "vscode";
 import { GitExtensionImpl } from "../api/extension.js";
 import { Askpass } from "../askpass.js";
@@ -25,15 +26,14 @@ import { Git } from "../git.js";
 import { findGit, type IGit } from "../git/find.js";
 import * as i18n from "../i18n/mod.js";
 import { Model } from "../model.js";
-import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
+import { createInlayHintsProvider } from "../ui/inlay-hints-provider.js";
 import * as config from "../util/config.js";
 import { toDisposable } from "../util/disposals.js";
 import { filterEvent } from "../util/events.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
-import { createInlayHintsProvider } from "../ui/inlay-hints-provider.js";
 
 export async function activate(context: ExtensionContext): Promise<void> {
     const outputChannel = window.createOutputChannel("Git Monolithic");
@@ -54,7 +54,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
             return () => {};
         },
     });
-    
+
     const result = new GitExtensionImpl();
 
     // TODO Recommend user disables built-in Git extension if repository is massive
@@ -62,23 +62,26 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
     // Serialize config change processing to prevent race conditions
     let configChangeQueue = Promise.resolve();
-    
-    const onConfigChange = filterEvent(workspace.onDidChangeConfiguration, e => config.affected(e) || config.builtinGitEnabled.affected(e));
+
+    const onConfigChange = filterEvent(
+        workspace.onDidChangeConfiguration,
+        e => config.affected(e) || config.builtinGitEnabled.affected(e),
+    );
     onConfigChange(() => {
         const lastQueue = configChangeQueue;
         async function handleConfigChange() {
             // Wait for previous task to complete
-            await lastQueue.catch(() => { /* Ignore errors from previous task */ });
+            await lastQueue.catch(() => {/* Ignore errors from previous task */});
 
             try {
                 let newState = config.enabled() && !config.builtinGitEnabled();
-    
+
                 if (newState === extensionEnablementState) {
                     return;
                 }
-    
+
                 extensionEnablementState = newState;
-    
+
                 if (extensionEnablementState) {
                     outputChannel.appendLine("Config changed, activating Git Monolithic extension...");
                     await enableExtension(result, context, outputChannel, telemetryReporter);
@@ -96,7 +99,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         }
 
         configChangeQueue = handleConfigChange();
-    })
+    });
 
     if (extensionEnablementState) {
         outputChannel.appendLine("Activating Git Monolithic extension...");
@@ -109,7 +112,12 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
 let extensionDisposable: Disposable | undefined;
 
-async function enableExtension(ext: GitExtensionImpl, context: ExtensionContext, outputChannel: OutputChannel, telemetryReporter: TelemetryReporter): Promise<void> {
+async function enableExtension(
+    ext: GitExtensionImpl,
+    context: ExtensionContext,
+    outputChannel: OutputChannel,
+    telemetryReporter: TelemetryReporter,
+): Promise<void> {
     try {
         const [model, modelDisposable] = await createModel(context, outputChannel, telemetryReporter);
         ext.model = model;

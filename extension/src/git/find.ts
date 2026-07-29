@@ -2,8 +2,8 @@ import { fromEnvironment, fromPath, type GitContext, type PersistentCLIContext }
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
-import type { OutputChannel } from "vscode";
 import { fromFields } from "temporal-polyfill/fns/Duration";
+import type { OutputChannel } from "vscode";
 import { snoopOnStream, SnoopStream } from "../util/snoop-stream.js";
 
 export interface IGit {
@@ -57,7 +57,7 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                 const onSpawn = (spawnPid: number): void => {
                     pid = spawnPid;
                     cliContext.onSpawn?.(spawnPid);
-                }
+                };
 
                 const start = Date.now();
                 const result = await context.cli(
@@ -66,16 +66,19 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                         stderr,
                         stdout,
                         onSpawn,
-                    }, 
-                    args,);
+                    },
+                    args,
+                );
 
-                const duration = fromFields({ milliseconds: Date.now() - start })
+                const duration = fromFields({ milliseconds: Date.now() - start });
                 const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
 
                 // Log result
                 if (isErr(result)) {
                     const err = unwrap(result);
-                    outputChannel.appendLine(`${invocId} < ERROR (PID = ${pid}, Duration = ${durationStr}) ${err.type.description}`);
+                    outputChannel.appendLine(
+                        `${invocId} < ERROR (PID = ${pid}, Duration = ${durationStr}) ${err.type.description}`,
+                    );
                 } else {
                     outputChannel.appendLine(`${invocId} < SUCCESS (PID = ${pid}, Duration = ${durationStr})`);
                 }

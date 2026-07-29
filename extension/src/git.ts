@@ -1,22 +1,26 @@
+import { log as gitLog } from "monolithic-git-interop/api/log/mod";
+import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
+import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
+import { show } from "monolithic-git-interop/api/show";
+import { type IFileStatus, tracked } from "monolithic-git-interop/api/status/tracked";
+import { untracked } from "monolithic-git-interop/api/status/untracked";
 import type { GitContext } from "monolithic-git-interop/cli";
+import * as gitErrors from "monolithic-git-interop/errors";
+import { unwrapOk } from "monolithic-git-interop/errors";
 import type { AllServices } from "monolithic-git-interop/services";
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
-import { untracked } from "monolithic-git-interop/api/status/untracked";
-import { tracked, type IFileStatus } from "monolithic-git-interop/api/status/tracked";
-import { show } from "monolithic-git-interop/api/show";
-import * as gitErrors from "monolithic-git-interop/errors"
-import { fromFields } from "temporal-polyfill/fns/Duration";
 import type * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
 import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { fromFields } from "temporal-polyfill/fns/Duration";
 import type { OutputChannel, Progress } from "vscode";
 import {
     type Branch,
@@ -38,9 +42,6 @@ import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD }
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
-import { log as gitLog } from "monolithic-git-interop/api/log/mod";
-import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
-import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
 import { parseGitCommits } from "./git/parseGitCommits.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
@@ -48,11 +49,10 @@ import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
 import { throat } from "./package-patches/throat.js";
+import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
 import { splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
 import * as Versions from "./util/versions.js";
-import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
-import { unwrapOk } from "monolithic-git-interop/errors";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
@@ -69,7 +69,7 @@ interface IGitOptions {
     version: string;
     context: GitContext;
     env?: { [key: string]: string };
-    outputChannel: OutputChannel,
+    outputChannel: OutputChannel;
 }
 
 const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";
@@ -313,7 +313,8 @@ export class Repository {
             });
             if (error.type === gitErrors.ERROR_NON_ZERO_EXIT) {
                 // TODO(Silic0nS0ldier): Rework error types to surface typed cause chains.
-                const exitCode: number | undefined = (error.cause as { exitState?: { code: number } })?.exitState?.code ?? undefined;
+                const exitCode: number | undefined = (error.cause as { exitState?: { code: number } })?.exitState?.code
+                    ?? undefined;
                 gitError.exitCode = exitCode;
             }
             this.git.log(`Failed to get object ${object}: ${unwrap(result)}`);
@@ -520,7 +521,7 @@ export class Repository {
 
         const result = await exec(child);
 
-        const duration = fromFields({ milliseconds: Date.now() - start })
+        const duration = fromFields({ milliseconds: Date.now() - start });
         const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
 
         if (isErr(result)) {
@@ -1102,7 +1103,7 @@ export class Repository {
         if (isOk(result)) {
             return unwrap(result);
         }
-        throw new Error("Could not find tracked files", { cause: unwrap(result)});
+        throw new Error("Could not find tracked files", { cause: unwrap(result) });
     }
 
     async getStatusUntracked(): Promise<string[]> {

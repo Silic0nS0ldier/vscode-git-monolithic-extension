@@ -1,8 +1,8 @@
-import path from "node:path";
+import ignore from "ignore";
 import fs from "node:fs";
+import path from "node:path";
 import { inspect } from "node:util";
 import { Disposable, type Event, type OutputChannel, Uri } from "vscode";
-import ignore from "ignore";
 import { createIgnoreFnFromList, type SuspendHandle, watch } from "./watch.js";
 
 export function createWorkingTreeWatcher(
@@ -33,7 +33,9 @@ export function createWorkingTreeWatcher(
             const ignored = rootGitIgnoreFn.ignores(relativePath);
             return ignored;
         } catch (e) {
-            outputChannel.appendLine(`ERROR: Path '${targetPath}' triggered an error in 'ignore' package: ` + inspect(e));
+            outputChannel.appendLine(
+                `ERROR: Path '${targetPath}' triggered an error in 'ignore' package: ` + inspect(e),
+            );
         }
         return false;
     };
@@ -56,7 +58,7 @@ export function createWorkingTreeWatcher(
         combinedIgnoreFn,
         [
             // Ensure .gitignore changes are always reported
-            rootGitIgnorePath
+            rootGitIgnorePath,
         ],
         outputChannel,
         "working-tree",

@@ -1,4 +1,11 @@
-import { type OutputChannel, type TextDocument, type TextDocumentContentProvider, Uri, window, workspace } from "vscode";
+import {
+    type OutputChannel,
+    type TextDocument,
+    type TextDocumentContentProvider,
+    Uri,
+    window,
+    workspace,
+} from "vscode";
 import type { Model } from "../model.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../repository/Resource.js";

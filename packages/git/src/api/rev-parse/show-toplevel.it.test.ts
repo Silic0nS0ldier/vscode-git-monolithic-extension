@@ -1,8 +1,8 @@
-import test from "node:test";
 import assert from "node:assert";
-import { tempGitRepo, gitCtx, services } from "../helpers.it.stub.js";
-import { showToplevel } from "./show-toplevel.js";
+import test from "node:test";
 import { unwrapOk } from "../../errors.js";
+import { gitCtx, services, tempGitRepo } from "../helpers.it.stub.js";
+import { showToplevel } from "./show-toplevel.js";
 
 test(showToplevel.name, async () => {
     await using repo = await tempGitRepo();

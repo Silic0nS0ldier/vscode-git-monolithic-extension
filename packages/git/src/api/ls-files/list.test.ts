@@ -1,8 +1,8 @@
 import test from "ava";
 import intoStream from "into-stream";
+import type { GitContext } from "../../cli/context.js";
 import { isOk, ok, unwrap } from "../../func-result.js";
 import { lsFiles } from "./list.js";
-import type { GitContext } from "../../cli/context.js";
 
 test("Single staged file", async t => {
     const gitContext: GitContext = {

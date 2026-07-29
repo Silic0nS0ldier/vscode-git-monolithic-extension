@@ -1,6 +1,12 @@
-import { MaxBufferError, getStreamAsBuffer } from "get-stream";
+import { getStreamAsBuffer, MaxBufferError } from "get-stream";
 import { PassThrough } from "node:stream";
-import { type BufferOverflowError, createError, ERROR_BUFFER_OVERFLOW, ERROR_GENERIC, type GenericError } from "../../errors.js";
+import {
+    type BufferOverflowError,
+    createError,
+    ERROR_BUFFER_OVERFLOW,
+    ERROR_GENERIC,
+    type GenericError,
+} from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import type { CLI, CLIErrors } from "../context.js";
 
@@ -22,13 +28,22 @@ export type ReadToErrors =
  * @param args
  * @param maxBuffer
  */
-export async function readToBuffer(context: ReadToContext, args: string[], maxBuffer: number): Promise<Result<Buffer, ReadToErrors>> {
+export async function readToBuffer(
+    context: ReadToContext,
+    args: string[],
+    maxBuffer: number,
+): Promise<Result<Buffer, ReadToErrors>> {
     const stdout = new PassThrough();
     const abortController = new AbortController();
 
     // Read response
     try {
-        const cliAction = context.cli({ cwd: context.cwd, signal: abortController.signal, stdout, timeout: context.timeout }, args);
+        const cliAction = context.cli({
+            cwd: context.cwd,
+            signal: abortController.signal,
+            stdout,
+            timeout: context.timeout,
+        }, args);
         // Throws on max buffer hit
         const streamReader = getStreamAsBuffer(stdout, { maxBuffer });
 

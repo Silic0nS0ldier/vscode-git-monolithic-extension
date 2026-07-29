@@ -2,8 +2,7 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn from_str_radix(src: &str, radix: u32) -> Result<u32, String> {
-    u32::from_str_radix(src, radix)
-        .map_err(|e| e.to_string())
+    u32::from_str_radix(src, radix).map_err(|e| e.to_string())
 }
 
 #[cfg(test)]

@@ -68,7 +68,7 @@ export function watch(
                     }
                     return;
                 }
-    
+
                 if (lockEvents.size > 0) {
                     // Locks gone, fire remembered events
                     outputChannel.appendLine(`TRACE: ${id} watcher releasing ${lockEvents.size} important events`);
@@ -78,7 +78,7 @@ export function watch(
                     }
                     lockEvents.clear();
                 }
-    
+
                 // Filter directory events, only files are of interest
                 // TODO Do the individual files also get updated?
                 if (isWatchableEvent(et)) {
@@ -87,7 +87,7 @@ export function watch(
                 }
             },
         );
-    
+
         // TODO Use unified logger
         watcher.on("error", err => {
             outputChannel.appendLine(`${id} watcher error: ${inspect(err)}`);
@@ -100,11 +100,15 @@ export function watch(
 
     function release(): void {
         if (disposed) {
-            outputChannel.appendLine(`WARN: ${id} watcher suspend handle disposed after watcher was disposed\n${new Error().stack}`);
+            outputChannel.appendLine(
+                `WARN: ${id} watcher suspend handle disposed after watcher was disposed\n${new Error().stack}`,
+            );
             return;
         }
         if (suspendCount === 0) {
-            outputChannel.appendLine(`WARN: ${id} watcher suspend handle disposed with no active suspend\n${new Error().stack}`);
+            outputChannel.appendLine(
+                `WARN: ${id} watcher suspend handle disposed with no active suspend\n${new Error().stack}`,
+            );
             return;
         }
         suspendCount--;
@@ -136,11 +140,17 @@ export function watch(
                 // Watcher is intentionally closed. The resume path always recreates
                 // (which picks up any updated ignore rules), so an explicit refresh
                 // here would be redundant and wasteful.
-                outputChannel.appendLine(`TRACE: ${id} watcher refresh requested while suspended; will be applied by resume`);
+                outputChannel.appendLine(
+                    `TRACE: ${id} watcher refresh requested while suspended; will be applied by resume`,
+                );
                 return;
             }
             if (watcher.isClosed()) {
-                outputChannel.appendLine(`TRACE: ${id} watcher refresh requested but watcher is closed, skipping refresh\n${new Error().stack}`);
+                outputChannel.appendLine(
+                    `TRACE: ${id} watcher refresh requested but watcher is closed, skipping refresh\n${
+                        new Error().stack
+                    }`,
+                );
                 return;
             }
             watcher.close();
@@ -174,12 +184,13 @@ export function watch(
 }
 
 function isWatchableEvent(event: keyof typeof TargetEventEnum): boolean {
-    return event !== TargetEventEnum.addDir && event !== TargetEventEnum.unlinkDir && event !== TargetEventEnum.renameDir
+    return event !== TargetEventEnum.addDir && event !== TargetEventEnum.unlinkDir
+        && event !== TargetEventEnum.renameDir;
 }
 
 export function createIgnoreFnFromList(ignoreList: string[]): (path: string) => boolean {
     return function ignoreFn(targetPath: string): boolean {
-        if (ignoreList.some(i => targetPath === i || targetPath.startsWith(i + '/'))) {
+        if (ignoreList.some(i => targetPath === i || targetPath.startsWith(i + "/"))) {
             return true;
         }
 

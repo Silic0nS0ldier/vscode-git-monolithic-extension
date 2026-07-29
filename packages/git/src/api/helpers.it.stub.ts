@@ -1,13 +1,13 @@
-import path from "node:path";
+import { runfiles } from "@bazel/runfiles";
 import fs from "node:fs/promises";
 import os from "node:os";
-import { runfiles } from "@bazel/runfiles";
+import path from "node:path";
 import { fromPath } from "../cli/from-path.js";
 import type { PersistentCLIContext } from "../cli/mod.js";
-import { createServices } from "../services/nodejs.js";
-import { isErr, unwrap } from "../func-result.js";
-import { init } from "./repository/init/mod.js";
 import { unwrapOk } from "../errors.js";
+import { isErr, unwrap } from "../func-result.js";
+import { createServices } from "../services/nodejs.js";
+import { init } from "./repository/init/mod.js";
 
 export const services = createServices();
 
@@ -27,20 +27,29 @@ export async function tempGitRepo(initialCommit: boolean = false) {
 
         // Set up user config for commits
         const configResult = await gitCtx.cli({ cwd: repoPath }, [
-            "config", "user.name", "Test User",
+            "config",
+            "user.name",
+            "Test User",
         ]);
         if (isErr(configResult)) {
             throw unwrap(configResult)._error;
         }
         const emailConfigResult = await gitCtx.cli({ cwd: repoPath }, [
-            "config", "user.email", "test@example.com",
+            "config",
+            "user.email",
+            "test@example.com",
         ]);
         if (isErr(emailConfigResult)) {
             throw unwrap(emailConfigResult)._error;
         }
 
         if (initialCommit) {
-            const commitResult = await gitCtx.cli({ cwd: repoPath }, ["commit", "--allow-empty", "-m", "Initial commit"]);
+            const commitResult = await gitCtx.cli({ cwd: repoPath }, [
+                "commit",
+                "--allow-empty",
+                "-m",
+                "Initial commit",
+            ]);
             if (isErr(commitResult)) {
                 throw unwrap(commitResult)._error;
             }

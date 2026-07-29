@@ -8,6 +8,6 @@ export async function hasExecutableBit(
     cwd: string,
     filePath: string,
     commit_ish: string,
-): Promise<Result<boolean|undefined, ReadToErrors>> {
+): Promise<Result<boolean | undefined, ReadToErrors>> {
     return checkExecutableBitFromCommand(git, cwd, ["ls-tree", commit_ish, filePath]);
 }
