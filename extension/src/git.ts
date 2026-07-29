@@ -48,7 +48,8 @@ import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
-import { Limiter, splitInChunks } from "./util.js";
+import { throat } from "./package-patches/throat.js";
+import { splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
 import { LineStream } from "./util/stream-by-line.js";
 import * as Versions from "./util/versions.js";
@@ -738,12 +739,12 @@ export class Repository {
     }
 
     async clean(paths: string[]): Promise<void> {
-        const limiter = new Limiter(5);
+        const limited = throat(5);
         const promises: Promise<unknown>[] = [];
         const args = ["clean", "-f", "-q"];
 
         for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
-            promises.push(limiter.queue(() => this.exec([...args, "--", ...chunk])));
+            promises.push(limited(() => this.exec([...args, "--", ...chunk])));
         }
 
         await Promise.all(promises);
