@@ -10,13 +10,13 @@ export async function runByRepository(
     resources: Uri[],
     fn: (repository: AbstractRepository, resources: Uri[]) => Promise<void>,
 ): Promise<void> {
-    const groups = resources.reduce((result, resource) => {
+    const groups = Map.groupBy(resources, resource => {
         let repository = model.getRepository(resource);
 
         if (!repository) {
             // TODO This won't go anywhere useful
             console.warn("Could not find git repository for ", resource);
-            return result;
+            return null;
         }
 
         // Could it be a submodule?
@@ -24,19 +24,14 @@ export async function runByRepository(
             repository = model.getRepositoryForSubmodule(resource) || repository;
         }
 
-        const tuple = result.filter(p => p.repository === repository)[0];
+        return repository;
+    });
 
-        if (tuple) {
-            tuple.resources.push(resource);
-        } else {
-            result.push({ repository, resources: [resource] });
-        }
-
-        return result;
-    }, [] as { repository: AbstractRepository; resources: Uri[] }[]);
-
-    const promises = groups
-        .map(({ repository, resources }) => fn(repository, resources));
+    const promises: Promise<void>[] = [];
+    for (const [repository, groupedResources] of groups) {
+        if (repository === null) continue;
+        promises.push(fn(repository, groupedResources));
+    }
 
     const results = await Promise.allSettled(promises);
 
