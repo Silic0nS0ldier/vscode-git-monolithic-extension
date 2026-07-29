@@ -3,16 +3,7 @@ module(name = "vscode_git_monolithic")
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
-bazel_dep(name = "aspect_rules_js", version = "3.0.3")
-
-# For pnpm v11 support
-archive_override(
-    module_name = "aspect_rules_js",
-    integrity = "sha256-/qXNoACOY5FtBoSyq+LmUYVyMBlZ4Z6l4luTFHsBU9M=",
-    strip_prefix = "rules_js-401406a1984917e4d17a1596b5c0dbced0927ff4",
-    urls = ["https://github.com/aspect-build/rules_js/archive/401406a1984917e4d17a1596b5c0dbced0927ff4.tar.gz"],
-)
-
+bazel_dep(name = "aspect_rules_js", version = "3.2.3")
 bazel_dep(name = "aspect_rules_lint", version = "2.7.2")
 bazel_dep(name = "aspect_rules_ts", version = "3.9.2")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
