@@ -59,3 +59,28 @@ test(clean.name + " - leaves tracked files alone", async () => {
 
     await fs.access(trackedFile);
 });
+
+test(clean.name + " - handles path list exceeding the CLI length limit", async () => {
+    await using repo = await tempGitRepo(true);
+
+    // Enough files that the combined pathspec exceeds MAX_CLI_LENGTH (30000)
+    // and forces multiple `git clean` invocations under the hood.
+    const fileCount = 2000;
+    const paths: string[] = [];
+    for (let i = 0; i < fileCount; i++) {
+        const name = `untracked-with-a-reasonably-long-filename-${i}.txt`;
+        await fs.writeFile(path.join(repo.path, name), "x");
+        paths.push(name);
+    }
+
+    // Sanity check: the combined length actually exceeds the chunk limit,
+    // otherwise this test would silently degrade to a single-chunk run.
+    const totalLength = paths.reduce((sum, p) => sum + p.length, 0);
+    assert.ok(totalLength > 30000, `pathspec should exceed chunk limit, got ${totalLength}`);
+
+    unwrapOk(await clean(gitCtx, repo.path, paths));
+
+    for (const name of paths) {
+        await assert.rejects(fs.access(path.join(repo.path, name)), `${name} should be removed`);
+    }
+});

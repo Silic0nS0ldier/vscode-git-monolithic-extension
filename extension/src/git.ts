@@ -49,7 +49,6 @@ import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
-import { throat } from "./package-patches/throat.js";
 import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
 import { splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
@@ -750,16 +749,7 @@ export class Repository {
     }
 
     async clean(paths: string[]): Promise<void> {
-        const limited = throat(5);
-        const promises: Promise<unknown>[] = [];
-
-        for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
-            promises.push(limited(async () => {
-                unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, chunk, { quiet: true }));
-            }));
-        }
-
-        await Promise.all(promises);
+        unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, paths, { quiet: true }));
     }
 
     async undo(): Promise<void> {
