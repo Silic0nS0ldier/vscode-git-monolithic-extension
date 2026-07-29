@@ -38,7 +38,7 @@ class TagItem implements QuickPickItem {
         return this.ref.name ?? "";
     }
     get description(): string {
-        return this.ref.commit?.substr(0, 8) ?? "";
+        return this.ref.commit?.slice(0, 8) ?? "";
     }
     constructor(readonly ref: Ref) {}
 }
