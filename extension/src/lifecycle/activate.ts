@@ -172,7 +172,7 @@ async function createModel(
     const onOutput = (str: string): void => {
         const lines = str.split(/\r?\n/mg);
 
-        while (/^\s*$/.test(lines[lines.length - 1])) {
+        while (/^\s*$/.test(lines.at(-1)!)) {
             lines.pop();
         }
 
