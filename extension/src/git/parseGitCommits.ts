@@ -1,3 +1,4 @@
+import { detach } from "../util/detach.js";
 import { commitRegex } from "./commit-regex.js";
 import type { Commit } from "./Commit.js";
 
@@ -26,17 +27,16 @@ export function parseGitCommits(data: string): Commit[] {
         [, ref, authorName, authorEmail, authorDate, commitDate, parents, message] = match;
 
         if (message.at(-1) === "\n") {
-            message = message.substr(0, message.length - 1);
+            message = message.slice(0, -1);
         }
 
-        // Stop excessive memory usage by using substr -- https://bugs.chromium.org/p/v8/issues/detail?id=2869
         commits.push({
             authorDate: new Date(Number(authorDate) * 1000),
-            authorEmail: ` ${authorEmail}`.substr(1),
-            authorName: ` ${authorName}`.substr(1),
+            authorEmail: detach(authorEmail),
+            authorName: detach(authorName),
             commitDate: new Date(Number(commitDate) * 1000),
-            hash: ` ${ref}`.substr(1),
-            message: ` ${message}`.substr(1),
+            hash: detach(ref),
+            message: detach(message),
             parents: parents ? parents.split(" ") : [],
         });
     } while (true);
