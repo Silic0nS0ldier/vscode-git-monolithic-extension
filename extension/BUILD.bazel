@@ -16,7 +16,6 @@ ts_project(
         ":node_modules/@types/node",
         ":node_modules/@types/vscode",
         ":node_modules/@vscode/extension-telemetry",
-        ":node_modules/get-stream",
         ":node_modules/ignore",
         ":node_modules/just-debounce",
         ":node_modules/monolithic-git-interop",
@@ -58,7 +57,6 @@ ts_project(
     deps = [
         ":node_modules/@types/node",
         ":node_modules/ava",
-        ":node_modules/get-stream",
         ":lib",
     ],
     tsconfig = ":tsconfig",
