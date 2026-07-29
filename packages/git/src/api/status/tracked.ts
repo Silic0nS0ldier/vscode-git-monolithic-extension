@@ -52,6 +52,11 @@ class GitStatusParser {
         return this.#result;
     }
 
+    // Note: `entry.path`, `entry.rename`, and `#lastRaw` are `SlicedString`s
+    // (>= 13 chars) that pin their parent chunk while any entry is reachable.
+    // With `--untracked-files=no` the output stays small enough for this not
+    // to matter; for larger output, wrap the assignments in `detach`. See
+    // https://issues.chromium.org/issues/41480525 and `extension/src/util/detach.ts`.
     update(raw: string): void {
         let normalisedRaw = raw;
         let i = 0;
@@ -63,7 +68,7 @@ class GitStatusParser {
             i = nextI;
         }
 
-        this.#lastRaw = normalisedRaw.substr(i);
+        this.#lastRaw = normalisedRaw.slice(i);
     }
 
     #parseEntry(raw: string, start: number): number | undefined {
