@@ -81,8 +81,35 @@ jobs:
         with:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
+      - name: Discover knip version
+        id: knip_version
+        run: |
+          set -euo pipefail
+          VERSION=$(grep -oP '^KNIP_VERSION="\K[0-9.]+' ./.devcontainer/feature-bazel/install.sh)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+      - uses: pnpm/action-setup@v6
+        with:
+          run_install: |
+            - args: [--global, "knip@${{ steps.knip_version.outputs.version }}"]
+      - name: Materialise Bazel-built node_modules for knip
+        run: |
+          set -euo pipefail
+          bazel --quiet build --show_result=0 \
+            //:node_modules \
+            //extension:node_modules \
+            //packages/git:node_modules \
+            //build_defs/rollup_bundle:node_modules \
+            //build_defs/vsix_package:node_modules
+          BAZEL_BIN=$(bazel --quiet info bazel-bin)
+          for pkg in . extension packages/git build_defs/rollup_bundle build_defs/vsix_package; do
+            rm -rf "$pkg/node_modules"
+            ln -s "$BAZEL_BIN/$pkg/node_modules" "$pkg/node_modules"
+          done
+      - run: knip
+        id: knip
+        continue-on-error: true
       - run: exit 1
-        if: steps.test.outcome == 'failure' || steps.build_vsix.outcome == 'failure'
+        if: steps.test.outcome == 'failure' || steps.build_vsix.outcome == 'failure' || steps.knip.outcome == 'failure'
   devcontainer:
     strategy:
       matrix:

@@ -91,9 +91,6 @@ importers:
       '@vscode/extension-telemetry':
         specifier: ^1.5.2
         version: 1.5.2(tslib@2.8.1)
-      get-stream:
-        specifier: 'catalog:'
-        version: 9.0.1
       ignore:
         specifier: ^7.0.6
         version: 7.0.6

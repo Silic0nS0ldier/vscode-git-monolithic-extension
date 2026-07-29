@@ -1,0 +1,44 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "workspaces": {
+        ".": {
+            "ignoreDependencies": [
+                "@typescript/native",
+                "renovate"
+            ]
+        },
+        "extension": {
+            "entry": [
+                "src/main.ts",
+                "src/askpass-main.ts"
+            ],
+            "project": [
+                "src/**/*.ts"
+            ]
+        },
+        "packages/git": {
+            "entry": [
+                "src/api/**/mod.ts"
+            ],
+            "project": [
+                "src/**/*.ts"
+            ]
+        },
+        "packages/wasm": {
+            "entry": []
+        },
+        "build_defs/rollup_bundle": {
+            "entry": [
+                "src/main.ts"
+            ]
+        },
+        "build_defs/vsix_package": {
+            "entry": [
+                "src/main.ts"
+            ]
+        }
+    },
+    "ignoreDependencies": [
+        "vscode"
+    ]
+}
