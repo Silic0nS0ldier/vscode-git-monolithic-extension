@@ -37,7 +37,7 @@ export class HEADItem implements QuickPickItem {
         return "HEAD";
     }
     get description(): string {
-        return (this.#repository.HEAD?.commit || "").substr(0, 8);
+        return (this.#repository.HEAD?.commit || "").slice(0, 8);
     }
     get alwaysShow(): boolean {
         return true;

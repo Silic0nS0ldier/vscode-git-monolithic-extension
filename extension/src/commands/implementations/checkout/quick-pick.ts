@@ -6,7 +6,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 
 export class CheckoutItem implements QuickPickItem {
     protected get shortCommit(): string {
-        return (this.ref.commit || "").substr(0, 8);
+        return (this.ref.commit || "").slice(0, 8);
     }
     get label(): string {
         return this.ref.name || this.shortCommit;

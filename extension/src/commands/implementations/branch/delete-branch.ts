@@ -8,7 +8,7 @@ import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 class BranchDeleteItem implements QuickPickItem {
     get #shortCommit(): string {
-        return (this.#ref.commit || "").substr(0, 8);
+        return (this.#ref.commit || "").slice(0, 8);
     }
     get branchName(): string | undefined {
         return this.#ref.name;
