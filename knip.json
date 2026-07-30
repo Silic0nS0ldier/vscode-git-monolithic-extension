@@ -2,6 +2,10 @@
     "$schema": "https://unpkg.com/knip@6/schema.json",
     "workspaces": {
         ".": {
+            "entry": [
+                "integration_tests/electron_host/check-electron-pin.mjs",
+                "integration_tests/electron_host/load-check.mjs"
+            ],
             "ignoreDependencies": [
                 "@typescript/native",
                 "renovate"

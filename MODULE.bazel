@@ -110,6 +110,56 @@ use_repo(
     "safaridriver",
 )
 
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+_ELECTRON_LINUX_BUILD_FILE = """\
+exports_files(["electron"])
+
+filegroup(
+    name = "dist",
+    srcs = glob(["**"], exclude = ["electron"]),
+    visibility = ["//visibility:public"],
+)
+"""
+
+_ELECTRON_DARWIN_BUILD_FILE = """\
+exports_files(["Electron.app/Contents/MacOS/Electron"])
+
+filegroup(
+    name = "dist",
+    srcs = glob(["**"], exclude = ["Electron.app/Contents/MacOS/Electron"]),
+    visibility = ["//visibility:public"],
+)
+"""
+
+http_archive(
+    name = "electron_linux_x64",
+    build_file_content = _ELECTRON_LINUX_BUILD_FILE,
+    sha256 = "aee1496b561509a6b7fd8ae1b2bc1bdb6f9a303966ddc7cff4989674ce8e043a",
+    url = "https://github.com/electron/electron/releases/download/v42.6.0/electron-v42.6.0-linux-x64.zip",
+)
+
+http_archive(
+    name = "electron_linux_arm64",
+    build_file_content = _ELECTRON_LINUX_BUILD_FILE,
+    sha256 = "8e3c69721cc7b009381a5be82f3fa0335d3a4420963bcd0f300c38dc072e1510",
+    url = "https://github.com/electron/electron/releases/download/v42.6.0/electron-v42.6.0-linux-arm64.zip",
+)
+
+http_archive(
+    name = "electron_darwin_x64",
+    build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
+    sha256 = "2ccd775c1d6aadf50a28b97f09631061d3cfd10db50a7ee5cbe70c03b987defc",
+    url = "https://github.com/electron/electron/releases/download/v42.6.0/electron-v42.6.0-darwin-x64.zip",
+)
+
+http_archive(
+    name = "electron_darwin_arm64",
+    build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
+    sha256 = "331c4b3f024e4a019861ae389654c060715218bc3ec129f72eaa02449c96f1bf",
+    url = "https://github.com/electron/electron/releases/download/v42.6.0/electron-v42.6.0-darwin-arm64.zip",
+)
+
 register_toolchains(
     # Required for building with //build_defs/platforms:vscode_ext target platform
     "//build_defs/rust_wasm_bindgen:toolchain_for_vscode_ext",
