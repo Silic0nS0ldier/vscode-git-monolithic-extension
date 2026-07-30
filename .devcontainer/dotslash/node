@@ -1,0 +1,30 @@
+#!/usr/bin/env dotslash
+{
+  "name": "node",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 33393412,
+      "hash": "sha256",
+      "digest": "9f619528f1db5ddc41dccf54211066fb42228d69a156733c69cb9d6cc92e358c",
+      "format": "tar.xz",
+      "path": "node-v26.5.0-linux-x64/bin/node",
+      "providers": [
+        {
+          "url": "https://nodejs.org/dist/v26.5.0/node-v26.5.0-linux-x64.tar.xz"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 32452996,
+      "hash": "sha256",
+      "digest": "036df0b49662ebb350eb56f1cac603699b1e9ed1e2603ee129fefda473479030",
+      "format": "tar.xz",
+      "path": "node-v26.5.0-linux-arm64/bin/node",
+      "providers": [
+        {
+          "url": "https://nodejs.org/dist/v26.5.0/node-v26.5.0-linux-arm64.tar.xz"
+        }
+      ]
+    }
+  }
+}

@@ -1,13 +1,6 @@
 {
     "name": "Git monolithic",
-    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-    "features": {
-        "./feature-bazel": {},
-        "ghcr.io/devcontainers/features/github-cli:1": {},
-        "ghcr.io/devcontainers/features/rust:1": {
-            "version": "1.95.0"
-        }
-    },
+    "image": "ghcr.io/silic0ns0ldier/vscode-git-monolithic-extension/devcontainer:latest",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -22,6 +15,9 @@
     },
     "initializeCommand": {
         "gh-cli-auth": "gh auth token > .git/__gh_token || true"
+    },
+    "onCreateCommand": {
+        "electron-deps": "./.devcontainer/install-electron-deps.sh"
     },
     "postStartCommand": {
         "gh-cli-auth": "test -s .git/__gh_token && gh auth login --with-token < .git/__gh_token || true"

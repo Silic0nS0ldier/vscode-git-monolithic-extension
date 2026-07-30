@@ -1,0 +1,30 @@
+#!/usr/bin/env dotslash
+{
+  "name": "jscpd",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 1698839,
+      "hash": "sha256",
+      "digest": "0cff53ca3188e5067ab9608c69709f2de4d9f71be606c8e369ca892b3be0a47a",
+      "format": "tar.gz",
+      "path": "jscpd",
+      "providers": [
+        {
+          "url": "https://github.com/kucherenko/jscpd/releases/download/v5.0.14/jscpd-linux-x64-gnu.tar.gz"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 1584227,
+      "hash": "sha256",
+      "digest": "3e80e3354536507d668c55e58b71c81eb4ff194222dcdfaf81fa7eea0a0dc6f5",
+      "format": "tar.gz",
+      "path": "jscpd",
+      "providers": [
+        {
+          "url": "https://github.com/kucherenko/jscpd/releases/download/v5.0.14/jscpd-linux-arm64-gnu.tar.gz"
+        }
+      ]
+    }
+  }
+}

@@ -33,7 +33,8 @@ jobs:
           bazelisk-cache: true
           # Repo cache not worth it here, very little to fetch.
           repository-cache: false
-      - run: node ./.github/workflows/update_bazel_nodejs.mjs ./.devcontainer/feature-bazel/install.sh ./MODULE.bazel
+      - run: node ./.github/workflows/update_dotslash_stubs.mjs
+      - run: node ./.github/workflows/update_bazel_nodejs.mjs ./MODULE.bazel
       - run: node ./.github/workflows/update_bazel_electron.mjs
       - run: bazel mod deps --lockfile_mode=update
       - uses: stefanzweifel/git-auto-commit-action@v7
@@ -66,6 +67,9 @@ jobs:
             - multitool.lock.json
             - packages/wasm/Cargo.toml
             - pnpm-lock.yaml
+      # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
+      # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - run: bazel test //...
         id: test
         continue-on-error: true
@@ -74,6 +78,7 @@ jobs:
         with:
           name: test-logs
           path: .bazel/testlogs/**/test.log
+          include-hidden-files: true
       - run: bazel build //extension/vsix:git_monolithic --stamp --config=release
         id: build_vsix
         continue-on-error: true
@@ -83,16 +88,6 @@ jobs:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
           archive: false
-      - name: Discover knip version
-        id: knip_version
-        run: |
-          set -euo pipefail
-          VERSION=$(grep -oP '^KNIP_VERSION="\K[0-9.]+' ./.devcontainer/feature-bazel/install.sh)
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-      - uses: pnpm/action-setup@v6
-        with:
-          run_install: |
-            - args: [--global, "knip@${{ steps.knip_version.outputs.version }}"]
       - name: Materialise Bazel-built node_modules for knip
         run: |
           set -euo pipefail
@@ -107,45 +102,50 @@ jobs:
             rm -rf "$pkg/node_modules"
             ln -s "$BAZEL_BIN/$pkg/node_modules" "$pkg/node_modules"
           done
-      - run: knip
+      - run: node ./node_modules/knip/bin/knip.js
         id: knip
         continue-on-error: true
       - run: exit 1
         if: steps.test.outcome == 'failure' || steps.build_vsix.outcome == 'failure' || steps.knip.outcome == 'failure'
-  devcontainer:
-    strategy:
-      matrix:
-        runner: [ubuntu-24.04, ubuntu-24.04-arm]
-    runs-on: ${{ matrix.runner }}
-    if: ${{ !cancelled() }}
-    needs: renovate_tasks
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
-      - uses: devcontainers/ci@v0.3
-        with:
-          runCmd: echo "Built successfully"
-          push: never
-  jscpd:
+  publish_devcontainer:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    if: ${{ !cancelled() }}
-    needs: renovate_tasks
+    needs: build_and_test
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v7
+      - uses: bazel-contrib/setup-bazel@0.19.0
         with:
-          ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
-      - name: Install jscpd
+          bazelrc: |
+            common --color=yes
+            common --curses=no
+            common --show_progress_rate_limit=5
+            common --lockfile_mode=error
+          cache-save: false
+          bazelisk-cache: true
+          disk-cache: "${{ github.workflow }}-devcontainer-ubuntu-24.04"
+          repository-cache: |
+            - MODULE.bazel
+            - MODULE.bazel.lock
+      - name: Authenticate to ghcr.io
         run: |
           set -euo pipefail
-          VERSION=$(grep -oP '^JSCPD_VERSION="\Kv[0-9.]+' ./.devcontainer/feature-bazel/install.sh)
-          echo "Installing jscpd ${VERSION}"
-          curl -fsSL "https://github.com/kucherenko/jscpd/releases/download/${VERSION}/jscpd-linux-x64-gnu.tar.gz" -o /tmp/jscpd.tar.gz
-          mkdir -p "$HOME/.local/bin"
-          tar -xzf /tmp/jscpd.tar.gz -C "$HOME/.local/bin"
-          chmod +x "$HOME/.local/bin/jscpd"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - run: jscpd .
+          mkdir -p "$HOME/.docker"
+          AUTH=$(printf '%s:%s' "${{ github.actor }}" "${{ secrets.GITHUB_TOKEN }}" | base64 -w0)
+          printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$AUTH" > "$HOME/.docker/config.json"
+      - run: bazel run //.devcontainer:push_image
+  jscpd:
+    runs-on: ubuntu-slim
+    if: ${{ !cancelled() }}
+    needs: renovate_tasks
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
+      - uses: facebook/install-dotslash@v2
+      - run: ./.devcontainer/dotslash/jscpd .
   dprint:
     runs-on: ubuntu-24.04
     if: ${{ !cancelled() }}
@@ -156,14 +156,5 @@ jobs:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - name: Install rustfmt
         run: rustup component add rustfmt
-      - name: Install dprint
-        run: |
-          set -euo pipefail
-          VERSION=$(grep -oP '^DPRINT_VERSION="\K[0-9.]+' ./.devcontainer/feature-bazel/install.sh)
-          echo "Installing dprint ${VERSION}"
-          curl -fsSL "https://github.com/dprint/dprint/releases/download/${VERSION}/dprint-x86_64-unknown-linux-gnu.zip" -o /tmp/dprint.zip
-          mkdir -p "$HOME/.local/bin"
-          unzip -o /tmp/dprint.zip -d "$HOME/.local/bin" dprint
-          chmod +x "$HOME/.local/bin/dprint"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - run: dprint check
+      - uses: facebook/install-dotslash@v2
+      - run: ./.devcontainer/dotslash/dprint check

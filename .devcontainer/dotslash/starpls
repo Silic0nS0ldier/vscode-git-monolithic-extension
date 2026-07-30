@@ -1,0 +1,28 @@
+#!/usr/bin/env dotslash
+{
+  "name": "starpls",
+  "platforms": {
+    "linux-x86_64": {
+      "size": 11560176,
+      "hash": "sha256",
+      "digest": "7c661cdde0d1c026665086d07523d825671e29056276681616bb32d0273c5eab",
+      "path": "starpls",
+      "providers": [
+        {
+          "url": "https://github.com/withered-magic/starpls/releases/download/v0.1.22/starpls-linux-amd64"
+        }
+      ]
+    },
+    "linux-aarch64": {
+      "size": 10716520,
+      "hash": "sha256",
+      "digest": "55877ec4c3ff03e1d90d59c76f69a3a144b6c29688747c8ac4d77993e2eef1ad",
+      "path": "starpls",
+      "providers": [
+        {
+          "url": "https://github.com/withered-magic/starpls/releases/download/v0.1.22/starpls-linux-aarch64"
+        }
+      ]
+    }
+  }
+}

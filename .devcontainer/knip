@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+# knip ships no standalone binary, so the image carries a rules_js launcher (see BUILD.bazel).
+# Launchers chdir into their own runfiles tree, but knip has to analyse the caller's project.
+set -euo pipefail
+
+export JS_BINARY__NO_CD_BINDIR=1
+exec /usr/lib/knip/.devcontainer/knip_launcher "$@"

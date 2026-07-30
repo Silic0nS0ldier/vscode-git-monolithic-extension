@@ -12,9 +12,29 @@ bazel_dep(name = "llvm", version = "0.8.14")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_multitool", version = "1.11.1")
 bazel_dep(name = "rules_nodejs", version = "6.7.5")
-bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.71.3")
-bazel_dep(name = "rules_rust", version = "0.71.3")
+bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.72.0")
+bazel_dep(name = "rules_rust", version = "0.72.0")
 bazel_dep(name = "rules_shell", version = "0.8.0")
+bazel_dep(name = "rules_oci", version = "2.3.0")
+bazel_dep(name = "rules_oci_runtime", version = "0.0.0")
+
+# Builds the rules_oci_runtime launcher from source, registering its toolchain.
+bazel_dep(name = "rules_oci_runtime_source", version = "0.0.0")
+bazel_dep(name = "tar.bzl", version = "0.10.4")
+
+archive_override(
+    module_name = "rules_oci_runtime",
+    integrity = "sha256-Q/JWg3ShqKQofMUKIt0dfz4Z1Nr7P7/VWYcl86vqLKU=",
+    strip_prefix = "rules-oci-runtime-96646ab50f824a66c50d2122d688886d8e0d6557",
+    urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/archive/96646ab50f824a66c50d2122d688886d8e0d6557.tar.gz"],
+)
+
+archive_override(
+    module_name = "rules_oci_runtime_source",
+    integrity = "sha256-Q/JWg3ShqKQofMUKIt0dfz4Z1Nr7P7/VWYcl86vqLKU=",
+    strip_prefix = "rules-oci-runtime-96646ab50f824a66c50d2122d688886d8e0d6557/source",
+    urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/archive/96646ab50f824a66c50d2122d688886d8e0d6557.tar.gz"],
+)
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
@@ -57,8 +77,11 @@ rust.toolchain(
 )
 
 crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+
+# Universe names are global, so this cannot be plain `crates`: rules_oci_runtime_source
+# declares one under that name.
 crate.from_cargo(
-    name = "crates",
+    name = "monolithic_crates",
     cargo_lockfile = "//:Cargo.lock",
     manifests = ["//:Cargo.toml"],
 )
@@ -66,7 +89,7 @@ crate.annotation(
     crate = "wasm-bindgen-cli",
     gen_all_binaries = True,
 )
-use_repo(crate, "crates")
+use_repo(crate, crates = "monolithic_crates")
 
 rust_wasm_bindgen_ext = use_extension("@rules_rust_wasm_bindgen//:extensions.bzl", "rust_ext")
 
@@ -166,4 +189,35 @@ register_toolchains(
     "//build_defs/rust_wasm_bindgen:toolchain",
     "@llvm//toolchain:all",
     "//build_defs/test_toolchains:wasm32_test_toolchain",
+)
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "devcontainers_base_ubuntu",
+    digest = "sha256:4bcb1b466771b1ba1ea110e2a27daea2f6093f9527fb75ee59703ec89b5561cb",
+    # Follows latest LTS release
+    image = "mcr.microsoft.com/devcontainers/base:ubuntu",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+)
+use_repo(oci, "devcontainers_base_ubuntu", "devcontainers_base_ubuntu_linux_amd64", "devcontainers_base_ubuntu_linux_arm64")
+
+http_archive(
+    name = "dotslash_amd64",
+    build_file_content = """
+exports_files(["dotslash"])
+    """,
+    sha256 = "7400dd0dbdf05d3be4e604b62807eb1bcbaa0d1bced010d30746243759e0ac03",
+    urls = ["https://github.com/facebook/dotslash/releases/download/v0.5.9/dotslash-ubuntu-22.04.x86_64.tar.gz"],
+)
+
+http_archive(
+    name = "dotslash_arm64",
+    build_file_content = """
+exports_files(["dotslash"])
+    """,
+    sha256 = "66030e17dc45386e13cca37b72eef78522c4940605a4fb10c977e1ee5b6f1170",
+    urls = ["https://github.com/facebook/dotslash/releases/download/v0.5.9/dotslash-ubuntu-22.04.aarch64.tar.gz"],
 )
