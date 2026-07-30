@@ -75,6 +75,7 @@ jobs:
         with:
           name: test-logs
           path: .bazel/testlogs/**/test.log
+          include-hidden-files: true
       - run: bazel build //extension/vsix:git_monolithic --stamp --config=release
         id: build_vsix
         continue-on-error: true
@@ -106,7 +107,7 @@ jobs:
   publish_devcontainer:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    needs: devcontainer
+    needs: build_and_test
     permissions:
       contents: read
       packages: write
