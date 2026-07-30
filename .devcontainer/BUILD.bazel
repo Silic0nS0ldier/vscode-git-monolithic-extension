@@ -128,11 +128,6 @@ sh_test(
         "CHECKS": "$(rlocationpath image_checks.sh)",
         "CONTAINER": "$(rlocationpath :container)",
     },
-    # Containers need user namespaces, which the Bazel sandbox does not nest.
-    tags = [
-        "external",
-        "no-sandbox",
-    ],
 )
 
 shellcheck_test(
