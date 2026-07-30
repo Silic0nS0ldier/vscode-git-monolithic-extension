@@ -21,7 +21,6 @@ import { EventEmitter } from "node:events";
 import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { fromFields } from "temporal-polyfill/fns/Duration";
 import type { OutputChannel, Progress } from "vscode";
 import {
     type Branch,
@@ -521,8 +520,9 @@ export class Repository {
 
         const result = await exec(child);
 
-        const duration = fromFields({ milliseconds: Date.now() - start });
-        const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
+        const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format({
+            milliseconds: Date.now() - start,
+        });
 
         if (isErr(result)) {
             this.git.log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
