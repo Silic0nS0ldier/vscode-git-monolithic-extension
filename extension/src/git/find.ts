@@ -2,7 +2,6 @@ import { fromEnvironment, fromPath, type GitContext, type PersistentCLIContext }
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
-import { fromFields } from "temporal-polyfill/fns/Duration";
 import type { OutputChannel } from "vscode";
 import { snoopOnStream, SnoopStream } from "../util/snoop-stream.js";
 
@@ -70,8 +69,9 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                     args,
                 );
 
-                const duration = fromFields({ milliseconds: Date.now() - start });
-                const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
+                const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format({
+                    milliseconds: Date.now() - start,
+                });
 
                 // Log result
                 if (isErr(result)) {

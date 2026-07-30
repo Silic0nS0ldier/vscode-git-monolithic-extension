@@ -27,7 +27,6 @@ ts_project(
         ":node_modules/just-debounce",
         ":node_modules/monolithic-git-interop",
         ":node_modules/onetime",
-        ":node_modules/temporal-polyfill",
         ":node_modules/throat",
         ":node_modules/vscode-diff",
         ":node_modules/watcher",

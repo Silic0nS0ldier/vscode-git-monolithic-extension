@@ -1,5 +1,4 @@
 import { isErr, unwrap } from "monolithic-git-interop/util/result";
-import { fromFields } from "temporal-polyfill/fns/Duration";
 import { getGitErrorCode, GitError } from "../error.js";
 import { exec, type IExecutionResult } from "../exec.js";
 import type { SpawnOptions } from "../SpawnOptions.js";
@@ -34,8 +33,7 @@ export async function internalExec(
 
     const execResult = await exec(child, options.abortSignal);
 
-    const duration = fromFields({ milliseconds: Date.now() - start });
-    const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
+    const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format({ milliseconds: Date.now() - start });
 
     if (isErr(execResult)) {
         log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);

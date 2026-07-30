@@ -15,7 +15,6 @@ catalog:
   ava: ^8.0.1
   cleye: ^2.6.0
   get-stream: ^9.0.1
-  temporal-polyfill: ^1.0.1
 
 catalogs:
   vscode:
