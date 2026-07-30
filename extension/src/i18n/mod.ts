@@ -1,1 +1,1 @@
-export * as Translations from "./translations/mod.js";
+export * as Translations from "./l10n.js";

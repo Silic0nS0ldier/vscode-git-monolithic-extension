@@ -1,9 +1,9 @@
 import * as fs from "node:fs";
-import * as i18n from "./i18n/mod.js";
+import { missOrInvalid } from "./i18n/strings.js";
 import { IPCClient } from "./ipc/ipcClient.js";
 
 function fatal(errMsg: string): void {
-    console.error(i18n.Translations.missOrInvalid());
+    console.error(missOrInvalid());
     console.error(errMsg);
     process.exit(1);
 }

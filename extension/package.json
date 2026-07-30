@@ -10,7 +10,6 @@
         "onetime": "^8.0.0",
         "throat": "^6.0.2",
         "vscode-diff": "^3.0.1",
-        "vscode-nls": "^5.2.0",
         "watcher": "^2.3.1"
     },
     "devDependencies": {
