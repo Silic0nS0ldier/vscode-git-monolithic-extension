@@ -104,6 +104,13 @@ export async function activate(context: ExtensionContext): Promise<void> {
     if (extensionEnablementState) {
         outputChannel.appendLine("Activating Git Monolithic extension...");
         await enableExtension(result, context, outputChannel, telemetryReporter);
+    } else if (!config.enabled()) {
+        outputChannel.appendLine("Git Monolithic is inactive because `git_monolithic.enabled` is false.");
+    } else {
+        outputChannel.appendLine(
+            "Git Monolithic is inactive because VSCode's builtin git extension is enabled. "
+                + "Set `git.enabled` to false to use Git Monolithic.",
+        );
     }
 
     deactivateTasks.push(() => telemetryReporter.dispose());
