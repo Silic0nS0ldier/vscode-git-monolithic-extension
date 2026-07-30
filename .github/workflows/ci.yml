@@ -125,6 +125,7 @@ jobs:
       - uses: devcontainers/ci@v0.3
         with:
           runCmd: echo "Built successfully"
+          push: never
   jscpd:
     runs-on: ubuntu-24.04
     if: ${{ !cancelled() }}
