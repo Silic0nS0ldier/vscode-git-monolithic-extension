@@ -1,3 +1,5 @@
+load("@aspect_rules_js//js:defs.bzl", "js_image_layer")
+load("@npm//:knip/package_json.bzl", knip_bin = "bin")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_push")
 load("@rules_oci_runtime//lib:defs.bzl", "runc_binary")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
@@ -37,6 +39,26 @@ tar(
     ),
 )
 
+# knip has no standalone release, so ship the npm package with its own node runtime.
+knip_bin.knip_binary(
+    name = "knip_launcher",
+)
+
+js_image_layer(
+    name = "knip_layers",
+    binary = ":knip_launcher",
+    root = "/usr/lib/knip",
+)
+
+tar(
+    name = "knip_shim",
+    srcs = ["knip"],
+    mutate = mutate(
+        package_dir = "usr/bin",
+        strip_prefix = ".devcontainer",
+    ),
+)
+
 tar(
     name = "rustup_symlinks",
     mtree = [
@@ -62,6 +84,8 @@ oci_image(
     tars = [
         ":dotslash",
         ":dotslash_stubs",
+        ":knip_layers",
+        ":knip_shim",
         ":rustup_symlinks",
     ],
 )
@@ -112,6 +136,11 @@ sh_library(
 )
 
 sh_library(
+    name = "knip_shim_script",
+    srcs = ["knip"],
+)
+
+sh_library(
     name = "install-electron-deps",
     srcs = ["install-electron-deps.sh"],
 )
@@ -135,5 +164,6 @@ shellcheck_test(
     srcs = [
         ":image_test_scripts",
         ":install-electron-deps",
+        ":knip_shim_script",
     ],
 )

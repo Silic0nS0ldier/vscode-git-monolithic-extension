@@ -26,4 +26,7 @@ done
 
 command -v dotslash > /dev/null || fail "dotslash is not on PATH"
 
+# knip is bundled outright rather than fetched on demand, so it can be run.
+knip --version > /dev/null || fail "knip failed to run"
+
 exit "$((failures > 0))"
