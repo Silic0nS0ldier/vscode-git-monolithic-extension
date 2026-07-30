@@ -39,7 +39,7 @@ PNPM_VERSION="11.17.0"
 # renovate: datasource=github-tags depName=nodejs/node
 NODE_VERSION="v26.5.0"
 # renovate: datasource=github-releases depName=kucherenko/jscpd
-JSCPD_VERSION="v5.0.12"
+JSCPD_VERSION="v5.0.14"
 # renovate: datasource=github-releases depName=dprint/dprint
 DPRINT_VERSION="0.55.2"
 # renovate: datasource=npm depName=knip
