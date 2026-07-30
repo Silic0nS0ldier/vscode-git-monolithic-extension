@@ -67,6 +67,9 @@ jobs:
             - multitool.lock.json
             - packages/wasm/Cargo.toml
             - pnpm-lock.yaml
+      # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
+      # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - run: bazel test //...
         id: test
         continue-on-error: true
