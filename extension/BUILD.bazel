@@ -30,7 +30,6 @@ ts_project(
         ":node_modules/temporal-polyfill",
         ":node_modules/throat",
         ":node_modules/vscode-diff",
-        ":node_modules/vscode-nls",
         ":node_modules/watcher",
     ],
 )

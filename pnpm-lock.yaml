@@ -112,9 +112,6 @@ importers:
       vscode-diff:
         specifier: ^3.0.1
         version: 3.0.1
-      vscode-nls:
-        specifier: ^5.2.0
-        version: 5.2.0
       watcher:
         specifier: ^2.3.1
         version: 2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688)
@@ -4004,9 +4001,6 @@ packages:
 
   vscode-diff@3.0.1:
     resolution: {integrity: sha512-0rRDmIuGsuQMIIhbWsILSMxG4k5x8unNvkD7P+yn5cA7O6bKg28P/dhvgABRvP5ksYmGE9UKHonk/Z4PBMdojA==}
-
-  vscode-nls@5.2.0:
-    resolution: {integrity: sha512-RAaHx7B14ZU04EU31pT+rKz2/zSl7xMsfIZuo8pd+KZO6PXtQmpevpq3vxvWNcrGbdmhM/rr5Uw5Mz+NBfhVng==}
 
   watcher@2.3.1:
     resolution: {integrity: sha512-d3yl+ey35h05r5EFP0TafE2jsmQUJ9cc2aernRVyAkZiu0J3+3TbNugNcqdUJDoWOfL2p+bNsN427stsBC/HnA==}
@@ -8746,8 +8740,6 @@ snapshots:
       vfile-message: 4.0.3
 
   vscode-diff@3.0.1: {}
-
-  vscode-nls@5.2.0: {}
 
   watcher@2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688):
     dependencies:
