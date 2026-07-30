@@ -34,6 +34,7 @@ jobs:
           # Repo cache not worth it here, very little to fetch.
           repository-cache: false
       - run: node ./.github/workflows/update_bazel_nodejs.mjs ./.devcontainer/feature-bazel/install.sh ./MODULE.bazel
+      - run: node ./.github/workflows/update_bazel_electron.mjs
       - run: bazel mod deps --lockfile_mode=update
       - uses: stefanzweifel/git-auto-commit-action@v7
       - id: get_commit

@@ -5,6 +5,11 @@ load("@rules_shell//shell:sh_library.bzl", "sh_library")
 load("//build_defs/lint:linters.bzl", "shellcheck_test")
 load("//build_defs/vsix_package:vsix_package.bzl", "vsix_package")
 
+exports_files(
+    ["package.json"],
+    visibility = ["//integration_tests/electron_host:__pkg__"],
+)
+
 # Copy bundled sources to src/
 output_files(
     name = "bundle_chunks_ref",

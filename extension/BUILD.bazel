@@ -1,18 +1,25 @@
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//extension:ava/package_json.bzl", "bin")
-load("//build_defs/rollup_bundle:rollup_bundle.bzl", "rollup_bundle")
 load("//build_defs/lint:linters.bzl", "eslint_test")
+load("//build_defs/rollup_bundle:rollup_bundle.bzl", "rollup_bundle")
 
 npm_link_all_packages(name = "node_modules")
 
 ts_project(
     name = "lib",
-    srcs = glob(["src/**/*.ts"], exclude = ["src/**/*.test.ts", "src/**/*.stub.ts"]) + ["package.json"],
+    srcs = glob(
+        ["src/**/*.ts"],
+        exclude = [
+            "src/**/*.test.ts",
+            "src/**/*.stub.ts",
+        ],
+    ) + ["package.json"],
+    declaration = True,
     out_dir = "dist",
     root_dir = "src",
+    tsconfig = ":tsconfig",
     deps = [
-        ":node_modules/temporal-polyfill",
         ":node_modules/@types/node",
         ":node_modules/@types/vscode",
         ":node_modules/@vscode/extension-telemetry",
@@ -20,20 +27,19 @@ ts_project(
         ":node_modules/just-debounce",
         ":node_modules/monolithic-git-interop",
         ":node_modules/onetime",
+        ":node_modules/temporal-polyfill",
         ":node_modules/throat",
         ":node_modules/vscode-diff",
         ":node_modules/vscode-nls",
         ":node_modules/watcher",
     ],
-    tsconfig = ":tsconfig",
-    declaration = True,
 )
 
 ts_config(
     name = "tsconfig",
     src = "tsconfig.json",
-    deps = ["//:tsconfig"],
     visibility = [":__pkg__"],
+    deps = ["//:tsconfig"],
 )
 
 rollup_bundle(
@@ -46,31 +52,37 @@ rollup_bundle(
     external_modules = [
         "vscode",
     ],
-    visibility = ["//extension/vsix:__pkg__"],
+    visibility = [
+        "//extension/vsix:__pkg__",
+        "//integration_tests/electron_host:__pkg__",
+    ],
 )
 
 ts_project(
     name = "lib_tests",
-    srcs = glob(["src/**/*.test.ts"]) + glob(["src/**/*.stub.ts"], allow_empty = True) + ["package.json"],
+    srcs = glob(["src/**/*.test.ts"]) + glob(
+        ["src/**/*.stub.ts"],
+        allow_empty = True,
+    ) + ["package.json"],
+    declaration = True,
     out_dir = "dist",
     root_dir = "src",
+    tsconfig = ":tsconfig",
     deps = [
+        ":lib",
         ":node_modules/@types/node",
         ":node_modules/ava",
-        ":lib",
     ],
-    tsconfig = ":tsconfig",
-    declaration = True,
 )
 
 bin.ava_test(
     name = "tests",
-    data = [
-        ":lib_tests",
-        "package.json",
-    ],
-    chdir = package_name(),
     args = ["-t"],
+    chdir = package_name(),
+    data = [
+        "package.json",
+        ":lib_tests",
+    ],
 )
 
 eslint_test(

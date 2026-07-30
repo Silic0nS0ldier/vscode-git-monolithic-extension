@@ -1,0 +1,120 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//build_defs/lint:linters.bzl", "shellcheck_test")
+
+sh_library(
+    name = "run-load-check",
+    srcs = ["run-load-check.sh"],
+)
+
+selects.config_setting_group(
+    name = "linux_x86_64",
+    match_all = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "linux_arm64",
+    match_all = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "macos_x86_64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "macos_arm64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:arm64",
+    ],
+)
+
+alias(
+    name = "electron_binary",
+    actual = select({
+        ":linux_x86_64": "@electron_linux_x64//:electron",
+        ":linux_arm64": "@electron_linux_arm64//:electron",
+        ":macos_x86_64": "@electron_darwin_x64//:Electron.app/Contents/MacOS/Electron",
+        ":macos_arm64": "@electron_darwin_arm64//:Electron.app/Contents/MacOS/Electron",
+    }),
+)
+
+alias(
+    name = "electron_dist",
+    actual = select({
+        ":linux_x86_64": "@electron_linux_x64//:dist",
+        ":linux_arm64": "@electron_linux_arm64//:dist",
+        ":macos_x86_64": "@electron_darwin_x64//:dist",
+        ":macos_arm64": "@electron_darwin_arm64//:dist",
+    }),
+)
+
+BUNDLE_ENTRY_POINTS = [
+    "//extension:bundle_/main.js",
+    "//extension:bundle_/askpass-main.js",
+]
+BUNDLE_DATA = BUNDLE_ENTRY_POINTS + ["//extension:bundle"]
+
+sh_test(
+    name = "electron_host_smoke_test",
+    size = "small",
+    srcs = [":run-load-check"],
+    args = [
+        "$(rootpath :electron_binary)",
+        "$(rootpath load-check.mjs)",
+    ] + ["$(rootpath %s)" % ep for ep in BUNDLE_ENTRY_POINTS],
+    data = BUNDLE_DATA + [
+        "load-check.mjs",
+        ":electron_binary",
+        ":electron_dist",
+    ],
+    env = {"ELECTRON_RUN_AS_NODE": "1"},
+)
+
+sh_test(
+    name = "node_host_smoke_test",
+    size = "small",
+    srcs = [":run-load-check"],
+    args = [
+        "$(rootpath //build_defs/node_bin:node)",
+        "$(rootpath load-check.mjs)",
+    ] + ["$(rootpath %s)" % ep for ep in BUNDLE_ENTRY_POINTS],
+    data = BUNDLE_DATA + [
+        "load-check.mjs",
+        "//build_defs/node_bin:node",
+    ],
+)
+
+sh_test(
+    name = "electron_pin_drift_test",
+    size = "small",
+    srcs = [":run-load-check"],
+    args = [
+        "$(rootpath //build_defs/node_bin:node)",
+        "$(rootpath check-electron-pin.mjs)",
+        "$(rootpath //:electron-pin.json)",
+        "$(rootpath //extension/vsix:package.json)",
+    ],
+    data = [
+        "check-electron-pin.mjs",
+        "//:electron-pin.json",
+        "//build_defs/node_bin:node",
+        "//extension/vsix:package.json",
+    ],
+)
+
+shellcheck_test(
+    name = "shellcheck",
+    srcs = [":run-load-check"],
+)
