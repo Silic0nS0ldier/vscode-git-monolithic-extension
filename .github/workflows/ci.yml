@@ -147,7 +147,7 @@ jobs:
       - uses: facebook/install-dotslash@v2
       - run: ./.devcontainer/dotslash/jscpd .
   dprint:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-24.04
     if: ${{ !cancelled() }}
     needs: renovate_tasks
     steps:
