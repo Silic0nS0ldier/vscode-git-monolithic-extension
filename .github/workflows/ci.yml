@@ -82,6 +82,7 @@ jobs:
         with:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
+          archive: false
       - name: Discover knip version
         id: knip_version
         run: |
