@@ -2,6 +2,7 @@ import commonjs__ from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { cli } from "cleye";
 import { rollup } from "rollup";
+import { nodeBuiltinPrefixPlugin } from "./node-builtin-prefix-plugin.js";
 import { wasmSourcePhasePlugin } from "./wasm-source-phase-plugin.js";
 
 // Work around https://github.com/rollup/plugins/issues/1662
@@ -55,6 +56,7 @@ const bundle = await (async () => {
         return await rollup({
             input: entryPoints,
             plugins: [
+                nodeBuiltinPrefixPlugin(),
                 wasmSourcePhasePlugin(),
                 nodeResolve(),
                 commonjs(),
@@ -89,6 +91,8 @@ try {
         // directory output.
         chunkFileNames: "chunks/[name].js",
         assetFileNames: "assets/[name][extname]",
+        // All modules are considered pure, transitive import order does not need to be maintained.
+        hoistTransitiveImports: false,
     });
     await bundle.close();
 } catch (e) {

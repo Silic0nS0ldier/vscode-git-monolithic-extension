@@ -1,7 +1,7 @@
 // service bindings for NodeJS
 
-import { spawn } from "child_process";
-import { existsSync as exists } from "fs";
+import { spawn } from "node:child_process";
+import { existsSync as exists } from "node:fs";
 import which from "which";
 import type { LogFn } from "../cli/create.js";
 import type { AllServices } from "./mod.js";
