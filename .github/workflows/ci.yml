@@ -137,7 +137,7 @@ jobs:
           printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$AUTH" > "$HOME/.docker/config.json"
       - run: bazel run //.devcontainer:push_image
   jscpd:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     if: ${{ !cancelled() }}
     needs: renovate_tasks
     steps:
@@ -147,7 +147,7 @@ jobs:
       - uses: facebook/install-dotslash@v2
       - run: ./.devcontainer/dotslash/jscpd .
   dprint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     if: ${{ !cancelled() }}
     needs: renovate_tasks
     steps:
