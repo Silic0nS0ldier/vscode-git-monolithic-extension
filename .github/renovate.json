@@ -106,6 +106,18 @@
             ],
             "groupName": "rules_rust",
             "description": "Update rules_rust and rules_rust_wasm_bindgen together, as they need to be kept in sync."
+        },
+        {
+            "matchManagers": [
+                "npm"
+            ],
+            "matchDepNames": [
+                "renovate"
+            ],
+            "schedule": [
+                "* * 1-7,15-21 * 1"
+            ],
+            "description": "Reduce update rate of packages with high-frequency publishes to 1st and 3rd Monday of each month."
         }
     ]
 }
