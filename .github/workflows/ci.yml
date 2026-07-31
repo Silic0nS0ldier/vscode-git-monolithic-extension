@@ -108,7 +108,9 @@ jobs:
       - run: exit 1
         if: steps.test.outcome == 'failure' || steps.build_vsix.outcome == 'failure' || steps.knip.outcome == 'failure'
   publish_devcontainer:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # `renovate_tasks` is skipped on most runs, and a skip propagates down the whole `needs` chain
+    # unless a status function is used, so `build_and_test` is checked explicitly.
+    if: ${{ !cancelled() && needs.build_and_test.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     needs: build_and_test
     permissions:

@@ -194,7 +194,7 @@ register_toolchains(
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "devcontainers_base_ubuntu",
-    digest = "sha256:4bcb1b466771b1ba1ea110e2a27daea2f6093f9527fb75ee59703ec89b5561cb",
+    digest = "sha256:1f8bb87ca6d342a587a9163a5a1ea8c487bcd4f149e8483a5ff711f795f0776d",
     # Follows latest LTS release
     image = "mcr.microsoft.com/devcontainers/base:ubuntu",
     platforms = [
