@@ -16,25 +16,16 @@ bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.72.0")
 bazel_dep(name = "rules_rust", version = "0.72.0")
 bazel_dep(name = "rules_shell", version = "0.8.0")
 bazel_dep(name = "rules_oci", version = "2.3.0")
-bazel_dep(name = "rules_oci_runtime", version = "0.0.0")
 
-# Builds the rules_oci_runtime launcher from source, registering its toolchain.
-bazel_dep(name = "rules_oci_runtime_source", version = "0.0.0")
-bazel_dep(name = "tar.bzl", version = "0.10.4")
-
+bazel_dep(name = "rules_oci_runtime", version = "0.0.0-20260801-2")
 archive_override(
     module_name = "rules_oci_runtime",
-    integrity = "sha256-Q/JWg3ShqKQofMUKIt0dfz4Z1Nr7P7/VWYcl86vqLKU=",
-    strip_prefix = "rules-oci-runtime-96646ab50f824a66c50d2122d688886d8e0d6557",
-    urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/archive/96646ab50f824a66c50d2122d688886d8e0d6557.tar.gz"],
+    integrity = "sha256-Dv7eqG/tFjOpE/ydJCkUKXrRIyaRUdRZWeaNfo7HwFM=",
+    strip_prefix = "rules_oci_runtime-0.0.0-20260801-2",
+    urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/releases/download/v0.0.0-20260801-2/rules_oci_runtime-0.0.0-20260801-2.tar.gz"],
 )
 
-archive_override(
-    module_name = "rules_oci_runtime_source",
-    integrity = "sha256-Q/JWg3ShqKQofMUKIt0dfz4Z1Nr7P7/VWYcl86vqLKU=",
-    strip_prefix = "rules-oci-runtime-96646ab50f824a66c50d2122d688886d8e0d6557/source",
-    urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/archive/96646ab50f824a66c50d2122d688886d8e0d6557.tar.gz"],
-)
+bazel_dep(name = "tar.bzl", version = "0.10.4")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
