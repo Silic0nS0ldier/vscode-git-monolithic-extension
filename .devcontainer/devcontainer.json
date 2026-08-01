@@ -1,6 +1,7 @@
 {
     "name": "Git monolithic",
     "image": "ghcr.io/silic0ns0ldier/vscode-git-monolithic-extension/devcontainer:latest",
+    "privileged": true,
     "customizations": {
         "vscode": {
             "extensions": [
