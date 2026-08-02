@@ -1,6 +1,32 @@
 common --symlink_prefix=.bazel/
 common --lockfile_mode=error
 
+# Path mapping strips the configuration segment (`bazel-out/k8-fastbuild/bin`) from action
+# command lines, so actions that differ only by configuration share cache entries. It only
+# pays off with a disk or remote cache, and needs sandboxed (or remote) execution.
+# https://github.com/bazelbuild/bazel/discussions/22658
+common --disk_cache=~/.cache/bazel-disk
+common --experimental_disk_cache_gc_max_size=20G
+build --experimental_output_paths=strip
+
+# Native C/C++ actions support path mapping but require an explicit opt-in. Starlark
+# actions have to opt in too; `@aspect_rules_js` (NpmPackageExtract) and `@llvm` already
+# do so themselves. Do not add a mnemonic here without first checking that the action
+# builds its command line from `Args` holding `File` objects — an action that bakes a
+# path into an env var, a generated manifest or a plain string will break under mapping.
+build --modify_execution_info=CppCompile=+supports-path-mapping
+build --modify_execution_info=CppModuleMap=+supports-path-mapping
+build --modify_execution_info=CppArchive=+supports-path-mapping
+
+# `@rules_rust` opts every Rust action in unconditionally, but `@llvm`'s C/C++ toolchain
+# hands back link flags as pre-joined strings (`-Lbazel-out/k8-opt-exec/...`,
+# `-Bbazel-out/...`), which Bazel only rewrites when they come from a `File`. A mapped
+# `Rustc` link action therefore looks for `crt1.o` and `libc` under a path that the
+# sandbox no longer contains. Opting the whole family back out keeps the two consistent;
+# `CargoBuildScriptRun` writes `-L` search paths into param files that `Rustc` reads, so
+# they have to be mapped or unmapped together.
+build --modify_execution_info=^(Rustc|RustcMetadata|CargoBuildScriptRun|ExtractCargoTomlEnvVars|Clippy)$=-supports-path-mapping
+
 common --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
 common --@aspect_rules_ts//ts:default_to_tsc_transpiler
 
