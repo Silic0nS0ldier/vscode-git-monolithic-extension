@@ -1,0 +1,196 @@
+load("@aspect_rules_js//js:defs.bzl", "js_test")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@rules_itest//:itest.bzl", "itest_service", "itest_task", "service_test")
+load("@rules_oci_runtime//lib:defs.bzl", "runc_binary")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_library.bzl", "sh_library")
+load("//build_defs/lint:linters.bzl", "eslint_test", "shellcheck_test")
+
+npm_link_all_packages(name = "node_modules")
+
+# The services bind to the host loopback (`runc_binary` containers share the host network
+# namespace), so the whole package is Linux-only.
+_LINUX_ONLY = ["@platforms//os:linux"]
+
+# Shared by the fixture task and the test, which each resolve it against TEST_TMPDIR.
+_WORKSPACE_SUBDIR = "git-monolithic-itest-workspace"
+
+# browserless generates one if unset, and the test needs to know it up front.
+_BROWSERLESS_TOKEN = "git-monolithic-itest"
+
+selects.config_setting_group(
+    name = "linux_x86_64",
+    match_all = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "linux_arm64",
+    match_all = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+)
+
+filegroup(
+    name = "code_server_binary",
+    srcs = select({
+        ":linux_x86_64": ["@code_server_linux_x64//:bin/code-server"],
+        ":linux_arm64": ["@code_server_linux_arm64//:bin/code-server"],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = _LINUX_ONLY,
+)
+
+# code-server resolves its Node runtime and the bundled VS Code build relative to the
+# launcher script, so the rest of the distribution has to be staged alongside it.
+filegroup(
+    name = "code_server_dist",
+    srcs = select({
+        ":linux_x86_64": ["@code_server_linux_x64//:dist"],
+        ":linux_arm64": ["@code_server_linux_arm64//:dist"],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = _LINUX_ONLY,
+)
+
+sh_library(
+    name = "service_scripts",
+    srcs = [
+        "code-server.sh",
+        "workspace-fixture.sh",
+    ],
+)
+
+sh_binary(
+    name = "workspace_fixture",
+    srcs = ["workspace-fixture.sh"],
+    data = [
+        "//build_defs/git_bin:dist",
+        "//build_defs/git_bin:git",
+    ],
+)
+
+itest_task(
+    name = "workspace_fixture_task",
+    args = [
+        "$(rootpath //build_defs/git_bin:git)",
+        _WORKSPACE_SUBDIR,
+    ],
+    data = ["//build_defs/git_bin:git"],
+    exe = ":workspace_fixture",
+)
+
+sh_binary(
+    name = "code_server",
+    srcs = ["code-server.sh"],
+    data = [
+        ":code_server_binary",
+        ":code_server_dist",
+        "//extension/vsix:git_monolithic",
+    ],
+    target_compatible_with = _LINUX_ONLY,
+)
+
+itest_service(
+    name = "code_server_service",
+    args = [
+        "$(rootpath :code_server_binary)",
+        "$(rootpath //extension/vsix:git_monolithic)",
+        "$${PORT}",
+    ],
+    autoassign_port = True,
+    data = [
+        ":code_server_binary",
+        "//extension/vsix:git_monolithic",
+    ],
+    # Installing the extension and booting the extension host is not quick.
+    expected_start_duration = "20s",
+    exe = ":code_server",
+    http_health_check_address = "http://127.0.0.1:$${PORT}/healthz",
+    target_compatible_with = _LINUX_ONLY,
+    deps = [":workspace_fixture_task"],
+)
+
+runc_binary(
+    name = "browserless_chromium",
+    env = {"TOKEN": _BROWSERLESS_TOKEN},
+    image = "@browserless_chromium",
+    target_compatible_with = _LINUX_ONLY,
+)
+
+itest_service(
+    name = "browserless_chromium_service",
+    # The container does not inherit the host environment, so the assigned port has to
+    # travel as a launcher flag rather than through `env`.
+    args = [
+        "--env",
+        "PORT=$${PORT}",
+    ],
+    autoassign_port = True,
+    exe = ":browserless_chromium",
+    http_health_check_address = "http://127.0.0.1:$${PORT}/json/version?token=" + _BROWSERLESS_TOKEN,
+    target_compatible_with = _LINUX_ONLY,
+)
+
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+    deps = ["//:tsconfig"],
+)
+
+ts_project(
+    name = "lib_tests",
+    srcs = glob(["src/**/*.ts"]) + ["package.json"],
+    out_dir = "dist",
+    root_dir = "src",
+    tsconfig = ":tsconfig",
+    deps = [
+        ":node_modules/@types/node",
+        ":node_modules/playwright-core",
+    ],
+)
+
+js_test(
+    name = "smoke_test_bin",
+    data = [
+        "package.json",
+        ":lib_tests",
+        ":node_modules/playwright-core",
+    ],
+    entry_point = "dist/smoke.test.js",
+    tags = ["manual"],
+    target_compatible_with = _LINUX_ONLY,
+)
+
+service_test(
+    name = "smoke_test",
+    size = "medium",
+    env = {
+        "BROWSERLESS_TOKEN": _BROWSERLESS_TOKEN,
+        "ITEST_WORKSPACE_SUBDIR": _WORKSPACE_SUBDIR,
+    },
+    services = [
+        ":browserless_chromium_service",
+        ":code_server_service",
+    ],
+    target_compatible_with = _LINUX_ONLY,
+    test = ":smoke_test_bin",
+)
+
+shellcheck_test(
+    name = "shellcheck",
+    srcs = [":service_scripts"],
+)
+
+eslint_test(
+    name = "eslint",
+    srcs = [":lib_tests"],
+)
+
+# TODO Workflow for test recording (https://playwright.dev/docs/codegen)
+# TODO Implement automatic screenshot capture (for extension README)
