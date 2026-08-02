@@ -8,4 +8,3 @@ members = [
 [workspace.dependencies]
 wasm-bindgen = "=0.2.126"
 wasm-bindgen-cli = "=0.2.126"
-wasm-bindgen-test = "0.3.76"

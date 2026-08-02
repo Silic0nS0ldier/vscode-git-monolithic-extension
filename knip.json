@@ -29,7 +29,12 @@
             ]
         },
         "packages/wasm": {
-            "entry": []
+            "entry": [
+                "wasm.test.js"
+            ],
+            "ignoreUnresolved": [
+                "./mod.js"
+            ]
         },
         "build_defs/rollup_bundle": {
             "entry": [

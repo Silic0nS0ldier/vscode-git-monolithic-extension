@@ -1,6 +1,7 @@
+load("@aspect_rules_js//js:defs.bzl", "js_test")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
-load("@rules_rust//rust:defs.bzl", "rust_shared_library")
-load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen", "rust_wasm_bindgen_test")
+load("@rules_rust//rust:defs.bzl", "rust_shared_library", "rust_test")
+load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen")
 load("@crates//:defs.bzl", "all_crate_deps")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 
@@ -12,15 +13,29 @@ rust_shared_library(
     deps = all_crate_deps(normal = True),
 )
 
+# Built for the host rather than `:wasm_lib`, whose wasm32 constraints leave nothing able to
+# execute the resulting binary. `#[wasm_bindgen]` degrades to a plain function off wasm32.
+rust_test(
+    name = "wasm_lib_test",
+    srcs = glob(["src/**"]),
+    edition = "2024",
+    deps = all_crate_deps(normal = True),
+)
+
 rust_wasm_bindgen(
     name = "wasm",
     wasm_file = ":wasm_lib",
     target = "web",
 )
 
-rust_wasm_bindgen_test(
+js_test(
     name = "wasm_test",
-    wasm = ":wasm",
+    data = [
+        "package.json",
+        ":mod_js",
+        ":wasm",
+    ],
+    entry_point = "wasm.test.js",
 )
 
 # Small ESM wrapper that source-phase-imports the sidecar `.wasm` file and
