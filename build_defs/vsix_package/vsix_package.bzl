@@ -28,17 +28,18 @@ def _vsix_package_impl(ctx):
     )
 
     out = ctx.actions.declare_file("%s.vsix" % ctx.label.name)
-    arguments = [
-        "--in-dir",
-        inputs_dir.path,
-        "--out-file",
-        out.path,
-    ]
+
+    # Built from `File` objects rather than `.path` strings so that the command line
+    # survives `--experimental_output_paths=strip`. `expand_directories` has to be off,
+    # otherwise `inputs_dir` is replaced by the files it contains.
+    arguments = ctx.actions.args()
+    arguments.add_all(["--in-dir", inputs_dir], expand_directories = False)
+    arguments.add_all(["--out-file", out])
     if ctx.attr.verbose:
-        arguments.append("--verbose")
+        arguments.add("--verbose")
     ctx.actions.run(
         executable = ctx.executable._packaging_tool,
-        arguments = arguments,
+        arguments = [arguments],
         env = {
             "BAZEL_BINDIR": ctx.bin_dir.path,
         },
