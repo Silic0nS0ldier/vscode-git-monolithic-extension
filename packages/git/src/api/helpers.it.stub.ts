@@ -12,7 +12,12 @@ import { init } from "./repository/init/mod.js";
 export const services = createServices();
 
 export const gitCtx = await (async () => {
-    const gitPath = runfiles.resolve("git/git");
+    const rlocation = process.env["GIT_BIN_RLOCATION"];
+    if (!rlocation) {
+        throw new Error("GIT_BIN_RLOCATION is not set; it is provided by the js_test `env` attribute");
+    }
+
+    const gitPath = runfiles.resolve(rlocation);
     const persistentContext: PersistentCLIContext = { env: process.env, timeout: 5_000 };
     return unwrapOk(await fromPath(gitPath, persistentContext, services));
 })();
