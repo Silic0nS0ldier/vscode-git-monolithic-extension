@@ -231,6 +231,40 @@ http_archive(
     url = _DUGITE_URL_PREFIX + "macOS-arm64.tar.gz",
 )
 
+# code-server hosts the extension for `//integration_tests`. Upstream VS Code cannot run
+# headless (Electron), and gitpod/openvscode-server stopped at 1.105.1 in October 2025,
+# below the `engines.vscode` floor in //extension/vsix:package.json.
+_CODE_SERVER_BUILD_FILE = """\
+exports_files(["bin/code-server"])
+
+filegroup(
+    name = "dist",
+    srcs = glob(["**"], exclude = ["bin/code-server"]),
+    visibility = ["//visibility:public"],
+)
+"""
+
+# renovate: datasource=github-releases depName=coder/code-server
+_CODE_SERVER_RELEASE = "4.131.0"
+
+_CODE_SERVER_URL_PREFIX = "https://github.com/coder/code-server/releases/download/v" + _CODE_SERVER_RELEASE + "/code-server-" + _CODE_SERVER_RELEASE + "-"
+
+http_archive(
+    name = "code_server_linux_x64",
+    build_file_content = _CODE_SERVER_BUILD_FILE,
+    sha256 = "f6316f0b14ef5c12ed6e67e0154dd02ccf5e66112064687d7e93c51763105361",
+    strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-amd64",
+    url = _CODE_SERVER_URL_PREFIX + "linux-amd64.tar.gz",
+)
+
+http_archive(
+    name = "code_server_linux_arm64",
+    build_file_content = _CODE_SERVER_BUILD_FILE,
+    sha256 = "4d2a8b2f755446079c4364b18e71c9121181e4e605c6c35939e5f1aac8d1eae8",
+    strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-arm64",
+    url = _CODE_SERVER_URL_PREFIX + "linux-arm64.tar.gz",
+)
+
 register_toolchains(
     "//build_defs/rust_wasm_bindgen:toolchain",
     "@llvm//toolchain:all",
@@ -246,16 +280,6 @@ oci.pull(
         "linux/amd64",
         "linux/arm64",
     ],
-)
-oci.pull(
-    name = "openvscode_server",
-    digest = "sha256:8f0fb92ed942f3d3047cd534046aa391bdeee39bb2b604b391825ff385d03ab3",
-    image = "docker.io/gitpod/openvscode-server",
-    platforms = [
-        "linux/amd64",
-        "linux/arm64",
-    ],
-    tag = "1.101.2",
 )
 oci.pull(
     name = "browserless_chromium",
@@ -275,9 +299,6 @@ use_repo(
     "devcontainers_base_ubuntu",
     "devcontainers_base_ubuntu_linux_amd64",
     "devcontainers_base_ubuntu_linux_arm64",
-    "openvscode_server",
-    "openvscode_server_linux_amd64",
-    "openvscode_server_linux_arm64",
 )
 
 http_archive(

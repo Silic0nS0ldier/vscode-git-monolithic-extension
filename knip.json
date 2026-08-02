@@ -2,10 +2,6 @@
     "$schema": "https://unpkg.com/knip@6/schema.json",
     "workspaces": {
         ".": {
-            "entry": [
-                "integration_tests/electron_host/check-electron-pin.mjs",
-                "integration_tests/electron_host/load-check.mjs"
-            ],
             "ignoreDependencies": [
                 "@typescript/native",
                 "renovate"
@@ -34,6 +30,17 @@
             ],
             "ignoreUnresolved": [
                 "./mod.js"
+            ]
+        },
+        "integration_tests": {
+            "entry": [
+                "src/smoke.test.ts",
+                "electron_host/check-electron-pin.mjs",
+                "electron_host/load-check.mjs"
+            ],
+            "project": [
+                "src/**/*.ts",
+                "electron_host/**/*.mjs"
             ]
         },
         "build_defs/rollup_bundle": {

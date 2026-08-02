@@ -71,6 +71,7 @@ vsix_package(
         ":copy_license",
     ],
     in_dir = "./",
+    visibility = ["//integration_tests:__pkg__"],
 )
 
 sh_library(
