@@ -1,0 +1,57 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+package(default_visibility = ["//visibility:public"])
+
+selects.config_setting_group(
+    name = "linux_x86_64",
+    match_all = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "linux_arm64",
+    match_all = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "macos_x86_64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "macos_arm64",
+    match_all = [
+        "@platforms//os:macos",
+        "@platforms//cpu:arm64",
+    ],
+)
+
+alias(
+    name = "git",
+    actual = select({
+        ":linux_x86_64": "@dugite_linux_x64//:bin/git",
+        ":linux_arm64": "@dugite_linux_arm64//:bin/git",
+        ":macos_x86_64": "@dugite_darwin_x64//:bin/git",
+        ":macos_arm64": "@dugite_darwin_arm64//:bin/git",
+    }),
+)
+
+# git locates `libexec/git-core` and the templates relative to its own binary, so the
+# rest of the distribution has to be staged alongside it.
+alias(
+    name = "dist",
+    actual = select({
+        ":linux_x86_64": "@dugite_linux_x64//:dist",
+        ":linux_arm64": "@dugite_linux_arm64//:dist",
+        ":macos_x86_64": "@dugite_darwin_x64//:dist",
+        ":macos_arm64": "@dugite_darwin_arm64//:dist",
+    }),
+)

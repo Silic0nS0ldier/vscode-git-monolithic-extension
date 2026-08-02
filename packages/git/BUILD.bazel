@@ -109,9 +109,19 @@ test_suite(
         data = [
             "package.json",
             ":lib_integration_tests",
-            "@git",
+            "//build_defs/git_bin:dist",
+            "//build_defs/git_bin:git",
         ],
         entry_point = entry_point,
+        env = {
+            # The repository holding git is platform dependent, so its runfiles path
+            # cannot be hardcoded in the test sources.
+            "GIT_BIN_RLOCATION": "$(rlocationpath //build_defs/git_bin:git)",
+        },
+        no_copy_to_bin = [
+            "//build_defs/git_bin:dist",
+            "//build_defs/git_bin:git",
+        ],
     )
     for (test_name, entry_point) in INTEGRATION_TESTS
 ]

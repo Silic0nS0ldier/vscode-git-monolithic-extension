@@ -7,7 +7,6 @@ bazel_dep(name = "aspect_rules_js", version = "3.2.3")
 bazel_dep(name = "aspect_rules_lint", version = "2.7.2")
 bazel_dep(name = "aspect_rules_ts", version = "3.9.2")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
-bazel_dep(name = "git", version = "2.55.0")
 bazel_dep(name = "llvm", version = "0.8.14")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_multitool", version = "1.11.1")
@@ -172,6 +171,67 @@ http_archive(
     build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
     sha256 = "1bdf5c042e0282e59784264cb29bb3341b1a17d4d14de591a834afb714ce8f63",
     url = "https://github.com/electron/electron/releases/download/v42.7.0/electron-v42.7.0-darwin-arm64.zip",
+)
+
+# Portable git builds from GitHub Desktop, used by `//packages/git` integration tests.
+# Building git from source (the BCR `git` module) also builds OpenSSL and BoringSSL, which
+# dominated the build: ~2400 of ~3600 action CPU-seconds for ~8s of tests.
+_DUGITE_BUILD_FILE = """\
+exports_files(["bin/git"])
+
+filegroup(
+    name = "dist",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "bin/git",
+            # Unused by these tests, and ~106MB of the ~139MB payload.
+            "libexec/git-core/git-credential-manager",
+            "libexec/git-core/git-lfs",
+            "libexec/git-core/*.so",
+            "share/locale/**",
+        ],
+    ),
+    visibility = ["//visibility:public"],
+)
+"""
+
+# renovate: datasource=github-releases depName=desktop/dugite-native versioning=regex:^v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)-(?<build>\d+)$
+_DUGITE_RELEASE = "v2.53.0-3"
+
+# Asset names embed the git source commit, which is not derivable from the release tag.
+# Kept in sync with _DUGITE_RELEASE by .github/workflows/update_bazel_git.mjs.
+_DUGITE_ASSET_VERSION = "v2.53.0-f49d009"
+
+_DUGITE_URL_PREFIX = "https://github.com/desktop/dugite-native/releases/download/" + _DUGITE_RELEASE + "/dugite-native-" + _DUGITE_ASSET_VERSION + "-"
+
+http_archive(
+    name = "dugite_linux_x64",
+    build_file_content = _DUGITE_BUILD_FILE,
+    sha256 = "b3a85433c8dfde76d21b90938ad2f971653deff4340b1b4d347258c63250eafc",
+    url = _DUGITE_URL_PREFIX + "ubuntu-x64.tar.gz",
+)
+
+http_archive(
+    name = "dugite_linux_arm64",
+    build_file_content = _DUGITE_BUILD_FILE,
+    sha256 = "d562ad433ed0dc1907f44a92fc701597bc577c48d07fe69ee7adddfee836ef4c",
+    url = _DUGITE_URL_PREFIX + "ubuntu-arm64.tar.gz",
+)
+
+http_archive(
+    name = "dugite_darwin_x64",
+    build_file_content = _DUGITE_BUILD_FILE,
+    sha256 = "caf27c36b8834969550535bcd5e58186f970e080d1e175e76d9c1de3aac409ed",
+    url = _DUGITE_URL_PREFIX + "macOS-x64.tar.gz",
+)
+
+http_archive(
+    name = "dugite_darwin_arm64",
+    build_file_content = _DUGITE_BUILD_FILE,
+    sha256 = "e561cfc80c755e6f3e938653e81efcd025c9827a5b76dd42778b1159b3fab437",
+    url = _DUGITE_URL_PREFIX + "macOS-arm64.tar.gz",
 )
 
 register_toolchains(
