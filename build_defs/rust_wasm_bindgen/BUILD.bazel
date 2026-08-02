@@ -3,7 +3,7 @@ load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen_toolchain")
 # Copy of default toolchain in `@rules_rust_wasm_bindgen` with our dependency versions.
 rust_wasm_bindgen_toolchain(
     name = "toolchain_impl",
-    wasm_bindgen_cli = "@crates//:wasm-bindgen-cli__wasm-bindgen",
+    wasm_bindgen_cli = "@multitool//tools/wasm-bindgen",
 )
 
 toolchain(

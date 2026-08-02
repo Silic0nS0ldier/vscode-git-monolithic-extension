@@ -75,10 +75,6 @@ crate.from_cargo(
     cargo_lockfile = "//:Cargo.lock",
     manifests = ["//:Cargo.toml"],
 )
-crate.annotation(
-    crate = "wasm-bindgen-cli",
-    gen_all_binaries = True,
-)
 use_repo(crate, crates = "monolithic_crates")
 
 rust_wasm_bindgen_ext = use_extension("@rules_rust_wasm_bindgen//:extensions.bzl", "rust_ext")

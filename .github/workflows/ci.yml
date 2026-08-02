@@ -38,6 +38,7 @@ jobs:
       - run: node ./.github/workflows/update_bazel_electron.mjs
       - run: node ./.github/workflows/update_bazel_git.mjs
       - run: node ./.github/workflows/update_bazel_rust.mjs
+      - run: node ./.github/workflows/update_multitool_wasm_bindgen.mjs
       - run: bazel mod deps --lockfile_mode=update
       - uses: stefanzweifel/git-auto-commit-action@v7
       - id: get_commit
@@ -61,7 +62,6 @@ jobs:
           bazelisk-cache: true
           disk-cache: "${{ github.workflow }}-test"
           repository-cache: |
-            - build_defs/rust_wasm_bindgen/Cargo.toml
             - Cargo.lock
             - Cargo.toml
             - MODULE.bazel
