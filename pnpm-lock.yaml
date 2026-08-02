@@ -126,7 +126,7 @@ importers:
   integration_tests:
     dependencies:
       playwright-core:
-        specifier: ^1.62.0
+        specifier: ^1.62.1
         version: 1.62.1
     devDependencies:
       '@types/node':
