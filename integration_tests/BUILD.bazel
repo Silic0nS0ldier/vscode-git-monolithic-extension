@@ -182,6 +182,33 @@ service_test(
     test = ":smoke_test_bin",
 )
 
+js_test(
+    name = "clone_test_bin",
+    data = [
+        "package.json",
+        ":lib_tests",
+        ":node_modules/playwright-core",
+    ],
+    entry_point = "dist/clone.test.js",
+    tags = ["manual"],
+    target_compatible_with = _LINUX_ONLY,
+)
+
+service_test(
+    name = "clone_test",
+    size = "medium",
+    env = {
+        "BROWSERLESS_TOKEN": _BROWSERLESS_TOKEN,
+        "ITEST_WORKSPACE_SUBDIR": _WORKSPACE_SUBDIR,
+    },
+    services = [
+        ":browserless_chromium_service",
+        ":code_server_service",
+    ],
+    target_compatible_with = _LINUX_ONLY,
+    test = ":clone_test_bin",
+)
+
 shellcheck_test(
     name = "shellcheck",
     srcs = [":service_scripts"],

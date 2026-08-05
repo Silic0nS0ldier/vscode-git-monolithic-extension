@@ -27,3 +27,18 @@ git commit --message "Initial commit"
 # Leave the working tree dirty so the SCM view has something to render.
 echo "modified" >>"$workspace/tracked.txt"
 echo "untracked" >"$workspace/untracked.txt"
+
+# Source repository for the clone test, plus an empty directory to clone into. Both
+# live outside the opened workspace so cloning does not perturb the SCM view.
+clone_source="${workspace}-clone-source"
+clone_target="${workspace}-clone-target"
+
+rm -rf "$clone_source" "$clone_target"
+mkdir -p "$clone_source" "$clone_target"
+
+"$git_bin" -C "$clone_source" init --initial-branch=main
+"$git_bin" -C "$clone_source" config user.email "itest@example.invalid"
+"$git_bin" -C "$clone_source" config user.name "Integration Test"
+echo "tracked" >"$clone_source/tracked.txt"
+"$git_bin" -C "$clone_source" add tracked.txt
+"$git_bin" -C "$clone_source" commit --message "Initial commit"
