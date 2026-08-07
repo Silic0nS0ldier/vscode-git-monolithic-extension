@@ -30,15 +30,15 @@ bazel_dep(name = "tar.bzl", version = "0.10.4")
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
     node_repositories = {
-        "26.5.1-darwin_arm64": ("node-v26.5.1-darwin-arm64.tar.xz", "node-v26.5.1-darwin-arm64", "f4665a1e764653ec6fe7686309e8907e9ebb9ba68c4b88b9185fdc29f221559b"),
-        "26.5.1-darwin_amd64": ("node-v26.5.1-darwin-x64.tar.xz", "node-v26.5.1-darwin-x64", "4436be8db0e2bd5ca3dee8c48aa8a157c9a8fef99580036ff1da8ef6aba44708"),
-        "26.5.1-linux_arm64": ("node-v26.5.1-linux-arm64.tar.xz", "node-v26.5.1-linux-arm64", "0b6b0cc2a1eecbe736f9918de8b5a6c9a48d286b88bec1298a3c1e3376182ea8"),
-        "26.5.1-linux_ppc64le": ("node-v26.5.1-linux-ppc64le.tar.xz", "node-v26.5.1-linux-ppc64le", "692d0c45896bf232e22b8b64a4a826ed0a70fec75545f208d120c109d0a86752"),
-        "26.5.1-linux_s390x": ("node-v26.5.1-linux-s390x.tar.xz", "node-v26.5.1-linux-s390x", "ff4635062f82308dda7c7164337ad9bb383568dac984ff64b35b888e7d7a4ef3"),
-        "26.5.1-linux_amd64": ("node-v26.5.1-linux-x64.tar.xz", "node-v26.5.1-linux-x64", "cc7b3484ade63bd203a9d304f21ec37a3b622b988d7bdecf1dc4d68fc44a91b7"),
-        "26.5.1-windows_amd64": ("node-v26.5.1-win-x64.zip", "node-v26.5.1-win-x64", "c432c996b95cbf7568f13a0fbb37526de84a27e3a5c520c3be15f05a9a168212"),
+        "26.6.0-darwin_arm64": ("node-v26.6.0-darwin-arm64.tar.xz", "node-v26.6.0-darwin-arm64", "ea029a807203a32378bf09abe56fea3ea40d6a2dbf663edbedaedd84abd1b10b"),
+        "26.6.0-darwin_amd64": ("node-v26.6.0-darwin-x64.tar.xz", "node-v26.6.0-darwin-x64", "6548b8f703d56ca42542837389dfeb106f9035ec4e6168cd81599ed66e0e2b4a"),
+        "26.6.0-linux_arm64": ("node-v26.6.0-linux-arm64.tar.xz", "node-v26.6.0-linux-arm64", "974e6f0332fb26179b34d49c57f35339e089a89faf8b82a81e44c0e1164b7923"),
+        "26.6.0-linux_ppc64le": ("node-v26.6.0-linux-ppc64le.tar.xz", "node-v26.6.0-linux-ppc64le", "8967dec897b3821ac900f37dd10b2397f337e8ce3f3a89180cecfdedc8550fde"),
+        "26.6.0-linux_s390x": ("node-v26.6.0-linux-s390x.tar.xz", "node-v26.6.0-linux-s390x", "776d69f7c81dc971a6732a095958809c9b4fb805633d848d0f28181ee2845cf9"),
+        "26.6.0-linux_amd64": ("node-v26.6.0-linux-x64.tar.xz", "node-v26.6.0-linux-x64", "e53a8c8ca2ee7135de38e63859bd4f43002ae2d222f5b3a98ac1945db9f544bb"),
+        "26.6.0-windows_amd64": ("node-v26.6.0-win-x64.zip", "node-v26.6.0-win-x64", "aa81c8552f251ff280134985ccdaf16d336e2961b1e2c3eeb7b7b2221509f723"),
     },
-    node_version = "26.5.1",
+    node_version = "26.6.0",
 )
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
