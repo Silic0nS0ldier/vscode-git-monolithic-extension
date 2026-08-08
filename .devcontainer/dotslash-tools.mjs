@@ -98,7 +98,7 @@ export const tools = {
     },
     node: {
         // renovate: datasource=github-tags depName=nodejs/node
-        version: "v26.6.0",
+        version: "v26.7.0",
         platforms: {
             "linux-x86_64": {
                 url: "https://nodejs.org/dist/{version}/node-{version}-linux-x64.tar.xz",
