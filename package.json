@@ -4,7 +4,7 @@
     "dependencies": {
         "@eslint/js": "^10.0.1",
         "@typescript/native": "npm:typescript@^7.0.2",
-        "eslint": "^10.8.0",
+        "eslint": "^10.8.1",
         "knip": "^6.32.0",
         "renovate": "^44.5.2",
         "typescript": "npm:@typescript/typescript6@^6.0.2",
