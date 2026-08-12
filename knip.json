@@ -34,7 +34,7 @@
         },
         "integration_tests": {
             "entry": [
-                "src/smoke.test.ts",
+                "src/scm.test.ts",
                 "electron_host/check-electron-pin.mjs",
                 "electron_host/load-check.mjs"
             ],

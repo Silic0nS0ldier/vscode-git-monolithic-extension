@@ -7,6 +7,9 @@ set -euo pipefail
 git_bin="$(realpath "$1")"
 workspace="${TEST_TMPDIR:-/tmp}/$2"
 
+# The test asserts against the same git build, and only this task can resolve its runfile.
+printf '%s' "$git_bin" >"${TEST_TMPDIR:-/tmp}/git-bin"
+
 # The dugite build ships its own config; ignore whatever the host has.
 export GIT_CONFIG_GLOBAL=/dev/null
 export GIT_CONFIG_SYSTEM=/dev/null
