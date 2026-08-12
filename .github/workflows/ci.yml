@@ -35,6 +35,7 @@ jobs:
           repository-cache: false
       - run: node ./.github/workflows/update_dotslash_stubs.mjs
       - run: node ./.github/workflows/update_bazel_nodejs.mjs ./MODULE.bazel
+      - run: node ./.github/workflows/update_bazel_code_server.mjs
       - run: node ./.github/workflows/update_bazel_electron.mjs
       - run: node ./.github/workflows/update_bazel_git.mjs
       - run: node ./.github/workflows/update_bazel_rust.mjs

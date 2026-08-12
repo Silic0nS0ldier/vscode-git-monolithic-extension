@@ -245,14 +245,17 @@ filegroup(
 """
 
 # renovate: datasource=github-releases depName=coder/code-server
-_CODE_SERVER_RELEASE = "4.131.0"
+# Source of truth for the VS Code version this repo targets: `engines.vscode` in
+# //extension/vsix:package.json is derived from this pin by update_bazel_code_server.mjs,
+# which also refreshes the digests below. Guarded by //integration_tests:code_server_pin_drift_test.
+_CODE_SERVER_RELEASE = "4.132.0"
 
 _CODE_SERVER_URL_PREFIX = "https://github.com/coder/code-server/releases/download/v" + _CODE_SERVER_RELEASE + "/code-server-" + _CODE_SERVER_RELEASE + "-"
 
 http_archive(
     name = "code_server_linux_x64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "f6316f0b14ef5c12ed6e67e0154dd02ccf5e66112064687d7e93c51763105361",
+    sha256 = "a38d26f4cb81f768feddff79e2937fd3f39c83d3da8be3da7225e1087e62e4ed",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-amd64",
     url = _CODE_SERVER_URL_PREFIX + "linux-amd64.tar.gz",
 )
@@ -260,7 +263,7 @@ http_archive(
 http_archive(
     name = "code_server_linux_arm64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "4d2a8b2f755446079c4364b18e71c9121181e4e605c6c35939e5f1aac8d1eae8",
+    sha256 = "ade569a677d1c04ee66ef153382b7e15bf261f955407663c7ddc6b87f9ee29fc",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-arm64",
     url = _CODE_SERVER_URL_PREFIX + "linux-arm64.tar.gz",
 )

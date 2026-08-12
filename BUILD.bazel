@@ -17,6 +17,12 @@ exports_files([
 ])
 
 js_library(
+    name = "module_bazel",
+    srcs = ["MODULE.bazel"],
+    visibility = ["//integration_tests:__pkg__"],
+)
+
+js_library(
     name = "eslintrc",
     srcs = ["eslint.config.mjs"],
     visibility = ["//build_defs/lint:__pkg__"],
