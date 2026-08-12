@@ -187,6 +187,20 @@ service_test(
     test = ":scm_test_bin",
 )
 
+js_test(
+    name = "code_server_pin_drift_test",
+    size = "small",
+    args = [
+        "$(rootpath //:module_bazel)",
+        "$(rootpath //extension/vsix:manifest)",
+    ],
+    data = [
+        "//:module_bazel",
+        "//extension/vsix:manifest",
+    ],
+    entry_point = "check-code-server-pin.mjs",
+)
+
 shellcheck_test(
     name = "shellcheck",
     srcs = [":service_scripts"],
