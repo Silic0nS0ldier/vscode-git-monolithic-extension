@@ -10,6 +10,8 @@ export const LOAD_TIMEOUT_MS = 120_000;
 /** Once the workbench is up, no single interaction should take anywhere near this long. */
 const ACTION_TIMEOUT_MS = 30_000;
 
+const OUTPUT_PANEL = "[id=\"workbench.panel.output\"]";
+
 /**
  * `rules_itest` exports assigned ports keyed by canonical label. Matching on a suffix
  * keeps the test working regardless of how the repository is named.
@@ -71,6 +73,46 @@ export async function openWorkbench(browser: Browser): Promise<Page> {
     return page;
 }
 
+/** Runs a command by the label the command palette lists it under. */
+export async function runCommand(page: Page, label: string): Promise<void> {
+    const palette = page.locator(".quick-input-widget");
+
+    await page.keyboard.press("Control+Shift+P");
+    await palette.waitFor({ state: "visible" });
+    await page.keyboard.type(label);
+
+    // A command contributed by an inactive extension is simply absent, and pressing enter
+    // would then run whatever the fuzzy match turned up instead.
+    await palette.locator(".monaco-list-row").filter({ hasText: label }).first().waitFor({ state: "visible" });
+    await page.keyboard.press("Enter");
+    await palette.waitFor({ state: "hidden" });
+}
+
+/**
+ * Lines of the output channel shown in the panel that mention `text`. The editor only
+ * renders the tail, so filtering is the way to reach lines written during activation.
+ */
+export async function filteredOutputPanelText(page: Page, text: string): Promise<string> {
+    const panel = page.locator(OUTPUT_PANEL);
+
+    await panel.waitFor({ state: "visible" });
+    await panel.locator(".monaco-inputbox input").first().fill(text);
+
+    // Filtering is debounced, so the panel keeps rendering the unfiltered tail for a beat.
+    return await pollUntil(
+        `the output panel to render a line matching '${text}'`,
+        // The editor word-wraps and renders spaces as non-breaking, so the rendered text
+        // only resembles the logged line once whitespace is collapsed.
+        async () => (await panel.locator(".view-lines").innerText()).replaceAll(/\s+/gu, " "),
+        rendered => rendered.includes(text),
+    );
+}
+
+export async function closeOutputPanel(page: Page): Promise<void> {
+    await page.getByRole("button", { name: "Hide Panel" }).click();
+    await page.locator(OUTPUT_PANEL).waitFor({ state: "hidden" });
+}
+
 /** The history view is a second `.scm-view`, and it renders commits rather than changes. */
 export function scmView(page: Page): Locator {
     return page.locator(".scm-view:not(.scm-history-view)").first();
@@ -89,6 +131,15 @@ export function resourceRow(view: Locator, fileName: string): Locator {
     return view.locator(".monaco-list-row").filter({
         has: view.page().locator(".label-name").filter({ hasText: exact }),
     });
+}
+
+/** The count badge on the header row of an SCM resource group, e.g. `Staged`. */
+export function groupCount(view: Locator, group: string): Locator {
+    // The header keeps the group name when populated and reads `Staged (empty)` otherwise.
+    const name = new RegExp(`^${group}\\b`, "u");
+    return view.locator(".monaco-list-row")
+        .filter({ has: view.page().locator(".resource-group .name").filter({ hasText: name }) })
+        .locator(".monaco-count-badge");
 }
 
 export async function invokeRowAction(view: Locator, fileName: string, action: string): Promise<void> {

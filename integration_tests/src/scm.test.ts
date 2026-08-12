@@ -4,13 +4,17 @@ import type { Page } from "playwright-core";
 import { headSubject, status } from "./git.js";
 import {
     capture,
+    closeOutputPanel,
     connect,
+    filteredOutputPanelText,
+    groupCount,
     invokeRowAction,
     LOAD_TIMEOUT_MS,
     openScmView,
     openWorkbench,
     pollUntil,
     resourceRow,
+    runCommand,
     scmView,
 } from "./harness.js";
 
@@ -59,12 +63,26 @@ scenario("the extension activates and reports working tree changes", async () =>
     assert.deepStrictEqual(await status(), { "tracked.txt": " M", "untracked.txt": "??" });
 });
 
+scenario("the provider is this extension rather than VS Code's builtin git", async () => {
+    // Both extensions contribute this command, but the builtin hides its palette entries
+    // while `git.enabled` is false, which is also the condition this extension waits for.
+    await runCommand(page, "Git: Show Git Output");
+
+    assert.match(
+        await filteredOutputPanelText(page, "Git Monolithic"),
+        /Activating Git Monolithic extension/u,
+        "Git Monolithic stayed dormant, so the SCM view above belongs to the builtin git extension",
+    );
+
+    await closeOutputPanel(page);
+});
+
 scenario("staging a change writes it to the index", async () => {
     const view = scmView(page);
 
     await invokeRowAction(view, "tracked.txt", "Stage Changes");
 
-    await view.getByText("Staged Changes", { exact: true }).waitFor({ state: "visible" });
+    await groupCount(view, "Staged").filter({ hasText: /^1$/u }).waitFor({ state: "visible" });
     assert.deepStrictEqual(
         await pollUntil("tracked.txt to be staged", status, current => current["tracked.txt"] === "M "),
         { "tracked.txt": "M ", "untracked.txt": "??" },
@@ -76,7 +94,7 @@ scenario("unstaging returns the change to the working tree", async () => {
 
     await invokeRowAction(view, "tracked.txt", "Unstage Changes");
 
-    await view.getByText("Staged Changes", { exact: true }).waitFor({ state: "hidden" });
+    await groupCount(view, "Staged").filter({ hasText: /^0$/u }).waitFor({ state: "visible" });
     assert.deepStrictEqual(
         await pollUntil("tracked.txt to leave the index", status, current => current["tracked.txt"] === " M"),
         { "tracked.txt": " M", "untracked.txt": "??" },
@@ -90,6 +108,10 @@ scenario("committing from the input box clears the working tree", async () => {
     await pollUntil("tracked.txt to be staged", status, current => current["tracked.txt"] === "M ");
     await invokeRowAction(view, "untracked.txt", "Stage Changes");
     await pollUntil("untracked.txt to be staged", status, current => current["untracked.txt"] === "A ");
+
+    // The index is ahead of the view for a moment, and committing before the view catches
+    // up prompts to stage everything instead.
+    await groupCount(view, "Staged").filter({ hasText: /^2$/u }).waitFor({ state: "visible" });
 
     // The input box is a Monaco editor; its textarea is not directly clickable.
     await view.locator(".monaco-editor").first().click();

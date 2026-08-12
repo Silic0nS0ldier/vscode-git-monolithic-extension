@@ -14,7 +14,16 @@ unset VSCODE_IPC_HOOK_CLI VSCODE_PID VSCODE_GIT_IPC_HANDLE
 
 state="${TEST_TMPDIR:-/tmp}/code-server"
 rm -rf "$state"
-mkdir -p "$state/user" "$state/extensions"
+mkdir -p "$state/user/User" "$state/extensions"
+
+# The extension under test is opt-in: it stays dormant while VS Code's builtin git
+# extension is enabled, so without this the test would drive the builtin instead.
+cat >"$state/user/User/settings.json" <<'JSON'
+{
+    "git.enabled": false,
+    "git_monolithic.enabled": true
+}
+JSON
 
 # code-server reads (and creates) ~/.config/code-server/config.yaml unless pointed
 # elsewhere. An empty file keeps the developer's own settings out of the test.
