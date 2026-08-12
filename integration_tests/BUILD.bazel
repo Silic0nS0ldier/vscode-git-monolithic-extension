@@ -121,6 +121,7 @@ runc_binary(
     env = {"TOKEN": _BROWSERLESS_TOKEN},
     image = "@browserless_chromium",
     target_compatible_with = _LINUX_ONLY,
+    strict_xattrs = False,
 )
 
 itest_service(

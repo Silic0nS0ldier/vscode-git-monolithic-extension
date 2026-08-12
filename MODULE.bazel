@@ -17,12 +17,12 @@ bazel_dep(name = "rules_rust", version = "0.72.0")
 bazel_dep(name = "rules_shell", version = "0.8.0")
 bazel_dep(name = "rules_oci", version = "2.3.0")
 
-bazel_dep(name = "rules_oci_runtime", version = "0.0.0-20260809")
+bazel_dep(name = "rules_oci_runtime", version = "0.0.0-20260812")
 archive_override(
     module_name = "rules_oci_runtime",
-    integrity = "sha256-MPCvDC1oAVpAEww0+XMr4BUWU+YDtega7U5Gy7gs6b8=",
-    strip_prefix = "rules_oci_runtime-0.0.0-20260809",
-    urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/releases/download/v0.0.0-20260809/rules_oci_runtime-0.0.0-20260809.tar.gz"],
+    integrity = "sha256-/lcMEWqnX2O28/9HgZnr6f8jLkM4tRZOn6VBE4kNxpA=",
+    strip_prefix = "rules_oci_runtime-0.0.0-20260812",
+    urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/releases/download/v0.0.0-20260812/rules_oci_runtime-0.0.0-20260812.tar.gz"],
 )
 
 bazel_dep(name = "tar.bzl", version = "0.10.4")
