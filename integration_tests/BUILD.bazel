@@ -118,7 +118,11 @@ itest_service(
 
 runc_binary(
     name = "browserless_chromium",
-    env = {"TOKEN": _BROWSERLESS_TOKEN},
+    # The default session timeout is 30s, which is shorter than a full suite run.
+    env = {
+        "TIMEOUT": "600000",
+        "TOKEN": _BROWSERLESS_TOKEN,
+    },
     image = "@browserless_chromium",
     target_compatible_with = _LINUX_ONLY,
     strict_xattrs = False,
@@ -157,19 +161,19 @@ ts_project(
 )
 
 js_test(
-    name = "smoke_test_bin",
+    name = "scm_test_bin",
     data = [
         "package.json",
         ":lib_tests",
         ":node_modules/playwright-core",
     ],
-    entry_point = "dist/smoke.test.js",
+    entry_point = "dist/scm.test.js",
     tags = ["manual"],
     target_compatible_with = _LINUX_ONLY,
 )
 
 service_test(
-    name = "smoke_test",
+    name = "scm_test",
     size = "medium",
     env = {
         "BROWSERLESS_TOKEN": _BROWSERLESS_TOKEN,
@@ -180,7 +184,7 @@ service_test(
         ":code_server_service",
     ],
     target_compatible_with = _LINUX_ONLY,
-    test = ":smoke_test_bin",
+    test = ":scm_test_bin",
 )
 
 shellcheck_test(
