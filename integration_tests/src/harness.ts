@@ -185,9 +185,10 @@ export async function pollUntil<T>(
     const deadline = Date.now() + timeoutMs;
     let last: T = await read();
 
-    while (!predicate(last)) {
+    // Reads are cheap and usually settle on the first retry, so start tight and back off.
+    for (let interval = 25; !predicate(last); interval = Math.min(interval * 2, 250)) {
         assert.ok(Date.now() < deadline, `timed out waiting for ${describe}; last value: ${JSON.stringify(last)}`);
-        await delay(250);
+        await delay(interval);
         last = await read();
     }
 

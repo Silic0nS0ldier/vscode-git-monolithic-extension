@@ -32,6 +32,10 @@ JSON
 : >"$state/config.yaml"
 export HOME="$state"
 
+# Without a serviceUrl the workbench skips the gallery entirely; otherwise it spends a
+# second or so querying open-vsx.org for extensions it will never install.
+export EXTENSIONS_GALLERY='{}'
+
 common=(
     --config "$state/config.yaml"
     --user-data-dir "$state/user"
