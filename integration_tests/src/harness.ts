@@ -10,6 +10,9 @@ export const LOAD_TIMEOUT_MS = 120_000;
 /** Once the workbench is up, no single interaction should take anywhere near this long. */
 const ACTION_TIMEOUT_MS = 30_000;
 
+/** The browser defaults to 800x600, which squashes the SCM view and the screenshots. */
+const WINDOW_SIZE = { height: 1_080, width: 1_920 };
+
 const OUTPUT_PANEL = "[id=\"workbench.panel.output\"]";
 
 /**
@@ -52,11 +55,19 @@ export async function connect(): Promise<Browser> {
     const token = process.env["BROWSERLESS_TOKEN"];
     assert.ok(token, "BROWSERLESS_TOKEN is unset");
 
+    const endpoint = new URL(`ws://127.0.0.1:${assignedPort(":browserless_chromium_service")}`);
+    endpoint.searchParams.set("token", token);
+    endpoint.searchParams.set(
+        "launch",
+        JSON.stringify({
+            args: [`--window-size=${WINDOW_SIZE.width},${WINDOW_SIZE.height}`],
+            defaultViewport: WINDOW_SIZE,
+        }),
+    );
+
     // CDP rather than Playwright's own protocol: it does not require the client version
     // to match the browser build shipped inside the browserless image.
-    return await chromium.connectOverCDP(
-        `ws://127.0.0.1:${assignedPort(":browserless_chromium_service")}?token=${token}`,
-    );
+    return await chromium.connectOverCDP(endpoint.toString());
 }
 
 export async function openWorkbench(browser: Browser): Promise<Page> {
@@ -96,7 +107,7 @@ export async function filteredOutputPanelText(page: Page, text: string): Promise
     const panel = page.locator(OUTPUT_PANEL);
 
     await panel.waitFor({ state: "visible" });
-    await panel.locator(".monaco-inputbox input").first().fill(text);
+    await page.locator(".viewpane-filter input").first().fill(text);
 
     // Filtering is debounced, so the panel keeps rendering the unfiltered tail for a beat.
     return await pollUntil(

@@ -21,7 +21,9 @@ mkdir -p "$state/user/User" "$state/extensions"
 cat >"$state/user/User/settings.json" <<'JSON'
 {
     "git.enabled": false,
-    "git_monolithic.enabled": true
+    "git_monolithic.enabled": true,
+    "workbench.startupEditor": "none",
+    "workbench.secondarySideBar.defaultVisibility": "hidden"
 }
 JSON
 
