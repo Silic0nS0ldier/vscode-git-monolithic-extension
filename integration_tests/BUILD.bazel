@@ -108,8 +108,7 @@ itest_service(
         ":code_server_binary",
         "//extension/vsix:git_monolithic",
     ],
-    # Installing the extension and booting the extension host is not quick.
-    expected_start_duration = "20s",
+    expected_start_duration = "5s",
     exe = ":code_server",
     http_health_check_address = "http://127.0.0.1:$${PORT}/healthz",
     target_compatible_with = _LINUX_ONLY,
@@ -137,8 +136,9 @@ itest_service(
         "PORT=$${PORT}",
     ],
     autoassign_port = True,
+    expected_start_duration = "10s",
     exe = ":browserless_chromium",
-    http_health_check_address = "http://127.0.0.1:$${PORT}/json/version?token=" + _BROWSERLESS_TOKEN,
+    http_health_check_address = "http://127.0.0.1:$${PORT}/meta?token=" + _BROWSERLESS_TOKEN,
     target_compatible_with = _LINUX_ONLY,
 )
 
