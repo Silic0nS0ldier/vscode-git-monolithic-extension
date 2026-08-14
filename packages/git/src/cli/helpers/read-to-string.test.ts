@@ -20,11 +20,28 @@ test("Basic case", async t => {
     }
 });
 
+test("Reads output up to the limit", async t => {
+    const output = "a".repeat(1024 * 1024 - 1);
+    const res = await readToString({
+        cli: async (context) => {
+            if (context.stdout) {
+                intoStream(output).pipe(context.stdout);
+            }
+            return ok(void 0);
+        },
+        cwd: "/",
+    }, []);
+    t.true(isOk(res));
+    if (isOk(res)) {
+        t.is(unwrap(res).length, output.length);
+    }
+});
+
 test("Buffer overflow", async t => {
     const res = await readToString({
         cli: async (context) => {
             if (context.stdout) {
-                intoStream("a".repeat(1025)).pipe(context.stdout);
+                intoStream("a".repeat(1024 * 1024 + 1)).pipe(context.stdout);
             }
             return ok(void 0);
         },
