@@ -105,9 +105,16 @@ async function invokeCommand(page: Page, label: string): Promise<void> {
     await palette.waitFor({ state: "visible" });
     await page.keyboard.type(label);
 
+    const row = pickerRow(palette, label);
+    await row.first().waitFor({ state: "visible" });
+
+    // The builtin git extension contributes commands under labels identical to ours, and
+    // hides only some of them, so an ambiguous label has to fail rather than pick one.
+    assert.strictEqual(await row.count(), 1, `the palette lists more than one '${label}'`);
+
     // Clicked rather than accepted with the keyboard: the palette ranks a longer fuzzy
     // match above the exact one, so enter would run a neighbouring command.
-    await pickerRow(palette, label).first().click();
+    await row.click();
 }
 
 /** Runs a command by the label the command palette lists it under. */
@@ -199,6 +206,12 @@ export function resourceRow(view: Locator, fileName: string): Locator {
     return view.locator(".monaco-list-row").filter({
         has: view.page().locator(".label-name").filter({ hasText: exactly(fileName) }),
     });
+}
+
+/** Text of the commit message box, whose blank lines collapse into single spaces. */
+export async function scmInputText(view: Locator): Promise<string> {
+    const input = view.locator(".monaco-editor").first();
+    return (await input.locator(".view-lines").innerText()).replaceAll(/\s+/gu, " ").trim();
 }
 
 /** The count badge on the header row of an SCM resource group, e.g. `Staged`. */
