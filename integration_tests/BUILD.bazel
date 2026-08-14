@@ -2,23 +2,14 @@ load("@aspect_rules_js//js:defs.bzl", "js_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@npm//:defs.bzl", "npm_link_all_packages")
-load("@rules_itest//:itest.bzl", "itest_service", "itest_task", "service_test")
+load("@rules_itest//:itest.bzl", "itest_service")
 load("@rules_oci_runtime//lib:defs.bzl", "runc_binary")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
 load("//build_defs/lint:linters.bzl", "eslint_test", "shellcheck_test")
+load(":defs.bzl", "BROWSERLESS_TOKEN", "LINUX_ONLY", "scm_itest")
 
 npm_link_all_packages(name = "node_modules")
-
-# The services bind to the host loopback (`runc_binary` containers share the host network
-# namespace), so the whole package is Linux-only.
-_LINUX_ONLY = ["@platforms//os:linux"]
-
-# Shared by the fixture task and the test, which each resolve it against TEST_TMPDIR.
-_WORKSPACE_SUBDIR = "git-monolithic-itest-workspace"
-
-# browserless generates one if unset, and the test needs to know it up front.
-_BROWSERLESS_TOKEN = "git-monolithic-itest"
 
 selects.config_setting_group(
     name = "linux_x86_64",
@@ -43,7 +34,7 @@ filegroup(
         ":linux_arm64": ["@code_server_linux_arm64//:bin/code-server"],
         "//conditions:default": [],
     }),
-    target_compatible_with = _LINUX_ONLY,
+    target_compatible_with = LINUX_ONLY,
 )
 
 # code-server resolves its Node runtime and the bundled VS Code build relative to the
@@ -55,7 +46,7 @@ filegroup(
         ":linux_arm64": ["@code_server_linux_arm64//:dist"],
         "//conditions:default": [],
     }),
-    target_compatible_with = _LINUX_ONLY,
+    target_compatible_with = LINUX_ONLY,
 )
 
 sh_library(
@@ -63,7 +54,7 @@ sh_library(
     srcs = [
         "code-server.sh",
         "workspace-fixture.sh",
-    ],
+    ] + glob(["fixtures/*.sh"]),
 )
 
 sh_binary(
@@ -75,16 +66,6 @@ sh_binary(
     ],
 )
 
-itest_task(
-    name = "workspace_fixture_task",
-    args = [
-        "$(rootpath //build_defs/git_bin:git)",
-        _WORKSPACE_SUBDIR,
-    ],
-    data = ["//build_defs/git_bin:git"],
-    exe = ":workspace_fixture",
-)
-
 sh_binary(
     name = "code_server",
     srcs = ["code-server.sh"],
@@ -93,26 +74,7 @@ sh_binary(
         ":code_server_dist",
         "//extension/vsix:git_monolithic",
     ],
-    target_compatible_with = _LINUX_ONLY,
-)
-
-itest_service(
-    name = "code_server_service",
-    args = [
-        "$(rootpath :code_server_binary)",
-        "$(rootpath //extension/vsix:git_monolithic)",
-        "$${PORT}",
-    ],
-    autoassign_port = True,
-    data = [
-        ":code_server_binary",
-        "//extension/vsix:git_monolithic",
-    ],
-    expected_start_duration = "5s",
-    exe = ":code_server",
-    http_health_check_address = "http://127.0.0.1:$${PORT}/healthz",
-    target_compatible_with = _LINUX_ONLY,
-    deps = [":workspace_fixture_task"],
+    target_compatible_with = LINUX_ONLY,
 )
 
 runc_binary(
@@ -120,10 +82,10 @@ runc_binary(
     # The default session timeout is 30s, which is shorter than a full suite run.
     env = {
         "TIMEOUT": "600000",
-        "TOKEN": _BROWSERLESS_TOKEN,
+        "TOKEN": BROWSERLESS_TOKEN,
     },
     image = "@browserless_chromium",
-    target_compatible_with = _LINUX_ONLY,
+    target_compatible_with = LINUX_ONLY,
     strict_xattrs = False,
 )
 
@@ -138,8 +100,8 @@ itest_service(
     autoassign_port = True,
     expected_start_duration = "10s",
     exe = ":browserless_chromium",
-    http_health_check_address = "http://127.0.0.1:$${PORT}/meta?token=" + _BROWSERLESS_TOKEN,
-    target_compatible_with = _LINUX_ONLY,
+    http_health_check_address = "http://127.0.0.1:$${PORT}/meta?token=" + BROWSERLESS_TOKEN,
+    target_compatible_with = LINUX_ONLY,
 )
 
 ts_config(
@@ -160,31 +122,10 @@ ts_project(
     ],
 )
 
-js_test(
-    name = "scm_test_bin",
-    data = [
-        "package.json",
-        ":lib_tests",
-        ":node_modules/playwright-core",
-    ],
+scm_itest(
+    name = "scm",
     entry_point = "dist/scm.test.js",
-    tags = ["manual"],
-    target_compatible_with = _LINUX_ONLY,
-)
-
-service_test(
-    name = "scm_test",
-    size = "medium",
-    env = {
-        "BROWSERLESS_TOKEN": _BROWSERLESS_TOKEN,
-        "ITEST_WORKSPACE_SUBDIR": _WORKSPACE_SUBDIR,
-    },
-    services = [
-        ":browserless_chromium_service",
-        ":code_server_service",
-    ],
-    target_compatible_with = _LINUX_ONLY,
-    test = ":scm_test_bin",
+    fixture = "fixtures/scm.sh",
 )
 
 js_test(

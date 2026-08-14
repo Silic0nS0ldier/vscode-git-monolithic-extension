@@ -17,7 +17,8 @@ const OUTPUT_PANEL = "[id=\"workbench.panel.output\"]";
 
 /**
  * `rules_itest` exports assigned ports keyed by canonical label. Matching on a suffix
- * keeps the test working regardless of how the repository is named.
+ * keeps the test working regardless of how the repository is named, and of the suite
+ * prefix each service target carries.
  */
 function assignedPort(labelSuffix: string): number {
     const raw = process.env["ASSIGNED_PORTS"];
@@ -55,7 +56,7 @@ export async function connect(): Promise<Browser> {
     const token = process.env["BROWSERLESS_TOKEN"];
     assert.ok(token, "BROWSERLESS_TOKEN is unset");
 
-    const endpoint = new URL(`ws://127.0.0.1:${assignedPort(":browserless_chromium_service")}`);
+    const endpoint = new URL(`ws://127.0.0.1:${assignedPort("browserless_chromium_service")}`);
     endpoint.searchParams.set("token", token);
     endpoint.searchParams.set(
         "launch",
@@ -75,7 +76,7 @@ export async function openWorkbench(browser: Browser): Promise<Page> {
     const page = await context.newPage();
     page.setDefaultTimeout(LOAD_TIMEOUT_MS);
 
-    const editorUrl = new URL(`http://127.0.0.1:${assignedPort(":code_server_service")}/`);
+    const editorUrl = new URL(`http://127.0.0.1:${assignedPort("code_server_service")}/`);
     editorUrl.searchParams.set("folder", workspaceDir());
     await page.goto(editorUrl.toString(), { waitUntil: "domcontentloaded" });
     await page.locator(".monaco-workbench").waitFor({ state: "visible" });
