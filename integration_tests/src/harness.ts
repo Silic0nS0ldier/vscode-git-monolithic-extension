@@ -208,6 +208,14 @@ export async function closeOutputPanel(page: Page): Promise<void> {
     await page.locator(OUTPUT_PANEL).waitFor({ state: "hidden" });
 }
 
+/**
+ * A toast notification whose message matches `text`, e.g. from a non-modal
+ * `window.showWarningMessage`.
+ */
+export function notification(page: Page, text: RegExp): Locator {
+    return page.locator(".notifications-toasts .notification-list-item").filter({ hasText: text });
+}
+
 /** The history view is a second `.scm-view`, and it renders commits rather than changes. */
 export function scmView(page: Page): Locator {
     return page.locator(".scm-view:not(.scm-history-view)").first();
