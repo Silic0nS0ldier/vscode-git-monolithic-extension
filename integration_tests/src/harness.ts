@@ -124,6 +124,19 @@ export async function runCommand(page: Page, label: string): Promise<void> {
 }
 
 /**
+ * Runs a command that replaces the palette with a quick pick of its own, identified by its
+ * placeholder since the widget itself never closes in between.
+ */
+export async function openPicker(page: Page, label: string, placeholder: string): Promise<Locator> {
+    await invokeCommand(page, label);
+
+    const picker = page.locator(QUICK_INPUT);
+    await picker.locator(`input[placeholder="${placeholder}"]`).waitFor({ state: "visible" });
+
+    return picker;
+}
+
+/**
  * Opens a quick pick from a status bar entry, identified by its placeholder since the
  * widget itself never closes in between.
  */
@@ -150,6 +163,12 @@ export function pickerRow(picker: Locator, label: string): Locator {
     return picker.locator(".monaco-list-row").filter({
         has: picker.page().locator(".label-name").filter({ hasText: exactly(label) }),
     });
+}
+
+/** Every row label the picker renders, in order, with the rendered padding collapsed. */
+export async function pickerRowLabels(picker: Locator): Promise<string[]> {
+    const labels = await picker.locator(".monaco-list-row .label-name").allInnerTexts();
+    return labels.map(label => label.replaceAll(/\s+/gu, " ").trim());
 }
 
 /** The status bar entry rendering exactly `text`. */
