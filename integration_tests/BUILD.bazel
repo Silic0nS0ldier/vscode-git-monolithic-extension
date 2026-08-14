@@ -140,6 +140,12 @@ scm_itest(
     fixture = "fixtures/scm.sh",
 )
 
+scm_itest(
+    name = "stash",
+    entry_point = "dist/stash.test.js",
+    fixture = "fixtures/stash.sh",
+)
+
 js_test(
     name = "code_server_pin_drift_test",
     size = "small",
