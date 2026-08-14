@@ -33,3 +33,8 @@ export async function status(): Promise<Record<string, string>> {
 export async function headSubject(): Promise<string> {
     return (await git("log", "-1", "--format=%s")).trim();
 }
+
+/** Object name of a revision, abbreviated the way the SCM UI renders it. */
+export async function shortCommit(rev: string): Promise<string> {
+    return (await git("rev-parse", rev)).trim().slice(0, 8);
+}

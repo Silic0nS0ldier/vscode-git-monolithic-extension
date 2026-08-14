@@ -123,6 +123,12 @@ ts_project(
 )
 
 scm_itest(
+    name = "refs",
+    entry_point = "dist/refs.test.js",
+    fixture = "fixtures/refs.sh",
+)
+
+scm_itest(
     name = "scm",
     entry_point = "dist/scm.test.js",
     fixture = "fixtures/scm.sh",
