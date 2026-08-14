@@ -10,6 +10,7 @@ import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
 import { commit as showCommit, show } from "monolithic-git-interop/api/show";
+import { list as listStashes } from "monolithic-git-interop/api/stash/list";
 import { type IFileStatus, tracked } from "monolithic-git-interop/api/status/tracked";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
 import type { GitContext } from "monolithic-git-interop/cli";
@@ -1138,15 +1139,7 @@ export class Repository {
     }
 
     async getStashes(): Promise<Stash[]> {
-        const result = await this.exec(["stash", "list"]);
-        const regex = /^stash@{(\d+)}:(.+)$/;
-        const rawStashes = result.stdout.trim().split("\n")
-            .filter(b => !!b)
-            .map(line => regex.exec(line) as RegExpExecArray)
-            .filter(g => !!g)
-            .map(([, index, description]: RegExpExecArray) => ({ description, index: parseInt(index) }));
-
-        return rawStashes;
+        return unwrapOk(await listStashes(this.#git._context, this.#repositoryRoot));
     }
 
     async getRemotes(): Promise<Remote[]> {
