@@ -1,4 +1,5 @@
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
+import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
 import { branch as branchDetail } from "monolithic-git-interop/api/for-each-ref/branch";
 import { list as listRefs, type RefKind } from "monolithic-git-interop/api/for-each-ref/list";
 import { log as gitLog } from "monolithic-git-interop/api/log/mod";
@@ -1238,15 +1239,16 @@ export class Repository {
 
     async getCommitTemplate(): Promise<string> {
         try {
-            const result = await this.exec(["config", "--get", "commit.template"]);
+            const result = await readConfigEffective(this.#git._context, this.#repositoryRoot, "commit.template");
+            const templateSetting = unwrapOk(result);
 
-            if (!result.stdout) {
+            if (!templateSetting) {
                 return "";
             }
 
             // https://github.com/git/git/blob/3a0f269e7c82aa3a87323cb7ae04ac5f129f036b/path.c#L612
             const homedir = os.homedir();
-            let templatePath = result.stdout.trim()
+            let templatePath = templateSetting
                 .replace(/^~([^\/]*)\//, (_, user) => `${user ? path.join(path.dirname(homedir), user) : homedir}/`);
 
             if (!path.isAbsolute(templatePath)) {

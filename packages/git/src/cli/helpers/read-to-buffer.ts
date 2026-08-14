@@ -7,7 +7,7 @@ import {
     ERROR_GENERIC,
     type GenericError,
 } from "../../errors.js";
-import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
+import { err, isErr, ok, type Result } from "../../func-result.js";
 import type { CLI, CLIErrors } from "../context.js";
 
 export type ReadToContext = {
@@ -50,8 +50,7 @@ export async function readToBuffer(
         const [streamResult, cliResult] = await Promise.all([streamReader, cliAction]);
 
         if (isErr(cliResult)) {
-            // Throwing to use same code path as buffer overflow handling
-            throw unwrap(cliResult);
+            return cliResult;
         }
 
         return ok(streamResult);
