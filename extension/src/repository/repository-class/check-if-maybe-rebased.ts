@@ -16,24 +16,7 @@ export async function checkIfMaybeRebased(
         return true;
     }
 
-    const maybeRebased = await run(Operation.Log, async () => {
-        try {
-            const result = await repository.exec([
-                "log",
-                "--oneline",
-                "--cherry",
-                `${currentBranch ?? ""}...${currentBranch ?? ""}@{upstream}`,
-                "--",
-            ]);
-            if (result.exitCode) {
-                return false;
-            }
-
-            return /^=/.test(result.stdout);
-        } catch {
-            return false;
-        }
-    });
+    const maybeRebased = await run(Operation.Log, () => repository.hasEquivalentUpstreamCommits(currentBranch));
 
     if (!maybeRebased) {
         return true;

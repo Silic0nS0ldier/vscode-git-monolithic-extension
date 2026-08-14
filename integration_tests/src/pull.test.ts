@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { after, before } from "node:test";
 import type { Page } from "playwright-core";
-import { headSubject } from "./git.js";
+import { headSubject, pushUnrelatedUpstreamCommit } from "./git.js";
 import {
     connect,
     createScenario,
@@ -41,5 +41,21 @@ scenario("pulling a branch that looks rebased warns before pulling", async () =>
     await warning.waitFor({ state: "hidden" });
 
     // Declining left the local commit untouched.
+    assert.strictEqual(await headSubject(), "Local pending change");
+});
+
+scenario("the warning still fires once the equivalent commit is no longer the newest", async () => {
+    // A genuinely unrelated commit now sits ahead of the equivalent one, so detection has to
+    // look past the first entry `--cherry` reports.
+    await pushUnrelatedUpstreamCommit();
+
+    await runCommand(page, "Git: Pull");
+
+    const warning = notification(page, /might have been rebased/u);
+    await warning.waitFor({ state: "visible" });
+
+    await warning.getByRole("button", { name: "Don't Pull" }).click();
+    await warning.waitFor({ state: "hidden" });
+
     assert.strictEqual(await headSubject(), "Local pending change");
 });
