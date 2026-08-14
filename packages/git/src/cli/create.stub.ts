@@ -6,6 +6,7 @@ export function createSpawn(endWith: "error" | "exit", options: {
     out?: string;
     err?: string;
     delay?: number;
+    code?: number;
 } = {}): SpawnFn {
     return () => {
         const cp: ChildProcess = {
@@ -28,7 +29,7 @@ export function createSpawn(endWith: "error" | "exit", options: {
                     fn = async (): Promise<void> => {
                         if (cp.connected) {
                             // @ts-expect-error
-                            listener(0, "SIGQUIT");
+                            listener(options.code ?? 0, "SIGQUIT");
                         }
                     };
                 }

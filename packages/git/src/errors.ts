@@ -20,7 +20,21 @@ export const ERROR_CANCELLED = Symbol("ERROR_CANCELLED");
 export type CancelledError = ErrorShape<typeof ERROR_CANCELLED>;
 
 export const ERROR_NON_ZERO_EXIT = Symbol("ERROR_NON_ZERO_EXIT");
-export type NonZeroExitError = ErrorShape<typeof ERROR_NON_ZERO_EXIT>;
+
+/** Output is captured as a tail: git prints its fatal message last. */
+export type NonZeroExitDetails = {
+    readonly args: readonly string[];
+    readonly cwd: string;
+    readonly executablePath: string;
+    readonly exitCode: number | null;
+    readonly signal: NodeJS.Signals | null;
+    readonly stdout: string;
+    readonly stderr: string;
+};
+
+export type NonZeroExitError =
+    & ErrorShape<typeof ERROR_NON_ZERO_EXIT>
+    & { readonly cause: NonZeroExitDetails };
 
 export const ERROR_GENERIC = Symbol("ERROR_GENERIC");
 export type GenericError = ErrorShape<typeof ERROR_GENERIC>;
@@ -39,6 +53,11 @@ export function createError<TSymbol>(type: TSymbol, cause?: unknown): ErrorShape
         type,
         _error: error,
     };
+}
+
+export function createNonZeroExitError(details: NonZeroExitDetails): NonZeroExitError {
+    const { _error } = createError(ERROR_NON_ZERO_EXIT, details);
+    return { _error, cause: details, type: ERROR_NON_ZERO_EXIT };
 }
 
 export function unwrapOk<TOk, TErr>(value: Result<TOk, TErr>): TOk {

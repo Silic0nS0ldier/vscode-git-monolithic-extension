@@ -307,15 +307,12 @@ export class Repository {
 
         if (isErr(result)) {
             const error = unwrap(result);
+            const details = error.type === gitErrors.ERROR_NON_ZERO_EXIT ? error.cause : undefined;
             const gitError = new GitError({
+                exitCode: details?.exitCode ?? undefined,
                 message: "Could not show object.",
+                stderr: details?.stderr,
             });
-            if (error.type === gitErrors.ERROR_NON_ZERO_EXIT) {
-                // TODO(Silic0nS0ldier): Rework error types to surface typed cause chains.
-                const exitCode: number | undefined = (error.cause as { exitState?: { code: number } })?.exitState?.code
-                    ?? undefined;
-                gitError.exitCode = exitCode;
-            }
             this.git.log(`Failed to get object ${object}: ${unwrap(result)}`);
             throw gitError;
         }
