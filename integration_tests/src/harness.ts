@@ -1,6 +1,7 @@
 import assert from "node:assert";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import test from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { type Browser, chromium, type Locator, type Page } from "playwright-core";
 
@@ -14,6 +15,17 @@ const ACTION_TIMEOUT_MS = 30_000;
 const WINDOW_SIZE = { height: 1_080, width: 1_920 };
 
 const OUTPUT_PANEL = "[id=\"workbench.panel.output\"]";
+
+const QUICK_INPUT = ".quick-input-widget";
+
+function escapeRegExp(text: string): string {
+    return text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
+}
+
+/** Matches a rendered label in full, rather than as a substring. */
+function exactly(label: string): RegExp {
+    return new RegExp(`^${escapeRegExp(label)}$`, "u");
+}
 
 /**
  * `rules_itest` exports assigned ports keyed by canonical label. Matching on a suffix
@@ -43,7 +55,7 @@ export function workspaceDir(): string {
 }
 
 /** Screenshots land next to the test log, which Bazel zips into outputs.zip. */
-export async function capture(page: Page, name: string): Promise<void> {
+async function capture(page: Page, name: string): Promise<void> {
     const dir = process.env["TEST_UNDECLARED_OUTPUTS_DIR"];
     if (dir === undefined) {
         return;
@@ -85,19 +97,64 @@ export async function openWorkbench(browser: Browser): Promise<Page> {
     return page;
 }
 
-/** Runs a command by the label the command palette lists it under. */
-export async function runCommand(page: Page, label: string): Promise<void> {
-    const palette = page.locator(".quick-input-widget");
+/** Types a command into the palette and runs it. */
+async function invokeCommand(page: Page, label: string): Promise<void> {
+    const palette = page.locator(QUICK_INPUT);
 
     await page.keyboard.press("Control+Shift+P");
     await palette.waitFor({ state: "visible" });
     await page.keyboard.type(label);
 
-    // A command contributed by an inactive extension is simply absent, and pressing enter
-    // would then run whatever the fuzzy match turned up instead.
-    await palette.locator(".monaco-list-row").filter({ hasText: label }).first().waitFor({ state: "visible" });
-    await page.keyboard.press("Enter");
-    await palette.waitFor({ state: "hidden" });
+    // Clicked rather than accepted with the keyboard: the palette ranks a longer fuzzy
+    // match above the exact one, so enter would run a neighbouring command.
+    await pickerRow(palette, label).first().click();
+}
+
+/** Runs a command by the label the command palette lists it under. */
+export async function runCommand(page: Page, label: string): Promise<void> {
+    await invokeCommand(page, label);
+    await page.locator(QUICK_INPUT).waitFor({ state: "hidden" });
+}
+
+/**
+ * Opens a quick pick from a status bar entry, identified by its placeholder since the
+ * widget itself never closes in between.
+ */
+export async function openPickerFromStatusBar(
+    page: Page,
+    itemText: string,
+    placeholder: string,
+): Promise<Locator> {
+    await statusBarItem(page, itemText).click();
+
+    const picker = page.locator(QUICK_INPUT);
+    await picker.locator(`input[placeholder="${placeholder}"]`).waitFor({ state: "visible" });
+
+    return picker;
+}
+
+export async function closePicker(page: Page): Promise<void> {
+    await page.keyboard.press("Escape");
+    await page.locator(QUICK_INPUT).waitFor({ state: "hidden" });
+}
+
+/** The picker row whose label is exactly `label`. */
+export function pickerRow(picker: Locator, label: string): Locator {
+    return picker.locator(".monaco-list-row").filter({
+        has: picker.page().locator(".label-name").filter({ hasText: exactly(label) }),
+    });
+}
+
+/** The status bar entry rendering exactly `text`. */
+function statusBarItem(page: Page, text: string): Locator {
+    // Entries render an icon ahead of their text, which leaves whitespace in the match.
+    const label = new RegExp(`^\\s*${escapeRegExp(text)}\\s*$`, "u");
+    return page.locator(".part.statusbar .statusbar-item").filter({ hasText: label }).first();
+}
+
+/** Text the status bar is currently rendering, with its icons and padding collapsed. */
+export async function statusBarText(page: Page): Promise<string> {
+    return (await page.locator(".part.statusbar").innerText()).replaceAll(/\s+/gu, " ");
 }
 
 /**
@@ -139,9 +196,8 @@ export async function openScmView(page: Page): Promise<Locator> {
 
 /** The row of the SCM list whose resource label is exactly `fileName`. */
 export function resourceRow(view: Locator, fileName: string): Locator {
-    const exact = new RegExp(`^${fileName.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`)}$`, "u");
     return view.locator(".monaco-list-row").filter({
-        has: view.page().locator(".label-name").filter({ hasText: exact }),
+        has: view.page().locator(".label-name").filter({ hasText: exactly(fileName) }),
     });
 }
 
@@ -194,4 +250,26 @@ export async function pollUntil<T>(
     }
 
     return last;
+}
+
+/**
+ * Builds the `scenario` declaration for a suite. Scenarios share one editor and one
+ * repository, and each one builds on the state the previous left behind, so they must stay
+ * in file order.
+ */
+export function createScenario(currentPage: () => Page): (name: string, body: () => Promise<void>) => void {
+    return function scenario(name, body): void {
+        const slug = name.replaceAll(/[^a-z0-9]+/giu, "-");
+
+        test(name, { timeout: LOAD_TIMEOUT_MS }, async () => {
+            try {
+                await body();
+                await capture(currentPage(), slug);
+            } catch (error) {
+                // A closed page cannot be captured; the original failure is the useful one.
+                await capture(currentPage(), `failure-${slug}`).catch(() => {});
+                throw error;
+            }
+        });
+    };
 }

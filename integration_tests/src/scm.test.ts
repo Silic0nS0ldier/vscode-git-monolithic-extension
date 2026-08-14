@@ -1,11 +1,11 @@
 import assert from "node:assert";
-import test, { after, before } from "node:test";
+import { after, before } from "node:test";
 import type { Page } from "playwright-core";
 import { headSubject, status } from "./git.js";
 import {
-    capture,
     closeOutputPanel,
     connect,
+    createScenario,
     filteredOutputPanelText,
     groupCount,
     invokeRowAction,
@@ -32,24 +32,7 @@ after(async () => {
     await browser.close();
 });
 
-/**
- * The scenarios share one editor and one repository, and each one builds on the state the
- * previous left behind, so they must stay in file order.
- */
-function scenario(name: string, body: () => Promise<void>): void {
-    const slug = name.replaceAll(/[^a-z0-9]+/giu, "-");
-
-    test(name, { timeout: LOAD_TIMEOUT_MS }, async () => {
-        try {
-            await body();
-            await capture(page, slug);
-        } catch (error) {
-            // A closed page cannot be captured; the original failure is the useful one.
-            await capture(page, `failure-${slug}`).catch(() => {});
-            throw error;
-        }
-    });
-}
+const scenario = createScenario(() => page);
 
 scenario("the extension activates and reports working tree changes", async () => {
     // The extension owns the only source control provider, so a populated SCM view proves
