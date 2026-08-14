@@ -2,6 +2,7 @@ import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
 import { branch as branchDetail } from "monolithic-git-interop/api/for-each-ref/branch";
 import { list as listRefs, type RefKind } from "monolithic-git-interop/api/for-each-ref/list";
+import { cherry } from "monolithic-git-interop/api/log/cherry";
 import { log as gitLog } from "monolithic-git-interop/api/log/mod";
 import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
 import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
@@ -1141,6 +1142,21 @@ export class Repository {
 
     async getStashes(): Promise<Stash[]> {
         return unwrapOk(await listStashes(this.#git._context, this.#repositoryRoot));
+    }
+
+    /**
+     * Whether `branch`'s upstream carries a commit that looks like a rebase of one only on
+     * `branch`, the way a force-push after a rebase would leave things.
+     */
+    async hasEquivalentUpstreamCommits(branch?: string): Promise<boolean> {
+        const range = `${branch ?? ""}...${branch ?? ""}@{upstream}`;
+        const result = await cherry(this.#git._context, this.#repositoryRoot, range);
+
+        if (isErr(result)) {
+            return false;
+        }
+
+        return unwrap(result).some(entry => entry.status === "equivalent");
     }
 
     async getRemotes(): Promise<Remote[]> {

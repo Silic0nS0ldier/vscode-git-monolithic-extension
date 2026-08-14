@@ -38,3 +38,14 @@ export async function headSubject(): Promise<string> {
 export async function shortCommit(rev: string): Promise<string> {
     return (await git("rev-parse", rev)).trim().slice(0, 8);
 }
+
+/**
+ * Pushes a new commit onto `origin/main`'s tip with no relation to any local commit, so
+ * `--cherry` sees a unique entry ahead of whatever it already reports as equivalent.
+ */
+export async function pushUnrelatedUpstreamCommit(): Promise<void> {
+    const tip = (await git("rev-parse", "origin/main")).trim();
+    const commit = (await git("commit-tree", "origin/main^{tree}", "-p", tip, "-m", "Unrelated newer change")).trim();
+    await git("push", "origin", `${commit}:refs/heads/main`);
+    await git("fetch", "origin");
+}
