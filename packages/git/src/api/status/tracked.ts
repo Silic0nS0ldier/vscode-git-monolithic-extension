@@ -56,7 +56,7 @@ class GitStatusParser {
     // (>= 13 chars) that pin their parent chunk while any entry is reachable.
     // With `--untracked-files=no` the output stays small enough for this not
     // to matter; for larger output, wrap the assignments in `detach`. See
-    // https://issues.chromium.org/issues/41480525 and `extension/src/util/detach.ts`.
+    // https://issues.chromium.org/issues/41480525 and `src/helpers/detach.ts`.
     update(raw: string): void {
         let normalisedRaw = raw;
         let i = 0;

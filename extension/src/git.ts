@@ -9,7 +9,7 @@ import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
-import { show } from "monolithic-git-interop/api/show";
+import { commit as showCommit, show } from "monolithic-git-interop/api/show";
 import { type IFileStatus, tracked } from "monolithic-git-interop/api/status/tracked";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
 import type { GitContext } from "monolithic-git-interop/cli";
@@ -45,7 +45,6 @@ import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD }
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
-import { parseGitCommits } from "./git/parseGitCommits.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
@@ -72,8 +71,6 @@ interface IGitOptions {
     env?: { [key: string]: string };
     outputChannel: OutputChannel;
 }
-
-const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";
 
 const REF_TYPES: Record<RefKind, RefTypeOptions> = {
     "head": RefType.Head,
@@ -1271,12 +1268,13 @@ export class Repository {
     }
 
     async getCommit(ref: string): Promise<Commit> {
-        const result = await this.exec(["show", "-s", `--format=${COMMIT_FORMAT}`, "-z", ref]);
-        const commits = parseGitCommits(result.stdout);
-        if (commits.length === 0) {
+        const commit = unwrapOk(await showCommit(this.#git._context, this.#repositoryRoot, ref));
+
+        if (!commit) {
             return Promise.reject<Commit>("bad commit format");
         }
-        return commits[0];
+
+        return commit;
     }
 
     async updateSubmodules(paths: string[]): Promise<void> {
