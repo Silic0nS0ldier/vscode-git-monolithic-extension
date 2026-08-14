@@ -195,7 +195,7 @@ filegroup(
 """
 
 # renovate: datasource=github-releases depName=desktop/dugite-native versioning=regex:^v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)-(?<build>\d+)$
-_DUGITE_RELEASE = "v2.53.0-3"
+_DUGITE_RELEASE = "v2.53.0-4"
 
 # Asset names embed the git source commit, which is not derivable from the release tag.
 # Kept in sync with _DUGITE_RELEASE by .github/workflows/update_bazel_git.mjs.
