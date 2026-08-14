@@ -10,8 +10,8 @@ const DEFAULT_PATTERNS = ["refs/heads", "refs/remotes", "refs/tags"];
 
 const FORMAT = "%(refname) %(objectname) %(*objectname)";
 
-// Object names are matched at their 40 character SHA-1 length; a SHA-256 repository is not
-// supported here yet.
+// TODO Match SHA-256 object names too. At 64 characters they fail every pattern below, so a
+// repository using that hash reports no refs at all.
 const HEAD_LINE = /^refs\/heads\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/;
 const REMOTE_HEAD_LINE = /^refs\/remotes\/([^/]+)\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/;
 const TAG_LINE = /^refs\/tags\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/;
