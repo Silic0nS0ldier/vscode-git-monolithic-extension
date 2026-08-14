@@ -1,4 +1,6 @@
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
+import { branch as branchDetail } from "monolithic-git-interop/api/for-each-ref/branch";
+import { list as listRefs, type RefKind } from "monolithic-git-interop/api/for-each-ref/list";
 import { log as gitLog } from "monolithic-git-interop/api/log/mod";
 import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
 import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
@@ -33,6 +35,7 @@ import {
     type LogOptions,
     type Ref,
     RefType,
+    type RefTypeOptions,
     type Remote,
 } from "./api/git.js";
 import type { Commit } from "./git/Commit.js";
@@ -51,7 +54,6 @@ import type { Submodule } from "./git/Submodule.js";
 import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
 import { splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
-import * as Versions from "./util/versions.js";
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
@@ -72,6 +74,12 @@ interface IGitOptions {
 }
 
 const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";
+
+const REF_TYPES: Record<RefKind, RefTypeOptions> = {
+    "head": RefType.Head,
+    "remote-head": RefType.RemoteHead,
+    "tag": RefType.Tag,
+};
 
 interface ICloneOptions {
     readonly parentPath: string;
@@ -100,10 +108,6 @@ export class Git {
         this._context = options.context;
         this.#services = createServices(msg => options.outputChannel.appendLine(msg));
         this.#env = options.env || {};
-    }
-
-    compareGitVersionTo(version: string): -1 | 0 | 1 {
-        return Versions.compare(Versions.fromString(this.version), Versions.fromString(version));
     }
 
     open(repository: string, dotGit: string): Repository {
@@ -1119,54 +1123,21 @@ export class Repository {
     async getRefs(
         opts?: { sort?: "alphabetically" | "committerdate"; contains?: string; pattern?: string; count?: number },
     ): Promise<Ref[]> {
-        const args = ["for-each-ref"];
+        const refs = unwrapOk(
+            await listRefs(this.#git._context, this.#repositoryRoot, {
+                contains: opts?.contains,
+                count: opts?.count,
+                pattern: opts?.pattern,
+                sort: opts?.sort === "committerdate" ? "committerdate" : undefined,
+            }),
+        );
 
-        if (opts?.count) {
-            args.push(`--count=${opts.count}`);
-        }
-
-        if (opts && opts.sort && opts.sort !== "alphabetically") {
-            args.push("--sort", `-${opts.sort}`);
-        }
-
-        args.push("--format", "%(refname) %(objectname) %(*objectname)");
-
-        if (opts?.pattern) {
-            args.push(opts.pattern);
-        } else {
-            // Constrain to the ref namespaces the parser below actually understands.
-            args.push("refs/heads", "refs/remotes", "refs/tags");
-        }
-
-        if (opts?.contains) {
-            args.push("--contains", opts.contains);
-        }
-
-        const result = await this.exec(args);
-
-        const fn = (line: string): Ref | null => {
-            let match: RegExpExecArray | null;
-
-            if (match = /^refs\/heads\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
-                return { commit: match[2], name: match[1], type: RefType.Head };
-            } else if (match = /^refs\/remotes\/([^/]+)\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
-                return {
-                    commit: match[3],
-                    name: `${match[1]}/${match[2]}`,
-                    remote: match[1],
-                    type: RefType.RemoteHead,
-                };
-            } else if (match = /^refs\/tags\/([^ ]+) ([0-9a-f]{40}) ([0-9a-f]{40})?$/.exec(line)) {
-                return { commit: match[3] ?? match[2], name: match[1], type: RefType.Tag };
-            }
-
-            return null;
-        };
-
-        return result.stdout.split("\n")
-            .filter(line => !!line)
-            .map(fn)
-            .filter(ref => !!ref) as Ref[];
+        return refs.map(ref => ({
+            commit: ref.commit,
+            name: ref.name,
+            remote: ref.remote,
+            type: REF_TYPES[ref.kind],
+        }));
     }
 
     async getStashes(): Promise<Stash[]> {
@@ -1219,88 +1190,29 @@ export class Repository {
             return this.getHEAD();
         }
 
-        const args = ["for-each-ref"];
+        const detail = unwrapOk(await branchDetail(this.#git._context, this.#repositoryRoot, name));
 
-        let supportsAheadBehind = true;
-        if (this.#git.compareGitVersionTo("1.9.0") === -1) {
-            args.push("--format=%(refname)%00%(upstream:short)%00%(objectname)");
-            supportsAheadBehind = false;
-        } else {
-            args.push("--format=%(refname)%00%(upstream:short)%00%(objectname)%00%(upstream:track)");
+        if (!detail) {
+            return Promise.reject<Branch>(new Error("No such branch"));
         }
 
-        if (/^refs\/(head|remotes)\//i.test(name)) {
-            args.push(name);
-        } else {
-            args.push(`refs/heads/${name}`, `refs/remotes/${name}`);
+        if (detail.kind === "remote-head") {
+            return {
+                commit: detail.commit,
+                name: detail.name,
+                remote: detail.remote,
+                type: RefType.RemoteHead,
+            };
         }
 
-        const result = await this.exec(args);
-        const branches: Branch[] = result.stdout.trim().split("\n").map<Branch | undefined>(line => {
-            let [branchName, upstream, ref, status] = line.trim().split("\0");
-
-            if (branchName.startsWith("refs/heads/")) {
-                branchName = branchName.substring(11);
-                const index = upstream.indexOf("/");
-
-                let ahead;
-                let behind;
-                const match = /\[(?:ahead ([0-9]+))?[,\s]*(?:behind ([0-9]+))?]|\[gone]/.exec(status);
-                if (match) {
-                    [, ahead, behind] = match;
-                }
-
-                return {
-                    ahead: Number(ahead) || 0,
-                    behind: Number(behind) || 0,
-                    commit: ref || undefined,
-                    name: branchName,
-                    type: RefType.Head,
-                    upstream: upstream
-                        ? {
-                            name: upstream.substring(index + 1),
-                            remote: upstream.substring(0, index),
-                        }
-                        : undefined,
-                };
-            } else if (branchName.startsWith("refs/remotes/")) {
-                branchName = branchName.substring(13);
-                const index = branchName.indexOf("/");
-
-                return {
-                    commit: ref,
-                    name: branchName.substring(index + 1),
-                    remote: branchName.substring(0, index),
-                    type: RefType.RemoteHead,
-                };
-            } else {
-                return undefined;
-            }
-        }).filter((b?: Branch): b is Branch => !!b);
-
-        if (branches.length) {
-            const [branch] = branches;
-
-            if (!supportsAheadBehind && branch.upstream) {
-                try {
-                    const result = await this.exec([
-                        "rev-list",
-                        "--left-right",
-                        "--count",
-                        `${branch.name}...${branch.upstream.remote}/${branch.upstream.name}`,
-                    ]);
-                    const [ahead, behind] = result.stdout.trim().split("\t");
-
-                    // TODO Anti-pattern, overriding types
-                    (branch as any).ahead = Number(ahead) || 0;
-                    (branch as any).behind = Number(behind) || 0;
-                } catch {}
-            }
-
-            return branch;
-        }
-
-        return Promise.reject<Branch>(new Error("No such branch"));
+        return {
+            ahead: detail.ahead,
+            behind: detail.behind,
+            commit: detail.commit,
+            name: detail.name,
+            type: RefType.Head,
+            upstream: detail.upstream,
+        };
     }
 
     async getBranches(query: BranchQuery): Promise<Ref[]> {
