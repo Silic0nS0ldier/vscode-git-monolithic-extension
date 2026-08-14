@@ -135,6 +135,12 @@ scm_itest(
 )
 
 scm_itest(
+    name = "pull",
+    entry_point = "dist/pull.test.js",
+    fixture = "fixtures/pull.sh",
+)
+
+scm_itest(
     name = "refs",
     entry_point = "dist/refs.test.js",
     fixture = "fixtures/refs.sh",
