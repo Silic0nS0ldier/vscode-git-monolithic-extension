@@ -129,6 +129,12 @@ scm_itest(
 )
 
 scm_itest(
+    name = "commit_template",
+    entry_point = "dist/commit-template.test.js",
+    fixture = "fixtures/commit-template.sh",
+)
+
+scm_itest(
     name = "refs",
     entry_point = "dist/refs.test.js",
     fixture = "fixtures/refs.sh",
