@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fromPath } from "../cli/from-path.js";
+import { readToString } from "../cli/helpers/read-to-string.js";
 import type { PersistentCLIContext } from "../cli/mod.js";
 import { unwrapOk } from "../errors.js";
 import { isErr, unwrap } from "../func-result.js";
@@ -21,6 +22,19 @@ export const gitCtx = await (async () => {
     const persistentContext: PersistentCLIContext = { env: process.env, timeout: 5_000 };
     return unwrapOk(await fromPath(gitPath, persistentContext, services));
 })();
+
+/** Runs git for test setup, throwing rather than returning a result. */
+export async function run(cwd: string, args: string[], env?: Record<string, string>): Promise<void> {
+    const result = await gitCtx.cli({ cwd, env }, args);
+    if (isErr(result)) {
+        throw unwrap(result)._error;
+    }
+}
+
+/** Reads git's output for test setup and assertions, throwing rather than returning a result. */
+export async function read(cwd: string, args: string[]): Promise<string> {
+    return unwrapOk(await readToString({ cli: gitCtx.cli, cwd }, args)).trim();
+}
 
 export async function tempGitRepo(initialCommit: boolean = false) {
     const repoPath = await fs.mkdtemp(path.join(os.tmpdir(), "git-interop-test"));
