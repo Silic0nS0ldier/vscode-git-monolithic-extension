@@ -37,8 +37,8 @@ methods are only reached passively through
 `"when": "false"` is hidden and not user-invocable.
 
 If no UI path can be driven headlessly, say so and agree an exception before continuing
-(example: `rev-parse --show-cdup` only runs when workspace trust is off, which needed
-`scm_itest(untrusted = True)` — a code-server started without `--disable-workspace-trust`).
+(example: `rev-parse --show-cdup` only runs when workspace trust is off, which needed an
+`UNTRUSTED_SUITES` entry — a code-server started without `--disable-workspace-trust`).
 
 ### 2. Write the extension integration test FIRST
 
@@ -51,14 +51,10 @@ This is the behaviour baseline. It must pass **before** any production code chan
    the "remote"; nothing may touch the network.
 2. `integration_tests/src/<family>.test.ts` — `before` opens the workbench, `createScenario`
    runs the ordered scenarios. Scenarios in a file share one editor and one repository.
-3. Register the suite in [integration_tests/BUILD.bazel](../../../integration_tests/BUILD.bazel):
-   ```starlark
-   scm_itest(
-       name = "<family>",
-       entry_point = "dist/<family>.test.js",
-       fixture = "fixtures/<family>.sh",
-   )
-   ```
+3. No BUILD edit: [integration_tests/BUILD.bazel](../../../integration_tests/BUILD.bazel)
+   globs `src/*.test.ts` and declares the library, the fixture task and the
+   `<family>_test` suite for each one. A Restricted Mode suite additionally goes in
+   `UNTRUSTED_SUITES`.
 4. Assert git ground truth through [src/git.ts](../../../integration_tests/src/git.ts) inside
    `pollUntil(...)` — the extension writes asynchronously.
 

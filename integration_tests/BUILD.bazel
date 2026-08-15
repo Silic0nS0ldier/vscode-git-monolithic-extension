@@ -110,9 +110,16 @@ ts_config(
     deps = ["//:tsconfig"],
 )
 
+# Everything the suites share. Each suite compiles only its own test file against this,
+# so adding a suite does not invalidate the others.
 ts_project(
-    name = "lib_tests",
-    srcs = glob(["src/**/*.ts"]) + ["package.json"],
+    name = "lib_harness",
+    srcs = [
+        "package.json",
+        "src/git.ts",
+        "src/harness.ts",
+    ],
+    declaration = True,
     out_dir = "dist",
     root_dir = "src",
     tsconfig = ":tsconfig",
@@ -122,54 +129,48 @@ ts_project(
     ],
 )
 
-scm_itest(
-    name = "commit",
-    entry_point = "dist/commit.test.js",
-    fixture = "fixtures/commit.sh",
-)
+# One suite per test source: `src/commit-template.test.ts` needs a matching
+# `fixtures/commit-template.sh`, and yields `:commit_template_lib` and
+# `:commit_template_test`.
+ITEST_SUITES = [(
+    file.removeprefix("src/").removesuffix(".test.ts").replace("-", "_"),
+    file.removeprefix("src/").removesuffix(".test.ts"),
+) for file in glob(["src/*.test.ts"])]
 
-scm_itest(
-    name = "commit_template",
-    entry_point = "dist/commit-template.test.js",
-    fixture = "fixtures/commit-template.sh",
-)
+# Suites whose workspace opens in Restricted Mode.
+UNTRUSTED_SUITES = ["untrusted"]
 
-scm_itest(
-    name = "object",
-    entry_point = "dist/object.test.js",
-    fixture = "fixtures/object.sh",
-)
+# Each suite compiles only its own test file, so suites do not invalidate each other.
+[
+    ts_project(
+        name = name + "_lib",
+        srcs = [
+            "package.json",
+            "src/%s.test.ts" % basename,
+        ],
+        declaration = True,
+        out_dir = "dist",
+        root_dir = "src",
+        tsconfig = ":tsconfig",
+        deps = [
+            ":lib_harness",
+            ":node_modules/@types/node",
+            ":node_modules/playwright-core",
+        ],
+    )
+    for (name, basename) in ITEST_SUITES
+]
 
-scm_itest(
-    name = "pull",
-    entry_point = "dist/pull.test.js",
-    fixture = "fixtures/pull.sh",
-)
-
-scm_itest(
-    name = "refs",
-    entry_point = "dist/refs.test.js",
-    fixture = "fixtures/refs.sh",
-)
-
-scm_itest(
-    name = "scm",
-    entry_point = "dist/scm.test.js",
-    fixture = "fixtures/scm.sh",
-)
-
-scm_itest(
-    name = "stash",
-    entry_point = "dist/stash.test.js",
-    fixture = "fixtures/stash.sh",
-)
-
-scm_itest(
-    name = "untrusted",
-    entry_point = "dist/untrusted.test.js",
-    fixture = "fixtures/untrusted.sh",
-    untrusted = True,
-)
+[
+    scm_itest(
+        name = name,
+        entry_point = "dist/%s.test.js" % basename,
+        fixture = "fixtures/%s.sh" % basename,
+        lib = ":%s_lib" % name,
+        untrusted = name in UNTRUSTED_SUITES,
+    )
+    for (name, basename) in ITEST_SUITES
+]
 
 js_test(
     name = "code_server_pin_drift_test",
@@ -192,7 +193,7 @@ shellcheck_test(
 
 eslint_test(
     name = "eslint",
-    srcs = [":lib_tests"],
+    srcs = [":lib_harness"],
 )
 
 # TODO Workflow for test recording (https://playwright.dev/docs/codegen)

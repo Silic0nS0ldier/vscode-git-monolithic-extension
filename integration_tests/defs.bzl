@@ -3,6 +3,7 @@
 
 load("@aspect_rules_js//js:defs.bzl", "js_test")
 load("@rules_itest//:itest.bzl", "itest_service", "itest_task", "service_test")
+load("//build_defs/lint:linters.bzl", "eslint_test")
 
 # The services bind to the host loopback (`runc_binary` containers share the host network
 # namespace), so every suite is Linux-only.
@@ -11,8 +12,13 @@ LINUX_ONLY = ["@platforms//os:linux"]
 # browserless generates one if unset, and the test needs to know it up front.
 BROWSERLESS_TOKEN = "git-monolithic-itest"
 
-def _scm_itest_impl(name, visibility, fixture, entry_point, package_json, size, untrusted):
+def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, size, untrusted):
     workspace_subdir = "git-monolithic-itest-" + name
+
+    eslint_test(
+        name = name + "_eslint",
+        srcs = [lib],
+    )
 
     itest_task(
         name = name + "_fixture_task",
@@ -52,8 +58,7 @@ def _scm_itest_impl(name, visibility, fixture, entry_point, package_json, size, 
         name = name + "_test_bin",
         data = [
             package_json,
-            ":lib_tests",
-            ":node_modules/playwright-core",
+            lib,
         ],
         entry_point = entry_point,
         tags = ["manual"],
@@ -85,7 +90,7 @@ observe each other's git state. The suite itself runs as `<name>_test`.
     implementation = _scm_itest_impl,
     attrs = {
         "entry_point": attr.label(
-            doc = "Compiled test entry point, produced by `:lib_tests`.",
+            doc = "Compiled test entry point, produced by `lib`.",
             mandatory = True,
         ),
         "fixture": attr.label(
@@ -94,6 +99,12 @@ observe each other's git state. The suite itself runs as `<name>_test`.
             doc = "Script shaping the suite's repository. Run with the git binary and the " +
                   "workspace directory as arguments, once `workspace-fixture.sh` has " +
                   "initialised the repository.",
+            mandatory = True,
+        ),
+        "lib": attr.label(
+            configurable = False,
+            doc = "The suite's own compiled test file. Kept out of this macro because a " +
+                  "symbolic macro may not declare `dist/*.js` outputs.",
             mandatory = True,
         ),
         "package_json": attr.label(
