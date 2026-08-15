@@ -7,6 +7,7 @@ set -euo pipefail
 code_server="$(realpath "$1")"
 vsix="$(realpath "$2")"
 port="$3"
+trust="$4"
 
 # The VS Code integrated terminal exports these. code-server's CLI treats them as a
 # request to open in the *developer's* editor and exits instead of serving.
@@ -16,14 +17,26 @@ state="${TEST_TMPDIR:-/tmp}/code-server"
 rm -rf "$state"
 mkdir -p "$state/user/User" "$state/extensions"
 
+# `--disable-workspace-trust` forces the folder to be trusted. An untrusted suite drops the
+# flag and silences the prompt instead, so the workbench opens straight into Restricted Mode
+# and the extension takes its reduced discovery path.
+trust_settings=""
+trust_args=(--disable-workspace-trust)
+if [[ "$trust" == "untrusted" ]]; then
+    trust_settings=',
+    "security.workspace.trust.startupPrompt": "never",
+    "security.workspace.trust.banner": "never"'
+    trust_args=()
+fi
+
 # The extension under test is opt-in: it stays dormant while VS Code's builtin git
 # extension is enabled, so without this the test would drive the builtin instead.
-cat >"$state/user/User/settings.json" <<'JSON'
+cat >"$state/user/User/settings.json" <<JSON
 {
     "git.enabled": false,
     "git_monolithic.enabled": true,
     "workbench.startupEditor": "none",
-    "workbench.secondarySideBar.defaultVisibility": "hidden"
+    "workbench.secondarySideBar.defaultVisibility": "hidden"${trust_settings}
 }
 JSON
 
@@ -49,4 +62,4 @@ common=(
 exec "$code_server" "${common[@]}" \
     --auth none \
     --bind-addr "127.0.0.1:${port}" \
-    --disable-workspace-trust
+    "${trust_args[@]}"

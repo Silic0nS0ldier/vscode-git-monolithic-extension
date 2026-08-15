@@ -158,6 +158,13 @@ scm_itest(
     fixture = "fixtures/stash.sh",
 )
 
+scm_itest(
+    name = "untrusted",
+    entry_point = "dist/untrusted.test.js",
+    fixture = "fixtures/untrusted.sh",
+    untrusted = True,
+)
+
 js_test(
     name = "code_server_pin_drift_test",
     size = "small",
