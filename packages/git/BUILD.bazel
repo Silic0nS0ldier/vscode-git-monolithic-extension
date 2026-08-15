@@ -78,8 +78,8 @@ bin.ava_test(
 )
 
 ts_project(
-    name = "lib_integration_tests",
-    srcs = glob(["src/**/*.it.*.ts"]) + ["package.json"],
+    name = "lib_integration_stubs",
+    srcs = glob(["src/**/*.it.stub.ts"]) + ["package.json"],
     declaration = True,
     out_dir = "dist",
     root_dir = "src",
@@ -92,13 +92,33 @@ ts_project(
 
 INTEGRATION_TESTS = [(
     "integration_test/" + file,
+    file,
     file.replace("src/", "dist/").replace(".ts", ".js"),
 ) for file in glob(["src/**/*.it.test.ts"])]
 
 test_suite(
     name = "integration_tests",
-    tests = [":" + test_name for (test_name, _) in INTEGRATION_TESTS],
+    tests = [":" + test_name for (test_name, _, _) in INTEGRATION_TESTS],
 )
+
+[
+    ts_project(
+        name = test_name + "_lib",
+        srcs = [
+            "package.json",
+            src,
+        ],
+        declaration = True,
+        out_dir = "dist",
+        root_dir = "src",
+        tsconfig = ":tsconfig",
+        deps = [
+            ":lib",
+            ":lib_integration_stubs",
+        ],
+    )
+    for (test_name, src, _) in INTEGRATION_TESTS
+]
 
 [
     js_test(
@@ -108,7 +128,7 @@ test_suite(
         ],
         data = [
             "package.json",
-            ":lib_integration_tests",
+            ":" + test_name + "_lib",
             "//build_defs/git_bin:dist",
             "//build_defs/git_bin:git",
         ],
@@ -123,14 +143,14 @@ test_suite(
             "//build_defs/git_bin:git",
         ],
     )
-    for (test_name, entry_point) in INTEGRATION_TESTS
+    for (test_name, _, entry_point) in INTEGRATION_TESTS
 ]
 
 eslint_test(
     name = "eslint",
     srcs = [
         ":lib",
-        ":lib_integration_tests",
+        ":lib_integration_stubs",
         ":lib_tests",
-    ],
+    ] + [":" + test_name + "_lib" for (test_name, _, _) in INTEGRATION_TESTS],
 )
