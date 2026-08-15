@@ -208,6 +208,25 @@ export async function closeOutputPanel(page: Page): Promise<void> {
     await page.locator(OUTPUT_PANEL).waitFor({ state: "hidden" });
 }
 
+export async function closeAllEditors(page: Page): Promise<void> {
+    await runCommand(page, "View: Close All Editors");
+}
+
+/**
+ * Text rendered on each side of the visible diff editor, with the rendered padding
+ * collapsed. Both sides load asynchronously, so callers have to poll.
+ */
+export async function diffEditorSides(page: Page): Promise<{ original: string; modified: string }> {
+    const editor = page.locator(".monaco-diff-editor").first();
+
+    async function side(name: "original" | "modified"): Promise<string> {
+        const lines = editor.locator(`.editor.${name} .view-lines`);
+        return (await lines.innerText()).replaceAll(/\s+/gu, " ").trim();
+    }
+
+    return { modified: await side("modified"), original: await side("original") };
+}
+
 /**
  * A toast notification whose message matches `text`, e.g. from a non-modal
  * `window.showWarningMessage`.
