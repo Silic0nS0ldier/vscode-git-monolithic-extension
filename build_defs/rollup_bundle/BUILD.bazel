@@ -1,13 +1,16 @@
-load("@npm//:defs.bzl", "npm_link_all_packages")
-load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
+load("@npm//:defs.bzl", "npm_link_all_packages")
 load("//build_defs/lint:linters.bzl", "eslint_test")
 
 npm_link_all_packages(name = "node_modules")
 
 js_binary(
     name = "bin",
-    data = [":lib", "package.json"],
+    data = [
+        "package.json",
+        ":lib",
+    ],
     entry_point = ":dist/main.js",
     visibility = ["//visibility:public"],
 )
@@ -15,8 +18,11 @@ js_binary(
 ts_project(
     name = "lib",
     srcs = glob(["src/**/*.ts"]) + ["package.json"],
+    declaration = True,
     out_dir = "dist",
     root_dir = "src",
+    tsconfig = ":tsconfig",
+    visibility = [":__pkg__"],
     deps = [
         ":node_modules/@rollup/plugin-commonjs",
         ":node_modules/@rollup/plugin-node-resolve",
@@ -24,16 +30,13 @@ ts_project(
         ":node_modules/cleye",
         ":node_modules/rollup",
     ],
-    tsconfig = ":tsconfig",
-    declaration = True,
-    visibility = [":__pkg__"],
 )
 
 ts_config(
     name = "tsconfig",
     src = "tsconfig.json",
-    deps = ["//:tsconfig"],
     visibility = [":__pkg__"],
+    deps = ["//:tsconfig"],
 )
 
 eslint_test(

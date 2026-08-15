@@ -1,15 +1,18 @@
 load("@aspect_rules_js//js:defs.bzl", "js_test")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@crates//:defs.bzl", "all_crate_deps")
 load("@rules_rust//rust:defs.bzl", "rust_shared_library", "rust_test")
 load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen")
-load("@crates//:defs.bzl", "all_crate_deps")
-load("@bazel_skylib//rules:write_file.bzl", "write_file")
 
 rust_shared_library(
     name = "wasm_lib",
     srcs = glob(["src/**"]),
     edition = "2024",
-    target_compatible_with = ["@platforms//cpu:wasm32", "@platforms//os:none"],
+    target_compatible_with = [
+        "@platforms//cpu:wasm32",
+        "@platforms//os:none",
+    ],
     deps = all_crate_deps(normal = True),
 )
 
@@ -24,8 +27,8 @@ rust_test(
 
 rust_wasm_bindgen(
     name = "wasm",
-    wasm_file = ":wasm_lib",
     target = "web",
+    wasm_file = ":wasm_lib",
 )
 
 js_test(
@@ -72,10 +75,10 @@ write_file(
 npm_package(
     name = "pkg",
     srcs = [
-        ":mod_js",
-        ":mod_dts",
-        ":wasm",
         "package.json",
+        ":mod_dts",
+        ":mod_js",
+        ":wasm",
     ],
     visibility = ["//visibility:public"],
 )

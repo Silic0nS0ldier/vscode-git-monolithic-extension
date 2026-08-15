@@ -64,6 +64,7 @@ BUNDLE_ENTRY_POINTS = [
     "//extension:bundle_/main.js",
     "//extension:bundle_/askpass-main.js",
 ]
+
 BUNDLE_DATA = BUNDLE_ENTRY_POINTS + ["//extension:bundle"]
 
 sh_test(

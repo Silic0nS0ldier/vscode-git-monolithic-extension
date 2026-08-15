@@ -19,4 +19,3 @@ shellcheck = lint_shellcheck_aspect(
 )
 
 shellcheck_test = lint_test(aspect = shellcheck)
-

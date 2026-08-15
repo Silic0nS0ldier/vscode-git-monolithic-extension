@@ -36,8 +36,8 @@ ts_project(
         ":node_modules/@types/which",
         ":node_modules/compare-versions",
         ":node_modules/get-stream",
-        ":node_modules/which",
         ":node_modules/monolithic-git-wasm",
+        ":node_modules/which",
     ],
 )
 

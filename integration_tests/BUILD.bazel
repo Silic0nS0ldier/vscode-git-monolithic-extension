@@ -85,8 +85,8 @@ runc_binary(
         "TOKEN": BROWSERLESS_TOKEN,
     },
     image = "@browserless_chromium",
-    target_compatible_with = LINUX_ONLY,
     strict_xattrs = False,
+    target_compatible_with = LINUX_ONLY,
 )
 
 itest_service(
@@ -98,8 +98,8 @@ itest_service(
         "PORT=$${PORT}",
     ],
     autoassign_port = True,
-    expected_start_duration = "10s",
     exe = ":browserless_chromium",
+    expected_start_duration = "10s",
     http_health_check_address = "http://127.0.0.1:$${PORT}/meta?token=" + BROWSERLESS_TOKEN,
     target_compatible_with = LINUX_ONLY,
 )

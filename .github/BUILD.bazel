@@ -2,7 +2,7 @@ load("@npm//:renovate/package_json.bzl", renovate_bin = "bin")
 
 renovate_bin.renovate_config_validator_test(
     name = "renovate_config",
-    data = ["renovate.json"],
     args = ["renovate.json"],
     chdir = package_name(),
+    data = ["renovate.json"],
 )

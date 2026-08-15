@@ -16,7 +16,6 @@ bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.72.0")
 bazel_dep(name = "rules_rust", version = "0.72.0")
 bazel_dep(name = "rules_shell", version = "0.8.0")
 bazel_dep(name = "rules_oci", version = "2.3.0")
-
 bazel_dep(name = "rules_oci_runtime", version = "0.0.0-20260814")
 archive_override(
     module_name = "rules_oci_runtime",
