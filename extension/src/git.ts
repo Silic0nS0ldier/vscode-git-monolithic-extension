@@ -1,3 +1,4 @@
+import { size as objectSize } from "monolithic-git-interop/api/cat-file/size";
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
 import { branch as branchDetail } from "monolithic-git-interop/api/for-each-ref/branch";
@@ -339,8 +340,7 @@ export class Repository {
             }
 
             const { mode, object } = elements[0];
-            const catFile = await this.exec(["cat-file", "-s", object]);
-            const size = parseInt(catFile.stdout);
+            const size = unwrapOk(await objectSize(this.#git._context, this.#repositoryRoot, object));
 
             return { mode, object, size };
         }
