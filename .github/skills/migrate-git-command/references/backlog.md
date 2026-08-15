@@ -10,17 +10,9 @@ excluded pending API design review.
 
 ## Done
 
-Phase 0 enablers (`scm_itest` macro, typed `NonZeroExitDetails`) and Phase 1 reads:
-`for-each-ref` list + branch, `show -s --format`, `stash list`, `config --get commit.template`,
-`log --oneline --cherry`.
-
-## Phase 1 remainder
-
-- `rev-parse --show-cdup` — `extension/src/model.ts`, bare-repo detection during folder
-  discovery. Only runs when `workspace.isTrusted` is false, and
-  `integration_tests/code-server.sh` passes `--disable-workspace-trust`, so no Playwright
-  scenario can reach it. Either add a code-server invocation without that flag, or accept
-  package-level tests only as a documented exception.
+Phase 0 enablers (`scm_itest` macro, typed `NonZeroExitDetails`, the `untrusted` suite mode)
+and Phase 1 reads: `for-each-ref` list + branch, `show -s --format`, `stash list`,
+`config --get commit.template`, `log --oneline --cherry`, `rev-parse --show-cdup`.
 
 ## Phase 2 — object & diff reads
 

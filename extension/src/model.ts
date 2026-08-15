@@ -312,8 +312,7 @@ export class Model {
             // Check if the folder is a bare repo: if it has a file named HEAD && `rev-parse --show -cdup` is empty
             try {
                 fs.accessSync(path.join(repoPath, "HEAD"), fs.constants.F_OK);
-                const result = await this.git.exec(repoPath, ["-C", repoPath, "rev-parse", "--show-cdup"]);
-                if (result.stderr.trim() === "" && result.stdout.trim() === "") {
+                if (await this.git.getPathToWorkTreeRoot(repoPath) === "") {
                     return;
                 }
             } catch {
