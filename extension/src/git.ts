@@ -10,6 +10,7 @@ import { findTrackingBranches } from "monolithic-git-interop/api/repository/find
 import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
+import { showCdup } from "monolithic-git-interop/api/rev-parse/show-cdup";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
 import { commit as showCommit, show } from "monolithic-git-interop/api/show";
 import { list as listStashes } from "monolithic-git-interop/api/stash/list";
@@ -221,6 +222,11 @@ export class Git {
 
     async getRepositoryDotGit(repositoryPath: string): Promise<string> {
         return unwrapOk(await gitDir(this._context, repositoryPath));
+    }
+
+    /** Empty at the top of a work tree, and wherever there is no work tree at all. */
+    async getPathToWorkTreeRoot(repositoryPath: string): Promise<string> {
+        return unwrapOk(await showCdup(this._context, repositoryPath));
     }
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {

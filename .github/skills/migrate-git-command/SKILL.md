@@ -37,8 +37,8 @@ methods are only reached passively through
 `"when": "false"` is hidden and not user-invocable.
 
 If no UI path can be driven headlessly, say so and agree an exception before continuing
-(example: `rev-parse --show-cdup` only runs when workspace trust is off, but
-`integration_tests/code-server.sh` passes `--disable-workspace-trust`).
+(example: `rev-parse --show-cdup` only runs when workspace trust is off, which needed
+`scm_itest(untrusted = True)` — a code-server started without `--disable-workspace-trust`).
 
 ### 2. Write the extension integration test FIRST
 
