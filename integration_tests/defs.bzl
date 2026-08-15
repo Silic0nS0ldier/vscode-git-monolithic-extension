@@ -11,7 +11,7 @@ LINUX_ONLY = ["@platforms//os:linux"]
 # browserless generates one if unset, and the test needs to know it up front.
 BROWSERLESS_TOKEN = "git-monolithic-itest"
 
-def _scm_itest_impl(name, visibility, fixture, entry_point, package_json, size):
+def _scm_itest_impl(name, visibility, fixture, entry_point, package_json, size, untrusted):
     workspace_subdir = "git-monolithic-itest-" + name
 
     itest_task(
@@ -34,6 +34,7 @@ def _scm_itest_impl(name, visibility, fixture, entry_point, package_json, size):
             "$(rootpath :code_server_binary)",
             "$(rootpath //extension/vsix:git_monolithic)",
             "$${PORT}",
+            "untrusted" if untrusted else "trusted",
         ],
         autoassign_port = True,
         data = [
@@ -105,6 +106,12 @@ observe each other's git state. The suite itself runs as `<name>_test`.
             configurable = False,
             default = "medium",
             doc = "Size of the generated `service_test`.",
+        ),
+        "untrusted": attr.bool(
+            configurable = False,
+            default = False,
+            doc = "Opens the workspace in Restricted Mode, for suites covering the " +
+                  "discovery path the extension takes when `workspace.isTrusted` is false.",
         ),
     },
 )
