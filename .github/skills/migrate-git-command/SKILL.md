@@ -157,5 +157,3 @@ sites rewired, the code deleted, and the baseline suite that passed untouched.
 - `runCommand` in [harness.ts](../../../integration_tests/src/harness.ts) asserts exactly one
   palette row matches the label. The builtin git extension contributes identically-titled
   commands — drive ambiguous ones from the status bar instead.
-- `buildifier` reformats pre-existing attribute order in `integration_tests/BUILD.bazel`;
-  revert that churn.

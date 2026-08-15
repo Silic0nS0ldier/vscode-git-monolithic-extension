@@ -19,8 +19,11 @@
         "commands": [
             {
                 "command": "rustfmt --edition 2024",
-                "exts": ["rs"],
-                "cacheKeyFiles": ["Cargo.toml"]
+                "exts": ["rs"]
+            },
+            {
+                "command": "buildifier -lint=off -path={{file_path}}",
+                "exts": ["bazel", "bzl"]
             }
         ]
     },
