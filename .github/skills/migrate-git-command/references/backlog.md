@@ -14,11 +14,12 @@ Phase 0 enablers (`scm_itest` macro, typed `NonZeroExitDetails`, the `untrusted`
 and Phase 1 reads: `for-each-ref` list + branch, `show -s --format`, `stash list`,
 `config --get commit.template`, `log --oneline --cherry`, `rev-parse --show-cdup`.
 
+Phase 2 so far: `cat-file -s`, baselined by the `object` suite.
+
 ## Phase 2 — object & diff reads
 
 Needs a `diff.test.ts` suite with a fixture producing real diffs.
 
-- `cat-file -s` (`getObjectDetails`) → `api/cat-file/size.ts`
 - the `diff` family in `extension/src/git/git-class/diff.ts` + `git.ts` `diff()`:
   `--name-status -z --diff-filter=ADMR`, and `diff [--cached] [ref] -- <path>`
   (`diffWithHEAD`, `diffWith`, `diffIndexWithHEAD`, `diffIndexWith`, `diffBetween`)
