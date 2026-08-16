@@ -91,5 +91,6 @@ sh_library(
 
 shellcheck_test(
     name = "shellcheck",
+    size = "small",
     srcs = [":sh-srcs"],
 )

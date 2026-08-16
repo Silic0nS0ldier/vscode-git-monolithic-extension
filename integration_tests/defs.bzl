@@ -18,6 +18,7 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
     eslint_test(
         name = name + "_eslint",
         srcs = [lib],
+        size = "small",
     )
 
     itest_task(
@@ -32,6 +33,14 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
             "//build_defs/git_bin:git",
         ],
         exe = ":workspace_fixture",
+        hygienic = False,
+    )
+
+    service_test(
+        name = name + "_fixture_task_hygiene_test",
+        size = "small",
+        services = [":" + name + "_fixture_task"],
+        test = "@rules_itest//:exit0",
     )
 
     itest_service(
@@ -52,6 +61,14 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         http_health_check_address = "http://127.0.0.1:$${PORT}/healthz",
         target_compatible_with = LINUX_ONLY,
         deps = [":" + name + "_fixture_task"],
+        hygienic = False,
+    )
+
+    service_test(
+        name = name + "_code_server_service_hygiene_test",
+        size = "small",
+        services = [":" + name + "_code_server_service"],
+        test = "@rules_itest//:exit0",
     )
 
     js_test(
@@ -115,7 +132,7 @@ observe each other's git state. The suite itself runs as `<name>_test`.
         ),
         "size": attr.string(
             configurable = False,
-            default = "medium",
+            default = "small",
             doc = "Size of the generated `service_test`.",
         ),
         "untrusted": attr.bool(

@@ -161,6 +161,7 @@ sh_test(
 
 shellcheck_test(
     name = "shellcheck",
+    size = "small",
     srcs = [
         ":image_test_scripts",
         ":install-electron-deps",

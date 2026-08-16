@@ -117,5 +117,6 @@ sh_test(
 
 shellcheck_test(
     name = "shellcheck",
+    size = "small",
     srcs = [":run-load-check"],
 )

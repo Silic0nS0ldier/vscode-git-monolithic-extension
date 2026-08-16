@@ -75,6 +75,7 @@ ts_project(
 
 bin.ava_test(
     name = "tests",
+    size = "small",
     args = ["-t"],
     chdir = package_name(),
     data = [
@@ -85,6 +86,7 @@ bin.ava_test(
 
 eslint_test(
     name = "eslint",
+    size = "small",
     srcs = [
         ":lib",
         ":lib_tests",

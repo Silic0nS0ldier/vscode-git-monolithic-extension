@@ -2,7 +2,7 @@ load("@aspect_rules_js//js:defs.bzl", "js_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@npm//:defs.bzl", "npm_link_all_packages")
-load("@rules_itest//:itest.bzl", "itest_service")
+load("@rules_itest//:itest.bzl", "itest_service", "service_test")
 load("@rules_oci_runtime//lib:defs.bzl", "runc_binary")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
@@ -101,7 +101,15 @@ itest_service(
     exe = ":browserless_chromium",
     expected_start_duration = "10s",
     http_health_check_address = "http://127.0.0.1:$${PORT}/meta?token=" + BROWSERLESS_TOKEN,
+    hygienic = False,
     target_compatible_with = LINUX_ONLY,
+)
+
+service_test(
+    name = "browserless_chromium_service_hygiene_test",
+    size = "small",
+    services = [":browserless_chromium_service"],
+    test = "@rules_itest//:exit0",
 )
 
 ts_config(
@@ -188,11 +196,13 @@ js_test(
 
 shellcheck_test(
     name = "shellcheck",
+    size = "small",
     srcs = [":service_scripts"],
 )
 
 eslint_test(
     name = "eslint",
+    size = "small",
     srcs = [":lib_harness"],
 )
 

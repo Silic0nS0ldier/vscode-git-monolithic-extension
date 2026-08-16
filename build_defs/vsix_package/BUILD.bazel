@@ -39,6 +39,7 @@ ts_config(
 
 eslint_test(
     name = "eslint",
+    size = "small",
     srcs = [
         ":lib",
     ],

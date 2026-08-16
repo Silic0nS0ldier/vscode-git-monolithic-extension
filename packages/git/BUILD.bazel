@@ -150,6 +150,7 @@ test_suite(
 
 eslint_test(
     name = "eslint",
+    size = "small",
     srcs = [
         ":lib",
         ":lib_integration_stubs",
