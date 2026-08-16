@@ -2,6 +2,9 @@ common --symlink_prefix=.bazel/
 common --lockfile_mode=error
 common --test_summary=short_uncached
 
+common --local_resources=disk_io=100
+common --default_test_resources=disk_io=5
+
 # Path mapping strips the configuration segment (`bazel-out/k8-fastbuild/bin`) from action
 # command lines, so actions that differ only by configuration share cache entries. It only
 # pays off with a disk or remote cache, and needs sandboxed (or remote) execution.

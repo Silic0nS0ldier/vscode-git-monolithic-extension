@@ -96,6 +96,12 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         target_compatible_with = LINUX_ONLY,
         test = ":" + name + "_test_bin",
         visibility = visibility,
+        tags = [
+            # chromium image extraction heavily saturates disk I/O, so we reserve 100% of bandwidth.
+            # TODO: Each chromium service instance has the exact same image, find a way to amortise
+            # the extraction cost across all suites _without_ introducing hermeticity violations.
+            "resources:disk_io:100",
+        ],
     )
 
 scm_itest = macro(
