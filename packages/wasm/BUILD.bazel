@@ -20,6 +20,7 @@ rust_shared_library(
 # execute the resulting binary. `#[wasm_bindgen]` degrades to a plain function off wasm32.
 rust_test(
     name = "wasm_lib_test",
+    size = "small",
     srcs = glob(["src/**"]),
     edition = "2024",
     deps = all_crate_deps(normal = True),
@@ -33,6 +34,7 @@ rust_wasm_bindgen(
 
 js_test(
     name = "wasm_test",
+    size = "small",
     data = [
         "package.json",
         ":mod_js",

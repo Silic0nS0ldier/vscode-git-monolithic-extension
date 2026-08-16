@@ -70,6 +70,7 @@ ts_project(
 
 bin.ava_test(
     name = "tests",
+    size = "small",
     chdir = package_name(),
     data = [
         "package.json",
@@ -123,6 +124,7 @@ test_suite(
 [
     js_test(
         name = test_name,
+        size = "small",
         args = [
             "--test",
         ],
