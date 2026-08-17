@@ -45,7 +45,7 @@ importers:
         specifier: ^6.32.2
         version: 6.32.2
       renovate:
-        specifier: ^44.29.5
+        specifier: ^44.30.0
         version: 44.30.4(supports-color@7.2.0)(typanion@3.14.0)
       typescript:
         specifier: npm:@typescript/typescript6@^6.0.2
