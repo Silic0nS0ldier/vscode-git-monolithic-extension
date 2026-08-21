@@ -82,7 +82,7 @@ export const tools = {
     },
     jscpd: {
         // renovate: datasource=github-releases depName=kucherenko/jscpd
-        version: "v5.0.15",
+        version: "v5.0.16",
         platforms: {
             "linux-x86_64": {
                 url: "https://github.com/kucherenko/jscpd/releases/download/{version}/jscpd-linux-x64-gnu.tar.gz",
