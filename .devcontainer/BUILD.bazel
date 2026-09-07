@@ -141,13 +141,8 @@ sh_library(
 )
 
 sh_library(
-    name = "install-electron-deps",
-    srcs = ["install-electron-deps.sh"],
-)
-
-sh_library(
-    name = "install-fuse",
-    srcs = ["install-fuse.sh"],
+    name = "install",
+    srcs = ["install.sh"],
 )
 
 sh_test(
@@ -169,8 +164,7 @@ shellcheck_test(
     size = "small",
     srcs = [
         ":image_test_scripts",
-        ":install-electron-deps",
-        ":install-fuse",
+        ":install",
         ":knip_shim_script",
     ],
 )
