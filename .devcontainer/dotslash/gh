@@ -3,26 +3,26 @@
   "name": "gh",
   "platforms": {
     "linux-x86_64": {
-      "size": 14863663,
+      "size": 15152253,
       "hash": "sha256",
-      "digest": "3b8ac6b30336802fc1a858d7c084e11cdf24ac1a761ca90b68022d7d729208de",
+      "digest": "e4d4bb4498e8d007abe545b6568926793ace1b6447da598294a610018cb164be",
       "format": "tar.gz",
-      "path": "gh_2.98.0_linux_amd64/bin/gh",
+      "path": "gh_2.100.0_linux_amd64/bin/gh",
       "providers": [
         {
-          "url": "https://github.com/cli/cli/releases/download/v2.98.0/gh_2.98.0_linux_amd64.tar.gz"
+          "url": "https://github.com/cli/cli/releases/download/v2.100.0/gh_2.100.0_linux_amd64.tar.gz"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 13523338,
+      "size": 13783869,
       "hash": "sha256",
-      "digest": "cf689084f3a3618f7eae4a2420d335d74626d65f5e594b9828d125d69f800d86",
+      "digest": "ea4e7a581a32ccad6cc7923cb1576ac5859ba4b9a16ab22eb8f8a96e78e2e961",
       "format": "tar.gz",
-      "path": "gh_2.98.0_linux_arm64/bin/gh",
+      "path": "gh_2.100.0_linux_arm64/bin/gh",
       "providers": [
         {
-          "url": "https://github.com/cli/cli/releases/download/v2.98.0/gh_2.98.0_linux_arm64.tar.gz"
+          "url": "https://github.com/cli/cli/releases/download/v2.100.0/gh_2.100.0_linux_arm64.tar.gz"
         }
       ]
     }
