@@ -3,7 +3,7 @@
     "type": "module",
     "dependencies": {
         "@vscode/extension-telemetry": "^1.5.2",
-        "ignore": "^7.0.6",
+        "ignore": "^7.0.8",
         "just-debounce": "^1.1.0",
         "monolithic-git-interop": "workspace:^",
         "onetime": "^8.0.0",
