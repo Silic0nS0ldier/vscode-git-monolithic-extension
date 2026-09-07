@@ -98,9 +98,11 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         visibility = visibility,
         tags = [
             # chromium image extraction heavily saturates disk I/O, so we reserve 100% of bandwidth.
-            # TODO: Each chromium service instance has the exact same image, find a way to amortise
-            # the extraction cost across all suites _without_ introducing hermeticity violations.
-            "resources:disk_io:100",
+            # TODO Reduce overhead by enabling FUSE rootfs backend.
+            # NOTE `resources:*` affect built actions (e.g. `test.xml` generation), this is being
+            #      fixed in https://github.com/bazelbuild/bazel/pull/30747
+            # TODO Self-generate `test.xml` to avoid builtin action.
+            "resources:disk_io:50",
         ],
     )
 

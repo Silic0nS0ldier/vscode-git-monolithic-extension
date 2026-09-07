@@ -96,6 +96,8 @@ itest_service(
     args = [
         "--env",
         "PORT=$${PORT}",
+        # TODO Remove once mount cleanup is reliable, Bazel crashes when mounts are not cleaned up.
+        "--rootfs=extract",
     ],
     autoassign_port = True,
     exe = ":browserless_chromium",
