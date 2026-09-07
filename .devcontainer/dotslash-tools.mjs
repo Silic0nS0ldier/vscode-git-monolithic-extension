@@ -66,7 +66,7 @@ export const tools = {
     },
     gh: {
         // renovate: datasource=github-releases depName=cli/cli
-        version: "v2.97.0",
+        version: "v2.98.0",
         platforms: {
             "linux-x86_64": {
                 url: "https://github.com/cli/cli/releases/download/{version}/gh_{versionNoV}_linux_amd64.tar.gz",
