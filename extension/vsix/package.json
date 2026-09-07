@@ -32,431 +32,513 @@
             {
                 "command": "git_monolithic.stageSelectedRanges",
                 "title": "%command.stageSelectedRanges%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.setLogLevel",
                 "title": "%command.setLogLevel%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.clone",
                 "title": "%command.clone%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.cloneRecursive",
                 "title": "%command.cloneRecursive%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.init",
                 "title": "%command.init%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(add)"
             },
             {
                 "command": "git_monolithic.openRepository",
                 "title": "%command.openRepository%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.close",
                 "title": "%command.close%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.refresh",
                 "title": "%command.refresh%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(refresh)"
             },
             {
                 "command": "git_monolithic.openChange",
                 "title": "%command.openChange%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(compare-changes)"
             },
             {
                 "command": "git_monolithic.openAllChanges",
                 "title": "%command.openAllChanges%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.openFile",
                 "title": "%command.openFile%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(go-to-file)"
             },
             {
                 "command": "git_monolithic.openFile2",
                 "title": "%command.openFile%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(go-to-file)"
             },
             {
                 "command": "git_monolithic.openHEADFile",
                 "title": "%command.openHEADFile%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.stage",
                 "title": "%command.stage%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(add)"
             },
             {
                 "command": "git_monolithic.stageAll",
                 "title": "%command.stageAll%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(add)"
             },
             {
                 "command": "git_monolithic.stageAllTracked",
                 "title": "%command.stageAllTracked%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(add)"
             },
             {
                 "command": "git_monolithic.stageAllUntracked",
                 "title": "%command.stageAllUntracked%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(add)"
             },
             {
                 "command": "git_monolithic.stageAllMerge",
                 "title": "%command.stageAllMerge%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(add)"
             },
             {
                 "command": "git_monolithic.unstage",
                 "title": "%command.unstage%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(remove)"
             },
             {
                 "command": "git_monolithic.unstageAll",
                 "title": "%command.unstageAll%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(remove)"
             },
             {
                 "command": "git_monolithic.clean",
                 "title": "%command.clean%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(discard)"
             },
             {
                 "command": "git_monolithic.cleanAll",
                 "title": "%command.cleanAll%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(discard)"
             },
             {
                 "command": "git_monolithic.cleanAllTracked",
                 "title": "%command.cleanAllTracked%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(discard)"
             },
             {
                 "command": "git_monolithic.cleanAllUntracked",
                 "title": "%command.cleanAllUntracked%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(discard)"
             },
             {
                 "command": "git_monolithic.rename",
                 "title": "%command.rename%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(discard)"
             },
             {
                 "command": "git_monolithic.commit",
                 "title": "%command.commit%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(check)"
             },
             {
                 "command": "git_monolithic.commitStaged",
                 "title": "%command.commitStaged%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitEmpty",
                 "title": "%command.commitEmpty%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitStagedSigned",
                 "title": "%command.commitStagedSigned%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitStagedAmend",
                 "title": "%command.commitStagedAmend%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitAll",
                 "title": "%command.commitAll%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitAllSigned",
                 "title": "%command.commitAllSigned%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitAllAmend",
                 "title": "%command.commitAllAmend%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitNoVerify",
                 "title": "%command.commitNoVerify%",
                 "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
                 "icon": "$(check)"
             },
             {
                 "command": "git_monolithic.commitStagedNoVerify",
                 "title": "%command.commitStagedNoVerify%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitEmptyNoVerify",
                 "title": "%command.commitEmptyNoVerify%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitStagedSignedNoVerify",
                 "title": "%command.commitStagedSignedNoVerify%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitStagedAmendNoVerify",
                 "title": "%command.commitStagedAmendNoVerify%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitAllNoVerify",
                 "title": "%command.commitAllNoVerify%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitAllSignedNoVerify",
                 "title": "%command.commitAllSignedNoVerify%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.commitAllAmendNoVerify",
                 "title": "%command.commitAllAmendNoVerify%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.restoreCommitTemplate",
                 "title": "%command.restoreCommitTemplate%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.undoCommit",
                 "title": "%command.undoCommit%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.checkout",
                 "title": "%command.checkout%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.checkoutDetached",
                 "title": "%command.checkoutDetached%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.branch",
                 "title": "%command.branch%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.branchFrom",
                 "title": "%command.branchFrom%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.deleteBranch",
                 "title": "%command.deleteBranch%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.renameBranch",
                 "title": "%command.renameBranch%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.merge",
                 "title": "%command.merge%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.rebase",
                 "title": "%command.rebase%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.createTag",
                 "title": "%command.createTag%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.deleteTag",
                 "title": "%command.deleteTag%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.fetch",
                 "title": "%command.fetch%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.fetchPrune",
                 "title": "%command.fetchPrune%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.fetchAll",
                 "title": "%command.fetchAll%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pull",
                 "title": "%command.pull%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pullRebase",
                 "title": "%command.pullRebase%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pullFrom",
                 "title": "%command.pullFrom%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.push",
                 "title": "%command.push%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pushForce",
                 "title": "%command.pushForce%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pushTo",
                 "title": "%command.pushTo%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pushToForce",
                 "title": "%command.pushToForce%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pushTags",
                 "title": "%command.pushTags%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pushWithTags",
                 "title": "%command.pushFollowTags%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.pushWithTagsForce",
                 "title": "%command.pushFollowTagsForce%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.cherryPick",
                 "title": "%command.cherryPick%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.removeRemote",
                 "title": "%command.removeRemote%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.sync",
                 "title": "%command.sync%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.syncRebase",
                 "title": "%command.syncRebase%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.publish",
                 "title": "%command.publish%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.showOutput",
                 "title": "%command.showOutput%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.ignore",
                 "title": "%command.ignore%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.revealInExplorer",
                 "title": "%command.revealInExplorer%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.stashIncludeUntracked",
                 "title": "%command.stashIncludeUntracked%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.stash",
                 "title": "%command.stash%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.stashPop",
                 "title": "%command.stashPop%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.stashPopLatest",
                 "title": "%command.stashPopLatest%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.stashApply",
                 "title": "%command.stashApply%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.stashApplyLatest",
                 "title": "%command.stashApplyLatest%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.stashDrop",
                 "title": "%command.stashDrop%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             },
             {
                 "command": "git_monolithic.rebaseAbort",
                 "title": "%command.rebaseAbort%",
-                "category": "Git"
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled"
             }
         ],
         "keybindings": [
@@ -464,7 +546,7 @@
                 "command": "git_monolithic.stageSelectedRanges",
                 "key": "ctrl+k ctrl+alt+s",
                 "mac": "cmd+k cmd+alt+s",
-                "when": "isInDiffEditor"
+                "when": "config.git_monolithic.enabled && isInDiffEditor"
             }
         ],
         "menus": {
