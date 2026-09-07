@@ -3,26 +3,26 @@
   "name": "jscpd",
   "platforms": {
     "linux-x86_64": {
-      "size": 1782608,
+      "size": 1829542,
       "hash": "sha256",
-      "digest": "d08693592e667f11964cd91a2ae72f255a2d3819ae1c17d23aae038d1f7fe775",
+      "digest": "71934bb9713a24223fac6b1a066b82f78e64102e98ff07ed51bec77901791c2a",
       "format": "tar.gz",
       "path": "jscpd",
       "providers": [
         {
-          "url": "https://github.com/kucherenko/jscpd/releases/download/v5.0.16/jscpd-linux-x64-gnu.tar.gz"
+          "url": "https://github.com/kucherenko/jscpd/releases/download/v5.1.0/jscpd-linux-x64-gnu.tar.gz"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 1658964,
+      "size": 1704414,
       "hash": "sha256",
-      "digest": "59a6cf21964898add28a4c5f42b3139a0ab451e9ff81217ff444fa7f3cfb44dd",
+      "digest": "ff31a108374a03d172edd94a4a58516ae9e5d72a3e3380fbeb9b8484130c822e",
       "format": "tar.gz",
       "path": "jscpd",
       "providers": [
         {
-          "url": "https://github.com/kucherenko/jscpd/releases/download/v5.0.16/jscpd-linux-arm64-gnu.tar.gz"
+          "url": "https://github.com/kucherenko/jscpd/releases/download/v5.1.0/jscpd-linux-arm64-gnu.tar.gz"
         }
       ]
     }
