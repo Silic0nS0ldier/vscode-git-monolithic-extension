@@ -18,8 +18,7 @@
         "gh-cli-auth": "gh auth token > .git/__gh_token || true"
     },
     "onCreateCommand": {
-        "electron-deps": "./.devcontainer/install-electron-deps.sh",
-        "fuse": "./.devcontainer/install-fuse.sh"
+        "install": "./.devcontainer/install.sh"
     },
     "postStartCommand": {
         "gh-cli-auth": "test -s .git/__gh_token && gh auth login --with-token < .git/__gh_token || true"

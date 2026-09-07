@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-# Libraries required by Electron in //integration_tests/electron_host:electron_host_smoke_test.
 #
 # These are not baked into the Bazel-built image because Ubuntu package versions
 # cannot currently be pinned reproducibly (rules_distroless' Ubuntu snapshot
@@ -8,6 +7,8 @@
 set -euo pipefail
 
 sudo apt-get update
+
+# Libraries required by Electron in //integration_tests/electron_host:electron_host_smoke_test
 sudo apt-get install -y --no-install-recommends \
   libasound2t64 \
   libatk1.0-0t64 \
@@ -26,3 +27,11 @@ sudo apt-get install -y --no-install-recommends \
   libxfixes3 \
   libxkbcommon0 \
   libxrandr2
+
+# FUSE3 for filesystem in userspace support
+sudo apt-get install -y --no-install-recommends \
+  fuse3
+
+if ! grep -qE '^\s*user_allow_other\s*$' /etc/fuse.conf; then
+  echo 'user_allow_other' | sudo tee -a /etc/fuse.conf > /dev/null
+fi
