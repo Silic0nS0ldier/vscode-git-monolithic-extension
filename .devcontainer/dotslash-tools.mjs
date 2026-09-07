@@ -130,7 +130,7 @@ export const tools = {
     },
     rustup: {
         // renovate: datasource=github-tags depName=rust-lang/rustup
-        version: "1.29.0",
+        version: "1.29.1",
         platforms: {
             "linux-x86_64": {
                 url: "https://static.rust-lang.org/rustup/archive/{version}/x86_64-unknown-linux-gnu/rustup-init",
