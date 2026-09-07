@@ -145,6 +145,11 @@ sh_library(
     srcs = ["install-electron-deps.sh"],
 )
 
+sh_library(
+    name = "install-fuse",
+    srcs = ["install-fuse.sh"],
+)
+
 sh_test(
     name = "image_test",
     size = "small",
@@ -165,6 +170,7 @@ shellcheck_test(
     srcs = [
         ":image_test_scripts",
         ":install-electron-deps",
+        ":install-fuse",
         ":knip_shim_script",
     ],
 )
