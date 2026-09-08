@@ -8,6 +8,7 @@ import fs from "node:fs/promises";
 const repoRoot = new URL("../../", import.meta.url);
 const moduleBazelPath = new URL("MODULE.bazel", repoRoot);
 const packageJsonPath = new URL("extension/vsix/package.json", repoRoot);
+const extensionPackageJsonPath = new URL("extension/package.json", repoRoot);
 
 // Repo name in MODULE.bazel -> code-server release asset platform.
 const PLATFORMS = {
@@ -80,4 +81,46 @@ await fs.writeFile(
     "utf-8",
 );
 
-console.log(`Pinned code-server ${release} (VS Code ${vscodeVersion}).`);
+// `@types/vscode` gates which APIs the extension can compile against, so it must never
+// describe a build newer than the host. It is not published for every VS Code release
+// (there is no 1.132.0, for instance), so take the newest one at or below the bundled
+// build. The pin is exact: a caret would let a later `pnpm install` resolve past the host.
+const typesRes = await fetch("https://registry.npmjs.org/@types/vscode", {
+    headers: { accept: "application/vnd.npm.install-v1+json" },
+});
+if (!typesRes.ok) {
+    throw new Error(`Failed to fetch @types/vscode versions: ${typesRes.status}`);
+}
+const typesJson = await typesRes.json();
+
+const toParts = version => version.split(".").map(Number);
+const compare = (a, b) => {
+    const [aParts, bParts] = [toParts(a), toParts(b)];
+    for (let i = 0; i < 3; i++) {
+        if (aParts[i] !== bParts[i]) {
+            return aParts[i] - bParts[i];
+        }
+    }
+    return 0;
+};
+
+const typesVersion = Object.keys(typesJson.versions ?? {})
+    .filter(version => /^\d+\.\d+\.\d+$/.test(version) && compare(version, vscodeVersion) <= 0)
+    .sort(compare)
+    .at(-1);
+if (!typesVersion) {
+    throw new Error(`No @types/vscode release at or below VS Code ${vscodeVersion}`);
+}
+
+const extensionPackageJsonContent = await fs.readFile(extensionPackageJsonPath, "utf-8");
+const typesRe = /("@types\/vscode"\s*:\s*")[^"]*(")/;
+if (!typesRe.test(extensionPackageJsonContent)) {
+    throw new Error("Could not find @types/vscode in extension/package.json");
+}
+await fs.writeFile(
+    extensionPackageJsonPath,
+    extensionPackageJsonContent.replace(typesRe, `$1${typesVersion}$2`),
+    "utf-8",
+);
+
+console.log(`Pinned code-server ${release} (VS Code ${vscodeVersion}, @types/vscode ${typesVersion}).`);

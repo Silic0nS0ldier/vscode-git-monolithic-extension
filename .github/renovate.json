@@ -76,6 +76,16 @@
                 "npm"
             ],
             "matchDepNames": [
+                "@types/vscode"
+            ],
+            "enabled": false,
+            "description": "@types/vscode is derived from the pinned coder/code-server release by update_bazel_code_server.mjs. Typings newer than the host let the extension compile against APIs that do not exist at runtime."
+        },
+        {
+            "matchManagers": [
+                "npm"
+            ],
+            "matchDepNames": [
                 "@eslint/js",
                 "eslint",
                 "typescript-eslint"
