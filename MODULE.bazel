@@ -185,29 +185,29 @@ filegroup(
 http_archive(
     name = "electron_linux_x64",
     build_file_content = _ELECTRON_LINUX_BUILD_FILE,
-    sha256 = "e85b28245deaa75c3c4f2cf5da084f4c7fbedd5af1630c59a827c41ac1f5e1af",
-    url = "https://github.com/electron/electron/releases/download/v42.7.1/electron-v42.7.1-linux-x64.zip",
+    sha256 = "2b47299ee6927b1e6cd6c12ee655794118349a3de48a0add97e438ebeebad809",
+    url = "https://github.com/electron/electron/releases/download/v42.8.1/electron-v42.8.1-linux-x64.zip",
 )
 
 http_archive(
     name = "electron_linux_arm64",
     build_file_content = _ELECTRON_LINUX_BUILD_FILE,
-    sha256 = "ba1f8055a6b601e9cd771a7c750ed37b912c486a51f51e58654ed9414bc898ba",
-    url = "https://github.com/electron/electron/releases/download/v42.7.1/electron-v42.7.1-linux-arm64.zip",
+    sha256 = "072e2441ee95b9ecf0d5ae56ef4715ee949258d10ca11ae5e856d7f93a7ebb36",
+    url = "https://github.com/electron/electron/releases/download/v42.8.1/electron-v42.8.1-linux-arm64.zip",
 )
 
 http_archive(
     name = "electron_darwin_x64",
     build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
-    sha256 = "a2f361b66b24b694715b057a9d4ba8c30457ce994e19acd9185c131539bc8900",
-    url = "https://github.com/electron/electron/releases/download/v42.7.1/electron-v42.7.1-darwin-x64.zip",
+    sha256 = "a9cb0bc4e7e41e047798c5366a2136ece4949fb9092c59d54597d6ce09bb2e09",
+    url = "https://github.com/electron/electron/releases/download/v42.8.1/electron-v42.8.1-darwin-x64.zip",
 )
 
 http_archive(
     name = "electron_darwin_arm64",
     build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
-    sha256 = "13b7c3782ac73ba64410542410a2d06f022c515730e97c5149aff2190a6c8e80",
-    url = "https://github.com/electron/electron/releases/download/v42.7.1/electron-v42.7.1-darwin-arm64.zip",
+    sha256 = "f03df963463d120a35a194e0c172f15c611ea81dceda09a6ea275843611231fd",
+    url = "https://github.com/electron/electron/releases/download/v42.8.1/electron-v42.8.1-darwin-arm64.zip",
 )
 
 # Portable git builds from GitHub Desktop, used by `//packages/git` integration tests.
@@ -284,18 +284,21 @@ filegroup(
 )
 """
 
-# renovate: datasource=github-releases depName=coder/code-server
 # Source of truth for the VS Code version this repo targets: `engines.vscode` in
-# //extension/vsix:package.json is derived from this pin by update_bazel_code_server.mjs,
-# which also refreshes the digests below. Guarded by //integration_tests:code_server_pin_drift_test.
-_CODE_SERVER_RELEASE = "4.132.0"
+# //extension/vsix:package.json and the `@types/vscode` pin in //extension:package.json are
+# derived from this pin by update_bazel_code_server.mjs, which also refreshes the digests
+# below. Guarded by //integration_tests:code_server_pin_drift_test.
+# Keep the renovate annotation directly above the assignment; the custom manager in
+# .github/renovate.json cannot see past an intervening comment line.
+# renovate: datasource=github-releases depName=coder/code-server
+_CODE_SERVER_RELEASE = "4.135.0"
 
 _CODE_SERVER_URL_PREFIX = "https://github.com/coder/code-server/releases/download/v" + _CODE_SERVER_RELEASE + "/code-server-" + _CODE_SERVER_RELEASE + "-"
 
 http_archive(
     name = "code_server_linux_x64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "a38d26f4cb81f768feddff79e2937fd3f39c83d3da8be3da7225e1087e62e4ed",
+    sha256 = "300ef4e37e469e6368a4673c6a623e1c9ba8a34f42b394fb49c431a8900bc7d1",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-amd64",
     url = _CODE_SERVER_URL_PREFIX + "linux-amd64.tar.gz",
 )
@@ -303,7 +306,7 @@ http_archive(
 http_archive(
     name = "code_server_linux_arm64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "ade569a677d1c04ee66ef153382b7e15bf261f955407663c7ddc6b87f9ee29fc",
+    sha256 = "fe6561798415e709109cb902dca2a57a687240af7d8220f6fa1d01cd2ae0541e",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-arm64",
     url = _CODE_SERVER_URL_PREFIX + "linux-arm64.tar.gz",
 )
