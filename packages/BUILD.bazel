@@ -3,7 +3,7 @@ load("//build_defs/lint:linters.bzl", "shellcheck_test")
 
 sh_library(
     name = "sh-srcs",
-    srcs = ["bazelify-node-modules.sh"],
+    srcs = ["bazelify-dist.sh"],
 )
 
 shellcheck_test(

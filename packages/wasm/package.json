@@ -3,7 +3,13 @@
     "name": "monolithic-git-wasm",
     "type": "module",
     "exports": {
-        "import": "./mod.js",
-        "types": "./mod.d.ts"
+        "import": "./dist/mod.js",
+        "types": "./dist/mod.d.ts"
+    },
+    "devDependencies": {
+        "@types/node": "catalog:vscode"
+    },
+    "scripts": {
+        "prepare": "sh ../bazelify-dist.sh"
     }
 }
