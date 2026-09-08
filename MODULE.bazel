@@ -61,8 +61,25 @@ multitool.hub(lockfile = "//:multitool.lock.json")
 use_repo(multitool, "multitool")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+
+# @llvm puts `--unwindlib=none` on every link action, but rustc also passes `-nodefaultlibs`,
+# so the clang driver never claims the flag and reports it as unused, which rustc's
+# `linker_messages` lint then echoes for every Rust link. Only the glibc Linux triples are
+# affected: @llvm already drops the flag on macOS for this same reason, and wasm32 links via
+# `rust-lld` with no cc toolchain involved.
+# TODO Drop once `--unwindlib=none` can be left off the links where it is redundant. It is an
+# unconditional `cc_toolchain(args = ...)` entry in @llvm today, so nothing can disable it;
+# gating it behind a `cc_feature` upstream would let @rules_rust — which is what adds the
+# `-nodefaultlibs` that makes it redundant — switch it off rather than mute the diagnostic.
+_UNUSED_UNWINDLIB_ARG = {
+    "aarch64-unknown-linux-gnu": ["-Clink-arg=-Wno-unused-command-line-argument"],
+    "x86_64-unknown-linux-gnu": ["-Clink-arg=-Wno-unused-command-line-argument"],
+}
+
 rust.toolchain(
     edition = "2024",
+    extra_exec_rustc_flags_triples = _UNUSED_UNWINDLIB_ARG,
+    extra_rustc_flags_triples = _UNUSED_UNWINDLIB_ARG,
     extra_target_triples = ["wasm32-unknown-unknown"],
     sha256s = {
         "cargo-1.98.1-aarch64-apple-darwin.tar.xz": "de51d4fade4f31ad8ec405261cc96bedc000d905f98980027610d6e288dbe21b",
