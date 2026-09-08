@@ -91,7 +91,7 @@ jobs:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
           archive: false
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@v2.1.0
         with:
           cache: true
           require-lockfile: true
