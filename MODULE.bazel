@@ -61,7 +61,6 @@ multitool.hub(lockfile = "//:multitool.lock.json")
 use_repo(multitool, "multitool")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-
 rust.toolchain(
     edition = "2024",
     extra_target_triples = ["wasm32-unknown-unknown"],
