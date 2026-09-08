@@ -1,6 +1,6 @@
 {
     "private": true,
-    "packageManager": "pnpm@11.23.0",
+    "packageManager": "pnpm@12.3.4",
     "dependencies": {
         "@eslint/js": "^10.0.1",
         "@typescript/native": "npm:typescript@^7.0.2",
