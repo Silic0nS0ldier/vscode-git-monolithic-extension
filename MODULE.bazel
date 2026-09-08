@@ -4,7 +4,7 @@ module(name = "vscode_git_monolithic")
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
 bazel_dep(name = "aspect_rules_js", version = "3.4.1")
-bazel_dep(name = "aspect_rules_lint", version = "2.7.2")
+bazel_dep(name = "aspect_rules_lint", version = "2.9.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.10.1")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
 bazel_dep(name = "llvm", version = "0.8.19")
