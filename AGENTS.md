@@ -98,7 +98,7 @@ Fork-specific naming (never use the upstream `git.` namespace):
 
 | Pattern                            | Runner                            | Notes                                                                                       |
 | ---------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
-| `src/**/*.test.ts`                 | ava                               | Unit. Test names are sentences.                                                             |
+| `src/**/*.test.ts`                 | ava                               | Unit. Test names are sentences. `packages/wasm` uses `node:test` instead.                   |
 | `packages/git/src/**/*.it.test.ts` | `node:test`                       | Runs a real git binary; fixtures in `*.it.stub.ts`.                                         |
 | `integration_tests/src/*.test.ts`  | `node:test` + playwright over CDP | One `scm_itest(...)` per suite in [integration_tests/defs.bzl](integration_tests/defs.bzl). |
 
@@ -113,10 +113,6 @@ When migrating a git invocation from `extension` into `packages/git`, add the in
 ## Pitfalls
 
 - `python3` is not installed. Script with `node`.
-- `node_modules` is produced by **Bazel, not `pnpm install`**. Each buildable package has a
-  `"prepare": "sh ../packages/bazelify-node-modules.sh"` script that symlinks it. A new package
-  must add that script _and_ be added to both lists in the knip step of
-  [.github/workflows/ci.yml](.github/workflows/ci.yml) _and_ to [knip.json](knip.json).
 - Dependency version bumps are initiated by Renovate; the `.github/workflows/update_*.mjs`
   scripts only complete the derived half (Bazel pins, digests). Don't hand-edit pinned versions.
 - `code-server` lags VSCode, so `engines.vscode` is pinned to it and guarded by

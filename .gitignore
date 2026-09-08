@@ -5,6 +5,10 @@
 node_modules/
 node_modules
 
+# Bazel build output overlays (directory and symlink)
+dist/
+dist
+
 # pnpm store
 .pnpm-store/
 

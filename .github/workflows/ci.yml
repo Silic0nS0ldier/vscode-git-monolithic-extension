@@ -91,22 +91,11 @@ jobs:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
           archive: false
-      - name: Materialise Bazel-built node_modules for knip
-        run: |
-          set -euo pipefail
-          bazel --quiet build --show_result=0 \
-            //:node_modules \
-            //extension:node_modules \
-            //integration_tests:node_modules \
-            //packages/git:node_modules \
-            //build_defs/rollup_bundle:node_modules \
-            //build_defs/vsix_package:node_modules
-          BAZEL_BIN=$(bazel --quiet info bazel-bin)
-          for pkg in . extension integration_tests packages/git build_defs/rollup_bundle build_defs/vsix_package; do
-            rm -rf "$pkg/node_modules"
-            ln -s "$BAZEL_BIN/$pkg/node_modules" "$pkg/node_modules"
-          done
-      - run: node ./node_modules/knip/bin/knip.js
+      - uses: pnpm/setup@v2.1.0
+        with:
+          cache: true
+          require-lockfile: true
+      - run: pnpm exec knip
         id: knip
         continue-on-error: true
       - run: exit 1

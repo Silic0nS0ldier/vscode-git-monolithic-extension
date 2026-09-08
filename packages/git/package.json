@@ -52,6 +52,6 @@
         "which": "^7.0.0"
     },
     "scripts": {
-        "prepare": "sh ../bazelify-node-modules.sh"
+        "prepare": "sh ../bazelify-dist.sh :lib"
     }
 }

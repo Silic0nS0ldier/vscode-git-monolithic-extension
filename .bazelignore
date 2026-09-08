@@ -1,0 +1,4 @@
+# Build-output overlays: symlinks into bazel-bin created by packages/bazelify-dist.sh.
+# Bazel must not glob through them.
+packages/git/dist
+packages/wasm/dist

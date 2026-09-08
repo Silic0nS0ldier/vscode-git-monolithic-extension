@@ -1,13 +1,18 @@
-load("@aspect_rules_js//js:defs.bzl", "js_test")
+load("@aspect_rules_js//js:defs.bzl", "js_library", "js_test")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@crates//:defs.bzl", "all_crate_deps")
+load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_rust//rust:defs.bzl", "rust_shared_library", "rust_test")
 load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen")
+load("//build_defs/lint:linters.bzl", "eslint_test")
+
+npm_link_all_packages(name = "node_modules")
 
 rust_shared_library(
     name = "wasm_lib",
-    srcs = glob(["src/**"]),
+    srcs = glob(["src/**/*.rs"]),
     edition = "2024",
     target_compatible_with = [
         "@platforms//cpu:wasm32",
@@ -21,26 +26,18 @@ rust_shared_library(
 rust_test(
     name = "wasm_lib_test",
     size = "small",
-    srcs = glob(["src/**"]),
+    srcs = glob(["src/**/*.rs"]),
     edition = "2024",
     deps = all_crate_deps(normal = True),
 )
 
+# wasm-bindgen writes its outputs into a directory named after the target, so the target is
+# named for the position the glue needs to occupy under `dist`.
 rust_wasm_bindgen(
-    name = "wasm",
+    name = "dist/wasm",
+    out_name = "wasm",
     target = "web",
     wasm_file = ":wasm_lib",
-)
-
-js_test(
-    name = "wasm_test",
-    size = "small",
-    data = [
-        "package.json",
-        ":mod_js",
-        ":wasm",
-    ],
-    entry_point = "wasm.test.js",
 )
 
 # Small ESM wrapper that source-phase-imports the sidecar `.wasm` file and
@@ -52,7 +49,7 @@ js_test(
 # the file next to the JS chunks in the output bundle.
 write_file(
     name = "mod_js",
-    out = "mod.js",
+    out = "dist/mod.js",
     content = [
         "import source W from \"./wasm/wasm_bg.wasm\";",
         "import { initSync } from \"./wasm/wasm.js\";",
@@ -67,10 +64,21 @@ write_file(
 # sibling `.d.ts` for the actual declarations.
 write_file(
     name = "mod_dts",
-    out = "mod.d.ts",
+    out = "dist/mod.d.ts",
     content = [
         "export * from \"./wasm/wasm.js\";",
         "",
+    ],
+)
+
+# The package's whole build output, exposed to editors and non-Bazel tooling as a single
+# `packages/wasm/dist` symlink by `../bazelify-dist.sh`.
+js_library(
+    name = "dist",
+    srcs = [
+        ":dist/wasm",
+        ":mod_dts",
+        ":mod_js",
     ],
 )
 
@@ -78,9 +86,58 @@ npm_package(
     name = "pkg",
     srcs = [
         "package.json",
-        ":mod_dts",
-        ":mod_js",
-        ":wasm",
+        ":dist",
     ],
+    include_types = True,
     visibility = ["//visibility:public"],
+)
+
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+    visibility = [":__pkg__"],
+    deps = ["//:tsconfig"],
+)
+
+ts_project(
+    name = "lib_tests",
+    srcs = glob(["src/**/*.test.ts"]) + ["package.json"],
+    declaration = True,
+    out_dir = "dist",
+    root_dir = "src",
+    tsconfig = ":tsconfig",
+    deps = [
+        ":dist",
+        ":node_modules/@types/node",
+    ],
+)
+
+TESTS = [(
+    file.removeprefix("src/").removesuffix(".test.ts"),
+    file.replace("src/", "dist/").replace(".ts", ".js"),
+) for file in glob(["src/**/*.test.ts"])]
+
+test_suite(
+    name = "tests",
+    tests = [":" + test_name + "_test" for (test_name, _) in TESTS],
+)
+
+[
+    js_test(
+        name = test_name + "_test",
+        size = "small",
+        args = ["--test"],
+        data = [
+            "package.json",
+            ":lib_tests",
+        ],
+        entry_point = entry_point,
+    )
+    for (test_name, entry_point) in TESTS
+]
+
+eslint_test(
+    name = "eslint",
+    size = "small",
+    srcs = [":lib_tests"],
 )

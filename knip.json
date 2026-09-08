@@ -26,10 +26,10 @@
         },
         "packages/wasm": {
             "entry": [
-                "wasm.test.js"
+                "src/**/*.test.ts"
             ],
-            "ignoreUnresolved": [
-                "./mod.js"
+            "project": [
+                "src/**/*.ts"
             ]
         },
         "integration_tests": {

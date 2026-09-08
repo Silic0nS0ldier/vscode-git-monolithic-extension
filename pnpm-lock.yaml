@@ -265,7 +265,11 @@ importers:
         specifier: ^9.1.0
         version: 9.1.0
 
-  packages/wasm: {}
+  packages/wasm:
+    devDependencies:
+      '@types/node':
+        specifier: catalog:vscode
+        version: 24.13.3
 
 packages:
 
