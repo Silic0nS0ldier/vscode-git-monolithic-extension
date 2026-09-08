@@ -8,6 +8,6 @@
         "knip": "^6.34.0",
         "renovate": "^44.30.3",
         "typescript": "npm:@typescript/typescript6@^6.0.2",
-        "typescript-eslint": "^8.69.0"
+        "typescript-eslint": "^8.70.0"
     }
 }
