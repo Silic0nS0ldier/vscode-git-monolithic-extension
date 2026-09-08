@@ -188,9 +188,11 @@ js_test(
     args = [
         "$(rootpath //:module_bazel)",
         "$(rootpath //extension/vsix:manifest)",
+        "$(rootpath //extension:manifest)",
     ],
     data = [
         "//:module_bazel",
+        "//extension:manifest",
         "//extension/vsix:manifest",
     ],
     entry_point = "check-code-server-pin.mjs",

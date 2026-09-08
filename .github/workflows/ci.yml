@@ -41,6 +41,12 @@ jobs:
       - run: node ./.github/workflows/update_bazel_rust.mjs
       - run: node ./.github/workflows/update_multitool_wasm_bindgen.mjs
       - run: bazel mod deps --lockfile_mode=update
+      # update_bazel_code_server.mjs can rewrite extension/package.json, which leaves
+      # pnpm-lock.yaml stale for the `require-lockfile` install in build_and_test.
+      - uses: pnpm/setup@v2.1.0
+        with:
+          install: false
+      - run: pnpm install --lockfile-only
       - uses: stefanzweifel/git-auto-commit-action@v7
       - id: get_commit
         run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
