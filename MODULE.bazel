@@ -24,7 +24,7 @@ archive_override(
     urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/releases/download/v0.0.0-20260816/rules_oci_runtime-0.0.0-20260816.tar.gz"],
 )
 
-bazel_dep(name = "tar.bzl", version = "0.10.4")
+bazel_dep(name = "tar.bzl", version = "0.10.8")
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
