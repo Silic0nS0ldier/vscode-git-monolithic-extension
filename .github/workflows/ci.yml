@@ -61,6 +61,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
+      - id: remote_cache
+        uses: cre4ture/bazel-github-actions-cache-v2@v0.3.2
+        with:
+          pack-size-mb: 32
+          backend-timeout-seconds: 30
+          storage-mode: packs
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -71,6 +77,8 @@ jobs:
             # Repo contents cache adds considerable pressure on GH Actions cache storage.
             # Disabled until we find a more efficient way to manage it.
             common --repo_contents_cache=
+            common --remote_cache=${{ steps.remote_cache.outputs.url }}
+            common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
           cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
           disk-cache: "${{ github.workflow }}-test"
@@ -82,35 +90,21 @@ jobs:
             - multitool.lock.json
             - packages/wasm/Cargo.toml
             - pnpm-lock.yaml
-      - id: remote_cache
-        uses: cre4ture/bazel-github-actions-cache-v2@v0.3.2
-        with:
-          # TODO Remove (for auto default)
-          write: "true"
-          # TODO Remove (for default)
-          key-prefix: git-monolithic-car-v1
-          pack-size-mb: 32
-          backend-timeout-seconds: 30
-          storage-mode: packs
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-      - run: bazel test //... $REMOTE_CACHE_ARGS
+      - run: bazel test //...
         id: test
         continue-on-error: true
-        env:
-          REMOTE_CACHE_ARGS: ${{ steps.remote_cache.outputs.bazel-args }}
       - uses: actions/upload-artifact@v7
         if: steps.test.outcome == 'failure'
         with:
           name: test-logs
           path: .bazel/testlogs/**/test.log
           include-hidden-files: true
-      - run: bazel build //extension/vsix:git_monolithic --stamp --config=release $REMOTE_CACHE_ARGS
+      - run: bazel build //extension/vsix:git_monolithic --stamp --config=release
         id: build_vsix
         continue-on-error: true
-        env:
-          REMOTE_CACHE_ARGS: ${{ steps.remote_cache.outputs.bazel-args }}
       - uses: actions/upload-artifact@v7
         if: steps.build_vsix.outcome != 'failure'
         with:
@@ -138,6 +132,12 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v7
+      - id: remote_cache
+        uses: cre4ture/bazel-github-actions-cache-v2@v0.3.2
+        with:
+          pack-size-mb: 32
+          backend-timeout-seconds: 30
+          storage-mode: packs
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -145,7 +145,11 @@ jobs:
             common --curses=no
             common --show_progress_rate_limit=5
             common --lockfile_mode=error
+            # Repo contents cache adds considerable pressure on GH Actions cache storage.
+            # Disabled until we find a more efficient way to manage it.
             common --repo_contents_cache=
+            common --remote_cache=${{ steps.remote_cache.outputs.url }}
+            common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
           cache-save: false
           bazelisk-cache: true
           # Shares build_and_test's key rather than keeping a second multi-GB entry: this job
@@ -155,25 +159,13 @@ jobs:
           repository-cache: |
             - MODULE.bazel
             - MODULE.bazel.lock
-      - id: remote_cache
-        uses: cre4ture/bazel-github-actions-cache-v2@v0.3.2
-        with:
-          # TODO Remove (for auto default)
-          write: "true"
-          # TODO Remove (for default)
-          key-prefix: git-monolithic-car-v1
-          pack-size-mb: 32
-          backend-timeout-seconds: 30
-          storage-mode: packs
       - name: Authenticate to ghcr.io
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.docker"
           AUTH=$(printf '%s:%s' "${{ github.actor }}" "${{ secrets.GITHUB_TOKEN }}" | base64 -w0)
           printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$AUTH" > "$HOME/.docker/config.json"
-      - run: bazel run //.devcontainer:push_image $REMOTE_CACHE_ARGS
-        env:
-          REMOTE_CACHE_ARGS: ${{ steps.remote_cache.outputs.bazel-args }}
+      - run: bazel run //.devcontainer:push_image
   jscpd:
     runs-on: ubuntu-slim
     if: ${{ !cancelled() }}
