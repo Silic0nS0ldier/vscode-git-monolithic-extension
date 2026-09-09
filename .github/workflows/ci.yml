@@ -10,6 +10,15 @@ on:
       - opened
       # Updated (excludes change of base branch)
       - synchronize
+  # Manual run used to populate the GitHub-backed Bazel remote cache. Routine runs read that
+  # cache but never publish to it: publication blocks Bazel on rate-limited uploads, so it is
+  # kept to an explicit, long-running seed.
+  workflow_dispatch:
+    inputs:
+      seed_remote_cache:
+        description: "Publish Bazel action outputs to the GitHub Actions cache"
+        type: boolean
+        default: false
 jobs:
   renovate_tasks:
     if: github.actor == 'renovate[bot]'
@@ -54,6 +63,13 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ !cancelled() }}
     needs: renovate_tasks
+    permissions:
+      contents: read
+      # `storage-mode: packs` discovers manifest heads through the Actions cache REST API.
+      actions: read
+    # A seeding run uploads every locally executed action output, which is bounded by GitHub's
+    # cache-creation rate limit rather than by the build itself.
+    timeout-minutes: ${{ (github.event_name == 'workflow_dispatch' && inputs.seed_remote_cache) && 120 || 60 }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -65,6 +81,11 @@ jobs:
             common --curses=no
             common --show_progress_rate_limit=5
             common --lockfile_mode=error
+            # `--repo_contents_cache` defaults to `{--repository_cache}/contents`, and
+            # setup-bazel archives all of `--repository_cache`. The contents cache is a second
+            # copy of every repo, its GC never runs on an ephemeral runner (it is gated on five
+            # minutes of server idle time), and it was ~70% of a 10GB cache entry.
+            common --repo_contents_cache=
           cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
           disk-cache: "${{ github.workflow }}-test"
@@ -76,21 +97,38 @@ jobs:
             - multitool.lock.json
             - packages/wasm/Cargo.toml
             - pnpm-lock.yaml
+      # Experimental, and pinned by commit SHA on the action author's own advice: it rides a
+      # runner cache protocol GitHub does not document as stable. Failures degrade to cache
+      # misses rather than failing the build.
+      - id: remote_cache
+        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        with:
+          write: ${{ (github.event_name == 'workflow_dispatch' && inputs.seed_remote_cache) && 'true' || 'false' }}
+          # Namespaced by storage format so a rollback does not read half-written state.
+          key-prefix: git-monolithic-car-v1
+          # `objects` mode is one cache creation per Bazel object. The local disk cache holds
+          # ~66k objects at a median of 807 bytes, which at GitHub's 200/minute ceiling would
+          # take hours. Packs turn that into one CARv2 archive plus one manifest per batch.
+          storage-mode: packs
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-      - run: bazel test //...
+      - run: bazel test //... $REMOTE_CACHE_ARGS
         id: test
         continue-on-error: true
+        env:
+          REMOTE_CACHE_ARGS: ${{ steps.remote_cache.outputs.bazel-args }}
       - uses: actions/upload-artifact@v7
         if: steps.test.outcome == 'failure'
         with:
           name: test-logs
           path: .bazel/testlogs/**/test.log
           include-hidden-files: true
-      - run: bazel build //extension/vsix:git_monolithic --stamp --config=release
+      - run: bazel build //extension/vsix:git_monolithic --stamp --config=release $REMOTE_CACHE_ARGS
         id: build_vsix
         continue-on-error: true
+        env:
+          REMOTE_CACHE_ARGS: ${{ steps.remote_cache.outputs.bazel-args }}
       - uses: actions/upload-artifact@v7
         if: steps.build_vsix.outcome != 'failure'
         with:
@@ -115,6 +153,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      # As in build_and_test: manifest-head discovery for `storage-mode: packs`.
+      actions: read
     steps:
       - uses: actions/checkout@v7
       - uses: bazel-contrib/setup-bazel@0.19.0
@@ -124,19 +164,32 @@ jobs:
             common --curses=no
             common --show_progress_rate_limit=5
             common --lockfile_mode=error
+            common --repo_contents_cache=
           cache-save: false
           bazelisk-cache: true
-          disk-cache: "${{ github.workflow }}-devcontainer-ubuntu-24.04"
+          # Shares build_and_test's key rather than keeping a second multi-GB entry: this job
+          # rebuilds a subgraph that job already built, and the two competed for the same
+          # repository-wide 10GB quota.
+          disk-cache: "${{ github.workflow }}-test"
           repository-cache: |
             - MODULE.bazel
             - MODULE.bazel.lock
+      - id: remote_cache
+        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        with:
+          # Read-only: this job never seeds.
+          write: "false"
+          key-prefix: git-monolithic-car-v1
+          storage-mode: packs
       - name: Authenticate to ghcr.io
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.docker"
           AUTH=$(printf '%s:%s' "${{ github.actor }}" "${{ secrets.GITHUB_TOKEN }}" | base64 -w0)
           printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$AUTH" > "$HOME/.docker/config.json"
-      - run: bazel run //.devcontainer:push_image
+      - run: bazel run //.devcontainer:push_image $REMOTE_CACHE_ARGS
+        env:
+          REMOTE_CACHE_ARGS: ${{ steps.remote_cache.outputs.bazel-args }}
   jscpd:
     runs-on: ubuntu-slim
     if: ${{ !cancelled() }}
