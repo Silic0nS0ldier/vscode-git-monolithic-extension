@@ -80,6 +80,10 @@ jobs:
           # repo-contents experiment below unable to populate anything. Revert to `auto` once it
           # has been measured.
           write: "true"
+          # Packs are staged on the runner's disk until published. When publication stalls (e.g. the
+          # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
+          # the runner rather than the build. Fail the request instead.
+          fail-on-cache-error: "true"
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -99,14 +103,10 @@ jobs:
             build --noslim_profile
           cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
-          repository-cache: |
-            - Cargo.lock
-            - Cargo.toml
-            - MODULE.bazel
-            - MODULE.bazel.lock
-            - multitool.lock.json
-            - packages/wasm/Cargo.toml
-            - pnpm-lock.yaml
+          # Was saving a 3.1 GB archive per main push, and two of them had filled 6.2 GB of the
+          # 10 GB quota. The remote cache covers actions and the repo contents cache now covers
+          # repository fetches, so archiving the repository cache as well is redundant.
+          repository-cache: false
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
