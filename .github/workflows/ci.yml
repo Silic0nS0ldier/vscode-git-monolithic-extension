@@ -17,7 +17,6 @@ jobs:
     if: github.event_name == 'pull_request' && github.actor == 'renovate[bot]'
     permissions:
       contents: write
-      # Manifest discovery for the packed remote cache below.
       actions: read
     runs-on: ubuntu-24.04
     outputs:
@@ -34,9 +33,7 @@ jobs:
           # Applies to initial manifest discovery and individual operations thereafter.
           backend-timeout-seconds: 120
           storage-mode: packs
-          # `fail-on-cache-error` is deliberately left off: this job only ever runs on pull requests,
-          # so it never publishes and cannot accumulate unpublished packs on disk. Degrading to
-          # misses is preferable to blocking dependency automation.
+          # `fail-on-cache-error` is deliberately left off, this is PR only which does not upload.
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -51,7 +48,6 @@ jobs:
             mod --noslim_profile
           cache-save: false
           bazelisk-cache: true
-          # Repo cache not worth it here, very little to fetch.
           repository-cache: false
       - run: node ./.github/workflows/update_dotslash_stubs.mjs
       - run: node ./.github/workflows/update_bazel_nodejs.mjs ./MODULE.bazel
@@ -116,9 +112,6 @@ jobs:
             build --noslim_profile
           cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
-          # Was saving a 3.1 GB archive per main push, and two of them had filled 6.2 GB of the
-          # 10 GB quota. The remote cache covers actions and the repo contents cache now covers
-          # repository fetches, so archiving the repository cache as well is redundant.
           repository-cache: false
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
@@ -201,9 +194,7 @@ jobs:
             run --noslim_profile
           cache-save: false
           bazelisk-cache: true
-          repository-cache: |
-            - MODULE.bazel
-            - MODULE.bazel.lock
+          repository-cache: false
       - name: Authenticate to ghcr.io
         run: |
           set -euo pipefail
