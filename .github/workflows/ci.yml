@@ -10,15 +10,6 @@ on:
       - opened
       # Updated (excludes change of base branch)
       - synchronize
-  # Manual run used to populate the GitHub-backed Bazel remote cache. Routine runs read that
-  # cache but never publish to it: publication blocks Bazel on rate-limited uploads, so it is
-  # kept to an explicit, long-running seed.
-  workflow_dispatch:
-    inputs:
-      seed_remote_cache:
-        description: "Publish Bazel action outputs to the GitHub Actions cache"
-        type: boolean
-        default: false
 jobs:
   renovate_tasks:
     if: github.actor == 'renovate[bot]'
@@ -67,9 +58,9 @@ jobs:
       contents: read
       # `storage-mode: packs` discovers manifest heads through the Actions cache REST API.
       actions: read
-    # A seeding run uploads every locally executed action output, which is bounded by GitHub's
-    # cache-creation rate limit rather than by the build itself.
-    timeout-minutes: ${{ (github.event_name == 'workflow_dispatch' && inputs.seed_remote_cache) && 120 || 60 }}
+    # Publication is bounded by GitHub's cache-creation rate limit rather than by the build, and
+    # Bazel waits on it. Drop back to 60 once the cache is seeded and PR uploads are turned off.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
         with:
@@ -103,7 +94,11 @@ jobs:
       - id: remote_cache
         uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
-          write: ${{ (github.event_name == 'workflow_dispatch' && inputs.seed_remote_cache) && 'true' || 'false' }}
+          # TEMPORARY: `true` also lets pull requests publish, which is how the cache gets
+          # seeded before this lands on `main`. Revert to `auto` (default-branch pushes only)
+          # once seeded — publication blocks Bazel on rate-limited uploads, so every PR paying
+          # that cost is not a steady state. Forks stay read-only either way.
+          write: "true"
           # Namespaced by storage format so a rollback does not read half-written state.
           key-prefix: git-monolithic-car-v1
           # `objects` mode is one cache creation per Bazel object. The local disk cache holds
@@ -177,8 +172,8 @@ jobs:
       - id: remote_cache
         uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
-          # Read-only: this job never seeds.
-          write: "false"
+          # This job only runs on `main` pushes, so `auto` means it always publishes.
+          write: auto
           key-prefix: git-monolithic-car-v1
           storage-mode: packs
       - name: Authenticate to ghcr.io
