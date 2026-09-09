@@ -31,6 +31,8 @@ jobs:
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
+            mod --profile=${{ runner.temp }}/mod.profile.gz
+            mod --noslim_profile
           cache-save: false
           bazelisk-cache: true
           # Repo cache not worth it here, very little to fetch.
@@ -43,6 +45,11 @@ jobs:
       - run: node ./.github/workflows/update_bazel_rust.mjs
       - run: node ./.github/workflows/update_multitool_wasm_bindgen.mjs
       - run: bazel mod deps --lockfile_mode=update
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: ${{ runner.temp }}/mod.profile.gz
+          archive: false
       # update_bazel_code_server.mjs can rewrite extension/package.json, which leaves
       # pnpm-lock.yaml stale for the `require-lockfile` install in build_and_test.
       - uses: pnpm/setup@v2.1.0
@@ -81,6 +88,10 @@ jobs:
             common --repo_contents_cache=
             common --remote_cache=${{ steps.remote_cache.outputs.url }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
+            build --profile=${{ runner.temp }}/build.profile.gz
+            test --profile=${{ runner.temp }}/test.profile.gz
+            build --experimental_profile_include_target_label
+            build --noslim_profile
           cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
           repository-cache: |
@@ -111,6 +122,16 @@ jobs:
         with:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
+          archive: false
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: ${{ runner.temp }}/test.profile.gz
+          archive: false
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: ${{ runner.temp }}/build.profile.gz
           archive: false
       - uses: pnpm/setup@v2.1.0
         with:
@@ -151,6 +172,9 @@ jobs:
             common --repo_contents_cache=
             common --remote_cache=${{ steps.remote_cache.outputs.url }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
+            run --profile=${{ runner.temp }}/run.profile.gz
+            run --experimental_profile_include_target_label
+            run --noslim_profile
           cache-save: false
           bazelisk-cache: true
           repository-cache: |
@@ -163,6 +187,11 @@ jobs:
           AUTH=$(printf '%s:%s' "${{ github.actor }}" "${{ secrets.GITHUB_TOKEN }}" | base64 -w0)
           printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$AUTH" > "$HOME/.docker/config.json"
       - run: bazel run //.devcontainer:push_image
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: ${{ runner.temp }}/run.profile.gz
+          archive: false
   jscpd:
     runs-on: ubuntu-slim
     if: ${{ !cancelled() }}
