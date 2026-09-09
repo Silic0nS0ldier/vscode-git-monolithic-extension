@@ -76,9 +76,14 @@ jobs:
           pack-size-mb: 32
           backend-timeout-seconds: 30
           storage-mode: packs
+          # TEMPORARY: pull requests are read-only under the default `auto`, which would leave the
+          # repo-contents experiment below unable to populate anything. Revert to `auto` once it
+          # has been measured.
+          write: "true"
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
