@@ -106,14 +106,6 @@ jobs:
             common --repo_contents_cache=
             common --remote_cache=${{ steps.remote_cache.outputs.url }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
-            # `toplevel` materialises outputs reachable from every top-level target, which pulls the
-            # 1 GB browserless_chromium OCI layout down even when every test is a cache hit. Bazel
-            # still fetches on demand for actions that actually run. Left at the default for
-            # `build`, whose output is uploaded as an artifact and so has to exist on disk.
-            test --remote_download_outputs=minimal
-            # Insurance for the failure-path artifact upload: failed tests re-run locally so their
-            # logs should exist anyway, but BwoB makes no documented guarantee and the logs are tiny.
-            test --remote_download_regex=.*/testlogs/.*
             build --profile=${{ runner.temp }}/build.profile.gz
             test --profile=${{ runner.temp }}/test.profile.gz
             build --experimental_profile_include_target_label
