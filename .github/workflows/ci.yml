@@ -37,7 +37,9 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
-            startup --experimental_remote_repo_contents_cache
+            # Disabled: https://github.com/bazelbuild/bazel/issues/30223
+            # TODO: Restore when on 9.3.0
+            # startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
@@ -96,7 +98,9 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
-            startup --experimental_remote_repo_contents_cache
+            # Disabled: https://github.com/bazelbuild/bazel/issues/30223
+            # TODO: Restore when on 9.3.0
+            # startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
@@ -125,7 +129,7 @@ jobs:
           name: test-logs
           path: .bazel/testlogs/**/test.log
           include-hidden-files: true
-      - run: bazel build //extension/vsix:git_monolithic --stamp --config=release
+      - run: bazel build //extension/vsix:git_monolithic --stamp --config=release --remote_download_outputs=toplevel
         id: build_vsix
         continue-on-error: true
       - uses: actions/upload-artifact@v7
@@ -179,7 +183,9 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
-            startup --experimental_remote_repo_contents_cache
+            # Disabled: https://github.com/bazelbuild/bazel/issues/30223
+            # TODO: Restore when on 9.3.0
+            # startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
