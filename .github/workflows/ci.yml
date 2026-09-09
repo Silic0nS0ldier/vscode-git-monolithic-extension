@@ -17,6 +17,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.actor == 'renovate[bot]'
     permissions:
       contents: write
+      actions: read
     runs-on: ubuntu-24.04
     outputs:
       commit_hash: ${{ steps.get_commit.outputs.COMMIT_HASH }}
@@ -25,17 +26,28 @@ jobs:
         with:
           # Required to have correct ref for git-auto-commit-action
           ref: ${{ github.head_ref }}
+      - id: remote_cache
+        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        with:
+          pack-size-mb: 32
+          # Applies to initial manifest discovery and individual operations thereafter.
+          backend-timeout-seconds: 120
+          storage-mode: packs
+          # `fail-on-cache-error` is deliberately left off, this is PR only which does not upload.
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
+            common --repo_contents_cache=
+            common --remote_cache=${{ steps.remote_cache.outputs.url }}
+            common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             mod --profile=${{ runner.temp }}/mod.profile.gz
             mod --noslim_profile
           cache-save: false
           bazelisk-cache: true
-          # Repo cache not worth it here, very little to fetch.
           repository-cache: false
       - run: node ./.github/workflows/update_dotslash_stubs.mjs
       - run: node ./.github/workflows/update_bazel_nodejs.mjs ./MODULE.bazel
@@ -74,11 +86,17 @@ jobs:
         uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
           pack-size-mb: 32
-          backend-timeout-seconds: 30
+          # Applies to initial manifest discovery and individual operations thereafter.
+          backend-timeout-seconds: 120
           storage-mode: packs
+          # Packs are staged on the runner's disk until published. When publication stalls (e.g. the
+          # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
+          # the runner rather than the build. Fail the request instead.
+          fail-on-cache-error: "true"
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
@@ -94,14 +112,7 @@ jobs:
             build --noslim_profile
           cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
-          repository-cache: |
-            - Cargo.lock
-            - Cargo.toml
-            - MODULE.bazel
-            - MODULE.bazel.lock
-            - multitool.lock.json
-            - packages/wasm/Cargo.toml
-            - pnpm-lock.yaml
+          repository-cache: false
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
@@ -158,11 +169,17 @@ jobs:
         uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
           pack-size-mb: 32
-          backend-timeout-seconds: 30
+          # Applies to initial manifest discovery and individual operations thereafter.
+          backend-timeout-seconds: 120
           storage-mode: packs
+          # Packs are staged on the runner's disk until published. When publication stalls (e.g. the
+          # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
+          # the runner rather than the build. Fail the request instead.
+          fail-on-cache-error: "true"
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
@@ -177,9 +194,7 @@ jobs:
             run --noslim_profile
           cache-save: false
           bazelisk-cache: true
-          repository-cache: |
-            - MODULE.bazel
-            - MODULE.bazel.lock
+          repository-cache: false
       - name: Authenticate to ghcr.io
         run: |
           set -euo pipefail
