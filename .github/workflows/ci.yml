@@ -56,11 +56,7 @@ jobs:
     needs: renovate_tasks
     permissions:
       contents: read
-      # `storage-mode: packs` discovers manifest heads through the Actions cache REST API.
       actions: read
-    # Publication is bounded by GitHub's cache-creation rate limit rather than by the build, and
-    # Bazel waits on it. Drop back to 60 once the cache is seeded and PR uploads are turned off.
-    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
         with:
@@ -72,10 +68,8 @@ jobs:
             common --curses=no
             common --show_progress_rate_limit=5
             common --lockfile_mode=error
-            # `--repo_contents_cache` defaults to `{--repository_cache}/contents`, and
-            # setup-bazel archives all of `--repository_cache`. The contents cache is a second
-            # copy of every repo, its GC never runs on an ephemeral runner (it is gated on five
-            # minutes of server idle time), and it was ~70% of a 10GB cache entry.
+            # Repo contents cache adds considerable pressure on GH Actions cache storage.
+            # Disabled until we find a more efficient way to manage it.
             common --repo_contents_cache=
           cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
@@ -88,22 +82,15 @@ jobs:
             - multitool.lock.json
             - packages/wasm/Cargo.toml
             - pnpm-lock.yaml
-      # Experimental, and pinned by commit SHA on the action author's own advice: it rides a
-      # runner cache protocol GitHub does not document as stable. Failures degrade to cache
-      # misses rather than failing the build.
       - id: remote_cache
-        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        uses: cre4ture/bazel-github-actions-cache-v2@v0.3.2
         with:
-          # TEMPORARY: `true` also lets pull requests publish, which is how the cache gets
-          # seeded before this lands on `main`. Revert to `auto` (default-branch pushes only)
-          # once seeded — publication blocks Bazel on rate-limited uploads, so every PR paying
-          # that cost is not a steady state. Forks stay read-only either way.
+          # TODO Remove (for auto default)
           write: "true"
-          # Namespaced by storage format so a rollback does not read half-written state.
+          # TODO Remove (for default)
           key-prefix: git-monolithic-car-v1
-          # `objects` mode is one cache creation per Bazel object. The local disk cache holds
-          # ~66k objects at a median of 807 bytes, which at GitHub's 200/minute ceiling would
-          # take hours. Packs turn that into one CARv2 archive plus one manifest per batch.
+          pack-size-mb: 32
+          backend-timeout-seconds: 30
           storage-mode: packs
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
@@ -148,7 +135,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      # As in build_and_test: manifest-head discovery for `storage-mode: packs`.
       actions: read
     steps:
       - uses: actions/checkout@v7
@@ -170,11 +156,14 @@ jobs:
             - MODULE.bazel
             - MODULE.bazel.lock
       - id: remote_cache
-        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        uses: cre4ture/bazel-github-actions-cache-v2@v0.3.2
         with:
-          # This job only runs on `main` pushes, so `auto` means it always publishes.
-          write: auto
+          # TODO Remove (for auto default)
+          write: "true"
+          # TODO Remove (for default)
           key-prefix: git-monolithic-car-v1
+          pack-size-mb: 32
+          backend-timeout-seconds: 30
           storage-mode: packs
       - name: Authenticate to ghcr.io
         run: |
