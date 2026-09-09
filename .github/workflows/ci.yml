@@ -10,9 +10,11 @@ on:
       - opened
       # Updated (excludes change of base branch)
       - synchronize
+permissions:
+  contents: read
 jobs:
   renovate_tasks:
-    if: github.actor == 'renovate[bot]'
+    if: github.event_name == 'pull_request' && github.actor == 'renovate[bot]'
     permissions:
       contents: write
     runs-on: ubuntu-24.04
