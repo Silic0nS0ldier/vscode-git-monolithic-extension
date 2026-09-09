@@ -74,7 +74,9 @@ jobs:
         uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
           pack-size-mb: 32
-          backend-timeout-seconds: 30
+          # Also bounds initial manifest discovery, which scales with stored data. Caching repo
+          # contents took manifests from 118 to 216 and 30s stopped being enough to enumerate them.
+          backend-timeout-seconds: 120
           storage-mode: packs
           # TEMPORARY: pull requests are read-only under the default `auto`, which would leave the
           # repo-contents experiment below unable to populate anything. Revert to `auto` once it
@@ -163,7 +165,8 @@ jobs:
         uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
           pack-size-mb: 32
-          backend-timeout-seconds: 30
+          # Shares the manifest set with `build_and_test`, so it needs the same discovery budget.
+          backend-timeout-seconds: 120
           storage-mode: packs
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
