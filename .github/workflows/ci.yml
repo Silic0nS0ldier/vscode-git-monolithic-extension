@@ -17,6 +17,8 @@ jobs:
     if: github.event_name == 'pull_request' && github.actor == 'renovate[bot]'
     permissions:
       contents: write
+      # Manifest discovery for the packed remote cache below.
+      actions: read
     runs-on: ubuntu-24.04
     outputs:
       commit_hash: ${{ steps.get_commit.outputs.COMMIT_HASH }}
@@ -25,12 +27,26 @@ jobs:
         with:
           # Required to have correct ref for git-auto-commit-action
           ref: ${{ github.head_ref }}
+      - id: remote_cache
+        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        with:
+          pack-size-mb: 32
+          # Applies to initial manifest discovery and individual operations thereafter.
+          backend-timeout-seconds: 120
+          storage-mode: packs
+          # `fail-on-cache-error` is deliberately left off: this job only ever runs on pull requests,
+          # so it never publishes and cannot accumulate unpublished packs on disk. Degrading to
+          # misses is preferable to blocking dependency automation.
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
+            common --repo_contents_cache=
+            common --remote_cache=${{ steps.remote_cache.outputs.url }}
+            common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             mod --profile=${{ runner.temp }}/mod.profile.gz
             mod --noslim_profile
           cache-save: false
@@ -74,14 +90,9 @@ jobs:
         uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
           pack-size-mb: 32
-          # Also bounds initial manifest discovery, which scales with stored data. Caching repo
-          # contents took manifests from 118 to 216 and 30s stopped being enough to enumerate them.
+          # Applies to initial manifest discovery and individual operations thereafter.
           backend-timeout-seconds: 120
           storage-mode: packs
-          # TEMPORARY: pull requests are read-only under the default `auto`, which would leave the
-          # repo-contents experiment below unable to populate anything. Revert to `auto` once it
-          # has been measured.
-          write: "true"
           # Packs are staged on the runner's disk until published. When publication stalls (e.g. the
           # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
           # the runner rather than the build. Fail the request instead.
@@ -165,12 +176,17 @@ jobs:
         uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
           pack-size-mb: 32
-          # Shares the manifest set with `build_and_test`, so it needs the same discovery budget.
+          # Applies to initial manifest discovery and individual operations thereafter.
           backend-timeout-seconds: 120
           storage-mode: packs
+          # Packs are staged on the runner's disk until published. When publication stalls (e.g. the
+          # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
+          # the runner rather than the build. Fail the request instead.
+          fail-on-cache-error: "true"
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
