@@ -10,9 +10,11 @@ on:
       - opened
       # Updated (excludes change of base branch)
       - synchronize
+permissions:
+  contents: read
 jobs:
   renovate_tasks:
-    if: github.actor == 'renovate[bot]'
+    if: github.event_name == 'pull_request' && github.actor == 'renovate[bot]'
     permissions:
       contents: write
     runs-on: ubuntu-24.04
@@ -54,10 +56,19 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ !cancelled() }}
     needs: renovate_tasks
+    permissions:
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
+      - id: remote_cache
+        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        with:
+          pack-size-mb: 32
+          backend-timeout-seconds: 30
+          storage-mode: packs
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -65,9 +76,13 @@ jobs:
             common --curses=no
             common --show_progress_rate_limit=5
             common --lockfile_mode=error
+            # Repo contents cache adds considerable pressure on GH Actions cache storage.
+            # Disabled until we find a more efficient way to manage it.
+            common --repo_contents_cache=
+            common --remote_cache=${{ steps.remote_cache.outputs.url }}
+            common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
           cache-save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           bazelisk-cache: true
-          disk-cache: "${{ github.workflow }}-test"
           repository-cache: |
             - Cargo.lock
             - Cargo.toml
@@ -115,8 +130,15 @@ jobs:
     permissions:
       contents: read
       packages: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
+      - id: remote_cache
+        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        with:
+          pack-size-mb: 32
+          backend-timeout-seconds: 30
+          storage-mode: packs
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -124,9 +146,13 @@ jobs:
             common --curses=no
             common --show_progress_rate_limit=5
             common --lockfile_mode=error
+            # Repo contents cache adds considerable pressure on GH Actions cache storage.
+            # Disabled until we find a more efficient way to manage it.
+            common --repo_contents_cache=
+            common --remote_cache=${{ steps.remote_cache.outputs.url }}
+            common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
           cache-save: false
           bazelisk-cache: true
-          disk-cache: "${{ github.workflow }}-devcontainer-ubuntu-24.04"
           repository-cache: |
             - MODULE.bazel
             - MODULE.bazel.lock
