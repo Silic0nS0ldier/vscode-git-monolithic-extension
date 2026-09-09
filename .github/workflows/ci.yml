@@ -62,7 +62,7 @@ jobs:
         with:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - id: remote_cache
-        uses: cre4ture/bazel-github-actions-cache-v2@v0.3.2
+        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
           pack-size-mb: 32
           backend-timeout-seconds: 30
@@ -133,7 +133,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - id: remote_cache
-        uses: cre4ture/bazel-github-actions-cache-v2@v0.3.2
+        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
         with:
           pack-size-mb: 32
           backend-timeout-seconds: 30
