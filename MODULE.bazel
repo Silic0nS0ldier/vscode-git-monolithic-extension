@@ -26,6 +26,17 @@ archive_override(
 
 bazel_dep(name = "tar.bzl", version = "0.10.8")
 
+# Reached via `aspect_rules_js -> protobuf -> rules_apple`. Its autoconfigured toolchain is
+# registered transitively, which makes toolchain resolution fetch a repo that shells out looking
+# for `swiftc`. `patches` only apply to an exact version, hence the pin.
+# See https://github.com/bazelbuild/rules_swift/pull/1815
+single_version_override(
+    module_name = "rules_swift",
+    patch_strip = 1,
+    patches = ["//:patches/rules_swift/3.1.2/0001_no_transitive_toolchain.patch"],
+    version = "3.1.2",
+)
+
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
     node_repositories = {
