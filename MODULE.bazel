@@ -302,7 +302,7 @@ filegroup(
 # Keep the renovate annotation directly above the assignment; the custom manager in
 # .github/renovate.json cannot see past an intervening comment line.
 # renovate: datasource=github-releases depName=coder/code-server
-_CODE_SERVER_RELEASE = "4.135.0"
+_CODE_SERVER_RELEASE = "4.136.2"
 
 _CODE_SERVER_URL_PREFIX = "https://github.com/coder/code-server/releases/download/v" + _CODE_SERVER_RELEASE + "/code-server-" + _CODE_SERVER_RELEASE + "-"
 
