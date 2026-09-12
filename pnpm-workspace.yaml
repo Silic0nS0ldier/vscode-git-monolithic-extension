@@ -12,7 +12,7 @@ allowBuilds:
   re2: false
 
 catalog:
-  '@types/node': ^25.9.5
+  '@types/node': ^25.9.6
   ava: ^8.0.1
   cleye: ^2.6.0
   get-stream: ^9.0.1
