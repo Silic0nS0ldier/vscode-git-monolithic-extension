@@ -1,9 +1,7 @@
-import type { GitContext } from "../../cli/context.js";
-import { readToBuffer, type ReadToErrors } from "../../cli/helpers/read-to-buffer.js";
-import { isErr, ok, type Result, unwrap } from "../../func-result.js";
-
-/** 4 MiB — room for tens of thousands of refs. */
-const MAX_BUFFER = 4 * 1024 * 1024;
+import { PassThrough } from "node:stream";
+import { finished } from "node:stream/promises";
+import type { CLIErrors, GitContext } from "../../cli/context.js";
+import { isErr, ok, type Result } from "../../func-result.js";
 
 /** The namespaces this module knows how to parse. */
 const DEFAULT_PATTERNS = ["refs/heads", "refs/remotes", "refs/tags"];
@@ -56,6 +54,48 @@ function parseLine(line: string): Ref | undefined {
     return undefined;
 }
 
+export type ListErrors = CLIErrors;
+
+type RefParser = {
+    /** Parses every complete line in `chunk`, holding any remainder for the next call. */
+    update(chunk: string): void;
+    /** Flushes a final line that git emitted without a trailing break. */
+    end(): Ref[];
+};
+
+function createRefParser(): RefParser {
+    const refs: Ref[] = [];
+    /** The tail of the last chunk, up to the line break that has yet to arrive. */
+    let partial = "";
+
+    function push(line: string): void {
+        const ref = parseLine(line);
+        if (ref !== undefined) {
+            refs.push(ref);
+        }
+    }
+
+    return {
+        end(): Ref[] {
+            push(partial);
+            partial = "";
+            return refs;
+        },
+        update(chunk: string): void {
+            const raw = partial + chunk;
+            let start = 0;
+            let end: number;
+
+            while ((end = raw.indexOf("\n", start)) !== -1) {
+                push(raw.slice(start, end));
+                start = end + 1;
+            }
+
+            partial = raw.slice(start);
+        },
+    };
+}
+
 /**
  * Lists branches, remote branches and tags.
  * Wraps `git for-each-ref --format=<fmt> [patterns]`.
@@ -64,7 +104,7 @@ export async function list(
     git: GitContext,
     cwd: string,
     opts: ListOptions = {},
-): Promise<Result<Ref[], ReadToErrors>> {
+): Promise<Result<Ref[], ListErrors>> {
     const args = ["for-each-ref"];
 
     if (opts.count) {
@@ -81,17 +121,17 @@ export async function list(
         args.push("--contains", opts.contains);
     }
 
-    const result = await readToBuffer({ cli: git.cli, cwd }, args, MAX_BUFFER);
+    const parser = createRefParser();
+    const stdout = new PassThrough({ encoding: "utf-8" });
+    stdout.on("data", (chunk: string) => parser.update(chunk));
 
-    if (isErr(result)) {
-        return result;
+    const cliResult = await git.cli({ cwd, stdout }, args);
+
+    if (isErr(cliResult)) {
+        return cliResult;
     }
 
-    const refs = unwrap(result).toString("utf-8")
-        .split("\n")
-        .filter(line => line.length > 0)
-        .map(parseLine)
-        .filter((ref): ref is Ref => ref !== undefined);
+    await finished(stdout);
 
-    return ok(refs);
+    return ok(parser.end());
 }

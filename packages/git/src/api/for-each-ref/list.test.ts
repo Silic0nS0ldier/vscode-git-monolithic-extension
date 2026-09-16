@@ -27,6 +27,20 @@ function createContext(stdout: string): { git: GitContext; calls: string[][] } {
     };
 }
 
+/** Delivers output in pieces, which is how a real ref listing arrives. */
+function createChunkedContext(chunks: string[]): GitContext {
+    return {
+        cli: async context => {
+            if (context.stdout) {
+                intoStream(chunks).pipe(context.stdout);
+            }
+            return ok(void 0);
+        },
+        path: "",
+        version: "UNSET",
+    };
+}
+
 test("Parses every ref namespace", async t => {
     const { git } = createContext(
         `refs/heads/main ${COMMIT} \n`
@@ -96,4 +110,31 @@ test("Applies every option", async t => {
         "--contains",
         "HEAD",
     ]]);
+});
+
+test("Joins refs split across chunk boundaries", async t => {
+    const git = createChunkedContext([
+        `refs/heads/ma`,
+        `in ${COMMIT} \nrefs/tags/v1.0.0 ${COMMIT} `,
+        `\n`,
+    ]);
+
+    const res = await list(git, "/fake");
+    t.true(isOk(res));
+    if (isOk(res)) {
+        t.deepEqual(unwrap(res), [
+            { commit: COMMIT, kind: "head", name: "main" },
+            { commit: COMMIT, kind: "tag", name: "v1.0.0" },
+        ]);
+    }
+});
+
+test("Reads a final ref that git left without a trailing newline", async t => {
+    const { git } = createContext(`refs/heads/main ${COMMIT} `);
+
+    const res = await list(git, "/fake");
+    t.true(isOk(res));
+    if (isOk(res)) {
+        t.deepEqual(unwrap(res), [{ commit: COMMIT, kind: "head", name: "main" }]);
+    }
 });
