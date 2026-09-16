@@ -103,3 +103,22 @@ test(list.name + " - keeps only refs containing a commit", async () => {
 
     assert.deepStrictEqual(refs.map(ref => ref.name), ["main"]);
 });
+
+test(list.name + " - lists a ref set larger than a read buffer would hold", async () => {
+    await using repo = await tempGitRepo(true);
+
+    const base = await commit(repo.path, "Base");
+    // ~70 bytes a line, so comfortably past the 4 MiB buffer this used to be read into.
+    const count = 70_000;
+    const lines = ["# pack-refs with: peeled fully-peeled "];
+    for (let i = 0; i < count; i++) {
+        lines.push(`${base} refs/heads/branch-${String(i).padStart(6, "0")}`);
+    }
+    await fs.writeFile(path.join(repo.path, ".git", "packed-refs"), lines.join("\n") + "\n");
+
+    const refs = unwrapOk(await list(gitCtx, repo.path, { pattern: "refs/heads/branch-*" }));
+
+    assert.strictEqual(refs.length, count);
+    assert.deepStrictEqual(refs[0], { commit: base, kind: "head", name: "branch-000000" });
+    assert.deepStrictEqual(refs[count - 1], { commit: base, kind: "head", name: "branch-069999" });
+});
