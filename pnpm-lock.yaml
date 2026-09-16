@@ -200,7 +200,7 @@ importers:
         specifier: ^10.10.0
         version: 10.10.0(jiti@2.7.0)(supports-color@7.2.0)
       knip:
-        specifier: ^6.35.0
+        specifier: ^6.35.1
         version: 6.35.1
       renovate:
         specifier: ^44.30.3
