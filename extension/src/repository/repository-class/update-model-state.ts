@@ -1,6 +1,6 @@
 import path from "node:path";
 import { commands, EventEmitter, Uri } from "vscode";
-import { type Branch, type Ref, type Remote, Status, type StatusOptions } from "../../api/git.js";
+import { type Branch, RefType, type Remote, Status, type StatusOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
 import type { Submodule } from "../../git/Submodule.js";
@@ -47,10 +47,6 @@ function branchEqual(a: Branch | undefined, b: Branch | undefined): boolean {
                 && a.upstream.remote === b.upstream.remote));
 }
 
-function refEqual(a: Ref, b: Ref): boolean {
-    return a.type === b.type && a.name === b.name && a.commit === b.commit && a.remote === b.remote;
-}
-
 function remoteEqual(a: Remote, b: Remote): boolean {
     return a.name === b.name
         && a.fetchUrl === b.fetchUrl
@@ -82,7 +78,7 @@ function resourceEqual(a: Resource, b: Resource): boolean {
 export async function updateModelState(
     repository: Repository,
     HEAD: Box<Branch | undefined>,
-    refs: Box<Ref[]>,
+    headTagName: Box<string | undefined>,
     remotes: Box<Remote[]>,
     submodules: Box<Submodule[]>,
     rebaseCommit: Box<Commit | undefined>,
@@ -97,7 +93,7 @@ export async function updateModelState(
     // produced any change worth notifying listeners about. Reading now (before
     // any `.set()` below) captures the pre-update values.
     const prevHEAD = HEAD.get();
-    const prevRefs = refs.get();
+    const prevHeadTagName = headTagName.get();
     const prevRemotes = remotes.get();
     const prevSubmodules = submodules.get();
     const prevRebaseCommit = rebaseCommit.get();
@@ -129,20 +125,22 @@ export async function updateModelState(
         // noop
     }
 
-    let sort = config.branchSortOrder();
-    // TODO Handle in config sanitisation
-    if (sort !== "alphabetically" && sort !== "committerdate") {
-        sort = "alphabetically";
-    }
-    const [newRefs, newRemotes, newSubmodules, newRebaseCommit] = await Promise.all([
-        repository.getRefs({ sort }),
+    // Only a detached HEAD is labelled with a tag, and only the first one matters, so the
+    // whole ref list is never worth listing here.
+    const pendingHeadTag = newHEAD && !newHEAD.name
+        ? repository.getRefs({ count: 1, namespace: RefType.Tag, pointsAt: "HEAD" })
+        : Promise.resolve([]);
+
+    const [headTags, newRemotes, newSubmodules, newRebaseCommit] = await Promise.all([
+        pendingHeadTag,
         repository.getRemotes(),
         repository.getSubmodules(),
         getRebaseCommit(repository),
     ]);
+    const newHeadTagName = headTags[0]?.name;
 
     HEAD.set(newHEAD);
-    refs.set(newRefs);
+    headTagName.set(newHeadTagName);
     remotes.set(newRemotes);
     submodules.set(newSubmodules);
     rebaseCommit.set(newRebaseCommit);
@@ -204,7 +202,7 @@ export async function updateModelState(
     );
 
     const hasMeaningfulChange = !branchEqual(prevHEAD, newHEAD)
-        || !arraysEqualBy(prevRefs, newRefs, refEqual)
+        || prevHeadTagName !== newHeadTagName
         || !arraysEqualBy(prevRemotes, newRemotes, remoteEqual)
         || !arraysEqualBy(prevSubmodules, newSubmodules, submoduleEqual)
         || !rebaseCommitEqual(prevRebaseCommit, newRebaseCommit)

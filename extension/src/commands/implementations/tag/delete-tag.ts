@@ -6,8 +6,8 @@ import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function deleteTag(repository: AbstractRepository): Promise<void> {
-        const picks = repository.refs.filter(ref => ref.type === RefType.Tag)
-            .map(ref => new TagItem(ref));
+        const refs = await repository.getRefs({ namespace: RefType.Tag });
+        const picks = refs.map(ref => new TagItem(ref));
 
         if (picks.length === 0) {
             window.showWarningMessage(i18n.Translations.noTags());

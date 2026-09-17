@@ -3,7 +3,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import * as config from "../../../util/config.js";
 import { CheckoutItem, CheckoutRemoteHeadItem, CheckoutTagItem } from "./quick-pick.js";
 
-export function createCheckoutItems(repository: AbstractRepository): CheckoutItem[] {
+export async function createCheckoutItems(repository: AbstractRepository): Promise<CheckoutItem[]> {
     const checkoutTypeConfig = config.checkoutType();
     let checkoutTypes: string[];
 
@@ -18,7 +18,7 @@ export function createCheckoutItems(repository: AbstractRepository): CheckoutIte
     const processors = checkoutTypes.map(getCheckoutProcessor)
         .filter(p => !!p) as CheckoutProcessor[];
 
-    for (const ref of repository.refs) {
+    for (const ref of await repository.getRefs()) {
         for (const processor of processors) {
             processor.onRef(ref);
         }

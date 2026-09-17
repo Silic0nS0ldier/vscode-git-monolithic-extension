@@ -97,7 +97,13 @@ test("Lists the default namespaces", async t => {
 test("Applies every option", async t => {
     const { calls, git } = createContext("");
 
-    await list(git, "/fake", { contains: "HEAD", count: 5, pattern: "refs/heads/feature*", sort: "committerdate" });
+    await list(git, "/fake", {
+        contains: "HEAD",
+        count: 5,
+        pattern: "refs/heads/feature*",
+        pointsAt: "HEAD",
+        sort: "committerdate",
+    });
 
     t.deepEqual(calls, [[
         "for-each-ref",
@@ -108,6 +114,8 @@ test("Applies every option", async t => {
         FORMAT,
         "refs/heads/feature*",
         "--contains",
+        "HEAD",
+        "--points-at",
         "HEAD",
     ]]);
 });
