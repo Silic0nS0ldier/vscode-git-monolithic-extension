@@ -1,5 +1,5 @@
 import type { EventEmitter } from "vscode";
-import type { Branch, Ref, Remote } from "../../api/git.js";
+import type { Branch, Remote } from "../../api/git.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import type { Box } from "../../util/box.js";
 import { RepositoryState, type RepositoryStateOptions } from "../RepositoryState.js";
@@ -7,7 +7,7 @@ import { RepositoryState, type RepositoryStateOptions } from "../RepositoryState
 export function createStateBox(
     onDidChangeState: EventEmitter<RepositoryStateOptions>,
     HEAD: Box<Branch | undefined>,
-    refs: Box<Ref[]>,
+    headTagName: Box<string | undefined>,
     remotes: Box<Remote[]>,
     sourceControlUI: SourceControlUIGroup,
 ): Box<RepositoryStateOptions> {
@@ -19,7 +19,7 @@ export function createStateBox(
             state = newState;
 
             HEAD.set(undefined);
-            refs.set([]);
+            headTagName.set(undefined);
             remotes.set([]);
             sourceControlUI.mergeGroup.resourceStates.set([]);
             sourceControlUI.stagedGroup.resourceStates.set([]);

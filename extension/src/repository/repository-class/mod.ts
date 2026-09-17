@@ -9,7 +9,7 @@ import {
     window,
     workspace,
 } from "vscode";
-import { type Branch, GitErrorCodes, type Ref, RefType, type Remote } from "../../api/git.js";
+import { type Branch, GitErrorCodes, type Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import type { Repository as BaseRepository } from "../../git.js";
 import { GitError } from "../../git/error.js";
@@ -104,7 +104,8 @@ export function createRepository(
     }
 
     const HEAD = createBox<Branch | undefined>(undefined);
-    const refs = createBox<Ref[]>([]);
+    /** Only set while HEAD is detached on a commit some tag points at. */
+    const headTagName = createBox<string | undefined>(undefined);
     const remotes = createBox<Remote[]>([]);
 
     const rootUri = Uri.file(repository.root);
@@ -131,7 +132,7 @@ export function createRepository(
     const state = createStateBox(
         onDidChangeStateEmitter,
         HEAD,
-        refs,
+        headTagName,
         remotes,
         sourceControlUI,
     );
@@ -165,7 +166,7 @@ export function createRepository(
         return updateModelStateImpl(
             repository,
             HEAD,
-            refs,
+            headTagName,
             remotes,
             submodules,
             rebaseCommit,
@@ -264,8 +265,7 @@ export function createRepository(
             return valueHEAD.name;
         }
 
-        const tag = refs.get().filter(iref => iref.type === RefType.Tag && iref.commit === valueHEAD.commit)[0];
-        const tagName = tag && tag.name;
+        const tagName = headTagName.get();
 
         if (tagName) {
             return tagName;
@@ -284,8 +284,7 @@ export function createRepository(
 
     filterEvent(
         workspace.onDidChangeConfiguration,
-        e => config.branchSortOrder.affected(e, rootUri)
-            || config.ignoreSubmodules.affected(e, rootUri)
+        e => config.ignoreSubmodules.affected(e, rootUri)
             || config.openDiffOnClick.affected(e, rootUri),
     )(updateModelState, null, disposables);
 
@@ -429,6 +428,10 @@ export function createRepository(
         getObjectDetails(ref, filePath) {
             return run(Operation.GetObjectDetails, () => repository.getObjectDetails(ref, filePath));
         },
+        getRefs(opts) {
+            // Callers get the configured ordering unless they ask for another one.
+            return repository.getRefs({ sort: config.branchSortOrder(rootUri), ...opts });
+        },
         getStashes() {
             return repository.getStashes();
         },
@@ -437,8 +440,7 @@ export function createRepository(
         },
         get headLabel() {
             return headLabelImpl(
-                HEAD.get(),
-                refs.get(),
+                headShortName(),
                 sourceControlUI,
             );
         },
@@ -543,9 +545,6 @@ export function createRepository(
         },
         get rebaseCommit() {
             return rebaseCommit.get();
-        },
-        get refs() {
-            return refs.get();
         },
         get remotes() {
             return remotes.get();

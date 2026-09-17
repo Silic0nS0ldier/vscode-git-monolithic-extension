@@ -104,6 +104,20 @@ test(list.name + " - keeps only refs containing a commit", async () => {
     assert.deepStrictEqual(refs.map(ref => ref.name), ["main"]);
 });
 
+test(list.name + " - keeps only refs pointing at a commit", async () => {
+    await using repo = await tempGitRepo(true);
+
+    await commit(repo.path, "Base");
+    // Annotated, so the ref resolves to a tag object and only peeling reaches the commit.
+    await run(repo.path, ["tag", "--annotate", "v1.0.0", "-m", "First release"]);
+    await commit(repo.path, "Tip");
+    await run(repo.path, ["tag", "v2.0.0"]);
+
+    const refs = unwrapOk(await list(gitCtx, repo.path, { pattern: "refs/tags", pointsAt: "HEAD~1" }));
+
+    assert.deepStrictEqual(refs.map(ref => ref.name), ["v1.0.0"]);
+});
+
 test(list.name + " - lists a ref set larger than a read buffer would hold", async () => {
     await using repo = await tempGitRepo(true);
 

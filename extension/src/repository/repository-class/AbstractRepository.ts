@@ -9,6 +9,7 @@ import type {
     Ref,
     Remote,
 } from "../../api/git.js";
+import type { RefQuery } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
 import type { Stash } from "../../git/Stash.js";
 import type { Submodule } from "../../git/Submodule.js";
@@ -64,6 +65,7 @@ export type AbstractRepository = {
         ref: string,
         filePath: string,
     ) => Promise<{ mode: string; object: string; size: number }>;
+    readonly getRefs: (opts?: RefQuery) => Promise<Ref[]>;
     readonly getStashes: () => Promise<Stash[]>;
     readonly getCommitTemplate: () => Promise<string>;
     readonly hashObject: (data: string) => Promise<string>;
@@ -95,7 +97,6 @@ export type AbstractRepository = {
     readonly rebase: (branch: string) => Promise<void>;
     readonly rebaseAbort: () => Promise<void>;
     readonly rebaseCommit: Commit | undefined;
-    readonly refs: Ref[];
     readonly remotes: readonly Remote[];
     readonly removeRemote: (name: string) => Promise<void>;
     readonly renameBranch: (name: string) => Promise<void>;

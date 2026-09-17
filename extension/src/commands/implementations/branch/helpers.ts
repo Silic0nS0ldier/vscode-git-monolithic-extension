@@ -47,7 +47,7 @@ export async function branch(repository: AbstractRepository, defaultName?: strin
     let target = "HEAD";
 
     if (from) {
-        const picks = [new HEADItem(repository), ...createCheckoutItems(repository)];
+        const picks = [new HEADItem(repository), ...await createCheckoutItems(repository)];
         const placeHolder = i18n.Translations.selectRefToBranchFrom(branchName);
         const choice = await window.showQuickPick(picks, { placeHolder });
 

@@ -42,7 +42,8 @@ export function createCommand(): ScmCommand {
             run = (force): Promise<void> => repository.deleteBranch(normalisedBranchName, force);
         } else {
             const currentHead = repository.HEAD && repository.HEAD.name;
-            const heads = repository.refs.filter(ref => ref.type === RefType.Head && ref.name !== currentHead)
+            const refs = await repository.getRefs({ namespace: RefType.Head });
+            const heads = refs.filter(ref => ref.name !== currentHead)
                 .map(ref => new BranchDeleteItem(ref));
 
             const placeHolder = i18n.Translations.selectBranchToDelete();

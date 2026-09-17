@@ -83,6 +83,24 @@ const REF_TYPES: Record<RefKind, RefTypeOptions> = {
     "tag": RefType.Tag,
 };
 
+const REF_NAMESPACES: Record<RefTypeOptions, string> = {
+    Head: "refs/heads",
+    RemoteHead: "refs/remotes",
+    Tag: "refs/tags",
+};
+
+/** What to list. Neither given, heads, remotes and tags are all listed. */
+type RefScope =
+    | { readonly namespace?: RefTypeOptions; readonly glob?: never }
+    | { readonly glob?: string; readonly namespace?: never };
+
+export type RefQuery = RefScope & {
+    readonly sort?: "alphabetically" | "committerdate";
+    readonly contains?: string;
+    readonly pointsAt?: string;
+    readonly count?: number;
+};
+
 interface ICloneOptions {
     readonly parentPath: string;
     readonly progress: Progress<{ increment: number }>;
@@ -1127,13 +1145,14 @@ export class Repository {
     }
 
     async getRefs(
-        opts?: { sort?: "alphabetically" | "committerdate"; contains?: string; pattern?: string; count?: number },
+        opts?: RefQuery,
     ): Promise<Ref[]> {
         const refs = unwrapOk(
             await listRefs(this.#git._context, this.#repositoryRoot, {
                 contains: opts?.contains,
                 count: opts?.count,
-                pattern: opts?.pattern,
+                pattern: opts?.glob ?? (opts?.namespace && REF_NAMESPACES[opts.namespace]),
+                pointsAt: opts?.pointsAt,
                 sort: opts?.sort === "committerdate" ? "committerdate" : undefined,
             }),
         );
@@ -1232,7 +1251,7 @@ export class Repository {
         const refs = await this.getRefs({
             contains: query.contains,
             count: query.count,
-            pattern: query.pattern ? `refs/${query.pattern}` : undefined,
+            glob: query.pattern ? `refs/${query.pattern}` : undefined,
         });
         return refs.filter(value => (value.type !== RefType.Tag) && (query.remote || !value.remote));
     }

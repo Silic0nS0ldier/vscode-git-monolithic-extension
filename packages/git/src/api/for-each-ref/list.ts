@@ -29,6 +29,8 @@ export type ListOptions = {
     readonly sort?: "committerdate";
     /** Restricts the listing to refs whose tip has this commit as an ancestor. */
     readonly contains?: string;
+    /** Restricts the listing to refs pointing at this commit. */
+    readonly pointsAt?: string;
     /** Listed instead of the default namespaces. */
     readonly pattern?: string;
     readonly count?: number;
@@ -119,6 +121,10 @@ export async function list(
 
     if (opts.contains) {
         args.push("--contains", opts.contains);
+    }
+
+    if (opts.pointsAt) {
+        args.push("--points-at", opts.pointsAt);
     }
 
     const parser = createRefParser();

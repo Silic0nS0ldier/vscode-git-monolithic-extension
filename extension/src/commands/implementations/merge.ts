@@ -25,11 +25,13 @@ export function createCommand(): ScmCommand {
         const checkoutType = config.checkoutType();
         const includeRemotes = checkoutType === "all" || checkoutType === "remote" || checkoutType?.includes("remote");
 
-        const heads = repository.refs.filter(ref => ref.type === RefType.Head)
+        const refs = await repository.getRefs();
+
+        const heads = refs.filter(ref => ref.type === RefType.Head)
             .filter(ref => ref.name || ref.commit)
             .map(ref => new MergeItem(ref as Branch));
 
-        const remoteHeads = (includeRemotes ? repository.refs.filter(ref => ref.type === RefType.RemoteHead) : [])
+        const remoteHeads = (includeRemotes ? refs.filter(ref => ref.type === RefType.RemoteHead) : [])
             .filter(ref => ref.name || ref.commit)
             .map(ref => new MergeItem(ref as Branch));
 

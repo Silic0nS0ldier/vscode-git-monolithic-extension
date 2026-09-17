@@ -1,4 +1,5 @@
 import { window } from "vscode";
+import { RefType } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
@@ -25,7 +26,7 @@ export function createCommand(): ScmCommand {
             return;
         }
 
-        const remoteRefs = repository.refs;
+        const remoteRefs = await repository.getRefs({ namespace: RefType.RemoteHead });
         const remoteRefsFiltered = remoteRefs.filter(r => (r.remote === remotePick.label));
         const branchPicks = remoteRefsFiltered.map(r => ({ label: r.name! }));
         const branchPlaceHolder = i18n.Translations.pickBranchPull();

@@ -31,7 +31,7 @@ export async function checkout(
         picks.push(createBranch, createBranchFrom, checkoutDetached);
     }
 
-    picks.push(...createCheckoutItems(repository));
+    picks.push(...await createCheckoutItems(repository));
 
     const quickpick = window.createQuickPick();
     quickpick.items = picks;
