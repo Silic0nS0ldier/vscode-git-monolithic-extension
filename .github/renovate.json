@@ -36,6 +36,23 @@
             "description": "Wait 3 days before updating. Safeguard against supply chain attacks and (for npm) unpublishing of packages."
         },
         {
+            "matchDatasources": [
+                "bazel"
+            ],
+            "minimumReleaseAgeBehaviour": "timestamp-optional",
+            "description": "The Bazel Central Registry does not report release timestamps. Under the default timestamp-required, minimumReleaseAge would suppress every bazel_dep update permanently rather than delaying it 3 days."
+        },
+        {
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchUpdateTypes": [
+                "digest"
+            ],
+            "minimumReleaseAgeBehaviour": "timestamp-optional",
+            "description": "Only Docker Hub reports tag_last_pushed, so digests from other registries (e.g. mcr.microsoft.com) cannot be aged and would be held forever. Renovate also never falls back to an older digest, since a digest must reflect what the tag points at now."
+        },
+        {
             "matchManagers": [
                 "npm"
             ],
