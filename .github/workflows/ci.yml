@@ -151,7 +151,9 @@ jobs:
       - uses: pnpm/setup@v2.1.0
         with:
           cache: true
-          require-lockfile: true
+          install: false
+      # Subset of dependencies for knip analysis
+      - run: pnpm install --frozen-lockfile --prod --filter . --filter ./packages/wasm
       - run: pnpm exec knip
         id: knip
         continue-on-error: true

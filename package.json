@@ -3,11 +3,13 @@
     "packageManager": "pnpm@12.4.1",
     "dependencies": {
         "@eslint/js": "^10.0.1",
-        "@typescript/native": "npm:typescript@^7.0.2",
         "eslint": "^10.10.0",
         "knip": "^6.35.1",
-        "renovate": "^44.30.3",
         "typescript": "npm:@typescript/typescript6@^6.0.2",
         "typescript-eslint": "^8.69.0"
+    },
+    "devDependencies": {
+        "@typescript/native": "npm:typescript@^7.0.2",
+        "renovate": "^44.30.3"
     }
 }
