@@ -27,6 +27,7 @@ import { anyEvent, eventToPromise, filterEvent } from "../../util/events.js";
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
+import { HeadState, type HeadStateOptions } from "../HeadState.js";
 import type { OperationResult } from "../OperationResult.js";
 import { causesLargeWorkingTreeChanges, isReadOnly, Operation, type OperationOptions } from "../Operations.js";
 import { OperationsImpl } from "../Operations.js";
@@ -274,6 +275,15 @@ export function createRepository(
         return (valueHEAD.commit || "").substring(0, 8);
     }
 
+    function headState(): HeadStateOptions {
+        // A rebase detaches HEAD, so it has to be tested for first.
+        if (rebaseCommit.get() !== undefined) {
+            return HeadState.Rebasing;
+        }
+
+        return HEAD.get()?.name === undefined ? HeadState.Detached : HeadState.Attached;
+    }
+
     function updateInputBoxPlaceholder(): void {
         const branchName = headShortName();
         sourceControlUI.sourceControl.inputBox.placeholder = i18n.Translations.commitMessageForCommand(branchName);
@@ -441,6 +451,7 @@ export function createRepository(
         get headLabel() {
             return headLabelImpl(
                 headShortName(),
+                headState(),
                 sourceControlUI,
             );
         },

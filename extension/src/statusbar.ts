@@ -21,15 +21,10 @@ class CheckoutStatusBar {
     }
 
     get command(): Command | undefined {
-        const rebasing = !!this.#repository.rebaseCommit;
-        const title = `$(git-branch) ${this.#repository.headLabel}${
-            rebasing ? ` (${i18n.Translations.rebasing()})` : ""
-        }`;
-
         return {
             arguments: [this.#repository.sourceControlUI.sourceControl],
             command: "git_monolithic.checkout",
-            title,
+            title: `$(git-branch) ${this.#repository.headLabel}`,
             tooltip: i18n.Translations.checkout(),
         };
     }

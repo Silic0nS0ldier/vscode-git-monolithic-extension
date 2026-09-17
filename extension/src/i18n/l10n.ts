@@ -118,6 +118,10 @@ export function rebasing(): string {
     return l10n.t("Rebasing");
 }
 
+export function detached(): string {
+    return l10n.t("Detached");
+}
+
 export function checkout(): string {
     return l10n.t("Checkout branch/tag...");
 }

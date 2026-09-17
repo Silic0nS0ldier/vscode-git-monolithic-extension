@@ -74,14 +74,15 @@ scenario("the ref picker lists local branches, remote branches and tags", async 
     }
 });
 
-scenario("the status bar names the tag a detached HEAD sits on", async () => {
+scenario("the status bar names the tag a detached HEAD sits on, and marks it detached", async () => {
     const picker = await openPickerFromStatusBar(page, "main", "Select a ref to checkout");
     await pickerRow(picker, "v1.0.0").click();
 
     // Checking out a tag detaches HEAD, so the label has no branch name to fall back on.
+    // The marker keeps the tag from reading as a branch of the same name.
     await pollUntil(
         "the status bar to name the tag HEAD is detached at",
         () => statusBarText(page),
-        text => text.includes("v1.0.0"),
+        text => text.includes("v1.0.0 (Detached)"),
     );
 });
