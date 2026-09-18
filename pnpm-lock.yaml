@@ -181,7 +181,7 @@ catalogs:
       specifier: ^24.13.3
       version: 24.13.3
 
-packageExtensionsChecksum: sha256-mLYkw/py/ZVi3TcFM7YZ6JbrSkrzvX7cbhCI+2sPg4o=
+packageExtensionsChecksum: sha256-JHfKjHwZ2dyzFJC3XTcZFUAzL55LJXKJ+qOcDe8IbX4=
 
 patchedDependencies:
   watcher@2.3.1: 97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688
