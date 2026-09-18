@@ -22,16 +22,6 @@ catalogs:
     '@types/node': ^24.13.3
 
 packageExtensions:
-  "@secretlint/resolver":
-    dependencies:
-      "@secretlint/secretlint-rule-basicauth": "^10.2.2"
-      "@secretlint/secretlint-rule-no-dotenv": "^10.2.2"
-      "@secretlint/secretlint-rule-npm": "^10.2.2"
-      "@secretlint/secretlint-rule-preset-recommend": "^10.2.2"
-      "@secretlint/secretlint-rule-privatekey": "^10.2.2"
-  "@textlint/resolver":
-    dependencies:
-      "@secretlint/secretlint-formatter-sarif": "^10.2.2"
   # chalk added as workaround for https://github.com/aspect-build/rules_lint/issues/752
   "eslint":
     dependencies:
