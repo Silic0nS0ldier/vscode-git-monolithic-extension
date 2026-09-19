@@ -28,13 +28,14 @@ jobs:
           ref: ${{ github.head_ref }}
       - id: remote_cache
         continue-on-error: true
-        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@71cf6ad213fa3d7760c6ced4a995521098a6e1bd # v0.3.2
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
           backend-timeout-seconds: 120
           storage-mode: packs
           # `fail-on-cache-error` is deliberately left off, this is PR only which does not upload.
+          write: true
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -87,7 +88,7 @@ jobs:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - id: remote_cache
         continue-on-error: true
-        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@71cf6ad213fa3d7760c6ced4a995521098a6e1bd # v0.3.2
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
@@ -97,6 +98,7 @@ jobs:
           # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
           # the runner rather than the build. Fail the request instead.
           fail-on-cache-error: "true"
+          write: true
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -175,7 +177,7 @@ jobs:
       - uses: actions/checkout@v7
       - id: remote_cache
         continue-on-error: true
-        uses: cre4ture/bazel-github-actions-cache-v2@2bc512d6a198bbc46cd427435a9241b1ef4c6115 # v0.3.2
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@71cf6ad213fa3d7760c6ced4a995521098a6e1bd # v0.3.2
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
@@ -185,6 +187,7 @@ jobs:
           # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
           # the runner rather than the build. Fail the request instead.
           fail-on-cache-error: "true"
+          write: true
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
