@@ -165,8 +165,8 @@ settings:
 catalogs:
   default:
     '@types/node':
-      specifier: ^25.9.6
-      version: 25.9.6
+      specifier: ^25.9.7
+      version: 25.9.7
     ava:
       specifier: ^8.0.1
       version: 8.0.1
@@ -230,7 +230,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 25.9.6
+        version: 25.9.7
 
   build_defs/vsix_package:
     dependencies:
@@ -243,7 +243,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 25.9.6
+        version: 25.9.7
 
   extension:
     dependencies:
@@ -290,7 +290,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 25.9.6
+        version: 25.9.7
 
   packages/git:
     dependencies:
@@ -1703,8 +1703,8 @@ packages:
   '@types/node@25.9.5':
     resolution: {integrity: sha512-OScDchr2fwuUmWdf4kZ9h7PcJiYDVInhJizG/biAq3cAvqwYktuy/TYGGdZNMtNTFUP7rnb0NU4TUdm82kt4Rg==}
 
-  '@types/node@25.9.6':
-    resolution: {integrity: sha512-JR6Q/PV5DKFvjrGFVqQJdeG0qvsqQQLDa3TzFrqVwhqRXqwNaxPo2KYCtCQXpOdIulCouKwT7a6in9nFthBAzw==}
+  '@types/node@25.9.7':
+    resolution: {integrity: sha512-Y+axoNWOFLvDNFxNbDA+kqqV05imHwTu5bZWWO6tQM3Y2NX1jvzUJkYlf4nYnMCnvu4wQBKW6Nr+ok6yHWA9aQ==}
 
   '@types/parse-path@7.1.0':
     resolution: {integrity: sha512-EULJ8LApcVEPbrfND0cRQqutIOdiIgJ1Mgrhpy755r14xMohPTEpkV/k28SJvuOs9bHRFW8x+KeDAEPiGQPB9Q==}
@@ -5880,7 +5880,7 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
-  '@types/node@25.9.6':
+  '@types/node@25.9.7':
     dependencies:
       undici-types: 7.24.6
 
@@ -7122,7 +7122,7 @@ snapshots:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       fast-glob: 3.3.3
-      ignore: 7.0.8
+      ignore: 7.0.9
       is-path-inside: 4.0.0
       slash: 5.1.0
       unicorn-magic: 0.4.0
