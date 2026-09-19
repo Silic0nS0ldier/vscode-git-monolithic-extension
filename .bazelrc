@@ -2,6 +2,7 @@ common --symlink_prefix=.bazel/
 common --lockfile_mode=error
 common --test_summary=short_uncached
 common --remote_download_outputs=minimal
+common --experimental_repository_downloader_retries=5
 
 common --local_resources=disk_io=100
 common --default_test_resources=disk_io=5
