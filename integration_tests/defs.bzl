@@ -38,7 +38,8 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
 
     service_test(
         name = name + "_fixture_task_hygiene_test",
-        size = "small",
+        size = "large",
+        timeout = "moderate",
         services = [":" + name + "_fixture_task"],
         test = "@rules_itest//:exit0",
     )
