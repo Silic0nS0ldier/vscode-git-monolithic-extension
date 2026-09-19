@@ -17,7 +17,7 @@
 
 const buildtools = name => ({
     // renovate: datasource=github-releases depName=bazelbuild/buildtools
-    version: "v8.5.1",
+    version: "v10.0.1",
     platforms: {
         "linux-x86_64": {
             url: `https://github.com/bazelbuild/buildtools/releases/download/{version}/${name}-linux-amd64`,
