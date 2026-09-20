@@ -48,8 +48,8 @@ jobs:
             common --repo_contents_cache=
             common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
-            common --remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
-            common --remote_downloader_local_fallback
+            common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
+            common --experimental_remote_downloader_local_fallback
             mod --profile=${{ runner.temp }}/mod.profile.gz
             mod --noslim_profile
           cache-save: false
@@ -116,8 +116,8 @@ jobs:
             common --repo_contents_cache=
             common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
-            common --remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
-            common --remote_downloader_local_fallback
+            common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
+            common --experimental_remote_downloader_local_fallback
             build --profile=${{ runner.temp }}/build.profile.gz
             test --profile=${{ runner.temp }}/test.profile.gz
             build --experimental_profile_include_target_label
@@ -207,8 +207,8 @@ jobs:
             common --repo_contents_cache=
             common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
-            common --remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
-            common --remote_downloader_local_fallback
+            common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
+            common --experimental_remote_downloader_local_fallback
             run --profile=${{ runner.temp }}/run.profile.gz
             run --experimental_profile_include_target_label
             run --noslim_profile
