@@ -46,7 +46,7 @@ jobs:
             common --curses=no
             common --show_progress_rate_limit=5
             common --repo_contents_cache=
-            common --remote_cache=${{ steps.remote_cache.outputs.url || '' }}
+            common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             mod --profile=${{ runner.temp }}/mod.profile.gz
             mod --noslim_profile
@@ -112,7 +112,7 @@ jobs:
             # Repo contents cache adds considerable pressure on GH Actions cache storage.
             # Disabled until we find a more efficient way to manage it.
             common --repo_contents_cache=
-            common --remote_cache=${{ steps.remote_cache.outputs.url || '' }}
+            common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             build --profile=${{ runner.temp }}/build.profile.gz
             test --profile=${{ runner.temp }}/test.profile.gz
@@ -201,7 +201,7 @@ jobs:
             # Repo contents cache adds considerable pressure on GH Actions cache storage.
             # Disabled until we find a more efficient way to manage it.
             common --repo_contents_cache=
-            common --remote_cache=${{ steps.remote_cache.outputs.url || '' }}
+            common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             run --profile=${{ runner.temp }}/run.profile.gz
             run --experimental_profile_include_target_label
