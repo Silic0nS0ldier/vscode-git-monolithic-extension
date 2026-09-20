@@ -39,14 +39,11 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
-            # Disabled: https://github.com/bazelbuild/bazel/issues/30223
-            # TODO: Restore when on 9.3.0
-            # startup --experimental_remote_repo_contents_cache
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
             common --repo_contents_cache=
-            common --experimental_remote_repo_contents_cache
             common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
@@ -105,9 +102,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
-            # Disabled: https://github.com/bazelbuild/bazel/issues/30223
-            # TODO: Restore when on 9.3.0
-            # startup --experimental_remote_repo_contents_cache
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
@@ -115,7 +110,6 @@ jobs:
             # Repo contents cache adds considerable pressure on GH Actions cache storage.
             # Disabled until we find a more efficient way to manage it.
             common --repo_contents_cache=
-            common --experimental_remote_repo_contents_cache
             common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
@@ -197,9 +191,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
-            # Disabled: https://github.com/bazelbuild/bazel/issues/30223
-            # TODO: Restore when on 9.3.0
-            # startup --experimental_remote_repo_contents_cache
+            startup --experimental_remote_repo_contents_cache
             common --color=yes
             common --curses=no
             common --show_progress_rate_limit=5
@@ -207,7 +199,6 @@ jobs:
             # Repo contents cache adds considerable pressure on GH Actions cache storage.
             # Disabled until we find a more efficient way to manage it.
             common --repo_contents_cache=
-            common --experimental_remote_repo_contents_cache
             common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
