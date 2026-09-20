@@ -47,15 +47,15 @@ single_version_override(
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(
     node_repositories = {
-        "26.8.2-darwin_arm64": ("node-v26.8.2-darwin-arm64.tar.xz", "node-v26.8.2-darwin-arm64", "f58e5044b938a3174184de4aaf1d2bbfcfff812e88220ff08e9221c09f5c8677"),
-        "26.8.2-darwin_amd64": ("node-v26.8.2-darwin-x64.tar.xz", "node-v26.8.2-darwin-x64", "49950999366bf6cd47c8c8fd3593aa82fb5efed494937b380b85677338285ca0"),
-        "26.8.2-linux_arm64": ("node-v26.8.2-linux-arm64.tar.xz", "node-v26.8.2-linux-arm64", "81d8f0fdea9dcd3bfdcfeafc5f8359c151f097e9880b0007c0645ca670d07971"),
-        "26.8.2-linux_ppc64le": ("node-v26.8.2-linux-ppc64le.tar.xz", "node-v26.8.2-linux-ppc64le", "69756edc54f372fe13e6e3fb100ed52d651da8ab8fcba76ea68bab6d26e90ef7"),
-        "26.8.2-linux_s390x": ("node-v26.8.2-linux-s390x.tar.xz", "node-v26.8.2-linux-s390x", "1eb6ce1ac6f236ee41599a6248031e827936c3f7a98d349366dcfc1344749e80"),
-        "26.8.2-linux_amd64": ("node-v26.8.2-linux-x64.tar.xz", "node-v26.8.2-linux-x64", "40e1d3225c1c9ae9a2671c98ecb9857e4d5555026394f348645676798840d5c5"),
-        "26.8.2-windows_amd64": ("node-v26.8.2-win-x64.zip", "node-v26.8.2-win-x64", "cf02f5d0c06c794b84f277177d5cf3743d0924ca49f6641cd435dd7cb6ee9085"),
+        "26.9.0-darwin_arm64": ("node-v26.9.0-darwin-arm64.tar.xz", "node-v26.9.0-darwin-arm64", "8dd6e383c216dbadd04e6eaac5b8fcaec8ba700a58fa51ebd38d4f9532741909"),
+        "26.9.0-darwin_amd64": ("node-v26.9.0-darwin-x64.tar.xz", "node-v26.9.0-darwin-x64", "6608fb3719eb61acbd5cee3e53833be12f84fac10a0799581a4995f67d4dab79"),
+        "26.9.0-linux_arm64": ("node-v26.9.0-linux-arm64.tar.xz", "node-v26.9.0-linux-arm64", "686d07ed3bc5d68d9f7bd4939b7e8849a87d0664ac19c8c5474474f44cc956db"),
+        "26.9.0-linux_ppc64le": ("node-v26.9.0-linux-ppc64le.tar.xz", "node-v26.9.0-linux-ppc64le", "2ba7e7927eddef043cf60075bbc39305ed3999e4eb7dca46f1c16d89dc681146"),
+        "26.9.0-linux_s390x": ("node-v26.9.0-linux-s390x.tar.xz", "node-v26.9.0-linux-s390x", "7b88848893ddb3e22549fcc27bbfac2083cf5738dc5186260ff0e2c28470bf05"),
+        "26.9.0-linux_amd64": ("node-v26.9.0-linux-x64.tar.xz", "node-v26.9.0-linux-x64", "c6ecd8efc1c1d395265891675319da7a7b3785c6be174bd78933cf4f057624d1"),
+        "26.9.0-windows_amd64": ("node-v26.9.0-win-x64.zip", "node-v26.9.0-win-x64", "c8af870b5b3e9789a6cbdb30270e7c212e12d76a7afa7fc7f21b6b21cc22a71b"),
     },
-    node_version = "26.8.2",
+    node_version = "26.9.0",
 )
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
