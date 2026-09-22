@@ -14,7 +14,7 @@ allowBuilds:
 catalog:
   '@types/node': ^25.9.7
   ava: ^8.0.1
-  cleye: ^2.6.0
+  cleye: ^2.7.0
   get-stream: ^9.0.1
 
 catalogs:
