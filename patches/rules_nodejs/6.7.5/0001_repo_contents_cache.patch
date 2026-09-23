@@ -1,0 +1,23 @@
+Declare rules_nodejs's toolchain hub repo reproducible so it can use the repo contents cache.
+
+The hub only writes a generated BUILD file derived from its own attributes, so it is
+trivially reproducible. Upstream marked the platform repo next to it but stopped short of
+the hub, leaving it refetched on every CI runner.
+
+Not yet raised upstream.
+
+--- a/nodejs/private/nodejs_toolchains_repo.bzl
++++ b/nodejs/private/nodejs_toolchains_repo.bzl
+@@ -115,6 +115,12 @@
+     # Base BUILD file for this repository
+     repository_ctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
++    if not hasattr(repository_ctx, "repo_metadata"):
++        return None
++
++    return repository_ctx.repo_metadata(reproducible = True)
++
+ nodejs_toolchains_repo = repository_rule(
+     _nodejs_toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms

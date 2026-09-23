@@ -1,0 +1,26 @@
+Declare buildifier_prebuilt's toolchain repo reproducible so it can use the repo contents
+cache.
+
+https://github.com/keith/buildifier-prebuilt/pull/120 marked the module *extension*
+reproducible via `extension_metadata`, which is a different mechanism; the repo rule itself
+still returns nothing, so the toolchains repo is refetched on every CI runner.
+
+Not yet raised upstream.
+
+diff --git a/defs.bzl b/defs.bzl
+index db41fa7..9da99a0 100644
+--- a/defs.bzl
++++ b/defs.bzl
+@@ -27,6 +27,12 @@ declare_toolchain(
+         )
+     repository_ctx.file("BUILD.bazel", content)
+ 
++    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
++    if not hasattr(repository_ctx, "repo_metadata"):
++        return None
++
++    return repository_ctx.repo_metadata(reproducible = True)
++
+ _buildifier_toolchain_setup = repository_rule(
+     implementation = _buildifier_toolchain_setup_impl,
+     attrs = {

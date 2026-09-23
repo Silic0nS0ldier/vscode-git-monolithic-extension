@@ -1,0 +1,23 @@
+Declare aspect_rules_lint's toolchain hub repo reproducible so it can use the repo contents cache.
+
+The hub only writes a generated BUILD file derived from its own attributes, so it is
+trivially reproducible. Upstream marked the platform repo next to it but stopped short of
+the hub, leaving it refetched on every CI runner.
+
+Not yet raised upstream.
+
+--- a/tools/toolchains/sarif_parser_toolchain.bzl
++++ b/tools/toolchains/sarif_parser_toolchain.bzl
+@@ -110,6 +110,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ sarif_parser_toolchains_repo = repository_rule(
+     _sarif_parser_toolchains_repo_impl,
+     doc = "Creates a repository with toolchain definitions for all known platforms which can be registered or selected.",

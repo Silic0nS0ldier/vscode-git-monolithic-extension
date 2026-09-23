@@ -1,0 +1,61 @@
+Declare rules_go's generated SDK repo rules reproducible so they can use the repo contents
+cache.
+
+Upstream marked `go_download_sdk_rule` reproducible but stopped short of the three repos
+derived from it, each of which only writes a generated BUILD/bzl file from its own
+attributes: `go_toolchains`, `io_bazel_rules_nogo` and `go_host_compatible_sdk_label`.
+Without this they are refetched on every CI runner.
+
+Not yet raised upstream.
+
+diff --git a/go/private/extensions.bzl b/go/private/extensions.bzl
+index 373d41d..637e9d0 100755
+--- a/go/private/extensions.bzl
++++ b/go/private/extensions.bzl
+@@ -23,6 +23,12 @@ def host_compatible_toolchain_impl(ctx):
+ HOST_COMPATIBLE_SDK = Label({})
+ """.format(repr(ctx.attr.toolchain)))
+ 
++    # Bazel <8.3.0 lacks ctx.repo_metadata
++    if not hasattr(ctx, "repo_metadata"):
++        return None
++
++    return ctx.repo_metadata(reproducible = True)
++
+ host_compatible_toolchain = repository_rule(
+     implementation = host_compatible_toolchain_impl,
+     attrs = {
+diff --git a/go/private/nogo.bzl b/go/private/nogo.bzl
+index 3baf117..13c4b26 100755
+--- a/go/private/nogo.bzl
++++ b/go/private/nogo.bzl
+@@ -46,6 +46,12 @@ EXCLUDES = {excludes}
+         executable = False,
+     )
+ 
++    # Bazel <8.3.0 lacks ctx.repo_metadata
++    if not hasattr(ctx, "repo_metadata"):
++        return None
++
++    return ctx.repo_metadata(reproducible = True)
++
+ # go_register_nogo creates a repository with an alias that points
+ # to the nogo rule that should be used globally by go rules in the workspace.
+ # This may be called automatically by go_rules_dependencies or by
+diff --git a/go/private/sdk.bzl b/go/private/sdk.bzl
+index 087b0b4..e3ac358 100755
+--- a/go/private/sdk.bzl
++++ b/go/private/sdk.bzl
+@@ -296,6 +296,12 @@ def _go_multiple_toolchains_impl(ctx):
+         executable = False,
+     )
+ 
++    # Bazel <8.3.0 lacks ctx.repo_metadata
++    if not hasattr(ctx, "repo_metadata"):
++        return None
++
++    return ctx.repo_metadata(reproducible = True)
++
+ go_multiple_toolchains = repository_rule(
+     implementation = _go_multiple_toolchains_impl,
+     attrs = {

@@ -1,0 +1,43 @@
+Declare the glibc and kernel-headers trampoline repos reproducible so they can use the
+repo contents cache.
+
+Both only render a checked-in BUILD template, so they are trivially reproducible. Upstream
+already marks the heavier llvm repos reproducible (see
+https://github.com/hermeticbuild/hermetic-llvm/pull/603) but missed these two.
+
+Not yet raised upstream.
+
+diff --git a/kernel/extension/kernel_headers.bzl b/kernel/extension/kernel_headers.bzl
+index 402cde8..b130ca4 100644
+--- a/kernel/extension/kernel_headers.bzl
++++ b/kernel/extension/kernel_headers.bzl
+@@ -5,6 +5,12 @@ def _kernel_headers_trampoline_repository_impl(repository_ctx):
+     repository_ctx.template("BUILD.bazel", repository_ctx.attr._build_file)
+     repository_ctx.file("linux_kernel_version_map.bzl", repository_ctx.attr.version_map)
+ 
++    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
++    if not hasattr(repository_ctx, "repo_metadata"):
++        return None
++
++    return repository_ctx.repo_metadata(reproducible = True)
++
+ _kernel_headers_trampoline_repository = repository_rule(
+     implementation = _kernel_headers_trampoline_repository_impl,
+     attrs = {
+diff --git a/runtimes/glibc/extension/glibc.bzl b/runtimes/glibc/extension/glibc.bzl
+index 6741ea2..0efb70b 100644
+--- a/runtimes/glibc/extension/glibc.bzl
++++ b/runtimes/glibc/extension/glibc.bzl
+@@ -80,6 +80,12 @@ def _glibc_release_strip_prefix(version):
+ def _glibc_trampoline_repository_impl(repository_ctx):
+     repository_ctx.template("BUILD.bazel", repository_ctx.attr._build_file)
+ 
++    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
++    if not hasattr(repository_ctx, "repo_metadata"):
++        return None
++
++    return repository_ctx.repo_metadata(reproducible = True)
++
+ _glibc_trampoline_repository = repository_rule(
+     implementation = _glibc_trampoline_repository_impl,
+     attrs = {

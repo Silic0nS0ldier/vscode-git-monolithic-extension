@@ -1,0 +1,25 @@
+Declare jq.bzl's toolchain hub repo reproducible so it can use the repo contents cache.
+
+Upstream marked `jq_platform_repo` reproducible in
+https://github.com/bazel-contrib/jq.bzl/pull/70 but stopped short of
+`jq_toolchains_repo`, which only writes a generated BUILD file derived from its own
+attributes and is therefore trivially reproducible. Without this, `jq_toolchains`
+misses the remote repo contents cache on every CI runner.
+
+Not yet raised upstream.
+
+--- a/jq/toolchain/toolchain.bzl
++++ b/jq/toolchain/toolchain.bzl
+@@ -106,6 +106,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ jq_toolchains_repo = repository_rule(
+     _jq_toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms

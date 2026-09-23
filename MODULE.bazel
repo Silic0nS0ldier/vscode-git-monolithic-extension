@@ -20,11 +20,122 @@ bazel_dep(name = "rules_oci_runtime", version = "0.0.0-20260816")
 archive_override(
     module_name = "rules_oci_runtime",
     integrity = "sha256-E3pFWwkanWUHR1nhucz518Nf0G1TDnZnzp+E3S+EXQQ=",
+    patch_strip = 1,
+    patches = ["//:patches/rules_oci_runtime/0.0.0-20260816/0001_repo_contents_cache.patch"],
     strip_prefix = "rules_oci_runtime-0.0.0-20260816",
     urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/releases/download/v0.0.0-20260816/rules_oci_runtime-0.0.0-20260816.tar.gz"],
 )
 
 bazel_dep(name = "tar.bzl", version = "0.10.9")
+
+# Transitive-only deps, floor-raised to the first release whose repo rules return
+# `repo_metadata(reproducible = True)`. Without it Bazel refetches them on every CI runner
+# instead of serving them from the remote repo contents cache.
+bazel_dep(name = "jq.bzl", version = "0.6.2")
+bazel_dep(name = "rules_buf", version = "0.5.4")
+bazel_dep(name = "yq.bzl", version = "0.4.0")
+
+# Upstream marked only the `*_platform_repo` rules reproducible and stopped short of the
+# `*_toolchains_repo` hubs, which merely write a generated BUILD file. Drop each patch once
+# the corresponding change lands upstream.
+single_version_override(
+    module_name = "tar.bzl",
+    patch_strip = 1,
+    patches = ["//:patches/tar.bzl/0.10.9/0001_repo_contents_cache.patch"],
+    version = "0.10.9",
+)
+
+single_version_override(
+    module_name = "jq.bzl",
+    patch_strip = 1,
+    patches = ["//:patches/jq.bzl/0.6.2/0001_repo_contents_cache.patch"],
+    version = "0.6.2",
+)
+
+single_version_override(
+    module_name = "yq.bzl",
+    patch_strip = 1,
+    patches = ["//:patches/yq.bzl/0.4.0/0001_repo_contents_cache.patch"],
+    version = "0.4.0",
+)
+
+single_version_override(
+    module_name = "aspect_bazel_lib",
+    patch_strip = 1,
+    patches = ["//:patches/aspect_bazel_lib/2.22.5/0001_repo_contents_cache.patch"],
+    version = "2.22.5",
+)
+
+single_version_override(
+    module_name = "aspect_rules_lint",
+    patch_strip = 1,
+    patches = ["//:patches/aspect_rules_lint/2.9.0/0001_repo_contents_cache.patch"],
+    version = "2.9.0",
+)
+
+single_version_override(
+    module_name = "rules_nodejs",
+    patch_strip = 1,
+    patches = ["//:patches/rules_nodejs/6.7.5/0001_repo_contents_cache.patch"],
+    version = "6.7.5",
+)
+
+single_version_override(
+    module_name = "rules_go",
+    patch_strip = 1,
+    patches = ["//:patches/rules_go/0.62.0/0001_repo_contents_cache.patch"],
+    version = "0.62.0",
+)
+
+single_version_override(
+    module_name = "rules_python",
+    patch_strip = 1,
+    patches = ["//:patches/rules_python/1.8.0/0001_repo_contents_cache.patch"],
+    version = "1.8.0",
+)
+
+single_version_override(
+    module_name = "gazelle",
+    patch_strip = 1,
+    patches = ["//:patches/gazelle/0.51.3/0001_repo_contents_cache.patch"],
+    version = "0.51.3",
+)
+
+single_version_override(
+    module_name = "diff.bzl",
+    patch_strip = 1,
+    patches = ["//:patches/diff.bzl/0.5.1/0001_repo_contents_cache.patch"],
+    version = "0.5.1",
+)
+
+single_version_override(
+    module_name = "buildifier_prebuilt",
+    patch_strip = 1,
+    patches = ["//:patches/buildifier_prebuilt/7.3.1/0001_repo_contents_cache.patch"],
+    version = "7.3.1",
+)
+
+single_version_override(
+    module_name = "llvm",
+    patch_strip = 1,
+    patches = ["//:patches/llvm/0.8.23/0001_repo_contents_cache.patch"],
+    version = "0.8.23",
+)
+
+single_version_override(
+    module_name = "rules_kotlin",
+    patch_strip = 1,
+    patches = ["//:patches/rules_kotlin/1.9.6/0001_repo_contents_cache.patch"],
+    version = "1.9.6",
+)
+
+# The fix is merged upstream but no release contains it yet, so there is nothing to bump to.
+single_version_override(
+    module_name = "rules_multitool",
+    patch_strip = 1,
+    patches = ["//:patches/rules_multitool/1.11.1/0001_repo_contents_cache.patch"],
+    version = "1.11.1",
+)
 
 # Reached via `aspect_rules_js -> protobuf -> rules_apple`. Its autoconfigured toolchain is
 # registered transitively, which makes toolchain resolution fetch a repo that shells out looking

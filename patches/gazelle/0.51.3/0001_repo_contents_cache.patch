@@ -1,0 +1,26 @@
+Declare gazelle's go_repository_config repo reproducible so it can use the repo contents
+cache.
+
+It only writes a config.json derived from its own attributes. Upstream already marks
+`go_repository` and `go_repository_tools` reproducible but missed this one.
+`bazel_gazelle_go_repository_cache` is deliberately left alone: it is a mutable cache.
+
+Not yet raised upstream.
+
+diff --git a/internal/bzlmod/go_deps.bzl b/internal/bzlmod/go_deps.bzl
+index e417d47..a74acc2 100644
+--- a/internal/bzlmod/go_deps.bzl
++++ b/internal/bzlmod/go_deps.bzl
+@@ -282,6 +282,12 @@ def _go_repository_config_impl(ctx):
+         "dep_files": ctx.attr.dep_files,
+     }))
+ 
++    # Bazel <8.3.0 lacks ctx.repo_metadata
++    if not hasattr(ctx, "repo_metadata"):
++        return None
++
++    return ctx.repo_metadata(reproducible = True)
++
+ _go_repository_config = repository_rule(
+     implementation = _go_repository_config_impl,
+     attrs = {

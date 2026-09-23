@@ -1,0 +1,25 @@
+Declare tar.bzl's toolchain hub repo reproducible so it can use the repo contents cache.
+
+Upstream marked `bsdtar_binary_repo` reproducible in
+https://github.com/bazel-contrib/tar.bzl/pull/95 but stopped short of
+`tar_toolchains_repo`, which only writes a generated BUILD file derived from its own
+attributes and is therefore trivially reproducible. Without this, `bsd_tar_toolchains`
+misses the remote repo contents cache on every CI runner.
+
+Not yet raised upstream.
+
+--- a/tar/toolchain/toolchain.bzl
++++ b/tar/toolchain/toolchain.bzl
+@@ -131,6 +131,12 @@
+ 
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ tar_toolchains_repo = repository_rule(
+     _tar_toolchains_repo_impl,
+     doc = """Creates a repository that exposes a tar_toolchain_type target.""",
