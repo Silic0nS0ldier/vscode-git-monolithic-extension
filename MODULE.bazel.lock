@@ -802,7 +802,7 @@
     },
     "@@rules_rust+//crate_universe:extensions.bzl%crate": {
       "general": {
-        "bzlTransitiveDigest": "iEBNWVpTvGcs4ofPIWzNQBXMNGpq6r/RB0TJcweO3p0=",
+        "bzlTransitiveDigest": "mahVeCCNbmrYYSpbmG+l6RQxEU1GGfiROfFq3HxQeHM=",
         "usagesDigest": "2Wge/phYA5QTxINJ0XhTRghT3gngTZ4DejByCot+klU=",
         "recordedInputs": [
           "ENV:CARGO_BAZEL_DEBUG \\0",

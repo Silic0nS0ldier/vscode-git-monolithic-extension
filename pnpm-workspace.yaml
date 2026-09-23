@@ -9,6 +9,7 @@ allowBuilds:
   core-js-pure: false
   dtrace-provider: false
   keytar: false
+  protobufjs: false
   re2: false
 
 catalog:
