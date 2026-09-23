@@ -310,14 +310,14 @@ filegroup(
 # Keep the renovate annotation directly above the assignment; the custom manager in
 # .github/renovate.json cannot see past an intervening comment line.
 # renovate: datasource=github-releases depName=coder/code-server
-_CODE_SERVER_RELEASE = "4.137.0"
+_CODE_SERVER_RELEASE = "4.138.0"
 
 _CODE_SERVER_URL_PREFIX = "https://github.com/coder/code-server/releases/download/v" + _CODE_SERVER_RELEASE + "/code-server-" + _CODE_SERVER_RELEASE + "-"
 
 http_archive(
     name = "code_server_linux_x64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "9303165b7fd43532091922f77e2f119ff2fa109c6b6f1c3c966fb02f3d6d9c8b",
+    sha256 = "5d63f26c5dabc2acd29610b9b27f413b016aa67019e2cfcdf54031625e18f535",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-amd64",
     url = _CODE_SERVER_URL_PREFIX + "linux-amd64.tar.gz",
 )
@@ -325,7 +325,7 @@ http_archive(
 http_archive(
     name = "code_server_linux_arm64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "0fba760298fe06480d940e218f0873a645ba1e7e3ac4b527059af82d85a90462",
+    sha256 = "fbebf4b18e97a5a48b7b105be0161d411e54ccfb53a1ffb1673c16518024fa30",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-arm64",
     url = _CODE_SERVER_URL_PREFIX + "linux-arm64.tar.gz",
 )
