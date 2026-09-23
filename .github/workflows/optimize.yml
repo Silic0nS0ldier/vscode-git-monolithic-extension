@@ -9,6 +9,14 @@ on:
         description: "Plan the optimisation without deleting or replacing cache entries"
         type: boolean
         default: true
+      reap-unmanifested-packs:
+        description: "Whether to reap unmanifested packs during optimisation"
+        type: boolean
+        default: true
+      reap-older-than-hours:
+        description: "Reap packs older than this many hours during optimisation"
+        type: number
+        default: 24
 
 permissions:
   contents: read
@@ -27,8 +35,11 @@ jobs:
       # needs write.
       actions: write
     steps:
-      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@3dd59cffa9a5eb31c6828bda378aef387b9b4303
+      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@c89da8f22cc7e35503e8cf6f0cf41500d22bd78e
         with:
+          dry-run: ${{ github.event_name != 'workflow_dispatch' || inputs.dry-run }}
           github-token: ${{ github.token }}
           min-runs: 1
-          dry-run: ${{ github.event_name != 'workflow_dispatch' || inputs.dry-run }}
+          pack-size-mb: 32
+          reap-older-than-hours: ${{ github.event_name != 'workflow_dispatch' || inputs.reap-older-than-hours }}
+          reap-unmanifested-packs: ${{ github.event_name != 'workflow_dispatch' || inputs.reap-unmanifested-packs }}
