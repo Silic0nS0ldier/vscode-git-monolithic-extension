@@ -22,7 +22,7 @@ jobs:
       # needs write.
       actions: write
     steps:
-      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@62772840a730860e7c211d60c037697e89bf2ab4
+      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@7b8dbadf815d2f521a50e0b4babd6e988b5c1a0a
         with:
           github-token: ${{ github.token }}
           min-runs: 1
