@@ -1,0 +1,29 @@
+name: Optimise Bazel Cache
+
+on:
+  schedule:
+    - cron: "17 4 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A second pass would plan against a view the first is already changing.
+concurrency:
+  group: optimise-bazel-cache
+  cancel-in-progress: false
+
+jobs:
+  optimise:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      # Deleting the cache entries this pass replaces is the only thing that
+      # needs write.
+      actions: write
+    steps:
+      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@62772840a730860e7c211d60c037697e89bf2ab4
+        with:
+          github-token: ${{ github.token }}
+          min-runs: 1
+          dry-run: true
