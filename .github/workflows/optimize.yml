@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "17 4 * * 0"
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Plan the optimisation without deleting or replacing cache entries"
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -22,8 +27,8 @@ jobs:
       # needs write.
       actions: write
     steps:
-      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@7b8dbadf815d2f521a50e0b4babd6e988b5c1a0a
+      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@3dd59cffa9a5eb31c6828bda378aef387b9b4303
         with:
           github-token: ${{ github.token }}
           min-runs: 1
-          dry-run: true
+          dry-run: ${{ github.event_name != 'workflow_dispatch' || inputs.dry-run }}
