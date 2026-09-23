@@ -11,6 +11,11 @@ shape="$(realpath "$3")"
 # The test asserts against the same git build, and only this task can resolve its runfile.
 printf '%s' "$git_bin" >"${TEST_TMPDIR:-/tmp}/git-bin"
 
+# The dugite build is compiled with prefix `/`, so it only finds the subcommands that are
+# not builtins — `submodule` among them — once it is told where they live.
+GIT_EXEC_PATH="$(dirname "$git_bin")/../libexec/git-core"
+export GIT_EXEC_PATH
+
 # The dugite build ships its own config; ignore whatever the host has.
 export GIT_CONFIG_GLOBAL=/dev/null
 export GIT_CONFIG_SYSTEM=/dev/null

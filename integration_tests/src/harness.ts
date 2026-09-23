@@ -213,6 +213,15 @@ export async function closeAllEditors(page: Page): Promise<void> {
 }
 
 /**
+ * Text of the visible editor, with the rendered padding collapsed. Scoped to the editor
+ * part so the SCM input box, which is a code editor of its own, cannot match.
+ */
+export async function editorText(page: Page): Promise<string> {
+    const lines = page.locator(".part.editor .monaco-editor .view-lines").first();
+    return (await lines.innerText()).replaceAll(/\s+/gu, " ").trim();
+}
+
+/**
  * Text rendered on each side of the visible diff editor, with the rendered padding
  * collapsed. Both sides load asynchronously, so callers have to poll.
  */

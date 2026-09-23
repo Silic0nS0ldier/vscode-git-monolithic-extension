@@ -39,6 +39,11 @@ export async function shortCommit(rev: string): Promise<string> {
     return (await git("rev-parse", rev)).trim().slice(0, 8);
 }
 
+/** Full object name of a revision, resolved in `dir` relative to the workspace. */
+export async function commitIn(dir: string, rev: string): Promise<string> {
+    return (await git("-C", dir, "rev-parse", rev)).trim();
+}
+
 /**
  * Pushes a new commit onto `origin/main`'s tip with no relation to any local commit, so
  * `--cherry` sees a unique entry ahead of whatever it already reports as equivalent.

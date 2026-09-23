@@ -153,3 +153,11 @@ sites rewired, the code deleted, and the baseline suite that passed untouched.
 - `runCommand` in [harness.ts](../../../integration_tests/src/harness.ts) asserts exactly one
   palette row matches the label. The builtin git extension contributes identically-titled
   commands — drive ambiguous ones from the status bar instead.
+- The dugite git build is compiled with prefix `/`, so subcommands that are not builtins
+  (`submodule`, `rebase --interactive`, anything in `libexec/git-core`) only resolve once
+  `GIT_EXEC_PATH` is set. `workspace-fixture.sh` exports it; a fixture calling git any other
+  way has to as well.
+- `autoRepositoryDetection` defaults to scanning the first level of the workspace folder, so
+  any nested repository — a submodule included — opens as a second SCM provider and doubles
+  every resource row. A fixture that needs one provider commits a `.vscode/settings.json`
+  turning both that and `git_monolithic.detectSubmodules` off.

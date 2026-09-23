@@ -1,6 +1,7 @@
 import { size as objectSize } from "monolithic-git-interop/api/cat-file/size";
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
+import { staged as stagedDiff, unstaged as unstagedDiff } from "monolithic-git-interop/api/diff/path";
 import { branch as branchDetail } from "monolithic-git-interop/api/for-each-ref/branch";
 import { list as listRefs, type RefKind } from "monolithic-git-interop/api/for-each-ref/list";
 import { cherry } from "monolithic-git-interop/api/log/cherry";
@@ -45,7 +46,6 @@ import {
 import type { Commit } from "./git/Commit.js";
 import { GitError } from "./git/error.js";
 import { exec, type IExecutionResult } from "./git/exec.js";
-import { diffIndexWithHEAD, diffWithHEAD } from "./git/git-class/diff.js";
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
@@ -399,11 +399,11 @@ export class Repository {
     }
 
     async diffWithHEAD(path: string): Promise<string> {
-        return diffWithHEAD({ exec: this.exec.bind(this) }, path);
+        return unwrapOk(await unstagedDiff(this.#git._context, this.#repositoryRoot, path));
     }
 
     async diffIndexWithHEAD(path: string): Promise<string> {
-        return diffIndexWithHEAD({ exec: this.exec.bind(this) }, path);
+        return unwrapOk(await stagedDiff(this.#git._context, this.#repositoryRoot, path));
     }
 
     async getMergeBase(ref1: string, ref2: string): Promise<string> {
