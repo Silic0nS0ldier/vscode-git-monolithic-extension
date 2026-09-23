@@ -28,7 +28,7 @@ bazel_dep(name = "tar.bzl", version = "0.10.9")
 
 # Reached via `aspect_rules_js -> protobuf -> rules_apple`. Its autoconfigured toolchain is
 # registered transitively, which makes toolchain resolution fetch a repo that shells out looking
-# for `swiftc`. `patches` only apply to an exact version, hence the pin.
+# for `swiftc`.
 # See https://github.com/bazelbuild/rules_swift/pull/1815
 single_version_override(
     module_name = "rules_swift",
@@ -42,6 +42,16 @@ single_version_override(
     patch_strip = 1,
     patches = ["//:patches/aspect_rules_ts/3.10.1/0001_typescript_from_node_modules.patch"],
     version = "3.10.1",
+)
+
+# Its repo rules never returned `repo_metadata`, so Bazel could not put crane, regctl, cosign or
+# any pulled image into the repo contents cache.
+# See https://github.com/bazel-contrib/rules_oci/pull/901
+single_version_override(
+    module_name = "rules_oci",
+    patch_strip = 1,
+    patches = ["//:patches/rules_oci/2.3.0/0001_repo_contents_cache.patch"],
+    version = "2.3.0",
 )
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
