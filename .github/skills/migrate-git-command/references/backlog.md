@@ -3,8 +3,8 @@
 Derived from `extension/src/git.ts` as of 2026-08-15. **Re-derive if it looks wrong**: search
 `extension/src/` for `this.exec([` / `this.stream([`; each remaining call is a candidate.
 
-Scope is limited to SCM-UI-reachable commands. `blame`, `apply`, `merge-base`, `diffBlobs` and
-public `hashObject` are backlog. Stdin-driven commands (`commit --file -`,
+Scope is limited to SCM-UI-reachable commands. `blame`, `apply`, `merge-base` and public
+`hashObject` are backlog. Stdin-driven commands (`commit --file -`,
 `hash-object --stdin` + its `update-index --cacheinfo` pair, `check-ignore --stdin`) are
 excluded pending API design review.
 
@@ -14,17 +14,20 @@ Phase 0 enablers (`scm_itest` macro, typed `NonZeroExitDetails`, the `untrusted`
 and Phase 1 reads: `for-each-ref` list + branch, `show -s --format`, `stash list`,
 `config --get commit.template`, `log --oneline --cherry`, `rev-parse --show-cdup`.
 
-Phase 2 so far: `cat-file -s`, baselined by the `object` suite.
+Phase 2 so far: `cat-file -s`, baselined by the `object` suite. The unreachable half of the
+`diff` family (`diff [--cached]` with no path, `diff <ref>`, `diff <a>...<b>`, `diff <blob>
+<blob>`) plus the `--name-status -z --diff-filter=ADMR` parser was deleted rather than
+migrated — nothing called it.
 
 ## Phase 2 — object & diff reads
 
 Needs a `diff.test.ts` suite with a fixture producing real diffs.
 
-- the `diff` family in `extension/src/git/git-class/diff.ts` + `git.ts` `diff()`:
-  `--name-status -z --diff-filter=ADMR`, and `diff [--cached] [ref] -- <path>`
-  (`diffWithHEAD`, `diffWith`, `diffIndexWithHEAD`, `diffIndexWith`, `diffBetween`)
-  → `api/diff/*.ts`. Move the name-status parser and `Change`/`Status` mapping into the
-  package.
+- `diff -- <path>` and `diff --cached -- <path>` in
+  `extension/src/git/git-class/diff.ts` (`diffWithHEAD`, `diffIndexWithHEAD`)
+  → `api/diff/path.ts`. Reachable only through the submodule branch of
+  `extension/src/fileSystemProvider.ts` `readFile`, so the baseline fixture needs a parent
+  repo with a local path submodule and `git_monolithic.detectSubmodules` disabled.
 
 ## Phase 3 — index & worktree mutations
 

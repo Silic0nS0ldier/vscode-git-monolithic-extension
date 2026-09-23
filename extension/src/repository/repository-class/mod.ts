@@ -372,23 +372,8 @@ export function createRepository(
         deleteTag(name) {
             return run(Operation.DeleteTag, () => repository.deleteTag(name));
         },
-        diff(cached) {
-            return run(Operation.Diff, () => repository.diff(cached));
-        },
-        diffBetween(ref1, ref2, path) {
-            return run(Operation.Diff, () => repository.diffBetween(ref1, ref2, path));
-        },
-        diffBlobs(object1, object2) {
-            return run(Operation.Diff, () => repository.diffBlobs(object1, object2));
-        },
-        diffIndexWith(ref, path) {
-            return run(Operation.Diff, () => repository.diffIndexWith(ref, path));
-        },
         diffIndexWithHEAD(path) {
             return run(Operation.Diff, () => repository.diffIndexWithHEAD(path));
-        },
-        diffWith(ref, path) {
-            return repository.diffWith(ref, path);
         },
         diffWithHEAD(path) {
             return run(Operation.Diff, () => repository.diffWithHEAD(path));
