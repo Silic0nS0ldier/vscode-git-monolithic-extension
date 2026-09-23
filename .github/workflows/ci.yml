@@ -28,7 +28,7 @@ jobs:
           ref: ${{ github.head_ref }}
       - id: remote_cache
         continue-on-error: true
-        uses: silic0ns0ldier/bazel-github-actions-cache-v2@c89da8f22cc7e35503e8cf6f0cf41500d22bd78e
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@049d67a72e18dd89d61e9cc927af5f5d9c336f63
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
@@ -87,7 +87,7 @@ jobs:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - id: remote_cache
         continue-on-error: true
-        uses: silic0ns0ldier/bazel-github-actions-cache-v2@c89da8f22cc7e35503e8cf6f0cf41500d22bd78e
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@049d67a72e18dd89d61e9cc927af5f5d9c336f63
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
@@ -175,7 +175,7 @@ jobs:
       - uses: actions/checkout@v7
       - id: remote_cache
         continue-on-error: true
-        uses: silic0ns0ldier/bazel-github-actions-cache-v2@c89da8f22cc7e35503e8cf6f0cf41500d22bd78e
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@049d67a72e18dd89d61e9cc927af5f5d9c336f63
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
