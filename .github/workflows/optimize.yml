@@ -41,5 +41,6 @@ jobs:
           github-token: ${{ github.token }}
           min-runs: 1
           pack-size-mb: 32
+          max-new-mb: 4096
           reap-older-than-hours: ${{ github.event_name != 'workflow_dispatch' || inputs.reap-older-than-hours }}
           reap-unmanifested-packs: ${{ github.event_name != 'workflow_dispatch' || inputs.reap-unmanifested-packs }}
