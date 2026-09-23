@@ -14,20 +14,11 @@ Phase 0 enablers (`scm_itest` macro, typed `NonZeroExitDetails`, the `untrusted`
 and Phase 1 reads: `for-each-ref` list + branch, `show -s --format`, `stash list`,
 `config --get commit.template`, `log --oneline --cherry`, `rev-parse --show-cdup`.
 
-Phase 2 so far: `cat-file -s`, baselined by the `object` suite. The unreachable half of the
-`diff` family (`diff [--cached]` with no path, `diff <ref>`, `diff <a>...<b>`, `diff <blob>
-<blob>`) plus the `--name-status -z --diff-filter=ADMR` parser was deleted rather than
-migrated — nothing called it.
-
-## Phase 2 — object & diff reads
-
-Needs a `diff.test.ts` suite with a fixture producing real diffs.
-
-- `diff -- <path>` and `diff --cached -- <path>` in
-  `extension/src/git/git-class/diff.ts` (`diffWithHEAD`, `diffIndexWithHEAD`)
-  → `api/diff/path.ts`. Reachable only through the submodule branch of
-  `extension/src/fileSystemProvider.ts` `readFile`, so the baseline fixture needs a parent
-  repo with a local path submodule and `git_monolithic.detectSubmodules` disabled.
+Phase 2 is complete: `cat-file -s`, baselined by the `object` suite, and
+`diff [--cached] -- <path>` → `api/diff/path.ts`, baselined by the `diff` suite. The
+unreachable half of the `diff` family (`diff [--cached]` with no path, `diff <ref>`,
+`diff <a>...<b>`, `diff <blob> <blob>`) plus the `--name-status -z --diff-filter=ADMR`
+parser was deleted rather than migrated — nothing called it.
 
 ## Phase 3 — index & worktree mutations
 
