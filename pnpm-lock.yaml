@@ -210,7 +210,7 @@ importers:
         specifier: npm:typescript@^7.0.2
         version: typescript@7.0.2
       renovate:
-        specifier: ^44.101.3
+        specifier: ^44.103.3
         version: 44.103.6(supports-color@7.2.0)(typanion@3.14.0)
 
   build_defs/rollup_bundle:
