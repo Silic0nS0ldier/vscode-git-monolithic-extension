@@ -77,18 +77,6 @@ export const Status: Record<StatusOptions, StatusOptions> = {
     UNTRACKED: "UNTRACKED",
 };
 
-export interface Change {
-    /**
-     * Returns either `originalUri` or `renameUri`, depending
-     * on whether this change is a rename change. When
-     * in doubt always use `uri` over the other two alternatives.
-     */
-    readonly uri: Uri;
-    readonly originalUri: Uri;
-    readonly renameUri: Uri | undefined;
-    readonly status: StatusOptions;
-}
-
 /**
  * Log options.
  */

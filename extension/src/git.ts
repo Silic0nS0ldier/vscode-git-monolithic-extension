@@ -32,7 +32,6 @@ import type { OutputChannel, Progress } from "vscode";
 import {
     type Branch,
     type BranchQuery,
-    type Change,
     type CommitOptions,
     ForcePushMode,
     type ForcePushModeOptions,
@@ -46,7 +45,7 @@ import {
 import type { Commit } from "./git/Commit.js";
 import { GitError } from "./git/error.js";
 import { exec, type IExecutionResult } from "./git/exec.js";
-import { diffBetween, diffIndexWith, diffIndexWithHEAD, diffWith, diffWithHEAD } from "./git/git-class/diff.js";
+import { diffIndexWithHEAD, diffWithHEAD } from "./git/git-class/diff.js";
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
@@ -399,90 +398,12 @@ export class Repository {
         }
     }
 
-    async diff(cached = false): Promise<string> {
-        const args = ["diff"];
-
-        if (cached) {
-            args.push("--cached");
-        }
-
-        const result = await this.exec(args);
-        return result.stdout;
+    async diffWithHEAD(path: string): Promise<string> {
+        return diffWithHEAD({ exec: this.exec.bind(this) }, path);
     }
 
-    diffWithHEAD(): Promise<Change[]>;
-    diffWithHEAD(path: string): Promise<string>;
-    diffWithHEAD(path?: string | undefined): Promise<string | Change[]>;
-    async diffWithHEAD(path?: string | undefined): Promise<string | Change[]> {
-        return diffWithHEAD(
-            {
-                exec: this.exec.bind(this),
-                repositoryRoot: this.#repositoryRoot,
-            },
-            path,
-        );
-    }
-
-    diffWith(ref: string): Promise<Change[]>;
-    diffWith(ref: string, path: string): Promise<string>;
-    diffWith(ref: string, path?: string | undefined): Promise<string | Change[]>;
-    async diffWith(ref: string, path?: string): Promise<string | Change[]> {
-        return diffWith(
-            {
-                exec: this.exec.bind(this),
-                repositoryRoot: this.#repositoryRoot,
-            },
-            ref,
-            path,
-        );
-    }
-
-    diffIndexWithHEAD(): Promise<Change[]>;
-    diffIndexWithHEAD(path: string): Promise<string>;
-    diffIndexWithHEAD(path?: string | undefined): Promise<string | Change[]>;
-    async diffIndexWithHEAD(path?: string): Promise<string | Change[]> {
-        return diffIndexWithHEAD(
-            {
-                exec: this.exec.bind(this),
-                repositoryRoot: this.#repositoryRoot,
-            },
-            path,
-        );
-    }
-
-    diffIndexWith(ref: string): Promise<Change[]>;
-    diffIndexWith(ref: string, path: string): Promise<string>;
-    diffIndexWith(ref: string, path?: string | undefined): Promise<string | Change[]>;
-    async diffIndexWith(ref: string, path?: string): Promise<string | Change[]> {
-        return diffIndexWith(
-            {
-                exec: this.exec.bind(this),
-                repositoryRoot: this.#repositoryRoot,
-            },
-            ref,
-            path,
-        );
-    }
-
-    async diffBlobs(object1: string, object2: string): Promise<string> {
-        const args = ["diff", object1, object2];
-        const result = await this.exec(args);
-        return result.stdout;
-    }
-
-    diffBetween(ref1: string, ref2: string, path?: undefined): Promise<Change[]>;
-    diffBetween(ref1: string, ref2: string, path: string): Promise<string>;
-    diffBetween(ref1: string, ref2: string, path?: string | undefined): Promise<string | Change[]>;
-    async diffBetween(ref1: string, ref2: string, path?: string): Promise<string | Change[]> {
-        return diffBetween(
-            {
-                exec: this.exec.bind(this),
-                repositoryRoot: this.#repositoryRoot,
-            },
-            ref1,
-            ref2,
-            path,
-        );
+    async diffIndexWithHEAD(path: string): Promise<string> {
+        return diffIndexWithHEAD({ exec: this.exec.bind(this) }, path);
     }
 
     async getMergeBase(ref1: string, ref2: string): Promise<string> {
