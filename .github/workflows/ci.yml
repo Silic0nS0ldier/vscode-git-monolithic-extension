@@ -28,13 +28,15 @@ jobs:
           ref: ${{ github.head_ref }}
       - id: remote_cache
         continue-on-error: true
-        uses: silic0ns0ldier/bazel-github-actions-cache-v2@3deb60125f300e4f64b73775659d2b1b60e8f2e5
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@f54c905ace82e71cdb82d467da8cdebe3fa70c91
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
           backend-timeout-seconds: 120
           storage-mode: packs
           # `fail-on-cache-error` is deliberately left off, this is PR only which does not upload.
+          asset-header-routes: |
+            https://ghcr.io/v2/*
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -47,6 +49,7 @@ jobs:
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --experimental_remote_downloader_local_fallback
+            common --experimental_remote_downloader_propagate_credentials
             mod --profile=${{ runner.temp }}/mod.profile.gz
             mod --noslim_profile
           cache-save: false
@@ -87,7 +90,7 @@ jobs:
           ref: ${{ needs.renovate_tasks.outputs.commit_hash || github.head_ref }}
       - id: remote_cache
         continue-on-error: true
-        uses: silic0ns0ldier/bazel-github-actions-cache-v2@3deb60125f300e4f64b73775659d2b1b60e8f2e5
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@f54c905ace82e71cdb82d467da8cdebe3fa70c91
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
@@ -97,6 +100,8 @@ jobs:
           # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
           # the runner rather than the build. Fail the request instead.
           fail-on-cache-error: "true"
+          asset-header-routes: |
+            https://ghcr.io/v2/*
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -112,6 +117,7 @@ jobs:
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --experimental_remote_downloader_local_fallback
+            common --experimental_remote_downloader_propagate_credentials
             build --profile=${{ runner.temp }}/build.profile.gz
             test --profile=${{ runner.temp }}/test.profile.gz
             build --experimental_profile_include_target_label
@@ -175,7 +181,7 @@ jobs:
       - uses: actions/checkout@v7
       - id: remote_cache
         continue-on-error: true
-        uses: silic0ns0ldier/bazel-github-actions-cache-v2@3deb60125f300e4f64b73775659d2b1b60e8f2e5
+        uses: silic0ns0ldier/bazel-github-actions-cache-v2@f54c905ace82e71cdb82d467da8cdebe3fa70c91
         with:
           pack-size-mb: 32
           # Applies to initial manifest discovery and individual operations thereafter.
@@ -185,6 +191,8 @@ jobs:
           # 10 GB cache quota is full) that staging grows unbounded and exhausts the disk, killing
           # the runner rather than the build. Fail the request instead.
           fail-on-cache-error: "true"
+          asset-header-routes: |
+            https://ghcr.io/v2/*
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           bazelrc: |
@@ -200,6 +208,7 @@ jobs:
             common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
             common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
             common --experimental_remote_downloader_local_fallback
+            common --experimental_remote_downloader_propagate_credentials
             run --profile=${{ runner.temp }}/run.profile.gz
             run --experimental_profile_include_target_label
             run --noslim_profile
