@@ -1,0 +1,41 @@
+Declare diff.bzl's repo rules reproducible so they can use the repo contents cache.
+
+Neither the integrity-pinned binary download nor the generated toolchain hub returns
+`repo_metadata`, so both are refetched on every CI runner.
+
+Not yet raised upstream; https://github.com/kormide/diff.bzl/pull/9 was closed unmerged.
+
+diff --git a/diff/private/toolchains_repo.bzl b/diff/private/toolchains_repo.bzl
+index f9e7fdb..1dc6fa6 100644
+--- a/diff/private/toolchains_repo.bzl
++++ b/diff/private/toolchains_repo.bzl
+@@ -71,6 +71,12 @@ toolchain(
+ 
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ toolchains_repo = repository_rule(
+     _toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms
+diff --git a/diff/repositories.bzl b/diff/repositories.bzl
+index d738c4d..123f35d 100644
+--- a/diff/repositories.bzl
++++ b/diff/repositories.bzl
+@@ -42,6 +42,12 @@ diffutils_toolchain(
+ 
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ diffutils_repository = repository_rule(
+     _diffutils_repo_impl,
+     doc = "Fetch external tools needed for diffutils toolchain",

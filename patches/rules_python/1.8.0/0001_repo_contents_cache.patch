@@ -1,0 +1,61 @@
+Declare rules_python's generated hub repos reproducible so they can use the repo contents
+cache.
+
+Upstream marked the downloading rules (`python_repository`, `uv_repository`) reproducible but
+stopped short of the repos generated from them, which only write BUILD/bzl files derived
+from their own attributes: `rules_python_internal`, `pythons_hub` and `uv`. Still true on
+rules_python 2.x, so there is no version to bump to.
+
+Not yet raised upstream.
+
+diff --git a/python/private/internal_config_repo.bzl b/python/private/internal_config_repo.bzl
+index 9fc301c..2576552 100644
+--- a/python/private/internal_config_repo.bzl
++++ b/python/private/internal_config_repo.bzl
+@@ -150,7 +150,11 @@ def _internal_config_repo_impl(rctx):
+         _TRANSITION_SETTINGS_DEBUG_TEMPLATE.format(lines = "\n".join(debug_lines)),
+     )
+ 
+-    return None
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
+ 
+ internal_config_repo = repository_rule(
+     implementation = _internal_config_repo_impl,
+diff --git a/python/private/pythons_hub.bzl b/python/private/pythons_hub.bzl
+index cc25b4b..5804e26 100644
+--- a/python/private/pythons_hub.bzl
++++ b/python/private/pythons_hub.bzl
+@@ -131,6 +131,12 @@ def _hub_repo_impl(rctx):
+         executable = False,
+     )
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ hub_repo = repository_rule(
+     doc = """\
+ This private rule create a repo with a BUILD file that contains a map of interpreter names
+diff --git a/python/uv/private/uv_toolchains_repo.bzl b/python/uv/private/uv_toolchains_repo.bzl
+index 7e11e0a..049295c 100644
+--- a/python/uv/private/uv_toolchains_repo.bzl
++++ b/python/uv/private/uv_toolchains_repo.bzl
+@@ -46,6 +46,12 @@ def _toolchains_repo_impl(repository_ctx):
+     )
+     repository_ctx.file("BUILD.bazel", contents)
+ 
++    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
++    if not hasattr(repository_ctx, "repo_metadata"):
++        return None
++
++    return repository_ctx.repo_metadata(reproducible = True)
++
+ uv_toolchains_repo = repository_rule(
+     _toolchains_repo_impl,
+     doc = "Generates a toolchain hub repository",

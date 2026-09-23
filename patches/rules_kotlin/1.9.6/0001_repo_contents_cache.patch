@@ -1,0 +1,24 @@
+Declare the kotlin capabilities repo reproducible so it can use the repo contents cache.
+
+It only renders checked-in templates using its own attributes, so it is trivially
+reproducible.
+
+Not yet raised upstream.
+
+diff --git a/src/main/starlark/core/repositories/compiler.bzl b/src/main/starlark/core/repositories/compiler.bzl
+index 2c947c6..98cea15 100755
+--- a/src/main/starlark/core/repositories/compiler.bzl
++++ b/src/main/starlark/core/repositories/compiler.bzl
+@@ -41,6 +41,12 @@ def _kotlin_capabilities_impl(repository_ctx):
+         executable = False,
+     )
+ 
++    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
++    if not hasattr(repository_ctx, "repo_metadata"):
++        return None
++
++    return repository_ctx.repo_metadata(reproducible = True)
++
+ def _get_capability_template(compiler_version, templates):
+     for ver, template in zip(_CAPABILITIES_TEMPLATES.keys(), templates):
+         if compiler_version.startswith(ver):

@@ -1,0 +1,246 @@
+Declare aspect_bazel_lib's toolchain repo rules reproducible so they can use the repo
+contents cache.
+
+These 16 repo rules either download an integrity-pinned binary or write a generated BUILD
+file derived entirely from their own attributes, so both are reproducible. Without this,
+15 `aspect_bazel_lib++toolchains+*` repos are refetched on every CI runner and miss the
+remote repo contents cache.
+
+This is a backport of the equivalent change in bazel-lib v3.2.1
+(https://github.com/bazel-contrib/bazel-lib/pull/1267). v3 is published to the BCR under
+the new module name `bazel_lib`, but `aspect_rules_ts` and `rules_oci` still depend on
+`aspect_bazel_lib`, so adopting it would put both module trees in the graph rather than
+replace this one. Drop this patch once those migrate.
+
+diff -ruN '--exclude=e2e' bazel_lib.orig/lib/private/copy_directory_toolchain.bzl bazel_lib/lib/private/copy_directory_toolchain.bzl
+--- a/lib/private/copy_directory_toolchain.bzl
++++ b/lib/private/copy_directory_toolchain.bzl
+@@ -149,6 +149,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ copy_directory_toolchains_repo = repository_rule(
+     _copy_directory_toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms
+@@ -185,6 +191,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ copy_directory_platform_repo = repository_rule(
+     implementation = _copy_directory_platform_repo_impl,
+     doc = "Fetch external tools needed for copy_directory toolchain",
+diff -ruN '--exclude=e2e' bazel_lib.orig/lib/private/copy_to_directory_toolchain.bzl bazel_lib/lib/private/copy_to_directory_toolchain.bzl
+--- a/lib/private/copy_to_directory_toolchain.bzl
++++ b/lib/private/copy_to_directory_toolchain.bzl
+@@ -149,6 +149,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ copy_to_directory_toolchains_repo = repository_rule(
+     _copy_to_directory_toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms
+@@ -185,6 +191,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ copy_to_directory_platform_repo = repository_rule(
+     implementation = _copy_to_directory_platform_repo_impl,
+     doc = "Fetch external tools needed for copy_to_directory toolchain",
+diff -ruN '--exclude=e2e' bazel_lib.orig/lib/private/coreutils_toolchain.bzl bazel_lib/lib/private/coreutils_toolchain.bzl
+--- a/lib/private/coreutils_toolchain.bzl
++++ b/lib/private/coreutils_toolchain.bzl
+@@ -218,6 +218,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ coreutils_toolchains_repo = repository_rule(
+     _coreutils_toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms
+@@ -252,6 +258,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ coreutils_platform_repo = repository_rule(
+     implementation = _coreutils_platform_repo_impl,
+     doc = "Fetch external tools needed for coreutils toolchain",
+diff -ruN '--exclude=e2e' bazel_lib.orig/lib/private/expand_template_toolchain.bzl bazel_lib/lib/private/expand_template_toolchain.bzl
+--- a/lib/private/expand_template_toolchain.bzl
++++ b/lib/private/expand_template_toolchain.bzl
+@@ -149,6 +149,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ expand_template_toolchains_repo = repository_rule(
+     _expand_template_toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms
+@@ -185,6 +191,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ expand_template_platform_repo = repository_rule(
+     implementation = _expand_template_platform_repo_impl,
+     doc = "Fetch external tools needed for expand_template toolchain",
+diff -ruN '--exclude=e2e' bazel_lib.orig/lib/private/jq_toolchain.bzl bazel_lib/lib/private/jq_toolchain.bzl
+--- a/lib/private/jq_toolchain.bzl
++++ b/lib/private/jq_toolchain.bzl
+@@ -154,6 +154,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ jq_toolchains_repo = repository_rule(
+     _jq_toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms
+@@ -189,6 +195,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ jq_platform_repo = repository_rule(
+     implementation = _jq_platform_repo_impl,
+     doc = "Fetch external tools needed for jq toolchain",
+diff -ruN '--exclude=e2e' bazel_lib.orig/lib/private/tar_toolchain.bzl bazel_lib/lib/private/tar_toolchain.bzl
+--- a/lib/private/tar_toolchain.bzl
++++ b/lib/private/tar_toolchain.bzl
+@@ -88,6 +88,12 @@
+ tar_toolchain(name = "bsdtar_toolchain", binary = "{}")
+ """.format(binary))
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ bsdtar_binary_repo = repository_rule(
+     implementation = _bsdtar_binary_repo,
+     attrs = {
+@@ -197,6 +203,12 @@
+ 
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ tar_toolchains_repo = repository_rule(
+     _tar_toolchains_repo_impl,
+     doc = """Creates a repository that exposes a tar_toolchain_type target.""",
+diff -ruN '--exclude=e2e' bazel_lib.orig/lib/private/yq_toolchain.bzl bazel_lib/lib/private/yq_toolchain.bzl
+--- a/lib/private/yq_toolchain.bzl
++++ b/lib/private/yq_toolchain.bzl
+@@ -436,6 +436,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ yq_toolchains_repo = repository_rule(
+     _yq_toolchains_repo_impl,
+     doc = """Creates a repository with toolchain definitions for all known platforms
+@@ -472,6 +478,12 @@
+     # Base BUILD file for this repository
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ yq_platform_repo = repository_rule(
+     implementation = _yq_platform_repo_impl,
+     doc = "Fetch external tools needed for yq toolchain",
+diff -ruN '--exclude=e2e' bazel_lib.orig/lib/private/zstd_toolchain.bzl bazel_lib/lib/private/zstd_toolchain.bzl
+--- a/lib/private/zstd_toolchain.bzl
++++ b/lib/private/zstd_toolchain.bzl
+@@ -80,6 +80,12 @@
+ zstd_toolchain(name = "zstd_toolchain", binary = "{}")
+ """.format(binary))
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ zstd_binary_repo = repository_rule(
+     implementation = _zstd_binary_repo,
+     attrs = {
+@@ -180,6 +186,12 @@
+ 
+     rctx.file("BUILD.bazel", build_content)
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ zstd_toolchains_repo = repository_rule(
+     _zstd_toolchains_repo_impl,
+     doc = """Creates a repository that exposes a zstd_toolchain_type zstdget.""",
