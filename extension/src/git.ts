@@ -2,6 +2,7 @@ import { size as objectSize } from "monolithic-git-interop/api/cat-file/size";
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
 import { staged as stagedDiff, unstaged as unstagedDiff } from "monolithic-git-interop/api/diff/path";
+import { fetch as gitFetch } from "monolithic-git-interop/api/fetch/mod";
 import { branch as branchDetail } from "monolithic-git-interop/api/for-each-ref/branch";
 import { list as listRefs, type RefKind } from "monolithic-git-interop/api/for-each-ref/list";
 import { cherry } from "monolithic-git-interop/api/log/cherry";
@@ -44,8 +45,9 @@ import {
     type Remote,
 } from "./api/git.js";
 import type { Commit } from "./git/Commit.js";
-import { GitError } from "./git/error.js";
+import { getGitErrorCode, GitError } from "./git/error.js";
 import { exec, type IExecutionResult } from "./git/exec.js";
+import { cliEnv } from "./git/git-class/cli-env.js";
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
@@ -114,6 +116,11 @@ export class Git {
     readonly _context: GitContext;
     readonly #services: AllServices;
     #env: { [key: string]: string };
+
+    /** Extension-owned environment additions, chiefly the askpass wiring. */
+    get env(): { readonly [key: string]: string } {
+        return this.#env;
+    }
 
     #onOutputEmitter = new EventEmitter();
     get onOutput(): EventEmitter {
@@ -773,45 +780,52 @@ export class Repository {
             readonly abortSignal?: AbortSignal;
         } = {},
     ): Promise<void> {
-        const args = ["fetch"];
-        const spawnOptions: SpawnOptions = {
-            abortSignal: options.abortSignal,
-            env: { "GIT_HTTP_USER_AGENT": this.git.userAgent },
-        };
+        const target = options.remote
+            ? { ref: options.ref, remote: options.remote }
+            : options.all
+            ? { all: true as const }
+            : {};
 
-        if (options.remote) {
-            args.push(options.remote);
+        const result = await gitFetch(this.#git._context, this.#repositoryRoot, {
+            ...target,
+            depth: options.depth,
+            // `askpass-main` pairs this with `VSCODE_GIT_COMMAND` to stay quiet during autofetch.
+            env: cliEnv(this.git.env, "fetch", options.silent ? { VSCODE_GIT_FETCH_SILENT: "true" } : {}),
+            prune: options.prune,
+            signal: options.abortSignal,
+            userAgent: this.git.userAgent,
+        });
 
-            if (options.ref) {
-                args.push(options.ref);
-            }
-        } else if (options.all) {
-            args.push("--all");
+        if (isOk(result)) {
+            return;
         }
 
-        if (options.prune) {
-            args.push("--prune");
+        const error = unwrap(result);
+
+        if (error.type !== gitErrors.ERROR_NON_ZERO_EXIT) {
+            throw error.type === gitErrors.ERROR_CANCELLED
+                ? new GitError({ message: "Cancelled" })
+                : error._error;
         }
 
-        if (typeof options.depth === "number") {
-            args.push(`--depth=${options.depth}`);
+        const { args, exitCode, stderr, stdout } = error.cause;
+        let gitErrorCode = getGitErrorCode(stderr);
+
+        if (/No remote repository specified\./.test(stderr)) {
+            gitErrorCode = GitErrorCodes.NoRemoteRepositorySpecified;
+        } else if (/Could not read from remote repository/.test(stderr)) {
+            gitErrorCode = GitErrorCodes.RemoteConnectionError;
         }
 
-        if (options.silent) {
-            spawnOptions.env!["VSCODE_GIT_FETCH_SILENT"] = "true";
-        }
-
-        try {
-            await this.exec(args, spawnOptions);
-        } catch (err) {
-            if (err instanceof GitError && /No remote repository specified\./.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.NoRemoteRepositorySpecified;
-            } else if (err instanceof GitError && /Could not read from remote repository/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.RemoteConnectionError;
-            }
-
-            throw err;
-        }
+        throw new GitError({
+            exitCode: exitCode ?? undefined,
+            gitArgs: [...args],
+            gitCommand: "fetch",
+            gitErrorCode,
+            message: "Failed to execute git",
+            stderr,
+            stdout,
+        });
     }
 
     async pull(rebase?: boolean, remote?: string, branch?: string, options: PullOptions = {}): Promise<void> {
