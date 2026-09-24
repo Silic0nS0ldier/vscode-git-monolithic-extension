@@ -390,6 +390,10 @@ export function createRepository(
         fetchAll: throat(1, () => fetchImpl(repoRoot, run, repository, { all: true })),
         fetchDefault: throat(1, (options = {}) => fetchImpl(repoRoot, run, repository, { silent: options.silent })),
         fetchPrune: throat(1, () => fetchImpl(repoRoot, run, repository, { prune: true })),
+        fetchUpstreams: throat(
+            1,
+            (scope, options = {}) => run(Operation.Fetch, () => repository.fetchUpstreams(scope, options)),
+        ),
         findTrackingBranches(upstreamRef) {
             return run(Operation.FindTrackingBranches, () => repository.findTrackingBranches(upstreamRef));
         },

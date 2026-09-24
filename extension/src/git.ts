@@ -52,6 +52,7 @@ import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
+import { upstreamFetchTargets, type UpstreamScope } from "./git/repository-class/fetch-targets.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
@@ -773,6 +774,8 @@ export class Repository {
         options: {
             remote?: string;
             ref?: string;
+            refs?: readonly string[];
+            skipMissingRefs?: boolean;
             all?: boolean;
             prune?: boolean;
             depth?: number;
@@ -781,7 +784,11 @@ export class Repository {
         } = {},
     ): Promise<void> {
         const target = options.remote
-            ? { refs: options.ref ? [options.ref] : undefined, remote: options.remote }
+            ? {
+                refs: options.refs ?? (options.ref ? [options.ref] : undefined),
+                remote: options.remote,
+                skipMissingRefs: options.skipMissingRefs,
+            }
             : options.all
             ? { all: true as const }
             : {};
@@ -826,6 +833,15 @@ export class Repository {
             stderr,
             stdout,
         });
+    }
+
+    /** Fetches only the upstream branches `scope` covers, one remote at a time. */
+    async fetchUpstreams(scope: UpstreamScope, options: { silent?: boolean } = {}): Promise<void> {
+        const targets = await upstreamFetchTargets(this.#git._context, this.#repositoryRoot, scope);
+
+        for (const [remote, refs] of targets) {
+            await this.fetch({ refs: [...refs], remote, silent: options.silent, skipMissingRefs: true });
+        }
     }
 
     async pull(rebase?: boolean, remote?: string, branch?: string, options: PullOptions = {}): Promise<void> {
