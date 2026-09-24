@@ -51,6 +51,12 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
             lib,
         ],
         entry_point = entry_point,
+        node_options = [
+            "--test-reporter=spec",
+            "--test-reporter-destination=stdout",
+            "--test-reporter=junit",
+            "--test-reporter-destination=$${XML_OUTPUT_FILE}",
+        ],
         tags = ["manual"],
         target_compatible_with = LINUX_ONLY,
     )
@@ -73,9 +79,6 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         tags = [
             # chromium image extraction heavily saturates disk I/O, so we reserve 100% of bandwidth.
             # TODO Reduce overhead by enabling FUSE rootfs backend.
-            # NOTE `resources:*` affect built actions (e.g. `test.xml` generation), this is being
-            #      fixed in https://github.com/bazelbuild/bazel/pull/30747
-            # TODO Self-generate `test.xml` to avoid builtin action.
             "resources:disk_io:50",
         ],
     )
