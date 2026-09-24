@@ -114,6 +114,41 @@ service_test(
     test = "@rules_itest//:exit0",
 )
 
+# The editor opens the suite's workspace from the page URL, so only workspace trust varies.
+[
+    [
+        itest_service(
+            name = prefix + "code_server_service",
+            args = [
+                "$(rootpath :code_server_binary)",
+                "$(rootpath //extension/vsix:git_monolithic)",
+                "$${PORT}",
+                trust,
+            ],
+            autoassign_port = True,
+            data = [
+                ":code_server_binary",
+                "//extension/vsix:git_monolithic",
+            ],
+            exe = ":code_server",
+            expected_start_duration = "5s",
+            http_health_check_address = "http://127.0.0.1:$${PORT}/healthz",
+            hygienic = False,
+            target_compatible_with = LINUX_ONLY,
+        ),
+        service_test(
+            name = prefix + "code_server_service_hygiene_test",
+            size = "small",
+            services = [":" + prefix + "code_server_service"],
+            test = "@rules_itest//:exit0",
+        ),
+    ]
+    for (prefix, trust) in [
+        ("", "trusted"),
+        ("untrusted_", "untrusted"),
+    ]
+]
+
 ts_config(
     name = "tsconfig",
     src = "tsconfig.json",

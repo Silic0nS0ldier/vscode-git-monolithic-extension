@@ -2,7 +2,7 @@
 """
 
 load("@aspect_rules_js//js:defs.bzl", "js_test")
-load("@rules_itest//:itest.bzl", "itest_service", "itest_task", "service_test")
+load("@rules_itest//:itest.bzl", "itest_task", "service_test")
 load("//build_defs/lint:linters.bzl", "eslint_test")
 
 # The services bind to the host loopback (`runc_binary` containers share the host network
@@ -44,34 +44,6 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         test = "@rules_itest//:exit0",
     )
 
-    itest_service(
-        name = name + "_code_server_service",
-        args = [
-            "$(rootpath :code_server_binary)",
-            "$(rootpath //extension/vsix:git_monolithic)",
-            "$${PORT}",
-            "untrusted" if untrusted else "trusted",
-        ],
-        autoassign_port = True,
-        data = [
-            ":code_server_binary",
-            "//extension/vsix:git_monolithic",
-        ],
-        expected_start_duration = "5s",
-        exe = ":code_server",
-        http_health_check_address = "http://127.0.0.1:$${PORT}/healthz",
-        target_compatible_with = LINUX_ONLY,
-        deps = [":" + name + "_fixture_task"],
-        hygienic = False,
-    )
-
-    service_test(
-        name = name + "_code_server_service_hygiene_test",
-        size = "small",
-        services = [":" + name + "_code_server_service"],
-        test = "@rules_itest//:exit0",
-    )
-
     js_test(
         name = name + "_test_bin",
         data = [
@@ -92,7 +64,8 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         },
         services = [
             ":browserless_chromium_service",
-            ":" + name + "_code_server_service",
+            ":untrusted_code_server_service" if untrusted else ":code_server_service",
+            ":" + name + "_fixture_task",
         ],
         target_compatible_with = LINUX_ONLY,
         test = ":" + name + "_test_bin",
