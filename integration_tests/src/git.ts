@@ -16,8 +16,14 @@ async function gitBin(): Promise<string> {
 
 async function git(...args: string[]): Promise<string> {
     const { stdout } = await execFileAsync(await gitBin(), ["-C", workspaceDir(), ...args], {
-        // The dugite build ships its own config; ignore whatever the host has.
-        env: { ...process.env, GIT_CONFIG_GLOBAL: "/dev/null", GIT_CONFIG_SYSTEM: "/dev/null" },
+        env: {
+            ...process.env,
+            // The dugite build ships its own config; ignore whatever the host has.
+            GIT_CONFIG_GLOBAL: "/dev/null",
+            GIT_CONFIG_SYSTEM: "/dev/null",
+            // Polling `git status` would otherwise take `index.lock` out from under the extension.
+            GIT_OPTIONAL_LOCKS: "0",
+        },
     });
     return stdout;
 }
