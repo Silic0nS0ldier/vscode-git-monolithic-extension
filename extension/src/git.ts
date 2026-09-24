@@ -1,3 +1,4 @@
+import { add as gitAdd } from "monolithic-git-interop/api/add/mod";
 import { size as objectSize } from "monolithic-git-interop/api/cat-file/size";
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
@@ -429,21 +430,31 @@ export class Repository {
     }
 
     async add(paths: string[], opts?: { update?: boolean }): Promise<void> {
-        const args = ["add"];
+        const result = await gitAdd(this.#git._context, this.#repositoryRoot, paths, {
+            env: cliEnv(this.git.env, "add"),
+            update: opts?.update,
+        });
 
-        if (opts && opts.update) {
-            args.push("-u");
-        } else {
-            args.push("-A");
+        if (isOk(result)) {
+            return;
         }
 
-        if (paths && paths.length) {
-            for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
-                await this.exec([...args, "--", ...chunk]);
-            }
-        } else {
-            await this.exec([...args, "--", "."]);
+        const error = unwrap(result);
+
+        if (error.type !== gitErrors.ERROR_NON_ZERO_EXIT) {
+            throw error._error;
         }
+
+        const { args, exitCode, stderr, stdout } = error.cause;
+        throw new GitError({
+            exitCode: exitCode ?? undefined,
+            gitArgs: [...args],
+            gitCommand: "add",
+            gitErrorCode: getGitErrorCode(stderr),
+            message: "Failed to execute git",
+            stderr,
+            stdout,
+        });
     }
 
     async rm(paths: string[]): Promise<void> {

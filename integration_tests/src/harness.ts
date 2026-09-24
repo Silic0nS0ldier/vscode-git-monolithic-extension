@@ -269,17 +269,33 @@ export async function scmInputText(view: Locator): Promise<string> {
     return (await input.locator(".view-lines").innerText()).replaceAll(/\s+/gu, " ").trim();
 }
 
-/** The count badge on the header row of an SCM resource group, e.g. `Staged`. */
-export function groupCount(view: Locator, group: string): Locator {
+/** The header row of an SCM resource group, e.g. `Staged`. */
+function groupRow(view: Locator, group: string): Locator {
     // The header keeps the group name when populated and reads `Staged (empty)` otherwise.
     const name = new RegExp(`^${group}\\b`, "u");
     return view.locator(".monaco-list-row")
-        .filter({ has: view.page().locator(".resource-group .name").filter({ hasText: name }) })
-        .locator(".monaco-count-badge");
+        .filter({ has: view.page().locator(".resource-group .name").filter({ hasText: name }) });
+}
+
+/** The count badge on the header row of an SCM resource group, e.g. `Staged`. */
+export function groupCount(view: Locator, group: string): Locator {
+    return groupRow(view, group).locator(".monaco-count-badge");
+}
+
+/** A modal dialog, e.g. from `window.showErrorMessage(..., { modal: true })`. */
+export function modalDialog(page: Page): Locator {
+    return page.locator(".monaco-dialog-box");
 }
 
 export async function invokeRowAction(view: Locator, fileName: string, action: string): Promise<void> {
-    const row = resourceRow(view, fileName);
+    await clickHoverAction(resourceRow(view, fileName), action);
+}
+
+export async function invokeGroupAction(view: Locator, group: string, action: string): Promise<void> {
+    await clickHoverAction(groupRow(view, group), action);
+}
+
+async function clickHoverAction(row: Locator, action: string): Promise<void> {
     const button = row.getByRole("button", { name: action });
 
     // Row actions only render while the row is hovered, and acting on one resource
