@@ -40,6 +40,7 @@ async function repoWithRemotes() {
         return {
             ahead,
             head,
+            origin,
             path: repo.path,
             async [Symbol.asyncDispose]() {
                 await fs.rm(origin, { force: true, recursive: true });
@@ -100,7 +101,7 @@ test(fetch.name + " - contacts every remote when asked", async () => {
 test(fetch.name + " - fetches a single ref from a named remote", async () => {
     await using repo = await repoWithRemotes();
 
-    unwrapOk(await fetch(gitCtx, repo.path, { ref: "main", remote: "secondary" }));
+    unwrapOk(await fetch(gitCtx, repo.path, { refs: ["main"], remote: "secondary" }));
 
     assert.strictEqual(await read(repo.path, ["rev-parse", "refs/remotes/origin/main"]), repo.head);
     assert.strictEqual(await read(repo.path, ["rev-parse", "FETCH_HEAD"]), repo.head);
@@ -109,9 +110,49 @@ test(fetch.name + " - fetches a single ref from a named remote", async () => {
 test(fetch.name + " - truncates history to the requested depth", async () => {
     await using repo = await repoWithRemotes();
 
-    unwrapOk(await fetch(gitCtx, repo.path, { depth: 1, ref: "main", remote: "origin" }));
+    unwrapOk(await fetch(gitCtx, repo.path, { depth: 1, refs: ["main"], remote: "origin" }));
 
     await fs.access(path.join(repo.path, ".git", "shallow"));
+});
+
+test(fetch.name + " - updates the tracking refs of only the listed refs", async () => {
+    await using repo = await repoWithRemotes();
+    await run(repo.origin, ["branch", "extra", "main"]);
+
+    unwrapOk(await fetch(gitCtx, repo.path, { refs: ["refs/heads/main"], remote: "origin" }));
+
+    assert.strictEqual(await read(repo.path, ["rev-parse", "refs/remotes/origin/main"]), repo.ahead);
+    const result = await gitCtx.cli({ cwd: repo.path }, ["rev-parse", "--verify", "refs/remotes/origin/extra"]);
+    assert.ok(isErr(result), "extra was not listed, so should not have been fetched");
+});
+
+test(fetch.name + " - fetches the listed refs the remote still has, when asked to skip the rest", async () => {
+    await using repo = await repoWithRemotes();
+
+    unwrapOk(
+        await fetch(gitCtx, repo.path, {
+            refs: ["refs/heads/retired", "refs/heads/main"],
+            remote: "origin",
+            skipMissingRefs: true,
+        }),
+    );
+
+    assert.strictEqual(await read(repo.path, ["rev-parse", "refs/remotes/origin/main"]), repo.ahead);
+});
+
+test(fetch.name + " - reports a listed ref the remote no longer has", async () => {
+    await using repo = await repoWithRemotes();
+
+    const result = await fetch(gitCtx, repo.path, { refs: ["refs/heads/retired"], remote: "origin" });
+
+    if (!isErr(result)) {
+        assert.fail("fetching a missing ref should fail");
+    }
+    const error = unwrap(result);
+    if (error.type !== ERROR_NON_ZERO_EXIT) {
+        assert.fail(`expected a non-zero exit, got ${String(error.type)}`);
+    }
+    assert.match(error.cause.stderr, /couldn't find remote ref refs\/heads\/retired/u);
 });
 
 test(fetch.name + " - reports the failure when the remote cannot be read", async () => {
