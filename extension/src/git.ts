@@ -781,7 +781,7 @@ export class Repository {
         } = {},
     ): Promise<void> {
         const target = options.remote
-            ? { ref: options.ref, remote: options.remote }
+            ? { refs: options.ref ? [options.ref] : undefined, remote: options.remote }
             : options.all
             ? { all: true as const }
             : {};
