@@ -31,8 +31,10 @@ fi
 
 # The extension under test is opt-in: it stays dormant while VS Code's builtin git
 # extension is enabled, so without this the test would drive the builtin instead.
+# Disabling AI features keeps the workbench from spawning an agent host process.
 cat >"$state/user/User/settings.json" <<JSON
 {
+    "chat.disableAIFeatures": true,
     "git.enabled": false,
     "git_monolithic.enabled": true,
     "workbench.startupEditor": "none",
