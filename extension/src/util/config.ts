@@ -121,7 +121,7 @@ export const branchSortOrder = createConfigOption<"alphabetically" | "committerd
     "committerdate",
 );
 export const ignoreSubmodules = createConfigOption<boolean>("ignoreSubmodules", false);
-export const autoFetch = createConfigOption<boolean | "all">("autofetch", false);
+export const autoFetch = createConfigOption<boolean | "all" | "tracked" | "mainAndCurrent">("autofetch", false);
 export const autoFetchPeriod = createConfigOption<number>("autofetchPeriod", 3 /** minutes */ * 60);
 export const path = createConfigOption<string | string[] | null>("path", null);
 export const showPushSuccessNotification = createConfigOption<boolean>("showPushSuccessNotification", false);

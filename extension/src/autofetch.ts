@@ -12,6 +12,7 @@ import {
 } from "vscode";
 import { GitErrorCodes } from "./api/git.js";
 import { GitError } from "./git/error.js";
+import type { UpstreamScope } from "./git/repository-class/fetch-targets.js";
 import * as i18n from "./i18n/mod.js";
 import { Operation, type OperationOptions } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
@@ -30,7 +31,7 @@ export class AutoFetcher {
     #onDidChange = this.#onDidChangeEmitter.event;
 
     #enabled: boolean = false;
-    #fetchAll: boolean = false;
+    #scope: "default" | "all" | UpstreamScope = "default";
     get enabled(): boolean {
         return this.#enabled;
     }
@@ -99,16 +100,24 @@ export class AutoFetcher {
 
         switch (config.autoFetch(Uri.file(this.#repository.root))) {
             case true:
-                this.#fetchAll = false;
+                this.#scope = "default";
                 this.enable();
                 break;
             case "all":
-                this.#fetchAll = true;
+                this.#scope = "all";
+                this.enable();
+                break;
+            case "tracked":
+                this.#scope = "tracked";
+                this.enable();
+                break;
+            case "mainAndCurrent":
+                this.#scope = "mainAndCurrent";
                 this.enable();
                 break;
             case false:
             default:
-                this.#fetchAll = false;
+                this.#scope = "default";
                 this.disable();
                 break;
         }
@@ -136,10 +145,12 @@ export class AutoFetcher {
             }
 
             try {
-                if (this.#fetchAll) {
+                if (this.#scope === "all") {
                     await this.#repository.fetchAll();
-                } else {
+                } else if (this.#scope === "default") {
                     await this.#repository.fetchDefault({ silent: true });
+                } else {
+                    await this.#repository.fetchUpstreams(this.#scope, { silent: true });
                 }
             } catch (err) {
                 if (err instanceof GitError && err.gitErrorCode === GitErrorCodes.AuthenticationFailed) {

@@ -11,6 +11,7 @@ import type {
 } from "../../api/git.js";
 import type { RefQuery } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
+import type { UpstreamScope } from "../../git/repository-class/fetch-targets.js";
 import type { Stash } from "../../git/Stash.js";
 import type { Submodule } from "../../git/Submodule.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
@@ -48,6 +49,7 @@ export type AbstractRepository = {
     readonly fetchAll: () => Promise<void>;
     readonly fetchDefault: (options?: { silent?: boolean }) => Promise<void>;
     readonly fetchPrune: () => Promise<void>;
+    readonly fetchUpstreams: (scope: UpstreamScope, options?: { silent?: boolean }) => Promise<void>;
     readonly findTrackingBranches: (upstreamRef: string) => Promise<Branch[]>;
     readonly getBranch: (name: string) => Promise<Branch>;
     readonly getBranches: (query: BranchQuery) => Promise<Ref[]>;
