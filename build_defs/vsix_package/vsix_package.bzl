@@ -57,10 +57,6 @@ vsix_package = rule(
             allow_files = True,
             doc = "A list of source files to bundle.",
         ),
-        "in_dir": attr.string(
-            mandatory = True,
-            doc = "The directory containing the extension to package.",
-        ),
         "verbose": attr.bool(
             default = False,
             doc = "Show vsce output.",

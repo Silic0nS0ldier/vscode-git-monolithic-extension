@@ -1,4 +1,5 @@
-"""Declares the browser-driven integration test suites.
+"""
+Declares the browser-driven integration test suites.
 """
 
 load("@aspect_rules_js//js:defs.bzl", "js_test")
@@ -77,18 +78,19 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         test = ":" + name + "_test_bin",
         visibility = visibility,
         tags = [
-            # chromium image extraction heavily saturates disk I/O, so we reserve 100% of bandwidth.
+            # chromium image extraction heavily saturates disk I/O, so we reserve 50% of bandwidth.
             # TODO Reduce overhead by enabling FUSE rootfs backend.
             "resources:disk_io:50",
         ],
     )
 
 scm_itest = macro(
-    doc = """Declares one browser-driven suite: its repository, its editor and its test.
+    doc = """
+        Declares one browser-driven suite: its repository, its editor and its test.
 
-Each suite gets its own repository and its own code-server instance, so suites cannot
-observe each other's git state. The suite itself runs as `<name>_test`.
-""",
+        Each suite gets its own repository and its own code-server instance, so suites cannot
+        observe each other's git state. The suite itself runs as `<name>_test`.
+    """,
     implementation = _scm_itest_impl,
     attrs = {
         "entry_point": attr.label(
@@ -98,15 +100,19 @@ observe each other's git state. The suite itself runs as `<name>_test`.
         "fixture": attr.label(
             allow_single_file = True,
             configurable = False,
-            doc = "Script shaping the suite's repository. Run with the git binary and the " +
-                  "workspace directory as arguments, once `workspace-fixture.sh` has " +
-                  "initialised the repository.",
+            doc = """
+                Script shaping the suite's repository. Run with the git binary and the
+                workspace directory as arguments, once `workspace-fixture.sh` has
+                initialised the repository.
+            """,
             mandatory = True,
         ),
         "lib": attr.label(
             configurable = False,
-            doc = "The suite's own compiled test file. Kept out of this macro because a " +
-                  "symbolic macro may not declare `dist/*.js` outputs.",
+            doc = """
+                The suite's own compiled test file. Kept out of this macro because a
+                symbolic macro may not declare `dist/*.js` outputs.
+            """,
             mandatory = True,
         ),
         "package_json": attr.label(
@@ -123,8 +129,10 @@ observe each other's git state. The suite itself runs as `<name>_test`.
         "untrusted": attr.bool(
             configurable = False,
             default = False,
-            doc = "Opens the workspace in Restricted Mode, for suites covering the " +
-                  "discovery path the extension takes when `workspace.isTrusted` is false.",
+            doc = """
+                Opens the workspace in Restricted Mode, for suites covering the
+                discovery path the extension takes when `workspace.isTrusted` is false.
+            """,
         ),
     },
 )

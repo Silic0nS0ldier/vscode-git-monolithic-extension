@@ -62,10 +62,10 @@ rollup_bundle = macro(
         ),
         "external_modules": attr.string_list(
             configurable = False,
-            doc = "External modules that should not (or can not) be bundled.",
+            doc = "External modules that should not (or cannot) be bundled.",
         ),
     },
     doc = """
-        Create a JS bundle using an opinionated Rollup configuration.Create a JS bundle using an opinionated Rollup configuration.
+        Create a JS bundle using an opinionated Rollup configuration.
     """,
 )
