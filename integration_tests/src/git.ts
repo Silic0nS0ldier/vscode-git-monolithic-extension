@@ -34,6 +34,20 @@ export async function headSubject(): Promise<string> {
     return (await git("log", "-1", "--format=%s")).trim();
 }
 
+/** Subject line of the commit a revision resolves to. */
+export async function subjectOf(rev: string): Promise<string> {
+    return (await git("log", "-1", "--format=%s", rev)).trim();
+}
+
+/** Object name a ref resolves to, or undefined when the ref does not exist. */
+export async function resolveRef(ref: string): Promise<string | undefined> {
+    try {
+        return (await git("rev-parse", "--verify", "--quiet", ref)).trim();
+    } catch {
+        return undefined;
+    }
+}
+
 /** Object name of a revision, abbreviated the way the SCM UI renders it. */
 export async function shortCommit(rev: string): Promise<string> {
     return (await git("rev-parse", rev)).trim().slice(0, 8);

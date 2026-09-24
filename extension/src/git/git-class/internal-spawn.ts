@@ -1,6 +1,7 @@
 import * as cp from "node:child_process";
 import { sanitizePath } from "../helpers.js";
 import type { SpawnOptions } from "../SpawnOptions.js";
+import { cliEnv } from "./cli-env.js";
 
 export function internalSpawn(
     gitPath: string,
@@ -19,12 +20,7 @@ export function internalSpawn(
 
     options.env = {
         ...process.env,
-        ...env,
-        ...options.env,
-        GIT_PAGER: "cat",
-        LANG: "en_US.UTF-8",
-        LC_ALL: "en_US.UTF-8",
-        VSCODE_GIT_COMMAND: args[0],
+        ...cliEnv(env, args[0], options.env),
     };
 
     if (options.cwd) {
