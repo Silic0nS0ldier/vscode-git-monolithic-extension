@@ -77,7 +77,6 @@ vsix_package(
         ":copy_bundle_main",
         ":copy_license",
     ],
-    in_dir = "./",
     visibility = ["//integration_tests:__pkg__"],
 )
 

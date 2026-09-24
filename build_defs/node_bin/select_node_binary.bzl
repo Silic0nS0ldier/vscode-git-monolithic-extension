@@ -1,5 +1,5 @@
 """
-Exposes NodeJS binary as a regular Bazel target.
+Exposes the Node.js binary as a regular Bazel target.
 """
 
 load("@rules_nodejs//nodejs:toolchain.bzl", "NodeInfo")
@@ -23,4 +23,5 @@ select_node_binary = rule(
     implementation = _select_node_binary_impl,
     executable = True,
     toolchains = ["@rules_nodejs//nodejs:toolchain_type"],
+    doc = "Symlinks the resolved Node.js toolchain's `node` binary as this target's executable.",
 )
