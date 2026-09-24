@@ -13,6 +13,8 @@ export function createCommand(): ScmCommand {
 
         if (uris.length > 0) {
             const untrackedChanges = config.untrackedChanges(Uri.file(repository.root));
+            // TODO Outside `mixed` this names untracked files alongside `-u`, which git rejects as
+            //      unknown pathspecs; leave the untracked group out there, as upstream does.
             await repository.add(uris, untrackedChanges === "mixed" ? undefined : { update: true });
         }
     }
