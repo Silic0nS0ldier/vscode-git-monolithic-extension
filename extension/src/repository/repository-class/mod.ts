@@ -224,7 +224,10 @@ export function createRepository(
     const updateWhenIdleAndWait = throat(1, async () => {
         await whenIdleAndFocused();
         await status();
-        await timeout(5000);
+        const cooldown = config.autoRefreshCooldown();
+        if (cooldown > 0) {
+            await timeout(cooldown);
+        }
     });
     const eventuallyUpdateWhenIdleAndWait = debounce(updateWhenIdleAndWait, 1000);
 

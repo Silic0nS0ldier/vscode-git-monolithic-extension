@@ -12,6 +12,7 @@ import {
 import * as i18n from "../i18n/mod.js";
 import type { Resource } from "../repository/Resource.js";
 import type { Box } from "../util/box.js";
+import * as config from "../util/config.js";
 
 /**
  * An encapsulatin of the source control panel.
@@ -121,7 +122,8 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
                 group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
             }
 
-            if (mayCauseLayoutShift) {
+            const layoutShiftDelay = config.layoutShiftDelay();
+            if (mayCauseLayoutShift && layoutShiftDelay > 0) {
                 const annotations: string[] = [];
                 const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
                     // Command carried over to allow viewing
@@ -143,7 +145,7 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
                 group.resourceStates = fadedResources;
                 group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
 
-                setTimeout(apply, 900);
+                setTimeout(apply, layoutShiftDelay);
             } else {
                 apply();
             }

@@ -1582,6 +1582,18 @@
                     "description": "%config.autorefresh%",
                     "default": true
                 },
+                "git_monolithic.autorefreshCooldown": {
+                    "type": "number",
+                    "minimum": 0,
+                    "markdownDescription": "%config.autorefreshCooldown%",
+                    "default": 5000
+                },
+                "git_monolithic.layoutShiftDelay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "markdownDescription": "%config.layoutShiftDelay%",
+                    "default": 900
+                },
                 "git_monolithic.autofetch": {
                     "type": [
                         "boolean",
