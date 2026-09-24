@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { appendFile, writeFile } from "node:fs/promises";
+import { appendFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { after, before } from "node:test";
 import type { Page } from "playwright-core";
@@ -11,7 +11,6 @@ import {
     invokeGroupAction,
     invokeRowAction,
     LOAD_TIMEOUT_MS,
-    modalDialog,
     openScmView,
     openWorkbench,
     pollUntil,
@@ -52,30 +51,9 @@ async function commitFromInputBox(message: string): Promise<void> {
     await pollUntil("the commit to be created", headSubject, subject => subject === message);
 }
 
-scenario("Stage All Changes gives up while untracked files are listed, naming the path git rejected", async () => {
+scenario("staging a file whose name starts with a dash stages that file", async () => {
     const view = await openScmView(page);
     await groupCount(view, "Untracked").filter({ hasText: /^600$/u }).waitFor({ state: "visible" });
-    const unchanged = await status();
-
-    // Outside `mixed` it stages with `-u`, yet still names the untracked files, which git
-    // refuses as pathspecs matching nothing it knows.
-    await runCommand(page, "Git: Stage All Changes");
-
-    const dialog = modalDialog(page);
-    await dialog.waitFor({ state: "visible" });
-    assert.match(
-        (await dialog.innerText()).replaceAll(/\s+/gu, " "),
-        /Git: pathspec '\S+' did not match any file\(s\) known to git/u,
-    );
-    await dialog.getByRole("button", { name: "Cancel" }).click();
-    await dialog.waitFor({ state: "hidden" });
-
-    // Git checks every pathspec before staging anything.
-    assert.deepStrictEqual(await status(), unchanged);
-});
-
-scenario("staging a file whose name starts with a dash stages that file", async () => {
-    const view = scmView(page);
 
     await invokeRowAction(view, "-dash.txt", "Stage Changes");
 
@@ -83,19 +61,23 @@ scenario("staging a file whose name starts with a dash stages that file", async 
     await groupCount(view, "Staged").filter({ hasText: /^1$/u }).waitFor({ state: "visible" });
 });
 
-scenario("Stage All Tracked Changes stages modifications and deletions alike", async () => {
+scenario("Stage All Changes stages the tracked changes and leaves untracked files alone", async () => {
     const view = scmView(page);
 
-    await invokeGroupAction(view, "Tracked", "Stage All Tracked Changes");
+    // Outside `mixed` it stages with `-u`, which rejects any untracked path it is handed.
+    await runCommand(page, "Git: Stage All Changes");
 
-    const current = await pollUntil(
-        "the tracked changes to be staged",
-        status,
-        current => current["tracked.txt"] === "M " && current["gone.txt"] === "D ",
+    assert.deepStrictEqual(
+        await pollUntil(
+            "the tracked changes to be staged",
+            status,
+            current => current["tracked.txt"] === "M " && current["gone.txt"] === "D ",
+        ),
+        // Porcelain status collapses a wholly untracked directory into one entry.
+        { "-dash.txt": "M ", "bulk/": "??", "gone.txt": "D ", "tracked.txt": "M " },
     );
-    // Porcelain status collapses a wholly untracked directory into one entry.
-    assert.strictEqual(current["bulk/"], "??");
     await groupCount(view, "Staged").filter({ hasText: /^3$/u }).waitFor({ state: "visible" });
+    await groupCount(view, "Untracked").filter({ hasText: /^600$/u }).waitFor({ state: "visible" });
 });
 
 scenario("Stage All Untracked Changes adds more files than fit on one command line", async () => {
@@ -175,5 +157,26 @@ scenario("smart commit with untracked changes mixed in commits the untracked fil
     assert.deepStrictEqual(
         await pollUntil("later.txt to be committed", status, current => Object.keys(current).length === 0),
         {},
+    );
+    await groupCount(view, "Tracked").filter({ hasText: /^0$/u }).waitFor({ state: "visible" });
+});
+
+scenario("Stage All Tracked Changes stages modifications and deletions alike", async () => {
+    const view = scmView(page);
+
+    await appendFile(join(workspaceDir(), "tracked.txt"), "tracked\n");
+    await rm(join(workspaceDir(), "-dash.txt"));
+    await resourceRow(view, "tracked.txt").waitFor({ state: "visible" });
+    await resourceRow(view, "-dash.txt").waitFor({ state: "visible" });
+
+    await invokeGroupAction(view, "Tracked", "Stage All Tracked Changes");
+
+    assert.deepStrictEqual(
+        await pollUntil(
+            "the tracked changes to be staged",
+            status,
+            current => current["tracked.txt"] === "M " && current["-dash.txt"] === "D ",
+        ),
+        { "-dash.txt": "D ", "tracked.txt": "M " },
     );
 });

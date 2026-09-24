@@ -282,11 +282,6 @@ export function groupCount(view: Locator, group: string): Locator {
     return groupRow(view, group).locator(".monaco-count-badge");
 }
 
-/** A modal dialog, e.g. from `window.showErrorMessage(..., { modal: true })`. */
-export function modalDialog(page: Page): Locator {
-    return page.locator(".monaco-dialog-box");
-}
-
 export async function invokeRowAction(view: Locator, fileName: string, action: string): Promise<void> {
     await clickHoverAction(resourceRow(view, fileName), action);
 }
