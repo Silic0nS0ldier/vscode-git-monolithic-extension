@@ -74,6 +74,26 @@ function resourceEqual(a: Resource, b: Resource): boolean {
         && a.state.renameResourceUri?.fsPath === b.state.renameResourceUri?.fsPath;
 }
 
+/** HEAD with its upstream details, or just HEAD when there are none, or undefined when unreadable. */
+async function readHEAD(repository: Repository): Promise<Branch | undefined> {
+    let head: Branch;
+    try {
+        head = await repository.getHEAD();
+    } catch {
+        return undefined;
+    }
+
+    if (!head.name) {
+        return head;
+    }
+
+    try {
+        return await repository.getBranch(head.name);
+    } catch {
+        return head;
+    }
+}
+
 export async function updateModelState(
     repository: Repository,
     HEAD: Box<Branch | undefined>,
@@ -106,33 +126,24 @@ export async function updateModelState(
     // TODO Account for potential missing items when limit is hit
     // Could use placeholder like "(empty)"
     // UI currently handles this using a heuristic
-    const status = await repository.getStatusTrackedAndMerge({ ignoreSubmodules });
+    const pendingStatus = repository.getStatusTrackedAndMerge({ ignoreSubmodules });
     const pendingUntrackedStatus = repository.getStatusUntracked();
+    // Awaited after the tracked groups are set, which an earlier failure below would skip.
+    pendingUntrackedStatus.catch(() => {});
     const useIcons = !config.decorationsEnabled();
 
-    let newHEAD: Branch | undefined;
-
-    try {
-        newHEAD = await repository.getHEAD();
-
-        if (newHEAD.name) {
-            try {
-                newHEAD = await repository.getBranch(newHEAD.name);
-            } catch (err) {
-                // noop
-            }
-        }
-    } catch (err) {
-        // noop
-    }
-
+    const pendingHEAD = readHEAD(repository);
     // Only a detached HEAD is labelled with a tag, and only the first one matters, so the
     // whole ref list is never worth listing here.
-    const pendingHeadTag = newHEAD && !newHEAD.name
-        ? repository.getRefs({ count: 1, namespace: RefType.Tag, pointsAt: "HEAD" })
-        : Promise.resolve([]);
+    const pendingHeadTag = pendingHEAD.then(head =>
+        head && !head.name
+            ? repository.getRefs({ count: 1, namespace: RefType.Tag, pointsAt: "HEAD" })
+            : []
+    );
 
-    const [headTags, newRemotes, newSubmodules, newRebaseCommit] = await Promise.all([
+    const [status, newHEAD, headTags, newRemotes, newSubmodules, newRebaseCommit] = await Promise.all([
+        pendingStatus,
+        pendingHEAD,
         pendingHeadTag,
         getRemotes(),
         repository.getSubmodules(),
