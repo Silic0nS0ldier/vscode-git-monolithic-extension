@@ -97,10 +97,10 @@ export async function updateModelState(
     const prevRemotes = remotes.get();
     const prevSubmodules = submodules.get();
     const prevRebaseCommit = rebaseCommit.get();
-    const prevMerge = sourceControlUI.mergeGroup.resourceStates.get();
-    const prevIndex = sourceControlUI.stagedGroup.resourceStates.get();
-    const prevTracked = sourceControlUI.trackedGroup.resourceStates.get();
-    const prevUntracked = sourceControlUI.untrackedGroup.resourceStates.get();
+    const prevMerge = sourceControlUI.mergeGroup.latestResourceStates();
+    const prevIndex = sourceControlUI.stagedGroup.latestResourceStates();
+    const prevTracked = sourceControlUI.trackedGroup.latestResourceStates();
+    const prevUntracked = sourceControlUI.untrackedGroup.latestResourceStates();
 
     // TODO Account for potential missing items when limit is hit
     // Could use placeholder like "(empty)"

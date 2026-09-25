@@ -58,11 +58,11 @@ export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): 
             // Must go last
             sourceControl.dispose();
         },
-        mergeGroup: { resourceStates: withUX(mergeGroup) },
+        mergeGroup: withUX(mergeGroup),
         sourceControl: sourceControl as unknown as SourceControlUI,
-        stagedGroup: { resourceStates: withUX(stagedGroup) },
-        trackedGroup: { resourceStates: withUX(trackedGroup) },
-        untrackedGroup: { resourceStates: withUX(untrackedGroup) },
+        stagedGroup: withUX(stagedGroup),
+        trackedGroup: withUX(trackedGroup),
+        untrackedGroup: withUX(untrackedGroup),
     };
 }
 
@@ -81,15 +81,18 @@ type SourceControlUI = {
     commitTemplate?: string;
 };
 
-function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
+function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI {
     let resources: readonly Resource[] = [];
+    let latest: readonly Resource[] = [];
     let resourceStrings = new Set<string>();
     const baseLabel = group.label;
-    return {
+    const resourceStates: Box<readonly Resource[]> = {
         get(): readonly Resource[] {
             return resources;
         },
         set(newValue): void {
+            latest = newValue;
+
             // Unexpected layout shifts can be expensive (e.g. accidentally reverting wrong file)
             // To avoid this we provide a grace period when the files shown change
             let mayCauseLayoutShift = true;
@@ -151,9 +154,12 @@ function withUX(group: SourceControlResourceGroup): Box<readonly Resource[]> {
             }
         },
     };
+    return { latestResourceStates: () => latest, resourceStates };
 }
 
 export type SourceControlResourceGroupUI = {
     // TODO This is used extensively as the source of truth, which couples the UI to application logic tightly
     readonly resourceStates: Box<readonly Resource[]>;
+    /** The latest refresh, which `resourceStates` holds back while a layout shift is pending. */
+    readonly latestResourceStates: () => readonly Resource[];
 };

@@ -103,7 +103,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
 }
 
 function collectDecorationData(group: SourceControlResourceGroupUI, bucket: Map<string, FileDecoration>): void {
-    for (const r of group.resourceStates.get()) {
+    for (const r of group.latestResourceStates()) {
         const decoration = r.state.resourceDecoration;
 
         if (decoration) {
@@ -115,6 +115,13 @@ function collectDecorationData(group: SourceControlResourceGroupUI, bucket: Map<
             }
         }
     }
+}
+
+function decorationsEqual(a: FileDecoration, b: FileDecoration): boolean {
+    return a.badge === b.badge
+        && a.tooltip === b.tooltip
+        && a.propagate === b.propagate
+        && a.color?.id === b.color?.id;
 }
 
 class GitDecorationProvider implements FileDecorationProvider {
@@ -148,9 +155,23 @@ class GitDecorationProvider implements FileDecorationProvider {
         collectDecorationData(this.#repository.sourceControlUI.trackedGroup, newDecorations);
         collectDecorationData(this.#repository.sourceControlUI.mergeGroup, newDecorations);
 
-        const uris = new Set([...this.#decorations.keys()].concat([...newDecorations.keys()]));
+        const changed: Uri[] = [];
+        for (const [uri, decoration] of newDecorations) {
+            const previous = this.#decorations.get(uri);
+            if (previous === undefined || !decorationsEqual(previous, decoration)) {
+                changed.push(Uri.parse(uri, true));
+            }
+        }
+        for (const uri of this.#decorations.keys()) {
+            if (!newDecorations.has(uri)) {
+                changed.push(Uri.parse(uri, true));
+            }
+        }
+
         this.#decorations = newDecorations;
-        this.#onDidChangeDecorationsEmitter.fire([...uris.values()].map(value => Uri.parse(value, true)));
+        if (changed.length > 0) {
+            this.#onDidChangeDecorationsEmitter.fire(changed);
+        }
     }
 
     #collectSubmoduleDecorationData(bucket: Map<string, FileDecoration>): void {
