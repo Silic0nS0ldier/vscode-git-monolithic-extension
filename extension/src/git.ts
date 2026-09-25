@@ -19,6 +19,11 @@ import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel
 import { commit as showCommit, show } from "monolithic-git-interop/api/show";
 import { list as listStashes } from "monolithic-git-interop/api/stash/list";
 import { type IFileStatus, tracked } from "monolithic-git-interop/api/status/tracked";
+import {
+    type HeadStatus,
+    supportsTrackedWithBranch,
+    trackedWithBranch,
+} from "monolithic-git-interop/api/status/tracked-with-branch";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
 import type { GitContext } from "monolithic-git-interop/cli";
 import * as gitErrors from "monolithic-git-interop/errors";
@@ -1085,6 +1090,43 @@ export class Repository {
         throw new Error("Could not find tracked files", { cause: unwrap(result) });
     }
 
+    /** Tracked changes, and HEAD with its upstream, which is undefined when HEAD cannot be read. */
+    async getStatusTrackedAndHEAD(
+        opts?: { ignoreSubmodules?: boolean },
+    ): Promise<{ status: IFileStatus[]; head: Branch | undefined }> {
+        if (!supportsTrackedWithBranch(this.#git._context)) {
+            const [status, head] = await Promise.all([this.getStatusTrackedAndMerge(opts), this.#readHEAD()]);
+            return { head, status };
+        }
+
+        const result = await trackedWithBranch(this.#git._context, this.#repositoryRoot, opts);
+        if (isErr(result)) {
+            throw new Error("Could not find tracked files", { cause: unwrap(result) });
+        }
+
+        const { files, head } = unwrap(result);
+        return { head: headStatusToBranch(head), status: files };
+    }
+
+    async #readHEAD(): Promise<Branch | undefined> {
+        let head: Branch;
+        try {
+            head = await this.getHEAD();
+        } catch {
+            return undefined;
+        }
+
+        if (!head.name) {
+            return head;
+        }
+
+        try {
+            return await this.getBranch(head.name);
+        } catch {
+            return head;
+        }
+    }
+
     async getStatusUntracked(): Promise<string[]> {
         const result = await untracked(this.#git._context, this.#repositoryRoot, "relative");
         if (isOk(result)) {
@@ -1302,4 +1344,20 @@ export class Repository {
 // TODO: Support core.commentChar
 function stripCommitMessageComments(message: string): string {
     return message.replace(/^\s*#.*$\n?/gm, "").trim();
+}
+
+/** The shapes `getHEAD` and `getBranch` produce, so either source compares equal. */
+function headStatusToBranch(head: HeadStatus): Branch {
+    if (!head.name || !head.commit) {
+        return { commit: head.commit, name: head.name, type: RefType.Head };
+    }
+
+    return {
+        ahead: head.ahead ?? 0,
+        behind: head.behind ?? 0,
+        commit: head.commit,
+        name: head.name,
+        type: RefType.Head,
+        upstream: head.upstream,
+    };
 }
