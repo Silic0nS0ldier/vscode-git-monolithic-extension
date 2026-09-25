@@ -85,7 +85,31 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
     let resources: readonly Resource[] = [];
     let latest: readonly Resource[] = [];
     let resourceStrings = new Set<string>();
+    let pendingApply: ReturnType<typeof setTimeout> | undefined;
     const baseLabel = group.label;
+
+    function apply(): void {
+        clearTimeout(pendingApply);
+        pendingApply = undefined;
+        resources = latest;
+        resourceStrings = new Set<string>(latest.map(r => r.resourceUri.toString()));
+
+        const annotations: string[] = [];
+        if (latest.length > 0) {
+            if (latest.length >= 500) {
+                // 500 used as the of limit 5000 is shared by multiple groups
+                // 500 may seem low, but should 99% of cases until a more reliable solution
+                // is used.
+                annotations.push("(too many files)");
+            }
+        } else {
+            annotations.push("(empty)");
+        }
+
+        group.resourceStates = [...resources];
+        group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
+    }
+
     const resourceStates: Box<readonly Resource[]> = {
         get(): readonly Resource[] {
             return resources;
@@ -105,53 +129,40 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
                 }
             }
 
-            function apply(): void {
-                resources = newValue;
-                resourceStrings = new Set<string>(newValue.map(r => r.resourceUri.toString()));
-
-                const annotations: string[] = [];
-                if (newValue.length > 0) {
-                    if (newValue.length >= 500) {
-                        // 500 used as the of limit 5000 is shared by multiple groups
-                        // 500 may seem low, but should 99% of cases until a more reliable solution
-                        // is used.
-                        annotations.push("(too many files)");
-                    }
-                } else {
-                    annotations.push("(empty)");
-                }
-
-                group.resourceStates = [...resources];
-                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
-            }
-
             const layoutShiftDelay = config.layoutShiftDelay();
-            if (mayCauseLayoutShift && layoutShiftDelay > 0) {
-                const annotations: string[] = [];
-                const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
-                    // Command carried over to allow viewing
-                    command: old.command,
-                    decorations: { faded: true },
-                    resourceUri: old.resourceUri,
-                }));
-                if (fadedResources.length > 0) {
-                    if (fadedResources.length >= 500) {
-                        // 500 used as the of limit 5000 is shared by multiple groups
-                        // 500 may seem low, but should 99% of cases until a more reliable solution
-                        // is used.
-                        annotations.push("(too many changes)");
-                    }
-                } else {
-                    annotations.push("(empty)");
-                }
-
-                group.resourceStates = fadedResources;
-                group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
-
-                setTimeout(apply, layoutShiftDelay);
-            } else {
+            if (!mayCauseLayoutShift || layoutShiftDelay <= 0) {
                 apply();
+                return;
             }
+
+            // Already faded; the pending apply takes the latest value, and restarting it would let
+            // a stream of refreshes keep the view faded.
+            if (pendingApply !== undefined) {
+                return;
+            }
+
+            const annotations: string[] = [];
+            const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
+                // Command carried over to allow viewing
+                command: old.command,
+                decorations: { faded: true },
+                resourceUri: old.resourceUri,
+            }));
+            if (fadedResources.length > 0) {
+                if (fadedResources.length >= 500) {
+                    // 500 used as the of limit 5000 is shared by multiple groups
+                    // 500 may seem low, but should 99% of cases until a more reliable solution
+                    // is used.
+                    annotations.push("(too many changes)");
+                }
+            } else {
+                annotations.push("(empty)");
+            }
+
+            group.resourceStates = fadedResources;
+            group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
+
+            pendingApply = setTimeout(apply, layoutShiftDelay);
         },
     };
     return { latestResourceStates: () => latest, resourceStates };

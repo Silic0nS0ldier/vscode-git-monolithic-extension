@@ -152,11 +152,11 @@ export function createRepository(
             return;
         }
 
-        // TODO This is getting out of sync, likely due to delayed update (UX)
-        sourceControlUI.sourceControl.count = sourceControlUI.mergeGroup.resourceStates.get().length
-            + sourceControlUI.stagedGroup.resourceStates.get().length
-            + sourceControlUI.trackedGroup.resourceStates.get().length
-            + sourceControlUI.untrackedGroup.resourceStates.get().length;
+        // The view holds back changed file lists for a moment; the count reflects the latest refresh.
+        sourceControlUI.sourceControl.count = sourceControlUI.mergeGroup.latestResourceStates().length
+            + sourceControlUI.stagedGroup.latestResourceStates().length
+            + sourceControlUI.trackedGroup.latestResourceStates().length
+            + sourceControlUI.untrackedGroup.latestResourceStates().length;
     }
 
     const onDidChangeStatusEmitter = new EventEmitter<void>();
