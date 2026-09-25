@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { after, before } from "node:test";
 import type { Page } from "playwright-core";
-import { headSubject, status } from "./git.js";
+import { headSubject, setLocalConfig, status } from "./git.js";
 import {
     closeOutputPanel,
     connect,
@@ -107,4 +107,16 @@ scenario("committing from the input box clears the working tree", async () => {
     );
     assert.deepStrictEqual(await status(), {});
     await resourceRow(view, "tracked.txt").waitFor({ state: "detached" });
+});
+
+scenario("a remote added outside the editor offers to publish the branch", async () => {
+    const publish = page.locator(".part.statusbar .statusbar-item").filter({
+        has: page.locator(".codicon-cloud-upload"),
+    });
+    assert.strictEqual(await publish.count(), 0, "the branch was publishable before any remote existed");
+
+    // Only the URL is needed for `git remote` to list it; nothing is fetched or pushed.
+    await setLocalConfig("remote.origin.url", "https://example.invalid/repository.git");
+
+    await publish.waitFor({ state: "visible" });
 });
