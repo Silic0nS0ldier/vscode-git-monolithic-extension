@@ -24,9 +24,9 @@ type Watcher = {
     suspend: () => SuspendHandle;
 } & Disposable;
 
-/** Handle returned by `Watcher.suspend()`; on dispose the suspend is released. */
+/** Handle returned by `Watcher.suspend()`; disposing it resumes watching, settling once events flow again. */
 export type SuspendHandle = {
-    readonly [Symbol.dispose]: () => void;
+    readonly [Symbol.asyncDispose]: () => Promise<void>;
 };
 
 /**
@@ -99,7 +99,7 @@ export function watch(
 
     let watcher = createWatcher();
 
-    function release(): void {
+    async function release(): Promise<void> {
         if (disposed) {
             outputChannel.appendLine(
                 `WARN: ${id} watcher suspend handle disposed after watcher was disposed\n${new Error().stack}`,
@@ -119,8 +119,7 @@ export function watch(
 
         outputChannel.appendLine(`TRACE: ${id} watcher resuming, re-creating underlying watcher`);
         watcher = createWatcher();
-        // Fire a single synthetic event so consumers refresh their view.
-        onFileChangeEmitter.fire(Uri.file(locations[0]));
+        await whenReady(watcher);
     }
 
     return {
@@ -160,8 +159,8 @@ export function watch(
         suspend(): SuspendHandle {
             if (disposed) {
                 outputChannel.appendLine(`WARN: ${id} watcher suspend() called after dispose\n${new Error().stack}`);
-                // Return an inert handle so `using` at the callsite is still well-formed.
-                return { [Symbol.dispose]: () => {} };
+                // Return an inert handle so `await using` at the callsite is still well-formed.
+                return { [Symbol.asyncDispose]: async () => {} };
             }
             suspendCount++;
             if (suspendCount === 1) {
@@ -172,12 +171,12 @@ export function watch(
             }
             let released = false;
             return {
-                [Symbol.dispose]: () => {
+                [Symbol.asyncDispose]: async () => {
                     if (released) {
                         return;
                     }
                     released = true;
-                    release();
+                    await release();
                 },
             };
         },
@@ -187,6 +186,18 @@ export function watch(
 function isWatchableEvent(event: keyof typeof TargetEventEnum): boolean {
     return event !== TargetEventEnum.addDir && event !== TargetEventEnum.unlinkDir
         && event !== TargetEventEnum.renameDir;
+}
+
+/** Changes made before this settles may go unreported; changes made after will not. */
+function whenReady(watcher: BaseWatcher): Promise<void> {
+    if (watcher.isReady() || watcher.isClosed()) {
+        return Promise.resolve();
+    }
+    return new Promise(resolve => {
+        watcher.once("ready", resolve);
+        // A watcher closed during setup never becomes ready.
+        watcher.once("close", resolve);
+    });
 }
 
 export function createIgnoreFnFromList(ignoreList: string[]): (path: string) => boolean {

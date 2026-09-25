@@ -187,15 +187,19 @@ export function createRepository(
 
         let error: unknown = null;
 
-        const shouldPauseWatchers = causesLargeWorkingTreeChanges(operation);
-        using _workingTreeSuspend = shouldPauseWatchers ? workingTreeWatcher.suspend() : null;
-        using _dotGitSuspend = shouldPauseWatchers ? dotGitFileWatcher.suspend() : null;
-
         operations.start(operation);
         onRunOperationEmitter.fire(operation);
 
         try {
-            const result = await retryRun(operation, runOperation);
+            let result: T;
+            {
+                // The refresh below covers the operation's own changes; resuming waits for the watchers to be ready.
+                await using _dotGitSuspend = isReadOnly(operation) ? null : dotGitFileWatcher.suspend();
+                await using _workingTreeSuspend = causesLargeWorkingTreeChanges(operation)
+                    ? workingTreeWatcher.suspend()
+                    : null;
+                result = await retryRun(operation, runOperation);
+            }
 
             if (operation === Operation.Status || !isReadOnly(operation)) {
                 await updateModelState();
@@ -213,6 +217,11 @@ export function createRepository(
         } finally {
             operations.end(operation);
             onDidRunOperationEmitter.fire({ error, operation });
+
+            // A failed operation may still have changed things, and its file events were suppressed.
+            if (error !== null && !isReadOnly(operation) && state.get() === RepositoryState.Idle) {
+                onFileChangeHandler();
+            }
         }
     }
 
