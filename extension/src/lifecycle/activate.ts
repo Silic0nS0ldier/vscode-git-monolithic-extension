@@ -1,5 +1,4 @@
 import type { TelemetryReporter } from "@vscode/extension-telemetry";
-import * as fsp from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { setTimeout } from "node:timers/promises";
@@ -32,6 +31,7 @@ import { createInlayHintsProvider } from "../ui/inlay-hints-provider.js";
 import * as config from "../util/config.js";
 import { toDisposable } from "../util/disposals.js";
 import { filterEvent } from "../util/events.js";
+import { hasDotGit } from "../util/has-dot-git.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
 
@@ -263,14 +263,7 @@ async function isGitRepository(folder: WorkspaceFolder): Promise<boolean> {
         return false;
     }
 
-    const dotGit = path.join(folder.uri.fsPath, ".git");
-
-    try {
-        const dotGitStat = await fsp.stat(dotGit);
-        return dotGitStat.isDirectory();
-    } catch (err) {
-        return false;
-    }
+    return await hasDotGit(folder.uri.fsPath);
 }
 
 async function checkGitVersion(info: IGit): Promise<void> {
