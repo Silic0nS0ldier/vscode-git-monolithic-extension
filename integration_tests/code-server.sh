@@ -32,14 +32,16 @@ fi
 # The extension under test is opt-in: it stays dormant while VS Code's builtin git
 # extension is enabled, so without this the test would drive the builtin instead.
 # Disabling AI features keeps the workbench from spawning an agent host process.
-# The refresh cooldown and layout shift delay guard large repositories, which no suite uses.
+# The refresh delays, layout shift delay and watcher debounce guard large repositories, which no suite uses.
 cat >"$state/user/User/settings.json" <<JSON
 {
     "chat.disableAIFeatures": true,
     "git.enabled": false,
     "git_monolithic.autorefreshCooldown": 0,
+    "git_monolithic.autorefreshDebounce": 0,
     "git_monolithic.enabled": true,
     "git_monolithic.layoutShiftDelay": 0,
+    "git_monolithic.watcherDebounce": 0,
     "workbench.startupEditor": "none",
     "workbench.secondarySideBar.defaultVisibility": "hidden"${trust_settings}
 }

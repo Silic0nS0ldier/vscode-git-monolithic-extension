@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import { inspect } from "node:util";
 import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
 import BaseWatcher from "watcher";
+import * as config from "../util/config.js";
 
 type TargetEvent = Parameters<BaseWatcher["event"]>[0];
 
@@ -51,7 +52,7 @@ export function watch(
             {
                 // TODO Check that file limit is not exceeded (10_000_000)
                 //      Use `git ls-files | wc -l` (or similar) to check
-                debounce: 500,
+                debounce: config.watcherDebounce(),
                 ignoreInitial: true,
                 renameDetection: false,
                 recursive: true,
