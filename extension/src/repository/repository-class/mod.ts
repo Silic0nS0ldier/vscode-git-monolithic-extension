@@ -152,7 +152,7 @@ export function createRepository(
             return;
         }
 
-        // The view holds back changed file lists for a moment; the count reflects the latest refresh.
+        // Note: The view fades a changed list before updating it a moment later; the count updates immediately.
         sourceControlUI.sourceControl.count = sourceControlUI.mergeGroup.latestResourceStates().length
             + sourceControlUI.stagedGroup.latestResourceStates().length
             + sourceControlUI.trackedGroup.latestResourceStates().length

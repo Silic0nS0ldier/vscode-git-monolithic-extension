@@ -97,9 +97,12 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
         const annotations: string[] = [];
         if (latest.length > 0) {
             if (latest.length >= 500) {
-                // 500 used as the of limit 5000 is shared by multiple groups
-                // 500 may seem low, but should 99% of cases until a more reliable solution
-                // is used.
+                // Only the first 5000 changes are shown in the UI (to prevent performance issues)
+                // so we need to indicate a potentially incomplete view.
+                // From this scope we cannot determine if there were 5000+ changes in total (e.g.
+                // split across tracked and untracked groups) so we conservatively indicate too
+                // many files on hitting 500.
+                // TODO Thread through the actual answer.
                 annotations.push("(too many files)");
             }
         } else {
@@ -150,9 +153,12 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
             }));
             if (fadedResources.length > 0) {
                 if (fadedResources.length >= 500) {
-                    // 500 used as the of limit 5000 is shared by multiple groups
-                    // 500 may seem low, but should 99% of cases until a more reliable solution
-                    // is used.
+                    // Only the first 5000 changes are shown in the UI (to prevent performance issues)
+                    // so we need to indicate a potentially incomplete view.
+                    // From this scope we cannot determine if there were 5000+ changes in total (e.g.
+                    // split across tracked and untracked groups) so we conservatively indicate too
+                    // many files on hitting 500.
+                    // TODO Thread through the actual answer.
                     annotations.push("(too many changes)");
                 }
             } else {
