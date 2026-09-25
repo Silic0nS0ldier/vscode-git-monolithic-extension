@@ -3,26 +3,26 @@
   "name": "node",
   "platforms": {
     "linux-x86_64": {
-      "size": 33857948,
+      "size": 33934532,
       "hash": "sha256",
-      "digest": "c6ecd8efc1c1d395265891675319da7a7b3785c6be174bd78933cf4f057624d1",
+      "digest": "ca70e9e349de048b9522abb3adc05b3bd6f43c5ffd3ec57916c7da292f59f022",
       "format": "tar.xz",
-      "path": "node-v26.9.0-linux-x64/bin/node",
+      "path": "node-v26.10.0-linux-x64/bin/node",
       "providers": [
         {
-          "url": "https://nodejs.org/dist/v26.9.0/node-v26.9.0-linux-x64.tar.xz"
+          "url": "https://nodejs.org/dist/v26.10.0/node-v26.10.0-linux-x64.tar.xz"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 32876484,
+      "size": 32937272,
       "hash": "sha256",
-      "digest": "686d07ed3bc5d68d9f7bd4939b7e8849a87d0664ac19c8c5474474f44cc956db",
+      "digest": "7a6353f63eb3d04765004b4adf172616243e4522434635cb1d26288658b04ab5",
       "format": "tar.xz",
-      "path": "node-v26.9.0-linux-arm64/bin/node",
+      "path": "node-v26.10.0-linux-arm64/bin/node",
       "providers": [
         {
-          "url": "https://nodejs.org/dist/v26.9.0/node-v26.9.0-linux-arm64.tar.xz"
+          "url": "https://nodejs.org/dist/v26.10.0/node-v26.10.0-linux-arm64.tar.xz"
         }
       ]
     }
