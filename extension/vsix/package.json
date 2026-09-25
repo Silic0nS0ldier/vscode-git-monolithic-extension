@@ -1582,6 +1582,12 @@
                     "description": "%config.autorefresh%",
                     "default": true
                 },
+                "git_monolithic.autorefreshDebounce": {
+                    "type": "number",
+                    "minimum": 0,
+                    "markdownDescription": "%config.autorefreshDebounce%",
+                    "default": 1000
+                },
                 "git_monolithic.autorefreshCooldown": {
                     "type": "number",
                     "minimum": 0,
@@ -1593,6 +1599,12 @@
                     "minimum": 0,
                     "markdownDescription": "%config.layoutShiftDelay%",
                     "default": 900
+                },
+                "git_monolithic.watcherDebounce": {
+                    "type": "number",
+                    "minimum": 0,
+                    "markdownDescription": "%config.watcherDebounce%",
+                    "default": 500
                 },
                 "git_monolithic.autofetch": {
                     "type": [

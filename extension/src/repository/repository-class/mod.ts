@@ -15,7 +15,6 @@ import type { Repository as BaseRepository } from "../../git.js";
 import { GitError } from "../../git/error.js";
 import type { Submodule } from "../../git/Submodule.js";
 import * as i18n from "../../i18n/mod.js";
-import { debounce } from "../../package-patches/just-debounce.js";
 import { throat } from "../../package-patches/throat.js";
 import { StatusBarCommands } from "../../statusbar.js";
 import { create as createSourceControlUI } from "../../ui/source-control.js";
@@ -229,7 +228,11 @@ export function createRepository(
             await timeout(cooldown);
         }
     });
-    const eventuallyUpdateWhenIdleAndWait = debounce(updateWhenIdleAndWait, 1000);
+    let pendingUpdate: ReturnType<typeof setTimeout> | undefined;
+    function eventuallyUpdateWhenIdleAndWait(): void {
+        clearTimeout(pendingUpdate);
+        pendingUpdate = setTimeout(updateWhenIdleAndWait, config.autoRefreshDebounce());
+    }
 
     function onFileChangeHandler(): void {
         const autorefresh = config.autoRefresh();
