@@ -107,6 +107,9 @@ each building on the previous one's state. Assert git ground truth via the CLI
 ([integration_tests/src/git.ts](integration_tests/src/git.ts)) inside `pollUntil(...)` — the
 extension writes asynchronously.
 
+A failing scenario saves a screenshot to `.bazel/testlogs/integration_tests/<suite>_test/test.outputs/`.
+Pass `--test_env=ITEST_SCREENSHOTS=1` to capture every scenario while authoring or debugging.
+
 When migrating a git invocation from `extension` into `packages/git`, add the integration test
 **first** as a behaviour baseline, then move the code and prove the untouched test still passes.
 
