@@ -220,7 +220,7 @@ export function createRepository(
                 inputTemplate.invalidate();
             }
 
-            if (operation === Operation.Status || !isReadOnly(operation)) {
+            if (operation === Operation.Refresh || !isReadOnly(operation)) {
                 await updateModelState();
             }
 
@@ -239,30 +239,30 @@ export function createRepository(
 
             // A failed operation may still have changed things, and its file events were suppressed.
             if (error !== null && !isReadOnly(operation) && state.get() === RepositoryState.Idle) {
-                onFileChangeHandler();
+                requestAutoRefresh();
             }
         }
     }
 
     // TODO This should fire on first hit, then again on leading edge if there is another call
-    const status = throat(1, () => run<void>(Operation.Status));
+    const runRefresh = throat(1, () => run<void>(Operation.Refresh));
 
     // TODO This should fire on first hit, then again on leading edge if there is another call
-    const updateWhenIdleAndWait = throat(1, async () => {
+    const autoRefreshWhenIdle = throat(1, async () => {
         await whenIdleAndFocused();
-        await status();
+        await runRefresh();
         const cooldown = config.autoRefreshCooldown();
         if (cooldown > 0) {
             await timeout(cooldown);
         }
     });
-    let pendingUpdate: ReturnType<typeof setTimeout> | undefined;
-    function eventuallyUpdateWhenIdleAndWait(): void {
-        clearTimeout(pendingUpdate);
-        pendingUpdate = setTimeout(updateWhenIdleAndWait, config.autoRefreshDebounce());
+    let pendingAutoRefresh: ReturnType<typeof setTimeout> | undefined;
+    function scheduleAutoRefresh(): void {
+        clearTimeout(pendingAutoRefresh);
+        pendingAutoRefresh = setTimeout(autoRefreshWhenIdle, config.autoRefreshDebounce());
     }
 
-    function onFileChangeHandler(): void {
+    function requestAutoRefresh(): void {
         const autorefresh = config.autoRefresh();
 
         if (!autorefresh) {
@@ -277,10 +277,10 @@ export function createRepository(
             return;
         }
 
-        eventuallyUpdateWhenIdleAndWait();
+        scheduleAutoRefresh();
     }
 
-    onFileChange(onFileChangeHandler, null, disposables);
+    onFileChange(requestAutoRefresh, null, disposables);
 
     const onDidChangeRepositoryEmitter = new EventEmitter<Uri>();
     const onDidChangeRepository = onDidChangeRepositoryEmitter.event;
@@ -369,6 +369,7 @@ export function createRepository(
         applyStash(index) {
             return run(Operation.Stash, () => repository.applyStash(index));
         },
+        autoRefresh: runRefresh,
         blame(path) {
             return run(Operation.Blame, () => repository.blame(path));
         },
@@ -582,7 +583,7 @@ export function createRepository(
         },
         refresh() {
             inputTemplate.invalidate();
-            return status();
+            return runRefresh();
         },
         get remotes() {
             return remotes.get();
@@ -616,7 +617,6 @@ export function createRepository(
         stage(resource, contents) {
             return stageImpl(repository, run, onDidChangeOriginalResourceEmitter, resource, contents);
         },
-        status,
         get submodules() {
             return submodules.get();
         },

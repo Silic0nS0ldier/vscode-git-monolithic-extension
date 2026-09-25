@@ -344,7 +344,7 @@ export class Model {
             );
 
             this.#open(repository);
-            await repository.status();
+            await repository.autoRefresh();
         } catch (ex) {
             // noop
             this.#outputChannel.appendLine(
