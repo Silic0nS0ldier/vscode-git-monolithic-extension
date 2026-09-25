@@ -78,9 +78,7 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         test = ":" + name + "_test_bin",
         visibility = visibility,
         tags = [
-            # chromium image extraction heavily saturates disk I/O, so we reserve 50% of bandwidth.
-            # TODO Reduce overhead by enabling FUSE rootfs backend.
-            "resources:disk_io:50",
+            "resources:disk_io:20",
         ],
     )
 
