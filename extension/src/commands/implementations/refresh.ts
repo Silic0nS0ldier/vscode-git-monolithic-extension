@@ -3,7 +3,7 @@ import { makeCommandId, type ScmCommand } from "../helpers.js";
 
 export function createCommand(): ScmCommand {
     async function refresh(repository: AbstractRepository): Promise<void> {
-        await repository.status();
+        await repository.refresh();
     }
 
     return {

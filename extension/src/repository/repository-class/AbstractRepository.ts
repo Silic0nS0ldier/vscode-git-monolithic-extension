@@ -94,6 +94,8 @@ export type AbstractRepository = {
     readonly rebase: (branch: string) => Promise<void>;
     readonly rebaseAbort: () => Promise<void>;
     readonly rebaseCommit: Commit | undefined;
+    /** A refresh the user asked for, which also re-reads what `status` serves from cache. */
+    readonly refresh: () => Promise<void>;
     readonly remotes: readonly Remote[];
     readonly removeRemote: (name: string) => Promise<void>;
     readonly renameBranch: (name: string) => Promise<void>;

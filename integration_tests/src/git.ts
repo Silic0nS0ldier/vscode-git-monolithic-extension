@@ -64,6 +64,10 @@ export async function commitIn(dir: string, rev: string): Promise<string> {
     return (await git("-C", dir, "rev-parse", rev)).trim();
 }
 
+export async function setLocalConfig(key: string, value: string): Promise<void> {
+    await git("config", key, value);
+}
+
 /**
  * Pushes a new commit onto `origin/main`'s tip with no relation to any local commit, so
  * `--cherry` sees a unique entry ahead of whatever it already reports as equivalent.

@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { setTimeout as timeout } from "node:timers/promises";
 import {
     Disposable,
@@ -42,7 +43,7 @@ import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConf
 import { createRebaseCommitBox } from "./createRebaseCommitBox.js";
 import { createStateBox } from "./createStateBox.js";
 import { fetch as fetchImpl } from "./fetch.js";
-import { getInputTemplate as getInputTemplateImpl } from "./get-input-template.js";
+import { createInputTemplate } from "./get-input-template.js";
 import { headLabel as headLabelImpl } from "./head-label.js";
 import { ignore as ignoreImpl } from "./ignore.js";
 import { AbstractRepositorySymbol } from "./isAbstractRepository.js";
@@ -162,6 +163,18 @@ export function createRepository(
     const onDidChangeStatusEmitter = new EventEmitter<void>();
     const onDidChangeStatus = onDidChangeStatusEmitter.event;
 
+    const inputTemplate = createInputTemplate(repository);
+    // Other config sources and the template file go unwatched; a deliberate refresh covers them.
+    onDotGitFileChange(
+        uri => {
+            if (uri.fsPath === join(dotGit, "config")) {
+                inputTemplate.invalidate();
+            }
+        },
+        null,
+        disposables,
+    );
+
     const updateModelState = throat(1, async () => {
         return updateModelStateImpl(
             repository,
@@ -174,6 +187,7 @@ export function createRepository(
             setCountBadge,
             onDidChangeStatusEmitter,
             sourceControlUI,
+            inputTemplate.get,
         );
     });
 
@@ -199,6 +213,11 @@ export function createRepository(
                     ? workingTreeWatcher.suspend()
                     : null;
                 result = await retryRun(operation, runOperation);
+            }
+
+            // Its `.git/config` write may go unreported while the watcher is suspended.
+            if (operation === Operation.Config) {
+                inputTemplate.invalidate();
             }
 
             if (operation === Operation.Status || !isReadOnly(operation)) {
@@ -434,7 +453,7 @@ export function createRepository(
             return getGlobalConfig(repository, key);
         },
         getInputTemplate() {
-            return getInputTemplateImpl(repository);
+            return inputTemplate.get();
         },
         getMergeBase(ref1, ref2) {
             return run(Operation.MergeBase, () => repository.getMergeBase(ref1, ref2));
@@ -560,6 +579,10 @@ export function createRepository(
         },
         get rebaseCommit() {
             return rebaseCommit.get();
+        },
+        refresh() {
+            inputTemplate.invalidate();
+            return status();
         },
         get remotes() {
             return remotes.get();
