@@ -21,6 +21,7 @@ import { StatusBarCommands } from "../../statusbar.js";
 import { create as createSourceControlUI } from "../../ui/source-control.js";
 import { toGitUri } from "../../uri.js";
 import { createBox } from "../../util/box.js";
+import { createCachedLookup } from "../../util/cached-lookup.js";
 import * as config from "../../util/config.js";
 import { dispose } from "../../util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "../../util/events.js";
@@ -164,11 +165,16 @@ export function createRepository(
     const onDidChangeStatus = onDidChangeStatusEmitter.event;
 
     const inputTemplate = createInputTemplate(repository);
+    const remotesLookup = createCachedLookup(() => repository.getRemotes());
+    function invalidateConfigLookups(): void {
+        inputTemplate.invalidate();
+        remotesLookup.invalidate();
+    }
     // Other config sources and the template file go unwatched; a deliberate refresh covers them.
     onDotGitFileChange(
         uri => {
             if (uri.fsPath === join(dotGit, "config")) {
-                inputTemplate.invalidate();
+                invalidateConfigLookups();
             }
         },
         null,
@@ -188,6 +194,7 @@ export function createRepository(
             onDidChangeStatusEmitter,
             sourceControlUI,
             inputTemplate.get,
+            remotesLookup.get,
         );
     });
 
@@ -216,8 +223,8 @@ export function createRepository(
             }
 
             // Its `.git/config` write may go unreported while the watcher is suspended.
-            if (operation === Operation.Config) {
-                inputTemplate.invalidate();
+            if (operation === Operation.Config || operation === Operation.Remote) {
+                invalidateConfigLookups();
             }
 
             if (operation === Operation.Refresh || !isReadOnly(operation)) {
@@ -582,7 +589,7 @@ export function createRepository(
             return rebaseCommit.get();
         },
         refresh() {
-            inputTemplate.invalidate();
+            invalidateConfigLookups();
             return runRefresh();
         },
         get remotes() {

@@ -86,6 +86,7 @@ export async function updateModelState(
     onDidChangeStatusEmitter: EventEmitter<void>,
     sourceControlUI: SourceControlUIGroup,
     getInputTemplate: () => Promise<string>,
+    getRemotes: () => Promise<Remote[]>,
 ): Promise<void> {
     const ignoreSubmodules = config.ignoreSubmodules(Uri.file(repository.root));
 
@@ -133,7 +134,7 @@ export async function updateModelState(
 
     const [headTags, newRemotes, newSubmodules, newRebaseCommit] = await Promise.all([
         pendingHeadTag,
-        repository.getRemotes(),
+        getRemotes(),
         repository.getSubmodules(),
         getRebaseCommit(repository),
     ]);

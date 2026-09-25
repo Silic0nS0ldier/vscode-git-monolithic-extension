@@ -1,4 +1,5 @@
 import type { Repository } from "../../git.js";
+import { createCachedLookup } from "../../util/cached-lookup.js";
 
 export type InputTemplate = {
     /** A merge or squash in progress supplies its own message; otherwise the cached commit template. */
@@ -8,7 +9,7 @@ export type InputTemplate = {
 };
 
 export function createInputTemplate(repository: Repository): InputTemplate {
-    let commitTemplate: Promise<string> | undefined;
+    const commitTemplate = createCachedLookup(() => repository.getCommitTemplate());
 
     return {
         async get() {
@@ -22,11 +23,8 @@ export function createInputTemplate(repository: Repository): InputTemplate {
                 return message;
             }
 
-            commitTemplate ??= repository.getCommitTemplate();
-            return await commitTemplate;
+            return await commitTemplate.get();
         },
-        invalidate() {
-            commitTemplate = undefined;
-        },
+        invalidate: commitTemplate.invalidate,
     };
 }
