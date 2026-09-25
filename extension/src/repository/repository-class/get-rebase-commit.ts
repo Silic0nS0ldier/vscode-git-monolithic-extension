@@ -6,9 +6,9 @@ import type { Commit } from "../../git/Commit.js";
 export async function getRebaseCommit(
     repository: Repository,
 ): Promise<Commit | undefined> {
-    const rebaseHeadPath = path.join(repository.root, ".git", "REBASE_HEAD");
-    const rebaseApplyPath = path.join(repository.root, ".git", "rebase-apply");
-    const rebaseMergePath = path.join(repository.root, ".git", "rebase-merge");
+    const rebaseHeadPath = path.join(repository.dotGit, "REBASE_HEAD");
+    const rebaseApplyPath = path.join(repository.dotGit, "rebase-apply");
+    const rebaseMergePath = path.join(repository.dotGit, "rebase-merge");
 
     try {
         const rebaseApplyExists = fs.existsSync(rebaseApplyPath);
