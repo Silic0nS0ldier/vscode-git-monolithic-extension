@@ -54,6 +54,9 @@ export function workspaceDir(): string {
     return join(testTmpDir(), subdir);
 }
 
+/** Failures are always captured; `--test_env=ITEST_SCREENSHOTS=1` captures every scenario. */
+const CAPTURE_ALL = process.env["ITEST_SCREENSHOTS"] === "1";
+
 /** Screenshots land next to the test log, which Bazel zips into outputs.zip. */
 async function capture(page: Page, name: string): Promise<void> {
     const dir = process.env["TEST_UNDECLARED_OUTPUTS_DIR"];
@@ -343,7 +346,9 @@ export function createScenario(currentPage: () => Page): (name: string, body: ()
         test(name, { timeout: LOAD_TIMEOUT_MS }, async () => {
             try {
                 await body();
-                await capture(currentPage(), slug);
+                if (CAPTURE_ALL) {
+                    await capture(currentPage(), slug);
+                }
             } catch (error) {
                 // A closed page cannot be captured; the original failure is the useful one.
                 await capture(currentPage(), `failure-${slug}`).catch(() => {});
