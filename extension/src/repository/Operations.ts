@@ -15,7 +15,7 @@ export function isReadOnly(operation: OperationOptions): boolean {
         case Operation.Show:
         case Operation.HashObject:
         case Operation.GetBranches:
-        case Operation.Status:
+        case Operation.Refresh:
             return true;
         case Operation.Add:
         case Operation.Apply:
@@ -99,13 +99,13 @@ export function causesLargeWorkingTreeChanges(operation: OperationOptions): bool
         case Operation.MergeBase:
         case Operation.Move:
         case Operation.Push:
+        case Operation.Refresh:
         case Operation.Remote:
         case Operation.Remove:
         case Operation.RenameBranch:
         case Operation.SetBranchUpstream:
         case Operation.Show:
         case Operation.Stage:
-        case Operation.Status:
         case Operation.Tag:
             return false;
         default:
@@ -131,7 +131,7 @@ function shouldShowProgress(operation: OperationOptions): boolean {
         case Operation.MergeBase:
         case Operation.HashObject:
         case Operation.GetBranches:
-        case Operation.Status:
+        case Operation.Refresh:
         case Operation.Add:
         case Operation.Apply:
         case Operation.Branch:
@@ -203,6 +203,7 @@ export type OperationOptions =
     | "Rebase"
     | "RebaseAbort"
     | "RebaseContinue"
+    | "Refresh"
     | "Remote"
     | "Remove"
     | "RenameBranch"
@@ -212,7 +213,6 @@ export type OperationOptions =
     | "Show"
     | "Stage"
     | "Stash"
-    | "Status"
     | "SubmoduleUpdate"
     | "Sync"
     | "Tag";
@@ -251,6 +251,7 @@ export const Operation = {
     Rebase: "Rebase",
     RebaseAbort: "RebaseAbort",
     RebaseContinue: "RebaseContinue",
+    Refresh: "Refresh",
     Remote: "Remote",
     Remove: "Remove",
     RenameBranch: "RenameBranch",
@@ -260,7 +261,6 @@ export const Operation = {
     Show: "Show",
     Stage: "Stage",
     Stash: "Stash",
-    Status: "Status",
     SubmoduleUpdate: "SubmoduleUpdate",
     Sync: "Sync",
     Tag: "Tag",

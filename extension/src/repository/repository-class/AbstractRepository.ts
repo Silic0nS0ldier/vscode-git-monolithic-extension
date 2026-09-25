@@ -29,6 +29,8 @@ export type AbstractRepository = {
     readonly addRemote: (name: string, url: string) => Promise<void>;
     readonly apply: (patch: string, reverse?: boolean) => Promise<void>;
     readonly applyStash: (index?: number) => Promise<void>;
+    /** A refresh the extension starts itself, which serves some lookups from cache; see `refresh`. */
+    readonly autoRefresh: () => Promise<void>;
     readonly blame: (path: string) => Promise<string>;
     readonly branch: (name: string, _checkout: boolean, _ref?: string) => Promise<void>;
     readonly buffer: (ref: string, filePath: string) => Promise<Buffer>;
@@ -94,7 +96,7 @@ export type AbstractRepository = {
     readonly rebase: (branch: string) => Promise<void>;
     readonly rebaseAbort: () => Promise<void>;
     readonly rebaseCommit: Commit | undefined;
-    /** A refresh the user asked for, which also re-reads what `status` serves from cache. */
+    /** A refresh the user asked for, which also re-reads what `autoRefresh` serves from cache. */
     readonly refresh: () => Promise<void>;
     readonly remotes: readonly Remote[];
     readonly removeRemote: (name: string) => Promise<void>;
@@ -108,7 +110,6 @@ export type AbstractRepository = {
     readonly setConfig: (key: string, value: string) => Promise<void>;
     readonly sourceControlUI: SourceControlUIGroup;
     readonly stage: (resource: Uri, contents: string) => Promise<void>;
-    readonly status: () => Promise<void>;
     readonly submodules: readonly Submodule[];
     readonly sync: (head: Branch) => Promise<void>;
     readonly syncLabel: string;
