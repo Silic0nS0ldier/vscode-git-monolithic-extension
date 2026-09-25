@@ -9,7 +9,6 @@ import type { Box } from "../../util/box.js";
 import * as config from "../../util/config.js";
 import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType, type ResourceGroupTypeOptions } from "../ResourceGroupType.js";
-import { getInputTemplate } from "./get-input-template.js";
 import { getRebaseCommit } from "./get-rebase-commit.js";
 import { pigeonholeFileStatus } from "./update-model-state/pigeonhole-file-status.js";
 
@@ -86,6 +85,7 @@ export async function updateModelState(
     setCountBadge: () => void,
     onDidChangeStatusEmitter: EventEmitter<void>,
     sourceControlUI: SourceControlUIGroup,
+    getInputTemplate: () => Promise<string>,
 ): Promise<void> {
     const ignoreSubmodules = config.ignoreSubmodules(Uri.file(repository.root));
 
@@ -215,5 +215,5 @@ export async function updateModelState(
         onDidChangeStatusEmitter.fire();
     }
 
-    sourceControlUI.sourceControl.commitTemplate = await getInputTemplate(repository);
+    sourceControlUI.sourceControl.commitTemplate = await getInputTemplate();
 }
