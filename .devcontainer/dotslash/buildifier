@@ -3,24 +3,24 @@
   "name": "buildifier",
   "platforms": {
     "linux-x86_64": {
-      "size": 10028736,
+      "size": 10029304,
       "hash": "sha256",
-      "digest": "e0ea28e2d639347724435ebafe0531fd764fbf20eec6a23000c81edd0d58e51d",
+      "digest": "31b6a8aa1e5c746696788f428729701770ad91925873d8256cb885c60e12c77e",
       "path": "buildifier",
       "providers": [
         {
-          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.0.1/buildifier-linux-amd64"
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.1.0/buildifier-linux-amd64"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 9563238,
+      "size": 9561790,
       "hash": "sha256",
-      "digest": "6d7aebd23aa85847a66d517bb6220d95f24a2752e62cce0f089145b680b539c7",
+      "digest": "38d2ed845f560b4a16ddee41de906508a95f8dc85b04e0851b0a71e3a70d3890",
       "path": "buildifier",
       "providers": [
         {
-          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.0.1/buildifier-linux-arm64"
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.1.0/buildifier-linux-arm64"
         }
       ]
     }
