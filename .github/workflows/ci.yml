@@ -54,7 +54,7 @@ jobs:
             common --experimental_remote_downloader_propagate_credentials
             mod --profile=${{ runner.temp }}/mod.profile.gz
             mod --noslim_profile
-            common --sandbox_writable_path=~/.cache/rules_oci_runtime
+            common --sandbox_writable_path=/home/runner/.cache/rules_oci_runtime
           cache-save: false
           bazelisk-cache: true
           repository-cache: false
