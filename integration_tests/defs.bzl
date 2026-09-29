@@ -77,9 +77,6 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         target_compatible_with = LINUX_ONLY,
         test = ":" + name + "_test_bin",
         visibility = visibility,
-        tags = [
-            "resources:disk_io:50",
-        ],
     )
 
 scm_itest = macro(

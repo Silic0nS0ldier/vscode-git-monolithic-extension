@@ -96,7 +96,6 @@ itest_service(
     args = [
         "--env",
         "PORT=$${PORT}",
-        "--verbose",
     ],
     autoassign_port = True,
     exe = ":browserless_chromium",

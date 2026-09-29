@@ -135,7 +135,7 @@ jobs:
         id: test
         continue-on-error: true
       - uses: actions/upload-artifact@v7
-        #if: steps.test.outcome == 'failure'
+        if: steps.test.outcome == 'failure'
         with:
           name: test-logs
           path: .bazel/testlogs/**/test.log
