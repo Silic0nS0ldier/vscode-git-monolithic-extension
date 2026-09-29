@@ -78,7 +78,7 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         test = ":" + name + "_test_bin",
         visibility = visibility,
         tags = [
-            "resources:disk_io:20",
+            "resources:disk_io:50",
         ],
     )
 
