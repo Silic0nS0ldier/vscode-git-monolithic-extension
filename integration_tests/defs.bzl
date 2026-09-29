@@ -77,11 +77,6 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         target_compatible_with = LINUX_ONLY,
         test = ":" + name + "_test_bin",
         visibility = visibility,
-        tags = [
-            # Chromium + code-server is CPU heavy at times.
-            # This gives them a bit of headroom.
-            "resources:cpu:1.25",
-        ],
     )
 
 scm_itest = macro(
