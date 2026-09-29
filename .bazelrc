@@ -7,6 +7,8 @@ common --experimental_repository_downloader_retries=5
 # Build runfile links only when required
 common --nobuild_runfile_links
 
+common --local_resources=chromium_load=4
+
 # Path mapping strips the configuration segment (`bazel-out/k8-fastbuild/bin`) from action
 # command lines, so actions that differ only by configuration share cache entries. It only
 # pays off with a disk or remote cache, and needs sandboxed (or remote) execution.
