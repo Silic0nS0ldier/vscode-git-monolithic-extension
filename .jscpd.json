@@ -21,5 +21,28 @@
         "console"
     ],
     "threshold": 5,
-    "absolute": false
+    "absolute": false,
+    "deadCode": {
+        "entry": [
+            "extension/src/main.ts",
+            "extension/src/askpass-main.ts",
+            "packages/git/src/api/**/*.ts",
+            "packages/git/src/cli/mod.ts",
+            "packages/git/src/cli/helpers/read-to-string.ts",
+            "packages/git/src/services/mod.ts",
+            "packages/git/src/services/nodejs.ts",
+            "packages/git/src/func-result.ts",
+            "packages/git/src/errors.ts",
+            "packages/git/src/**/*.stub.ts",
+            "packages/wasm/src/**/*.test.ts",
+            "integration_tests/src/*.test.ts",
+            "integration_tests/src/git.ts",
+            "integration_tests/src/harness.ts",
+            "integration_tests/check-code-server-pin.mjs",
+            "integration_tests/electron_host/check-electron-pin.mjs",
+            "integration_tests/electron_host/load-check.mjs",
+            "build_defs/rollup_bundle/src/main.ts",
+            "build_defs/vsix_package/src/main.ts"
+        ]
+    }
 }
