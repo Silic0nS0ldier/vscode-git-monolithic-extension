@@ -1,7 +1,6 @@
-import { PassThrough } from "node:stream";
-import { finished } from "node:stream/promises";
 import type { GitContext } from "../../cli/context.js";
-import { createError, ERROR_GENERIC, type GenericError } from "../../errors.js";
+import { streamToParser } from "../../cli/helpers/stream-to-parser.js";
+import type { GenericError } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 
 export type TrackedErrors = GenericError;
@@ -17,21 +16,15 @@ export async function tracked(
     }
 
     const parser = new GitStatusParser();
-    const stdout = new PassThrough();
-    stdout.on("data", (chunk: string) => {
-        parser.update(chunk);
-    });
 
     const args = ["status", "-z", "--untracked-files=no"];
     if (opts?.ignoreSubmodules) {
         args.push("--ignore-submodules");
     }
-    const cliAction = git.cli({ cwd, stdout }, args);
-
-    const [cliResult] = await Promise.all([cliAction, finished(stdout)]);
+    const cliResult = await streamToParser(git, cwd, args, parser);
 
     if (isErr(cliResult)) {
-        return err(createError(ERROR_GENERIC, unwrap(cliResult)));
+        return err(unwrap(cliResult));
     }
 
     return ok(parser.status);
