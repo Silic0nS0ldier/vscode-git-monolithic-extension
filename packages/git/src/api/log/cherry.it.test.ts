@@ -4,7 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { unwrapOk } from "../../errors.js";
 import { isErr } from "../../func-result.js";
-import { gitCtx, read, run, tempBareRepo, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, read, run, tempGitRepo, tempOrigin } from "../helpers.it.stub.js";
 import { cherry } from "./cherry.js";
 
 async function commit(repo: string, content: string, message: string): Promise<void> {
@@ -14,13 +14,11 @@ async function commit(repo: string, content: string, message: string): Promise<v
 }
 
 test(cherry.name + " - marks a rebased-and-repushed commit as equivalent", async () => {
-    await using remote = await tempBareRepo();
     await using repo = await tempGitRepo(true);
     await run(repo.path, ["branch", "-M", "main"]);
 
     await commit(repo.path, "base", "Base");
-    await run(repo.path, ["remote", "add", "origin", remote.path]);
-    await run(repo.path, ["push", "--set-upstream", "origin", "main"]);
+    await using _origin = await tempOrigin(repo.path);
 
     await commit(repo.path, "local", "Local pending change");
 
@@ -37,13 +35,11 @@ test(cherry.name + " - marks a rebased-and-repushed commit as equivalent", async
 });
 
 test(cherry.name + " - marks a commit with no equivalent as unique", async () => {
-    await using remote = await tempBareRepo();
     await using repo = await tempGitRepo(true);
     await run(repo.path, ["branch", "-M", "main"]);
 
     await commit(repo.path, "base", "Base");
-    await run(repo.path, ["remote", "add", "origin", remote.path]);
-    await run(repo.path, ["push", "--set-upstream", "origin", "main"]);
+    await using _origin = await tempOrigin(repo.path);
 
     // Pushed straight from local, so it has no local-only counterpart to be equivalent to.
     await commit(repo.path, "upstream-only", "Upstream-only change");

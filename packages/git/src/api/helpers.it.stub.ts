@@ -118,15 +118,27 @@ export async function tempGitRepo(initialCommit: boolean = false) {
     }
 }
 
-/** A bare repository to push at, so upstream tracking is set up the way git does it. */
-export async function tempBareRepo() {
-    const repoPath = await fs.mkdtemp(path.join(os.tmpdir(), "git-interop-test-remote"));
-    await run(repoPath, ["init", "--bare", "--initial-branch=main", "."]);
-
-    return {
-        path: repoPath,
+/**
+ * Adds a bare repository as `origin` and pushes the current branch to it, so upstream
+ * tracking is set up the way git does it.
+ */
+export async function tempOrigin(repoPath: string) {
+    const originPath = await fs.mkdtemp(path.join(os.tmpdir(), "git-interop-test-remote"));
+    const origin = {
+        path: originPath,
         async [Symbol.asyncDispose]() {
-            await fs.rm(repoPath, { force: true, recursive: true });
+            await fs.rm(originPath, { force: true, recursive: true });
         },
     };
+
+    try {
+        await run(originPath, ["init", "--bare", "--initial-branch=main", "."]);
+        await run(repoPath, ["remote", "add", "origin", originPath]);
+        await run(repoPath, ["push", "--set-upstream", "origin", "HEAD"]);
+    } catch (error) {
+        await origin[Symbol.asyncDispose]();
+        throw error;
+    }
+
+    return origin;
 }

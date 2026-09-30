@@ -1,35 +1,23 @@
 import assert from "node:assert";
-import fs from "node:fs/promises";
 import test from "node:test";
 import { unwrapOk } from "../../errors.js";
-import { gitCtx, run, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, run, tempGitRepo, tempOrigin } from "../helpers.it.stub.js";
 import { upstreams } from "./upstreams.js";
 
 /** A work tree whose `origin` is a bare repository it has pushed `main` and `topic` to. */
 async function repoWithOrigin() {
-    const repo = await tempGitRepo(true);
-    const origin = `${repo.path}-origin.git`;
+    await using stack = new AsyncDisposableStack();
+    const repo = stack.use(await tempGitRepo(true));
+    await run(repo.path, ["branch", "-M", "main"]);
+    const origin = stack.use(await tempOrigin(repo.path)).path;
+    await run(repo.path, ["push", "origin", "main:topic"]);
 
-    try {
-        await run(repo.path, ["branch", "-M", "main"]);
-        await run(repo.path, ["init", "--bare", "--initial-branch=main", origin]);
-        await run(repo.path, ["remote", "add", "origin", origin]);
-        await run(repo.path, ["push", "--set-upstream", "origin", "main"]);
-        await run(repo.path, ["push", "origin", "main:topic"]);
-
-        return {
-            origin,
-            path: repo.path,
-            async [Symbol.asyncDispose]() {
-                await fs.rm(origin, { force: true, recursive: true });
-                await repo[Symbol.asyncDispose]();
-            },
-        };
-    } catch (error) {
-        await fs.rm(origin, { force: true, recursive: true });
-        await repo[Symbol.asyncDispose]();
-        throw error;
-    }
+    const cleanup = stack.move();
+    return {
+        origin,
+        path: repo.path,
+        [Symbol.asyncDispose]: () => cleanup.disposeAsync(),
+    };
 }
 
 test(upstreams.name + " - lists branches tracking a remote, by the remote's name for the ref", async () => {
