@@ -1,15 +1,10 @@
-import { Status } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { makeCommandId, type ScmCommand } from "../../helpers.js";
+import { getUntrackedResources, makeCommandId, type ScmCommand } from "../../helpers.js";
 import { cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
 
 export function createCommand(): ScmCommand {
     async function cleanAllUntracked(repository: AbstractRepository): Promise<void> {
-        const resources = [
-            ...repository.sourceControlUI.trackedGroup.resourceStates.get(),
-            ...repository.sourceControlUI.untrackedGroup.resourceStates.get(),
-        ]
-            .filter(r => r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED);
+        const resources = getUntrackedResources(repository);
 
         if (resources.length === 0) {
             return;

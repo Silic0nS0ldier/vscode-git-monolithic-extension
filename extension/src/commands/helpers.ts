@@ -6,6 +6,7 @@ import {
     window,
     workspace,
 } from "vscode";
+import { Status } from "../api/git.js";
 import type { Model } from "../model.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../repository/Resource.js";
@@ -121,6 +122,14 @@ export function getSCMResource(
             )[0];
     }
     return undefined;
+}
+
+export function getUntrackedResources(repository: AbstractRepository): Resource[] {
+    return [
+        ...repository.sourceControlUI.trackedGroup.resourceStates.get(),
+        ...repository.sourceControlUI.untrackedGroup.resourceStates.get(),
+    ]
+        .filter(r => r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED);
 }
 
 export interface ScmCommandOptions {
