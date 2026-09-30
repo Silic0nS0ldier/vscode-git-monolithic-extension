@@ -1,25 +1,11 @@
 import assert from "node:assert";
 import fs from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { unwrapOk } from "../../errors.js";
 import { isErr } from "../../func-result.js";
-import { gitCtx, read, run, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, read, run, tempBareRepo, tempGitRepo } from "../helpers.it.stub.js";
 import { cherry } from "./cherry.js";
-
-/** A bare repository to push at, so upstream tracking is set up the way git does it. */
-async function tempBareRepo() {
-    const repoPath = await fs.mkdtemp(path.join(os.tmpdir(), "git-interop-test-remote"));
-    await run(repoPath, ["init", "--bare", "--initial-branch=main", "."]);
-
-    return {
-        path: repoPath,
-        async [Symbol.asyncDispose]() {
-            await fs.rm(repoPath, { force: true, recursive: true });
-        },
-    };
-}
 
 async function commit(repo: string, content: string, message: string): Promise<void> {
     await fs.writeFile(path.join(repo, "file.txt"), content);
