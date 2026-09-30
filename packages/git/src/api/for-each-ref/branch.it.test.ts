@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { unwrapOk } from "../../errors.js";
-import { gitCtx, read, run, tempBareRepo, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, read, run, tempGitRepo, tempOrigin } from "../helpers.it.stub.js";
 import { branch } from "./branch.js";
 
 async function commit(repo: string, message: string): Promise<string> {
@@ -31,13 +31,11 @@ test(branch.name + " - resolves a branch by its short name", async () => {
 });
 
 test(branch.name + " - reports the upstream and how far it has diverged", async () => {
-    await using remote = await tempBareRepo();
     await using repo = await tempGitRepo(true);
     await run(repo.path, ["branch", "-M", "main"]);
 
     await commit(repo.path, "Base");
-    await run(repo.path, ["remote", "add", "origin", remote.path]);
-    await run(repo.path, ["push", "--set-upstream", "origin", "main"]);
+    await using _origin = await tempOrigin(repo.path);
 
     const ahead = await commit(repo.path, "Ahead");
 
@@ -64,13 +62,11 @@ test(branch.name + " - reports the upstream and how far it has diverged", async 
 });
 
 test(branch.name + " - resolves a fully qualified remote ref", async () => {
-    await using remote = await tempBareRepo();
     await using repo = await tempGitRepo(true);
     await run(repo.path, ["branch", "-M", "main"]);
 
     const head = await commit(repo.path, "Base");
-    await run(repo.path, ["remote", "add", "origin", remote.path]);
-    await run(repo.path, ["push", "--set-upstream", "origin", "main"]);
+    await using _origin = await tempOrigin(repo.path);
 
     const detail = unwrapOk(await branch(gitCtx, repo.path, "refs/remotes/origin/main"));
 

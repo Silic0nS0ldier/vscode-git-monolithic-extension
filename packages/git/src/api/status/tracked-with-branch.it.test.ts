@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { unwrapOk } from "../../errors.js";
-import { gitCtx, read, run, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, read, run, tempGitRepo, tempOrigin } from "../helpers.it.stub.js";
 import { trackedWithBranch } from "./tracked-with-branch.js";
 import { tracked } from "./tracked.js";
 
@@ -26,10 +26,7 @@ test(trackedWithBranch.name + " - reports the same changes as tracked", async ()
 
 test(trackedWithBranch.name + " - reports the branch and its distance from the upstream", async () => {
     await using repo = await tempGitRepo(true);
-    await using remote = await tempGitRepo();
-    await run(remote.path, ["config", "receive.denyCurrentBranch", "ignore"]);
-    await run(repo.path, ["remote", "add", "origin", remote.path]);
-    await run(repo.path, ["push", "--set-upstream", "origin", "HEAD"]);
+    await using _origin = await tempOrigin(repo.path);
     await run(repo.path, ["commit", "--allow-empty", "-m", "Ahead"]);
 
     const { head } = unwrapOk(await trackedWithBranch(gitCtx, repo.path));

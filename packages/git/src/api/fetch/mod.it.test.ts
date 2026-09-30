@@ -4,7 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { ERROR_NON_ZERO_EXIT, unwrapOk } from "../../errors.js";
 import { isErr, unwrap } from "../../func-result.js";
-import { gitCtx, read, run, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, read, run, tempGitRepo, tempOrigin } from "../helpers.it.stub.js";
 import { fetch } from "./mod.js";
 
 /**
@@ -13,47 +13,35 @@ import { fetch } from "./mod.js";
  * never been fetched from.
  */
 async function repoWithRemotes() {
-    const repo = await tempGitRepo(true);
-    const origin = `${repo.path}-origin.git`;
+    await using stack = new AsyncDisposableStack();
+    const repo = stack.use(await tempGitRepo(true));
+    await run(repo.path, ["branch", "-M", "main"]);
+    const origin = stack.use(await tempOrigin(repo.path)).path;
+
+    await run(origin, ["branch", "retired", "main"]);
+    await run(repo.path, ["fetch", "origin"]);
+    await run(origin, ["update-ref", "-d", "refs/heads/retired"]);
+
+    const tree = await read(repo.path, ["rev-parse", "HEAD^{tree}"]);
+    const head = await read(repo.path, ["rev-parse", "HEAD"]);
+    const ahead = await read(repo.path, ["commit-tree", tree, "-p", head, "-m", "Upstream change"]);
+    await run(repo.path, ["push", "origin", `${ahead}:refs/heads/main`]);
+    // `git push` advances the tracking ref even for a raw object name.
+    await run(repo.path, ["update-ref", "refs/remotes/origin/main", head]);
+
     const secondary = `${repo.path}-secondary.git`;
+    stack.defer(() => fs.rm(secondary, { force: true, recursive: true }));
+    await run(repo.path, ["clone", "--bare", repo.path, secondary]);
+    await run(repo.path, ["remote", "add", "secondary", secondary]);
 
-    try {
-        await run(repo.path, ["branch", "-M", "main"]);
-        await run(repo.path, ["init", "--bare", "--initial-branch=main", origin]);
-        await run(repo.path, ["remote", "add", "origin", origin]);
-        await run(repo.path, ["push", "--set-upstream", "origin", "main"]);
-
-        await run(origin, ["branch", "retired", "main"]);
-        await run(repo.path, ["fetch", "origin"]);
-        await run(origin, ["update-ref", "-d", "refs/heads/retired"]);
-
-        const tree = await read(repo.path, ["rev-parse", "HEAD^{tree}"]);
-        const head = await read(repo.path, ["rev-parse", "HEAD"]);
-        const ahead = await read(repo.path, ["commit-tree", tree, "-p", head, "-m", "Upstream change"]);
-        await run(repo.path, ["push", "origin", `${ahead}:refs/heads/main`]);
-        // `git push` advances the tracking ref even for a raw object name.
-        await run(repo.path, ["update-ref", "refs/remotes/origin/main", head]);
-
-        await run(repo.path, ["clone", "--bare", repo.path, secondary]);
-        await run(repo.path, ["remote", "add", "secondary", secondary]);
-
-        return {
-            ahead,
-            head,
-            origin,
-            path: repo.path,
-            async [Symbol.asyncDispose]() {
-                await fs.rm(origin, { force: true, recursive: true });
-                await fs.rm(secondary, { force: true, recursive: true });
-                await repo[Symbol.asyncDispose]();
-            },
-        };
-    } catch (error) {
-        await fs.rm(origin, { force: true, recursive: true });
-        await fs.rm(secondary, { force: true, recursive: true });
-        await repo[Symbol.asyncDispose]();
-        throw error;
-    }
+    const cleanup = stack.move();
+    return {
+        ahead,
+        head,
+        origin,
+        path: repo.path,
+        [Symbol.asyncDispose]: () => cleanup.disposeAsync(),
+    };
 }
 
 test(fetch.name + " - advances the tracking ref of the default remote", async () => {
