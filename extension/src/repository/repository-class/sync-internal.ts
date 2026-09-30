@@ -8,7 +8,7 @@ import { fromCancellationToken } from "../../util/abort-signal-adapters.js";
 import * as config from "../../util/config.js";
 import { Operation } from "../Operations.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
-import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
+import { fetchAndPull } from "./fetch-and-pull.js";
 import { maybeAutoStash } from "./maybe-auto-stash.js";
 import { pushInternal } from "./push-internal.js";
 import type { RunFn } from "./run.js";
@@ -41,21 +41,13 @@ export async function syncInternal(
             repository,
             async () => {
                 const repositoryUri = Uri.file(repoRoot);
-                const fetchOnPull = config.fetchOnPull(repositoryUri);
-                const tags = config.pullTags(repositoryUri);
                 const followTags = config.followTagsWhenSync(repositoryUri);
                 const supportCancellation = config.supportCancellation(repositoryUri);
 
-                const fn = async (abortSignal?: AbortSignal): Promise<void> => {
-                    // When fetchOnPull is enabled, fetch all branches when pulling
-                    if (fetchOnPull) {
-                        await repository.fetch({ all: true, abortSignal });
-                    }
-
-                    if (await checkIfMaybeRebased(run, repository, HEAD?.name)) {
-                        await repository.pull(rebase, remoteName, pullBranch, { abortSignal, tags });
-                    }
-                };
+                const fn = (abortSignal?: AbortSignal): Promise<void> =>
+                    fetchAndPull(run, repoRoot, repository, HEAD?.name, rebase, remoteName, pullBranch, {
+                        abortSignal,
+                    });
 
                 if (supportCancellation) {
                     const opts: ProgressOptions = {
