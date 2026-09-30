@@ -58,7 +58,9 @@ export function createCommand(
                 },
             );
         } catch (err) {
-            if (isCancelledError(err)) {
+            // `runByRepository` aggregates each repository's failure.
+            const errors = err instanceof AggregateError ? err.errors : [err];
+            if (errors.every(isCancelledError)) {
                 return;
             }
 

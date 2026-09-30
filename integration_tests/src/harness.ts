@@ -247,6 +247,11 @@ export function notification(page: Page, text: RegExp): Locator {
     return page.locator(".notifications-toasts .notification-list-item").filter({ hasText: text });
 }
 
+/** A modal dialog whose message matches `text`, e.g. from `window.showWarningMessage` with `modal: true`. */
+export function dialog(page: Page, text: RegExp): Locator {
+    return page.locator(".monaco-dialog-box").filter({ hasText: text });
+}
+
 /** The history view is a second `.scm-view`, and it renders commits rather than changes. */
 export function scmView(page: Page): Locator {
     return page.locator(".scm-view:not(.scm-history-view)").first();
