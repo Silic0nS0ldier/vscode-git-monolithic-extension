@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { unwrapOk } from "../../errors.js";
-import { gitCtx, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, tempGitRepo, writeUntrackedPastCliLimit } from "../helpers.it.stub.js";
 import { clean } from "./mod.js";
 
 test(clean.name + " - removes untracked file", async () => {
@@ -63,20 +63,7 @@ test(clean.name + " - leaves tracked files alone", async () => {
 test(clean.name + " - handles path list exceeding the CLI length limit", async () => {
     await using repo = await tempGitRepo(true);
 
-    // Enough files that the combined pathspec exceeds MAX_CLI_LENGTH (30000)
-    // and forces multiple `git clean` invocations under the hood.
-    const fileCount = 2000;
-    const paths: string[] = [];
-    for (let i = 0; i < fileCount; i++) {
-        const name = `untracked-with-a-reasonably-long-filename-${i}.txt`;
-        await fs.writeFile(path.join(repo.path, name), "x");
-        paths.push(name);
-    }
-
-    // Sanity check: the combined length actually exceeds the chunk limit,
-    // otherwise this test would silently degrade to a single-chunk run.
-    const totalLength = paths.reduce((sum, p) => sum + p.length, 0);
-    assert.ok(totalLength > 30000, `pathspec should exceed chunk limit, got ${totalLength}`);
+    const paths = await writeUntrackedPastCliLimit(repo.path);
 
     unwrapOk(await clean(gitCtx, repo.path, paths));
 

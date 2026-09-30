@@ -1,4 +1,5 @@
 import { runfiles } from "@bazel/runfiles";
+import assert from "node:assert";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -45,6 +46,25 @@ export async function writeExecutableBitFixture(repoPath: string): Promise<void>
     const nonExecFilePath = path.join(repoPath, "non_executable.txt");
     await fs.writeFile(nonExecFilePath, "This is a non-executable file.");
     await fs.chmod(nonExecFilePath, 0o644);
+}
+
+/**
+ * Writes enough untracked files that their combined pathspec exceeds MAX_CLI_LENGTH (30000),
+ * forcing a chunked API into multiple invocations. Returns their repo-relative paths.
+ */
+export async function writeUntrackedPastCliLimit(repoPath: string): Promise<string[]> {
+    const paths: string[] = [];
+    for (let i = 0; i < 2000; i++) {
+        const name = `untracked-with-a-reasonably-long-filename-${i}.txt`;
+        await fs.writeFile(path.join(repoPath, name), "x");
+        paths.push(name);
+    }
+
+    // Otherwise a caller's test would silently degrade to a single-chunk run.
+    const totalLength = paths.reduce((sum, p) => sum + p.length, 0);
+    assert.ok(totalLength > 30000, `pathspec should exceed chunk limit, got ${totalLength}`);
+
+    return paths;
 }
 
 export async function tempGitRepo(initialCommit: boolean = false) {
