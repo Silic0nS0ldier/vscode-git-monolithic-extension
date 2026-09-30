@@ -4,7 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { ERROR_NON_ZERO_EXIT, unwrapOk } from "../../errors.js";
 import { isErr, unwrap } from "../../func-result.js";
-import { gitCtx, read, run, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, read, run, tempGitRepo, writeUntrackedPastCliLimit } from "../helpers.it.stub.js";
 import { add } from "./mod.js";
 
 /** Path to its two-letter porcelain status code, e.g. `file.txt` -> `M ` (staged). */
@@ -107,17 +107,7 @@ test(add.name + " - fails on a path that does not exist", async () => {
 test(add.name + " - handles path list exceeding the CLI length limit", async () => {
     await using repo = await tempGitRepo(true);
 
-    // Enough files that the combined pathspec exceeds MAX_CLI_LENGTH (30000)
-    // and forces multiple `git add` invocations under the hood.
-    const paths: string[] = [];
-    for (let i = 0; i < 2000; i++) {
-        const name = `untracked-with-a-reasonably-long-filename-${i}.txt`;
-        await fs.writeFile(path.join(repo.path, name), "x");
-        paths.push(name);
-    }
-
-    const totalLength = paths.reduce((sum, p) => sum + p.length, 0);
-    assert.ok(totalLength > 30000, `pathspec should exceed chunk limit, got ${totalLength}`);
+    const paths = await writeUntrackedPastCliLimit(repo.path);
 
     unwrapOk(await add(gitCtx, repo.path, paths));
 
