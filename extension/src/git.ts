@@ -16,6 +16,7 @@ import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showCdup } from "monolithic-git-interop/api/rev-parse/show-cdup";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
+import { rm as gitRm } from "monolithic-git-interop/api/rm/mod";
 import { commit as showCommit, show } from "monolithic-git-interop/api/show";
 import { list as listStashes } from "monolithic-git-interop/api/stash/list";
 import { type IFileStatus, tracked } from "monolithic-git-interop/api/status/tracked";
@@ -25,12 +26,12 @@ import {
     trackedWithBranch,
 } from "monolithic-git-interop/api/status/tracked-with-branch";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
-import type { GitContext } from "monolithic-git-interop/cli";
+import type { CLIErrors, GitContext } from "monolithic-git-interop/cli";
 import * as gitErrors from "monolithic-git-interop/errors";
 import { unwrapOk } from "monolithic-git-interop/errors";
 import type { AllServices } from "monolithic-git-interop/services";
 import { createServices } from "monolithic-git-interop/services/nodejs";
-import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
+import { isErr, isOk, type Result, unwrap } from "monolithic-git-interop/util/result";
 import type * as cp from "node:child_process";
 import { EventEmitter } from "node:events";
 import { promises as fs } from "node:fs";
@@ -292,6 +293,30 @@ interface PullOptions {
 
 let runCounter = 0;
 
+/** Throws what `this.exec` would have for the same failure. */
+function throwOnCliError(result: Result<void, CLIErrors>, gitCommand: string): void {
+    if (isOk(result)) {
+        return;
+    }
+
+    const error = unwrap(result);
+
+    if (error.type !== gitErrors.ERROR_NON_ZERO_EXIT) {
+        throw error._error;
+    }
+
+    const { args, exitCode, stderr, stdout } = error.cause;
+    throw new GitError({
+        exitCode: exitCode ?? undefined,
+        gitArgs: [...args],
+        gitCommand,
+        gitErrorCode: getGitErrorCode(stderr),
+        message: "Failed to execute git",
+        stderr,
+        stdout,
+    });
+}
+
 // TODO All logic here needs to be split across the following locations;
 // - extension/src/repository/repository-class/mod.ts (business logic)
 // - monolithic-git-interop (git interactions)
@@ -440,38 +465,15 @@ export class Repository {
             update: opts?.update,
         });
 
-        if (isOk(result)) {
-            return;
-        }
-
-        const error = unwrap(result);
-
-        if (error.type !== gitErrors.ERROR_NON_ZERO_EXIT) {
-            throw error._error;
-        }
-
-        const { args, exitCode, stderr, stdout } = error.cause;
-        throw new GitError({
-            exitCode: exitCode ?? undefined,
-            gitArgs: [...args],
-            gitCommand: "add",
-            gitErrorCode: getGitErrorCode(stderr),
-            message: "Failed to execute git",
-            stderr,
-            stdout,
-        });
+        throwOnCliError(result, "add");
     }
 
     async rm(paths: string[]): Promise<void> {
-        const args = ["rm", "--"];
+        const result = await gitRm(this.#git._context, this.#repositoryRoot, paths, {
+            env: cliEnv(this.git.env, "rm"),
+        });
 
-        if (!paths || !paths.length) {
-            return;
-        }
-
-        args.push(...paths.map(sanitizePath));
-
-        await this.exec(args);
+        throwOnCliError(result, "rm");
     }
 
     async stage(path: string, data: string): Promise<void> {
