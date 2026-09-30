@@ -1,12 +1,10 @@
-import { type OutputChannel, Uri, window } from "vscode";
-import * as i18n from "../../../i18n/mod.js";
+import { type OutputChannel, Uri } from "vscode";
 import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
-import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
-import { categorizeResourceByResolution, stageDeletionConflict } from "./helpers.js";
+import { categorizeResourceByResolution, stageConflicts, stageDeletionConflict } from "./helpers.js";
 
 export function createCommand(
     outputChannel: OutputChannel,
@@ -37,18 +35,8 @@ export function createCommand(
         const selection = normalisedResourceStates.filter(s => s instanceof Resource) as Resource[];
         const { resolved, unresolved, deletionConflicts } = await categorizeResourceByResolution(selection);
 
-        if (unresolved.length > 0) {
-            const message = i18n.Translations.confirmStageWithMergeConflicts(unresolved);
-            const yes = i18n.Translations.yes();
-            const pick = await window.showWarningMessage(message, { modal: true }, yes);
-
-            if (pick !== yes) {
-                return;
-            }
-        }
-
-        try {
-            await runByRepository(
+        const proceed = await stageConflicts(unresolved, () =>
+            runByRepository(
                 model,
                 deletionConflicts.map(r => r.state.resourceUri),
                 async (repository, resources) => {
@@ -56,15 +44,10 @@ export function createCommand(
                         await stageDeletionConflict(repository, resource);
                     }
                 },
-            );
-        } catch (err) {
-            // `runByRepository` aggregates each repository's failure.
-            const errors = err instanceof AggregateError ? err.errors : [err];
-            if (errors.every(isCancelledError)) {
-                return;
-            }
+            ));
 
-            throw err;
+        if (!proceed) {
+            return;
         }
 
         const workingTree = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.WorkingTree);

@@ -8,11 +8,12 @@ import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { applyLineChanges } from "../../../staging.js";
 import { grep } from "../../../util/grep.js";
+import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import { runByRepository } from "../../helpers.js";
 
 export async function categorizeResourceByResolution(
     resources: Resource[],
-): Promise<{ merge: Resource[]; resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[] }> {
+): Promise<{ resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[] }> {
     const selection: Resource[] = resources.filter(s => s instanceof Resource);
     const merge = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.Merge);
     const isBothAddedOrModified = (s: Resource): boolean =>
@@ -29,7 +30,40 @@ export async function categorizeResourceByResolution(
         ...possibleUnresolved.filter((_s, i) => unresolvedBothModified[i]),
     ];
 
-    return { deletionConflicts, merge, resolved, unresolved };
+    return { deletionConflicts, resolved, unresolved };
+}
+
+/**
+ * Confirms staging `unresolved` conflicts, then runs `stageDeletionConflicts`.
+ * Resolves to false when the user backs out of either, before anything else is staged.
+ */
+export async function stageConflicts(
+    unresolved: Resource[],
+    stageDeletionConflicts: () => Promise<void>,
+): Promise<boolean> {
+    if (unresolved.length > 0) {
+        const message = i18n.Translations.confirmStageWithMergeConflicts(unresolved);
+        const yes = i18n.Translations.yes();
+        const pick = await window.showWarningMessage(message, { modal: true }, yes);
+
+        if (pick !== yes) {
+            return false;
+        }
+    }
+
+    try {
+        await stageDeletionConflicts();
+    } catch (err) {
+        // `runByRepository` aggregates each repository's failure.
+        const errors = err instanceof AggregateError ? err.errors : [err];
+        if (errors.every(isCancelledError)) {
+            return false;
+        }
+
+        throw err;
+    }
+
+    return true;
 }
 
 export async function stageDeletionConflict(repository: AbstractRepository, uri: Uri): Promise<void> {

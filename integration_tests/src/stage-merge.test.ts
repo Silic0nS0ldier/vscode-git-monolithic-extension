@@ -1,15 +1,18 @@
 import assert from "node:assert";
 import { after, before } from "node:test";
+import { isDeepStrictEqual } from "node:util";
 import type { Page } from "playwright-core";
 import { status } from "./git.js";
 import {
     connect,
     createScenario,
     dialog,
+    invokeGroupAction,
     invokeRowAction,
     LOAD_TIMEOUT_MS,
     openScmView,
     openWorkbench,
+    pollUntil,
 } from "./harness.js";
 
 let browser: Awaited<ReturnType<typeof connect>>;
@@ -47,4 +50,34 @@ scenario("cancelling the deletion prompt for a conflict stages nothing and raise
         "cancelling surfaced an error",
     );
     assert.deepStrictEqual(await status(), CONFLICTED);
+});
+
+scenario("Stage All Merge Changes asks about only the unresolved file, before resolving anything", async () => {
+    const view = await openScmView(page);
+
+    await invokeGroupAction(view, "Merge", "Stage All Merge Changes");
+
+    const warning = dialog(page, /Are you sure you want to stage unresolved\.txt with merge conflicts\?/u);
+    await warning.getByRole("button", { name: "Cancel" }).click();
+    await warning.waitFor({ state: "hidden" });
+
+    assert.deepStrictEqual(await status(), CONFLICTED);
+});
+
+scenario("confirming Stage All Merge Changes stages every conflict, deletions included", async () => {
+    const view = await openScmView(page);
+
+    await invokeGroupAction(view, "Merge", "Stage All Merge Changes");
+
+    const warning = dialog(page, /Are you sure you want to stage unresolved\.txt with merge conflicts\?/u);
+    await warning.getByRole("button", { name: "Yes" }).click();
+
+    const prompt = dialog(page, /was deleted by us and modified by them/u);
+    await prompt.getByRole("button", { name: "Delete File" }).click();
+
+    await pollUntil(
+        "every conflict to be staged",
+        status,
+        current => isDeepStrictEqual(current, { "resolved.txt": "M ", "unresolved.txt": "M " }),
+    );
 });
