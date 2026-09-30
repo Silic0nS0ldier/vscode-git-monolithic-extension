@@ -1,9 +1,7 @@
 import assert from "node:assert";
-import fs from "node:fs/promises";
-import path from "node:path";
 import test from "node:test";
 import { unwrapOk } from "../../errors.js";
-import { gitCtx, tempGitRepo } from "../helpers.it.stub.js";
+import { gitCtx, tempGitRepo, writeExecutableBitFixture } from "../helpers.it.stub.js";
 import { hasExecutableBit } from "./has-executable-bit.js";
 
 test(hasExecutableBit.name, async () => {
@@ -14,15 +12,7 @@ test(hasExecutableBit.name, async () => {
         assert.strictEqual(hasExecBit, expected, `Expected "${filePath}" to have executable bit: ${expected}`);
     }
 
-    // Create a file with executable permissions
-    const filePath = path.join(repo.path, "executable.sh");
-    await fs.writeFile(filePath, "#!/bin/bash\necho Hello");
-    await fs.chmod(filePath, 0o755); // rwxr-xr-x
-
-    // Create a file without executable permissions
-    const nonExecFilePath = path.join(repo.path, "non_executable.txt");
-    await fs.writeFile(nonExecFilePath, "This is a non-executable file.");
-    await fs.chmod(nonExecFilePath, 0o644); // rw-r--r--
+    await writeExecutableBitFixture(repo.path);
 
     // Untracked
     await assertHasExecutableBit("executable.sh", "HEAD", undefined);

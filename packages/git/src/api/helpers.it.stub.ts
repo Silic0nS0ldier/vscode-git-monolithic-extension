@@ -36,6 +36,17 @@ export async function read(cwd: string, args: string[]): Promise<string> {
     return unwrapOk(await readToString({ cli: gitCtx.cli, cwd }, args)).trim();
 }
 
+/** Writes `executable.sh` (0o755) and `non_executable.txt` (0o644), neither yet added. */
+export async function writeExecutableBitFixture(repoPath: string): Promise<void> {
+    const filePath = path.join(repoPath, "executable.sh");
+    await fs.writeFile(filePath, "#!/bin/bash\necho Hello");
+    await fs.chmod(filePath, 0o755);
+
+    const nonExecFilePath = path.join(repoPath, "non_executable.txt");
+    await fs.writeFile(nonExecFilePath, "This is a non-executable file.");
+    await fs.chmod(nonExecFilePath, 0o644);
+}
+
 export async function tempGitRepo(initialCommit: boolean = false) {
     const repoPath = await fs.mkdtemp(path.join(os.tmpdir(), "git-interop-test"));
     try {
