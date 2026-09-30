@@ -1,7 +1,6 @@
 import { from_str_radix } from "monolithic-git-wasm";
-import { PassThrough } from "node:stream";
-import { finished } from "node:stream/promises";
 import type { GitContext } from "../../cli/context.js";
+import { streamToParser } from "../../cli/helpers/stream-to-parser.js";
 import { createError, ERROR_GENERIC, type GenericError } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import { trySemverCheck } from "../version/mod.js";
@@ -43,21 +42,15 @@ export async function trackedWithBranch(
     opts?: { ignoreSubmodules?: boolean },
 ): Promise<Result<TrackedWithBranch, TrackedWithBranchErrors>> {
     const parser = new PorcelainV2Parser();
-    const stdout = new PassThrough();
-    stdout.on("data", (chunk: string) => {
-        parser.update(chunk);
-    });
 
     const args = ["status", "-z", "--porcelain=v2", "--branch", "--untracked-files=no"];
     if (opts?.ignoreSubmodules) {
         args.push("--ignore-submodules");
     }
-    const cliAction = git.cli({ cwd, stdout }, args);
-
-    const [cliResult] = await Promise.all([cliAction, finished(stdout)]);
+    const cliResult = await streamToParser(git, cwd, args, parser);
 
     if (isErr(cliResult)) {
-        return err(createError(ERROR_GENERIC, unwrap(cliResult)));
+        return err(unwrap(cliResult));
     }
 
     return parser.result();
