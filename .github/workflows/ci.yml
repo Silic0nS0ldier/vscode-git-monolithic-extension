@@ -165,6 +165,8 @@ jobs:
           install: false
       # Subset of dependencies for knip analysis
       - run: pnpm install --frozen-lockfile --prod --filter . --filter ./packages/wasm
+      # pnpm >=12.7 skips `prepare` on `--prod` installs; knip needs the `dist` link it creates.
+      - run: pnpm --filter ./packages/wasm run prepare
       - run: pnpm exec knip
         id: knip
         continue-on-error: true
