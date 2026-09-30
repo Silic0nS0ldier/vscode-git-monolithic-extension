@@ -117,3 +117,16 @@ export async function tempGitRepo(initialCommit: boolean = false) {
         throw error;
     }
 }
+
+/** A bare repository to push at, so upstream tracking is set up the way git does it. */
+export async function tempBareRepo() {
+    const repoPath = await fs.mkdtemp(path.join(os.tmpdir(), "git-interop-test-remote"));
+    await run(repoPath, ["init", "--bare", "--initial-branch=main", "."]);
+
+    return {
+        path: repoPath,
+        async [Symbol.asyncDispose]() {
+            await fs.rm(repoPath, { force: true, recursive: true });
+        },
+    };
+}
