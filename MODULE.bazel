@@ -3,7 +3,7 @@ module(name = "vscode_git_monolithic")
 # To fully update lockfile: bazel mod deps --lockfile_mode=refresh
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
-bazel_dep(name = "aspect_rules_js", version = "3.5.0")
+bazel_dep(name = "aspect_rules_js", version = "3.5.1")
 bazel_dep(name = "aspect_rules_lint", version = "2.9.0")
 bazel_dep(name = "aspect_rules_ts", version = "3.10.1")
 bazel_dep(name = "bazel_skylib", version = "1.9.2")
