@@ -1,0 +1,33 @@
+Declare rules_distroless's `deb_import` reproducible so it can use the repo contents cache.
+
+Its inputs are the sha256-pinned `.deb` URLs, the rule attributes and each dependency's
+`filemap.json` (a recorded input). Without this every package repo reruns on every CI
+runner, and `host_bsdtar()` reading the bsdtar binary materialises
+`@bsd_tar_toolchains_linux_amd64`.
+
+`_extracted/` holds scratch copies of `.so` linker scripts and `.pc` files that nothing in
+the generated BUILD file references, so it is deleted to keep it out of the cache entry.
+
+`deb_import` also shells out to host `grep` and `mkdir`. Their output reaches the repo
+only as file lists derived from the pinned archive, so it does not affect the contents.
+
+Not yet raised upstream.
+
+diff --git a/apt/private/deb_import.bzl b/apt/private/deb_import.bzl
+--- a/apt/private/deb_import.bzl
++++ b/apt/private/deb_import.bzl
+@@ -496,6 +496,14 @@ def _deb_import_impl(rctx):
+         symlink_outs = symlinks.keys(),
+     ))
+ 
++    rctx.delete(_EXTRACT_DIR)
++
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ deb_import = repository_rule(
+     implementation = _deb_import_impl,
+     attrs = {
