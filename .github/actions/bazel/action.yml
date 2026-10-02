@@ -9,6 +9,10 @@ inputs:
     description: "Whether the job publishes Bazel's caches at the end"
     required: false
     default: "false"
+  hidden-lockfile:
+    description: "Whether to restore the hidden lockfile, and refresh and save it at the end when `cache-save` is set"
+    required: false
+    default: "true"
   extra-bazelrc:
     description: "Lines appended to the generated bazelrc"
     required: false
@@ -55,3 +59,7 @@ runs:
         cache-save: ${{ inputs.cache-save }}
         bazelisk-cache: true
         repository-cache: false
+    - uses: ./.github/actions/bazel-hidden-lockfile
+      if: inputs.hidden-lockfile == 'true'
+      with:
+        save: ${{ inputs.cache-save }}

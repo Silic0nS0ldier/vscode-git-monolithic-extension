@@ -49,6 +49,9 @@
             "entry": [
                 "src/main.ts"
             ],
+            "ignoreBinaries": [
+                "bazel"
+            ],
             "project": [
                 "src/**/*.ts"
             ]

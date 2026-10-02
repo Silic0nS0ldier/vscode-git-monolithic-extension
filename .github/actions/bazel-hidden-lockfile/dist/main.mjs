@@ -33,7 +33,7 @@ import require$$1$2 from 'node:console';
 import require$$1$3 from 'node:dns';
 import require$$5$3 from 'node:string_decoder';
 import * as child from 'node:child_process';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { setTimeout as setTimeout$1 } from 'node:timers';
 import process$1 from 'node:process';
 import require$$1$4 from 'node:tty';
@@ -83209,7 +83209,14 @@ async function main(workspace) {
     }
     setOutput("cache-hit", matched === keys.primary);
 }
-async function post() {
+async function refresh(workspace) {
+    return new Promise((resolve) => {
+        const child = spawn("bazel", ["mod", "deps", "--lockfile_mode=update"], { cwd: workspace, stdio: "inherit" });
+        child.on("error", () => resolve(false));
+        child.on("close", (code) => resolve(code === 0));
+    });
+}
+async function post(workspace) {
     if (!getBooleanInput("save")) {
         return;
     }
@@ -83221,6 +83228,10 @@ async function post() {
     }
     if (getState(STATE_MATCHED) === primary) {
         info(`Cache hit on ${primary}, not saving.`);
+        return;
+    }
+    if (!await refresh(workspace)) {
+        warning("`bazel mod deps` failed, not saving the hidden lockfile.");
         return;
     }
     if (!existsSync(lockfile)) {
@@ -83241,12 +83252,13 @@ async function post() {
     }
 }
 try {
+    const workspace = process.env["GITHUB_WORKSPACE"] ?? process.cwd();
     if (getState("is-post") === "true") {
-        await post();
+        await post(workspace);
     }
     else {
         saveState("is-post", "true");
-        await main(process.env["GITHUB_WORKSPACE"] ?? process.cwd());
+        await main(workspace);
     }
 }
 catch (e) {
