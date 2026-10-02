@@ -1,0 +1,44 @@
+Declare rules_distroless's apt hub and filemap repos reproducible so they can use the
+repo contents cache.
+
+`translate_dependency_set` (the apt hub) is a pure function of `lock_content`,
+`depset_name`, `mergedusr` and the `package_template` file, which is a recorded input.
+`deb_filemap` only writes its `files` attribute to disk. Without this both rerun on every
+CI runner, and reading `package_template` materialises all of `@rules_distroless`.
+
+Not yet raised upstream.
+
+diff --git a/apt/private/deb_filemap.bzl b/apt/private/deb_filemap.bzl
+index f8f50ae..326f2b0 100644
+--- a/apt/private/deb_filemap.bzl
++++ b/apt/private/deb_filemap.bzl
+@@ -10,6 +10,12 @@
+     rctx.file("filemap.json", rctx.attr.files)
+     rctx.file("BUILD.bazel", 'exports_files(["filemap.json"], visibility = ["//visibility:public"])\n')
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ deb_filemap = repository_rule(
+     implementation = _deb_filemap_impl,
+     attrs = {
+diff --git a/apt/private/translate_dependency_set.bzl b/apt/private/translate_dependency_set.bzl
+index 46bfe4c..4382a7f 100644
+--- a/apt/private/translate_dependency_set.bzl
++++ b/apt/private/translate_dependency_set.bzl
+@@ -263,6 +263,12 @@
+         architectures = starlark_codegen_utils.to_list_attr(dependency_set["sets"].keys()),
+     ))
+ 
++    # Bazel <8.3.0 lacks rctx.repo_metadata
++    if not hasattr(rctx, "repo_metadata"):
++        return None
++
++    return rctx.repo_metadata(reproducible = True)
++
+ translate_dependency_set = repository_rule(
+     implementation = _translate_dependency_set_impl,
+     attrs = {
