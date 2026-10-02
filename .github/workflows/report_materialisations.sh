@@ -3,16 +3,15 @@
 # Appends the remote repos Bazel materialised, and the repos whose repo rules ran, to the job summary.
 # Report only: never fails the job.
 #
-# Usage: OUTPUT_BASE=<bazel output base> report_materialisations.sh <heading> [profile.gz]
+# Usage: report_materialisations.sh <heading> <bazel stderr log> [profile.gz]
 #
-# `command.log` only describes the most recent Bazel command, so call this straight after the
-# command it reports on, and resolve OUTPUT_BASE before the first build (`bazel info` is a command).
+# Bazel 9 leaves no `command.log` in the output base, so the caller has to capture stderr.
 set -uo pipefail
 
 heading="${1:-Bazel}"
-profile="${2:-}"
+command_log="${2:-}"
+profile="${3:-}"
 summary="${GITHUB_STEP_SUMMARY:-/dev/stdout}"
-command_log="${OUTPUT_BASE:-}/command.log"
 
 # Colour codes and `\r` redraws from `--color=yes` would otherwise end up in repo names.
 strip_ansi() {
@@ -56,8 +55,8 @@ print_grouped() {
     echo
     echo "#### Materialised remote repos"
     echo
-    if [[ -z "${OUTPUT_BASE:-}" || ! -f "$command_log" ]]; then
-        echo "_No command log at \`${command_log}\`_"
+    if [[ -z "$command_log" || ! -f "$command_log" ]]; then
+        echo "_No Bazel log at \`${command_log}\`_"
     else
         materialised="$(
             strip_ansi <"$command_log" \

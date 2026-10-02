@@ -132,12 +132,11 @@ jobs:
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-      # `bazel info` is a command that replaces `command.log`, so resolve it once before building.
-      - run: echo "OUTPUT_BASE=$(bazel info output_base)" >> "$GITHUB_ENV"
-      - run: bazel test //...
+      # Stderr is teed because Bazel 9 leaves no `command.log` for the report to read.
+      - run: bazel test //... 2> >(tee "${{ runner.temp }}/test.log" >&2)
         id: test
         continue-on-error: true
-      - run: ./.github/workflows/report_materialisations.sh "bazel test //..." "${{ runner.temp }}/test.profile.gz"
+      - run: ./.github/workflows/report_materialisations.sh "bazel test //..." "${{ runner.temp }}/test.log" "${{ runner.temp }}/test.profile.gz"
         if: always()
       - uses: actions/upload-artifact@v7
         if: steps.test.outcome == 'failure'
