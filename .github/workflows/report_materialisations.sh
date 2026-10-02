@@ -32,6 +32,25 @@ print_list() {
     fi
 }
 
+# Hundreds of repos can share one extension, so summarise per `<module>++<extension>` first.
+print_grouped() {
+    local list="$1"
+    if [[ -z "$list" ]]; then
+        echo "_None_"
+    else
+        echo "| Module extension | Repos |"
+        echo "| --- | ---: |"
+        printf '%s\n' "$list" | sed 's/+[^+]*$//' | sort | uniq -c | sort -k1,1nr -k2 \
+            | awk '{ printf "| `%s` | %s |\n", $2, $1 }'
+        echo
+        echo "<details><summary>All $(printf '%s\n' "$list" | wc -l) repos</summary>"
+        echo
+        printf '%s\n' "$list" | sed -e 's/^/- `/' -e 's/$/`/'
+        echo
+        echo "</details>"
+    fi
+}
+
 {
     echo "### ${heading}"
     echo
@@ -53,14 +72,16 @@ print_list() {
     if [[ -z "$profile" || ! -f "$profile" ]]; then
         echo "_No profile at \`${profile}\`_"
     else
-        # Profiles can be truncated, so stream them rather than parsing as JSON.
+        # Profiles can be truncated, so stream them rather than parsing as JSON. `local: ` events
+        # are commands a repo rule executed, not repos.
         ran="$(
             { gzip -dc "$profile" 2>/dev/null || true; } \
                 | grep -o '"cat":"Starlark repository function call","name":"[^"]*"' \
                 | sed -e 's/.*"name":"//' -e 's/"$//' \
+                | grep -v '^local: ' \
                 | sort -u
         )"
-        print_list "$ran"
+        print_grouped "$ran"
     fi
     echo
 } >>"$summary" || true
