@@ -1,0 +1,24 @@
+Drop the redundant `module_ctx.watch(version_from)` from the `typescript` extension.
+
+The extension never reads `version_from`; it only forwards the label to `npm_dependencies()`, and
+the `http_archive_version` repository rule that does read it already records it as an input. The
+`watch` changes no output, but because the extension is reproducible and re-runs on every fresh
+server, it forces Bazel to materialise the entire repo that owns the label (here the whole `@npm`
+hub) whenever a remote repo contents cache is in use.
+
+Applies on top of 0001_typescript_from_node_modules.patch. Kept separate so it can go upstream
+independently.
+
+diff --git a/ts/extensions.bzl b/ts/extensions.bzl
+index 5152ec0..792f2d6 100644
+--- a/ts/extensions.bzl
++++ b/ts/extensions.bzl
+@@ -86,8 +86,6 @@ To resolve this conflict, the root module should explicitly specify the desired
+ 
+     for name, entry in selected.items():
+         version_from = entry["version_from"]
+-        if version_from and hasattr(module_ctx, "watch"):
+-            module_ctx.watch(version_from)
+ 
+         ts_version = entry["version"]
+         if not ts_version and not version_from:
