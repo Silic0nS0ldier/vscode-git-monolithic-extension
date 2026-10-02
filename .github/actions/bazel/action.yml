@@ -38,8 +38,7 @@ runs:
           common --curses=no
           common --show_progress_rate_limit=5
           common --lockfile_mode=error
-          # Repo contents cache adds considerable pressure on GH Actions cache storage.
-          # Disabled until we find a more efficient way to manage it.
+          # GH Actions runners are ephemeral, local disk caches offer no value.
           common --repo_contents_cache=
           common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
           common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
@@ -47,12 +46,11 @@ runs:
           common --experimental_remote_downloader_local_fallback
           common --experimental_remote_downloader_propagate_credentials
           common --noslim_profile
+          common --experimental_profile_include_target_label
           mod --profile=${{ runner.temp }}/mod.profile.gz
           build --profile=${{ runner.temp }}/build.profile.gz
-          build --experimental_profile_include_target_label
           test --profile=${{ runner.temp }}/test.profile.gz
           run --profile=${{ runner.temp }}/run.profile.gz
-          run --experimental_profile_include_target_label
           ${{ inputs.extra-bazelrc }}
         cache-save: ${{ inputs.cache-save }}
         bazelisk-cache: true
