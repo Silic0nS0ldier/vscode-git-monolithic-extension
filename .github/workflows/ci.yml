@@ -73,6 +73,12 @@ jobs:
             # Off by default; read by report_materialisations.sh.
             common --write_command_log
             common --sandbox_writable_path=/home/runner/.cache/rules_oci_runtime
+      - uses: ./.github/actions/bazel-hidden-lockfile
+        with:
+          save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      # Refreshes only stale entries; the build and test commands keep `--lockfile_mode=error`.
+      - run: bazel mod deps --lockfile_mode=update
+      - run: git diff --exit-code MODULE.bazel.lock
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
@@ -134,6 +140,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/bazel
+      - uses: ./.github/actions/bazel-hidden-lockfile
+        with:
+          save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      # Refreshes only stale entries; the build and test commands keep `--lockfile_mode=error`.
+      - run: bazel mod deps --lockfile_mode=update
+      - run: git diff --exit-code MODULE.bazel.lock
       - name: Authenticate to ghcr.io
         run: |
           set -euo pipefail
