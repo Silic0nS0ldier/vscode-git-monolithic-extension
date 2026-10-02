@@ -1,5 +1,4 @@
 {
-    "name": "Git monolithic",
     "image": "ghcr.io/silic0ns0ldier/vscode-git-monolithic-extension/devcontainer:latest",
     "privileged": true,
     "customizations": {
@@ -8,7 +7,7 @@
                 "bazelbuild.vscode-bazel"
             ],
             "settings": {
-                "bazel.enableCodeLens": true,
+                "bazel.codeLens.enable": true,
                 "bazel.lsp.command": "starpls",
                 "bazel.lsp.args": ["server"]
             }
