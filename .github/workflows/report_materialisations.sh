@@ -3,9 +3,10 @@
 # Appends the remote repos Bazel materialised, and the repos whose repo rules ran, to the job summary.
 # Report only: never fails the job.
 #
-# Usage: report_materialisations.sh <heading> <bazel stderr log> [profile.gz]
+# Usage: report_materialisations.sh <heading> <command.log> [profile.gz]
 #
-# Bazel 9 leaves no `command.log` in the output base, so the caller has to capture stderr.
+# Needs `--write_command_log`, and `command.log` only holds the last Bazel command, so call this
+# straight after the command it reports on.
 set -uo pipefail
 
 heading="${1:-Bazel}"
@@ -56,7 +57,7 @@ print_grouped() {
     echo "#### Materialised remote repos"
     echo
     if [[ -z "$command_log" || ! -f "$command_log" ]]; then
-        echo "_No Bazel log at \`${command_log}\`_"
+        echo "_No command log at \`${command_log}\`_"
     else
         materialised="$(
             strip_ansi <"$command_log" \

@@ -113,6 +113,8 @@ jobs:
             common --curses=no
             common --show_progress_rate_limit=5
             common --lockfile_mode=error
+            # Off by default; read by report_materialisations.sh.
+            common --write_command_log
             # Repo contents cache adds considerable pressure on GH Actions cache storage.
             # Disabled until we find a more efficient way to manage it.
             common --repo_contents_cache=
@@ -132,11 +134,12 @@ jobs:
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-      # Stderr is teed because Bazel 9 leaves no `command.log` for the report to read.
-      - run: bazel test //... 2> >(tee "${{ runner.temp }}/test.log" >&2)
+      # Any later Bazel command deletes `command.log`, so resolve the path before building.
+      - run: echo "OUTPUT_BASE=$(bazel info output_base)" >> "$GITHUB_ENV"
+      - run: bazel test //...
         id: test
         continue-on-error: true
-      - run: ./.github/workflows/report_materialisations.sh "bazel test //..." "${{ runner.temp }}/test.log" "${{ runner.temp }}/test.profile.gz"
+      - run: ./.github/workflows/report_materialisations.sh "bazel test //..." "$OUTPUT_BASE/command.log" "${{ runner.temp }}/test.profile.gz"
         if: always()
       - uses: actions/upload-artifact@v7
         if: steps.test.outcome == 'failure'
