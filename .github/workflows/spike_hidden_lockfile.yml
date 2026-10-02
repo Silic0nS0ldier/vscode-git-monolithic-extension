@@ -1,0 +1,109 @@
+# Throwaway M4a spike for #948. Never merge.
+name: "Spike: hidden lockfile"
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+permissions:
+  contents: read
+  actions: read
+jobs:
+  populate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/bazel
+        with:
+          fail-on-cache-error: "false"
+      - uses: ./.github/actions/bazel-hidden-lockfile
+        id: hidden_lockfile
+        with:
+          save: "true"
+      - run: bazel mod deps --lockfile_mode=update
+      - name: MODULE.bazel.lock is unchanged
+        run: git diff --exit-code MODULE.bazel.lock
+      - name: Report the hidden lockfile
+        run: |
+          set -euo pipefail
+          hidden="$(bazel info output_base)/MODULE.bazel.lock"
+          {
+            echo "### Hidden lockfile"
+            echo
+            echo "- restored before \`bazel mod deps\`: cache-hit=\`${{ steps.hidden_lockfile.outputs.cache-hit }}\`"
+            echo "- output base: \`$(bazel info output_base)\`"
+            if [[ -f "$hidden" ]]; then
+              echo "- raw size: $(stat -c %s "$hidden") bytes"
+              echo "- gzip size: $(gzip -c "$hidden" | wc -c) bytes"
+              echo "- repo spec count: $(grep -o '"repoSpec"' "$hidden" | wc -l)"
+            else
+              echo "- **missing**: \`$hidden\`"
+              exit 1
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          cp "$hidden" "${{ runner.temp }}/hidden-MODULE.bazel.lock"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: ${{ runner.temp }}/hidden-MODULE.bazel.lock
+          archive: false
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: ${{ runner.temp }}/mod.profile.gz
+          archive: false
+  # `control` is the same build without the restore, to compare the profiles against.
+  build:
+    needs: populate
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [control, restore]
+    steps:
+      - uses: actions/checkout@v7
+      - run: mkdir -p -m 700 ~/.cache/rules_oci_runtime
+      - uses: ./.github/actions/bazel
+        with:
+          fail-on-cache-error: "false"
+          extra-bazelrc: |
+            common --write_command_log
+            common --sandbox_writable_path=/home/runner/.cache/rules_oci_runtime
+      - uses: ./.github/actions/bazel-hidden-lockfile
+        if: matrix.mode == 'restore'
+        id: hidden_lockfile
+      - run: echo "OUTPUT_BASE=$(bazel info output_base)" >> "$GITHUB_ENV"
+      - name: Hidden lockfile on this runner
+        if: matrix.mode == 'restore'
+        run: |
+          {
+            echo "### Restore (${{ matrix.mode }})"
+            echo
+            echo "- cache-hit (exact primary key): \`${{ steps.hidden_lockfile.outputs.cache-hit }}\`"
+            ls -l "$OUTPUT_BASE/MODULE.bazel.lock" | sed 's/^/- `/; s/$/`/'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - run: bazel build //...
+        id: build
+        continue-on-error: true
+      - run: ./.github/workflows/report_materialisations.sh "bazel build //... (${{ matrix.mode }})" "$OUTPUT_BASE/command.log" "${{ runner.temp }}/build.profile.gz"
+        if: always()
+      - name: Count extension evaluations
+        if: always()
+        run: |
+          profile="${{ runner.temp }}/build.profile.gz"
+          {
+            echo "#### Module extension events (${{ matrix.mode }})"
+            echo
+            echo "| Event | Count |"
+            echo "| --- | ---: |"
+            echo "| \`evaluate module extension\` | $( { gzip -dc "$profile" || true; } | grep -o '"name":"evaluate module extension[^"]*"' | wc -l) |"
+            echo "| \`check lockfile for\` | $( { gzip -dc "$profile" || true; } | grep -o '"name":"check lockfile for[^"]*"' | wc -l) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          cp "$profile" "${{ runner.temp }}/build-${{ matrix.mode }}.profile.gz"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: ${{ runner.temp }}/build-${{ matrix.mode }}.profile.gz
+          archive: false
+      - run: exit 1
+        if: steps.build.outcome == 'failure'
