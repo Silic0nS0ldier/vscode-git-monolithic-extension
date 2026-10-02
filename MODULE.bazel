@@ -31,7 +31,10 @@ archive_override(
     module_name = "rules_distroless",
     integrity = "sha256-iOMifemtStwEb3B1ClSAzrzmY4FdNpoHPdOjvK6iV8s=",
     patch_strip = 1,
-    patches = ["//:patches/rules_distroless/0.10.0/0001_reproducible_snapshots.patch"],
+    patches = [
+        "//:patches/rules_distroless/0.10.0/0001_reproducible_snapshots.patch",
+        "//:patches/rules_distroless/0.10.0/0002_repo_contents_cache.patch",
+    ],
     strip_prefix = "rules_distroless-0.10.0",
     urls = ["https://github.com/bazel-contrib/rules_distroless/releases/download/v0.10.0/rules_distroless-v0.10.0.tar.gz"],
 )
