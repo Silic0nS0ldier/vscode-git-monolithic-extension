@@ -1,0 +1,14 @@
+name: Bazel hidden lockfile
+description: Persists Bazel's hidden lockfile (<output_base>/MODULE.bazel.lock) across runs so reproducible module extensions are not re-evaluated
+inputs:
+  save:
+    description: "Whether the job publishes the hidden lockfile at the end"
+    required: false
+    default: "false"
+outputs:
+  cache-hit:
+    description: "Whether the hidden lockfile was restored from the primary key"
+runs:
+  using: node24
+  main: dist/main.mjs
+  post: dist/main.mjs

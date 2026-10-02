@@ -8,6 +8,7 @@
         "**/target",
         "**/.bazel",
         "**/.pnpm-store",
+        ".github/actions/*/dist",
         "pnpm-lock.yaml",
         "Cargo.lock",
         "MODULE.bazel.lock",

@@ -8,6 +8,8 @@ node_modules
 # Bazel build output overlays (directory and symlink)
 dist/
 dist
+# Committed because the action runs before Bazel is available.
+!.github/actions/*/dist/
 
 # pnpm store
 .pnpm-store/

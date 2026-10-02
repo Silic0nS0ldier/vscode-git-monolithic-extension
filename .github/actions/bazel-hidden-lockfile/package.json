@@ -1,0 +1,14 @@
+{
+    "private": true,
+    "name": "bazel-hidden-lockfile",
+    "version": "0.0.0",
+    "type": "module",
+    "dependencies": {
+        "@actions/cache": "^6.3.0",
+        "@actions/core": "^3.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "catalog:",
+        "ava": "catalog:"
+    }
+}
