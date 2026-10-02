@@ -1,5 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_image_layer")
+load("@jq.bzl//jq:jq.bzl", "jq")
 load("@npm//:knip/package_json.bzl", knip_bin = "bin")
+load("@rules_distroless//distroless:defs.bzl", "flatten")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_push")
 load("@rules_oci_runtime//lib:defs.bzl", "runc_binary")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
@@ -78,10 +80,53 @@ tar(
     ],
 )
 
+# `@devcontainer_apt//:flat` is avoided because it replaces /var/lib/dpkg/status, hiding the
+# base image's packages from apt. Maintainer scripts do not run.
+flatten(
+    name = "apt_packages",
+    deduplicate = True,
+    tars = ["@devcontainer_apt//:packages"],
+)
+
+# `<arch> <package> <version>` per resolved package, for image_checks.sh.
+jq(
+    name = "apt_versions",
+    srcs = ["@devcontainer_apt//:lock.json"],
+    out = "apt_versions.txt",
+    args = ["--raw-output"],
+    filter = '.packages | keys[] | capture("/[^/]+/(?<name>[^:]+):(?<arch>[^=]+)=(?<version>.+)$") | "\\(.arch) \\(.name) \\(.version)"',
+)
+
+# fuse3's postinst, which does not run here, is what makes `fusermount3` setuid.
+genrule(
+    name = "fusermount3",
+    srcs = ["@devcontainer_apt//fuse3:data"],
+    outs = ["fusermount3.bin"],
+    cmd = "$(BSDTAR_BIN) -xOf $< ./usr/bin/fusermount3 > $@",
+    toolchains = ["@bsd_tar_toolchains//:resolved_toolchain"],
+)
+
+# Without `user_allow_other`, `fusermount3` refuses the auto-unmounting mount `runc_binary` asks
+# for, so every interrupted `bazel test` leaves a mount behind. The mount point sits in a 0700
+# directory, so no other user gains access.
+tar(
+    name = "fuse",
+    srcs = [
+        "fuse.conf",
+        ":fusermount3",
+    ],
+    mtree = [
+        "etc/fuse.conf uid=0 gid=0 mode=0644 time=1672560000 type=file content=$(execpath fuse.conf)",
+        "usr/bin/fusermount3 uid=0 gid=0 mode=4755 time=1672560000 type=file content=$(execpath :fusermount3)",
+    ],
+)
+
 oci_image(
     name = "image",
     base = "@devcontainers_base_ubuntu",
     tars = [
+        ":apt_packages",
+        ":fuse",
         ":dotslash",
         ":dotslash_stubs",
         ":knip_layers",
@@ -140,20 +185,17 @@ sh_library(
     srcs = ["knip"],
 )
 
-sh_library(
-    name = "install",
-    srcs = ["install.sh"],
-)
-
 sh_test(
     name = "image_test",
     size = "small",
     srcs = ["image_test.sh"],
     data = [
         "image_checks.sh",
+        ":apt_versions",
         ":container",
     ],
     env = {
+        "APT_VERSIONS": "$(rlocationpath :apt_versions)",
         "CHECKS": "$(rlocationpath image_checks.sh)",
         "CONTAINER": "$(rlocationpath :container)",
     },
@@ -164,7 +206,6 @@ shellcheck_test(
     size = "small",
     srcs = [
         ":image_test_scripts",
-        ":install",
         ":knip_shim_script",
     ],
 )

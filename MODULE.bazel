@@ -24,7 +24,22 @@ archive_override(
     urls = ["https://github.com/Silic0nS0ldier/rules-oci-runtime/releases/download/v0.0.0-20260929/rules_oci_runtime-0.0.0-20260929.tar.gz"],
 )
 
+bazel_dep(name = "rules_distroless", version = "0.10.0")
+
+# Not yet on the BCR, and 0.9.4 there cannot normalise packages onto a merged-/usr base.
+archive_override(
+    module_name = "rules_distroless",
+    integrity = "sha256-iOMifemtStwEb3B1ClSAzrzmY4FdNpoHPdOjvK6iV8s=",
+    patch_strip = 1,
+    patches = ["//:patches/rules_distroless/0.10.0/0001_reproducible_snapshots.patch"],
+    strip_prefix = "rules_distroless-0.10.0",
+    urls = ["https://github.com/bazel-contrib/rules_distroless/releases/download/v0.10.0/rules_distroless-v0.10.0.tar.gz"],
+)
+
 bazel_dep(name = "tar.bzl", version = "0.10.9")
+
+tar_toolchains = use_extension("@tar.bzl//tar:extensions.bzl", "toolchains")
+use_repo(tar_toolchains, "bsd_tar_toolchains")
 
 # Transitive-only deps, floor-raised to the first release whose repo rules return
 # `repo_metadata(reproducible = True)`. Without it Bazel refetches them on every CI runner
@@ -484,6 +499,58 @@ use_repo(
     "devcontainers_base_ubuntu_linux_amd64",
     "devcontainers_base_ubuntu_linux_arm64",
 )
+
+apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
+
+# Derived from the `devcontainers_base_ubuntu` build time by update_devcontainer_apt_snapshot.mjs,
+# so packages already in the base image resolve to the versions it ships. Guarded by
+# //.devcontainer:image_test.
+apt.sources_list(
+    architectures = [
+        "amd64",
+        "arm64",
+    ],
+    components = ["main"],
+    suites = [
+        "resolute",
+        "resolute-security",
+        "resolute-updates",
+    ],
+    types = ["deb"],
+    uris = ["https://snapshot.ubuntu.com/ubuntu/20260910T121620Z"],
+)
+apt.install(
+    dependency_set = "devcontainer_apt",
+    mergedusr = True,
+    packages = [
+        # FUSE for `runc_binary`, see //.devcontainer:fuse.conf
+        "fuse3",
+        # Libraries required by Electron in //integration_tests/electron_host:electron_host_smoke_test
+        "libasound2t64",
+        "libatk-bridge2.0-0t64",
+        "libatk1.0-0t64",
+        "libatspi2.0-0t64",
+        "libcairo2",
+        "libcups2t64",
+        "libdbus-1-3",
+        "libgbm1",
+        "libglib2.0-0t64",
+        "libgtk-3-0t64",
+        "libnss3",
+        "libpango-1.0-0",
+        "libxcomposite1",
+        "libxdamage1",
+        "libxfixes3",
+        "libxkbcommon0",
+        "libxrandr2",
+    ],
+    suites = [
+        "resolute",
+        "resolute-security",
+        "resolute-updates",
+    ],
+)
+use_repo(apt, "devcontainer_apt")
 
 http_archive(
     name = "dotslash_amd64",
