@@ -8,4 +8,5 @@ runfiles="${RUNFILES_DIR:-${TEST_SRCDIR:-$0.runfiles}}"
 # One container start covers every check, since starting one is expensive.
 exec "${runfiles}/${CONTAINER}" \
   --mount "${runfiles}/${CHECKS}:/image_checks.sh:ro" \
+  --mount "${runfiles}/${APT_VERSIONS}:/apt_versions.txt:ro" \
   -- /bin/bash /image_checks.sh

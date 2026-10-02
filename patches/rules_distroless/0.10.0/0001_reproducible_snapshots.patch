@@ -1,0 +1,17 @@
+Declare the apt extension reproducible when every source is a snapshot.
+
+Without it Bazel records every generated repo spec in MODULE.bazel.lock (~31k lines for the
+devcontainer packages). Snapshot index hashes are already kept as facts, which fully determine
+the extension's output.
+
+--- a/apt/extensions.bzl
++++ b/apt/extensions.bzl
+@@ -536,6 +536,8 @@
+         )
+         return mctx.extension_metadata(
+             facts = {"indices": cacheable_indices, "formats": cacheable_formats},
++            # Snapshot indices are pinned by the facts above, so nothing else needs recording.
++            reproducible = all([k in snapshot_indices for k in used_keys]),
+         )
+ 
+ _doc = """
