@@ -10,7 +10,7 @@ inputs:
     required: false
     default: "false"
   hidden-lockfile:
-    description: "Whether to persist the hidden lockfile and refresh it with `bazel mod deps`"
+    description: "Whether to restore the hidden lockfile, and refresh and save it at the end when `cache-save` is set"
     required: false
     default: "true"
   extra-bazelrc:
@@ -63,10 +63,3 @@ runs:
       if: inputs.hidden-lockfile == 'true'
       with:
         save: ${{ inputs.cache-save }}
-    # Refreshes only stale entries; build and test commands keep `--lockfile_mode=error`.
-    - run: bazel mod deps --lockfile_mode=update
-      if: inputs.hidden-lockfile == 'true'
-      shell: bash
-    - run: git diff --exit-code MODULE.bazel.lock
-      if: inputs.hidden-lockfile == 'true'
-      shell: bash

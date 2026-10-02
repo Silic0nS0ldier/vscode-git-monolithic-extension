@@ -1,6 +1,6 @@
 import * as cache from "@actions/cache";
 import * as core from "@actions/core";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -46,7 +46,15 @@ async function main(workspace: string): Promise<void> {
     core.setOutput("cache-hit", matched === keys.primary);
 }
 
-async function post(): Promise<void> {
+async function refresh(workspace: string): Promise<boolean> {
+    return new Promise((resolve) => {
+        const child = spawn("bazel", ["mod", "deps", "--lockfile_mode=update"], { cwd: workspace, stdio: "inherit" });
+        child.on("error", () => resolve(false));
+        child.on("close", (code) => resolve(code === 0));
+    });
+}
+
+async function post(workspace: string): Promise<void> {
     if (!core.getBooleanInput("save")) {
         return;
     }
@@ -59,6 +67,13 @@ async function post(): Promise<void> {
     }
     if (core.getState(STATE_MATCHED) === primary) {
         core.info(`Cache hit on ${primary}, not saving.`);
+        return;
+    }
+    // Evaluates every extension, not only those the job's commands needed, so later jobs find them all.
+    // Run after the job's own commands so their materialisations aren't hidden by this one.
+    if (!await refresh(workspace)) {
+        // The key is immutable, so saving a partial file would pin it until the inputs change.
+        core.warning("`bazel mod deps` failed, not saving the hidden lockfile.");
         return;
     }
     if (!existsSync(lockfile)) {
@@ -81,11 +96,12 @@ async function post(): Promise<void> {
 
 try {
     // `main` and `post` are the same file; state saved during `main` is how `post` is recognised.
+    const workspace = process.env["GITHUB_WORKSPACE"] ?? process.cwd();
     if (core.getState("is-post") === "true") {
-        await post();
+        await post(workspace);
     } else {
         core.saveState("is-post", "true");
-        await main(process.env["GITHUB_WORKSPACE"] ?? process.cwd());
+        await main(workspace);
     }
 } catch (e) {
     core.setFailed(e instanceof Error ? e.message : String(e));

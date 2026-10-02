@@ -30,7 +30,7 @@ jobs:
         with:
           # This is PR only, which does not upload, so there is no staging to run away.
           fail-on-cache-error: "false"
-          # Rewrites MODULE.bazel inputs below, so the lockfile check would run against stale state.
+          # Rewrites module inputs below, so a restored hidden lockfile would be stale.
           hidden-lockfile: "false"
       - run: node ./.github/workflows/update_dotslash_stubs.mjs
       - run: node ./.github/workflows/update_bazel_nodejs.mjs ./MODULE.bazel
