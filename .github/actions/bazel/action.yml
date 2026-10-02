@@ -9,6 +9,10 @@ inputs:
     description: "Whether the job publishes Bazel's caches at the end"
     required: false
     default: "false"
+  hidden-lockfile:
+    description: "Whether to persist the hidden lockfile and refresh it with `bazel mod deps`"
+    required: false
+    default: "true"
   extra-bazelrc:
     description: "Lines appended to the generated bazelrc"
     required: false
@@ -55,3 +59,14 @@ runs:
         cache-save: ${{ inputs.cache-save }}
         bazelisk-cache: true
         repository-cache: false
+    - uses: ./.github/actions/bazel-hidden-lockfile
+      if: inputs.hidden-lockfile == 'true'
+      with:
+        save: ${{ inputs.cache-save }}
+    # Refreshes only stale entries; build and test commands keep `--lockfile_mode=error`.
+    - run: bazel mod deps --lockfile_mode=update
+      if: inputs.hidden-lockfile == 'true'
+      shell: bash
+    - run: git diff --exit-code MODULE.bazel.lock
+      if: inputs.hidden-lockfile == 'true'
+      shell: bash
