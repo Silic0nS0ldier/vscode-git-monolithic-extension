@@ -1,4 +1,5 @@
 import commonjs__ from "@rollup/plugin-commonjs";
+import json__ from "@rollup/plugin-json";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { cli } from "cleye";
 import { rollup } from "rollup";
@@ -7,6 +8,7 @@ import { wasmSourcePhasePlugin } from "./wasm-source-phase-plugin.js";
 
 // Work around https://github.com/rollup/plugins/issues/1662
 const commonjs = commonjs__ as unknown as typeof commonjs__.default;
+const json = json__ as unknown as typeof json__.default;
 
 const argv = cli({
     flags: {
@@ -60,6 +62,7 @@ const bundle = await (async () => {
                 wasmSourcePhasePlugin(),
                 nodeResolve(),
                 commonjs(),
+                json(),
             ],
             external: externalModules,
             onwarn: (warning, defaultHandler) => {

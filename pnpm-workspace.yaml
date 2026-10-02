@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - build_defs/*
+  - .github/actions/*
   - extension
   - integration_tests
 
@@ -23,6 +24,10 @@ catalogs:
     '@types/node': ^24.13.3
 
 packageExtensions:
+  # Imported by the generated twirp client but not declared.
+  "@actions/cache":
+    dependencies:
+      "@protobuf-ts/runtime": "^2.11.1"
   # chalk added as workaround for https://github.com/aspect-build/rules_lint/issues/752
   "eslint":
     dependencies:

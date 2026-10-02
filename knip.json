@@ -45,6 +45,14 @@
                 "electron_host/**/*.mjs"
             ]
         },
+        ".github/actions/bazel-hidden-lockfile": {
+            "entry": [
+                "src/main.ts"
+            ],
+            "project": [
+                "src/**/*.ts"
+            ]
+        },
         "build_defs/rollup_bundle": {
             "entry": [
                 "src/main.ts"

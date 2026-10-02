@@ -25,6 +25,7 @@ ts_project(
     visibility = [":__pkg__"],
     deps = [
         ":node_modules/@rollup/plugin-commonjs",
+        ":node_modules/@rollup/plugin-json",
         ":node_modules/@rollup/plugin-node-resolve",
         ":node_modules/@types/node",
         ":node_modules/cleye",

@@ -41,6 +41,7 @@
             "integration_tests/check-code-server-pin.mjs",
             "integration_tests/electron_host/check-electron-pin.mjs",
             "integration_tests/electron_host/load-check.mjs",
+            ".github/actions/bazel-hidden-lockfile/src/main.ts",
             "build_defs/rollup_bundle/src/main.ts",
             "build_defs/vsix_package/src/main.ts"
         ]

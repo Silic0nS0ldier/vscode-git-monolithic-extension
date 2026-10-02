@@ -1,0 +1,79 @@
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@npm//.github/actions/bazel-hidden-lockfile:ava/package_json.bzl", "bin")
+load("//build_defs/lint:linters.bzl", "eslint_test")
+load("//build_defs/rollup_bundle:rollup_bundle.bzl", "rollup_bundle")
+
+npm_link_all_packages(name = "node_modules")
+
+ts_project(
+    name = "lib",
+    srcs = glob(
+        ["src/**/*.ts"],
+        exclude = ["src/**/*.test.ts"],
+    ) + ["package.json"],
+    declaration = True,
+    out_dir = "dist",
+    root_dir = "src",
+    tsconfig = ":tsconfig",
+    deps = [
+        ":node_modules/@actions/cache",
+        ":node_modules/@actions/core",
+        ":node_modules/@types/node",
+    ],
+)
+
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+    visibility = [":__pkg__"],
+    deps = ["//:tsconfig"],
+)
+
+# The action runs before any Bazel build in a job, so it can't be built there. The bundle is
+# committed and this fails `bazel test //...` when it drifts from the source.
+rollup_bundle(
+    name = "bundle",
+    srcs = [":lib"],
+    entry_points = ["dist/main.js"],
+)
+
+write_source_files(
+    name = "dist",
+    files = {"dist/main.mjs": ":bundle_/main.js"},
+)
+
+ts_project(
+    name = "lib_tests",
+    srcs = glob(["src/**/*.test.ts"]) + ["package.json"],
+    declaration = True,
+    out_dir = "dist",
+    root_dir = "src",
+    tsconfig = ":tsconfig",
+    deps = [
+        ":lib",
+        ":node_modules/@types/node",
+        ":node_modules/ava",
+    ],
+)
+
+bin.ava_test(
+    name = "tests",
+    size = "small",
+    args = ["-t"],
+    chdir = package_name(),
+    data = [
+        "package.json",
+        ":lib_tests",
+    ],
+)
+
+eslint_test(
+    name = "eslint",
+    size = "small",
+    srcs = [
+        ":lib",
+        ":lib_tests",
+    ],
+)
