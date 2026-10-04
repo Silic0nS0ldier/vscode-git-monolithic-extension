@@ -15,13 +15,14 @@ test(lsTree.name + " - existing file at HEAD", async () => {
     await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
     await gitCtx.cli({ cwd: repo.path }, ["commit", "-m", "Add hello.txt"]);
 
-    const entries = unwrapOk(await lsTree(gitCtx, repo.path, "HEAD", "hello.txt"));
-    assert.strictEqual(entries.length, 1);
-    assert.strictEqual(entries[0].mode, "100644");
-    assert.strictEqual(entries[0].type, "blob");
-    assert.strictEqual(entries[0].file, "hello.txt");
-    assert.ok(entries[0].object.length === 40, "object hash should be 40 chars");
-    assert.strictEqual(entries[0].size, "6"); // "hello\n" is 6 bytes
+    const [lsTreeEntry, ...extras] = unwrapOk(await lsTree(gitCtx, repo.path, "HEAD", "hello.txt"));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(lsTreeEntry != null);
+    assert.strictEqual(lsTreeEntry.mode, "100644");
+    assert.strictEqual(lsTreeEntry.type, "blob");
+    assert.strictEqual(lsTreeEntry.file, "hello.txt");
+    assert.ok(lsTreeEntry.object.length === 40, "object hash should be 40 chars");
+    assert.strictEqual(lsTreeEntry.size, "6"); // "hello\n" is 6 bytes
 });
 
 test(lsTree.name + " - file not in tree", async () => {
@@ -40,9 +41,10 @@ test(lsTree.name + " - executable file mode", async () => {
     await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
     await gitCtx.cli({ cwd: repo.path }, ["commit", "-m", "Add run.sh"]);
 
-    const entries = unwrapOk(await lsTree(gitCtx, repo.path, "HEAD", "run.sh"));
-    assert.strictEqual(entries.length, 1);
-    assert.strictEqual(entries[0].mode, "100755");
+    const [lsTreeEntry, ...extras] = unwrapOk(await lsTree(gitCtx, repo.path, "HEAD", "run.sh"));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(lsTreeEntry != null);
+    assert.strictEqual(lsTreeEntry.mode, "100755");
 });
 
 test(lsTree.name + " - error for invalid ref", async () => {

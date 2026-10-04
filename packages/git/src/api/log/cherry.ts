@@ -2,6 +2,7 @@ import type { GitContext } from "../../cli/context.js";
 import type { ReadToErrors } from "../../cli/helpers/read-to-buffer.js";
 import { readToString } from "../../cli/helpers/read-to-string.js";
 import { isErr, ok, type Result, unwrap } from "../../func-result.js";
+import { notNull } from "../../helpers/predicates.js";
 
 const CHERRY_LINE = /^([=+])\s+(\S+)\s+(.*)$/;
 
@@ -34,9 +35,10 @@ export async function cherry(
         return ok([]);
     }
 
+    // TODO Handle unchecked index access (deferred as currently misses silently degrade to `undefined`)
     const entries = data.split("\n")
-        .map(line => CHERRY_LINE.exec(line))
-        .filter((match): match is RegExpExecArray => match !== null)
+        .map(line => CHERRY_LINE.exec(line) as [unknown, string, string, string]|null)
+        .filter(notNull)
         .map(([, marker, hash, subject]) => ({
             hash,
             status: marker === "=" ? "equivalent" as const : "unique" as const,

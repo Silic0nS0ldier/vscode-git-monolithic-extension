@@ -33,7 +33,8 @@ export type BranchDetail =
     };
 
 function parseLine(line: string, trackable: boolean): BranchDetail | undefined {
-    const [refname, upstream, commit, track] = line.trim().split("\0");
+    // TODO Handle unchecked index access (deferred due to existing logic issues e.g. `commit || undefined`)
+    const [refname, upstream, commit, track] = line.trim().split("\0") as [string, string, string, string?];
 
     if (refname.startsWith("refs/heads/")) {
         const [, ahead, behind] = (trackable ? TRACK.exec(track ?? "") : null) ?? [];

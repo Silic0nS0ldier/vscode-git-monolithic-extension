@@ -29,8 +29,9 @@ test("Keeps the blank line between subject and body", t => {
     const res = parseCommits(record(HASH, PARENT, "Subject\n\nBody line\n"));
     t.true(isOk(res));
     if (isOk(res)) {
-        t.is(unwrap(res)[0].message, "Subject\n\nBody line");
-        t.deepEqual(unwrap(res)[0].parents, [PARENT]);
+        const commits = unwrap(res);
+        t.deepEqual(commits.map(commit => commit.message), ["Subject\n\nBody line"]);
+        t.deepEqual(commits.map(commit => commit.parents), [[PARENT]]);
     }
 });
 

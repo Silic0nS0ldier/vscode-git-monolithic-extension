@@ -1,4 +1,5 @@
 import { from_str_radix } from "monolithic-git-wasm";
+import { notNull } from "../../helpers/predicates.js";
 import type { GitContext } from "../../cli/context.js";
 import type { ReadToErrors } from "../../cli/helpers/read-to-buffer.js";
 import { readToString } from "../../cli/helpers/read-to-string.js";
@@ -32,9 +33,15 @@ export async function list(
         const match of unwrap(result).trim().split("\n")
             .filter(line => line.length > 0)
             .map(line => STASH_LINE.exec(line))
-            .filter((match): match is RegExpExecArray => match !== null)
+            .filter(notNull)
     ) {
         const [, index, description] = match;
+
+        // Invariant: `match` is expected to be in the format "stash@{n}:description"
+        if (!index || !description) {
+            return err(createError(ERROR_GENERIC, `Unexpected stash line format: "${match[0]}"`));
+        }
+
         try {
             // TODO Descriptions are currently returned with a leading space, it should be removed.
             entries.push({ description, index: from_str_radix(index, 10) });

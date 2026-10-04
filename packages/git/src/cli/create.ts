@@ -1,4 +1,4 @@
-import { type Readable, Writable } from "node:stream";
+import type { Readable } from "node:stream";
 import { setTimeout as delay } from "node:timers/promises";
 import {
     createError,
@@ -11,46 +11,13 @@ import {
 import { err, isErr, ok, type Result, unwrap } from "../func-result.js";
 import type { ChildProcessService, ProcessService } from "../services/mod.js";
 import type { CLI, CLIResult, PersistentCLIContext } from "./context.js";
+import { tailOf } from "./helpers/tail-of-stream.js";
 
 /** Enough to hold a wall of merge conflicts, small enough to carry for every invocation. */
 const OUTPUT_TAIL_LIMIT = 64 * 1024;
 
 /** Bounded because git can leave a background process holding the pipe open. */
 const OUTPUT_DRAIN_TIMEOUT_MS = 500;
-
-type OutputTail = {
-    /** Resolves once the source stream has been fully consumed. */
-    readonly ended: Promise<void>;
-    text(): string;
-};
-
-/**
- * Retains the last `limit` bytes written to `source`.
- *
- * Consuming the stream is not optional: an unread pipe stalls the child once its buffer
- * fills.
- */
-function tailOf(source: Readable, limit: number): OutputTail {
-    const chunks: Buffer[] = [];
-    let size = 0;
-
-    const sink = new Writable({
-        write(chunk: Buffer, _encoding, cb) {
-            chunks.push(chunk);
-            size += chunk.length;
-            while (chunks.length > 1 && size - chunks[0].length >= limit) {
-                size -= chunks.shift()!.length;
-            }
-            cb();
-        },
-    });
-    source.pipe(sink);
-
-    return {
-        ended: new Promise<void>(resolve => void sink.once("finish", () => resolve())),
-        text: () => Buffer.concat(chunks).subarray(-limit).toString("utf-8"),
-    };
-}
 
 export type ChildProcess = {
     readonly stdout: Readable;

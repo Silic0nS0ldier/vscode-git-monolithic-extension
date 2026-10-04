@@ -31,6 +31,13 @@ export function parseCommits(data: string): Result<Commit[], GenericError> {
 
     while ((match = commitRegex.exec(data)) !== null) {
         const [, hash, authorName, authorEmail, authorDateStr, commitDateStr, parents, rawMessage = ""] = match;
+
+        // Invariant: All expected fields are populated, issues here point to flaw in regex.
+        if (!hash || !authorName || !authorEmail || !authorDateStr || !commitDateStr || parents == null) {
+            // "...","b57c59aa6aa7716372e94c3ef9d89049540a7c19","Test User","test@example.com","1791091634","1791091634","","Initial commit\\n"
+            return err(createError(ERROR_GENERIC, `Missing required commit fields in data: ${JSON.stringify(match)}`));
+        }
+
         const message = rawMessage.endsWith("\n") ? rawMessage.slice(0, -1) : rawMessage;
 
         try {

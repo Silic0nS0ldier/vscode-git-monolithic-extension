@@ -40,7 +40,7 @@ test("Narrows the listing to the given patterns", async t => {
 
     await upstreams(git, "/fake", ["refs/heads/feature"]);
 
-    t.deepEqual(calls[0].slice(2), ["refs/heads/feature"]);
+    t.deepEqual(calls.map(call => call.slice(2)), [["refs/heads/feature"]])
 });
 
 test("Reports what each branch tracks, and whether the tracking ref is gone", async t => {

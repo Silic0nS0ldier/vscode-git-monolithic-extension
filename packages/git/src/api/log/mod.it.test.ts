@@ -9,14 +9,15 @@ import { log } from "./mod.js";
 test(log.name + " - initial commit", async () => {
     await using repo = await tempGitRepo(true);
 
-    const entries = unwrapOk(await log(gitCtx, repo.path));
-    assert.strictEqual(entries.length, 1);
-    assert.ok(entries[0].hash.length === 40, "hash should be 40 chars");
-    assert.deepStrictEqual(entries[0].parents, []);
-    assert.ok(entries[0].authorName.length > 0, "authorName should be set");
-    assert.ok(entries[0].authorEmail.length > 0, "authorEmail should be set");
-    assert.ok(entries[0].authorDate instanceof Date);
-    assert.ok(entries[0].commitDate instanceof Date);
+    const [commit, ...extras] = unwrapOk(await log(gitCtx, repo.path));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(commit != null);
+    assert.ok(commit.hash.length === 40, "hash should be 40 chars");
+    assert.deepStrictEqual(commit.parents, []);
+    assert.ok(commit.authorName.length > 0, "authorName should be set");
+    assert.ok(commit.authorEmail.length > 0, "authorEmail should be set");
+    assert.ok(commit.authorDate instanceof Date);
+    assert.ok(commit.commitDate instanceof Date);
 });
 
 test(log.name + " - two commits", async () => {
@@ -27,11 +28,13 @@ test(log.name + " - two commits", async () => {
     await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
     await gitCtx.cli({ cwd: repo.path }, ["commit", "-m", "Add file"]);
 
-    const entries = unwrapOk(await log(gitCtx, repo.path));
-    assert.strictEqual(entries.length, 2);
-    assert.strictEqual(entries[0].message, "Add file");
-    assert.strictEqual(entries[0].parents.length, 1);
-    assert.strictEqual(entries[0].parents[0], entries[1].hash);
+    const [commitOne, commitTwo, ...extras] = unwrapOk(await log(gitCtx, repo.path));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(commitOne != null);
+    assert.strictEqual(commitOne.message, "Add file");
+    assert.strictEqual(commitOne.parents.length, 1);
+    assert.ok(commitTwo != null);
+    assert.strictEqual(commitOne.parents[0], commitTwo.hash);
 });
 
 test(log.name + " - maxEntries limits results", async () => {
@@ -58,7 +61,8 @@ test(log.name + " - path filter", async () => {
     await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
     await gitCtx.cli({ cwd: repo.path }, ["commit", "-m", "Add b"]);
 
-    const entries = unwrapOk(await log(gitCtx, repo.path, { path: "a.txt" }));
-    assert.strictEqual(entries.length, 1);
-    assert.strictEqual(entries[0].message, "Add a");
+    const [commit, ...extras] = unwrapOk(await log(gitCtx, repo.path, { path: "a.txt" }));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(commit != null);
+    assert.strictEqual(commit.message, "Add a");
 });

@@ -1,5 +1,6 @@
 import type { GitContext } from "../../cli/context.js";
 import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
+import { notNull } from "../../helpers/predicates.js";
 import { isErr, ok, type Result, unwrap } from "../../func-result.js";
 
 export type LsFilesEntry = {
@@ -28,11 +29,12 @@ export async function lsFiles(
     }
 
     const raw = unwrap(result);
+    // TODO Handle unchecked index access (deferred as currently misses silently degrade to `undefined`)
     const entries = raw
         .split("\n")
         .filter(l => l.length > 0)
-        .map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line))
-        .filter((m): m is RegExpExecArray => m !== null)
+        .map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line) as [unknown, string, string, string, string]|null)
+        .filter(notNull)
         .map(([, mode, object, stage, file]) => ({ file, mode, object, stage }));
 
     return ok(entries);

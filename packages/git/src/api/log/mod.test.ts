@@ -24,15 +24,19 @@ test("Single commit, no parents", async t => {
     const res = await log(gitContext, "/fake");
     t.true(isOk(res));
     if (isOk(res)) {
-        const entries = unwrap(res);
-        t.is(entries.length, 1);
-        t.is(entries[0].hash, HASH);
-        t.is(entries[0].authorName, "Alice");
-        t.is(entries[0].authorEmail, "alice@example.com");
-        t.deepEqual(entries[0].authorDate, new Date(1000000000 * 1000));
-        t.deepEqual(entries[0].commitDate, new Date(1000000001 * 1000));
-        t.deepEqual(entries[0].parents, []);
-        t.is(entries[0].message, "Initial commit");
+        const [commit, ...extras] = unwrap(res);
+        t.is(extras.length, 0);
+        if (t.assert(commit)) {
+            t.like(commit, {
+                hash: HASH,
+                authorName: "Alice",
+                authorEmail: "alice@example.com",
+                authorDate: new Date(1000000000 * 1000),
+                commitDate: new Date(1000000001 * 1000),
+                parents: [],
+                message: "Initial commit",
+            });
+        }
     }
 });
 
@@ -54,10 +58,14 @@ test("Commit with parent", async t => {
     const res = await log(gitContext, "/fake");
     t.true(isOk(res));
     if (isOk(res)) {
-        const entries = unwrap(res);
-        t.is(entries.length, 1);
-        t.deepEqual(entries[0].parents, [PARENT]);
-        t.is(entries[0].message, "Second commit");
+        const [commit, ...extras] = unwrap(res);
+        t.is(extras.length, 0);
+        if (t.assert(commit)) {
+            t.like(commit, {
+                parents: [PARENT],
+                message: "Second commit",
+            });
+        }
     }
 });
 
@@ -80,10 +88,8 @@ test("Two commits", async t => {
     const res = await log(gitContext, "/fake");
     t.true(isOk(res));
     if (isOk(res)) {
-        const entries = unwrap(res);
-        t.is(entries.length, 2);
-        t.is(entries[0].message, "First");
-        t.is(entries[1].message, "Second");
+        const commits = unwrap(res);
+        t.deepEqual(commits.map(commit => commit.message), ["First", "Second"]);
     }
 });
 

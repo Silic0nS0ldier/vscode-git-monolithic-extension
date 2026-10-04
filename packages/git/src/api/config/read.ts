@@ -36,6 +36,11 @@ export async function read(
 
     const [from, value] = data.split("\t", 2);
 
+    // Invariant: `data` is expected to be in the format "<scope>\t<value>"
+    if (!from || !value) {
+        return err(createError(ERROR_GENERIC, `Malformed config data: ${JSON.stringify(data)}`));
+    }
+
     if (!isKnownScope(from)) {
         // Will occur if git adds a new config source e.g. worktree
         return err(createError(ERROR_GENERIC, `Value sourced from unknown scope`));
@@ -71,12 +76,22 @@ export async function readAll(
     for (const line of lines) {
         const [from, keyValue] = line.split("\t", 2);
 
+        // Invariant: `line` is expected to be in the format "<scope>\t<key>=<value>"
+        if (!from || !keyValue) {
+            return err(createError(ERROR_GENERIC, `Malformed config line: ${JSON.stringify(line)}`));
+        }
+
         if (!isKnownScope(from)) {
             // Will occur if git adds a new config source e.g. worktree
             return err(createError(ERROR_GENERIC, `Value sourced from unknown scope`));
         }
 
         const [key, value] = keyValue.split("=", 2);
+
+        // Invariant: `keyValue` is expected to be in the format "<key>=<value>"
+        if (!key || !value) {
+            return err(createError(ERROR_GENERIC, `Malformed config key-value pair: ${JSON.stringify(keyValue)}`));
+        }
 
         entries.push({
             from,

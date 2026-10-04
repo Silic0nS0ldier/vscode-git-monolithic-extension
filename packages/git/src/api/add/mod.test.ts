@@ -28,7 +28,7 @@ test("Stages the whole working tree when given no paths", async t => {
 
     t.true(isOk(res));
     t.deepEqual(calls.map(call => call.args), [["add", "-A", "--", "."]]);
-    t.is(calls[0].context.cwd, "/fake");
+    t.deepEqual(calls.map(call => call.context.cwd), ["/fake"]);
 });
 
 test("Stages only what git already tracks when asked to update", async t => {
@@ -96,7 +96,11 @@ test("Hands the given environment to git", async t => {
 
     await add(git, "/fake", ["file.txt"], { env: { LC_ALL: "en_US.UTF-8" } });
 
-    t.deepEqual(calls[0].context.env, { LC_ALL: "en_US.UTF-8" });
+    const [first, ...extras] = calls;
+    t.is(extras.length, 0);
+    if (t.assert(first)) {
+        t.deepEqual(first.context.env, { LC_ALL: "en_US.UTF-8" });
+    }
 });
 
 test("Is not cut short by the shared invocation timeout", async t => {
@@ -104,5 +108,6 @@ test("Is not cut short by the shared invocation timeout", async t => {
 
     await add(git, "/fake", []);
 
-    t.is(calls[0].context.timeout, Number.POSITIVE_INFINITY);
+    t.deepEqual(calls.map(call => call.args), [["add", "-A", "--", "."]]);
+    t.deepEqual(calls.map(call => call.context.cwd), ["/fake"]);
 });

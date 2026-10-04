@@ -13,12 +13,13 @@ test(lsFiles.name + " - staged file", async () => {
     await fs.writeFile(filePath, "hello\n");
     await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
 
-    const entries = unwrapOk(await lsFiles(gitCtx, repo.path, "hello.txt"));
-    assert.strictEqual(entries.length, 1);
-    assert.strictEqual(entries[0].mode, "100644");
-    assert.strictEqual(entries[0].stage, "0");
-    assert.strictEqual(entries[0].file, "hello.txt");
-    assert.ok(entries[0].object.length === 40, "object hash should be 40 chars");
+    const [lsFilesEntry, ...extras] = unwrapOk(await lsFiles(gitCtx, repo.path, "hello.txt"));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(lsFilesEntry != null);
+    assert.strictEqual(lsFilesEntry.mode, "100644");
+    assert.strictEqual(lsFilesEntry.stage, "0");
+    assert.strictEqual(lsFilesEntry.file, "hello.txt");
+    assert.ok(lsFilesEntry.object.length === 40, "object hash should be 40 chars");
 });
 
 test(lsFiles.name + " - committed file", async () => {
@@ -29,9 +30,10 @@ test(lsFiles.name + " - committed file", async () => {
     await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
     await gitCtx.cli({ cwd: repo.path }, ["commit", "-m", "Add hello.txt"]);
 
-    const entries = unwrapOk(await lsFiles(gitCtx, repo.path, "hello.txt"));
-    assert.strictEqual(entries.length, 1);
-    assert.strictEqual(entries[0].file, "hello.txt");
+    const [lsFilesEntry, ...extras] = unwrapOk(await lsFiles(gitCtx, repo.path, "hello.txt"));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(lsFilesEntry != null);
+    assert.strictEqual(lsFilesEntry.file, "hello.txt");
 });
 
 test(lsFiles.name + " - unstaged file returns empty", async () => {
@@ -52,7 +54,8 @@ test(lsFiles.name + " - executable file mode", async () => {
     await fs.chmod(scriptPath, 0o755);
     await gitCtx.cli({ cwd: repo.path }, ["add", "."]);
 
-    const entries = unwrapOk(await lsFiles(gitCtx, repo.path, "run.sh"));
-    assert.strictEqual(entries.length, 1);
-    assert.strictEqual(entries[0].mode, "100755");
+    const [lsFilesEntry, ...extras] = unwrapOk(await lsFiles(gitCtx, repo.path, "run.sh"));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(lsFilesEntry != null);
+    assert.strictEqual(lsFilesEntry.mode, "100755");
 });

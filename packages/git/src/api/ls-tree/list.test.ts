@@ -21,13 +21,17 @@ test("Single file entry", async t => {
     const res = await lsTree(gitContext, "/fake", "HEAD", "README.md");
     t.true(isOk(res));
     if (isOk(res)) {
-        const entries = unwrap(res);
-        t.is(entries.length, 1);
-        t.is(entries[0].mode, "100644");
-        t.is(entries[0].type, "blob");
-        t.is(entries[0].object, "db4eff851028003f9df7747b2ad58622b307bb6a");
-        t.is(entries[0].size, "42");
-        t.is(entries[0].file, "README.md");
+        const [lsTreeEntry, ...extras] = unwrap(res);
+        t.is(extras.length, 0);
+        if (t.assert(lsTreeEntry)) {
+            t.like(lsTreeEntry, {
+                mode: "100644",
+                type: "blob",
+                object: "db4eff851028003f9df7747b2ad58622b307bb6a",
+                size: "42",
+                file: "README.md",
+            });
+        }
     }
 });
 
@@ -68,8 +72,7 @@ test("Executable file entry", async t => {
     t.true(isOk(res));
     if (isOk(res)) {
         const entries = unwrap(res);
-        t.is(entries.length, 1);
-        t.is(entries[0].mode, "100755");
-        t.is(entries[0].file, "script.sh");
+        t.deepEqual(entries.map(entry => entry.mode), ["100755"]);
+        t.deepEqual(entries.map(entry => entry.file), ["script.sh"]);
     }
 });

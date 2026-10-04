@@ -19,12 +19,16 @@ test("Single staged file", async t => {
     const res = await lsFiles(gitContext, "/fake", "README.md");
     t.true(isOk(res));
     if (isOk(res)) {
-        const entries = unwrap(res);
-        t.is(entries.length, 1);
-        t.is(entries[0].mode, "100644");
-        t.is(entries[0].object, "db4eff851028003f9df7747b2ad58622b307bb6a");
-        t.is(entries[0].stage, "0");
-        t.is(entries[0].file, "README.md");
+        const [lsFilesEntry, ...extras] = unwrap(res);
+        t.is(extras.length, 0);
+        if (t.assert(lsFilesEntry)) {
+            t.like(lsFilesEntry, {
+                mode: "100644",
+                object: "db4eff851028003f9df7747b2ad58622b307bb6a",
+                stage: "0",
+                file: "README.md",
+            });
+        }
     }
 });
 
@@ -62,10 +66,14 @@ test("Executable file in index", async t => {
     const res = await lsFiles(gitContext, "/fake", "script.sh");
     t.true(isOk(res));
     if (isOk(res)) {
-        const entries = unwrap(res);
-        t.is(entries.length, 1);
-        t.is(entries[0].mode, "100755");
-        t.is(entries[0].stage, "0");
-        t.is(entries[0].file, "script.sh");
+        const [lsFilesEntry, ...extras] = unwrap(res);
+        t.is(extras.length, 0);
+        if (t.assert(lsFilesEntry)) {
+            t.like(lsFilesEntry, {
+                mode: "100755",
+                stage: "0",
+                file: "script.sh",
+            });
+        }
     }
 });

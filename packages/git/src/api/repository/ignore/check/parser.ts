@@ -6,10 +6,11 @@
  */
 export function parseIgnoreCheck(raw: string): string[] {
     const ignored = [];
+    // TODO Remove unchecked index access bypass, harden against out-of-bounds errors
     const elements = raw.split("\0");
     for (let i = 0; i < elements.length; i += 4) {
         const pattern = elements[i + 2];
-        const path = elements[i + 3];
+        const path = elements[i + 3] as string;
         if (pattern && !pattern.startsWith("!")) {
             ignored.push(path);
         }

@@ -27,11 +27,12 @@ test(cherry.name + " - marks a rebased-and-repushed commit as equivalent", async
     await run(repo.path, ["push", "origin", `${equivalent}:refs/heads/main`]);
     await run(repo.path, ["fetch", "origin"]);
 
-    const entries = unwrapOk(await cherry(gitCtx, repo.path, "main...main@{upstream}"));
+    const [cherryEntry, ...extras] = unwrapOk(await cherry(gitCtx, repo.path, "main...main@{upstream}"));
 
-    assert.strictEqual(entries.length, 1);
-    assert.strictEqual(entries[0].status, "equivalent");
-    assert.strictEqual(entries[0].hash, equivalent.slice(0, entries[0].hash.length));
+    assert.strictEqual(extras.length, 0);
+    assert.ok(cherryEntry != null);
+    assert.strictEqual(cherryEntry.status, "equivalent");
+    assert.strictEqual(cherryEntry.hash, equivalent.slice(0, cherryEntry.hash.length));
 });
 
 test(cherry.name + " - marks a commit with no equivalent as unique", async () => {
@@ -47,10 +48,11 @@ test(cherry.name + " - marks a commit with no equivalent as unique", async () =>
     await run(repo.path, ["reset", "--hard", "HEAD~1"]);
     await run(repo.path, ["fetch", "origin"]);
 
-    const entries = unwrapOk(await cherry(gitCtx, repo.path, "main...main@{upstream}"));
+    const [cherryEntry, ...extras] = unwrapOk(await cherry(gitCtx, repo.path, "main...main@{upstream}"));
 
-    assert.strictEqual(entries.length, 1);
-    assert.strictEqual(entries[0].status, "unique");
+    assert.strictEqual(extras.length, 0);
+    assert.ok(cherryEntry != null);
+    assert.strictEqual(cherryEntry.status, "unique");
 });
 
 test(cherry.name + " - yields nothing when nothing diverges", async () => {

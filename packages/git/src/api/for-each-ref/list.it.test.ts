@@ -47,6 +47,7 @@ test(list.name + " - reports the commit an annotated tag points at", async () =>
 
     const [tag] = unwrapOk(await list(gitCtx, repo.path, { pattern: "refs/tags" }));
 
+    assert.ok(tag != null);
     assert.strictEqual(tag.kind, "tag");
     assert.strictEqual(tag.commit, base, "the tag object should be dereferenced to its commit");
 });

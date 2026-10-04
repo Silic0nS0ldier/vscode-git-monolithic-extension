@@ -32,8 +32,8 @@ test("Fetches the default remote when given no options", async t => {
     const res = await fetch(git, "/fake");
 
     t.true(isOk(res));
-    t.deepEqual(calls[0].args, ["fetch"]);
-    t.is(calls[0].context.cwd, "/fake");
+    t.deepEqual(calls.map(call => call.args), [["fetch"]]);
+    t.deepEqual(calls.map(call => call.context.cwd), ["/fake"]);
 });
 
 test("Fetches the given refs from a named remote", async t => {
@@ -41,7 +41,7 @@ test("Fetches the given refs from a named remote", async t => {
 
     await fetch(git, "/fake", { refs: ["main", "refs/heads/feature"], remote: "origin" });
 
-    t.deepEqual(calls[0].args, ["fetch", "origin", "main", "refs/heads/feature"]);
+    t.deepEqual(calls.map(call => call.args), [["fetch", "origin", "main", "refs/heads/feature"]]);
 });
 
 test("Fetches the configured refspecs of a named remote when given no refs", async t => {
@@ -49,7 +49,7 @@ test("Fetches the configured refspecs of a named remote when given no refs", asy
 
     await fetch(git, "/fake", { remote: "origin" });
 
-    t.deepEqual(calls[0].args, ["fetch", "origin"]);
+    t.deepEqual(calls.map(call => call.args), [["fetch", "origin"]]);
 });
 
 test("Fetches nothing when given an empty list of refs", async t => {
@@ -106,7 +106,14 @@ test("Drops refs the remote no longer has and fetches the rest, when asked to", 
 });
 
 test("Succeeds without a final invocation when every ref is missing", async t => {
-    const { calls, git } = createContext(args => missingRef(args[2]));
+    const { calls, git } = createContext(args => {
+        const ref = args[2];
+        if (t.assert(ref)) {
+            return missingRef(ref)
+        }
+        // TODO This can be removed when refactoring onto `node:test`.
+        throw new Error();
+    });
 
     const res = await fetch(git, "/fake", {
         refs: ["refs/heads/a", "refs/heads/b"],
@@ -141,7 +148,7 @@ test("Fetches every remote when no remote is named", async t => {
 
     await fetch(git, "/fake", { all: true });
 
-    t.deepEqual(calls[0].args, ["fetch", "--all"]);
+    t.deepEqual(calls.map(call => call.args), [["fetch", "--all"]]);
 });
 
 test("Applies pruning and depth after the remote", async t => {
@@ -149,7 +156,7 @@ test("Applies pruning and depth after the remote", async t => {
 
     await fetch(git, "/fake", { depth: 1, prune: true, refs: ["main"], remote: "origin" });
 
-    t.deepEqual(calls[0].args, ["fetch", "origin", "main", "--prune", "--depth=1"]);
+    t.deepEqual(calls.map(call => call.args), [["fetch", "origin", "main", "--prune", "--depth=1"]]);
 });
 
 test("Advertises the given user agent to HTTP remotes", async t => {
@@ -157,7 +164,7 @@ test("Advertises the given user agent to HTTP remotes", async t => {
 
     await fetch(git, "/fake", { userAgent: "git/2.0 vscode/1.0" });
 
-    t.is(calls[0].context.env?.["GIT_HTTP_USER_AGENT"], "git/2.0 vscode/1.0");
+    t.deepEqual(calls.map(call => call.context.env?.["GIT_HTTP_USER_AGENT"]), ["git/2.0 vscode/1.0"]);
 });
 
 test("Carries caller supplied environment through, and lets the user agent win", async t => {
@@ -168,8 +175,13 @@ test("Carries caller supplied environment through, and lets the user agent win",
         userAgent: "git/2.0",
     });
 
-    t.is(calls[0].context.env?.["GIT_ASKPASS"], "/askpass.sh");
-    t.is(calls[0].context.env?.["GIT_HTTP_USER_AGENT"], "git/2.0");
+    t.deepEqual(calls.map(call => ({
+        askpass: call.context.env?.["GIT_ASKPASS"],
+        userAgent: call.context.env?.["GIT_HTTP_USER_AGENT"],
+    })), [{
+        askpass: "/askpass.sh",
+        userAgent: "git/2.0"
+    }]);
 });
 
 test("Forwards the abort signal", async t => {
@@ -178,7 +190,10 @@ test("Forwards the abort signal", async t => {
 
     await fetch(git, "/fake", { signal: controller.signal });
 
-    t.is(calls[0].context.signal, controller.signal);
+    const [call] = calls;
+    if (t.assert(call)) {
+        t.is(call.context.signal, controller.signal);
+    }
 });
 
 test("Leaves the invocation unbounded, since a remote sets the pace", async t => {
@@ -186,7 +201,7 @@ test("Leaves the invocation unbounded, since a remote sets the pace", async t =>
 
     await fetch(git, "/fake");
 
-    t.false(Number.isFinite(calls[0].context.timeout ?? Number.POSITIVE_INFINITY));
+    t.deepEqual(calls.map(call => Number.isFinite(call.context.timeout ?? Number.POSITIVE_INFINITY)), [false])
 });
 
 test("Reports a failed invocation", async t => {

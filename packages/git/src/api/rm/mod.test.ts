@@ -28,7 +28,7 @@ test("Removes every given path in a single invocation", async t => {
 
     t.true(isOk(res));
     t.deepEqual(calls.map(call => call.args), [["rm", "--", "a.txt", "nested/b.txt"]]);
-    t.is(calls[0].context.cwd, "/fake");
+    t.deepEqual(calls.map(call => call.context.cwd), ["/fake"]);
 });
 
 test("Does not run git when given no paths", async t => {
@@ -81,7 +81,7 @@ test("Hands the given environment to git", async t => {
 
     await rm(git, "/fake", ["file.txt"], { env: { LC_ALL: "en_US.UTF-8" } });
 
-    t.deepEqual(calls[0].context.env, { LC_ALL: "en_US.UTF-8" });
+    t.deepEqual(calls.map(call => call.context.env), [{ LC_ALL: "en_US.UTF-8" }]);
 });
 
 test("Is not cut short by the shared invocation timeout", async t => {
@@ -89,5 +89,5 @@ test("Is not cut short by the shared invocation timeout", async t => {
 
     await rm(git, "/fake", ["file.txt"]);
 
-    t.is(calls[0].context.timeout, Number.POSITIVE_INFINITY);
+    t.deepEqual(calls.map(call => call.context.timeout), [Number.POSITIVE_INFINITY]);
 });
