@@ -270,7 +270,7 @@ importers:
         specifier: ^1.5.2
         version: 1.5.2(tslib@2.8.1)
       ignore:
-        specifier: ^7.0.11
+        specifier: ^7.0.12
         version: 7.0.12
       just-debounce:
         specifier: ^1.1.0
