@@ -345,29 +345,29 @@ filegroup(
 http_archive(
     name = "electron_linux_x64",
     build_file_content = _ELECTRON_LINUX_BUILD_FILE,
-    sha256 = "3075c82d0749e136bca77563d4dd24e881714d17d98241fafd02320da5d6e237",
-    url = "https://github.com/electron/electron/releases/download/v43.6.0/electron-v43.6.0-linux-x64.zip",
+    sha256 = "37337496ed2b18b9e247dc9ddbbca8519ecdf3577eae8bfbdeecad2925ee1945",
+    url = "https://github.com/electron/electron/releases/download/v43.7.3/electron-v43.7.3-linux-x64.zip",
 )
 
 http_archive(
     name = "electron_linux_arm64",
     build_file_content = _ELECTRON_LINUX_BUILD_FILE,
-    sha256 = "e8b4ef7acdfb3f254463f832dded44c17cb8c65f790d0377e8c04f91bbeeb3a4",
-    url = "https://github.com/electron/electron/releases/download/v43.6.0/electron-v43.6.0-linux-arm64.zip",
+    sha256 = "69c2d141d2123e640d765e49a54a4478856adad67cee048bb2bb4f244f388f87",
+    url = "https://github.com/electron/electron/releases/download/v43.7.3/electron-v43.7.3-linux-arm64.zip",
 )
 
 http_archive(
     name = "electron_darwin_x64",
     build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
-    sha256 = "27f0ba89978e6a8a2fea212f8be8b114a60f5747df41f42f424b8b0131477ec4",
-    url = "https://github.com/electron/electron/releases/download/v43.6.0/electron-v43.6.0-darwin-x64.zip",
+    sha256 = "031d17b68877921ffb4961a0cb12f37ffa23348fbf6d5f1980dafce41f9d3651",
+    url = "https://github.com/electron/electron/releases/download/v43.7.3/electron-v43.7.3-darwin-x64.zip",
 )
 
 http_archive(
     name = "electron_darwin_arm64",
     build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
-    sha256 = "5183a2b15d013517386edd9f1ea8e3402755f6c3ea17893f92acb20052f3a2e7",
-    url = "https://github.com/electron/electron/releases/download/v43.6.0/electron-v43.6.0-darwin-arm64.zip",
+    sha256 = "5c74bddfa481cb57bce037f238fd9129355c15443a800e8710d0931d712fda92",
+    url = "https://github.com/electron/electron/releases/download/v43.7.3/electron-v43.7.3-darwin-arm64.zip",
 )
 
 # Portable git builds from GitHub Desktop, used by `//packages/git` integration tests.
@@ -451,14 +451,14 @@ filegroup(
 # Keep the renovate annotation directly above the assignment; the custom manager in
 # .github/renovate.json cannot see past an intervening comment line.
 # renovate: datasource=github-releases depName=coder/code-server
-_CODE_SERVER_RELEASE = "4.139.1"
+_CODE_SERVER_RELEASE = "4.140.0"
 
 _CODE_SERVER_URL_PREFIX = "https://github.com/coder/code-server/releases/download/v" + _CODE_SERVER_RELEASE + "/code-server-" + _CODE_SERVER_RELEASE + "-"
 
 http_archive(
     name = "code_server_linux_x64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "53029be6c5781b7bca49b815fcc9a2a3fc111813ad8c9965b2c0f0d2985a0674",
+    sha256 = "864c5d01c808ade57e4d12c708717be7a187219fded60428f263b9e2da9f6b48",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-amd64",
     url = _CODE_SERVER_URL_PREFIX + "linux-amd64.tar.gz",
 )
@@ -466,7 +466,7 @@ http_archive(
 http_archive(
     name = "code_server_linux_arm64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "0edb4b60d9c4744b2dd14b0911e3c2e6dd8c6f3c13bd58bda23ae744e59e7df1",
+    sha256 = "ae4b07153f2037b06d24749bc8004221fcbf3ffe317038401be0452f541bf200",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-arm64",
     url = _CODE_SERVER_URL_PREFIX + "linux-arm64.tar.gz",
 )
