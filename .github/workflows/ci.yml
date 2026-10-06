@@ -57,6 +57,9 @@ jobs:
         run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   build_and_test:
     runs-on: ubuntu-24.04
+    concurrency:
+      group: build-and-test
+      cancel-in-progress: false
     if: ${{ !cancelled() }}
     needs: renovate_tasks
     permissions:
