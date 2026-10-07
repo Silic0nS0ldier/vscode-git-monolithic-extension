@@ -1,36 +1,43 @@
+import zip from "core-js-pure/es/iterator/zip.js";
 import { type TextDocument, Uri, window } from "vscode";
 import type { ILineChange } from "vscode-diff/dist/vs/editor/common/diff/legacyLinesDiffComputer.js";
 import { Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
-import { Resource } from "../../../repository/Resource.js";
+import type { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { applyLineChanges } from "../../../staging.js";
 import { grep } from "../../../util/grep.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import { runByRepository } from "../../helpers.js";
 
+function isBothAddedOrModified(s: Resource): boolean {
+    return s.state.type === Status.BOTH_MODIFIED || s.state.type === Status.BOTH_ADDED;
+}
+
+function isAnyDeleted(s: Resource): boolean {
+    return s.state.type === Status.DELETED_BY_THEM || s.state.type === Status.DELETED_BY_US;
+}
+
 export async function categorizeResourceByResolution(
     resources: Resource[],
 ): Promise<{ resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[] }> {
-    const selection: Resource[] = resources.filter(s => s instanceof Resource);
-    const merge = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.Merge);
-    const isBothAddedOrModified = (s: Resource): boolean =>
-        s.state.type === Status.BOTH_MODIFIED || s.state.type === Status.BOTH_ADDED;
-    const isAnyDeleted = (s: Resource): boolean =>
-        s.state.type === Status.DELETED_BY_THEM || s.state.type === Status.DELETED_BY_US;
+    const merge = resources.filter(s => s.state.resourceGroupType === ResourceGroupType.Merge);
     const possibleUnresolved = merge.filter(isBothAddedOrModified);
-    const promises = possibleUnresolved.map(s => grep(s.state.resourceUri.fsPath, /^<{7}|^={7}|^>{7}/));
-    const unresolvedBothModified = await Promise.all<boolean>(promises);
-    const resolved = possibleUnresolved.filter((_s, i) => !unresolvedBothModified[i]);
-    const deletionConflicts = merge.filter(s => isAnyDeleted(s));
-    const unresolved = [
-        ...merge.filter(s => !isBothAddedOrModified(s) && !isAnyDeleted(s)),
-        ...possibleUnresolved.filter((_s, i) => unresolvedBothModified[i]),
-    ];
+    const hasMarkers = await Promise.all(
+        possibleUnresolved.map(s => grep(s.state.resourceUri.fsPath, /^<{7}|^={7}|^>{7}/)),
+    );
+    const checked = [...zip([possibleUnresolved, hasMarkers])];
 
-    return { deletionConflicts, resolved, unresolved };
+    return {
+        deletionConflicts: merge.filter(isAnyDeleted),
+        resolved: checked.filter(([, marked]) => !marked).map(([s]) => s),
+        unresolved: [
+            ...merge.filter(s => !isBothAddedOrModified(s) && !isAnyDeleted(s)),
+            ...checked.filter(([, marked]) => marked).map(([s]) => s),
+        ],
+    };
 }
 
 /**
