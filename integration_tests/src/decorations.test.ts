@@ -14,7 +14,6 @@ import {
     openWorkbench,
     pollUntil,
     resourceRow,
-    runCommand,
     workspaceDir,
 } from "./harness.js";
 
@@ -113,7 +112,6 @@ scenario("committing removes the decorations of what was committed", async () =>
 
 scenario("a file created on disk is decorated as untracked", async () => {
     await writeFile(join(workspaceDir(), "created.txt"), "created\n");
-    await runCommand(page, "File: Refresh Explorer");
 
     await expectBadges("created.txt to be decorated as untracked", {
         "clean.txt": "",
