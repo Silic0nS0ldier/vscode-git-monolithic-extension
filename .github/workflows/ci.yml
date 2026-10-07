@@ -181,3 +181,30 @@ jobs:
       - name: Put DotSlash stubs on PATH
         run: echo "$GITHUB_WORKSPACE/.devcontainer/dotslash" >> "$GITHUB_PATH"
       - run: dprint check
+  report_checks:
+    # GITHUB_TOKEN pushes do not trigger another run, and native checks stay on the original SHA.
+    # Wait for job conclusions (including post steps), then mirror them onto the commit we tested.
+    if: ${{ always() && needs.renovate_tasks.outputs.commit_hash != '' && needs.renovate_tasks.outputs.commit_hash != github.event.pull_request.head.sha }}
+    runs-on: ubuntu-24.04
+    needs: [renovate_tasks, build_and_test, jscpd, dprint]
+    permissions:
+      checks: write
+    steps:
+      # No checkout: reporting must not execute PR code with a write token.
+      - name: Associate checks with the generated commit
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_HASH: ${{ needs.renovate_tasks.outputs.commit_hash }}
+          JOB_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'del(.renovate_tasks) | to_entries[] | [.key, .value.result] | @tsv' <<< "$JOB_RESULTS" |
+            while IFS=$'\t' read -r job conclusion; do
+              gh api --method POST "repos/$GITHUB_REPOSITORY/check-runs" \
+                -f name="$job" \
+                -f head_sha="$COMMIT_HASH" \
+                -f status=completed \
+                -f conclusion="$conclusion" \
+                -f details_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT" \
+                -f external_id="$GITHUB_RUN_ID:$GITHUB_RUN_ATTEMPT:$job"
+            done
