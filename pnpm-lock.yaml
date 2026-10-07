@@ -269,6 +269,9 @@ importers:
       '@vscode/extension-telemetry':
         specifier: ^1.5.2
         version: 1.5.2(tslib@2.8.1)
+      core-js-pure:
+        specifier: ^3.50.0
+        version: 3.50.0
       ignore:
         specifier: ^7.0.12
         version: 7.0.12
@@ -2642,6 +2645,9 @@ packages:
 
   core-js-pure@3.49.0:
     resolution: {integrity: sha512-XM4RFka59xATyJv/cS3O3Kml72hQXUeGRuuTmMYFxwzc9/7C8OYTaIR/Ji+Yt8DXzsFLNhat15cE/JP15HrCgw==}
+
+  core-js-pure@3.50.0:
+    resolution: {integrity: sha512-6GP3Pxz4IKyWjAfa747vIu/jilB5z29JWROLqH/b+pXVcpgh6tM06ZIBwSuglgVqzDYURhOK6oEzTrG0bCHitA==}
 
   croner@10.0.1:
     resolution: {integrity: sha512-ixNtAJndqh173VQ4KodSdJEI6nuioBWI0V1ITNKhZZsO0pEMoDxz539T4FTTbSZ/xIOSuDnzxLVRqBVSvPNE2g==}
@@ -7252,6 +7258,8 @@ snapshots:
   convert-to-spaces@2.0.1: {}
 
   core-js-pure@3.49.0: {}
+
+  core-js-pure@3.50.0: {}
 
   croner@10.0.1: {}
 

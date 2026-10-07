@@ -1,3 +1,4 @@
+import zip from "core-js-pure/es/iterator/zip.js";
 import path from "node:path";
 import { commands, EventEmitter, Uri } from "vscode";
 import { type Branch, RefType, type Remote, Status, type StatusOptions } from "../../api/git.js";
@@ -20,11 +21,10 @@ function arraysEqualBy<T>(a: readonly T[], b: readonly T[], eq: (x: T, y: T) => 
         return false;
     }
 
-    // TODO(Silic0nS0ldier): Pretty sure there is a new (or upcoming proposal) for iterating over
-    // 2 arrays at the same time.
-    // TODO Remove need for `!` override.
-    for (let i = 0; i < a.length; i++) {
-        if (!eq(a[i]!, b[i]!)) {
+    // TODO(Silic0nS0ldier): Switch to native `Iterator.zip` once the extension host is on Electron >=45
+    // (V8 >=15.3); it is behind `--js-joint-iteration` in Electron 43/44.
+    for (const [x, y] of zip([a, b], { mode: "strict" })) {
+        if (!eq(x, y)) {
             return false;
         }
     }
