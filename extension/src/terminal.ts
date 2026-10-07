@@ -20,8 +20,11 @@ export function registerTerminalEnvironmentManager(
         context.environmentVariableCollection.clear();
 
         if (enabled) {
-            for (const name of Object.keys(env)) {
-                context.environmentVariableCollection.replace(name, env[name]);
+            for (const name in env) {
+                const value = env[name];
+                if (value) {
+                    context.environmentVariableCollection.replace(name, value);
+                }
             }
         }
     }

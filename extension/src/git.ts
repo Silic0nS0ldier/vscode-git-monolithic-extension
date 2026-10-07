@@ -183,17 +183,17 @@ export class Git {
 
             let totalProgress = 0;
             let previousProgress = 0;
-
+            
             const onLine = (line: string): void => {
-                let match: RegExpMatchArray | null = null;
-
-                if (match = /Counting objects:\s*(\d+)%/i.exec(line)) {
+                // TODO Handle unchecked index access (deferred as currently misses silently degrade to `undefined`)
+                let match: [unknown, string]|null = null;
+                if (match = /Counting objects:\s*(\d+)%/i.exec(line) as [unknown, string]|null) {
                     totalProgress = Math.floor(parseInt(match[1]) * 0.1);
-                } else if (match = /Compressing objects:\s*(\d+)%/i.exec(line)) {
+                } else if (match = /Compressing objects:\s*(\d+)%/i.exec(line) as [unknown, string]|null) {
                     totalProgress = 10 + Math.floor(parseInt(match[1]) * 0.1);
-                } else if (match = /Receiving objects:\s*(\d+)%/i.exec(line)) {
+                } else if (match = /Receiving objects:\s*(\d+)%/i.exec(line) as [unknown, string]|null) {
                     totalProgress = 20 + Math.floor(parseInt(match[1]) * 0.4);
-                } else if (match = /Resolving deltas:\s*(\d+)%/i.exec(line)) {
+                } else if (match = /Resolving deltas:\s*(\d+)%/i.exec(line) as [unknown, string]|null) {
                     totalProgress = 60 + Math.floor(parseInt(match[1]) * 0.4);
                 }
 
@@ -389,25 +389,25 @@ export class Repository {
 
     async getObjectDetails(treeish: string, path: string): Promise<{ mode: string; object: string; size: number }> {
         if (!treeish) { // index
-            const elements = await this.lsfiles(path);
+            const [element] = await this.lsfiles(path);
 
-            if (elements.length === 0) {
+            if (!element) {
                 throw new GitError({ gitErrorCode: GitErrorCodes.UnknownPath, message: "Path not known by git" });
             }
 
-            const { mode, object } = elements[0];
+            const { mode, object } = element;
             const size = unwrapOk(await objectSize(this.#git._context, this.#repositoryRoot, object));
 
             return { mode, object, size };
         }
 
-        const elements = await this.lstree(treeish, path);
+        const [element] = await this.lstree(treeish, path);
 
-        if (elements.length === 0) {
+        if (!element) {
             throw new GitError({ gitErrorCode: GitErrorCodes.UnknownPath, message: "Path not known by git" });
         }
 
-        const { mode, object, size } = elements[0];
+        const { mode, object, size } = element;
         return { mode, object, size: parseInt(size) };
     }
 
@@ -1197,8 +1197,12 @@ export class Repository {
         const remotes: MutableRemote[] = [];
 
         for (const line of lines) {
-            const parts = line.split(/\s/);
-            const [name, url, type] = parts;
+            const [name, url, type] = line.split(/\s/);
+
+            // Invariant: `line` is a structured like "___ ___ ___"
+            if (!name || !url || !type) {
+                throw new Error(`Could not parse name, url and type from "${line}"`);
+            }
 
             let remote = remotes.find(r => r.name === name);
 

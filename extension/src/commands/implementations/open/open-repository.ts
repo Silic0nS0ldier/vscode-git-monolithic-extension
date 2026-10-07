@@ -10,19 +10,24 @@ export function createCommand(
     async function openRepository(repoPath?: string): Promise<void> {
         let normalisedRepoPath = repoPath;
         if (!normalisedRepoPath) {
-            const result = await window.showOpenDialog({
+            const [result, ...otherResults] = await window.showOpenDialog({
                 canSelectFiles: false,
                 canSelectFolders: true,
                 canSelectMany: false,
                 defaultUri: Uri.file(os.homedir()),
                 openLabel: i18n.Translations.openRepository(),
-            });
+            }) ?? [];
 
-            if (!result || result.length === 0) {
+            // Invariant: `otherResults` should be empty when `canSelectMany: false`.
+            if (otherResults.length !== 0) {
+                throw new Error(`Got ${1 + otherResults.length} results when at most 1 was expected.`);
+            }
+
+            if (!result) {
                 return;
             }
 
-            normalisedRepoPath = result[0].fsPath;
+            normalisedRepoPath = result.fsPath;
         }
 
         await model.openRepository(normalisedRepoPath);

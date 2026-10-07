@@ -9,11 +9,13 @@ function fatal(errMsg: string): void {
 }
 
 function main(argv: string[]): void {
-    if (argv.length !== 5) {
+    const [, , request, , rawHost, ...extra] = argv;
+    if (request === undefined || rawHost === undefined || extra.length > 0) {
         return fatal("Wrong number of arguments");
     }
 
-    if (!process.env["VSCODE_GIT_ASKPASS_PIPE"]) {
+    const output = process.env["VSCODE_GIT_ASKPASS_PIPE"];
+    if (!output) {
         return fatal("Missing pipe");
     }
 
@@ -21,9 +23,7 @@ function main(argv: string[]): void {
         return fatal("Skip silent fetch commands");
     }
 
-    const output = process.env["VSCODE_GIT_ASKPASS_PIPE"] as string;
-    const request = argv[2];
-    const host = argv[4].replace(/^["']+|["':]+$/g, "");
+    const host = rawHost.replace(/^["']+|["':]+$/g, "");
     const ipcClient = new IPCClient("askpass");
 
     ipcClient.call({ host, request }).then(res => {

@@ -3,48 +3,42 @@ import { Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
-import { cleanTrackedChanges, cleanUntrackedChange, cleanUntrackedChanges } from "./helpers.js";
+import { cleanTrackedChanges, cleanUntrackedChanges } from "./helpers.js";
 
 export async function cleanAll(repository: AbstractRepository): Promise<void> {
-    let resources = repository.sourceControlUI.trackedGroup.resourceStates.get();
+    // TODO trackedGroup never holds UNTRACKED/IGNORED, so untracked files are never discarded.
+    // Include untrackedGroup when `untrackedChanges` is "mixed" (as stage-all does), or drop the split.
+    const resources = repository.sourceControlUI.trackedGroup.resourceStates.get();
 
     if (resources.length === 0) {
         return;
     }
 
-    const trackedResources = resources.filter(r =>
-        r.state.type !== Status.UNTRACKED && r.state.type !== Status.IGNORED
-    );
-    const untrackedResources = resources.filter(r =>
-        r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED
+    const { tracked = [], untrackedOrIgnored = [] } = Object.groupBy(
+        resources,
+        r => r.state.type === Status.UNTRACKED || r.state.type === Status.IGNORED
+            ? "untrackedOrIgnored"
+            : "tracked",
     );
 
-    if (untrackedResources.length === 0) {
-        await cleanTrackedChanges(repository, resources);
-    } else if (resources.length === 1) {
-        await cleanUntrackedChange(repository, resources[0]);
-    } else if (trackedResources.length === 0) {
-        await cleanUntrackedChanges(repository, resources);
-    } else { // resources.length > 1 && untrackedResources.length > 0 && trackedResources.length > 0
-        const untrackedMessage = i18n.Translations.warnUntracked2(untrackedResources);
-
+    if (untrackedOrIgnored.length === 0) {
+        await cleanTrackedChanges(repository, tracked);
+    } else if (tracked.length === 0) {
+        await cleanUntrackedChanges(repository, untrackedOrIgnored);
+    } else {
         const message = i18n.Translations.confirmDiscard2(
-            untrackedMessage,
+            i18n.Translations.warnUntracked2(untrackedOrIgnored),
             resources,
         );
-
-        const yesTracked = i18n.Translations.confirmDiscardTracked(trackedResources);
-
+        const yesTracked = i18n.Translations.confirmDiscardTracked(tracked);
         const yesAll = i18n.Translations.discardAll(resources);
         const pick = await window.showWarningMessage(message, { modal: true }, yesTracked, yesAll);
 
         if (pick === yesTracked) {
-            resources = trackedResources;
-        } else if (pick !== yesAll) {
-            return;
+            await repository.clean(tracked.map(r => r.state.resourceUri));
+        } else if (pick === yesAll) {
+            await repository.clean(resources.map(r => r.state.resourceUri));
         }
-
-        await repository.clean(resources.map(r => r.state.resourceUri));
     }
 }
 

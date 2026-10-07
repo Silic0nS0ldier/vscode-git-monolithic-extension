@@ -8,7 +8,7 @@ export async function cleanUntrackedChanges(
     resources: readonly Resource[],
 ): Promise<void> {
     const message = i18n.Translations.confirmDelete(resources);
-    const yes = i18n.Translations.deleteFiles();
+    const yes = resources.length === 1 ? i18n.Translations.deleteFile() : i18n.Translations.deleteFiles();
     const pick = await window.showWarningMessage(message, { modal: true }, yes);
 
     if (pick !== yes) {
@@ -16,18 +16,6 @@ export async function cleanUntrackedChanges(
     }
 
     await repository.clean(resources.map(r => r.state.resourceUri));
-}
-
-export async function cleanUntrackedChange(repository: AbstractRepository, resource: Resource): Promise<void> {
-    const message = i18n.Translations.confirmDelete([resource]);
-    const yes = i18n.Translations.deleteFile();
-    const pick = await window.showWarningMessage(message, { modal: true }, yes);
-
-    if (pick !== yes) {
-        return;
-    }
-
-    await repository.clean([resource.state.resourceUri]);
 }
 
 export async function cleanTrackedChanges(

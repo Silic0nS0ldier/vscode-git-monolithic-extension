@@ -12,7 +12,7 @@ PACKAGE="${PACKAGE%/}"
 BAZEL_BIN="$(bazel --quiet info bazel-bin)"
 
 echo "Building //$PACKAGE$TARGET"
-bazel --quiet build --show_result=0 "$TARGET"
+bazel --quiet build --remote_download_outputs=toplevel --output_groups=+types --show_result=0 "$TARGET"
 
 echo "Deleting ./dist"
 rm -rf ./dist

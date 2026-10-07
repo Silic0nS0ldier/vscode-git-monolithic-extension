@@ -3,6 +3,14 @@ import { l10n, type TextDocument, type Uri } from "vscode";
 import type { LogLevelOptions } from "../logging/log.js";
 import type { Resource } from "../repository/Resource.js";
 
+function takeFirstIfOnlyMember<T>(arr: readonly T[]): T|null {
+    const [v, ...extras] = arr;
+    if (v && extras.length === 0) {
+        return v;
+    }
+    return null;
+}
+
 export function yes(): string {
     return l10n.t("Yes");
 }
@@ -458,10 +466,11 @@ export function noChangesStash(): string {
 }
 
 export function unsavedStashFiles(documents: TextDocument[]): string {
-    if (documents.length === 1) {
+    const singleDoc = takeFirstIfOnlyMember(documents);
+    if (singleDoc) {
         return l10n.t(
             "The following file has unsaved changes which won't be included in the stash if you proceed: {0}.\n\nWould you like to save it before stashing?",
-            path.basename(documents[0].fileName),
+            path.basename(singleDoc.fileName),
         );
     }
 
@@ -488,16 +497,17 @@ export function provideStashMessage(): string {
 }
 
 export function confirmStageWithMergeConflicts(unresolved: Resource[]): string {
-    if (unresolved.length > 1) {
+    const singleUnresolved = takeFirstIfOnlyMember(unresolved);
+    if (singleUnresolved) {
         return l10n.t(
-            "Are you sure you want to stage {0} files with merge conflicts?",
-            unresolved.length,
+            "Are you sure you want to stage {0} with merge conflicts?",
+            path.basename(singleUnresolved.state.resourceUri.fsPath),
         );
     }
 
     return l10n.t(
-        "Are you sure you want to stage {0} with merge conflicts?",
-        path.basename(unresolved[0].state.resourceUri.fsPath),
+        "Are you sure you want to stage {0} files with merge conflicts?",
+        unresolved.length,
     );
 }
 
@@ -652,10 +662,11 @@ export function noRemotesToFetch(): string {
 }
 
 export function unsavedCommitFiles(documents: TextDocument[]): string {
-    if (documents.length === 1) {
+    const singleDoc = takeFirstIfOnlyMember(documents);
+    if (singleDoc) {
         return l10n.t(
             "The following file has unsaved changes which won't be included in the commit if you proceed: {0}.\n\nWould you like to save it before committing?",
-            path.basename(documents[0].uri.fsPath),
+            path.basename(singleDoc.uri.fsPath),
         );
     }
 
@@ -750,10 +761,11 @@ export function proposeOpenClonedRepository2(): string {
 }
 
 export function confirmDelete(files: readonly Resource[]): string {
-    if (files.length === 1) {
+    const singleFile = takeFirstIfOnlyMember(files);
+    if (singleFile) {
         l10n.t(
             "Are you sure you want to DELETE {0}?\nThis is IRREVERSIBLE!\nThis file will be FOREVER LOST if you proceed.",
-            path.basename(files[0].state.resourceUri.fsPath),
+            path.basename(singleFile.state.resourceUri.fsPath),
         );
     }
 
@@ -772,10 +784,11 @@ export function deleteFile(): string {
 }
 
 export function cleanTrackedChanges(files: readonly Resource[]): string {
-    if (files.length === 1) {
+    const singleFile = takeFirstIfOnlyMember(files);
+    if (singleFile) {
         return l10n.t(
             "Are you sure you want to discard changes in {0}?",
-            path.basename(files[0].state.resourceUri.fsPath),
+            path.basename(singleFile.state.resourceUri.fsPath),
         );
     }
 
@@ -806,10 +819,11 @@ export function restoreFiles(): string {
 }
 
 export function confirmRestoreFiles(files: readonly Resource[]): string {
-    if (files.length === 1) {
+    const singleFile = takeFirstIfOnlyMember(files);
+    if (singleFile) {
         return l10n.t(
             "Are you sure you want to restore {0}?",
-            path.basename(files[0].state.resourceUri.fsPath),
+            path.basename(singleFile.state.resourceUri.fsPath),
         );
     }
 
@@ -820,10 +834,11 @@ export function confirmRestoreFiles(files: readonly Resource[]): string {
 }
 
 export function confirmDiscard(files: readonly Resource[]): string {
-    if (files.length === 1) {
+    const singleFile = takeFirstIfOnlyMember(files);
+    if (singleFile) {
         return l10n.t(
             "Are you sure you want to discard changes in {0}?",
-            path.basename(files[0].state.resourceUri.fsPath),
+            path.basename(singleFile.state.resourceUri.fsPath),
         );
     }
 
@@ -841,10 +856,11 @@ export function warnUntracked(untracked: number): string {
 }
 
 export function warnUntracked2(untrackedFiles: readonly Resource[]): string {
-    if (untrackedFiles.length === 1) {
+    const singleUntrackedFile = takeFirstIfOnlyMember(untrackedFiles);
+    if (singleUntrackedFile) {
         return l10n.t(
             "The following untracked file will be DELETED FROM DISK if discarded: {0}.",
-            path.basename(untrackedFiles[0].state.resourceUri.fsPath),
+            path.basename(singleUntrackedFile.state.resourceUri.fsPath),
         );
     }
 

@@ -55,12 +55,11 @@ export function toLineRanges(selections: readonly Selection[], textDocument: Tex
     lineRanges.sort((a, b) => a.start.line - b.start.line);
 
     const result = lineRanges.reduce((result, l) => {
-        if (result.length === 0) {
-            result.push(l);
-            return result;
+        const [last, ...rest] = result;
+        if (!last) {
+            return [l];
         }
 
-        const [last, ...rest] = result;
         const intersection = l.intersection(last);
 
         if (intersection) {

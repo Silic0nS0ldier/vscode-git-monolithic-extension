@@ -49,16 +49,16 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
         const selections = activeEditor.selections;
 
         // Find editor with older state
-        const olderStateEditors = visibleEditors.filter(e => {
+        const [olderStateEditor, ...additionalOlderStateEditors] = visibleEditors.filter(e => {
             return (e.document.uri.scheme === "gitm")
                 && (e.document.uri.fsPath === fileUri.fsPath);
         });
-        if (olderStateEditors.length > 1) {
+
+        if (additionalOlderStateEditors.length > 0) {
             return void window.showErrorMessage(`Multiple instances of diff base editor found. ${failGoalMessage}`);
-        } else if (olderStateEditors.length === 0) {
+        } else if (!olderStateEditor) {
             return void window.showErrorMessage(`Diff base editor not found. ${failGoalMessage}`);
         }
-        const olderStateEditor = olderStateEditors[0];
         const base = olderStateEditor.document;
 
         // Use VSCode diff algorithm to obtain line changes

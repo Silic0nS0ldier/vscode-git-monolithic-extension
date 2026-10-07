@@ -41,15 +41,22 @@ export async function cloneRepository(
         let defaultCloneDirectory = config.defaultCloneDirectory();
         defaultCloneDirectory = defaultCloneDirectory.replace(/^~/, os.homedir());
 
-        const uris = await window.showOpenDialog({
+        const [uri, ...otherResults] = await window.showOpenDialog({
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
             defaultUri: Uri.file(defaultCloneDirectory),
             openLabel: i18n.Translations.selectRepositoryFolder(),
-        });
+        }) ?? [];
 
-        if (!uris || uris.length === 0) {
+        // Invariant: `otherResults` should be empty when `canSelectMany: false`.
+        if (otherResults.length !== 0) {
+            throw new Error(`Got ${1 + otherResults.length} results when at most 1 was expected.`);
+        }
+
+
+
+        if (!uri) {
             /* __GDPR__
 				"clone" : {
 					"outcome" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
@@ -59,7 +66,6 @@ export async function cloneRepository(
             return;
         }
 
-        const uri = uris[0];
         normalisedParentPath = uri.fsPath;
     }
 

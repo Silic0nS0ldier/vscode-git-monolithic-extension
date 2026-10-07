@@ -44,10 +44,11 @@ export class CheckoutRemoteHeadItem extends CheckoutItem {
             return;
         }
 
-        const branches = await repository.findTrackingBranches(this.ref.name);
+        const [firstBranch] = await repository.findTrackingBranches(this.ref.name);
 
-        if (branches.length > 0) {
-            await repository.checkout(branches[0].name!, opts);
+        if (firstBranch) {
+            // TODO Picking the first tracking branch might not always be the desired behavior.
+            await repository.checkout(firstBranch.name!, opts);
         } else {
             await repository.checkoutTracking(this.ref.name, opts);
         }

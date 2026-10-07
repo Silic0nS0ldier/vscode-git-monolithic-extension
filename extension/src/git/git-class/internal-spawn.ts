@@ -20,7 +20,8 @@ export function internalSpawn(
 
     options.env = {
         ...process.env,
-        ...cliEnv(env, args[0], options.env),
+        // TODO `command` argument here is sometimes/always a git subcommand.
+        ...cliEnv(env, args[0] ?? "", options.env),
     };
 
     if (options.cwd) {

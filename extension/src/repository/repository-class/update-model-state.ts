@@ -19,8 +19,12 @@ function arraysEqualBy<T>(a: readonly T[], b: readonly T[], eq: (x: T, y: T) => 
     if (a.length !== b.length) {
         return false;
     }
+
+    // TODO(Silic0nS0ldier): Pretty sure there is a new (or upcoming proposal) for iterating over
+    // 2 arrays at the same time.
+    // TODO Remove need for `!` override.
     for (let i = 0; i < a.length; i++) {
-        if (!eq(a[i], b[i])) {
+        if (!eq(a[i]!, b[i]!)) {
             return false;
         }
     }

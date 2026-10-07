@@ -77,9 +77,11 @@ export async function openFile(
         if (activeTextEditor && activeTextEditor.document.uri.path === uri.path) {
             // preserve not only selection but also visible range
             opts.selection = activeTextEditor.selection;
-            const previousVisibleRanges = activeTextEditor.visibleRanges;
+            const [lastRangeVisible] = activeTextEditor.visibleRanges;
             const editor = await window.showTextDocument(document, opts);
-            editor.revealRange(previousVisibleRanges[0]);
+            if (lastRangeVisible) {
+                editor.revealRange(lastRangeVisible);
+            }
         } else {
             await commands.executeCommand("vscode.open", uri, opts);
         }

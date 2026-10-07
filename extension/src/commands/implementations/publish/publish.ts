@@ -7,16 +7,19 @@ export async function publish(repository: AbstractRepository): Promise<void> {
     const branchName = repository.HEAD && repository.HEAD.name || "";
     const remotes = repository.remotes;
 
-    if (remotes.length === 0) {
-        window.showWarningMessage(
-            i18n.Translations.noRemotesToPublish(),
-        );
-        return;
-    }
+    {
+        const [firstRemote, ...otherRemotes] = remotes;
+        if (!firstRemote) {
+            window.showWarningMessage(
+                i18n.Translations.noRemotesToPublish(),
+            );
+            return;
+        }
 
-    if (remotes.length === 1) {
-        await repository.pushTo(remotes[0].name, branchName, true);
-        return;
+        if (otherRemotes.length === 0) {
+            await repository.pushTo(firstRemote.name, branchName, true);
+            return;
+        }
     }
 
     const remoteNames = remotes.map((remote) => remote.name);

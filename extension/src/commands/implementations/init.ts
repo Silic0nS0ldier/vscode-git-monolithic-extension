@@ -12,16 +12,17 @@ export function createCommand(
     async function init(skipFolderPrompt = false): Promise<void> {
         let repositoryPath: string | undefined = undefined;
         let askToOpen = true;
+        const [firstWorkspaceFolder, ...additionalWorkspaceFolders] = workspace.workspaceFolders ?? [];
 
-        if (workspace.workspaceFolders) {
-            if (skipFolderPrompt && workspace.workspaceFolders.length === 1) {
-                repositoryPath = workspace.workspaceFolders[0].uri.fsPath;
+        if (firstWorkspaceFolder) {
+            if (skipFolderPrompt && additionalWorkspaceFolders.length === 0) {
+                repositoryPath = firstWorkspaceFolder.uri.fsPath;
                 askToOpen = false;
             } else {
                 const placeHolder = i18n.Translations.initRepository();
                 const pick = { label: i18n.Translations.chooseFolder() };
                 const items: { label: string; folder?: WorkspaceFolder }[] = [
-                    ...workspace.workspaceFolders.map(folder => ({
+                    ...[firstWorkspaceFolder, ...additionalWorkspaceFolders].map(folder => ({
                         description: folder.uri.fsPath,
                         folder,
                         label: folder.name,
@@ -41,23 +42,26 @@ export function createCommand(
 
         if (!repositoryPath) {
             const homeUri = Uri.file(os.homedir());
-            const defaultUri = workspace.workspaceFolders && workspace.workspaceFolders.length > 0
-                ? Uri.file(workspace.workspaceFolders[0].uri.fsPath)
+            const defaultUri = firstWorkspaceFolder
+                ? Uri.file(firstWorkspaceFolder.uri.fsPath)
                 : homeUri;
 
-            const result = await window.showOpenDialog({
+            const [uri, ...otherResults] = await window.showOpenDialog({
                 canSelectFiles: false,
                 canSelectFolders: true,
                 canSelectMany: false,
                 defaultUri,
                 openLabel: i18n.Translations.initRepository2(),
-            });
+            }) ?? [];
 
-            if (!result || result.length === 0) {
-                return;
+            // Invariant: `otherResults` should be empty when `canSelectMany: false`.
+            if (otherResults.length !== 0) {
+                throw new Error(`Got ${1 + otherResults.length} results when at most 1 was expected.`);
             }
 
-            const uri = result[0];
+            if (!uri) {
+                return;
+            }
 
             if (homeUri.toString().startsWith(uri.toString())) {
                 const yes = i18n.Translations.initRepository2();

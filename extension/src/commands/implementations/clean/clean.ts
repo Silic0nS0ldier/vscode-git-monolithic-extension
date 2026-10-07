@@ -6,6 +6,14 @@ import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { makeCommandId, normaliseResourceStates, runByRepository, type ScmCommand } from "../../helpers.js";
 
+function takeFirstIfOnlyMember<T>(arr: readonly T[]): T | null {
+    const [v, ...extras] = arr;
+    if (v && extras.length === 0) {
+        return v;
+    }
+    return null;
+}
+
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
     async function clean(...resourceStates: Resource[]): Promise<void> {
         const normalisedResourceStates = normaliseResourceStates(model, outputChannel, resourceStates);
@@ -16,7 +24,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
                 || s.state.resourceGroupType === ResourceGroupType.Untracked)
         ) as Resource[];
 
-        if (!scmResources.length) {
+        if (scmResources.length === 0) {
             return;
         }
 
@@ -24,12 +32,13 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
         let message: string;
         let yes = i18n.Translations.discard();
 
-        if (scmResources.length === 1) {
+        const singleScmResource = takeFirstIfOnlyMember(scmResources);
+        if (singleScmResource) {
             if (untrackedCount > 0) {
                 message = i18n.Translations.confirmDelete(scmResources);
                 yes = i18n.Translations.deleteFile();
             } else {
-                if (scmResources[0].state.type === Status.DELETED) {
+                if (singleScmResource.state.type === Status.DELETED) {
                     yes = i18n.Translations.restoreFile();
                     message = i18n.Translations.confirmRestoreFiles(scmResources);
                 } else {

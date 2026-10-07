@@ -39,13 +39,19 @@ export function createCommand(): ScmCommand {
 
         // set upstream branch as first
         if (repository.HEAD?.upstream) {
+            // TODO The usage of `?` inside string templates here is liable to hide bugs. e.g. `undefined/undefined`
             const upstreamName = `${repository.HEAD?.upstream.remote}/${repository.HEAD?.upstream.name}`;
-            const index = picks.findIndex(e => e.ref.name === upstreamName);
+            const upstreamPick = picks.find((pick, i) => {
+                if (pick.ref.name === upstreamName) {
+                    picks.splice(i, 1);
+                    return true;
+                }
+                return false;
+            })
 
-            if (index > -1) {
-                const [ref] = picks.splice(index, 1);
-                ref.description = "(upstream)";
-                picks.unshift(ref);
+            if (upstreamPick) {
+                upstreamPick.description = "(upstream)";
+                picks.unshift(upstreamPick);
             }
         }
 
