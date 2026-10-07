@@ -85,7 +85,7 @@ jobs:
       - run: echo "OUTPUT_BASE=$(bazel info output_base)" >> "$GITHUB_ENV"
       # Later steps use `!cancelled()` so they still run after a failure, which keeps the failing
       # step and job marked as failed. Each is gated on the outcome of the step it depends on.
-      - run: bazel test //...
+      - run: bazel test //... && exit 1
         id: test
       - run: ./.github/workflows/report_materialisations.sh "bazel test //..." "$OUTPUT_BASE/command.log" "${{ runner.temp }}/test.profile.gz"
         if: always()
