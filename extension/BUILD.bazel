@@ -30,6 +30,7 @@ ts_project(
         ":node_modules/@types/node",
         ":node_modules/@types/vscode",
         ":node_modules/@vscode/extension-telemetry",
+        ":node_modules/core-js-pure",
         ":node_modules/ignore",
         ":node_modules/just-debounce",
         ":node_modules/monolithic-git-interop",
