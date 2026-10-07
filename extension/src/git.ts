@@ -183,17 +183,17 @@ export class Git {
 
             let totalProgress = 0;
             let previousProgress = 0;
-            
+
             const onLine = (line: string): void => {
                 // TODO Handle unchecked index access (deferred as currently misses silently degrade to `undefined`)
-                let match: [unknown, string]|null = null;
-                if (match = /Counting objects:\s*(\d+)%/i.exec(line) as [unknown, string]|null) {
+                let match: [unknown, string] | null = null;
+                if (match = /Counting objects:\s*(\d+)%/i.exec(line) as [unknown, string] | null) {
                     totalProgress = Math.floor(parseInt(match[1]) * 0.1);
-                } else if (match = /Compressing objects:\s*(\d+)%/i.exec(line) as [unknown, string]|null) {
+                } else if (match = /Compressing objects:\s*(\d+)%/i.exec(line) as [unknown, string] | null) {
                     totalProgress = 10 + Math.floor(parseInt(match[1]) * 0.1);
-                } else if (match = /Receiving objects:\s*(\d+)%/i.exec(line) as [unknown, string]|null) {
+                } else if (match = /Receiving objects:\s*(\d+)%/i.exec(line) as [unknown, string] | null) {
                     totalProgress = 20 + Math.floor(parseInt(match[1]) * 0.4);
-                } else if (match = /Resolving deltas:\s*(\d+)%/i.exec(line) as [unknown, string]|null) {
+                } else if (match = /Resolving deltas:\s*(\d+)%/i.exec(line) as [unknown, string] | null) {
                     totalProgress = 60 + Math.floor(parseInt(match[1]) * 0.4);
                 }
 

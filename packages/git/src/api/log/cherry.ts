@@ -37,7 +37,7 @@ export async function cherry(
 
     // TODO Handle unchecked index access (deferred as currently misses silently degrade to `undefined`)
     const entries = data.split("\n")
-        .map(line => CHERRY_LINE.exec(line) as [unknown, string, string, string]|null)
+        .map(line => CHERRY_LINE.exec(line) as [unknown, string, string, string] | null)
         .filter(notNull)
         .map(([, marker, hash, subject]) => ({
             hash,

@@ -3,7 +3,7 @@ import { l10n, type TextDocument, type Uri } from "vscode";
 import type { LogLevelOptions } from "../logging/log.js";
 import type { Resource } from "../repository/Resource.js";
 
-function takeFirstIfOnlyMember<T>(arr: readonly T[]): T|null {
+function takeFirstIfOnlyMember<T>(arr: readonly T[]): T | null {
     const [v, ...extras] = arr;
     if (v && extras.length === 0) {
         return v;

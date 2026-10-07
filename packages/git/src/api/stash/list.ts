@@ -1,10 +1,10 @@
 import { from_str_radix } from "monolithic-git-wasm";
-import { notNull } from "../../helpers/predicates.js";
 import type { GitContext } from "../../cli/context.js";
 import type { ReadToErrors } from "../../cli/helpers/read-to-buffer.js";
 import { readToString } from "../../cli/helpers/read-to-string.js";
 import { createError, ERROR_GENERIC, type GenericError } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
+import { notNull } from "../../helpers/predicates.js";
 
 const STASH_LINE = /^stash@\{(\d+)\}:(.+)$/;
 

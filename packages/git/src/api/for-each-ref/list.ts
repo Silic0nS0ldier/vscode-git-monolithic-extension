@@ -39,21 +39,21 @@ export type ListOptions = {
 function parseLine(line: string): Ref | undefined {
     // TODO Handle unchecked index access (deferred as currently misses silently degrade to `undefined`)
     {
-        const match = HEAD_LINE.exec(line) as [unknown, string, string]|null;
+        const match = HEAD_LINE.exec(line) as [unknown, string, string] | null;
         if (match !== null) {
             return { commit: match[2], kind: "head", name: match[1] };
         }
     }
 
     {
-        const match = REMOTE_HEAD_LINE.exec(line) as [unknown, string, string, string]|null;
+        const match = REMOTE_HEAD_LINE.exec(line) as [unknown, string, string, string] | null;
         if (match !== null) {
             return { commit: match[3], kind: "remote-head", name: `${match[1]}/${match[2]}`, remote: match[1] };
         }
     }
 
     {
-        const match = TAG_LINE.exec(line) as [unknown, string, string, string]|null;
+        const match = TAG_LINE.exec(line) as [unknown, string, string, string] | null;
         if (match !== null) {
             return { commit: match[3] ?? match[2], kind: "tag", name: match[1] };
         }

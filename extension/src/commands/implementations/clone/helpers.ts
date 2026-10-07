@@ -54,8 +54,6 @@ export async function cloneRepository(
             throw new Error(`Got ${1 + otherResults.length} results when at most 1 was expected.`);
         }
 
-
-
         if (!uri) {
             /* __GDPR__
 				"clone" : {

@@ -109,7 +109,7 @@ test("Succeeds without a final invocation when every ref is missing", async t =>
     const { calls, git } = createContext(args => {
         const ref = args[2];
         if (t.assert(ref)) {
-            return missingRef(ref)
+            return missingRef(ref);
         }
         // TODO This can be removed when refactoring onto `node:test`.
         throw new Error();
@@ -175,13 +175,16 @@ test("Carries caller supplied environment through, and lets the user agent win",
         userAgent: "git/2.0",
     });
 
-    t.deepEqual(calls.map(call => ({
-        askpass: call.context.env?.["GIT_ASKPASS"],
-        userAgent: call.context.env?.["GIT_HTTP_USER_AGENT"],
-    })), [{
-        askpass: "/askpass.sh",
-        userAgent: "git/2.0"
-    }]);
+    t.deepEqual(
+        calls.map(call => ({
+            askpass: call.context.env?.["GIT_ASKPASS"],
+            userAgent: call.context.env?.["GIT_HTTP_USER_AGENT"],
+        })),
+        [{
+            askpass: "/askpass.sh",
+            userAgent: "git/2.0",
+        }],
+    );
 });
 
 test("Forwards the abort signal", async t => {
@@ -201,7 +204,7 @@ test("Leaves the invocation unbounded, since a remote sets the pace", async t =>
 
     await fetch(git, "/fake");
 
-    t.deepEqual(calls.map(call => Number.isFinite(call.context.timeout ?? Number.POSITIVE_INFINITY)), [false])
+    t.deepEqual(calls.map(call => Number.isFinite(call.context.timeout ?? Number.POSITIVE_INFINITY)), [false]);
 });
 
 test("Reports a failed invocation", async t => {

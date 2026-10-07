@@ -1,7 +1,7 @@
 import type { GitContext } from "../../cli/context.js";
 import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
-import { notNull } from "../../helpers/predicates.js";
 import { isErr, ok, type Result, unwrap } from "../../func-result.js";
+import { notNull } from "../../helpers/predicates.js";
 
 export type LsFilesEntry = {
     mode: string;
@@ -33,7 +33,7 @@ export async function lsFiles(
     const entries = raw
         .split("\n")
         .filter(l => l.length > 0)
-        .map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line) as [unknown, string, string, string, string]|null)
+        .map(line => /^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line) as [unknown, string, string, string, string] | null)
         .filter(notNull)
         .map(([, mode, object, stage, file]) => ({ file, mode, object, stage }));
 

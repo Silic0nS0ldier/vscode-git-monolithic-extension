@@ -47,7 +47,7 @@ export function createCommand(): ScmCommand {
                     return true;
                 }
                 return false;
-            })
+            });
 
             if (upstreamPick) {
                 upstreamPick.description = "(upstream)";
