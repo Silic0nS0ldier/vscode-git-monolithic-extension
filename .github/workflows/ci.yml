@@ -83,22 +83,23 @@ jobs:
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       # Any later Bazel command deletes `command.log`, so resolve the path before building.
       - run: echo "OUTPUT_BASE=$(bazel info output_base)" >> "$GITHUB_ENV"
+      # Later steps use `!cancelled()` so they still run after a failure, which keeps the failing
+      # step and job marked as failed. Each is gated on the outcome of the step it depends on.
       - run: bazel test //...
         id: test
-        continue-on-error: true
       - run: ./.github/workflows/report_materialisations.sh "bazel test //..." "$OUTPUT_BASE/command.log" "${{ runner.temp }}/test.profile.gz"
         if: always()
       - uses: actions/upload-artifact@v7
-        if: steps.test.outcome == 'failure'
+        if: ${{ !cancelled() && steps.test.outcome == 'failure' }}
         with:
           name: test-logs
           path: .bazel/testlogs/**/test.log
           include-hidden-files: true
       - run: bazel build //extension/vsix:git_monolithic --stamp --config=release --remote_download_outputs=toplevel
         id: build_vsix
-        continue-on-error: true
+        if: ${{ !cancelled() && steps.test.outcome != 'skipped' }}
       - uses: actions/upload-artifact@v7
-        if: steps.build_vsix.outcome != 'failure'
+        if: ${{ !cancelled() && steps.build_vsix.outcome == 'success' }}
         with:
           name: git-monolithic-vsix
           path: .bazel/bin/extension/vsix/git_monolithic.vsix
@@ -114,18 +115,21 @@ jobs:
           path: ${{ runner.temp }}/build.profile.gz
           archive: false
       - uses: pnpm/setup@v3.0.0
+        id: pnpm_setup
+        if: ${{ !cancelled() && steps.test.outcome != 'skipped' }}
         with:
           cache: true
           install: false
       # Subset of dependencies for knip analysis
       - run: pnpm install --frozen-lockfile --prod --filter . --filter ./packages/wasm
+        id: pnpm_install
+        if: ${{ !cancelled() && steps.pnpm_setup.outcome == 'success' }}
       # pnpm >=12.7 skips `prepare` on `--prod` installs; knip needs the `dist` link it creates.
       - run: pnpm --filter ./packages/wasm run prepare
+        id: wasm_prepare
+        if: ${{ !cancelled() && steps.pnpm_install.outcome == 'success' }}
       - run: pnpm exec knip
-        id: knip
-        continue-on-error: true
-      - run: exit 1
-        if: steps.test.outcome == 'failure' || steps.build_vsix.outcome == 'failure' || steps.knip.outcome == 'failure'
+        if: ${{ !cancelled() && steps.wasm_prepare.outcome == 'success' }}
   publish_devcontainer:
     # `renovate_tasks` is skipped on most runs, and a skip propagates down the whole `needs` chain
     # unless a status function is used, so `build_and_test` is checked explicitly.

@@ -4,7 +4,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "bazelbuild.vscode-bazel"
+                "bazelbuild.vscode-bazel",
+                "github.vscode-github-actions"
             ],
             "settings": {
                 "bazel.codeLens.enable": true,
