@@ -185,6 +185,9 @@ jobs:
       - name: Put DotSlash stubs on PATH
         run: echo "$GITHUB_WORKSPACE/.devcontainer/dotslash" >> "$GITHUB_PATH"
       - run: dprint check
+      - name: Intentionally fail the check association test
+        if: github.event.pull_request.number == 986 && github.head_ref == 'copilot/add-status-check-association'
+        run: exit 1
   report_checks:
     # GITHUB_TOKEN pushes do not trigger another run, and native checks stay on the original SHA.
     # Wait for job conclusions (including post steps), then mirror them onto the commit we tested.
@@ -210,5 +213,7 @@ jobs:
                 -f status=completed \
                 -f conclusion="$conclusion" \
                 -f details_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT" \
+                -f "output[title]=$job: $conclusion" \
+                -f "output[summary]=Result from [CI run $GITHUB_RUN_ID, attempt $GITHUB_RUN_ATTEMPT]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT) on commit $COMMIT_HASH." \
                 -f external_id="$GITHUB_RUN_ID:$GITHUB_RUN_ATTEMPT:$job"
             done
