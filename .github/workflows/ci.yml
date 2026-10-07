@@ -14,7 +14,8 @@ permissions:
   contents: read
 jobs:
   renovate_tasks:
-    if: github.event_name == 'pull_request' && github.actor == 'renovate[bot]'
+    # Temporary end-to-end test, restricted to this same-repository PR and trusted actors.
+    if: github.event_name == 'pull_request' && (github.actor == 'renovate[bot]' || (github.event.pull_request.number == 986 && github.head_ref == 'copilot/add-status-check-association' && github.event.pull_request.head.repo.full_name == github.repository && (github.actor_id == '17376090' || github.actor_id == '198982749')))
     permissions:
       contents: write
       actions: read
@@ -53,6 +54,9 @@ jobs:
           install: false
       - run: pnpm install --lockfile-only
       - uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          skip_dirty_check: ${{ github.event.pull_request.number == 986 }}
+          commit_options: ${{ github.event.pull_request.number == 986 && '--allow-empty' || '' }}
       - id: get_commit
         run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   build_and_test:
