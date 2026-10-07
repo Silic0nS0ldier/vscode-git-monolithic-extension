@@ -14,6 +14,7 @@ import {
     openWorkbench,
     pollUntil,
     resourceRow,
+    runCommand,
     workspaceDir,
 } from "./harness.js";
 
@@ -40,9 +41,13 @@ function explorerRow(fileName: string): Locator {
 }
 
 /** The letter the explorer renders after each file name, or "" for an undecorated file. */
-async function badges(fileNames: string[]): Promise<Record<string, string>> {
+async function badges(fileNames: string[]): Promise<Record<string, string | null>> {
     const entries = await Promise.all(fileNames.map(async fileName => {
         const label = explorerRow(fileName).locator(".monaco-icon-label");
+        if (await label.count() === 0) {
+            return [fileName, null] as const;
+        }
+
         // The badge is a pseudo-element, so it is absent from the rendered text.
         const content = await label.evaluate(el => getComputedStyle(el, "::after").content);
         return [fileName, content === "none" ? "" : content.replaceAll("\"", "")] as const;
@@ -108,6 +113,7 @@ scenario("committing removes the decorations of what was committed", async () =>
 
 scenario("a file created on disk is decorated as untracked", async () => {
     await writeFile(join(workspaceDir(), "created.txt"), "created\n");
+    await runCommand(page, "File: Refresh Explorer");
 
     await expectBadges("created.txt to be decorated as untracked", {
         "clean.txt": "",
