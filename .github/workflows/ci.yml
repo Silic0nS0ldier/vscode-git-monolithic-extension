@@ -14,8 +14,7 @@ permissions:
   contents: read
 jobs:
   renovate_tasks:
-    # Temporary end-to-end test, restricted to this same-repository PR and trusted actors.
-    if: github.event_name == 'pull_request' && (github.actor == 'renovate[bot]' || (github.event.pull_request.number == 986 && github.head_ref == 'copilot/add-status-check-association' && github.event.pull_request.head.repo.full_name == github.repository && (github.actor_id == '17376090' || github.actor_id == '198982749')))
+    if: github.event_name == 'pull_request' && github.actor == 'renovate[bot]'
     permissions:
       contents: write
       actions: read
@@ -54,9 +53,6 @@ jobs:
           install: false
       - run: pnpm install --lockfile-only
       - uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          skip_dirty_check: ${{ github.event.pull_request.number == 986 }}
-          commit_options: ${{ github.event.pull_request.number == 986 && '--allow-empty' || '' }}
       - id: get_commit
         run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   build_and_test:
@@ -185,9 +181,6 @@ jobs:
       - name: Put DotSlash stubs on PATH
         run: echo "$GITHUB_WORKSPACE/.devcontainer/dotslash" >> "$GITHUB_PATH"
       - run: dprint check
-      - name: Intentionally fail the check association test
-        if: github.event.pull_request.number == 986 && github.head_ref == 'copilot/add-status-check-association'
-        run: exit 1
   report_checks:
     # GITHUB_TOKEN pushes do not trigger another run, and native checks stay on the original SHA.
     # Wait for job conclusions (including post steps), then mirror them onto the commit we tested.
