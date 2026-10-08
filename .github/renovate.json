@@ -162,16 +162,6 @@
                 "npm"
             ],
             "matchDepNames": [
-                "rollup"
-            ],
-            "allowedVersions": "<4.64.0",
-            "description": "rollup 4.64.x tree-shakes away core-js-pure's native Symbol detection, breaking the bundled Iterator.zip polyfill. Lift once https://github.com/rollup/rollup/issues/6560 is fixed."
-        },
-        {
-            "matchManagers": [
-                "npm"
-            ],
-            "matchDepNames": [
                 "renovate"
             ],
             "schedule": [
