@@ -179,7 +179,7 @@ single_version_override(
 )
 
 # Its repo rules never returned `repo_metadata`, so Bazel could not put crane, regctl, cosign or
-# any pulled image into the repo contents cache.
+# any pulled image into the repo contents cache, and digest pulls keyed it on the host's credentials.
 # See https://github.com/bazel-contrib/rules_oci/pull/901
 single_version_override(
     module_name = "rules_oci",
