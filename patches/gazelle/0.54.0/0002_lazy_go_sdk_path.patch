@@ -1,0 +1,38 @@
+Only resolve the Go SDK to a path in `compute_env` when `go` is actually run.
+
+`compute_env` (used by `bazel_gazelle_go_repository_cache` and the `go_deps` extension) called
+`ctx.path()` on the SDK's `ROOT` label unconditionally, but the result is only needed for the
+`GO_REPOSITORY_USE_HOST_{MOD,}CACHE` branches; `GOROOT` is recorded as a label. With
+`--experimental_remote_repo_contents_cache`, `ctx.path(Label)` materialises the whole SDK, and
+the non-reproducible `bazel_gazelle_go_repository_cache` runs on every fresh server because each
+`go_repository` records its `go.env` as an input. Consumers that run `go` (`go_repository_tools`,
+`go_repository` on a cache miss) still resolve the label via `read_go_env_file`.
+
+Not yet raised upstream.
+
+diff --git a/internal/env.bzl b/internal/env.bzl
+index bcccf9c..5337a3b 100644
+--- a/internal/env.bzl
++++ b/internal/env.bzl
+@@ -59,19 +59,18 @@ def compute_env(
+             fail('gazelle could not find a Go SDK. Specify which one to use with gazelle_dependencies(go_sdk = "go_sdk").')
+         go_sdk_label = Label("@" + matches[0] + "//:ROOT")
+ 
+-    go_root = str(ctx.path(go_sdk_label).dirname)
+     go_path = ""  # default: the cache repo itself; recomputed by read_go_env_file()
+     go_cache = ""  # default: <cache repo>/gocache; recomputed by read_go_env_file()
+     go_mod_cache = ""
+     if ctx.getenv("GO_REPOSITORY_USE_HOST_MODCACHE") == "1":
+         extension = executable_extension(ctx)
+-        go_tool = go_root + "/bin/go" + extension
++        go_tool = str(ctx.path(go_sdk_label).dirname) + "/bin/go" + extension
+         go_mod_cache = read_go_env(ctx, go_tool, "GOMODCACHE")
+         if not go_mod_cache:
+             fail("GOMODCACHE must be set when GO_REPOSITORY_USE_HOST_MODCACHE is enabled.")
+     if ctx.getenv("GO_REPOSITORY_USE_HOST_CACHE") == "1":
+         extension = executable_extension(ctx)
+-        go_tool = go_root + "/bin/go" + extension
++        go_tool = str(ctx.path(go_sdk_label).dirname) + "/bin/go" + extension
+         go_mod_cache = read_go_env(ctx, go_tool, "GOMODCACHE")
+         go_path = read_go_env(ctx, go_tool, "GOPATH")
+         if not go_mod_cache and not go_path:

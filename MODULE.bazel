@@ -114,8 +114,11 @@ single_version_override(
 single_version_override(
     module_name = "gazelle",
     patch_strip = 1,
-    patches = ["//:patches/gazelle/0.51.3/0001_repo_contents_cache.patch"],
-    version = "0.51.3",
+    patches = [
+        "//:patches/gazelle/0.54.0/0001_repo_contents_cache.patch",
+        "//:patches/gazelle/0.54.0/0002_lazy_go_sdk_path.patch",
+    ],
+    version = "0.54.0",
 )
 
 single_version_override(

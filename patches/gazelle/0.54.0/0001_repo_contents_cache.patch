@@ -7,11 +7,11 @@ It only writes a config.json derived from its own attributes. Upstream already m
 
 Not yet raised upstream.
 
-diff --git a/internal/bzlmod/go_deps.bzl b/internal/bzlmod/go_deps.bzl
-index e417d47..a74acc2 100644
---- a/internal/bzlmod/go_deps.bzl
-+++ b/internal/bzlmod/go_deps.bzl
-@@ -282,6 +282,12 @@ def _go_repository_config_impl(ctx):
+diff --git a/internal/bzlmod/go_repository_config.bzl b/internal/bzlmod/go_repository_config.bzl
+index 97b69fa..75514f4 100644
+--- a/internal/bzlmod/go_repository_config.bzl
++++ b/internal/bzlmod/go_repository_config.bzl
+@@ -42,6 +42,12 @@ def _go_repository_config_impl(ctx):
          "dep_files": ctx.attr.dep_files,
      }))
  
@@ -21,6 +21,6 @@ index e417d47..a74acc2 100644
 +
 +    return ctx.repo_metadata(reproducible = True)
 +
- _go_repository_config = repository_rule(
+ go_repository_config = repository_rule(
      implementation = _go_repository_config_impl,
      attrs = {
