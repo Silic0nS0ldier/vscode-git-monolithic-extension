@@ -1,8 +1,19 @@
-Declare rules_oci's repo rules reproducible so they can use the repo contents cache.
+Declare rules_oci's repo rules reproducible so they can use the repo contents cache, and keep host
+credentials out of the cache key of digest pulls.
 
 Bazel refuses to store a repo in the repo contents cache unless its implementation returns
 `repo_metadata(reproducible = True)`. Without this every `bazel clean --expunge`, and every
 cache miss on a fresh checkout, refetches crane, regctl, cosign and each pulled image layer.
+
+Even then, a digest-pinned `oci_pull`/`oci_alias` recorded `~/.docker/config.json` as an input
+(`rctx.read` with the default `watch = "auto"`) and declared `HOME` and friends in `environ`, so
+CI's per-run `GITHUB_TOKEN` login meant it never hit the cache. Digest pulls now read the
+credential file with `watch = "no"` and declare no `environ`; tag pulls still watch both. The
+credential-helper and OAuth2 shim scripts are also deleted after running.
+
+Carries all three commits of the upstream PR, a215a05, 59c69f2 and 3888554, onto 2.3.0. The last
+conflicted in `_fetch_auth_via_creds_helper` with an unrelated upstream change to its
+`rctx.execute(...)` call; 2.3.0's call is kept.
 
 Upstream fix: https://github.com/bazel-contrib/rules_oci/pull/901
 Drop this patch, and the `single_version_override` pinning it, once that lands in a release.
@@ -57,7 +68,7 @@ index f1a9530..f1b48b4 100644
          "@aspect_bazel_lib//lib:repositories",
          "@bazel_features//:bzl_files",
 diff --git a/oci/private/BUILD.bazel b/oci/private/BUILD.bazel
-index a432341..8ec06db 100644
+index a432341..1c3c322 100644
 --- a/oci/private/BUILD.bazel
 +++ b/oci/private/BUILD.bazel
 @@ -85,6 +85,9 @@ bzl_library(
@@ -70,7 +81,14 @@ index a432341..8ec06db 100644
  )
  
  bzl_library(
-@@ -107,7 +110,10 @@ bzl_library(
+@@ -101,13 +104,17 @@ bzl_library(
+         "//oci/private:util",
+         "@aspect_bazel_lib//lib:base64",
+         "@aspect_bazel_lib//lib:repo_utils",
++        "@bazel_skylib//lib:versions",
+     ],
+ )
+ 
  bzl_library(
      name = "util",
      srcs = ["util.bzl"],
@@ -82,8 +100,111 @@ index a432341..8ec06db 100644
      deps = [
          ":windows_utils",
          "@bazel_skylib//lib:paths",
+diff --git a/oci/private/authn.bzl b/oci/private/authn.bzl
+index bd590d8..3af5c85 100644
+--- a/oci/private/authn.bzl
++++ b/oci/private/authn.bzl
+@@ -2,8 +2,23 @@
+ 
+ load("@aspect_bazel_lib//lib:base64.bzl", "base64")
+ load("@aspect_bazel_lib//lib:repo_utils.bzl", "repo_utils")
++load("@bazel_skylib//lib:versions.bzl", "versions")
+ load(":util.bzl", "util")
+ 
++# Environment variables that decide where the credential file is, or how it is used.
++_AUTH_ENV_VARS = [
++    "DOCKER_CONFIG",
++    "REGISTRY_AUTH_FILE",
++    "XDG_RUNTIME_DIR",
++    "HOME",
++    "OCI_ENABLE_OAUTH2_SUPPORT",
++]
++
++# Bazel 7.1 added `repository_ctx.getenv` and the `watch` parameter of `repository_ctx.read`.
++# `native.bazel_version` only exists where repo rules can run, not when this file is loaded from
++# a BUILD file, e.g. to generate docs.
++_CAN_WATCH = hasattr(native, "bazel_version") and versions.is_at_least("7.1.0", versions.get())
++
+ # Unfortunately bazel downloader doesn't let us sniff the WWW-Authenticate header, therefore we need to
+ # keep a map of known registries that require us to acquire a temporary token for authentication.
+ _WWW_AUTH = {
+@@ -128,6 +143,9 @@ echo %1 | docker-credential-{} get """.format(helper_name),
+ exec "docker-credential-{}" get <<< "$1" """.format(helper_name),
+         )
+     result = rctx.execute([rctx.path(executable), raw_host])
++
++    # Don't leave the shim in the repo, otherwise it becomes part of the repo's contents.
++    rctx.delete(executable)
+     if result.return_code:
+         if not allow_fail:
+             fail("credential helper failed: \nSTDOUT:\n{}\nSTDERR:\n{}".format(result.stdout, result.stderr))
+@@ -218,6 +236,7 @@ def _oauth2(rctx, realm, scope, service, secret):
+     else:
+         fail("oauth2 failed, could not find either of: curl, wget, powershell")
+ 
++    rctx.delete(executable)
+     if result.return_code:
+         fail("oauth2 failed:\nSTDOUT:\n{}\nSTDERR:\n{}".format(result.stdout, result.stderr))
+     return result.stdout
+@@ -399,12 +418,38 @@ def _explain(state):
+         return NO_CONFIG_FOUND_ERROR
+     return None
+ 
+-def _new_auth(rctx, config_path = None):
++def _new_auth(rctx, config_path = None, reproducible = False):
++    """Create an authenticator from the host's registry credentials.
++
++    Args:
++        rctx: repository context
++        config_path: path to the credential file, or None to look it up from the environment
++        reproducible: whether the repo's contents are pinned by a digest. If so, the credential
++            file and the environment variables that locate it are not made inputs of the repo.
++    Returns:
++        a struct with `get_token` and `explain` functions
++    """
++
++    # Credentials only decide whether the registry serves the content, never what that content
++    # is. When the repo is pinned by digest, watching them would only tie the repo contents cache
++    # key to the host: its `$HOME`, and its credential file's path and bytes. When pulling by tag
++    # they are still watched, so the repo is refetched when they change, as it was when they were
++    # listed in `environ`.
++    watch = "auto"
++    if reproducible:
++        watch = "no"
++    elif _CAN_WATCH:
++        for name in _AUTH_ENV_VARS:
++            rctx.getenv(name)
++
+     if not config_path:
+         config_path = _get_auth_file_path(rctx)
+     config = {}
+     if config_path:
+-        config = json.decode(rctx.read(config_path))
++        if _CAN_WATCH:
++            config = json.decode(rctx.read(config_path, watch = watch))
++        else:
++            config = json.decode(rctx.read(config_path))
+     state = {
+         "config": config,
+         "auth": {},
+@@ -417,11 +462,8 @@ def _new_auth(rctx, config_path = None):
+ 
+ authn = struct(
+     new = _new_auth,
+-    ENVIRON = [
+-        "DOCKER_CONFIG",
+-        "REGISTRY_AUTH_FILE",
+-        "XDG_RUNTIME_DIR",
+-        "HOME",
+-        "OCI_ENABLE_OAUTH2_SUPPORT",
+-    ],
++    # Values of `environ` are part of a repo's predeclared inputs, so they would split the repo
++    # contents cache by host even for digest pulls. Where possible `_new_auth` watches them itself,
++    # and only for tag pulls.
++    ENVIRON = [] if _CAN_WATCH else _AUTH_ENV_VARS,
+ )
 diff --git a/oci/private/pull.bzl b/oci/private/pull.bzl
-index 84617ce..ee5454b 100644
+index 84617ce..d1545b5 100644
 --- a/oci/private/pull.bzl
 +++ b/oci/private/pull.bzl
 @@ -102,6 +102,18 @@ def _config_path(rctx):
@@ -116,27 +237,49 @@ index 84617ce..ee5454b 100644
      else:
          util.warning(rctx, "Fetching from {}@{} without an integrity hash, result will not be cached.".format(rctx.attr.repository, identifier))
  
-@@ -339,6 +351,12 @@ repo(
- )
- """)
+@@ -227,7 +239,13 @@ def _find_platform_manifest(index_mf, platform_wanted):
+     return None
  
+ def _oci_pull_impl(rctx):
+-    au = authn.new(rctx, _config_path(rctx))
 +    # Pulling by a verified digest is reproducible: every downloaded blob is checked against a
 +    # digest derived from the `identifier` attribute. A tag is not, since the registry is free to
 +    # move it to different content at any time, and neither is a digest in an algorithm we cannot
 +    # check - in both cases nothing would notice the registry serving different bytes.
-+    return util.repo_metadata(rctx, reproducible = _is_verified_digest(rctx.attr.identifier))
++    reproducible = _is_verified_digest(rctx.attr.identifier)
++
++    au = authn.new(rctx, _config_path(rctx), reproducible = reproducible)
+     downloader = _create_downloader(rctx, au)
+ 
+     manifest, size, digest = downloader.download_manifest(rctx.attr.identifier, "manifest.json")
+@@ -339,6 +357,8 @@ repo(
+ )
+ """)
+ 
++    return util.repo_metadata(rctx, reproducible = reproducible)
 +
  oci_pull = repository_rule(
      implementation = _oci_pull_impl,
      attrs = dicts.add(
-@@ -469,6 +487,11 @@ buildozer 'set digest "{digest}"' 'remove tag' 'remove platforms' {optional_plat
+@@ -396,7 +416,12 @@ def _oci_alias_impl(rctx):
+     if not rctx.attr.platforms and not rctx.attr.platform:
+         fail("One of 'platforms' or 'platform' must be set")
  
-     rctx.file("BUILD.bazel", content = build)
- 
+-    au = authn.new(rctx, _config_path(rctx))
 +    # Same as oci_pull: only a verified digest pins the content this repo describes. Note the
 +    # generated `digest.txt` is derived from `identifier`, so with a tag it can change between
 +    # fetches.
-+    return util.repo_metadata(rctx, reproducible = _is_verified_digest(rctx.attr.identifier))
++    reproducible = _is_verified_digest(rctx.attr.identifier)
++
++    au = authn.new(rctx, _config_path(rctx), reproducible = reproducible)
+     downloader = _create_downloader(rctx, au)
+ 
+     available_platforms = []
+@@ -469,6 +494,8 @@ buildozer 'set digest "{digest}"' 'remove tag' 'remove platforms' {optional_plat
+ 
+     rctx.file("BUILD.bazel", content = build)
+ 
++    return util.repo_metadata(rctx, reproducible = reproducible)
 +
  oci_alias = repository_rule(
      implementation = _oci_alias_impl,
