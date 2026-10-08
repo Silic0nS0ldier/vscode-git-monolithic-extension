@@ -29,7 +29,6 @@ ts_project(
         ":node_modules/@rollup/plugin-node-resolve",
         ":node_modules/@types/node",
         ":node_modules/cleye",
-        # Pinned to 4.63.6 until https://github.com/rollup/rollup/issues/6560 is fixed (see .github/renovate.json).
         ":node_modules/rollup",
     ],
 )
