@@ -114,7 +114,7 @@ export const tools = {
     },
     pnpm: {
         // renovate: datasource=npm depName=pnpm
-        version: "12.9.1",
+        version: "12.10.0",
         platforms: {
             "linux-x86_64": {
                 url: "https://github.com/pnpm/pnpm/releases/download/v{version}/pnpm-linux-x64.tar.gz",
