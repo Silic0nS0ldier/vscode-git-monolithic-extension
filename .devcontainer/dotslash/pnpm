@@ -3,26 +3,26 @@
   "name": "pnpm",
   "platforms": {
     "linux-x86_64": {
-      "size": 23785772,
+      "size": 23793537,
       "hash": "sha256",
-      "digest": "54f7167e1d5d035cdd83ecd1a8f4d06ee7bb62caf046303c8110fb127f881207",
+      "digest": "502a275984a4cd01e5579ac72049a241091cac5118e44becf84951130c3e079e",
       "format": "tar.gz",
       "path": "pnpm",
       "providers": [
         {
-          "url": "https://github.com/pnpm/pnpm/releases/download/v12.10.0/pnpm-linux-x64.tar.gz"
+          "url": "https://github.com/pnpm/pnpm/releases/download/v12.10.1/pnpm-linux-x64.tar.gz"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 21416835,
+      "size": 21426961,
       "hash": "sha256",
-      "digest": "5b7da9406c0604ef3f6272278d911259ae604d79522af97edfbb98b954716d99",
+      "digest": "18dbb118de1dbef0e4516c17bf847d6ee206fc4deffb2bb488ec8e1d2814e078",
       "format": "tar.gz",
       "path": "pnpm",
       "providers": [
         {
-          "url": "https://github.com/pnpm/pnpm/releases/download/v12.10.0/pnpm-linux-arm64.tar.gz"
+          "url": "https://github.com/pnpm/pnpm/releases/download/v12.10.1/pnpm-linux-arm64.tar.gz"
         }
       ]
     }
