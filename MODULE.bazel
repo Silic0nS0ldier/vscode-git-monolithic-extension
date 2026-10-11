@@ -348,29 +348,29 @@ filegroup(
 http_archive(
     name = "electron_linux_x64",
     build_file_content = _ELECTRON_LINUX_BUILD_FILE,
-    sha256 = "37337496ed2b18b9e247dc9ddbbca8519ecdf3577eae8bfbdeecad2925ee1945",
-    url = "https://github.com/electron/electron/releases/download/v43.7.3/electron-v43.7.3-linux-x64.zip",
+    sha256 = "4d0a48398c444258dbcf2f5f83b49ca5bc53583130f354e0c299dad5b22b5271",
+    url = "https://github.com/electron/electron/releases/download/v43.7.7/electron-v43.7.7-linux-x64.zip",
 )
 
 http_archive(
     name = "electron_linux_arm64",
     build_file_content = _ELECTRON_LINUX_BUILD_FILE,
-    sha256 = "69c2d141d2123e640d765e49a54a4478856adad67cee048bb2bb4f244f388f87",
-    url = "https://github.com/electron/electron/releases/download/v43.7.3/electron-v43.7.3-linux-arm64.zip",
+    sha256 = "16071038a9677d0f00b11d3d0f0b7b4ea3250987727aa73aa563b87789f2d5ab",
+    url = "https://github.com/electron/electron/releases/download/v43.7.7/electron-v43.7.7-linux-arm64.zip",
 )
 
 http_archive(
     name = "electron_darwin_x64",
     build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
-    sha256 = "031d17b68877921ffb4961a0cb12f37ffa23348fbf6d5f1980dafce41f9d3651",
-    url = "https://github.com/electron/electron/releases/download/v43.7.3/electron-v43.7.3-darwin-x64.zip",
+    sha256 = "cbed66567d55db4a2bffad0bb6ee9795ca0037ad241039f7473fe75680d10905",
+    url = "https://github.com/electron/electron/releases/download/v43.7.7/electron-v43.7.7-darwin-x64.zip",
 )
 
 http_archive(
     name = "electron_darwin_arm64",
     build_file_content = _ELECTRON_DARWIN_BUILD_FILE,
-    sha256 = "5c74bddfa481cb57bce037f238fd9129355c15443a800e8710d0931d712fda92",
-    url = "https://github.com/electron/electron/releases/download/v43.7.3/electron-v43.7.3-darwin-arm64.zip",
+    sha256 = "9327d8ba5bc9e279d1a2f7da90235301c65a2e80eb4ad3bc5610d28d483340f9",
+    url = "https://github.com/electron/electron/releases/download/v43.7.7/electron-v43.7.7-darwin-arm64.zip",
 )
 
 # Portable git builds from GitHub Desktop, used by `//packages/git` integration tests.
@@ -461,7 +461,7 @@ _CODE_SERVER_URL_PREFIX = "https://github.com/coder/code-server/releases/downloa
 http_archive(
     name = "code_server_linux_x64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "864c5d01c808ade57e4d12c708717be7a187219fded60428f263b9e2da9f6b48",
+    sha256 = "65bcd20b524d03eb1b5adb7f360244599ef0e5b74089a46a982d32c074b97a29",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-amd64",
     url = _CODE_SERVER_URL_PREFIX + "linux-amd64.tar.gz",
 )
@@ -469,7 +469,7 @@ http_archive(
 http_archive(
     name = "code_server_linux_arm64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "ae4b07153f2037b06d24749bc8004221fcbf3ffe317038401be0452f541bf200",
+    sha256 = "e5cc78da1d631c6cf6162f9b18eeaa8ee9d3239e1a88bb99d0602cdc5fa1852d",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-arm64",
     url = _CODE_SERVER_URL_PREFIX + "linux-arm64.tar.gz",
 )
