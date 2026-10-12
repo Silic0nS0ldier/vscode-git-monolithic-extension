@@ -345,6 +345,12 @@ importers:
         specifier: ^9.1.0
         version: 9.1.0
 
+  packages/sauron:
+    dependencies:
+      '@types/node':
+        specifier: catalog:vscode
+        version: 24.13.3
+
   packages/wasm:
     devDependencies:
       '@types/node':
