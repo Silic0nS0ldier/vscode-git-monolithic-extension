@@ -48,7 +48,7 @@ jobs:
           archive: false
       # update_bazel_code_server.mjs can rewrite extension/package.json, which leaves
       # pnpm-lock.yaml stale for the `require-lockfile` install in build_and_test.
-      - uses: pnpm/setup@v3.0.0
+      - uses: pnpm/setup@v3.1.1
         with:
           install: false
       - run: pnpm install --lockfile-only
@@ -114,7 +114,7 @@ jobs:
         with:
           path: ${{ runner.temp }}/build.profile.gz
           archive: false
-      - uses: pnpm/setup@v3.0.0
+      - uses: pnpm/setup@v3.1.1
         id: pnpm_setup
         if: ${{ !cancelled() && steps.test.outcome != 'skipped' }}
         with:
