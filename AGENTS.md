@@ -41,7 +41,7 @@ bazel mod deps --lockfile_mode=update                # after ANY MODULE.bazel ed
   do not. Run `dprint fmt` before finishing — CI fails on `dprint check`.
 - `--lockfile_mode=error` is on by default; a `MODULE.bazel` edit without a lock update fails.
 - Other CLI tools are DotSlash stubs in `.devcontainer/dotslash/` (`buildifier`, `jscpd`,
-  `starpls`, `gh`, `node`, `pnpm`, `rustup`) and are also on `PATH` in the devcontainer.
+  `gh`, `node`, `pnpm`, `rustup`) and are also on `PATH` in the devcontainer.
 
 ## Conventions
 

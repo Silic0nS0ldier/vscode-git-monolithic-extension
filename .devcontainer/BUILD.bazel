@@ -32,7 +32,6 @@ tar(
         "dotslash/node",
         "dotslash/pnpm",
         "dotslash/rustup",
-        "dotslash/starpls",
         "dotslash/unused-deps",
     ],
     mutate = mutate(

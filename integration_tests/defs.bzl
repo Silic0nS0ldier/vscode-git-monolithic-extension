@@ -8,12 +8,20 @@ load("//build_defs/lint:linters.bzl", "eslint_test")
 
 # The services bind to the host loopback (`runc_binary` containers share the host network
 # namespace), so every suite is Linux-only.
-LINUX_ONLY = ["@platforms//os:linux"]
+LINUX_ONLY: list[str] = ["@platforms//os:linux"]
 
 # browserless generates one if unset, and the test needs to know it up front.
-BROWSERLESS_TOKEN = "git-monolithic-itest"
+BROWSERLESS_TOKEN: str = "git-monolithic-itest"
 
-def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, size, untrusted):
+def _scm_itest_impl(
+        name: str,
+        visibility: list[Label],
+        fixture: Label,
+        lib: Label,
+        entry_point: select[Label],
+        package_json: Label,
+        size: str,
+        untrusted: bool) -> None:
     workspace_subdir = "git-monolithic-itest-" + name
 
     eslint_test(
