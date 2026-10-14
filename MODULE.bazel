@@ -174,6 +174,7 @@ single_version_override(
     patches = [
         "//:patches/aspect_rules_ts/3.10.1/0001_typescript_from_node_modules.patch",
         "//:patches/aspect_rules_ts/3.10.1/0002_no_redundant_watch.patch",
+        "//:patches/aspect_rules_ts/3.10.1/0003_universal_default_to_tsc_transpiler.patch",
     ],
     version = "3.10.1",
 )
