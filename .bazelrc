@@ -4,6 +4,9 @@ common --test_summary=short_uncached
 common --remote_download_outputs=minimal
 common --experimental_repository_downloader_retries=5
 
+# Checks `.bzl` files against their type annotations at load time.
+common --experimental_starlark_static_type_checking
+
 # Build runfile links only when required
 common --nobuild_runfile_links
 
