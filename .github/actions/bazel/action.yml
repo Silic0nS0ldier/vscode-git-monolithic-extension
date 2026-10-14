@@ -46,9 +46,9 @@ runs:
           common --repo_contents_cache=
           common --remote_cache=${{ steps.remote_cache.outputs.grpc-url || '' }}
           common --remote_upload_local_results=${{ steps.remote_cache.outputs.writable || 'false' }}
-          common --experimental_remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
-          common --experimental_remote_downloader_local_fallback
-          common --experimental_remote_downloader_propagate_credentials
+          common --remote_downloader=${{ steps.remote_cache.outputs.grpc-url || '' }}
+          common --remote_downloader_local_fallback
+          common --remote_downloader_propagate_credentials
           common --noslim_profile
           common --experimental_profile_include_target_label
           mod --profile=${{ runner.temp }}/mod.profile.gz

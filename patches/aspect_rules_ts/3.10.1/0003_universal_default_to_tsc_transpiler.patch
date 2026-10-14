@@ -1,0 +1,20 @@
+Give `default_to_tsc_transpiler` universal scope so it reaches the exec configuration.
+
+Bazel 10 flips `--incompatible_exclude_starlark_flags_from_exec_config`, which resets Starlark
+flags to their defaults in the exec configuration. A `ts_project` built as a tool then fails
+analysis with "Required Transpiler Selection" even though the flag is set.
+See https://github.com/bazelbuild/bazel/issues/26909.
+
+Independent of the other patches. Kept separate so it can go upstream.
+
+diff --git a/ts/BUILD.bazel b/ts/BUILD.bazel
+--- a/ts/BUILD.bazel
++++ b/ts/BUILD.bazel
+@@ -25,6 +25,7 @@
+ bool_flag(
+     name = "default_to_tsc_transpiler",
+     build_setting_default = False,
++    scope = "universal",
+     visibility = ["//visibility:public"],
+ )
+ 
