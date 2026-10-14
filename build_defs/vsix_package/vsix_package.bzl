@@ -4,7 +4,7 @@ VSIX package rule.
 
 load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory_bin_action")
 
-def _vscode_ext_transition_impl(_settings, _attr):
+def _vscode_ext_transition_impl(_settings: dict[str, Any], _attr: struct) -> dict[str, str]:
     return {
         "//command_line_option:platforms": str(Label(":vscode_ext")),
     }
@@ -15,10 +15,12 @@ _vscode_ext_transition = transition(
     outputs = ["//command_line_option:platforms"],
 )
 
-def _copy_inputs(ctx, replace_prefixes = {}):
-    # type: (ctx, dict) -> File
+def _copy_inputs(ctx: Ctx, replace_prefixes: dict[str, str] = {}) -> File:
     inputs_dir = ctx.actions.declare_directory(ctx.label.name + "_inputs_dir")
-    copy_to_directory_bin = ctx.toolchains["@aspect_bazel_lib//lib:copy_to_directory_toolchain_type"].copy_to_directory_info.bin
+
+    # The type checker does not yet know that `ToolchainContext` is indexable.
+    toolchains: Any = ctx.toolchains
+    copy_to_directory_bin = toolchains["@aspect_bazel_lib//lib:copy_to_directory_toolchain_type"].copy_to_directory_info.bin
     copy_to_directory_bin_action(
         ctx,
         name = ctx.label.name,
@@ -29,8 +31,7 @@ def _copy_inputs(ctx, replace_prefixes = {}):
     )
     return inputs_dir
 
-def _vsix_unpacked_impl(ctx):
-    # type: (ctx) -> list
+def _vsix_unpacked_impl(ctx: Ctx) -> list[struct]:
     inputs_dir = _copy_inputs(ctx, ctx.attr.replace_prefixes)
     return [DefaultInfo(files = depset([inputs_dir]))]
 
@@ -53,8 +54,7 @@ vsix_unpacked = rule(
     """,
 )
 
-def _vsix_package_impl(ctx):
-    # type: (ctx) -> list
+def _vsix_package_impl(ctx: Ctx) -> list[struct]:
     inputs_dir = _copy_inputs(ctx)
 
     out = ctx.actions.declare_file("%s.vsix" % ctx.label.name)
