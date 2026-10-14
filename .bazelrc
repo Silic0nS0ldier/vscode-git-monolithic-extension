@@ -37,6 +37,8 @@ build --modify_execution_info=^(Rustc|RustcMetadata|CargoBuildScriptRun|ExtractC
 
 common --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
 common --@aspect_rules_ts//ts:default_to_tsc_transpiler
+# Bazel 10 drops Starlark flags in the exec config; `ts_project` tools (e.g. rollup_bundle) need this one.
+common --experimental_propagate_custom_flag=@aspect_rules_ts//ts:default_to_tsc_transpiler
 
 common --@rules_rust//rust/settings:pipelined_compilation=true
 
