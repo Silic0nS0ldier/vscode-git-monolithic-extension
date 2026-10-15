@@ -6,6 +6,7 @@
 # A stale symlink here only costs unresolved imports until the next build; nothing
 # else, `pnpm install` included, depends on it.
 TARGET="${1:-:dist}"
+set -eu
 
 PACKAGE="$(git rev-parse --show-prefix)"
 PACKAGE="${PACKAGE%/}"
@@ -18,4 +19,9 @@ echo "Deleting ./dist"
 rm -rf ./dist
 
 echo "Linking"
-ln --symbolic --no-dereference "$BAZEL_BIN/$PACKAGE/dist" ./dist
+DEST="$BAZEL_BIN/$PACKAGE/dist"
+if [ ! -d "$DEST" ]; then
+    echo "error: $DEST does not exist after building $TARGET" >&2
+    exit 1
+fi
+ln --symbolic --no-dereference "$DEST" ./dist
