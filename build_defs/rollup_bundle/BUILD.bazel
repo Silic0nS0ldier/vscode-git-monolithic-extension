@@ -1,4 +1,4 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("//build_defs/lint:linters.bzl", "eslint_test")
@@ -17,7 +17,10 @@ js_binary(
 
 ts_project(
     name = "lib",
-    srcs = glob(["src/**/*.ts"]) + ["package.json"],
+    srcs = glob(
+        ["src/**/*.ts"],
+        exclude = ["src/**/*.test.ts"],
+    ) + ["package.json"],
     declaration = True,
     out_dir = "dist",
     root_dir = "src",
@@ -40,10 +43,36 @@ ts_config(
     deps = ["//:tsconfig"],
 )
 
+ts_project(
+    name = "lib_tests",
+    srcs = glob(["src/**/*.test.ts"]) + ["package.json"],
+    declaration = True,
+    out_dir = "dist",
+    root_dir = "src",
+    tsconfig = ":tsconfig",
+    deps = [
+        ":lib",
+        ":node_modules/@types/node",
+        ":node_modules/rollup",
+    ],
+)
+
+js_test(
+    name = "typescript_helper_warnings_test",
+    size = "small",
+    args = ["--test"],
+    data = [
+        "package.json",
+        ":lib_tests",
+    ],
+    entry_point = "dist/typescript-helper-warnings-plugin.test.js",
+)
+
 eslint_test(
     name = "eslint",
     size = "small",
     srcs = [
         ":lib",
+        ":lib_tests",
     ],
 )

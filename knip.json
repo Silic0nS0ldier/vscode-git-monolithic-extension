@@ -58,7 +58,8 @@
         },
         "build_defs/rollup_bundle": {
             "entry": [
-                "src/main.ts"
+                "src/main.ts",
+                "src/**/*.test.ts"
             ]
         },
         "build_defs/vsix_package": {
