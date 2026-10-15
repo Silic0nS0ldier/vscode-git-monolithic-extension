@@ -169,6 +169,16 @@ single_version_override(
     version = "3.1.2",
 )
 
+# Reached via `aspect_bazel_lib -> stardoc -> rules_jvm_external`. Android's transitive toolchain
+# registrations force its repo to materialise during toolchain resolution even though this build
+# does not use Android, and trigger host SDK discovery.
+single_version_override(
+    module_name = "rules_android",
+    patch_strip = 1,
+    patches = ["//:patches/rules_android/0.8.0/0001_no_transitive_toolchains.patch"],
+    version = "0.8.0",
+)
+
 single_version_override(
     module_name = "aspect_rules_ts",
     patch_strip = 1,
