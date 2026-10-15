@@ -1,16 +1,24 @@
 {
     "private": true,
-    "name": "suaron",
-    "description": "",
+    "name": "sauron",
+    "description": "Fault-tolerant file crawler/watcher with suspension, aggregation and hierarchical ignore rules.",
     "version": "0.0.0",
     "type": "module",
     "exports": {
+        ".": {
+            "import": "./dist/mod.js",
+            "types": "./dist/mod.d.ts"
+        }
     },
     "devDependencies": {
+        "ava": "catalog:"
     },
     "dependencies": {
-        "@types/node": "catalog:vscode"
+        "@types/node": "catalog:vscode",
+        "ignore": "^7.0.12",
+        "monolithic-git-interop": "workspace:^"
     },
     "scripts": {
+        "prepare": "sh ../bazelify-dist.sh :lib"
     }
 }

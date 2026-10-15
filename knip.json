@@ -24,6 +24,14 @@
                 "src/**/*.ts"
             ]
         },
+        "packages/sauron": {
+            "entry": [
+                "src/**/*.test.ts"
+            ],
+            "project": [
+                "src/**/*.ts"
+            ]
+        },
         "packages/wasm": {
             "entry": [
                 "src/**/*.test.ts"

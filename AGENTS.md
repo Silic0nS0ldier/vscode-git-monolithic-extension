@@ -17,6 +17,8 @@ packages/wasm  (Rust → wasm)  ──▶  packages/git  ──▶  extension  �
 
 - `packages/git` — npm package `monolithic-git-interop`. Pure git-CLI wrapper, **no VSCode
   dependency**. Subpath exports only.
+- `packages/sauron` — npm package `sauron`. File crawler/watcher (suspension, aggregation, nested
+  ignore rules), **no VSCode dependency**. Prototype; not yet used by the extension. See its README.
 - `extension` — the extension source. `src/main.ts` only re-exports from `src/lifecycle/`.
 - `extension/vsix` — manifest, nls, assets. Bazel copies the rollup output in; no TS of its own.
 - `build_defs` — custom Bazel rules (`rollup_bundle`, `vsix_package`, `rust_wasm_bindgen`,

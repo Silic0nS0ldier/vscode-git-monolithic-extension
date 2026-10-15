@@ -350,6 +350,16 @@ importers:
       '@types/node':
         specifier: catalog:vscode
         version: 24.13.3
+      ignore:
+        specifier: ^7.0.12
+        version: 7.0.12
+      monolithic-git-interop:
+        specifier: workspace:^
+        version: link:../git
+    devDependencies:
+      ava:
+        specifier: 'catalog:'
+        version: 8.0.1(rollup@4.64.5)(supports-color@7.2.0)
 
   packages/wasm:
     devDependencies:
