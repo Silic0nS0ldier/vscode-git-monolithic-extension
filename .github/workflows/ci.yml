@@ -143,15 +143,36 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/bazel
+      # Only the digest is downloaded; `bazel run` would materialise every layer tarball.
+      - run: bazel build //.devcontainer:image_index.digest --remote_download_outputs=toplevel
+      - id: compare
+        name: Compare with the published image
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          changed=$(./.github/workflows/devcontainer_needs_publish.sh \
+            .bazel/bin/.devcontainer/image_index.json.sha256 \
+            silic0ns0ldier/vscode-git-monolithic-extension/devcontainer \
+            latest)
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
       - name: Authenticate to ghcr.io
+        if: steps.compare.outputs.changed == 'true'
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.docker"
           AUTH=$(printf '%s:%s' "${{ github.actor }}" "${{ secrets.GITHUB_TOKEN }}" | base64 -w0)
           printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$AUTH" > "$HOME/.docker/config.json"
       - run: bazel run //.devcontainer:push_image
+        if: steps.compare.outputs.changed == 'true'
       - uses: actions/upload-artifact@v7
         if: always()
+        with:
+          path: ${{ runner.temp }}/build.profile.gz
+          archive: false
+      - uses: actions/upload-artifact@v7
+        if: ${{ always() && steps.compare.outputs.changed == 'true' }}
         with:
           path: ${{ runner.temp }}/run.profile.gz
           archive: false
