@@ -42,10 +42,10 @@
                 "fs.promises.stat": 2,
                 "fs.watch": 1557,
                 "fs.total": 3116,
-                "coverage.functions": 387478,
-                "coverage.blocks": 521327,
+                "coverage.functions": 389035,
+                "coverage.blocks": 536885,
                 "inotify.watches": 1557,
-                "heap.retained": 7121296
+                "heap.retained": 7221896
             },
             "edit": {
                 "fs.total": 0,
@@ -55,21 +55,21 @@
             "burst": {
                 "fs.promises.readdir": 5,
                 "fs.total": 5,
-                "coverage.functions": 20415,
-                "coverage.blocks": 19450
+                "coverage.functions": 20425,
+                "coverage.blocks": 19455
             },
             "add-tree": {
                 "fs.promises.readdir": 32,
                 "fs.watch": 31,
                 "fs.total": 63,
-                "coverage.functions": 2970,
-                "coverage.blocks": 2859
+                "coverage.functions": 3003,
+                "coverage.blocks": 3006
             },
             "remove-tree": {
                 "fs.promises.readdir": 1,
                 "fs.total": 1,
-                "coverage.functions": 38864,
-                "coverage.blocks": 49270,
+                "coverage.functions": 38866,
+                "coverage.blocks": 49531,
                 "inotify.watches": 1329
             },
             "close": {
@@ -86,16 +86,16 @@
                 "fs.stat": 13999,
                 "fs.watch": 1558,
                 "fs.total": 18671,
-                "coverage.functions": 1132527,
-                "coverage.blocks": 894580,
+                "coverage.functions": 1132531,
+                "coverage.blocks": 894583,
                 "inotify.watches": 1558,
-                "heap.retained": 10934728
+                "heap.retained": 10934896
             },
             "edit": {
                 "fs.stat": 1,
                 "fs.total": 1,
-                "coverage.functions": 43,
-                "coverage.blocks": 1
+                "coverage.functions": 47,
+                "coverage.blocks": 3
             },
             "burst": {
                 "fs.stat": 688,
@@ -114,7 +114,7 @@
             "remove-tree": {
                 "fs.stat": 2547,
                 "fs.total": 2547,
-                "coverage.functions": 3935726,
+                "coverage.functions": 3935718,
                 "coverage.blocks": 7338291,
                 "inotify.watches": 1330
             },

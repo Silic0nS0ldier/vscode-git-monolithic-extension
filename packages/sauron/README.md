@@ -118,9 +118,17 @@ Built-ins: `gitignore({ patterns })` (nested `.gitignore` files plus extra root 
 - **Roots.** Each root is anchored by a watch on its nearest existing ancestor (normally its parent). The anchor
   sees the root being created, removed or replaced, and a file root's changes. A removed root is reported as a
   subtree, and the anchor moves up until the root reappears. The anchor watch is in place before the root is
-  checked, so nothing created in between is missed.
-- **Suspension.** Releasing the last handle waits for in-flight rescans before resuming, so the next `changes`
-  batch covers everything that happened while suspended.
+  checked, so nothing created in between is missed. Unrelated activity next to a root costs a string comparison.
+  If the anchor directory itself is removed or moved, the root is checked by identity (device and inode) and only
+  re-crawled if it changed. Events without a name may hide a replacement, so they re-crawl it.
+- **Failures.** Nothing is retried synchronously, so a failure that recurs at once cannot loop. A watch that fails
+  to register or is lost (Node closes a watch that errors), a listing or a `stat` that fails, and an anchor that
+  fails are retried after a backoff, through the tree as it is by then. After `retry.attempts` the path is reported
+  once as `degraded` and left alone for `retry.cooldown`, unless `rescan()` asks again. Events cannot bypass this:
+  while a path backs off, activity does not retry it early. A lost watch reports its directory as a subtree, as
+  changes may have been missed. Failures during the initial crawl are retried after it; `crawl` still reports done.
+- **Suspension.** Releasing the last handle retries any failures that are backing off, then waits for in-flight
+  rescans before resuming, so the next `changes` batch covers everything that happened while suspended.
 - **Backends.** `Backend` abstracts the platform. `createNodeBackend()` registers one non-recursive `fs.watch` per
   directory, because Node's `recursive: true` is emulated in userland on Linux. Tests use an in-memory backend.
 

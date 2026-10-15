@@ -6,6 +6,7 @@ import type { AbsolutePath } from "../path.js";
 import { watch, type Watcher, type WatchEvent, type WatchOptions } from "./mod.js";
 
 const SETTLE = { quiet: 10, maxWait: 1_000 };
+const RETRY = { attempts: 3, delay: 1, maxDelay: 4 };
 
 function start(fake: FakeBackend, options: Partial<WatchOptions> = {}): Watcher {
     const created = watch({ roots: [p("/repo")], backend: fake, settle: SETTLE, ...options });
@@ -29,6 +30,29 @@ async function until<T extends WatchEvent["type"]>(
             return result.value as Extract<WatchEvent, { type: T }>;
         }
     }
+}
+
+/** Records every event in the background. Use instead of `until`, not alongside it. */
+function record(watcher: Watcher): WatchEvent[] {
+    const events: WatchEvent[] = [];
+    void (async () => {
+        for (;;) {
+            const result = await watcher.next();
+            if (result.done) {
+                return;
+            }
+            events.push(result.value);
+        }
+    })();
+    return events;
+}
+
+function degraded(events: readonly WatchEvent[]): AbsolutePath[] {
+    return events.flatMap(event => event.type === "degraded" ? [event.scope] : []);
+}
+
+function changed(events: readonly WatchEvent[]): string[] {
+    return sorted(new Set(events.flatMap(event => event.type === "changes" ? all(event) : []) as AbsolutePath[]));
 }
 
 async function crawled(watcher: Watcher): Promise<void> {
@@ -322,8 +346,8 @@ test("anchors are released as they move, and only the root's parent stays watche
 
     // Removed again: everything below the new anchor is released.
     fake.remove("/x/y");
-    await eventually(() => fake.watched.has(p("/x")));
-    t.deepEqual(sorted(fake.watched), ["/x"]);
+    await eventually(() => sorted(fake.watched).join() === "/x");
+    t.pass();
 });
 
 test("unrelated activity next to a missing root is ignored", async t => {
@@ -426,17 +450,350 @@ test("a file root becoming a directory is crawled", async t => {
     t.pass();
 });
 
-test("exhausting the watch limit degrades only the affected subtree", async t => {
+test("a watch that keeps failing is retried a bounded number of times, then reported once as degraded", async t => {
     const fake = createFakeBackend();
     fake.mkdir("/repo/ok");
     fake.mkdir("/repo/full/deep");
     fake.failWatch = dir => dir === p("/repo/full") ? "limit" : null;
-    await using watcher = start(fake);
+    await using watcher = start(fake, { retry: RETRY });
 
-    const event = await until(watcher, "degraded");
-    t.is(event.scope, p("/repo/full"));
-    await crawled(watcher);
+    const events = record(watcher);
+    await eventually(() => degraded(events).length > 0);
+    t.deepEqual(degraded(events), [p("/repo/full")]);
+    t.is(fake.watchAttempts.get(p("/repo/full")), RETRY.attempts + 1);
     t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/ok"]);
+    await new Promise(resolve => setTimeout(resolve, 50));
+    t.is(fake.watchAttempts.get(p("/repo/full")), RETRY.attempts + 1, "no attempts after giving up");
+
+    // An explicit rescan tries again.
+    fake.failWatch = null;
+    watcher.rescan();
+    await eventually(() => fake.watched.has(p("/repo/full/deep")));
+    t.pass();
+});
+
+test("a watch that fails transiently is retried until it succeeds", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/flaky/deep");
+    fake.failWatch = dir => dir === p("/repo/flaky") && fake.watchAttempts.get(dir)! <= 2 ? "limit" : null;
+    await using watcher = start(fake, { retry: RETRY });
+
+    const changes = await until(watcher, "changes");
+    t.deepEqual(all(changes), ["/repo/flaky"], "reported, as it was unwatched for a while");
+    await eventually(() => fake.watched.has(p("/repo/flaky/deep")));
+    t.is(fake.watchAttempts.get(p("/repo/flaky")), 3);
+});
+
+test("a watch lost after the crawl is re-established, and its directory reported", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/b");
+    await using watcher = start(fake, { retry: RETRY });
+    await crawled(watcher);
+
+    fake.breakWatch("/repo/a");
+
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/a"]);
+    await eventually(() => fake.watched.has(p("/repo/a")) && fake.watched.has(p("/repo/a/b")));
+    t.is(fake.watchCalls.get(p("/repo/a")), 2);
+});
+
+for (
+    const [when, breakWatch] of [
+        ["while registering", (fake: FakeBackend, dir: AbsolutePath) => fake.breakWatch(dir)],
+        ["while listing", (fake: FakeBackend, dir: AbsolutePath) => setImmediate(() => fake.breakWatch(dir))],
+    ] as const
+) {
+    test(`a watch lost during the initial crawl (${when}) is retried after it`, async t => {
+        const fake = createFakeBackend();
+        fake.mkdir("/repo/a/b/c");
+        fake.afterWatch = dir => {
+            if (dir === p("/repo/a/b") && fake.watchCalls.get(dir) === 1) {
+                breakWatch(fake, dir);
+            }
+        };
+        await using watcher = start(fake, { retry: RETRY });
+
+        await crawled(watcher);
+        await eventually(() => fake.watched.has(p("/repo/a/b/c")));
+        t.is(fake.watchCalls.get(p("/repo/a/b")), 2);
+        t.true(all(await until(watcher, "changes")).includes("/repo/a/b"));
+    });
+}
+
+test("a watch lost straight after every registration is given up on instead of looping", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    fake.afterWatch = dir => {
+        if (dir === p("/repo/a")) {
+            setImmediate(() => fake.breakWatch(dir));
+        }
+    };
+    await using watcher = start(fake, { retry: RETRY });
+
+    const events = record(watcher);
+    await eventually(() => degraded(events).length > 0);
+    await new Promise(resolve => setTimeout(resolve, 50));
+    t.deepEqual(degraded(events), [p("/repo/a")]);
+    t.is(fake.watchAttempts.get(p("/repo/a")), RETRY.attempts + 1);
+});
+
+test("a listing that keeps failing is given up on, and later activity does not retry it", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    fake.failReaddir = dir => dir === p("/repo/a") ? "other" : null;
+    await using watcher = start(fake, { retry: RETRY });
+
+    const events = record(watcher);
+    await eventually(() => degraded(events).length > 0);
+    t.deepEqual(degraded(events), [p("/repo/a")]);
+    fake.write("/repo/a/new");
+    await new Promise(resolve => setTimeout(resolve, 50));
+    t.is(fake.readdirAttempts.get(p("/repo/a")), RETRY.attempts + 1);
+});
+
+test("an anchor that keeps failing is given up on, while the root stays watched", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo");
+    fake.failWatch = dir => dir === p("/") ? "other" : null;
+    await using watcher = start(fake, { retry: RETRY });
+
+    const events = record(watcher);
+    await eventually(() => degraded(events).length > 0);
+    await new Promise(resolve => setTimeout(resolve, 50));
+    t.deepEqual(degraded(events), [p("/repo")]);
+    t.is(fake.watchAttempts.get(p("/")), RETRY.attempts + 1);
+
+    fake.write("/repo/file");
+    await eventually(() => changed(events).length > 0);
+    t.deepEqual(changed(events), ["/repo/file"]);
+});
+
+test("a root that vanishes whenever it is watched does not loop", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo");
+    // `stat` sees a directory that `watch` cannot find.
+    fake.failWatch = dir => dir === p("/repo") ? "not-found" : null;
+    await using watcher = start(fake, { retry: RETRY });
+
+    const events = record(watcher);
+    await eventually(() => degraded(events).length > 0);
+    await new Promise(resolve => setTimeout(resolve, 50));
+    t.deepEqual(degraded(events), [p("/repo")]);
+    t.is(fake.watchAttempts.get(p("/repo")), RETRY.attempts + 1);
+});
+
+test("a nameless event next to a root re-crawls it, as it may have been replaced", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.emitNameless("/");
+
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo"]);
+    await eventually(() => fake.watchCalls.get(p("/repo/a")) === 2);
+    t.pass();
+});
+
+test("a removed anchor moves up instead of going quiet", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/x");
+    await using watcher = start(fake, { roots: [p("/x/y/z")] });
+    await crawled(watcher);
+
+    fake.remove("/x");
+    await eventually(() => fake.watched.has(p("/")));
+    fake.mkdir("/x/y/z");
+
+    t.deepEqual(all(await until(watcher, "changes")), ["/x/y/z"]);
+});
+
+test("a retry watches the directory that replaced the one that failed", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/b");
+    fake.failWatch = dir => dir === p("/repo/a/b") && fake.watchAttempts.get(dir) === 1 ? "limit" : null;
+    await using watcher = start(fake, { retry: { attempts: 3, delay: 50, maxDelay: 50 } });
+    await crawled(watcher);
+
+    // Replaced while the retry is pending; the replacement skips the path until then.
+    fake.remove("/repo/a");
+    fake.mkdir("/repo/a/b/c");
+
+    await eventually(() => fake.watched.has(p("/repo/a/b/c")));
+    t.pass();
+});
+
+test("an anchor retry repairs whichever anchor is current", async t => {
+    const fake = createFakeBackend();
+    await using watcher = start(fake, { roots: [p("/x/y/z")], retry: { attempts: 3, delay: 50, maxDelay: 50 } });
+    await crawled(watcher);
+
+    // The anchor moves to /x while the old one's retry is pending, then the new one is lost too.
+    fake.mkdir("/x");
+    fake.breakWatch("/");
+    await eventually(() => fake.watched.has(p("/x")));
+    fake.breakWatch("/x");
+
+    await eventually(() => fake.watched.has(p("/x")));
+    fake.mkdir("/x/y/z");
+    t.deepEqual(all(await until(watcher, "changes")), ["/x/y/z"]);
+});
+
+test("events next to a failing root do not add attempts", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo");
+    fake.failWatch = dir => dir === p("/repo") ? "limit" : null;
+    await using watcher = start(fake, { retry: RETRY });
+    const events = record(watcher);
+
+    for (let i = 0; i < 20; i++) {
+        fake.emitNameless("/");
+        await new Promise(resolve => setImmediate(resolve));
+    }
+    await eventually(() => degraded(events).length > 0);
+    for (let i = 0; i < 20; i++) {
+        fake.emitNameless("/");
+    }
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    t.is(fake.watchAttempts.get(p("/repo")), RETRY.attempts + 1);
+    t.deepEqual(degraded(events), [p("/repo")]);
+});
+
+test("a stat that keeps failing is given up on", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo");
+    fake.failStat = target => target === p("/repo") ? "other" : null;
+    await using watcher = start(fake, { retry: RETRY });
+    const events = record(watcher);
+
+    await eventually(() => degraded(events).length > 0);
+    const stats = fake.statCalls;
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    t.is(fake.statCalls, stats);
+    t.deepEqual(degraded(events), [p("/repo")]);
+});
+
+test("a path given up on is tried again by activity after the cooldown", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    fake.failReaddir = dir => dir === p("/repo/a") ? "other" : null;
+    await using watcher = start(fake, { retry: { attempts: 1, delay: 1, maxDelay: 1, cooldown: 200 } });
+    const events = record(watcher);
+    await eventually(() => degraded(events).length === 1);
+    t.is(fake.readdirAttempts.get(p("/repo/a")), 2);
+
+    await new Promise(resolve => setTimeout(resolve, 250));
+    fake.write("/repo/a/new");
+
+    await eventually(() => degraded(events).length === 2);
+    t.is(fake.readdirAttempts.get(p("/repo/a")), 4);
+});
+
+test("a retry that is slower to fail than the cooldown still counts towards the same streak", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    fake.failReaddir = dir => dir === p("/repo/a") ? "other" : null;
+    fake.readdirDelay = dir => dir === p("/repo/a") ? 40 : 0;
+    await using watcher = start(fake, { retry: { attempts: 2, delay: 1, maxDelay: 1, cooldown: 20 } });
+    const events = record(watcher);
+
+    await eventually(() => degraded(events).length === 1);
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    t.is(fake.readdirAttempts.get(p("/repo/a")), 3);
+    t.deepEqual(degraded(events), [p("/repo/a")]);
+});
+
+test("a root that keeps failing to list is given up on, though checking it succeeds", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo");
+    fake.failReaddir = dir => dir === p("/repo") ? "other" : null;
+    fake.readdirDelay = dir => dir === p("/repo") ? 40 : 0;
+    await using watcher = start(fake, { retry: { attempts: 2, delay: 1, maxDelay: 1, cooldown: 20 } });
+    const events = record(watcher);
+
+    await eventually(() => degraded(events).length === 1);
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    t.is(fake.readdirAttempts.get(p("/repo")), 3);
+});
+
+test("an anchor lost while registering is not counted as working", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo");
+    fake.afterWatch = dir => {
+        if (dir === p("/")) {
+            fake.breakWatch(dir);
+        }
+    };
+    await using watcher = start(fake, { retry: { attempts: 2, delay: 30, maxDelay: 30, cooldown: 1 } });
+    const events = record(watcher);
+
+    await eventually(() => degraded(events).length === 1);
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    t.is(fake.watchAttempts.get(p("/")), 3);
+    t.deepEqual(degraded(events), [p("/repo")]);
+});
+
+test("failures far enough apart do not add up", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    await using watcher = start(fake, { retry: { attempts: 1, delay: 1, maxDelay: 1, cooldown: 30 } });
+    const events = record(watcher);
+    await eventually(() => events.some(event => event.type === "crawl" && event.done));
+
+    for (let i = 2; i <= 4; i++) {
+        fake.breakWatch("/repo/a");
+        await eventually(() => fake.watchCalls.get(p("/repo/a")) === i);
+        await new Promise(resolve => setTimeout(resolve, 60));
+    }
+    t.deepEqual(degraded(events), []);
+});
+
+test("resuming keeps retrying until failures recover or run out of attempts", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    await using watcher = start(fake, { retry: { attempts: 3, delay: 10_000, maxDelay: 10_000 } });
+    await crawled(watcher);
+
+    const handle = watcher.suspend("checkout");
+    fake.breakWatch("/repo/a");
+    // The first two attempts at re-watching fail too.
+    fake.failWatch = dir => dir === p("/repo/a") && fake.watchAttempts.get(dir)! <= 3 ? "limit" : null;
+    await handle[Symbol.asyncDispose]();
+
+    t.true(fake.watched.has(p("/repo/a")));
+    t.is(fake.watchAttempts.get(p("/repo/a")), 4);
+});
+
+test("resuming retries failures now rather than waiting for their backoff", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    await using watcher = start(fake, { retry: { attempts: 3, delay: 10_000, maxDelay: 10_000 } });
+    await crawled(watcher);
+
+    const handle = watcher.suspend("checkout");
+    fake.breakWatch("/repo/a");
+    t.false(fake.watched.has(p("/repo/a")));
+    await handle[Symbol.asyncDispose]();
+
+    t.true(fake.watched.has(p("/repo/a")));
+});
+
+test("a nameless event in a directory lists it again without re-watching", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.emitNameless("/repo/a");
+
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/a"]);
+    t.is(fake.readdirAttempts.get(p("/repo/a")), 2);
+    t.is(fake.watchCalls.get(p("/repo/a")), 1);
 });
 
 test("nested roots are watched once", async t => {

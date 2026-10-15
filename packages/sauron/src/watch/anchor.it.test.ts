@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { type AbsolutePath, absolutePath, watch, type WatchEvent } from "../mod.js";
+import { type AbsolutePath, absolutePath, watch, type Watcher, type WatchEvent } from "../mod.js";
 
 /** Inodes (hex) the kernel watches for this process, from inotify's fdinfo. */
 function watchedInodes(): Set<string> {
@@ -16,7 +16,7 @@ function watchedInodes(): Set<string> {
         } catch {
             continue;
         }
-        for (const match of info.matchAll(/^inotify wd:\d+ ino:([0-9a-f]+)/gm)) {
+        for (const match of info.matchAll(/^inotify wd:[0-9a-f]+ ino:([0-9a-f]+)/gm)) {
             inodes.add(match[1]!);
         }
     }
@@ -33,6 +33,38 @@ function watched(...dirs: string[]): string[] {
     return dirs.filter(dir => fs.existsSync(dir) && inodes.has(inode(dir)));
 }
 
+function tempDir(): string {
+    return fs.realpathSync(fs.mkdtempSync(path.join(process.env["TEST_TMPDIR"] ?? os.tmpdir(), "anchor-")));
+}
+
+/** Watches `root` until its crawl is done. `events` collects everything after, `changes` just the changes. */
+async function start(root: string): Promise<{ watcher: Watcher; events: WatchEvent[]; changes: WatchEvent[] }> {
+    const target = absolutePath(root);
+    assert.ok(!isErr(target));
+    const created = watch({ roots: [unwrap(target)], settle: { quiet: 20, maxWait: 1_000 } });
+    assert.ok(!isErr(created));
+    const watcher = unwrap(created);
+    const events: WatchEvent[] = [];
+    const changes: WatchEvent[] = [];
+    const crawled = Promise.withResolvers<void>();
+    void (async () => {
+        for await (const event of watcher) {
+            if (event.type === "crawl") {
+                if (event.done) {
+                    crawled.resolve();
+                }
+                continue;
+            }
+            events.push(event);
+            if (event.type === "changes") {
+                changes.push(event);
+            }
+        }
+    })();
+    await crawled.promise;
+    return { watcher, events, changes };
+}
+
 async function until(condition: () => boolean, message: () => string): Promise<void> {
     const deadline = performance.now() + 5_000;
     while (!condition()) {
@@ -44,25 +76,9 @@ async function until(condition: () => boolean, message: () => string): Promise<v
 test("anchors follow a missing root down, ignore unrelated activity, and are released", {
     skip: process.platform !== "linux" && "Reads inotify state from /proc",
 }, async () => {
-    const top = fs.realpathSync(fs.mkdtempSync(path.join(process.env["TEST_TMPDIR"] ?? os.tmpdir(), "anchor-")));
+    const top = tempDir();
     const [p, q, r] = [path.join(top, "p"), path.join(top, "p/q"), path.join(top, "p/q/r")];
-    const target = absolutePath(r);
-    assert.ok(!isErr(target));
-    const created = watch({ roots: [unwrap(target)], settle: { quiet: 20, maxWait: 1_000 } });
-    assert.ok(!isErr(created));
-    const watcher = unwrap(created);
-    const changes: WatchEvent[] = [];
-    const crawled = Promise.withResolvers<void>();
-    void (async () => {
-        for await (const event of watcher) {
-            if (event.type === "crawl" && event.done) {
-                crawled.resolve();
-            } else if (event.type === "changes") {
-                changes.push(event);
-            }
-        }
-    })();
-    await crawled.promise;
+    const { watcher, changes } = await start(r);
     const show = () => `watched: ${JSON.stringify(watched(top, p, q, r).map(dir => path.relative(top, dir)))}`;
 
     try {
@@ -94,27 +110,11 @@ test("anchors follow a missing root down, ignore unrelated activity, and are rel
 test("activity next to a directory root is not reported and does not re-crawl it", {
     skip: process.platform !== "linux" && "Reads inotify state from /proc",
 }, async () => {
-    const top = fs.realpathSync(fs.mkdtempSync(path.join(process.env["TEST_TMPDIR"] ?? os.tmpdir(), "anchor-")));
+    const top = tempDir();
     const root = path.join(top, "root");
     const sub = path.join(root, "sub");
     fs.mkdirSync(sub, { recursive: true });
-    const target = absolutePath(root);
-    assert.ok(!isErr(target));
-    const created = watch({ roots: [unwrap(target)], settle: { quiet: 20, maxWait: 1_000 } });
-    assert.ok(!isErr(created));
-    const watcher = unwrap(created);
-    const events: WatchEvent[] = [];
-    const crawled = Promise.withResolvers<void>();
-    void (async () => {
-        for await (const event of watcher) {
-            if (event.type === "crawl" && event.done) {
-                crawled.resolve();
-            } else {
-                events.push(event);
-            }
-        }
-    })();
-    await crawled.promise;
+    const { watcher, events } = await start(root);
     const subInode = inode(sub);
 
     try {
@@ -135,6 +135,60 @@ test("activity next to a directory root is not reported and does not re-crawl it
         // Same directory, same watch: not re-crawled.
         assert.equal(inode(sub), subInode);
         assert.deepEqual(watched(top, root, sub), [top, root, sub]);
+    } finally {
+        await watcher[Symbol.asyncDispose]();
+    }
+    fs.rmSync(top, { recursive: true, force: true });
+});
+
+test("moving the directory holding a root reports the root gone and releases the moved watches", {
+    skip: process.platform !== "linux" && "Reads inotify state from /proc",
+}, async () => {
+    const top = tempDir();
+    const root = path.join(top, "p/root");
+    fs.mkdirSync(path.join(root, "sub"), { recursive: true });
+    const { watcher, changes } = await start(root);
+    const moved = [path.join(top, "p2"), path.join(top, "p2/root"), path.join(top, "p2/root/sub")];
+    const show = () => `watched: ${JSON.stringify(watched(top, ...moved).map(dir => path.relative(top, dir)))}`;
+
+    try {
+        // The root's own watches see nothing: only the directory holding it moved.
+        fs.renameSync(path.join(top, "p"), path.join(top, "p2"));
+        await until(() => changes.length > 0, () => "The root's removal was not reported");
+        assert.deepEqual(changes, [{ type: "changes", paths: new Set(), subtrees: new Set([root as AbsolutePath]) }]);
+        await until(() => watched(top, ...moved).join() === top, show);
+
+        fs.mkdirSync(path.join(root, "sub"), { recursive: true });
+        const recreated = [top, path.join(top, "p"), root, path.join(root, "sub")];
+        await until(
+            () => watched(...recreated).join() === recreated.slice(1).join(),
+            () => `watched: ${JSON.stringify(watched(...recreated).map(dir => path.relative(top, dir)))}`,
+        );
+    } finally {
+        await watcher[Symbol.asyncDispose]();
+    }
+    fs.rmSync(top, { recursive: true, force: true });
+});
+
+test("an anchor directory moved and re-created at once is watched afresh", {
+    skip: process.platform !== "linux" && "Reads inotify state from /proc",
+}, async () => {
+    const top = tempDir();
+    const p = path.join(top, "p");
+    const r = path.join(p, "r");
+    fs.mkdirSync(p);
+    const { watcher, changes } = await start(r);
+
+    try {
+        // Same path, new directory: the old anchor watch follows the moved one.
+        fs.renameSync(p, path.join(top, "p2"));
+        fs.mkdirSync(p);
+        await until(() => watched(p).length === 1, () => "The re-created anchor directory is not watched");
+
+        fs.mkdirSync(r);
+        await until(() => changes.length > 0, () => "The root's creation was not reported");
+        assert.deepEqual(changes, [{ type: "changes", paths: new Set(), subtrees: new Set([r as AbsolutePath]) }]);
+        assert.deepEqual(watched(path.join(top, "p2")), []);
     } finally {
         await watcher[Symbol.asyncDispose]();
     }

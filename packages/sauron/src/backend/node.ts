@@ -47,8 +47,11 @@ export function createNodeBackend(): Backend {
                         name: parsed !== null && isOk(parsed) ? unwrap(parsed) : null,
                     });
                 });
-                // E.g. the directory was deleted; a nameless event prompts a rescan which discovers that.
-                watcher.on("error", () => listener({ type: "rename", name: null }));
+                // Node closes the handle on error, so the watch is gone.
+                watcher.on("error", cause => {
+                    watcher.close();
+                    listener({ type: "lost", cause });
+                });
                 return ok(undefined);
             } catch (e) {
                 return err(toBackendError(dir, e));
@@ -73,8 +76,9 @@ export function createNodeBackend(): Backend {
         async stat(target, signal) {
             try {
                 signal.throwIfAborted();
-                const stats = await fs.promises.stat(target);
-                return ok(stats.isDirectory() ? "directory" : stats.isFile() ? "file" : "other");
+                const stats = await fs.promises.stat(target, { bigint: true });
+                const kind = stats.isDirectory() ? "directory" : stats.isFile() ? "file" : "other";
+                return ok({ kind, id: `${stats.dev}:${stats.ino}` });
             } catch (e) {
                 const error = toBackendError(target, e);
                 return error.type === "not-found" ? ok(null) : err(error);

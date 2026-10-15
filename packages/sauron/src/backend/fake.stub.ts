@@ -2,7 +2,11 @@ import { err, isErr, ok, unwrap } from "monolithic-git-interop/util/result";
 import { type AbsolutePath, absolutePath, type EntryKind, type FileName, parent } from "../path.js";
 import type { Backend, BackendError, RawEvent } from "./mod.js";
 
-type Entry = { readonly kind: "directory" } | { readonly kind: "file"; content: string };
+type Entry = { readonly kind: "directory"; readonly id: string } | {
+    readonly kind: "file";
+    readonly id: string;
+    content: string;
+};
 
 export type FakeBackend = Backend & {
     mkdir(path: string): void;
@@ -16,7 +20,27 @@ export type FakeBackend = Backend & {
     readonly statCalls: number;
     /** Makes `watch` fail for matching directories. */
     failWatch: ((dir: AbsolutePath) => BackendError["type"] | null) | null;
+    /** Makes `readdir` fail for matching directories. */
+    failReaddir: ((dir: AbsolutePath) => BackendError["type"] | null) | null;
+    /** Milliseconds `readdir` takes for matching directories (default: one macrotask). */
+    readdirDelay: ((dir: AbsolutePath) => number) | null;
+    /** Makes `stat` fail for matching paths. */
+    failStat: ((target: AbsolutePath) => BackendError["type"] | null) | null;
+    /** Called after a watch is registered, e.g. to break it. */
+    afterWatch: ((dir: AbsolutePath) => void) | null;
+    /** Number of `watch` calls per directory, including failed ones. */
+    readonly watchAttempts: ReadonlyMap<AbsolutePath, number>;
+    /** Number of `readdir` calls per directory, including failed ones. */
+    readonly readdirAttempts: ReadonlyMap<AbsolutePath, number>;
+    /** Ends the watches on `dir` with an error, as a platform watcher may. */
+    breakWatch(dir: string): void;
+    /** Emits an event without a name to the watches on `dir`. */
+    emitNameless(dir: string): void;
 };
+
+function increment(counts: Map<AbsolutePath, number>, key: AbsolutePath): void {
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+}
 
 export function p(raw: string): AbsolutePath {
     const result = absolutePath(raw);
@@ -32,12 +56,16 @@ function nameOf(path: AbsolutePath): FileName {
 
 /** In-memory file system emitting events the way a non-recursive platform watcher would. */
 export function createFakeBackend(): FakeBackend {
-    const entries = new Map<AbsolutePath, Entry>([[p("/"), { kind: "directory" }]]);
+    let nextId = 0;
+    const newId = () => String(nextId++);
+    const entries = new Map<AbsolutePath, Entry>([[p("/"), { kind: "directory", id: newId() }]]);
     const listeners = new Map<AbsolutePath, Set<(event: RawEvent) => void>>();
     const watchCalls = new Map<AbsolutePath, number>();
+    const watchAttempts = new Map<AbsolutePath, number>();
+    const readdirAttempts = new Map<AbsolutePath, number>();
     let statCalls = 0;
 
-    function emit(target: AbsolutePath, type: RawEvent["type"]): void {
+    function emit(target: AbsolutePath, type: "rename" | "change"): void {
         const dir = parent(target);
         if (dir === null) {
             return;
@@ -56,12 +84,31 @@ export function createFakeBackend(): FakeBackend {
         if (dir !== null) {
             mkdir(dir);
         }
-        entries.set(target, { kind: "directory" });
+        entries.set(target, { kind: "directory", id: newId() });
         emit(target, "rename");
     }
 
     const backend: FakeBackend = {
         failWatch: null,
+        failReaddir: null,
+        failStat: null,
+        readdirDelay: null,
+        afterWatch: null,
+        watchAttempts,
+        readdirAttempts,
+        breakWatch(raw) {
+            const dir = p(raw);
+            const dead = [...listeners.get(dir) ?? []];
+            listeners.delete(dir);
+            for (const listener of dead) {
+                listener({ type: "lost", cause: new Error("injected loss") });
+            }
+        },
+        emitNameless(raw) {
+            for (const listener of listeners.get(p(raw)) ?? []) {
+                listener({ type: "rename", name: null });
+            }
+        },
         get watched() {
             return new Set(listeners.entries().filter(([, set]) => set.size > 0).map(([dir]) => dir));
         },
@@ -79,7 +126,7 @@ export function createFakeBackend(): FakeBackend {
                 return;
             }
             mkdir(parent(target)!);
-            entries.set(target, { kind: "file", content });
+            entries.set(target, { kind: "file", id: newId(), content });
             emit(target, "rename");
         },
         remove(raw) {
@@ -98,6 +145,7 @@ export function createFakeBackend(): FakeBackend {
             }
         },
         watch(dir, listener, signal) {
+            increment(watchAttempts, dir);
             const failure = backend.failWatch?.(dir) ?? null;
             if (failure !== null) {
                 return err({ type: failure, path: dir, cause: new Error(`injected ${failure}`) });
@@ -113,10 +161,17 @@ export function createFakeBackend(): FakeBackend {
             }
             set.add(listener);
             signal.addEventListener("abort", () => set.delete(listener), { once: true });
+            backend.afterWatch?.(dir);
             return ok(undefined);
         },
         async readdir(dir) {
-            await new Promise(resolve => setImmediate(resolve));
+            increment(readdirAttempts, dir);
+            const delay = backend.readdirDelay?.(dir) ?? 0;
+            await new Promise(resolve => delay === 0 ? setImmediate(resolve) : setTimeout(resolve, delay));
+            const failure = backend.failReaddir?.(dir) ?? null;
+            if (failure !== null) {
+                return err({ type: failure, path: dir, cause: new Error(`injected ${failure}`) });
+            }
             if (entries.get(dir)?.kind !== "directory") {
                 return err({ type: "not-found", path: dir, cause: new Error("ENOENT") });
             }
@@ -131,7 +186,12 @@ export function createFakeBackend(): FakeBackend {
         async stat(target) {
             statCalls++;
             await new Promise(resolve => setImmediate(resolve));
-            return ok(entries.get(target)?.kind ?? null);
+            const failure = backend.failStat?.(target) ?? null;
+            if (failure !== null) {
+                return err({ type: failure, path: target, cause: new Error(`injected ${failure}`) });
+            }
+            const entry = entries.get(target);
+            return ok(entry === undefined ? null : { kind: entry.kind, id: entry.id });
         },
         async readText(file) {
             await new Promise(resolve => setImmediate(resolve));
