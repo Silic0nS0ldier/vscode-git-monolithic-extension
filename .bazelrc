@@ -9,7 +9,8 @@ common --nobuild_runfile_links
 
 common --local_resources=chromium_load=4
 
-common --host_platform=@platforms_contrib//host:native
+# TODO Switch to apparent name once https://github.com/bazelbuild/bazel/pull/31609 merged and in bazel release.
+common --host_platform=@@platforms_contrib+//host:native
 
 # Path mapping strips the configuration segment (`bazel-out/k8-fastbuild/bin`) from action
 # command lines, so actions that differ only by configuration share cache entries. It only
