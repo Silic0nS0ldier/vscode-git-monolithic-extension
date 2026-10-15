@@ -4,6 +4,7 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { cli } from "cleye";
 import { rollup } from "rollup";
 import { nodeBuiltinPrefixPlugin } from "./node-builtin-prefix-plugin.js";
+import { typescriptHelperWarningsPlugin } from "./typescript-helper-warnings-plugin.js";
 import { wasmSourcePhasePlugin } from "./wasm-source-phase-plugin.js";
 
 // Work around https://github.com/rollup/plugins/issues/1662
@@ -63,6 +64,7 @@ const bundle = await (async () => {
                 nodeResolve(),
                 commonjs(),
                 json(),
+                typescriptHelperWarningsPlugin(),
             ],
             external: externalModules,
             onwarn: (warning, defaultHandler) => {
