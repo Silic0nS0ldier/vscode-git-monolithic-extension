@@ -3,26 +3,26 @@
   "name": "dprint",
   "platforms": {
     "linux-x86_64": {
-      "size": 10075470,
+      "size": 10077740,
       "hash": "sha256",
-      "digest": "9d2de0313bbfc26ed80148a38a430c037a216a905cdf317f6271f8a10311933a",
+      "digest": "f58b5d7c13ccd613cfa264f1ae82d4e5db1373f8fe20462bc1126051d111b0ce",
       "format": "zip",
       "path": "dprint",
       "providers": [
         {
-          "url": "https://github.com/dprint/dprint/releases/download/0.62.0/dprint-x86_64-unknown-linux-gnu.zip"
+          "url": "https://github.com/dprint/dprint/releases/download/0.63.0/dprint-x86_64-unknown-linux-gnu.zip"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 8850215,
+      "size": 8868356,
       "hash": "sha256",
-      "digest": "79025432b0fcfaa09fa1324a97a2cf4ec5d972175830fb496dc4be4f6a89340e",
+      "digest": "8dfbf17fc4be97020e51bd47e1370acdb019301295ed539840016671cab33e89",
       "format": "zip",
       "path": "dprint",
       "providers": [
         {
-          "url": "https://github.com/dprint/dprint/releases/download/0.62.0/dprint-aarch64-unknown-linux-gnu.zip"
+          "url": "https://github.com/dprint/dprint/releases/download/0.63.0/dprint-aarch64-unknown-linux-gnu.zip"
         }
       ]
     }
