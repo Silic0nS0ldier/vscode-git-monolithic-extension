@@ -10,6 +10,11 @@ common --nobuild_runfile_links
 common --local_resources=chromium_load=4
 
 # TODO Switch to apparent name once https://github.com/bazelbuild/bazel/pull/31609 merged and in bazel release.
+# Selecting :native runs the non-reproducible cpu_feature_constraints repo rule on fresh CI hosts.
+# It watches and executes a label in detect_cpu_<os>_<cpu>, materialising that whole tool repo even
+# with a remote repo contents cache. The pinned executable is reproducible; its host-specific report
+# is not. Removing the watch alone cannot avoid materialisation because execution still needs it.
+# Any future optimisation must preserve native CPU constraints and flags, not reuse another host's report.
 common --host_platform=@@platforms_contrib+//host:native
 # TODO Inheritance via `--host_platform` provides an incorrect hashed `bazel info bazel-bin` result.
 common --platforms=@@platforms_contrib+//host:native

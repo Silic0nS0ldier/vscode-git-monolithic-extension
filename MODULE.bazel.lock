@@ -170,7 +170,6 @@
     "https://bcr.bazel.build/modules/re2/2024-07-02/MODULE.bazel": "0eadc4395959969297cbcf31a249ff457f2f1d456228c67719480205aa306daa",
     "https://bcr.bazel.build/modules/re2/2025-11-05.bcr.1/MODULE.bazel": "3d9d4995833fc0334fc5c88b56a05288dd25d651544cd7b2233bbd6357bbeba0",
     "https://bcr.bazel.build/modules/re2/2025-11-05.bcr.1/source.json": "7df1394aabda1c9bc188a302f5d54b1c657924edd04ebc57d2be29dbd7efd141",
-    "https://bcr.bazel.build/modules/rules_android/0.1.1/MODULE.bazel": "48809ab0091b07ad0182defb787c4c5328bd3a278938415c00a7b69b50c4d3a8",
     "https://bcr.bazel.build/modules/rules_android/0.8.0/MODULE.bazel": "92961a7a1218694a31fa748eba164db2721f5c42f2d7ed3325c52b19d00ae2f5",
     "https://bcr.bazel.build/modules/rules_android/0.8.0/source.json": "efec84c34a78d0b6a23b7a07d51e810942428a5b980857284806d0a59762591f",
     "https://bcr.bazel.build/modules/rules_apple/3.16.0/MODULE.bazel": "0d1caf0b8375942ce98ea944be754a18874041e4e0459401d925577624d3a54a",
