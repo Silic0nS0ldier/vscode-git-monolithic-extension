@@ -52,17 +52,20 @@ export function joinRelative(dir: RelativePath | null, name: FileName): Relative
     return (dir === null ? name : `${dir}/${name}`) as RelativePath;
 }
 
+const COLON = 58;
+
 /** `null` for a root. */
 export function parent(target: AbsolutePath): AbsolutePath | null {
     const index = target.lastIndexOf("/");
     if (index === target.length - 1) {
         return null;
     }
-    const root = target.slice(0, index + 1);
-    if (root === "/" || /^[A-Za-z]:\/$/.test(root)) {
-        return root as AbsolutePath;
+    if (index === 0) {
+        return "/" as AbsolutePath;
     }
-    return target.slice(0, index) as AbsolutePath;
+    // Keep the separator of a drive root (`C:/`).
+    const end = index === 2 && target.charCodeAt(1) === COLON ? 3 : index;
+    return target.slice(0, end) as AbsolutePath;
 }
 
 /** Whether `target` is strictly inside `dir`. */

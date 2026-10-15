@@ -1,4 +1,4 @@
-import { type AbsolutePath, isWithin, parent } from "../path.js";
+import { type AbsolutePath, parent } from "../path.js";
 
 export type ChangeSet = {
     /** Individual paths that changed. */
@@ -8,6 +8,7 @@ export type ChangeSet = {
 };
 
 export type ChangeBuffer = {
+    /** Upper bound; entries made redundant by a later subtree are only pruned by {@link take}. */
     readonly size: number;
     addPath(target: AbsolutePath): void;
     addSubtree(dir: AbsolutePath): void;
@@ -24,9 +25,10 @@ export function createChangeBuffer(collapseAt: number): ChangeBuffer {
     let subtrees = new Set<AbsolutePath>();
     let perDirectory = new Map<AbsolutePath, number>();
 
-    function isCovered(target: AbsolutePath): boolean {
-        for (let current: AbsolutePath | null = target; current !== null; current = parent(current)) {
-            if (subtrees.has(current)) {
+    /** Whether `target` or an ancestor is a subtree. */
+    function isCovered(target: AbsolutePath | null, within: ReadonlySet<AbsolutePath>): boolean {
+        for (let current = target; current !== null; current = parent(current)) {
+            if (within.has(current)) {
                 return true;
             }
         }
@@ -34,25 +36,9 @@ export function createChangeBuffer(collapseAt: number): ChangeBuffer {
     }
 
     function addSubtree(dir: AbsolutePath): void {
-        if (isCovered(dir)) {
-            return;
+        if (subtrees.size === 0 || !isCovered(dir, subtrees)) {
+            subtrees.add(dir);
         }
-        for (const p of paths) {
-            if (p === dir || isWithin(p, dir)) {
-                paths.delete(p);
-            }
-        }
-        for (const s of subtrees) {
-            if (isWithin(s, dir)) {
-                subtrees.delete(s);
-            }
-        }
-        for (const d of perDirectory.keys()) {
-            if (d === dir || isWithin(d, dir)) {
-                perDirectory.delete(d);
-            }
-        }
-        subtrees.add(dir);
     }
 
     return {
@@ -60,7 +46,7 @@ export function createChangeBuffer(collapseAt: number): ChangeBuffer {
             return paths.size + subtrees.size;
         },
         addPath(target) {
-            if (paths.has(target) || isCovered(target)) {
+            if (paths.has(target) || (subtrees.size > 0 && isCovered(target, subtrees))) {
                 return;
             }
             paths.add(target);
@@ -70,13 +56,17 @@ export function createChangeBuffer(collapseAt: number): ChangeBuffer {
             }
             const count = (perDirectory.get(dir) ?? 0) + 1;
             perDirectory.set(dir, count);
-            if (count >= collapseAt) {
+            if (count === collapseAt) {
                 addSubtree(dir);
             }
         },
         addSubtree,
         take() {
-            const taken = { paths, subtrees };
+            const all = subtrees;
+            const taken: ChangeSet = all.size === 0 ? { paths, subtrees } : {
+                paths: new Set(paths.values().filter(p => !isCovered(p, all))),
+                subtrees: new Set(all.values().filter(s => !isCovered(parent(s), all))),
+            };
             paths = new Set();
             subtrees = new Set();
             perDirectory = new Map();

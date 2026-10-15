@@ -11,7 +11,8 @@
         }
     },
     "devDependencies": {
-        "ava": "catalog:"
+        "ava": "catalog:",
+        "watcher": "^2.3.1"
     },
     "dependencies": {
         "@types/node": "catalog:vscode",

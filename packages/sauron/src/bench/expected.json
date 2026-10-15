@@ -1,0 +1,127 @@
+{
+    "tolerance": {
+        "sauron": {
+            "coverage": {
+                "relative": 0.001,
+                "absolute": 5
+            },
+            "fs": {
+                "relative": 0,
+                "absolute": 0
+            },
+            "heap": {
+                "relative": 0.005,
+                "absolute": 0
+            },
+            "inotify": {
+                "relative": 0,
+                "absolute": 0
+            }
+        },
+        "watcher": {
+            "coverage": null,
+            "fs": {
+                "relative": 0,
+                "absolute": 0
+            },
+            "heap": {
+                "relative": 0.005,
+                "absolute": 0
+            },
+            "inotify": {
+                "relative": 0,
+                "absolute": 0
+            }
+        }
+    },
+    "results": {
+        "sauron": {
+            "crawl": {
+                "fs.promises.readdir": 1556,
+                "fs.promises.readFile": 1,
+                "fs.watch": 1556,
+                "fs.total": 3113,
+                "coverage.functions": 387458,
+                "coverage.blocks": 521319,
+                "inotify.watches": 1556,
+                "heap.retained": 7107560
+            },
+            "edit": {
+                "fs.total": 0,
+                "coverage.functions": 30,
+                "coverage.blocks": 11
+            },
+            "burst": {
+                "fs.promises.readdir": 5,
+                "fs.total": 5,
+                "coverage.functions": 20415,
+                "coverage.blocks": 19050
+            },
+            "add-tree": {
+                "fs.promises.readdir": 32,
+                "fs.watch": 31,
+                "fs.total": 63,
+                "coverage.functions": 2975,
+                "coverage.blocks": 2960
+            },
+            "remove-tree": {
+                "fs.promises.readdir": 1,
+                "fs.total": 1,
+                "coverage.functions": 21673,
+                "coverage.blocks": 18004,
+                "inotify.watches": 1328
+            },
+            "close": {
+                "fs.total": 0,
+                "coverage.functions": 1337,
+                "coverage.blocks": 1327
+            }
+        },
+        "watcher": {
+            "crawl": {
+                "fs.existsSync": 1,
+                "fs.readdir": 3112,
+                "fs.readFileSync": 1,
+                "fs.stat": 13999,
+                "fs.watch": 1558,
+                "fs.total": 18671,
+                "coverage.functions": 1132527,
+                "coverage.blocks": 894580,
+                "inotify.watches": 1558,
+                "heap.retained": 10930192
+            },
+            "edit": {
+                "fs.stat": 1,
+                "fs.total": 1,
+                "coverage.functions": 43,
+                "coverage.blocks": 1
+            },
+            "burst": {
+                "fs.stat": 688,
+                "fs.total": 688,
+                "coverage.functions": 32265,
+                "coverage.blocks": 17442
+            },
+            "add-tree": {
+                "fs.readdir": 148,
+                "fs.stat": 131,
+                "fs.watch": 31,
+                "fs.total": 310,
+                "coverage.functions": 12943,
+                "coverage.blocks": 6546
+            },
+            "remove-tree": {
+                "fs.stat": 2547,
+                "fs.total": 2547,
+                "coverage.functions": 3935725,
+                "coverage.blocks": 7716136,
+                "inotify.watches": 1330
+            },
+            "close": {
+                "fs.total": 0,
+                "coverage.functions": 2668,
+                "coverage.blocks": 3989
+            }
+        }
+    }
+}

@@ -26,7 +26,10 @@
         },
         "packages/sauron": {
             "entry": [
-                "src/**/*.test.ts"
+                "src/**/*.test.ts",
+                "src/bench/main.ts",
+                "src/bench/child.ts",
+                "src/bench/subjects/*.ts"
             ],
             "project": [
                 "src/**/*.ts"

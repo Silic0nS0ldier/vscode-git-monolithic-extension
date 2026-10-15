@@ -1,4 +1,4 @@
-load("@aspect_rules_js//js:defs.bzl", "js_test")
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_test")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
@@ -25,6 +25,7 @@ ts_project(
         exclude = [
             "src/**/*.test.ts",
             "src/**/*.stub.ts",
+            "src/bench/**",
         ],
     ) + ["package.json"],
     declaration = True,
@@ -52,7 +53,10 @@ ts_project(
             "src/**/*.test.ts",
             "src/**/*.stub.ts",
         ],
-        exclude = ["src/**/*.it.*.ts"],
+        exclude = [
+            "src/**/*.it.*.ts",
+            "src/bench/**",
+        ],
     ) + ["package.json"],
     declaration = True,
     out_dir = "dist",
@@ -115,10 +119,51 @@ test_suite(
     for (test_name, _, entry_point) in INTEGRATION_TESTS
 ]
 
+ts_project(
+    name = "bench_lib",
+    srcs = glob(["src/bench/**/*.ts"]) + ["package.json"],
+    declaration = True,
+    out_dir = "dist",
+    root_dir = "src",
+    tsconfig = ":tsconfig",
+    deps = [
+        ":lib",
+        ":node_modules/@types/node",
+        ":node_modules/ignore",
+        ":node_modules/monolithic-git-interop",
+        ":node_modules/watcher",
+    ],
+)
+
+BENCH_DATA = [
+    "package.json",
+    "src/bench/expected.json",
+    ":bench_lib",
+]
+
+# Deterministic performance comparison against `watcher`. Fails when results leave the expected range,
+# whether better or worse. See src/bench/README.md.
+js_test(
+    name = "bench",
+    size = "medium",
+    data = BENCH_DATA,
+    entry_point = "dist/bench/main.js",
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+js_binary(
+    name = "bench_update",
+    args = ["--update"],
+    data = BENCH_DATA,
+    entry_point = "dist/bench/main.js",
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
 eslint_test(
     name = "eslint",
     size = "small",
     srcs = [
+        ":bench_lib",
         ":lib",
         ":lib_tests",
     ] + [":" + test_name + "_lib" for (test_name, _, _) in INTEGRATION_TESTS],

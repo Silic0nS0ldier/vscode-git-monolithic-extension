@@ -81,6 +81,10 @@ const DEFAULT_COLLAPSE_AT = 256;
 const DEFAULT_CONCURRENCY = 32;
 const MAX_NOTICES = 100;
 
+function nextMacrotask(): Promise<void> {
+    return new Promise(resolve => setImmediate(resolve));
+}
+
 export function watch(options: WatchOptions): Result<Watcher, WatchSetupError> {
     const quiet = options.settle?.quiet ?? DEFAULT_QUIET;
     const maxWait = options.settle?.maxWait ?? DEFAULT_MAX_WAIT;
@@ -221,8 +225,7 @@ function createWatcher(config: Config): Watcher {
     /** In-flight rescans may still be classifying new names, so only `maxWait` overrides them. */
     function settle(force: boolean): void {
         if (!force && rescans.size > 0) {
-            clearTimeout(quietTimer);
-            quietTimer = setTimeout(settle, config.quiet, false);
+            quietTimer?.refresh();
             return;
         }
         clearTimers();
@@ -240,9 +243,11 @@ function createWatcher(config: Config): Watcher {
             batchStart = Date.now();
             setStatus("activity", { type: "activity", since: batchStart });
             maxTimer = setTimeout(settle, config.maxWait, true);
+            quietTimer = setTimeout(settle, config.quiet, false);
+        } else {
+            // Cheaper than replacing the timer on every event.
+            quietTimer?.refresh();
         }
-        clearTimeout(quietTimer);
-        quietTimer = setTimeout(settle, config.quiet, false);
     }
 
     function recordPath(target: AbsolutePath): void {
@@ -426,7 +431,9 @@ function createWatcher(config: Config): Watcher {
     function startRescans(node: DirNode): void {
         if (node.rescanPending && !node.rescanRunning && !node.controller.signal.aborted && closeReason === null) {
             node.rescanRunning = true;
-            track(runRescans(node), true);
+            // Deferred until every event from the same read is handled. That coalesces them, and lets a
+            // parent detach a removed directory before it is listed.
+            track(nextMacrotask().then(() => runRescans(node)), true);
         }
     }
 

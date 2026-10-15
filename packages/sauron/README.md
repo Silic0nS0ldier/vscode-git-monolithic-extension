@@ -117,6 +117,13 @@ Built-ins: `gitignore({ patterns })` (nested `.gitignore` files plus extra root 
 - **Backends.** `Backend` abstracts the platform. `createNodeBackend()` registers one non-recursive `fs.watch` per
   directory, because Node's `recursive: true` is emulated in userland on Linux. Tests use an in-memory backend.
 
+## Benchmark
+
+`bazel test //packages/sauron:bench` compares sauron with `watcher` (the package the extension uses today) using
+deterministic metrics: fs calls, V8 precise coverage, inotify watches and retained heap. It fails when a result
+leaves its expected range, whether better or worse, and when sauron does more work than `watcher`. See
+[src/bench/README.md](src/bench/README.md).
+
 ## Not yet implemented
 
 - Watching roots that do not exist yet (via their nearest existing parent).
