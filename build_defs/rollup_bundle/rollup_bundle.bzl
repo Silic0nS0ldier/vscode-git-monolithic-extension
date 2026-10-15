@@ -67,5 +67,7 @@ rollup_bundle = macro(
     },
     doc = """
         Create a JS bundle using an opinionated Rollup configuration.
+        Circular dependency warnings wholly within node_modules are suppressed;
+        cycles involving project sources and other warnings remain visible.
     """,
 )
