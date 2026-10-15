@@ -11,6 +11,8 @@ never throws (it returns `Result` tuples from `monolithic-git-interop/util/resul
 - **Suspension.** Ref-counted handles that work with `await using`. Directories stay watched while suspended, so
   resuming does not re-crawl.
 - **Teardown.** `await using`, an `AbortSignal`, or leaving a `for await` loop.
+- **Any root.** A root may be a directory (watched recursively) or a file. It need not exist yet, and may be removed,
+  replaced or re-created.
 - **Ignoring.** Rules are applied one directory at a time and chain from parent to child, as nested `.gitignore`
   files do. Ignored directories are never watched or descended into.
 - **Branded strings.** `AbsolutePath`, `RelativePath` and `FileName` are distinct types at compile time and plain
@@ -111,7 +113,12 @@ Built-ins: `gitignore({ patterns })` (nested `.gitignore` files plus extra root 
   depend on whether the entry is a directory) are applied before the change is reported.
 - **Rescans.** At most one rescan runs per directory; events that arrive meanwhile coalesce into one more.
   While any rescan is in flight, a batch only settles at `maxWait`, so a burst is not split across batches.
-  A `rename` of a watched subdirectory re-watches it, because a platform watch follows the original inode.
+  A `rename` of a watched subdirectory re-watches it, because a platform watch follows the original inode. Its old
+  contents are reported as a subtree.
+- **Roots.** Each root is anchored by a watch on its nearest existing ancestor (normally its parent). The anchor
+  sees the root being created, removed or replaced, and a file root's changes. A removed root is reported as a
+  subtree, and the anchor moves up until the root reappears. The anchor watch is in place before the root is
+  checked, so nothing created in between is missed.
 - **Suspension.** Releasing the last handle waits for in-flight rescans before resuming, so the next `changes`
   batch covers everything that happened while suspended.
 - **Backends.** `Backend` abstracts the platform. `createNodeBackend()` registers one non-recursive `fs.watch` per
@@ -124,9 +131,25 @@ deterministic metrics: fs calls, V8 precise coverage, inotify watches and retain
 leaves its expected range, whether better or worse, and when sauron does more work than `watcher`. See
 [src/bench/README.md](src/bench/README.md).
 
+## Parity with `watcher`
+
+[src/watch/parity.it.test.ts](src/watch/parity.it.test.ts) runs `watcher`'s own test suite (v2.3.1, names kept
+verbatim) against both, on a real file system. sauron must report every path each test expects, cover everything
+`watcher` reports, and report nothing more unless the scenario says why. Where it does report more, it is more
+correct:
+
+- Entries replaced, even by themselves (renamed away and back): sauron reports them rather than compare identities.
+  Git checks them too, as replacing changes ctime.
+- Files replaced with identical stats (inode reused, same size and mtime): `watcher` compares stats, so can miss
+  them.
+- Directories deeper than 20 levels, where `watcher` stops by default.
+
+Tests that do not apply are listed as skipped, with the reason: initial `add` events (sauron's `crawl` event
+marks when the initial state is known), the `depth`, `recursive: false` and `native` options, and rename
+detection (the extension disables it).
+
 ## Not yet implemented
 
-- Watching roots that do not exist yet (via their nearest existing parent).
 - Native recursive backends (FSEvents, `ReadDirectoryChangesW`) and watchman/fsmonitor.
 - A polling fallback for `degraded` subtrees.
 - Caching `.gitignore` contents across rescans of the same directory.

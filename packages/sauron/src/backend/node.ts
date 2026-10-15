@@ -70,6 +70,16 @@ export function createNodeBackend(): Backend {
                 return err(toBackendError(dir, e));
             }
         },
+        async stat(target, signal) {
+            try {
+                signal.throwIfAborted();
+                const stats = await fs.promises.stat(target);
+                return ok(stats.isDirectory() ? "directory" : stats.isFile() ? "file" : "other");
+            } catch (e) {
+                const error = toBackendError(target, e);
+                return error.type === "not-found" ? ok(null) : err(error);
+            }
+        },
         async readText(file, signal) {
             try {
                 return ok(await fs.promises.readFile(file, { encoding: "utf8", signal }));

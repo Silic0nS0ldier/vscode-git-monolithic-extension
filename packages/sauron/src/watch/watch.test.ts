@@ -68,7 +68,7 @@ test("the initial crawl watches every directory and reports completion", async t
     t.is(watcher.state, "crawling");
     await crawled(watcher);
     t.is(watcher.state, "watching");
-    t.deepEqual(sorted(fake.watched), ["/repo", "/repo/a", "/repo/a/b", "/repo/c"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/a", "/repo/a/b", "/repo/c"]);
 });
 
 test("a burst of writes is announced by activity then settles into one batch", async t => {
@@ -274,13 +274,156 @@ test("invalid options and an aborted signal are rejected without throwing", t =>
     }]);
 });
 
-test("a missing root is reported as degraded", async t => {
+test("a missing root is watched once created, without reporting an error", async t => {
     const fake = createFakeBackend();
     await using watcher = start(fake);
+    const crawl = await until(watcher, "crawl");
+    t.deepEqual(crawl, { type: "crawl", directories: 0, done: true });
 
-    const event = await until(watcher, "degraded");
-    t.is(event.scope, p("/repo"));
-    t.is(event.error.type, "watch-failed");
+    fake.mkdir("/repo/a");
+
+    const changes = await until(watcher, "changes");
+    t.deepEqual(sorted(changes.subtrees), ["/repo"]);
+    await eventually(() => fake.watched.has(p("/repo/a")));
+    t.pass();
+});
+
+test("a root inside missing directories is watched once created", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/x");
+    await using watcher = start(fake, { roots: [p("/x/y/z")] });
+    await crawled(watcher);
+    t.deepEqual(sorted(fake.watched), ["/x"]);
+
+    fake.mkdir("/x/y");
+    await eventually(() => fake.watched.has(p("/x/y")) && !fake.watched.has(p("/x")));
+    fake.write("/x/y/z/file");
+
+    const changes = await until(watcher, "changes");
+    t.true(all(changes).includes("/x/y/z"));
+    await eventually(() => fake.watched.has(p("/x/y/z")));
+    t.pass();
+});
+
+test("anchors are released as they move, and only the root's parent stays watched", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/x");
+    await using watcher = start(fake, { roots: [p("/x/y/z")] });
+    await crawled(watcher);
+    t.deepEqual(sorted(fake.watched), ["/x"]);
+
+    fake.mkdir("/x/y");
+    await eventually(() => fake.watched.has(p("/x/y")));
+    t.deepEqual(sorted(fake.watched), ["/x/y"]);
+
+    fake.mkdir("/x/y/z/w");
+    await eventually(() => fake.watched.has(p("/x/y/z/w")));
+    t.deepEqual(sorted(fake.watched), ["/x/y", "/x/y/z", "/x/y/z/w"]);
+
+    // Removed again: everything below the new anchor is released.
+    fake.remove("/x/y");
+    await eventually(() => fake.watched.has(p("/x")));
+    t.deepEqual(sorted(fake.watched), ["/x"]);
+});
+
+test("unrelated activity next to a missing root is ignored", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/x");
+    await using watcher = start(fake, { roots: [p("/x/y/z")] });
+    await crawled(watcher);
+    const stats = fake.statCalls;
+
+    fake.write("/x/other");
+    fake.write("/x/other", "changed");
+    fake.mkdir("/x/unrelated/deep");
+    fake.remove("/x/other");
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    t.is(fake.statCalls, stats, "no re-check of the root");
+    t.deepEqual(sorted(fake.watched), ["/x"]);
+    fake.mkdir("/x/y/z");
+    // The first batch holds only the root; anything unrelated would have been reported before or with it.
+    t.deepEqual(all(await until(watcher, "changes")), ["/x/y/z"]);
+});
+
+test("unrelated activity next to a directory root does not re-crawl it", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a");
+    await using watcher = start(fake);
+    await crawled(watcher);
+    const stats = fake.statCalls;
+
+    fake.write("/sibling");
+    fake.write("/sibling", "changed");
+    fake.mkdir("/other/dir");
+    fake.remove("/sibling");
+    fake.write("/repo/a/file");
+
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/a/file"]);
+    t.is(fake.statCalls, stats);
+    t.is(fake.watchCalls.get(p("/repo")), 1);
+});
+
+test("a removed root is reported, then watched again once re-created", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/a/file");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.remove("/repo");
+    t.deepEqual(sorted((await until(watcher, "changes")).subtrees), ["/repo"]);
+    await eventually(() => !fake.watched.has(p("/repo")));
+
+    fake.write("/repo/a/file");
+    t.deepEqual(sorted((await until(watcher, "changes")).subtrees), ["/repo"]);
+    await eventually(() => fake.watched.has(p("/repo/a")));
+    t.pass();
+});
+
+test("a replaced root is crawled again", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/old");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.remove("/repo");
+    fake.mkdir("/repo/new");
+
+    t.deepEqual(sorted((await until(watcher, "changes")).subtrees), ["/repo"]);
+    await eventually(() => fake.watched.has(p("/repo/new")) && !fake.watched.has(p("/repo/old")));
+    t.pass();
+});
+
+test("a file root reports changes to that file only", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/a");
+    fake.write("/repo/b");
+    await using watcher = start(fake, { roots: [p("/repo/a")] });
+    await crawled(watcher);
+    t.deepEqual(sorted(fake.watched), ["/repo"]);
+
+    fake.write("/repo/b", "changed");
+    fake.write("/repo/c");
+    fake.mkdir("/repo/d");
+    fake.remove("/repo/c");
+    fake.write("/repo/a", "changed");
+
+    const changes = await until(watcher, "changes");
+    t.deepEqual(all(changes), ["/repo/a"]);
+});
+
+test("a file root becoming a directory is crawled", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/a");
+    await using watcher = start(fake, { roots: [p("/repo/a")] });
+    await crawled(watcher);
+
+    fake.remove("/repo/a");
+    fake.write("/repo/a/nested");
+
+    t.true(all(await until(watcher, "changes")).includes("/repo/a"));
+    await eventually(() => fake.watched.has(p("/repo/a")));
+    t.pass();
 });
 
 test("exhausting the watch limit degrades only the affected subtree", async t => {
@@ -293,7 +436,7 @@ test("exhausting the watch limit degrades only the affected subtree", async t =>
     const event = await until(watcher, "degraded");
     t.is(event.scope, p("/repo/full"));
     await crawled(watcher);
-    t.deepEqual(sorted(fake.watched), ["/repo", "/repo/ok"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/ok"]);
 });
 
 test("nested roots are watched once", async t => {

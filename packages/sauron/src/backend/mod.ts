@@ -25,6 +25,8 @@ export type Backend = {
     /** Watches `dir` until `signal` aborts. */
     watch(dir: AbsolutePath, listener: (event: RawEvent) => void, signal: AbortSignal): Result<void, BackendError>;
     readdir(dir: AbsolutePath, signal: AbortSignal): Promise<Result<ReadonlyMap<FileName, EntryKind>, BackendError>>;
+    /** Follows symlinks. `null` when nothing exists at `target`. */
+    stat(target: AbsolutePath, signal: AbortSignal): Promise<Result<EntryKind | null, BackendError>>;
     /** `null` when the file does not exist. */
     readText(file: AbsolutePath, signal: AbortSignal): Promise<Result<string | null, BackendError>>;
 };

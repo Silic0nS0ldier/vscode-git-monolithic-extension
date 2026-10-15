@@ -24,10 +24,12 @@ export function createChangeBuffer(collapseAt: number): ChangeBuffer {
     let paths = new Set<AbsolutePath>();
     let subtrees = new Set<AbsolutePath>();
     let perDirectory = new Map<AbsolutePath, number>();
+    /** Length of the shortest subtree; no shorter ancestor needs checking. */
+    let shortest = Infinity;
 
-    /** Whether `target` or an ancestor is a subtree. */
-    function isCovered(target: AbsolutePath | null, within: ReadonlySet<AbsolutePath>): boolean {
-        for (let current = target; current !== null; current = parent(current)) {
+    /** Whether `target` or an ancestor is one of `within`. */
+    function isCovered(target: AbsolutePath | null, within: ReadonlySet<AbsolutePath>, minLength: number): boolean {
+        for (let current = target; current !== null && current.length >= minLength; current = parent(current)) {
             if (within.has(current)) {
                 return true;
             }
@@ -36,8 +38,9 @@ export function createChangeBuffer(collapseAt: number): ChangeBuffer {
     }
 
     function addSubtree(dir: AbsolutePath): void {
-        if (subtrees.size === 0 || !isCovered(dir, subtrees)) {
+        if (subtrees.size === 0 || !isCovered(dir, subtrees, shortest)) {
             subtrees.add(dir);
+            shortest = Math.min(shortest, dir.length);
         }
     }
 
@@ -46,7 +49,7 @@ export function createChangeBuffer(collapseAt: number): ChangeBuffer {
             return paths.size + subtrees.size;
         },
         addPath(target) {
-            if (paths.has(target) || (subtrees.size > 0 && isCovered(target, subtrees))) {
+            if (paths.has(target) || (subtrees.size > 0 && isCovered(target, subtrees, shortest))) {
                 return;
             }
             paths.add(target);
@@ -63,13 +66,15 @@ export function createChangeBuffer(collapseAt: number): ChangeBuffer {
         addSubtree,
         take() {
             const all = subtrees;
+            const min = shortest;
             const taken: ChangeSet = all.size === 0 ? { paths, subtrees } : {
-                paths: new Set(paths.values().filter(p => !isCovered(p, all))),
-                subtrees: new Set(all.values().filter(s => !isCovered(parent(s), all))),
+                paths: new Set(paths.values().filter(p => !isCovered(p, all, min))),
+                subtrees: new Set(all.values().filter(s => !isCovered(parent(s), all, min))),
             };
             paths = new Set();
             subtrees = new Set();
             perDirectory = new Map();
+            shortest = Infinity;
             return taken;
         },
     };

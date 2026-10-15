@@ -9,6 +9,7 @@ import {
     isWithin,
     join,
     joinRelative,
+    parent,
     type RelativePath,
 } from "../path.js";
 import { type ChangeSet, createChangeBuffer } from "./changes.js";
@@ -58,7 +59,10 @@ export type Watcher =
     };
 
 export type WatchOptions = {
-    /** Directories to watch. Roots nested inside another root are dropped. */
+    /**
+     * Directories (watched recursively) or files to watch. They need not exist yet, and may be removed and
+     * re-created. Roots nested inside another root are dropped.
+     */
     readonly roots: readonly [AbsolutePath, ...AbsolutePath[]];
     readonly ignore?: Ignorer;
     readonly signal?: AbortSignal;
@@ -80,6 +84,8 @@ const DEFAULT_MAX_WAIT = 5_000;
 const DEFAULT_COLLAPSE_AT = 256;
 const DEFAULT_CONCURRENCY = 32;
 const MAX_NOTICES = 100;
+/** Bounds re-checks when the tree keeps changing while a root's anchor moves. */
+const MAX_RESOLVE_ATTEMPTS = 16;
 
 function nextMacrotask(): Promise<void> {
     return new Promise(resolve => setImmediate(resolve));
@@ -137,6 +143,18 @@ type DirNode = {
     rescanDeep: boolean;
 };
 
+/**
+ * A configured root. Its anchor watches the nearest existing ancestor (normally the parent), which observes
+ * the root being created, removed or replaced, and changes to a root that is a file.
+ */
+type RootState = {
+    readonly path: AbsolutePath;
+    kind: "pending" | "directory" | "file";
+    anchor: { readonly dir: AbsolutePath; readonly controller: AbortController } | null;
+    resolveRunning: boolean;
+    resolvePending: boolean;
+};
+
 type StatusKey = "crawl" | "activity" | "suspension";
 
 type Config = {
@@ -154,7 +172,9 @@ function createWatcher(config: Config): Watcher {
     const { backend } = config;
     const limit = createLimiter(config.concurrency);
     const buffer = createChangeBuffer(config.collapseAt);
+    /** Watched directory trees, keyed by root. */
     const roots = new Map<AbsolutePath, DirNode>();
+    const rootStates = new Map<AbsolutePath, RootState>();
     const closed = Promise.withResolvers<CloseReason>();
 
     // Delivery state. Status events conflate (latest per key wins), notices queue (bounded).
@@ -166,6 +186,8 @@ function createWatcher(config: Config): Watcher {
     let quietTimer: NodeJS.Timeout | undefined;
     let maxTimer: NodeJS.Timeout | undefined;
 
+    const closedController = new AbortController();
+    const closedSignal = closedController.signal;
     const inflight = new Set<Promise<void>>();
     const rescans = new Set<Promise<void>>();
     let suspendCount = 0;
@@ -337,11 +359,13 @@ function createWatcher(config: Config): Watcher {
         if (isErr(listed)) {
             const error = unwrap(listed);
             if (error.type === "not-found") {
-                // Its parent reports the removal; a root has no parent so is reported as degraded.
-                if (node.parent === null) {
-                    reportBackendError(node.path, "readdir-failed", error);
+                // Its parent (or for a root, its anchor) reports the removal.
+                const root = node.parent === null ? rootStates.get(node.path) : undefined;
+                if (root !== undefined) {
+                    scheduleResolve(root);
+                } else {
+                    detach(node);
                 }
-                detach(node);
                 return;
             }
             reportBackendError(node.path, "readdir-failed", error);
@@ -403,9 +427,12 @@ function createWatcher(config: Config): Watcher {
         if (isErr(watched)) {
             node.controller.abort();
             const error = unwrap(watched);
-            // A vanished subdirectory is reported by its parent.
-            if (error.type !== "not-found" || parent === null) {
+            const root = parent === null ? rootStates.get(path) : undefined;
+            if (error.type !== "not-found") {
                 reportBackendError(path, "watch-failed", error);
+            } else if (root !== undefined) {
+                // Vanished since it was resolved. A vanished subdirectory is reported by its parent instead.
+                scheduleResolve(root);
             }
             return Promise.resolve();
         }
@@ -485,14 +512,131 @@ function createWatcher(config: Config): Watcher {
             scheduleRescan(node, false);
             return;
         }
-        recordPath(join(node.path, name));
         if (type === "rename") {
             // The directory may have been replaced, and an old watch keeps following the original.
             const child = node.children.get(name);
             if (child !== undefined) {
+                recordSubtree(child.path);
                 detach(child);
+            } else {
+                recordPath(join(node.path, name));
             }
             scheduleRescan(node, false);
+        } else {
+            recordPath(join(node.path, name));
+        }
+    }
+
+    /** `undefined` when the check failed (already reported). */
+    async function statPath(target: AbsolutePath, signal: AbortSignal): Promise<EntryKind | null | undefined> {
+        const result = await backend.stat(target, signal);
+        if (isErr(result)) {
+            reportBackendError(target, "watch-failed", unwrap(result));
+            return undefined;
+        }
+        return unwrap(result);
+    }
+
+    async function nearestDirectory(start: AbsolutePath | null, signal: AbortSignal): Promise<AbsolutePath | null> {
+        for (let dir = start; dir !== null; dir = parent(dir)) {
+            const kind = await statPath(dir, signal);
+            if (kind === "directory" || kind === undefined || signal.aborted) {
+                return kind === undefined ? null : dir;
+            }
+        }
+        return null;
+    }
+
+    function moveAnchor(root: RootState, dir: AbsolutePath | null): void {
+        root.anchor?.controller.abort();
+        if (dir === null) {
+            root.anchor = null;
+            return;
+        }
+        const controller = new AbortController();
+        root.anchor = { dir, controller };
+        const next = root.path.slice(dir.length + (dir.endsWith("/") ? 0 : 1)).split("/", 1)[0];
+        const isParent = parent(root.path) === dir;
+        const watched = backend.watch(dir, event => {
+            if (closeReason !== null || controller.signal.aborted || (event.name !== null && event.name !== next)) {
+                return;
+            }
+            if (event.type === "change" && event.name !== null && isParent && root.kind !== "pending") {
+                // Content of a file root. A directory root's own metadata is not of interest.
+                if (root.kind === "file") {
+                    recordPath(root.path);
+                }
+                return;
+            }
+            scheduleResolve(root);
+        }, controller.signal);
+        if (isErr(watched)) {
+            // Kept, so the failure is not retried. The root itself may still be watched.
+            reportBackendError(dir, "watch-failed", unwrap(watched));
+        }
+    }
+
+    /** Finds what is at the root now, re-anchors it and (re)starts watching it. */
+    async function resolveRoot(root: RootState, report: boolean): Promise<void> {
+        const signal = closedSignal;
+        for (let attempt = 0; attempt < MAX_RESOLVE_ATTEMPTS; attempt++) {
+            const kind = await statPath(root.path, signal);
+            if (kind === undefined || signal.aborted) {
+                return;
+            }
+            const anchor = kind === null
+                ? await nearestDirectory(parent(root.path), signal)
+                : parent(root.path);
+            if (signal.aborted) {
+                return;
+            }
+            if (anchor !== (root.anchor?.dir ?? null)) {
+                moveAnchor(root, anchor);
+                // Look again, as the root may have changed before the anchor was in place.
+                continue;
+            }
+            const tree = roots.get(root.path);
+            if (tree !== undefined) {
+                // Removed or replaced; its watches would keep following the original directory.
+                detach(tree);
+            }
+            if (report && (root.kind !== "pending" || kind !== null)) {
+                if (root.kind === "directory") {
+                    recordSubtree(root.path);
+                } else {
+                    recordPath(root.path);
+                }
+            }
+            root.kind = kind === "directory" ? "directory" : kind === null ? "pending" : "file";
+            if (root.kind === "directory") {
+                await crawl(root.path, null, null, report);
+            }
+            return;
+        }
+        notify({
+            type: "degraded",
+            scope: root.path,
+            error: { type: "watch-failed", path: root.path, cause: new Error("Root kept changing while resolving") },
+        });
+    }
+
+    async function runResolves(root: RootState, report: boolean): Promise<void> {
+        try {
+            do {
+                root.resolvePending = false;
+                await resolveRoot(root, report);
+                report = true;
+            } while (root.resolvePending && closeReason === null);
+        } finally {
+            root.resolveRunning = false;
+        }
+    }
+
+    function scheduleResolve(root: RootState): void {
+        root.resolvePending = true;
+        if (!root.resolveRunning && closeReason === null) {
+            root.resolveRunning = true;
+            track(nextMacrotask().then(() => runResolves(root, true)), true);
         }
     }
 
@@ -520,10 +664,14 @@ function createWatcher(config: Config): Watcher {
             closeReason = reason;
             config.signal?.removeEventListener("abort", onAbort);
             clearTimers();
+            closedController.abort();
             for (const root of roots.values()) {
                 teardown(root);
             }
             roots.clear();
+            for (const root of rootStates.values()) {
+                root.anchor?.controller.abort();
+            }
             notices.length = 0;
             status.clear();
             batchReady = false;
@@ -544,8 +692,13 @@ function createWatcher(config: Config): Watcher {
 
     const uniqueRoots = new Set(config.roots);
     const topRoots = [...uniqueRoots].filter(r => !uniqueRoots.values().some(o => isWithin(r, o)));
+    const initial = topRoots.map(path => {
+        const root: RootState = { path, kind: "pending", anchor: null, resolveRunning: true, resolvePending: false };
+        rootStates.set(path, root);
+        return runResolves(root, false);
+    });
     track(
-        Promise.all(topRoots.map(root => crawl(root, null, null, false))).then(() => {
+        Promise.all(initial).then(() => {
             crawlDone = true;
             setStatus("crawl", { type: "crawl", directories: crawledDirectories, done: true });
         }),
@@ -625,6 +778,13 @@ function createWatcher(config: Config): Watcher {
         rescan(scope) {
             if (closeReason !== null) {
                 return;
+            }
+            if (scope === undefined) {
+                for (const root of rootStates.values()) {
+                    if (root.kind !== "directory") {
+                        scheduleResolve(root);
+                    }
+                }
             }
             const targets = scope === undefined ? [...roots.values()] : [findNode(scope)];
             for (const node of targets) {

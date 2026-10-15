@@ -12,6 +12,8 @@ export type FakeBackend = Backend & {
     readonly watched: ReadonlySet<AbsolutePath>;
     /** Number of watches ever registered per directory. */
     readonly watchCalls: ReadonlyMap<AbsolutePath, number>;
+    /** Number of `stat` calls so far. */
+    readonly statCalls: number;
     /** Makes `watch` fail for matching directories. */
     failWatch: ((dir: AbsolutePath) => BackendError["type"] | null) | null;
 };
@@ -33,6 +35,7 @@ export function createFakeBackend(): FakeBackend {
     const entries = new Map<AbsolutePath, Entry>([[p("/"), { kind: "directory" }]]);
     const listeners = new Map<AbsolutePath, Set<(event: RawEvent) => void>>();
     const watchCalls = new Map<AbsolutePath, number>();
+    let statCalls = 0;
 
     function emit(target: AbsolutePath, type: RawEvent["type"]): void {
         const dir = parent(target);
@@ -63,6 +66,9 @@ export function createFakeBackend(): FakeBackend {
             return new Set(listeners.entries().filter(([, set]) => set.size > 0).map(([dir]) => dir));
         },
         watchCalls,
+        get statCalls() {
+            return statCalls;
+        },
         mkdir,
         write(raw, content = "") {
             const target = p(raw);
@@ -79,12 +85,17 @@ export function createFakeBackend(): FakeBackend {
         remove(raw) {
             const target = p(raw);
             const prefix = target + "/";
-            for (const key of entries.keys()) {
-                if (key === target || key.startsWith(prefix)) {
-                    entries.delete(key);
+            const removed = [...entries.keys()].filter(key => key === target || key.startsWith(prefix));
+            // Like `rm -r` and inotify: deepest first, each reported to its directory, and a watched directory
+            // reports its own deletion (libuv names it after the directory itself).
+            removed.sort((a, b) => b.length - a.length);
+            for (const key of removed) {
+                entries.delete(key);
+                emit(key, "rename");
+                for (const listener of listeners.get(key) ?? []) {
+                    listener({ type: "rename", name: nameOf(key) });
                 }
             }
-            emit(target, "rename");
         },
         watch(dir, listener, signal) {
             const failure = backend.failWatch?.(dir) ?? null;
@@ -116,6 +127,11 @@ export function createFakeBackend(): FakeBackend {
                 }
             }
             return ok(result);
+        },
+        async stat(target) {
+            statCalls++;
+            await new Promise(resolve => setImmediate(resolve));
+            return ok(entries.get(target)?.kind ?? null);
         },
         async readText(file) {
             await new Promise(resolve => setImmediate(resolve));

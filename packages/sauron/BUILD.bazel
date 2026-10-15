@@ -100,7 +100,11 @@ test_suite(
         out_dir = "dist",
         root_dir = "src",
         tsconfig = ":tsconfig",
-        deps = [":lib"],
+        deps = [
+            ":lib",
+            ":node_modules/monolithic-git-interop",
+            ":node_modules/watcher",
+        ],
     )
     for (test_name, src, _) in INTEGRATION_TESTS
 ]
