@@ -8,9 +8,7 @@
                 "github.vscode-github-actions"
             ],
             "settings": {
-                "bazel.codeLens.enable": true,
-                "bazel.lsp.command": "starpls",
-                "bazel.lsp.args": ["server"]
+                "bazel.codeLens.enable": true
             }
         }
     },

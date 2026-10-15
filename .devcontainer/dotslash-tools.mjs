@@ -142,19 +142,5 @@ export const tools = {
             },
         },
     },
-    starpls: {
-        // renovate: datasource=github-releases depName=withered-magic/starpls
-        version: "v0.1.22",
-        platforms: {
-            "linux-x86_64": {
-                url: "https://github.com/withered-magic/starpls/releases/download/{version}/starpls-linux-amd64",
-                path: "starpls",
-            },
-            "linux-aarch64": {
-                url: "https://github.com/withered-magic/starpls/releases/download/{version}/starpls-linux-aarch64",
-                path: "starpls",
-            },
-        },
-    },
     "unused-deps": buildtools("unused-deps"),
 };
