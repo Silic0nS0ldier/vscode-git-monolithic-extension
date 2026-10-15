@@ -5,6 +5,7 @@ import { cli } from "cleye";
 import { rollup } from "rollup";
 import { nodeBuiltinPrefixPlugin } from "./node-builtin-prefix-plugin.js";
 import { typescriptHelperWarningsPlugin } from "./typescript-helper-warnings-plugin.js";
+import { isDependencyCycle } from "./warnings.js";
 import { wasmSourcePhasePlugin } from "./wasm-source-phase-plugin.js";
 
 // Work around https://github.com/rollup/plugins/issues/1662
@@ -68,6 +69,9 @@ const bundle = await (async () => {
             ],
             external: externalModules,
             onwarn: (warning, defaultHandler) => {
+                if (isDependencyCycle(warning)) {
+                    return;
+                }
                 if (warning.code === "UNRESOLVED_IMPORT") {
                     console.error(warning.message);
                     console.error(`ID: ${warning.id}`);
