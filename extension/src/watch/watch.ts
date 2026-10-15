@@ -8,15 +8,15 @@ type TargetEvent = Parameters<BaseWatcher["event"]>[0];
 
 // This funny looking object satisfies isolated modules rules regarding ambient const enum usage
 // while remaining type checked _just enough_ that if something changes in an update, we'll know.
-const TargetEventEnum: Record<TargetEvent, string> = {
-    add: "add",
-    addDir: "addDir",
-    change: "change",
-    rename: "rename",
-    renameDir: "renameDir",
-    unlink: "unlink",
-    unlinkDir: "unlinkDir",
-};
+const TargetEventEnum = {
+    add: "add" as const,
+    addDir: "addDir" as const,
+    change: "change" as const,
+    rename: "rename" as const,
+    renameDir: "renameDir" as const,
+    unlink: "unlink" as const,
+    unlinkDir: "unlinkDir" as const,
+} satisfies Record<TargetEvent, string>;
 
 type Watcher = {
     event: Event<Uri>;
