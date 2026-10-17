@@ -34,7 +34,7 @@ runs:
         fail-on-cache-error: ${{ inputs.fail-on-cache-error }}
         asset-header-routes: |
           https://ghcr.io/v2/*
-    - uses: bazel-contrib/setup-bazel@0.19.0
+    - uses: bazel-contrib/setup-bazel@0.19.1
       with:
         bazelrc: |
           startup --experimental_remote_repo_contents_cache
