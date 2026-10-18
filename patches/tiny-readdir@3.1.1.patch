@@ -1,0 +1,47 @@
+diff --git a/dist/index.js b/dist/index.js
+index 1b2a253d66f198bfbbbb4b87b3b876bc57b0801c..5017ccc410ac2eafa769a4b8614c753df7fb6c05 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1,7 +1,6 @@
+ /* IMPORT */
+ import fs from 'node:fs';
+ import path from 'node:path';
+-import makeCounterPromise from 'promise-make-counter';
+ import { NOOP_PROMISE_LIKE } from './constants.js';
+ import { castArray, isFunction } from './utils.js';
+ /* MAIN */
+@@ -20,7 +19,19 @@ const readdir = (rootPath, options) => {
+     const visited = new Set();
+     const resultEmpty = { directories: [], files: [], symlinks: [] };
+     const result = { directories, files, symlinks };
+-    const { promise, increment, decrement } = makeCounterPromise();
++    const { promise, resolve } = Promise.withResolvers();
++    let counter = 0;
++    const increment = () => {
++        counter += 1;
++    };
++    const decrement = () => {
++        counter -= 1;
++        if (counter)
++            return;
++        resolve();
++    };
++    increment();
++    queueMicrotask(decrement);
+     let foundPaths = 0;
+     const handleDirectory = (subPath, depth) => {
+         if (visited.has(subPath))
+diff --git a/package.json b/package.json
+index 9e613ee0595d86fc637b79d8ef19b22bd0a1f457..79aa6ab7a8772bdbd36c7a49842d75dd05e29207 100755
+--- a/package.json
++++ b/package.json
+@@ -26,9 +26,6 @@
+     "simple",
+     "tiny"
+   ],
+-  "dependencies": {
+-    "promise-make-counter": "^1.0.2"
+-  },
+   "devDependencies": {
+     "@types/node": "^18.19.130",
+     "benchloop": "^2.1.1",
