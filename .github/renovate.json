@@ -103,6 +103,16 @@
                 "npm"
             ],
             "matchDepNames": [
+                "@vscode/diff"
+            ],
+            "enabled": false,
+            "description": "@vscode/diff is an experimental prerelease series published near-daily. update_bazel_code_server.mjs pins it to the version the code-server release's VS Code ships."
+        },
+        {
+            "matchManagers": [
+                "npm"
+            ],
+            "matchDepNames": [
                 "@eslint/js",
                 "eslint",
                 "typescript-eslint"

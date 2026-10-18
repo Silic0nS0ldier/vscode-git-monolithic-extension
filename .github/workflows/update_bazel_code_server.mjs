@@ -117,10 +117,33 @@ const typesRe = /("@types\/vscode"\s*:\s*")[^"]*(")/;
 if (!typesRe.test(extensionPackageJsonContent)) {
     throw new Error("Could not find @types/vscode in extension/package.json");
 }
+
+// `@vscode/diff` is an experimental prerelease series, so follow the build VS Code ships rather
+// than every publish. The pin is exact: a caret would admit later prereleases of the same version.
+const vscodePackageRes = await fetch(
+    `https://raw.githubusercontent.com/microsoft/vscode/${vscodeVersion}/package.json`,
+);
+if (!vscodePackageRes.ok) {
+    throw new Error(`Failed to fetch VS Code ${vscodeVersion} package.json: ${vscodePackageRes.status}`);
+}
+const vscodeDiffVersion = (await vscodePackageRes.json()).dependencies?.["@vscode/diff"];
+if (!/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(vscodeDiffVersion ?? "")) {
+    throw new Error(`VS Code ${vscodeVersion} has no exact @vscode/diff dependency, found "${vscodeDiffVersion}"`);
+}
+const diffRe = /("@vscode\/diff"\s*:\s*")[^"]*(")/;
+if (!diffRe.test(extensionPackageJsonContent)) {
+    throw new Error("Could not find @vscode/diff in extension/package.json");
+}
+
 await fs.writeFile(
     extensionPackageJsonPath,
-    extensionPackageJsonContent.replace(typesRe, `$1${typesVersion}$2`),
+    extensionPackageJsonContent
+        .replace(typesRe, `$1${typesVersion}$2`)
+        .replace(diffRe, `$1${vscodeDiffVersion}$2`),
     "utf-8",
 );
 
-console.log(`Pinned code-server ${release} (VS Code ${vscodeVersion}, @types/vscode ${typesVersion}).`);
+console.log(
+    `Pinned code-server ${release} (VS Code ${vscodeVersion}, @types/vscode ${typesVersion}, `
+        + `@vscode/diff ${vscodeDiffVersion}).`,
+);
