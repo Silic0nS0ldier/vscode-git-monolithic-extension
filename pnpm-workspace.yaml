@@ -33,7 +33,14 @@ packageExtensions:
     dependencies:
       "chalk": "^4.0.0"
 
+overrides:
+  # Leaner 3.x (drops the per-name maps watcher never reads); types fixed up by the watcher patch.
+  "watcher>tiny-readdir": "3.1.1"
+  # Promise.withResolvers ponyfill, inlined by the tiny-readdir patch.
+  "tiny-readdir>promise-make-counter": "-"
+
 patchedDependencies:
+  "tiny-readdir@3.1.1": "patches/tiny-readdir@3.1.1.patch"
   "watcher@2.3.1": "patches/watcher@2.3.1.patch"
 
 minimumReleaseAgeExclude:

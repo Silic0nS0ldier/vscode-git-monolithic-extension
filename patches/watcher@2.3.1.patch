@@ -1,18 +1,28 @@
 diff --git a/dist/types.d.ts b/dist/types.d.ts
-index 819f534ca9cd6121e61dd078a3e618b49a1d77cc..a62b47e41b08bcd4cfab8f96a93aa6b31013b04b 100644
+index 819f534ca9cd6121e61dd078a3e618b49a1d77cc..64492351a95ab4711330286a81ade4629a9464fb 100644
 --- a/dist/types.d.ts
 +++ b/dist/types.d.ts
 @@ -1,8 +1,8 @@
  /// <reference types="node" />
  import type { FSWatcher, BigIntStats } from 'node:fs';
- import type { ResultDirectories } from 'tiny-readdir';
+-import type { ResultDirectories } from 'tiny-readdir';
 -import type { FSTargetEvent, TargetEvent } from './enums';
 -import type WatcherStats from './watcher_stats';
++import type { Result } from 'tiny-readdir';
 +import type { FSTargetEvent, TargetEvent } from './enums.js';
 +import type WatcherStats from './watcher_stats.js';
  type Callback = () => void;
  type Disposer = () => void;
  type Event = [TargetEvent, Path, Path?];
+@@ -12,7 +12,7 @@ type HandlerBatched = (event?: FSTargetEvent, targetPath?: Path, isInitial?: boo
+ type Ignore = ((targetPath: Path) => boolean) | RegExp;
+ type INO = bigint | number;
+ type Path = string;
+-type ReaddirMap = ResultDirectories;
++type ReaddirMap = Record<string, Result>;
+ type Stats = BigIntStats;
+ type LocksAdd = Map<INO, () => void>;
+ type LocksUnlink = Map<INO, () => Path>;
 diff --git a/dist/utils.d.ts b/dist/utils.d.ts
 index 04221a1368b9bea7e847c6d3a0c56f3de3bb7f85..e1a68991e86bf2cd6622c6197cb15fb3a08c38f9 100644
 --- a/dist/utils.d.ts

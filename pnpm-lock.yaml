@@ -181,10 +181,15 @@ catalogs:
       specifier: ^24.13.3
       version: 24.13.3
 
+overrides:
+  watcher>tiny-readdir: 3.1.1
+  tiny-readdir>promise-make-counter: '-'
+
 packageExtensionsChecksum: sha256-n0rMu2+bERVk1SXnPicpMiA3+A3BWl3xBLEFXdV9zpk=
 
 patchedDependencies:
-  watcher@2.3.1: 97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688
+  tiny-readdir@3.1.1: 8fe5818c58dcbdddfd8de909471730072cb0d115e22b974b3fe907e8ad0eee02
+  watcher@2.3.1: 2ff97c4d88a0111a15f01855c90f08ec8c6859e2459afc4c3f7547d2b5e77887
 
 importers:
 
@@ -292,7 +297,7 @@ importers:
         version: 6.0.2
       watcher:
         specifier: ^2.3.1
-        version: 2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688)
+        version: 2.3.1(patch_hash=2ff97c4d88a0111a15f01855c90f08ec8c6859e2459afc4c3f7547d2b5e77887)
     devDependencies:
       '@types/node':
         specifier: catalog:vscode
@@ -3832,12 +3837,6 @@ packages:
     resolution: {integrity: sha512-FYgfaA69XZ93zaXLoMNQ+ViDXGGBgR8aLh03txzcFhV+9xOXx7+8DLCULrKKpR9+GsH9ZfHm82aSUPpozX0Ztg==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
-  promise-make-counter@1.0.2:
-    resolution: {integrity: sha512-FJAxTBWQuQoAs4ZOYuKX1FHXxEgKLEzBxUvwr4RoOglkTpOjWuM+RXsK3M9q5lMa8kjqctUrhwYeZFT4ygsnag==}
-
-  promise-make-naked@3.0.2:
-    resolution: {integrity: sha512-B+b+kQ1YrYS7zO7P7bQcoqqMUizP06BOyNSBEnB5VJKDSWo8fsVuDkfSmwdjF0JsRtaNh83so5MMFJ95soH5jg==}
-
   proper-lockfile@4.1.2:
     resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
 
@@ -4186,8 +4185,8 @@ packages:
     resolution: {integrity: sha512-TIsDdtKo6+XrPtiTm1ssmMngN1sAhyKnTO2kunQWqNPWIVvCm15Wmw4SWInwTVgJ5u/Tr04+8Ei9TNcw4x4ONA==}
     engines: {node: '>=4'}
 
-  tiny-readdir@2.7.4:
-    resolution: {integrity: sha512-721U+zsYwDirjr8IM6jqpesD/McpZooeFi3Zc6mcjy1pse2C+v19eHPFRqz4chGXZFw7C3KITDjAtHETc2wj7Q==}
+  tiny-readdir@3.1.1:
+    resolution: {integrity: sha512-SiNW3Kp5xshlA3McA2C/tjU7K8+VJc9ZNe09foB8ut8lMY7bR9NKPo5ARHDOj24mV69/utNy8gqDjF93FcFlFg==}
 
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
@@ -8388,12 +8387,6 @@ snapshots:
   proc-log@7.0.0:
     optional: true
 
-  promise-make-counter@1.0.2:
-    dependencies:
-      promise-make-naked: 3.0.2
-
-  promise-make-naked@3.0.2: {}
-
   proper-lockfile@4.1.2:
     dependencies:
       graceful-fs: 4.2.11
@@ -8935,9 +8928,7 @@ snapshots:
 
   time-zone@1.0.0: {}
 
-  tiny-readdir@2.7.4:
-    dependencies:
-      promise-make-counter: 1.0.2
+  tiny-readdir@3.1.1(patch_hash=8fe5818c58dcbdddfd8de909471730072cb0d115e22b974b3fe907e8ad0eee02): {}
 
   tinyglobby@0.2.17:
     dependencies:
@@ -9125,11 +9116,11 @@ snapshots:
 
   walk-up-path@4.0.0: {}
 
-  watcher@2.3.1(patch_hash=97197a1cc222a88416ba71860d423c1eb31d226fd890ce92ceee0eefd8abf688):
+  watcher@2.3.1(patch_hash=2ff97c4d88a0111a15f01855c90f08ec8c6859e2459afc4c3f7547d2b5e77887):
     dependencies:
       dettle: 1.0.5
       stubborn-fs: 1.2.5
-      tiny-readdir: 2.7.4
+      tiny-readdir: 3.1.1(patch_hash=8fe5818c58dcbdddfd8de909471730072cb0d115e22b974b3fe907e8ad0eee02)
 
   web-streams-polyfill@3.3.3: {}
 
