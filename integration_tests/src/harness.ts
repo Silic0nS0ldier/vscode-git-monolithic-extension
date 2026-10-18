@@ -5,11 +5,58 @@ import test from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { type Browser, chromium, type Locator, type Page } from "playwright-core";
 
-/** Generous: a cold extension host boot dominates the first scenario. */
+/** Timeout of the `before` hook opening the workbench. Generous: a cold extension host boot dominates it. */
 export const LOAD_TIMEOUT_MS = 120_000;
+
+/** Left for capturing a screenshot once a wait inside a node:test hook or scenario gives up. */
+const CAPTURE_GRACE_MS = 10_000;
 
 /** Once the workbench is up, no single interaction should take anywhere near this long. */
 const ACTION_TIMEOUT_MS = 30_000;
+
+/** A scenario is a handful of interactions, each bounded by {@link ACTION_TIMEOUT_MS}. */
+const SCENARIO_TIMEOUT_MS = 60_000;
+
+/** Lets the waits inside a scenario, which share its deadline, report before the scenario does. */
+const SCENARIO_GRACE_MS = 2_000;
+
+/** Bazel's clock covers starting the services before this process, and stopping them after. */
+const SERVICE_OVERHEAD_MS = 30_000;
+
+/**
+ * Bazel kills the test at `TEST_TIMEOUT` without reporting which wait was stuck. Every wait
+ * is capped to this deadline, so the stuck one fails first with its own message.
+ */
+const SUITE_DEADLINE = ((): number => {
+    const raw = process.env["TEST_TIMEOUT"] ?? "";
+    assert.match(raw, /^[1-9][0-9]*$/u, "TEST_TIMEOUT is unset; this test must run via the service_test target");
+    return Date.now() + Number(raw) * 1_000 - SERVICE_OVERHEAD_MS;
+})();
+
+/** The earlier of `timeoutMs` from now and the suite deadline. */
+function deadlineIn(timeoutMs: number): number {
+    return Math.min(Date.now() + timeoutMs, SUITE_DEADLINE);
+}
+
+/** Playwright treats a timeout of 0 as no timeout at all, so an expired deadline still yields 1ms. */
+function playwrightTimeout(deadline: number): number {
+    return Math.max(1, deadline - Date.now());
+}
+
+const TIMED_OUT = Symbol("timed out");
+
+/** Settles with `work`, or with {@link TIMED_OUT} once `deadline` passes, whichever is first. */
+async function beforeDeadline<T>(work: Promise<T>, deadline: number): Promise<T | typeof TIMED_OUT> {
+    const timer = new AbortController();
+    try {
+        return await Promise.race([
+            work,
+            delay(Math.max(0, deadline - Date.now()), TIMED_OUT, { signal: timer.signal }),
+        ]);
+    } finally {
+        timer.abort();
+    }
+}
 
 /** The browser defaults to 800x600, which squashes the SCM view and the screenshots. */
 const WINDOW_SIZE = { height: 1_080, width: 1_920 };
@@ -67,7 +114,9 @@ async function capture(page: Page, name: string): Promise<void> {
         return;
     }
     await mkdir(dir, { recursive: true });
-    await writeFile(join(dir, `${name}.png`), await page.screenshot({ fullPage: true }));
+    // Not the page default, which is all but spent when a scenario ran out of time.
+    const png = await page.screenshot({ fullPage: true, timeout: CAPTURE_GRACE_MS });
+    await writeFile(join(dir, `${name}.png`), png);
 }
 
 export async function connect(): Promise<Browser> {
@@ -92,12 +141,26 @@ export async function connect(): Promise<Browser> {
 export async function openWorkbench(browser: Browser): Promise<Page> {
     const context = browser.contexts()[0] ?? await browser.newContext();
     const page = await context.newPage();
-    page.setDefaultTimeout(LOAD_TIMEOUT_MS);
+    // Fail inside the hook's own timeout, so the failure is captured rather than cut short.
+    page.setDefaultTimeout(playwrightTimeout(deadlineIn(LOAD_TIMEOUT_MS - CAPTURE_GRACE_MS)));
 
-    const editorUrl = new URL(`http://127.0.0.1:${assignedPort("code_server_service")}/`);
-    editorUrl.searchParams.set("folder", workspaceDir());
-    await page.goto(editorUrl.toString(), { waitUntil: "domcontentloaded" });
-    await page.locator(".monaco-workbench").waitFor({ state: "visible" });
+    try {
+        const editorUrl = new URL(`http://127.0.0.1:${assignedPort("code_server_service")}/`);
+        editorUrl.searchParams.set("folder", workspaceDir());
+        await page.goto(editorUrl.toString(), { waitUntil: "domcontentloaded" });
+        await page.locator(".monaco-workbench").waitFor({ state: "visible" });
+
+        // The checkout entry is labelled by the repository's first status refresh. Waiting
+        // for it here keeps a slow activation from eating into the first scenario's waits.
+        await page.locator(".part.statusbar .statusbar-item")
+            .filter({ has: page.locator(".codicon-git-branch"), hasText: /\S/u })
+            .first()
+            .waitFor({ state: "visible" });
+    } catch (error) {
+        await capture(page, "failure-open-workbench").catch(() => {});
+        throw error;
+    }
+
     page.setDefaultTimeout(ACTION_TIMEOUT_MS);
 
     return page;
@@ -340,7 +403,8 @@ async function clickHoverAction(row: Locator, action: string): Promise<void> {
 
 /**
  * The extension writes to git asynchronously, so every git-side assertion has to wait for
- * the UI action to land rather than read once.
+ * the UI action to land rather than read once. A read still in flight at the deadline is
+ * abandoned, since Playwright reads wait out their own, longer, timeout.
  */
 export async function pollUntil<T>(
     describe: string,
@@ -348,17 +412,21 @@ export async function pollUntil<T>(
     predicate: (value: T) => boolean,
     timeoutMs = 30_000,
 ): Promise<T> {
-    const deadline = Date.now() + timeoutMs;
-    let last: T = await read();
+    const deadline = deadlineIn(timeoutMs);
+    let last = "no read completed";
 
     // Reads are cheap and usually settle on the first retry, so start tight and back off.
-    for (let interval = 25; !predicate(last); interval = Math.min(interval * 2, 250)) {
-        assert.ok(Date.now() < deadline, `timed out waiting for ${describe}; last value: ${JSON.stringify(last)}`);
+    for (let interval = 25;; interval = Math.min(interval * 2, 250)) {
+        const value = await beforeDeadline(read(), deadline);
+        if (value !== TIMED_OUT) {
+            if (predicate(value)) {
+                return value;
+            }
+            last = `last value: ${JSON.stringify(value)}`;
+        }
+        assert.ok(value !== TIMED_OUT && Date.now() < deadline, `timed out waiting for ${describe}; ${last}`);
         await delay(interval);
-        last = await read();
     }
-
-    return last;
 }
 
 /**
@@ -370,9 +438,14 @@ export function createScenario(currentPage: () => Page): (name: string, body: ()
     return function scenario(name, body): void {
         const slug = name.replaceAll(/[^a-z0-9]+/giu, "-");
 
-        test(name, { timeout: LOAD_TIMEOUT_MS }, async () => {
+        // Timed here rather than by node:test, whose timeout skips the failure capture below.
+        test(name, async () => {
+            const deadline = deadlineIn(SCENARIO_TIMEOUT_MS);
             try {
-                await body();
+                // Lets the stuck interaction itself report when the suite is almost out of time.
+                currentPage().setDefaultTimeout(Math.min(ACTION_TIMEOUT_MS, playwrightTimeout(deadline)));
+                const outcome = await beforeDeadline(body(), deadline + SCENARIO_GRACE_MS);
+                assert.notStrictEqual(outcome, TIMED_OUT, "the scenario ran out of time; see the screenshot");
                 if (CAPTURE_ALL) {
                     await capture(currentPage(), slug);
                 }

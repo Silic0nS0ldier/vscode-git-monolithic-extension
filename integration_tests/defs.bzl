@@ -65,6 +65,9 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
     service_test(
         name = name + "_test",
         size = size,
+        # A suite takes 30-50s on CI, too close to the 60s a small test gets. The harness caps
+        # every wait to this, less service overhead, so a stuck wait reports itself first.
+        timeout = "moderate",
         env = {
             "BROWSERLESS_TOKEN": BROWSERLESS_TOKEN,
             "ITEST_WORKSPACE_SUBDIR": workspace_subdir,
@@ -124,7 +127,7 @@ scm_itest = macro(
         "size": attr.string(
             configurable = False,
             default = "small",
-            doc = "Size of the generated `service_test`.",
+            doc = "Size of the generated `service_test`. Its timeout is fixed at `moderate`.",
         ),
         "untrusted": attr.bool(
             configurable = False,

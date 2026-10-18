@@ -110,6 +110,12 @@ extension writes asynchronously.
 A failing scenario saves a screenshot to `.bazel/testlogs/integration_tests/<suite>_test/test.outputs/`.
 Pass `--test_env=ITEST_SCREENSHOTS=1` to capture every scenario while authoring or debugging.
 
+`openWorkbench` returns only once the repository's first status refresh has landed, so scenarios
+never absorb activation time. Every harness wait (`pollUntil`, Playwright's default timeout, each
+scenario) is also capped to a suite deadline derived from Bazel's `TEST_TIMEOUT`, so a stuck wait
+fails with its own message and screenshot instead of Bazel killing the suite silently. Wait via the
+harness rather than with ad-hoc timers.
+
 When migrating a git invocation from `extension` into `packages/git`, add the integration test
 **first** as a behaviour baseline, then move the code and prove the untouched test still passes.
 
