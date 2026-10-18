@@ -6,18 +6,6 @@ import * as config from "../util/config.js";
 
 type TargetEvent = Parameters<BaseWatcher["event"]>[0];
 
-// This funny looking object satisfies isolated modules rules regarding ambient const enum usage
-// while remaining type checked _just enough_ that if something changes in an update, we'll know.
-const TargetEventEnum: Record<TargetEvent, string> = {
-    add: "add",
-    addDir: "addDir",
-    change: "change",
-    rename: "rename",
-    renameDir: "renameDir",
-    unlink: "unlink",
-    unlinkDir: "unlinkDir",
-};
-
 type Watcher = {
     event: Event<Uri>;
     refresh: () => void;
@@ -46,7 +34,7 @@ export function watch(
     let disposed = false;
 
     function createWatcher() {
-        const lockEvents = new Map<string, keyof typeof TargetEventEnum>();
+        const lockEvents = new Map<string, TargetEvent>();
         const watcher = new BaseWatcher(
             [...locations, ...locks],
             {
@@ -183,9 +171,8 @@ export function watch(
     };
 }
 
-function isWatchableEvent(event: keyof typeof TargetEventEnum): boolean {
-    return event !== TargetEventEnum.addDir && event !== TargetEventEnum.unlinkDir
-        && event !== TargetEventEnum.renameDir;
+function isWatchableEvent(event: TargetEvent): boolean {
+    return event !== "addDir" && event !== "unlinkDir" && event !== "renameDir";
 }
 
 /** Changes made before this settles may go unreported; changes made after will not. */

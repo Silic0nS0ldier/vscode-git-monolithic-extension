@@ -189,7 +189,7 @@ packageExtensionsChecksum: sha256-n0rMu2+bERVk1SXnPicpMiA3+A3BWl3xBLEFXdV9zpk=
 
 patchedDependencies:
   tiny-readdir@3.1.1: 8fe5818c58dcbdddfd8de909471730072cb0d115e22b974b3fe907e8ad0eee02
-  watcher@2.3.1: 2ff97c4d88a0111a15f01855c90f08ec8c6859e2459afc4c3f7547d2b5e77887
+  watcher@2.3.1: aa7937374fa215a4c53d3c965a60db1da36cac88fabf716f76bb672746fc4983
 
 importers:
 
@@ -297,7 +297,7 @@ importers:
         version: 6.0.2
       watcher:
         specifier: ^2.3.1
-        version: 2.3.1(patch_hash=2ff97c4d88a0111a15f01855c90f08ec8c6859e2459afc4c3f7547d2b5e77887)
+        version: 2.3.1(patch_hash=aa7937374fa215a4c53d3c965a60db1da36cac88fabf716f76bb672746fc4983)
     devDependencies:
       '@types/node':
         specifier: catalog:vscode
@@ -9116,7 +9116,7 @@ snapshots:
 
   walk-up-path@4.0.0: {}
 
-  watcher@2.3.1(patch_hash=2ff97c4d88a0111a15f01855c90f08ec8c6859e2459afc4c3f7547d2b5e77887):
+  watcher@2.3.1(patch_hash=aa7937374fa215a4c53d3c965a60db1da36cac88fabf716f76bb672746fc4983):
     dependencies:
       dettle: 1.0.5
       stubborn-fs: 1.2.5

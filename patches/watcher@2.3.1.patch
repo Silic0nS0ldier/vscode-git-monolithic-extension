@@ -1,5 +1,44 @@
+diff --git a/dist/enums.d.ts b/dist/enums.d.ts
+index cc6b18faa67ac1213bab6236d1bc8ccaccfe47d2..12c2a1a590317b25000bbe3ea61bdbd367b97680 100644
+--- a/dist/enums.d.ts
++++ b/dist/enums.d.ts
+@@ -1,28 +1,6 @@
+-declare const enum FileType {
+-    DIR = 1,
+-    FILE = 2
+-}
+-declare const enum FSTargetEvent {
+-    CHANGE = "change",
+-    RENAME = "rename"
+-}
+-declare const enum FSWatcherEvent {
+-    CHANGE = "change",
+-    ERROR = "error"
+-}
+-declare const enum TargetEvent {
+-    ADD = "add",
+-    ADD_DIR = "addDir",
+-    CHANGE = "change",
+-    RENAME = "rename",
+-    RENAME_DIR = "renameDir",
+-    UNLINK = "unlink",
+-    UNLINK_DIR = "unlinkDir"
+-}
+-declare const enum WatcherEvent {
+-    ALL = "all",
+-    CLOSE = "close",
+-    ERROR = "error",
+-    READY = "ready"
+-}
+-export { FileType, FSTargetEvent, FSWatcherEvent, TargetEvent, WatcherEvent };
++type FileType = 1 | 2;
++type FSTargetEvent = "change" | "rename";
++type FSWatcherEvent = "change" | "error";
++type TargetEvent = "add" | "addDir" | "change" | "rename" | "renameDir" | "unlink" | "unlinkDir";
++type WatcherEvent = "all" | "close" | "error" | "ready";
++export type { FileType, FSTargetEvent, FSWatcherEvent, TargetEvent, WatcherEvent };
 diff --git a/dist/types.d.ts b/dist/types.d.ts
-index 819f534ca9cd6121e61dd078a3e618b49a1d77cc..64492351a95ab4711330286a81ade4629a9464fb 100644
+index 819f534ca9cd6121e61dd078a3e618b49a1d77cc..0552cf7fc62963038a3011d721374d414b53b149 100644
 --- a/dist/types.d.ts
 +++ b/dist/types.d.ts
 @@ -1,8 +1,8 @@
@@ -23,6 +62,21 @@ index 819f534ca9cd6121e61dd078a3e618b49a1d77cc..64492351a95ab4711330286a81ade462
  type Stats = BigIntStats;
  type LocksAdd = Map<INO, () => void>;
  type LocksUnlink = Map<INO, () => Path>;
+@@ -25,10 +25,10 @@ type LockConfig = {
+     targetPath: Path;
+     locks: LocksPair;
+     events: {
+-        add: TargetEvent.ADD | TargetEvent.ADD_DIR;
+-        change?: TargetEvent.CHANGE;
+-        rename: TargetEvent.RENAME | TargetEvent.RENAME_DIR;
+-        unlink: TargetEvent.UNLINK | TargetEvent.UNLINK_DIR;
++        add: "add" | "addDir";
++        change?: "change";
++        rename: "rename" | "renameDir";
++        unlink: "unlink" | "unlinkDir";
+     };
+ };
+ type PollerConfig = {
 diff --git a/dist/utils.d.ts b/dist/utils.d.ts
 index 04221a1368b9bea7e847c6d3a0c56f3de3bb7f85..e1a68991e86bf2cd6622c6197cb15fb3a08c38f9 100644
 --- a/dist/utils.d.ts
@@ -37,7 +91,7 @@ index 04221a1368b9bea7e847c6d3a0c56f3de3bb7f85..e1a68991e86bf2cd6622c6197cb15fb3
      lang: {
          debounce: <Args extends unknown[]>(fn: import("dettle/dist/types").FN<Args, unknown>, wait?: number | undefined, options?: import("dettle/dist/types").DebounceOptions | undefined) => import("dettle/dist/types").Debounced<Args>;
 diff --git a/dist/watcher.d.ts b/dist/watcher.d.ts
-index 352c3c2d7aea8ff4a52fd788d260553fbebda532..103fc97f9b713e309bfe7b007b00970992ff3698 100644
+index 352c3c2d7aea8ff4a52fd788d260553fbebda532..97e12e7427873b46608032499c6088690c928ece 100644
 --- a/dist/watcher.d.ts
 +++ b/dist/watcher.d.ts
 @@ -1,11 +1,11 @@
@@ -49,7 +103,7 @@ index 352c3c2d7aea8ff4a52fd788d260553fbebda532..103fc97f9b713e309bfe7b007b009709
 -import WatcherLocker from './watcher_locker';
 -import WatcherPoller from './watcher_poller';
 -import type { Callback, Disposer, Handler, Ignore, Path, PollerConfig, SubwatcherConfig, WatcherOptions, WatcherConfig } from './types';
-+import { TargetEvent } from './enums.js';
++import type { TargetEvent } from './enums.js';
 +import WatcherHandler from './watcher_handler.js';
 +import WatcherLocker from './watcher_locker.js';
 +import WatcherPoller from './watcher_poller.js';
@@ -57,8 +111,102 @@ index 352c3c2d7aea8ff4a52fd788d260553fbebda532..103fc97f9b713e309bfe7b007b009709
  declare class Watcher extends EventEmitter {
      _closed: boolean;
      _ready: boolean;
+diff --git a/dist/watcher.js b/dist/watcher.js
+index 9aaf77f1685c3bd5a6229955f4265bd6e4891aa8..c7bfbce27561ba30302d5620ad4aafb843820438 100644
+--- a/dist/watcher.js
++++ b/dist/watcher.js
+@@ -3,7 +3,6 @@ import { EventEmitter } from 'node:events';
+ import fs from 'node:fs';
+ import path from 'node:path';
+ import { DEPTH, LIMIT, HAS_NATIVE_RECURSION, POLLING_INTERVAL } from './constants.js';
+-import { TargetEvent, WatcherEvent } from './enums.js';
+ import Utils from './utils.js';
+ import WatcherHandler from './watcher_handler.js';
+ import WatcherLocker from './watcher_locker.js';
+@@ -17,9 +16,9 @@ class Watcher extends EventEmitter {
+         this._ready = false;
+         this._closeAborter = new AbortController();
+         this._closeSignal = this._closeAborter.signal;
+-        this.on(WatcherEvent.CLOSE, () => this._closeAborter.abort());
+-        this._closeWait = new Promise(resolve => this.on(WatcherEvent.CLOSE, resolve));
+-        this._readyWait = new Promise(resolve => this.on(WatcherEvent.READY, resolve));
++        this.on("close", () => this._closeAborter.abort());
++        this._closeWait = new Promise(resolve => this.on("close", resolve));
++        this._readyWait = new Promise(resolve => this.on("ready", resolve));
+         this._locker = new WatcherLocker(this);
+         this._roots = new Set();
+         this._poller = new WatcherPoller();
+@@ -48,25 +47,25 @@ class Watcher extends EventEmitter {
+         if (this.isClosed())
+             return false;
+         this._closed = true;
+-        return this.emit(WatcherEvent.CLOSE);
++        return this.emit("close");
+     }
+     error(exception) {
+         if (this.isClosed())
+             return false;
+         const error = Utils.lang.castError(exception);
+-        return this.emit(WatcherEvent.ERROR, error);
++        return this.emit("error", error);
+     }
+     event(event, targetPath, targetPathNext) {
+         if (this.isClosed())
+             return false;
+-        this.emit(WatcherEvent.ALL, event, targetPath, targetPathNext);
++        this.emit("all", event, targetPath, targetPathNext);
+         return this.emit(event, targetPath, targetPathNext);
+     }
+     ready() {
+         if (this.isClosed() || this.isReady())
+             return false;
+         this._ready = true;
+-        return this.emit(WatcherEvent.READY);
++        return this.emit("ready");
+     }
+     pollerExists(targetPath, options) {
+         for (const poller of this._pollers) {
+@@ -255,12 +254,12 @@ class Watcher extends EventEmitter {
+         const watcher = new Watcher(handler);
+         const start = () => {
+             this._subwatchers.add(config);
+-            this.on(WatcherEvent.CLOSE, stop); // Ensuring the subwatcher is stopped on close
++            this.on("close", stop); // Ensuring the subwatcher is stopped on close
+             watcher.watchFile(filePath, options, handler);
+         };
+         const stop = () => {
+             this._subwatchers.delete(config);
+-            this.removeListener(WatcherEvent.CLOSE, stop); // Ensuring there are no leftover listeners
++            this.removeListener("close", stop); // Ensuring there are no leftover listeners
+             watcher.close();
+         };
+         return start();
+@@ -301,12 +300,12 @@ class Watcher extends EventEmitter {
+         const config = { targetPath, options };
+         const start = () => {
+             this._pollers.add(config);
+-            this.on(WatcherEvent.CLOSE, stop); // Ensuring polling is stopped on close
++            this.on("close", stop); // Ensuring polling is stopped on close
+             fs.watchFile(targetPath, watcherOptions, callback);
+         };
+         const stop = () => {
+             this._pollers.delete(config);
+-            this.removeListener(WatcherEvent.CLOSE, stop); // Ensuring there are no leftover listeners
++            this.removeListener("close", stop); // Ensuring there are no leftover listeners
+             fs.unwatchFile(targetPath, callback);
+         };
+         Utils.lang.attempt(start);
+@@ -386,7 +385,7 @@ class Watcher extends EventEmitter {
+         if (this.isClosed())
+             return;
+         if (handler !== Utils.lang.noop) {
+-            this.on(WatcherEvent.ALL, handler);
++            this.on("all", handler);
+         }
+         options.readdirMap = undefined; // Only usable before initialization
+         this.ready();
 diff --git a/dist/watcher_handler.d.ts b/dist/watcher_handler.d.ts
-index b92ac0aae58471459c8223e3312826adaca9c3c5..ddc06d4f0db082075c0a7ceaf05c236737912df5 100644
+index b92ac0aae58471459c8223e3312826adaca9c3c5..bd86867d3a39d874e88cccaf3982ca66be37a146 100644
 --- a/dist/watcher_handler.d.ts
 +++ b/dist/watcher_handler.d.ts
 @@ -1,8 +1,8 @@
@@ -67,28 +215,268 @@ index b92ac0aae58471459c8223e3312826adaca9c3c5..ddc06d4f0db082075c0a7ceaf05c2367
 -import { FSTargetEvent } from './enums';
 -import type Watcher from './watcher';
 -import type { Event, FSWatcher, Handler, HandlerBatched, Path, WatcherOptions, WatcherConfig } from './types';
-+import { FSTargetEvent } from './enums.js';
++import type { FSTargetEvent } from './enums.js';
 +import type Watcher from './watcher.js';
 +import type { Event, FSWatcher, Handler, HandlerBatched, Path, WatcherOptions, WatcherConfig } from './types.js';
  declare class WatcherHandler {
      base?: WatcherHandler;
      watcher: Watcher;
+diff --git a/dist/watcher_handler.js b/dist/watcher_handler.js
+index e2d73044a12664f93218af70e4498f11ac2c5382..ab9fc727cf69f97a40bbc84f27d711345df227de 100644
+--- a/dist/watcher_handler.js
++++ b/dist/watcher_handler.js
+@@ -1,7 +1,6 @@
+ /* IMPORT */
+ import path from 'node:path';
+ import { DEBOUNCE, DEPTH, LIMIT, HAS_NATIVE_RECURSION, IS_WINDOWS } from './constants.js';
+-import { FSTargetEvent, FSWatcherEvent, TargetEvent } from './enums.js';
+ import Utils from './utils.js';
+ /* MAIN */
+ class WatcherHandler {
+@@ -64,7 +63,7 @@ class WatcherHandler {
+             const targetEventPrev = targetsEventPrev[targetPath];
+             if (targetEvent === targetEventPrev)
+                 return acc; // Same event, ignoring
+-            if (targetEvent === TargetEvent.CHANGE && targetEventPrev === TargetEvent.ADD)
++            if (targetEvent === "change" && targetEventPrev === "add")
+                 return acc; // "change" after "add", ignoring
+             targetsEventPrev[targetPath] = targetEvent;
+             acc.push(event);
+@@ -76,10 +75,10 @@ class WatcherHandler {
+             const targetEvents = await this.watcher._poller.update(targetPath, this.options.pollingTimeout);
+             await Promise.all(targetEvents.map(async (event) => {
+                 events.push([event, targetPath]);
+-                if (event === TargetEvent.ADD_DIR) {
++                if (event === "addDir") {
+                     await this.eventsPopulateAddDir(targetPaths, targetPath, events, isInitial);
+                 }
+-                else if (event === TargetEvent.UNLINK_DIR) {
++                else if (event === "unlinkDir") {
+                     await this.eventsPopulateUnlinkDir(targetPaths, targetPath, events, isInitial);
+                 }
+             }));
+@@ -122,7 +121,7 @@ class WatcherHandler {
+                 this.watcher._locker.getLockTargetAdd(targetPath, this.options.renameTimeout);
+             }
+             else {
+-                this.watcher.event(TargetEvent.ADD, targetPath);
++                this.watcher.event("add", targetPath);
+             }
+         }
+     }
+@@ -135,13 +134,13 @@ class WatcherHandler {
+                 this.watcher._locker.getLockTargetAddDir(targetPath, this.options.renameTimeout);
+             }
+             else {
+-                this.watcher.event(TargetEvent.ADD_DIR, targetPath);
++                this.watcher.event("addDir", targetPath);
+             }
+         }
+     }
+     onTargetChange(targetPath) {
+         if (this._isSubRoot(targetPath)) {
+-            this.watcher.event(TargetEvent.CHANGE, targetPath);
++            this.watcher.event("change", targetPath);
+         }
+     }
+     onTargetUnlink(targetPath) {
+@@ -151,7 +150,7 @@ class WatcherHandler {
+                 this.watcher._locker.getLockTargetUnlink(targetPath, this.options.renameTimeout);
+             }
+             else {
+-                this.watcher.event(TargetEvent.UNLINK, targetPath);
++                this.watcher.event("unlink", targetPath);
+             }
+         }
+     }
+@@ -163,25 +162,25 @@ class WatcherHandler {
+                 this.watcher._locker.getLockTargetUnlinkDir(targetPath, this.options.renameTimeout);
+             }
+             else {
+-                this.watcher.event(TargetEvent.UNLINK_DIR, targetPath);
++                this.watcher.event("unlinkDir", targetPath);
+             }
+         }
+     }
+     onTargetEvent(event) {
+         const [targetEvent, targetPath] = event;
+-        if (targetEvent === TargetEvent.ADD) {
++        if (targetEvent === "add") {
+             this.onTargetAdd(targetPath);
+         }
+-        else if (targetEvent === TargetEvent.ADD_DIR) {
++        else if (targetEvent === "addDir") {
+             this.onTargetAddDir(targetPath);
+         }
+-        else if (targetEvent === TargetEvent.CHANGE) {
++        else if (targetEvent === "change") {
+             this.onTargetChange(targetPath);
+         }
+-        else if (targetEvent === TargetEvent.UNLINK) {
++        else if (targetEvent === "unlink") {
+             this.onTargetUnlink(targetPath);
+         }
+-        else if (targetEvent === TargetEvent.UNLINK_DIR) {
++        else if (targetEvent === "unlinkDir") {
+             this.onTargetUnlinkDir(targetPath);
+         }
+     }
+@@ -193,7 +192,7 @@ class WatcherHandler {
+     onWatcherEvent(event, targetPath, isInitial = false) {
+         return this.handlerBatched(event, targetPath, isInitial);
+     }
+-    onWatcherChange(event = FSTargetEvent.CHANGE, targetName) {
++    onWatcherChange(event = "change", targetName) {
+         if (this.watcher.isClosed())
+             return;
+         const targetPath = path.resolve(this.folderPath, targetName || '');
+@@ -205,7 +204,7 @@ class WatcherHandler {
+     }
+     onWatcherError(error) {
+         if (IS_WINDOWS && error.code === 'EPERM') { // This may happen when a folder is deleted
+-            this.onWatcherChange(FSTargetEvent.CHANGE, '');
++            this.onWatcherChange("change", '');
+         }
+         else {
+             this.watcher.error(error);
+@@ -218,16 +217,16 @@ class WatcherHandler {
+     }
+     async initWatcherEvents() {
+         const onChange = this.onWatcherChange.bind(this);
+-        this.fswatcher.on(FSWatcherEvent.CHANGE, onChange);
++        this.fswatcher.on("change", onChange);
+         const onError = this.onWatcherError.bind(this);
+-        this.fswatcher.on(FSWatcherEvent.ERROR, onError);
++        this.fswatcher.on("error", onError);
+     }
+     async initInitialEvents() {
+         const isInitial = !this.watcher.isReady(); // "isInitial" => is ignorable via the "ignoreInitial" option
+         if (this.filePath) { // Single initial path
+             if (this.watcher._poller.stats.has(this.filePath))
+                 return; // Already polled
+-            await this.onWatcherEvent(FSTargetEvent.CHANGE, this.filePath, isInitial);
++            await this.onWatcherEvent("change", this.filePath, isInitial);
+         }
+         else { // Multiple initial paths
+             const depth = this.options.recursive && (HAS_NATIVE_RECURSION && this.options.native !== false) ? this.options.depth ?? DEPTH : Math.min(1, this.options.depth ?? DEPTH);
+@@ -239,7 +238,7 @@ class WatcherHandler {
+                     return; // Already polled
+                 if (this.watcher.isIgnored(targetPath, this.options.ignore))
+                     return;
+-                return this.onWatcherEvent(FSTargetEvent.CHANGE, targetPath, isInitial);
++                return this.onWatcherEvent("change", targetPath, isInitial);
+             }));
+         }
+     }
 diff --git a/dist/watcher_locker.d.ts b/dist/watcher_locker.d.ts
-index 4b948a537fd8011ea0d7aef59c2b2156b8ec3f5d..dd31f714ffa625ba7c9e428853054b87d55cb04e 100644
+index 4b948a537fd8011ea0d7aef59c2b2156b8ec3f5d..74699b9515a6f603483c8fa8cf4bfa7c49bda6a6 100644
 --- a/dist/watcher_locker.d.ts
 +++ b/dist/watcher_locker.d.ts
 @@ -1,6 +1,6 @@
 -import { TargetEvent } from './enums';
 -import type Watcher from './watcher';
 -import type { Path, LocksAdd, LocksUnlink, LocksPair, LockConfig } from './types';
-+import { TargetEvent } from './enums.js';
++import type { TargetEvent } from './enums.js';
 +import type Watcher from './watcher.js';
 +import type { Path, LocksAdd, LocksUnlink, LocksPair, LockConfig } from './types.js';
  declare class WatcherLocker {
      _locksAdd: LocksAdd;
      _locksAddDir: LocksAdd;
+@@ -10,15 +10,15 @@ declare class WatcherLocker {
+     _locksFile: LocksPair;
+     _watcher: Watcher;
+     static DIR_EVENTS: {
+-        readonly add: TargetEvent.ADD_DIR;
+-        readonly rename: TargetEvent.RENAME_DIR;
+-        readonly unlink: TargetEvent.UNLINK_DIR;
++        readonly add: "addDir";
++        readonly rename: "renameDir";
++        readonly unlink: "unlinkDir";
+     };
+     static FILE_EVENTS: {
+-        readonly add: TargetEvent.ADD;
+-        readonly change: TargetEvent.CHANGE;
+-        readonly rename: TargetEvent.RENAME;
+-        readonly unlink: TargetEvent.UNLINK;
++        readonly add: "add";
++        readonly change: "change";
++        readonly rename: "rename";
++        readonly unlink: "unlink";
+     };
+     constructor(watcher: Watcher);
+     getLockAdd(config: LockConfig, timeout?: number): void;
+diff --git a/dist/watcher_locker.js b/dist/watcher_locker.js
+index 3a95887796137bb994293b425f56a7e8e0f891b5..d7e65a6837c64466196f8efdd6e030f0d0abfbcb 100644
+--- a/dist/watcher_locker.js
++++ b/dist/watcher_locker.js
+@@ -1,6 +1,5 @@
+ /* IMPORT */
+ import { RENAME_TIMEOUT } from './constants.js';
+-import { FileType, TargetEvent } from './enums.js';
+ import Utils from './utils.js';
+ import WatcherLocksResolver from './watcher_locks_resolver.js';
+ /* MAIN */
+@@ -80,7 +79,7 @@ class WatcherLocker {
+         locks.add.get(ino)?.();
+     }
+     getLockTargetAdd(targetPath, timeout) {
+-        const ino = this._watcher._poller.getIno(targetPath, TargetEvent.ADD, FileType.FILE);
++        const ino = this._watcher._poller.getIno(targetPath, "add", 2 /* FileType.FILE */);
+         return this.getLockAdd({
+             ino,
+             targetPath,
+@@ -89,7 +88,7 @@ class WatcherLocker {
+         }, timeout);
+     }
+     getLockTargetAddDir(targetPath, timeout) {
+-        const ino = this._watcher._poller.getIno(targetPath, TargetEvent.ADD_DIR, FileType.DIR);
++        const ino = this._watcher._poller.getIno(targetPath, "addDir", 1 /* FileType.DIR */);
+         return this.getLockAdd({
+             ino,
+             targetPath,
+@@ -98,7 +97,7 @@ class WatcherLocker {
+         }, timeout);
+     }
+     getLockTargetUnlink(targetPath, timeout) {
+-        const ino = this._watcher._poller.getIno(targetPath, TargetEvent.UNLINK, FileType.FILE);
++        const ino = this._watcher._poller.getIno(targetPath, "unlink", 2 /* FileType.FILE */);
+         return this.getLockUnlink({
+             ino,
+             targetPath,
+@@ -107,7 +106,7 @@ class WatcherLocker {
+         }, timeout);
+     }
+     getLockTargetUnlinkDir(targetPath, timeout) {
+-        const ino = this._watcher._poller.getIno(targetPath, TargetEvent.UNLINK_DIR, FileType.DIR);
++        const ino = this._watcher._poller.getIno(targetPath, "unlinkDir", 1 /* FileType.DIR */);
+         return this.getLockUnlink({
+             ino,
+             targetPath,
+@@ -125,15 +124,15 @@ class WatcherLocker {
+     }
+ }
+ WatcherLocker.DIR_EVENTS = {
+-    add: TargetEvent.ADD_DIR,
+-    rename: TargetEvent.RENAME_DIR,
+-    unlink: TargetEvent.UNLINK_DIR
++    add: "addDir",
++    rename: "renameDir",
++    unlink: "unlinkDir"
+ };
+ WatcherLocker.FILE_EVENTS = {
+-    add: TargetEvent.ADD,
+-    change: TargetEvent.CHANGE,
+-    rename: TargetEvent.RENAME,
+-    unlink: TargetEvent.UNLINK
++    add: "add",
++    change: "change",
++    rename: "rename",
++    unlink: "unlink"
+ };
+ /* EXPORT */
+ export default WatcherLocker;
 diff --git a/dist/watcher_poller.d.ts b/dist/watcher_poller.d.ts
-index ed1263f9c1e1023ac9b7ba9b81cc395753db384d..a2e2845bb5d8d0733dcafebe21652fc5a10075ad 100644
+index ed1263f9c1e1023ac9b7ba9b81cc395753db384d..27503b9b0d3f01ec827249bbe044b6c7b2bdcc53 100644
 --- a/dist/watcher_poller.d.ts
 +++ b/dist/watcher_poller.d.ts
 @@ -1,7 +1,7 @@
@@ -96,13 +484,102 @@ index ed1263f9c1e1023ac9b7ba9b81cc395753db384d..a2e2845bb5d8d0733dcafebe21652fc5
 -import LazyMapSet from './lazy_map_set';
 -import WatcherStats from './watcher_stats';
 -import type { INO, Path } from './types';
-+import { FileType, TargetEvent } from './enums.js';
++import type { FileType, TargetEvent } from './enums.js';
 +import LazyMapSet from './lazy_map_set.js';
 +import WatcherStats from './watcher_stats.js';
 +import type { INO, Path } from './types.js';
  declare class WatcherPoller {
      inos: Partial<Record<TargetEvent, Record<Path, [INO, FileType]>>>;
      paths: LazyMapSet<INO, Path>;
+diff --git a/dist/watcher_poller.js b/dist/watcher_poller.js
+index 3059f9523d05ed8c93df97627193356022b6e848..ac02effd2b1873b9a5c1aeb17457e400399ad24d 100644
+--- a/dist/watcher_poller.js
++++ b/dist/watcher_poller.js
+@@ -1,5 +1,4 @@
+ /* IMPORT */
+-import { FileType, TargetEvent } from './enums.js';
+ import LazyMapSet from './lazy_map_set.js';
+ import Utils from './utils.js';
+ import WatcherStats from './watcher_stats.js';
+@@ -46,22 +45,22 @@ class WatcherPoller {
+         this.updateStats(targetPath, next);
+         if (!prev && next) {
+             if (next.isFile()) {
+-                this.updateIno(targetPath, TargetEvent.ADD, next);
+-                return [TargetEvent.ADD];
++                this.updateIno(targetPath, "add", next);
++                return ["add"];
+             }
+             if (next.isDirectory()) {
+-                this.updateIno(targetPath, TargetEvent.ADD_DIR, next);
+-                return [TargetEvent.ADD_DIR];
++                this.updateIno(targetPath, "addDir", next);
++                return ["addDir"];
+             }
+         }
+         else if (prev && !next) {
+             if (prev.isFile()) {
+-                this.updateIno(targetPath, TargetEvent.UNLINK, prev);
+-                return [TargetEvent.UNLINK];
++                this.updateIno(targetPath, "unlink", prev);
++                return ["unlink"];
+             }
+             if (prev.isDirectory()) {
+-                this.updateIno(targetPath, TargetEvent.UNLINK_DIR, prev);
+-                return [TargetEvent.UNLINK_DIR];
++                this.updateIno(targetPath, "unlinkDir", prev);
++                return ["unlinkDir"];
+             }
+         }
+         else if (prev && next) {
+@@ -69,27 +68,27 @@ class WatcherPoller {
+                 if (next.isFile()) {
+                     if (prev.ino === next.ino && !prev.size && !next.size)
+                         return []; // Same path, same content and same file, nothing actually changed
+-                    this.updateIno(targetPath, TargetEvent.CHANGE, next);
+-                    return [TargetEvent.CHANGE];
++                    this.updateIno(targetPath, "change", next);
++                    return ["change"];
+                 }
+                 if (next.isDirectory()) {
+-                    this.updateIno(targetPath, TargetEvent.UNLINK, prev);
+-                    this.updateIno(targetPath, TargetEvent.ADD_DIR, next);
+-                    return [TargetEvent.UNLINK, TargetEvent.ADD_DIR];
++                    this.updateIno(targetPath, "unlink", prev);
++                    this.updateIno(targetPath, "addDir", next);
++                    return ["unlink", "addDir"];
+                 }
+             }
+             else if (prev.isDirectory()) {
+                 if (next.isFile()) {
+-                    this.updateIno(targetPath, TargetEvent.UNLINK_DIR, prev);
+-                    this.updateIno(targetPath, TargetEvent.ADD, next);
+-                    return [TargetEvent.UNLINK_DIR, TargetEvent.ADD];
++                    this.updateIno(targetPath, "unlinkDir", prev);
++                    this.updateIno(targetPath, "add", next);
++                    return ["unlinkDir", "add"];
+                 }
+                 if (next.isDirectory()) {
+                     if (prev.ino === next.ino)
+                         return []; // Same path and same directory, nothing actually changed
+-                    this.updateIno(targetPath, TargetEvent.UNLINK_DIR, prev);
+-                    this.updateIno(targetPath, TargetEvent.ADD_DIR, next);
+-                    return [TargetEvent.UNLINK_DIR, TargetEvent.ADD_DIR];
++                    this.updateIno(targetPath, "unlinkDir", prev);
++                    this.updateIno(targetPath, "addDir", next);
++                    return ["unlinkDir", "addDir"];
+                 }
+             }
+         }
+@@ -97,7 +96,7 @@ class WatcherPoller {
+     }
+     updateIno(targetPath, event, stats) {
+         const inos = this.inos[event] = this.inos[event] || (this.inos[event] = {});
+-        const type = stats.isFile() ? FileType.FILE : FileType.DIR;
++        const type = stats.isFile() ? 2 /* FileType.FILE */ : 1 /* FileType.DIR */;
+         inos[targetPath] = [stats.ino, type];
+     }
+     updateStats(targetPath, stats) {
 diff --git a/dist/watcher_stats.d.ts b/dist/watcher_stats.d.ts
 index 61733034f16a3d4c569b6b2019ce384cb39bf3b1..27ca6d4a1ecb098370dceb2b39b8cde310a23f9c 100644
 --- a/dist/watcher_stats.d.ts
