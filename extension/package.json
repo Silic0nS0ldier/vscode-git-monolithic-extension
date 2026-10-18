@@ -2,6 +2,7 @@
     "private": true,
     "type": "module",
     "dependencies": {
+        "@vscode/diff": "0.0.2-7",
         "@vscode/extension-telemetry": "^1.5.2",
         "core-js-pure": "^3.50.0",
         "ignore": "^7.0.12",
@@ -9,7 +10,6 @@
         "monolithic-git-interop": "workspace:^",
         "onetime": "^8.0.0",
         "throat": "^6.0.2",
-        "vscode-diff": "^3.0.1",
         "watcher": "^2.3.1"
     },
     "devDependencies": {

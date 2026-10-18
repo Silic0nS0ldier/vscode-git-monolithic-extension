@@ -119,7 +119,9 @@ When migrating a git invocation from `extension` into `packages/git`, add the in
 - Dependency version bumps are initiated by Renovate; the `.github/workflows/update_*.mjs`
   scripts only complete the derived half (Bazel pins, digests). Don't hand-edit pinned versions.
 - `code-server` lags VSCode, so `engines.vscode` and the exact `@types/vscode` pin are derived
-  from it and guarded by `//integration_tests:code_server_pin_drift_test`.
+  from it and guarded by `//integration_tests:code_server_pin_drift_test`. The exact
+  `@vscode/diff` pin (an experimental prerelease series) follows the version that VSCode build
+  depends on; Renovate leaves it alone.
 - `.shellcheckrc` sets `shell=sh`; add `# shellcheck shell=bash` to bash scripts.
 - Telemetry is a no-op `Proxy`, deliberately stubbed rather than removed.
 

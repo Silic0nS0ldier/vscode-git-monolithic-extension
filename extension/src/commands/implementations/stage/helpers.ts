@@ -1,8 +1,8 @@
 import zip from "core-js-pure/es/iterator/zip.js";
 import { type TextDocument, Uri, window } from "vscode";
-import type { ILineChange } from "vscode-diff/dist/vs/editor/common/diff/legacyLinesDiffComputer.js";
 import { Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
+import type { LineChange } from "../../../line-changes.js";
 import type { Model } from "../../../model.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../../../repository/Resource.js";
@@ -125,7 +125,7 @@ export async function stageChanges(
     model: Model,
     originalDocument: TextDocument,
     modifiedDocument: TextDocument,
-    changes: ILineChange[],
+    changes: LineChange[],
 ): Promise<void> {
     const modifiedUri = modifiedDocument.uri;
 

@@ -29,6 +29,7 @@ ts_project(
     deps = [
         ":node_modules/@types/node",
         ":node_modules/@types/vscode",
+        ":node_modules/@vscode/diff",
         ":node_modules/@vscode/extension-telemetry",
         ":node_modules/core-js-pure",
         ":node_modules/ignore",
@@ -36,7 +37,6 @@ ts_project(
         ":node_modules/monolithic-git-interop",
         ":node_modules/onetime",
         ":node_modules/throat",
-        ":node_modules/vscode-diff",
         ":node_modules/watcher",
     ],
 )

@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { inspect } from "node:util";
 import { EndOfLine, type OutputChannel, Uri, window } from "vscode";
-import { DiffComputer, type ILineChange } from "vscode-diff/dist/vs/editor/common/diff/legacyLinesDiffComputer.js";
+import { computeLineChanges, type LineChange } from "../../../line-changes.js";
 import type { Model } from "../../../model.js";
 import { intersectDiffWithRange, toLineRanges } from "../../../staging.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
@@ -64,15 +64,8 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
         // Use VSCode diff algorithm to obtain line changes
         const currentLines = current.getText().split(getEOLChar(current.eol));
         const baseLines = base.getText().split(getEOLChar(base.eol));
-        const diffComputer = new DiffComputer(baseLines, currentLines, {
-            maxComputationTime: 0,
-            shouldComputeCharChanges: true,
-            shouldIgnoreTrimWhitespace: false,
-            shouldMakePrettyDiff: false,
-            shouldPostProcessCharChanges: true,
-        });
-        const diffResult = diffComputer.computeDiff();
-        if (diffResult.quitEarly === true) {
+        const diffResult = computeLineChanges(baseLines, currentLines);
+        if (diffResult.hitTimeout) {
             return void window.showErrorMessage(
                 `Diff computation was aborted, potentially due to a large file. ${failGoalMessage}`,
             );
@@ -84,12 +77,12 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
         const selectedLines = toLineRanges(selections, current);
         const selectedChanges = changes
             .map(diff =>
-                selectedLines.reduce<ILineChange | null>(
+                selectedLines.reduce<LineChange | null>(
                     (result, range) => result || intersectDiffWithRange(current, diff, range),
                     null,
                 )
             )
-            .filter(d => !!d) as ILineChange[];
+            .filter(d => !!d) as LineChange[];
 
         // Stage
         await stageChanges(model, base, current, selectedChanges);
