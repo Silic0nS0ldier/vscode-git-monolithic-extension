@@ -37,7 +37,6 @@ export async function fromEnvironment(
     let gitPath: string | null | false = await services.shell.which(gitBin, {
         path: services.process.env.PATH ?? "",
         pathExt: services.process.env.PATHEXT ?? undefined,
-        nothrow: true,
     });
 
     if (!gitPath) {

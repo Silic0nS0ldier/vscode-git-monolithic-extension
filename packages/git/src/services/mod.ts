@@ -8,7 +8,7 @@ export type FsService = {
 
 export type ShellService = {
     shell: {
-        which: (cmd: string, options: { path: string; pathExt?: string; nothrow: true }) => Promise<string | null>;
+        which: (cmd: string, options: { path: string; pathExt?: string }) => Promise<string | null>;
     };
 };
 

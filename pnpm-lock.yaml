@@ -328,16 +328,10 @@ importers:
       monolithic-git-wasm:
         specifier: workspace:^
         version: link:../wasm
-      which:
-        specifier: ^7.0.0
-        version: 7.0.0
     devDependencies:
       '@bazel/runfiles':
         specifier: ^6.5.0
         version: 6.5.0
-      '@types/which':
-        specifier: ^3.0.4
-        version: 3.0.4
       ava:
         specifier: 'catalog:'
         version: 8.0.1(rollup@4.64.7)(supports-color@7.2.0)
@@ -1730,9 +1724,6 @@ packages:
 
   '@types/vscode@1.140.0':
     resolution: {integrity: sha512-KAB5RBZIgnUhpp4mKsVJPPHLOQKu6WtGy2xpfWjaajEXO4xIIC+UESAXLiQ9ewx6QD1uBmvC/S8BJzkbvv4bRA==}
-
-  '@types/which@3.0.4':
-    resolution: {integrity: sha512-liyfuo/106JdlgSchJzXEQCVArk0CvevqPote8F8HgWgJ3dRCcTHgJIsLDuee0kxk/mhbInzIZk3QWSZJ8R+2w==}
 
   '@typescript-eslint/eslint-plugin@8.71.2':
     resolution: {integrity: sha512-K72/pvT7qpm8q3k8G5u93NCSN1RcLxX5h7Gw0bQpbMXviBHeY6Nx1WEwmk9wP+eKTSQ8ecxvcgt/ZX/rB938xQ==}
@@ -6046,8 +6037,6 @@ snapshots:
 
   '@types/vscode@1.140.0': {}
 
-  '@types/which@3.0.4': {}
-
   '@typescript-eslint/eslint-plugin@8.71.2(@typescript-eslint/parser@8.71.2(@typescript/typescript6@6.0.2)(eslint@10.12.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0))(@typescript/typescript6@6.0.2)(eslint@10.12.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
@@ -7527,7 +7516,8 @@ snapshots:
 
   isexe@2.0.0: {}
 
-  isexe@4.0.0: {}
+  isexe@4.0.0:
+    optional: true
 
   istextorbinary@9.5.0:
     dependencies:
@@ -9161,6 +9151,7 @@ snapshots:
   which@7.0.0:
     dependencies:
       isexe: 4.0.0
+    optional: true
 
   word-wrap@1.2.5: {}
 
