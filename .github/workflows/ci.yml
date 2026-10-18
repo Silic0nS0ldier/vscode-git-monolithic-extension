@@ -93,7 +93,9 @@ jobs:
         if: ${{ !cancelled() && steps.test.outcome == 'failure' }}
         with:
           name: test-logs
-          path: .bazel/testlogs/**/test.log
+          path: |
+            .bazel/testlogs/**/test.log
+            .bazel/testlogs/**/test.outputs/**
           include-hidden-files: true
       - run: bazel build //extension/vsix:git_monolithic --stamp --config=release --remote_download_outputs=toplevel
         id: build_vsix

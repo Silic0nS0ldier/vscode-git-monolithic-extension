@@ -16,6 +16,9 @@ const WINDOW_SIZE = { height: 1_080, width: 1_920 };
 
 const OUTPUT_PANEL = "[id=\"workbench.panel.output\"]";
 
+/** The panel hosts the active view's filter in its own title bar, outside the view itself. */
+const PANEL_FILTER = "[id=\"workbench.parts.panel\"] .viewpane-filter input";
+
 const QUICK_INPUT = ".quick-input-widget";
 
 function escapeRegExp(text: string): string {
@@ -187,21 +190,40 @@ export async function statusBarText(page: Page): Promise<string> {
 }
 
 /**
+ * Reveals the extension's output channel. `outputChannel.show()` focuses the output editor
+ * some time after the panel appears, and a fill that lands in between loses its text to
+ * that editor, so wait for focus to arrive first.
+ */
+export async function showGitOutput(page: Page): Promise<void> {
+    await runCommand(page, "Git: Show Git Output");
+    await page.locator(`${OUTPUT_PANEL}:focus-within`).waitFor({ state: "visible" });
+}
+
+/** Filter input of the view shown in the panel; inactive views may leave theirs in the DOM. */
+function panelFilter(page: Page): Locator {
+    return page.locator(PANEL_FILTER).filter({ visible: true });
+}
+
+/**
  * Lines of the output channel shown in the panel that mention `text`. The editor only
  * renders the tail, so filtering is the way to reach lines written during activation.
+ * Reveal the panel with {@link showGitOutput} first.
  */
 export async function filteredOutputPanelText(page: Page, text: string): Promise<string> {
-    const panel = page.locator(OUTPUT_PANEL);
+    const filter = panelFilter(page);
+    const lines = page.locator(OUTPUT_PANEL).locator(".view-lines");
 
-    await panel.waitFor({ state: "visible" });
-    await page.locator(".viewpane-filter input").first().fill(text);
+    await lines.waitFor({ state: "visible" });
+    await filter.fill(text);
+    // Without this, a lost fill only surfaces as a timeout showing the unfiltered tail.
+    assert.strictEqual(await filter.inputValue(), text, "the output filter did not receive the typed text");
 
     // Filtering is debounced, so the panel keeps rendering the unfiltered tail for a beat.
     return await pollUntil(
         `the output panel to render a line matching '${text}'`,
         // The editor word-wraps and renders spaces as non-breaking, so the rendered text
         // only resembles the logged line once whitespace is collapsed.
-        async () => (await panel.locator(".view-lines").innerText()).replaceAll(/\s+/gu, " "),
+        async () => (await lines.innerText()).replaceAll(/\s+/gu, " "),
         rendered => rendered.includes(text),
     );
 }
