@@ -12,7 +12,7 @@ import {
     openWorkbench,
     pollUntil,
     resourceRow,
-    runCommand,
+    showGitOutput,
     statusBarText,
 } from "./harness.js";
 
@@ -49,7 +49,7 @@ scenario("the extension runs against a workspace opened in Restricted Mode", asy
 });
 
 scenario("nested repositories are opened unless the bare repository probe skips them", async () => {
-    await runCommand(page, "Git: Show Git Output");
+    await showGitOutput(page);
 
     // The control, which the scan reaches after the two folders it skips.
     await pollUntil(

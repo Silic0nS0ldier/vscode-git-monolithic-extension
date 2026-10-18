@@ -14,8 +14,8 @@ import {
     openWorkbench,
     pollUntil,
     resourceRow,
-    runCommand,
     scmView,
+    showGitOutput,
 } from "./harness.js";
 
 const COMMIT_MESSAGE = "Commit from the SCM input box";
@@ -49,7 +49,7 @@ scenario("the extension activates and reports working tree changes", async () =>
 scenario("the provider is this extension rather than VS Code's builtin git", async () => {
     // Both extensions contribute this command, but the builtin hides its palette entries
     // while `git.enabled` is false, which is also the condition this extension waits for.
-    await runCommand(page, "Git: Show Git Output");
+    await showGitOutput(page);
 
     assert.match(
         await filteredOutputPanelText(page, "Git Monolithic"),
