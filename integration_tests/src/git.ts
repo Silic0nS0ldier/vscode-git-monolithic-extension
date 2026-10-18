@@ -6,6 +6,9 @@ import { testTmpDir, workspaceDir } from "./harness.js";
 
 const execFileAsync = promisify(execFile);
 
+/** Calls outside a poll have no deadline of their own, so a git that never exits would hang the suite. */
+const GIT_TIMEOUT_MS = 10_000;
+
 let cachedBin: string | undefined;
 
 /** The fixture task records the absolute path of the Bazel-provided git build here. */
@@ -24,6 +27,7 @@ async function git(...args: string[]): Promise<string> {
             // Polling `git status` would otherwise take `index.lock` out from under the extension.
             GIT_OPTIONAL_LOCKS: "0",
         },
+        timeout: GIT_TIMEOUT_MS,
     });
     return stdout;
 }
