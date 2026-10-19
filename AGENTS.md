@@ -110,6 +110,11 @@ extension writes asynchronously.
 A failing scenario saves a screenshot to `.bazel/testlogs/integration_tests/<suite>_test/test.outputs/`.
 Pass `--test_env=ITEST_SCREENSHOTS=1` to capture every scenario while authoring or debugging.
 
+Pass `--test_env=ITEST_COVERAGE=1` to collect V8 coverage of the extension into
+`test.outputs/coverage/`: one `coverage-*.json` per process that ran its code (the extension host,
+plus askpass if prompted), in the `NODE_V8_COVERAGE` format, of the shipped bundle, not mapped back
+to sources; and `summary.txt` (byte coverage and never-called functions).
+
 `openWorkbench` returns only once the repository's first status refresh has landed, so scenarios
 never absorb activation time. Every harness wait (`pollUntil`, Playwright's default timeout, each
 scenario) is also capped to a suite deadline derived from Bazel's `TEST_TIMEOUT`, so a stuck wait

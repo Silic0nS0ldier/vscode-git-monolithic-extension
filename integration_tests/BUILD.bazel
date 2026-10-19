@@ -159,6 +159,7 @@ ts_project(
     name = "lib_harness",
     srcs = [
         "package.json",
+        "src/coverage.ts",
         "src/git.ts",
         "src/harness.ts",
     ],

@@ -1,9 +1,16 @@
 import assert from "node:assert";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import test from "node:test";
+import test, { after } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { type Browser, chromium, type Locator, type Page } from "playwright-core";
+import {
+    COVERAGE_ENABLED,
+    hasExtensionHostDump,
+    rawCoverageDir,
+    readExtensionDumps,
+    writeCoverage,
+} from "./coverage.js";
 
 /** Timeout of the `before` hook opening the workbench. Generous: a cold extension host boot dominates it. */
 export const LOAD_TIMEOUT_MS = 120_000;
@@ -138,6 +145,27 @@ export async function connect(): Promise<Browser> {
     return await chromium.connectOverCDP(endpoint.toString());
 }
 
+let workbench: Page | undefined;
+
+// Registered on import, so it runs ahead of each suite's own `after` closing the browser.
+after(async () => {
+    const dir = process.env["TEST_UNDECLARED_OUTPUTS_DIR"];
+    if (!COVERAGE_ENABLED || workbench === undefined || dir === undefined) {
+        return;
+    }
+    // Closing the workbench asks the extension host to deactivate and exit, which is when
+    // Node writes its coverage.
+    await workbench.close();
+    const rawDir = rawCoverageDir(testTmpDir());
+    const dumps = await pollUntil(
+        `the extension host to write its coverage to ${rawDir}`,
+        async () => await readExtensionDumps(rawDir),
+        hasExtensionHostDump,
+        ACTION_TIMEOUT_MS,
+    );
+    await writeCoverage(dumps, join(dir, "coverage"));
+}, { timeout: ACTION_TIMEOUT_MS + CAPTURE_GRACE_MS });
+
 export async function openWorkbench(browser: Browser): Promise<Page> {
     const context = browser.contexts()[0] ?? await browser.newContext();
     const page = await context.newPage();
@@ -162,6 +190,7 @@ export async function openWorkbench(browser: Browser): Promise<Page> {
     }
 
     page.setDefaultTimeout(ACTION_TIMEOUT_MS);
+    workbench = page;
 
     return page;
 }
