@@ -1,12 +1,11 @@
 import type { Branch, Remote } from "../../api/git.js";
 import type { Repository } from "../../git.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
-import { throttle } from "../../util/throttle.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 import type { RunFn } from "./run.js";
 import { syncInternal } from "./sync-internal.js";
 
-export const sync = throttle(1, (
+export const sync = (
     run: RunFn<void> & RunFn<boolean>,
     repoRoot: string,
     sourceControlUI: SourceControlUIGroup,
@@ -25,4 +24,4 @@ export const sync = throttle(1, (
     finalRepository,
     head,
     false,
-));
+);
