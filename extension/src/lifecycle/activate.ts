@@ -16,7 +16,6 @@ import {
     workspace,
     type WorkspaceFolder,
 } from "vscode";
-import { GitExtensionImpl } from "../api/extension.js";
 import { Askpass } from "../askpass.js";
 import { registerCommands } from "../commands/register.js";
 import { addDecorations } from "../decorationProvider.js";
@@ -55,8 +54,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
         },
     });
 
-    const result = new GitExtensionImpl();
-
     // TODO Recommend user disables built-in Git extension if repository is massive
     let extensionEnablementState: boolean = config.enabled() && !config.builtinGitEnabled();
 
@@ -84,10 +81,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
                 if (extensionEnablementState) {
                     outputChannel.appendLine("Config changed, activating Git Monolithic extension...");
-                    await enableExtension(result, context, outputChannel, telemetryReporter);
+                    await enableExtension(context, outputChannel, telemetryReporter);
                 } else {
                     outputChannel.appendLine("Config changed, deactivating Git Monolithic extension...");
-                    disableExtension(result);
+                    disableExtension();
                 }
             } catch (err) {
                 outputChannel.appendLine(`[ERROR] Failed to process config change: ${inspect(err)}`);
@@ -103,7 +100,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
     if (extensionEnablementState) {
         outputChannel.appendLine("Activating Git Monolithic extension...");
-        await enableExtension(result, context, outputChannel, telemetryReporter);
+        await enableExtension(context, outputChannel, telemetryReporter);
     } else if (!config.enabled()) {
         outputChannel.appendLine("Git Monolithic is inactive because `git_monolithic.enabled` is false.");
     } else {
@@ -114,20 +111,18 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
 
     deactivateTasks.push(() => telemetryReporter.dispose());
-    deactivateTasks.push(async () => disableExtension(result));
+    deactivateTasks.push(async () => disableExtension());
 }
 
 let extensionDisposable: Disposable | undefined;
 
 async function enableExtension(
-    ext: GitExtensionImpl,
     context: ExtensionContext,
     outputChannel: OutputChannel,
     telemetryReporter: TelemetryReporter,
 ): Promise<void> {
     try {
         const [model, modelDisposable] = await createModel(context, outputChannel, telemetryReporter);
-        ext.model = model;
         const inlayHintsProvider = createInlayHintsProvider(model, outputChannel);
         const fileInlayDisposable = languages.registerInlayHintsProvider({ scheme: "file" }, inlayHintsProvider);
 
@@ -144,8 +139,7 @@ async function enableExtension(
     }
 }
 
-function disableExtension(ext: GitExtensionImpl): void {
-    ext.model = undefined;
+function disableExtension(): void {
     extensionDisposable?.dispose();
     extensionDisposable = undefined;
 }
