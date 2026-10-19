@@ -77,8 +77,25 @@ export async function setLocalConfig(key: string, value: string): Promise<void> 
  * `--cherry` sees a unique entry ahead of whatever it already reports as equivalent.
  */
 export async function pushUnrelatedUpstreamCommit(): Promise<void> {
+    await pushUnrelatedUpstreamCommitUnfetched();
+    await git("fetch", "origin");
+}
+
+/**
+ * Like {@link pushUnrelatedUpstreamCommit}, but leaves `origin/main` behind, so a later fetch by the extension can be
+ * observed. Returns the pushed commit.
+ */
+export async function pushUnrelatedUpstreamCommitUnfetched(): Promise<string> {
     const tip = (await git("rev-parse", "origin/main")).trim();
     const commit = (await git("commit-tree", "origin/main^{tree}", "-p", tip, "-m", "Unrelated newer change")).trim();
     await git("push", "origin", `${commit}:refs/heads/main`);
-    await git("fetch", "origin");
+    return commit;
+}
+
+/**
+ * Makes every later push to `origin` (accepted or rejected) create `marker`, by wrapping the receive-pack command
+ * git runs for the local bare remote.
+ */
+export async function markPushesToOrigin(marker: string): Promise<void> {
+    await setLocalConfig("remote.origin.receivepack", `touch '${marker}' && '${await gitBin()}' receive-pack`);
 }

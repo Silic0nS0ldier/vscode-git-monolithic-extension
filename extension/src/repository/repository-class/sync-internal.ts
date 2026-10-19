@@ -11,7 +11,7 @@ import { pushInternal } from "./push-internal.js";
 import type { RunFn } from "./run.js";
 
 export async function syncInternal(
-    run: RunFn<void> & RunFn<boolean>,
+    run: RunFn<void>,
     repoRoot: string,
     sourceControlUI: SourceControlUIGroup,
     repository: Repository,
@@ -41,7 +41,7 @@ export async function syncInternal(
                 const repositoryUri = Uri.file(repoRoot);
                 const followTags = config.followTagsWhenSync(repositoryUri);
 
-                await fetchAndPull(run, repoRoot, repository, HEAD?.name, rebase, remoteName, pullBranch, {
+                await fetchAndPull(repoRoot, repository, rebase, remoteName, pullBranch, {
                     abortSignal: signal,
                 });
                 signal.throwIfAborted();
