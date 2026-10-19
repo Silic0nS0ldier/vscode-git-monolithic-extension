@@ -541,9 +541,6 @@ export function createRepository(
         ignore(files) {
             return ignoreImpl(run, repository, files);
         },
-        log(options) {
-            return run(Operation.Log, () => repository.log(options));
-        },
         merge(ref) {
             return run(Operation.Merge, () => repository.merge(ref));
         },
