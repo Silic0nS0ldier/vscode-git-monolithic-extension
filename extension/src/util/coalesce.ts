@@ -12,5 +12,8 @@ import { createScheduler } from "./scheduler.js";
 export function coalesce<TResult, TArgs extends unknown[]>(
     fn: (...args: TArgs) => Promise<TResult>,
 ): (...args: TArgs) => Promise<TResult> {
-    return createScheduler().coalesced(fn);
+    const scheduler = createScheduler();
+    return function(this: unknown, ...args) {
+        return scheduler.schedule({ key: "" }, () => fn.apply(this, args));
+    };
 }
