@@ -8,7 +8,6 @@ export function isReadOnly(operation: OperationOptions): boolean {
         case Operation.GetCommitTemplate:
         case Operation.GetObjectDetails:
         case Operation.Log:
-        case Operation.LogFile:
         case Operation.Show:
         case Operation.Refresh:
             return true;
@@ -39,7 +38,6 @@ export function isReadOnly(operation: OperationOptions): boolean {
         case Operation.Stage:
         case Operation.Tag:
         case Operation.Stash:
-        case Operation.SubmoduleUpdate:
         case Operation.Sync:
             return false;
         default:
@@ -64,7 +62,6 @@ export function causesLargeWorkingTreeChanges(operation: OperationOptions): bool
         case Operation.Reset:
         case Operation.RevertFiles:
         case Operation.Stash:
-        case Operation.SubmoduleUpdate:
         case Operation.Sync:
             return true;
         case Operation.Add:
@@ -81,7 +78,6 @@ export function causesLargeWorkingTreeChanges(operation: OperationOptions): bool
         case Operation.GetObjectDetails:
         case Operation.Ignore:
         case Operation.Log:
-        case Operation.LogFile:
         case Operation.Move:
         case Operation.Push:
         case Operation.Refresh:
@@ -109,7 +105,6 @@ function shouldShowProgress(operation: OperationOptions): boolean {
         case Operation.FindTrackingBranches:
         case Operation.GetCommitTemplate:
         case Operation.Log:
-        case Operation.LogFile:
         case Operation.Refresh:
         case Operation.Add:
         case Operation.Branch:
@@ -137,7 +132,6 @@ function shouldShowProgress(operation: OperationOptions): boolean {
         case Operation.Stage:
         case Operation.Tag:
         case Operation.Stash:
-        case Operation.SubmoduleUpdate:
         case Operation.Sync:
             return true;
         default:
@@ -164,7 +158,6 @@ export type OperationOptions =
     | "GetObjectDetails"
     | "Ignore"
     | "Log"
-    | "LogFile"
     | "Merge"
     | "Move"
     | "Pull"
@@ -181,7 +174,6 @@ export type OperationOptions =
     | "Show"
     | "Stage"
     | "Stash"
-    | "SubmoduleUpdate"
     | "Sync"
     | "Tag";
 
@@ -204,7 +196,6 @@ export const Operation = {
     GetObjectDetails: "GetObjectDetails",
     Ignore: "Ignore",
     Log: "Log",
-    LogFile: "LogFile",
     Merge: "Merge",
     Move: "Move",
     Pull: "Pull",
@@ -221,7 +212,6 @@ export const Operation = {
     Show: "Show",
     Stage: "Stage",
     Stash: "Stash",
-    SubmoduleUpdate: "SubmoduleUpdate",
     Sync: "Sync",
     Tag: "Tag",
 } satisfies Record<OperationOptions, OperationOptions>;
