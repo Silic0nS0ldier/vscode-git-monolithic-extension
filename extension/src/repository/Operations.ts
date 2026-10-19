@@ -25,7 +25,6 @@ export function isReadOnly(operation: OperationOptions): boolean {
         case Operation.CherryPick:
         case Operation.Clean:
         case Operation.Commit:
-        case Operation.Config: // TODO Split to read and write variants
         case Operation.DeleteBranch:
         case Operation.DeleteRef:
         case Operation.DeleteTag:
@@ -81,7 +80,6 @@ export function causesLargeWorkingTreeChanges(operation: OperationOptions): bool
         case Operation.Branch:
         case Operation.CheckIgnore:
         case Operation.Commit:
-        case Operation.Config:
         case Operation.DeleteBranch:
         case Operation.DeleteRef:
         case Operation.DeleteTag:
@@ -140,7 +138,6 @@ function shouldShowProgress(operation: OperationOptions): boolean {
         case Operation.CherryPick:
         case Operation.Clean:
         case Operation.Commit:
-        case Operation.Config:
         case Operation.DeleteBranch:
         case Operation.DeleteRef:
         case Operation.DeleteTag:
@@ -180,7 +177,6 @@ export type OperationOptions =
     | "CherryPick"
     | "Clean"
     | "Commit"
-    | "Config"
     | "DeleteBranch"
     | "DeleteRef"
     | "DeleteTag"
@@ -228,7 +224,6 @@ export const Operation = {
     CherryPick: "CherryPick",
     Clean: "Clean",
     Commit: "Commit",
-    Config: "Config",
     DeleteBranch: "DeleteBranch",
     DeleteRef: "DeleteRef",
     DeleteTag: "DeleteTag",
