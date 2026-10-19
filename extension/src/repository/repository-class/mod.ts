@@ -10,7 +10,7 @@ import {
     window,
     workspace,
 } from "vscode";
-import { type Branch, type ForcePushModeOptions, GitErrorCodes, type Remote } from "../../api/git.js";
+import { type Branch, GitErrorCodes, type Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import type { Repository as BaseRepository } from "../../git.js";
 import { GitError } from "../../git/error.js";
@@ -58,7 +58,7 @@ import { stage as stageImpl } from "./stage.js";
 import { syncInternal } from "./sync-internal.js";
 import { syncLabel as syncLabelImpl } from "./sync-label.js";
 import { syncTooltip as syncTooltipImpl } from "./sync-tooltip.js";
-import { sync as syncImpl } from "./sync.js";
+import { withSyncCancellation } from "./sync.js";
 import { updateModelState as updateModelStateImpl } from "./update-model-state.js";
 
 export function createRepository(
@@ -359,7 +359,36 @@ export function createRepository(
     const onDidChangeOriginalResource = onDidChangeOriginalResourceEmitter.event;
 
     // Remote operations (fetch, pull, push, sync) run one at a time so they don't contend for git's locks.
+    // Repeat requests that are still queued are merged when their key (the operation plus every argument that changes
+    // what it does) matches.
     const remoteOperations = createScheduler();
+    function scheduleRemote<T>(
+        key: readonly unknown[],
+        task: (signal: AbortSignal) => Promise<T>,
+        signal?: AbortSignal,
+    ): Promise<T> {
+        return remoteOperations.schedule({ key: JSON.stringify(key), signal }, task);
+    }
+    const branchKey = (head: Branch | undefined) => [head?.name, head?.upstream?.remote, head?.upstream?.name];
+    const syncScheduled = (head: Branch, rebase: boolean) =>
+        withSyncCancellation(repoRoot, signal =>
+            scheduleRemote(
+                [rebase ? "syncRebase" : "sync", ...branchKey(head)],
+                taskSignal =>
+                    syncInternal(
+                        run,
+                        repoRoot,
+                        sourceControlUI,
+                        repository,
+                        HEAD.get(),
+                        remotes.get(),
+                        finalRepository,
+                        head,
+                        rebase,
+                        taskSignal,
+                    ),
+                signal,
+            ));
 
     const finalRepository: AbstractRepository = {
         get HEAD() {
@@ -428,15 +457,27 @@ export function createRepository(
         dropStash(index) {
             return run(Operation.Stash, () => repository.dropStash(index));
         },
-        fetch: remoteOperations.exclusive(options => fetchImpl(repoRoot, run, repository, options)),
-        fetchAll: remoteOperations.coalesced(() => fetchImpl(repoRoot, run, repository, { all: true })),
-        fetchDefault: remoteOperations.coalesced((options = {}) =>
-            fetchImpl(repoRoot, run, repository, { silent: options.silent })
-        ),
-        fetchPrune: remoteOperations.coalesced(() => fetchImpl(repoRoot, run, repository, { prune: true })),
-        fetchUpstreams: remoteOperations.coalesced(
-            (scope, options = {}) => run(Operation.Fetch, () => repository.fetchUpstreams(scope, options)),
-        ),
+        fetch(options) {
+            return scheduleRemote(["fetch", options], () => fetchImpl(repoRoot, run, repository, options));
+        },
+        fetchAll() {
+            return scheduleRemote(["fetchAll"], () => fetchImpl(repoRoot, run, repository, { all: true }));
+        },
+        fetchDefault(options = {}) {
+            return scheduleRemote(
+                ["fetchDefault", options.silent],
+                () => fetchImpl(repoRoot, run, repository, { silent: options.silent }),
+            );
+        },
+        fetchPrune() {
+            return scheduleRemote(["fetchPrune"], () => fetchImpl(repoRoot, run, repository, { prune: true }));
+        },
+        fetchUpstreams(scope, options = {}) {
+            return scheduleRemote(
+                ["fetchUpstreams", scope, options.silent],
+                () => run(Operation.Fetch, () => repository.fetchUpstreams(scope, options)),
+            );
+        },
         findTrackingBranches(upstreamRef) {
             return run(Operation.FindTrackingBranches, () => repository.findTrackingBranches(upstreamRef));
         },
@@ -512,74 +553,87 @@ export function createRepository(
         popStash(index) {
             return run(Operation.Stash, () => repository.popStash(index));
         },
-        pull: remoteOperations.coalesced((head?: Branch, unshallow?: boolean) =>
-            pullImpl(run, repoRoot, repository, HEAD.get(), sourceControlUI, head, unshallow)
-        ),
-        pullFrom: remoteOperations.exclusive((rebase, remote, branch, unshallow) =>
-            pullFromImpl(
-                run,
-                repoRoot,
-                repository,
-                HEAD.get(),
-                sourceControlUI,
-                rebase,
-                remote,
-                branch,
-                unshallow,
-            )
-        ),
-        pullWithRebase: remoteOperations.coalesced((head: Branch | undefined) =>
-            pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, HEAD.get(), head)
-        ),
-        push: remoteOperations.coalesced((head: Branch, forcePushMode?: ForcePushModeOptions) =>
-            pushImpl(run, repository, finalRepository, head, forcePushMode)
-        ),
-        pushFollowTags: remoteOperations.exclusive((remote, forcePushMode) =>
-            run(
-                Operation.Push,
-                () =>
-                    pushInternal(
-                        repository,
-                        finalRepository,
-                        remote,
-                        undefined,
-                        false,
-                        true,
-                        forcePushMode,
-                    ),
-            )
-        ),
-        pushTags: remoteOperations.exclusive((remote, forcePushMode) =>
-            run(
-                Operation.Push,
-                () =>
-                    pushInternal(
-                        repository,
-                        finalRepository,
-                        remote,
-                        undefined,
-                        false,
-                        false,
-                        forcePushMode,
-                        true,
-                    ),
-            )
-        ),
-        pushTo: remoteOperations.exclusive((remote, name, setUpstream = false, forcePushMode) =>
-            run(
-                Operation.Push,
-                () =>
-                    pushInternal(
-                        repository,
-                        finalRepository,
-                        remote,
-                        name,
-                        setUpstream,
-                        undefined,
-                        forcePushMode,
-                    ),
-            )
-        ),
+        pull(head, unshallow) {
+            return scheduleRemote(
+                ["pull", ...branchKey(head), unshallow],
+                () => pullImpl(run, repoRoot, repository, HEAD.get(), sourceControlUI, head, unshallow),
+            );
+        },
+        pullFrom(rebase, remote, branch, unshallow) {
+            return scheduleRemote(["pullFrom", rebase, remote, branch, unshallow], () =>
+                pullFromImpl(
+                    run,
+                    repoRoot,
+                    repository,
+                    HEAD.get(),
+                    sourceControlUI,
+                    rebase,
+                    remote,
+                    branch,
+                    unshallow,
+                ));
+        },
+        pullWithRebase(head) {
+            return scheduleRemote(
+                ["pullWithRebase", ...branchKey(head)],
+                () => pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, HEAD.get(), head),
+            );
+        },
+        push(head, forcePushMode) {
+            return scheduleRemote(
+                ["push", ...branchKey(head), forcePushMode],
+                () => pushImpl(run, repository, finalRepository, head, forcePushMode),
+            );
+        },
+        pushFollowTags(remote, forcePushMode) {
+            return scheduleRemote(["pushFollowTags", remote, forcePushMode], () =>
+                run(
+                    Operation.Push,
+                    () =>
+                        pushInternal(
+                            repository,
+                            finalRepository,
+                            remote,
+                            undefined,
+                            false,
+                            true,
+                            forcePushMode,
+                        ),
+                ));
+        },
+        pushTags(remote, forcePushMode) {
+            return scheduleRemote(["pushTags", remote, forcePushMode], () =>
+                run(
+                    Operation.Push,
+                    () =>
+                        pushInternal(
+                            repository,
+                            finalRepository,
+                            remote,
+                            undefined,
+                            false,
+                            false,
+                            forcePushMode,
+                            true,
+                        ),
+                ));
+        },
+        pushTo(remote, name, setUpstream = false, forcePushMode) {
+            return scheduleRemote(["pushTo", remote, name, setUpstream, forcePushMode], () =>
+                run(
+                    Operation.Push,
+                    () =>
+                        pushInternal(
+                            repository,
+                            finalRepository,
+                            remote,
+                            name,
+                            setUpstream,
+                            undefined,
+                            forcePushMode,
+                        ),
+                ));
+        },
         rebase(branch) {
             return run(Operation.Rebase, () => repository.rebase(branch));
         },
@@ -628,35 +682,15 @@ export function createRepository(
         get submodules() {
             return submodules.get();
         },
-        sync: remoteOperations.coalesced((head: Branch) =>
-            syncImpl(
-                run,
-                repoRoot,
-                sourceControlUI,
-                repository,
-                HEAD.get(),
-                remotes.get(),
-                finalRepository,
-                head,
-            )
-        ),
+        sync(head) {
+            return syncScheduled(head, false);
+        },
         get syncLabel() {
             return syncLabelImpl(HEAD.get(), remotes.get());
         },
-        syncRebase: remoteOperations.coalesced(
-            (head: Branch) =>
-                syncInternal(
-                    run,
-                    repoRoot,
-                    sourceControlUI,
-                    repository,
-                    HEAD.get(),
-                    remotes.get(),
-                    finalRepository,
-                    head,
-                    true,
-                ),
-        ),
+        syncRebase(head) {
+            return syncScheduled(head, true);
+        },
         get syncTooltip() {
             return syncTooltipImpl(HEAD.get(), remotes.get());
         },

@@ -1,80 +1,137 @@
-export interface Scheduler {
-    /** Every call is queued and runs in turn. */
-    readonly exclusive: <TResult, TArgs extends unknown[]>(
-        fn: (...args: TArgs) => Promise<TResult>,
-    ) => (...args: TArgs) => Promise<TResult>;
+export interface ScheduleOptions {
     /**
-     * Calls are queued and run in turn, but while a call to this wrapper is waiting in the queue, further calls join
-     * it (their arguments are discarded) instead of queuing again.
+     * Calls sharing a key join a queued (not yet started) task instead of queuing again; the joining call's `task` is
+     * discarded. Once a task starts, a new call with its key queues afresh. Omit to always queue.
      *
-     * Suits idempotent work (refresh, fetch, sync). Read mutable state inside `fn` rather than passing it as an
-     * argument, as the queued call runs later.
+     * The key must capture everything that changes what the task does. Read mutable state inside the task rather
+     * than capturing it at call time, as a queued task runs later.
      */
-    readonly coalesced: <TResult, TArgs extends unknown[]>(
-        fn: (...args: TArgs) => Promise<TResult>,
-    ) => (...args: TArgs) => Promise<TResult>;
+    readonly key?: string;
+    /**
+     * Aborting rejects this call immediately with `signal.reason`. The task itself is only abandoned once every call
+     * sharing it has aborted: removed from the queue if it has not started, otherwise its own signal is aborted (it
+     * keeps its turn in the queue until it settles).
+     */
+    readonly signal?: AbortSignal;
+}
+
+export interface Scheduler {
+    readonly schedule: <T>(options: ScheduleOptions, task: (signal: AbortSignal) => Promise<T>) => Promise<T>;
+}
+
+interface Entry {
+    readonly controller: AbortController;
+    readonly key: string | undefined;
+    readonly promise: Promise<unknown>;
+    readonly start: () => void;
+    callers: number;
+    started: boolean;
 }
 
 /**
- * Creates a FIFO queue that runs one task at a time. Functions wrapped by the same scheduler never overlap.
- * A task starts synchronously when the queue is idle.
+ * Creates a FIFO queue that runs one task at a time. A task starts synchronously when the queue is idle.
  */
 export function createScheduler(): Scheduler {
     let active = false;
-    const waiting: (() => void)[] = [];
+    const queue: Entry[] = [];
+    const queuedByKey = new Map<string, Entry>();
 
-    function release(): void {
-        const next = waiting.shift();
+    function startNext(): void {
+        const next = queue.shift();
         if (next) {
-            next();
+            next.start();
         } else {
             active = false;
         }
     }
 
-    function schedule<T>(task: () => Promise<T>): Promise<T> {
-        const run = async (): Promise<T> => {
-            try {
-                return await task();
-            } finally {
-                release();
-            }
-        };
-
-        if (!active) {
-            active = true;
-            return run();
+    function forget(entry: Entry): void {
+        if (entry.key !== undefined && queuedByKey.get(entry.key) === entry) {
+            queuedByKey.delete(entry.key);
         }
+    }
 
-        const { promise, resolve } = Promise.withResolvers<T>();
-        waiting.push(() => resolve(run()));
-        return promise;
+    function createEntry<T>(key: string | undefined, task: (signal: AbortSignal) => Promise<T>): Entry {
+        const controller = new AbortController();
+        const { promise, resolve, reject } = Promise.withResolvers<unknown>();
+        // Every caller may abort and stop listening while the task is still running.
+        promise.catch(() => {});
+        const entry: Entry = {
+            callers: 0,
+            controller,
+            key,
+            promise,
+            start() {
+                entry.started = true;
+                forget(entry);
+                const run = async (): Promise<T> => {
+                    try {
+                        return await task(controller.signal);
+                    } finally {
+                        startNext();
+                    }
+                };
+                run().then(resolve, reject);
+            },
+            started: false,
+        };
+        return entry;
+    }
+
+    function leave(entry: Entry, reason: unknown): void {
+        entry.callers--;
+        if (entry.callers > 0) {
+            return;
+        }
+        if (entry.started) {
+            entry.controller.abort(reason);
+        } else {
+            forget(entry);
+            queue.splice(queue.indexOf(entry), 1);
+        }
     }
 
     return {
-        exclusive(fn) {
-            return function(this: unknown, ...args) {
-                return schedule(() => fn.apply(this, args));
-            };
-        },
-        coalesced<TResult, TArgs extends unknown[]>(fn: (...args: TArgs) => Promise<TResult>) {
-            let pending: Promise<TResult> | undefined;
-            return function(this: unknown, ...args: TArgs): Promise<TResult> {
-                if (pending) {
-                    return pending;
+        schedule<T>({ key, signal }: ScheduleOptions, task: (signal: AbortSignal) => Promise<T>): Promise<T> {
+            if (signal?.aborted) {
+                return Promise.reject(signal.reason);
+            }
+
+            let entry = key === undefined ? undefined : queuedByKey.get(key);
+            if (!entry) {
+                entry = createEntry(key, task);
+                if (active) {
+                    queue.push(entry);
+                    if (key !== undefined) {
+                        queuedByKey.set(key, entry);
+                    }
+                } else {
+                    active = true;
+                    entry.start();
                 }
-                let started = false;
-                const result = schedule(() => {
-                    started = true;
-                    pending = undefined;
-                    return fn.apply(this, args);
-                });
-                // When the queue is idle the task starts synchronously, so there is nothing left pending.
-                if (!started) {
-                    pending = result;
+            }
+            entry.callers++;
+
+            const shared = entry.promise as Promise<T>;
+            if (!signal) {
+                return shared;
+            }
+
+            const joined = entry;
+            const { promise, resolve, reject } = Promise.withResolvers<T>();
+            let settled = false;
+            const onAbort = (): void => {
+                if (!settled) {
+                    reject(signal.reason);
+                    leave(joined, signal.reason);
                 }
-                return result;
             };
+            signal.addEventListener("abort", onAbort, { once: true });
+            shared.then(resolve, reject).finally(() => {
+                settled = true;
+                signal.removeEventListener("abort", onAbort);
+            });
+            return promise;
         },
     };
 }

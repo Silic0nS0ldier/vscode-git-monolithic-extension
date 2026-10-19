@@ -1,10 +1,7 @@
-/* eslint-disable sort-keys */
-import { ProgressLocation, type ProgressOptions, Uri, window } from "vscode";
+import { Uri } from "vscode";
 import type { Branch, Remote } from "../../api/git.js";
 import type { Repository } from "../../git.js";
-import * as i18n from "../../i18n/mod.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
-import { fromCancellationToken } from "../../util/abort-signal-adapters.js";
 import * as config from "../../util/config.js";
 import { Operation } from "../Operations.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
@@ -23,6 +20,7 @@ export async function syncInternal(
     finalRepository: AbstractRepository,
     head: Branch,
     rebase: boolean,
+    signal: AbortSignal,
 ): Promise<void> {
     let remoteName: string | undefined;
     let pullBranch: string | undefined;
@@ -42,24 +40,11 @@ export async function syncInternal(
             async () => {
                 const repositoryUri = Uri.file(repoRoot);
                 const followTags = config.followTagsWhenSync(repositoryUri);
-                const supportCancellation = config.supportCancellation(repositoryUri);
 
-                const fn = (abortSignal?: AbortSignal): Promise<void> =>
-                    fetchAndPull(run, repoRoot, repository, HEAD?.name, rebase, remoteName, pullBranch, {
-                        abortSignal,
-                    });
-
-                if (supportCancellation) {
-                    const opts: ProgressOptions = {
-                        cancellable: true,
-                        location: ProgressLocation.Notification,
-                        title: i18n.Translations.syncIsUnpredictable(),
-                    };
-
-                    await window.withProgress(opts, (_, token) => fn(fromCancellationToken(token)));
-                } else {
-                    await fn();
-                }
+                await fetchAndPull(run, repoRoot, repository, HEAD?.name, rebase, remoteName, pullBranch, {
+                    abortSignal: signal,
+                });
+                signal.throwIfAborted();
 
                 const remote = remotes.find(r => r.name === remoteName);
 
