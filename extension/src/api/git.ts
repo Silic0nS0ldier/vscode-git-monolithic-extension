@@ -95,13 +95,6 @@ export interface FetchOptions {
     depth?: number;
 }
 
-export interface BranchQuery {
-    readonly remote?: boolean;
-    readonly pattern?: string;
-    readonly count?: number;
-    readonly contains?: string;
-}
-
 export interface Credentials {
     readonly username: string;
     readonly password: string;
@@ -130,7 +123,6 @@ type GitErrorCodesOptions =
     | "IsInSubmodule"
     | "LocalChangesOverwritten"
     | "NoLocalChanges"
-    | "NoPathFound"
     | "NoRemoteReference"
     | "NoRemoteRepositorySpecified"
     | "NoStashFound"
@@ -139,7 +131,6 @@ type GitErrorCodesOptions =
     | "NoUpstreamBranch"
     | "NoUserEmailConfigured"
     | "NoUserNameConfigured"
-    | "PatchDoesNotApply"
     | "PermissionDenied"
     | "PushRejected"
     | "RemoteConnectionError"
@@ -165,7 +156,6 @@ export const GitErrorCodes: Record<GitErrorCodesOptions, GitErrorCodesOptions> =
     IsInSubmodule: "IsInSubmodule",
     LocalChangesOverwritten: "LocalChangesOverwritten",
     NoLocalChanges: "NoLocalChanges",
-    NoPathFound: "NoPathFound",
     NoRemoteReference: "NoRemoteReference",
     NoRemoteRepositorySpecified: "NoRemoteRepositorySpecified",
     NoStashFound: "NoStashFound",
@@ -174,7 +164,6 @@ export const GitErrorCodes: Record<GitErrorCodesOptions, GitErrorCodesOptions> =
     NoUserNameConfigured: "NoUserNameConfigured",
     NotAGitRepository: "NotAGitRepository",
     NotAtRepositoryRoot: "NotAtRepositoryRoot",
-    PatchDoesNotApply: "PatchDoesNotApply",
     PermissionDenied: "PermissionDenied",
     PushRejected: "PushRejected",
     RemoteConnectionError: "RemoteConnectionError",

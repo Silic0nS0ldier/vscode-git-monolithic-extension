@@ -404,19 +404,10 @@ export function createRepository(
         add(resources, opts) {
             return run(Operation.Add, () => repository.add(resources.map(r => r.fsPath), opts));
         },
-        addRemote(name, url) {
-            return run(Operation.Remote, () => repository.addRemote(name, url));
-        },
-        apply(patch, reverse) {
-            return run(Operation.Apply, () => repository.apply(patch, reverse));
-        },
         applyStash(index) {
             return run(Operation.Stash, () => repository.applyStash(index));
         },
         autoRefresh: runRefresh,
-        blame(path) {
-            return run(Operation.Blame, () => repository.blame(path));
-        },
         branch(name, _checkout, _ref) {
             return run(Operation.Branch, () => repository.branch(name, _checkout, _ref));
         },
@@ -487,12 +478,6 @@ export function createRepository(
         findTrackingBranches(upstreamRef) {
             return run(Operation.FindTrackingBranches, () => repository.findTrackingBranches(upstreamRef));
         },
-        getBranch(name) {
-            return run(Operation.GetBranch, () => repository.getBranch(name));
-        },
-        getBranches(query) {
-            return run(Operation.GetBranches, () => repository.getBranches(query));
-        },
         getCommit(ref) {
             return repository.getCommit(ref);
         },
@@ -501,9 +486,6 @@ export function createRepository(
         },
         getInputTemplate() {
             return inputTemplate.get();
-        },
-        getMergeBase(ref1, ref2) {
-            return run(Operation.MergeBase, () => repository.getMergeBase(ref1, ref2));
         },
         getObjectDetails(ref, filePath) {
             return run(Operation.GetObjectDetails, () => repository.getObjectDetails(ref, filePath));
@@ -514,9 +496,6 @@ export function createRepository(
         },
         getStashes() {
             return repository.getStashes();
-        },
-        hashObject(data) {
-            return run(Operation.HashObject, () => repository.hashObject(data));
         },
         get headLabel() {
             return headLabelImpl(
@@ -658,9 +637,6 @@ export function createRepository(
         renameBranch(name) {
             return run(Operation.RenameBranch, () => repository.renameBranch(name));
         },
-        renameRemote(name, newName) {
-            return run(Operation.Remote, () => repository.renameRemote(name, newName));
-        },
         reset(treeish, hard) {
             return run(Operation.Reset, () => repository.reset(treeish, hard));
         },
@@ -671,9 +647,6 @@ export function createRepository(
             return run(Operation.Remove, () => repository.rm(resources.map(r => r.fsPath)));
         },
         root: repoRoot,
-        setBranchUpstream(name, upstream) {
-            return run(Operation.SetBranchUpstream, () => repository.setBranchUpstream(name, upstream));
-        },
         sourceControlUI,
         stage(resource, contents) {
             return stageImpl(repository, run, onDidChangeOriginalResourceEmitter, resource, contents);
