@@ -724,20 +724,6 @@ export class Repository {
         unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, paths, { quiet: true }));
     }
 
-    async undo(): Promise<void> {
-        unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, [], { directories: true }));
-
-        try {
-            await this.exec(["checkout", "--", "."]);
-        } catch (err) {
-            if (err instanceof GitError && /did not match any file\(s\) known to git\./.test(err.stderr || "")) {
-                return;
-            }
-
-            throw err;
-        }
-    }
-
     async reset(treeish: string, hard: boolean = false): Promise<void> {
         const args = ["reset", hard ? "--hard" : "--soft", treeish];
         await this.exec(args);
