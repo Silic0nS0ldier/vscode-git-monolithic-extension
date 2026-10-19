@@ -7,7 +7,6 @@ import { fetch as gitFetch } from "monolithic-git-interop/api/fetch/mod";
 import { branch as branchDetail } from "monolithic-git-interop/api/for-each-ref/branch";
 import { list as listRefs, type RefKind } from "monolithic-git-interop/api/for-each-ref/list";
 import { cherry } from "monolithic-git-interop/api/log/cherry";
-import { log as gitLog } from "monolithic-git-interop/api/log/mod";
 import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
 import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
@@ -45,7 +44,6 @@ import {
     ForcePushMode,
     type ForcePushModeOptions,
     GitErrorCodes,
-    type LogOptions,
     type Ref,
     RefType,
     type RefTypeOptions,
@@ -354,19 +352,6 @@ export class Repository {
 
     async getConfigs(): Promise<{ key: string; value: string }[]> {
         return await getAllConfig(this);
-    }
-
-    async log(options?: LogOptions): Promise<Commit[]> {
-        const result = await gitLog(this.#git._context, this.#repositoryRoot, options);
-        if (isErr(result)) {
-            const error = unwrap(result);
-            if (error.type === gitErrors.ERROR_NON_ZERO_EXIT) {
-                // An empty repo
-                return [];
-            }
-            throw error._error;
-        }
-        return unwrap(result);
     }
 
     async buffer(object: string): Promise<Buffer> {

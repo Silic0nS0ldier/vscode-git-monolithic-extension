@@ -5,7 +5,6 @@ import type {
     CommitOptions,
     FetchOptions,
     ForcePushModeOptions,
-    LogOptions,
     Ref,
     Remote,
 } from "../../api/git.js";
@@ -70,7 +69,6 @@ export type AbstractRepository = {
     readonly hashObject: (data: string) => Promise<string>;
     readonly HEAD: Branch | undefined;
     readonly headLabel: string;
-    readonly log: (options?: LogOptions) => Promise<Commit[]>;
     readonly merge: (ref: string) => Promise<void>;
     readonly move: (from: string, to: string) => Promise<void>;
     readonly onDidChangeOperations: Event<OperationOptions | OperationResult>;
