@@ -20,8 +20,7 @@ import {
     workspace,
     type WorkspaceFoldersChangeEvent,
 } from "vscode";
-import type { APIState as State, CredentialsProvider } from "./api/git.js";
-import type { Askpass } from "./askpass.js";
+import type { APIState as State } from "./api/git.js";
 import type { Git } from "./git.js";
 import * as i18n from "./i18n/mod.js";
 import { debounce } from "./package-patches/just-debounce.js";
@@ -115,17 +114,14 @@ export class Model {
     });
 
     #disposables: Disposable[] = [];
-    readonly #askpass: Askpass;
     #globalState: Memento;
     #outputChannel: OutputChannel;
 
     constructor(
         readonly git: Git,
-        askpass: Askpass,
         globalState: Memento,
         outputChannel: OutputChannel,
     ) {
-        this.#askpass = askpass;
         this.#globalState = globalState;
         this.#outputChannel = outputChannel;
         workspace.onDidChangeWorkspaceFolders(this.#onDidChangeWorkspaceFolders, this, this.#disposables);
@@ -540,10 +536,6 @@ export class Model {
         }
 
         return undefined;
-    }
-
-    registerCredentialsProvider(provider: CredentialsProvider): Disposable {
-        return this.#askpass.registerCredentialsProvider(provider);
     }
 
     dispose(): void {

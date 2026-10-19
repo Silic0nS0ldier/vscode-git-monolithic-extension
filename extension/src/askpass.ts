@@ -1,18 +1,15 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Disposable, type InputBoxOptions, type OutputChannel, Uri, window } from "vscode";
-import type { Credentials, CredentialsProvider } from "./api/git.js";
+import { type InputBoxOptions, type OutputChannel, window } from "vscode";
 import { createIPCServer, type IIPCHandler, type IIPCServer } from "./ipc/ipcServer.js";
 import * as config from "./util/config.js";
-import { EmptyDisposable, type IDisposable, toDisposable } from "./util/disposals.js";
+import { EmptyDisposable, type IDisposable } from "./util/disposals.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export class Askpass implements IIPCHandler {
     #disposable: IDisposable = EmptyDisposable;
-    #cache = new Map<string, Credentials>();
-    #credentialsProviders = new Set<CredentialsProvider>();
     #ipc?: IIPCServer;
 
     static async create(outputChannel: OutputChannel): Promise<Askpass> {
@@ -38,30 +35,7 @@ export class Askpass implements IIPCHandler {
             return "";
         }
 
-        const uri = Uri.parse(host);
-        const authority = uri.authority.replace(/^.*@/, "");
         const password = /password/i.test(request);
-        const cached = this.#cache.get(authority);
-
-        if (cached && password) {
-            this.#cache.delete(authority);
-            return cached.password;
-        }
-
-        if (!password) {
-            for (const credentialsProvider of this.#credentialsProviders) {
-                try {
-                    const credentials = await credentialsProvider.getCredentials(uri);
-
-                    if (credentials) {
-                        this.#cache.set(authority, credentials);
-                        setTimeout(() => this.#cache.delete(authority), 60_000);
-                        return credentials.username;
-                    }
-                } catch {}
-            }
-        }
-
         const options: InputBoxOptions = {
             ignoreFocusOut: true,
             password,
@@ -85,11 +59,6 @@ export class Askpass implements IIPCHandler {
             VSCODE_GIT_ASKPASS_MAIN: path.join(__dirname, "askpass-main.js"),
             VSCODE_GIT_ASKPASS_NODE: process.execPath,
         };
-    }
-
-    registerCredentialsProvider(provider: CredentialsProvider): Disposable {
-        this.#credentialsProviders.add(provider);
-        return toDisposable(() => this.#credentialsProviders.delete(provider));
     }
 
     dispose(): void {

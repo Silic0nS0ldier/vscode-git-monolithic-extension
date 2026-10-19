@@ -1,5 +1,3 @@
-import type { ProviderResult, Uri } from "vscode";
-
 export type ForcePushModeOptions = "Force" | "ForceWithLease";
 export const ForcePushMode: Record<ForcePushModeOptions, ForcePushModeOptions> = {
     Force: "Force",
@@ -93,15 +91,6 @@ export interface FetchOptions {
     all?: boolean;
     prune?: boolean;
     depth?: number;
-}
-
-export interface Credentials {
-    readonly username: string;
-    readonly password: string;
-}
-
-export interface CredentialsProvider {
-    getCredentials(host: Uri): ProviderResult<Credentials>;
 }
 
 export type APIState = "uninitialized" | "initialized";

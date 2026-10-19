@@ -195,7 +195,7 @@ async function createModel(
     };
     git.onOutput.addListener("log", onOutput);
 
-    const model = new Model(git, askpass, context.globalState, outputChannel);
+    const model = new Model(git, context.globalState, outputChannel);
     disposables.push(model);
 
     const onRepository = async (): Promise<void> =>
