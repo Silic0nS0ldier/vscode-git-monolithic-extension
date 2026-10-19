@@ -1,13 +1,5 @@
 import type { Disposable, Event, Uri } from "vscode";
-import type {
-    Branch,
-    BranchQuery,
-    CommitOptions,
-    FetchOptions,
-    ForcePushModeOptions,
-    Ref,
-    Remote,
-} from "../../api/git.js";
+import type { Branch, CommitOptions, FetchOptions, ForcePushModeOptions, Ref, Remote } from "../../api/git.js";
 import type { RefQuery } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
 import type { UpstreamScope } from "../../git/repository-class/fetch-targets.js";
@@ -25,12 +17,9 @@ export type AbstractRepository = {
     readonly getInputTemplate: () => Promise<string>;
     readonly headShortName: string | undefined;
     readonly add: (resources: Uri[], opts?: { update?: boolean }) => Promise<void>;
-    readonly addRemote: (name: string, url: string) => Promise<void>;
-    readonly apply: (patch: string, reverse?: boolean) => Promise<void>;
     readonly applyStash: (index?: number) => Promise<void>;
     /** A refresh the extension starts itself, which serves some lookups from cache; see `refresh`. */
     readonly autoRefresh: () => Promise<void>;
-    readonly blame: (path: string) => Promise<string>;
     readonly branch: (name: string, _checkout: boolean, _ref?: string) => Promise<void>;
     readonly buffer: (ref: string, filePath: string) => Promise<Buffer>;
     readonly checkIgnore: (filePaths: string[]) => Promise<Set<string>>;
@@ -52,10 +41,7 @@ export type AbstractRepository = {
     readonly fetchPrune: () => Promise<void>;
     readonly fetchUpstreams: (scope: UpstreamScope, options?: { silent?: boolean }) => Promise<void>;
     readonly findTrackingBranches: (upstreamRef: string) => Promise<Branch[]>;
-    readonly getBranch: (name: string) => Promise<Branch>;
-    readonly getBranches: (query: BranchQuery) => Promise<Ref[]>;
     readonly getCommit: (ref: string) => Promise<Commit>;
-    readonly getMergeBase: (ref1: string, ref2: string) => Promise<string>;
     readonly getObjectDetails: (
         ref: string,
         filePath: string,
@@ -63,7 +49,6 @@ export type AbstractRepository = {
     readonly getRefs: (opts?: RefQuery) => Promise<Ref[]>;
     readonly getStashes: () => Promise<Stash[]>;
     readonly getCommitTemplate: () => Promise<string>;
-    readonly hashObject: (data: string) => Promise<string>;
     readonly HEAD: Branch | undefined;
     readonly headLabel: string;
     readonly merge: (ref: string) => Promise<void>;
@@ -96,12 +81,10 @@ export type AbstractRepository = {
     readonly remotes: readonly Remote[];
     readonly removeRemote: (name: string) => Promise<void>;
     readonly renameBranch: (name: string) => Promise<void>;
-    readonly renameRemote: (name: string, newName: string) => Promise<void>;
     readonly reset: (treeish: string, hard?: boolean) => Promise<void>;
     readonly revert: (resources: Uri[]) => Promise<void>;
     readonly rm: (resources: Uri[]) => Promise<void>;
     readonly root: string;
-    readonly setBranchUpstream: (name: string, upstream: string) => Promise<void>;
     readonly sourceControlUI: SourceControlUIGroup;
     readonly stage: (resource: Uri, contents: string) => Promise<void>;
     readonly submodules: readonly Submodule[];

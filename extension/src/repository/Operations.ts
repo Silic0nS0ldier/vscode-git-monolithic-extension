@@ -2,23 +2,17 @@ import { UnreachableError } from "../util/unreachable-error.js";
 
 export function isReadOnly(operation: OperationOptions): boolean {
     switch (operation) {
-        case Operation.Blame:
         case Operation.CheckIgnore:
         case Operation.Diff:
         case Operation.FindTrackingBranches:
-        case Operation.GetBranch:
         case Operation.GetCommitTemplate:
         case Operation.GetObjectDetails:
         case Operation.Log:
         case Operation.LogFile:
-        case Operation.MergeBase:
         case Operation.Show:
-        case Operation.HashObject:
-        case Operation.GetBranches:
         case Operation.Refresh:
             return true;
         case Operation.Add:
-        case Operation.Apply:
         case Operation.Branch:
         case Operation.Checkout:
         case Operation.CheckoutTracking:
@@ -42,7 +36,6 @@ export function isReadOnly(operation: OperationOptions): boolean {
         case Operation.RenameBranch:
         case Operation.Reset:
         case Operation.RevertFiles:
-        case Operation.SetBranchUpstream:
         case Operation.Stage:
         case Operation.Tag:
         case Operation.Stash:
@@ -59,7 +52,6 @@ export function isReadOnly(operation: OperationOptions): boolean {
  */
 export function causesLargeWorkingTreeChanges(operation: OperationOptions): boolean {
     switch (operation) {
-        case Operation.Apply:
         case Operation.Checkout:
         case Operation.CheckoutTracking:
         case Operation.CherryPick:
@@ -76,7 +68,6 @@ export function causesLargeWorkingTreeChanges(operation: OperationOptions): bool
         case Operation.Sync:
             return true;
         case Operation.Add:
-        case Operation.Blame:
         case Operation.Branch:
         case Operation.CheckIgnore:
         case Operation.Commit:
@@ -86,22 +77,17 @@ export function causesLargeWorkingTreeChanges(operation: OperationOptions): bool
         case Operation.Diff:
         case Operation.Fetch:
         case Operation.FindTrackingBranches:
-        case Operation.GetBranch:
-        case Operation.GetBranches:
         case Operation.GetCommitTemplate:
         case Operation.GetObjectDetails:
-        case Operation.HashObject:
         case Operation.Ignore:
         case Operation.Log:
         case Operation.LogFile:
-        case Operation.MergeBase:
         case Operation.Move:
         case Operation.Push:
         case Operation.Refresh:
         case Operation.Remote:
         case Operation.Remove:
         case Operation.RenameBranch:
-        case Operation.SetBranchUpstream:
         case Operation.Show:
         case Operation.Stage:
         case Operation.Tag:
@@ -119,19 +105,13 @@ function shouldShowProgress(operation: OperationOptions): boolean {
         case Operation.GetObjectDetails:
         case Operation.Show:
             return false;
-        case Operation.Blame:
         case Operation.Diff:
         case Operation.FindTrackingBranches:
-        case Operation.GetBranch:
         case Operation.GetCommitTemplate:
         case Operation.Log:
         case Operation.LogFile:
-        case Operation.MergeBase:
-        case Operation.HashObject:
-        case Operation.GetBranches:
         case Operation.Refresh:
         case Operation.Add:
-        case Operation.Apply:
         case Operation.Branch:
         case Operation.Checkout:
         case Operation.CheckoutTracking:
@@ -154,7 +134,6 @@ function shouldShowProgress(operation: OperationOptions): boolean {
         case Operation.RenameBranch:
         case Operation.Reset:
         case Operation.RevertFiles:
-        case Operation.SetBranchUpstream:
         case Operation.Stage:
         case Operation.Tag:
         case Operation.Stash:
@@ -168,8 +147,6 @@ function shouldShowProgress(operation: OperationOptions): boolean {
 
 export type OperationOptions =
     | "Add"
-    | "Apply"
-    | "Blame"
     | "Branch"
     | "CheckIgnore"
     | "Checkout"
@@ -183,16 +160,12 @@ export type OperationOptions =
     | "Diff"
     | "Fetch"
     | "FindTrackingBranches"
-    | "GetBranch"
-    | "GetBranches"
     | "GetCommitTemplate"
     | "GetObjectDetails"
-    | "HashObject"
     | "Ignore"
     | "Log"
     | "LogFile"
     | "Merge"
-    | "MergeBase"
     | "Move"
     | "Pull"
     | "Push"
@@ -205,7 +178,6 @@ export type OperationOptions =
     | "RenameBranch"
     | "Reset"
     | "RevertFiles"
-    | "SetBranchUpstream"
     | "Show"
     | "Stage"
     | "Stash"
@@ -215,8 +187,6 @@ export type OperationOptions =
 
 export const Operation = {
     Add: "Add",
-    Apply: "Apply",
-    Blame: "Blame",
     Branch: "Branch",
     CheckIgnore: "CheckIgnore",
     Checkout: "Checkout",
@@ -230,16 +200,12 @@ export const Operation = {
     Diff: "Diff",
     Fetch: "Fetch",
     FindTrackingBranches: "FindTrackingBranches",
-    GetBranch: "GetBranch",
-    GetBranches: "GetBranches",
     GetCommitTemplate: "GetCommitTemplate",
     GetObjectDetails: "GetObjectDetails",
-    HashObject: "HashObject",
     Ignore: "Ignore",
     Log: "Log",
     LogFile: "LogFile",
     Merge: "Merge",
-    MergeBase: "MergeBase",
     Move: "Move",
     Pull: "Pull",
     Push: "Push",
@@ -252,7 +218,6 @@ export const Operation = {
     RenameBranch: "RenameBranch",
     Reset: "Reset",
     RevertFiles: "RevertFiles",
-    SetBranchUpstream: "SetBranchUpstream",
     Show: "Show",
     Stage: "Stage",
     Stash: "Stash",

@@ -39,7 +39,6 @@ import * as path from "node:path";
 import type { OutputChannel, Progress } from "vscode";
 import {
     type Branch,
-    type BranchQuery,
     type CommitOptions,
     ForcePushMode,
     type ForcePushModeOptions,
@@ -396,44 +395,12 @@ export class Repository {
         return unwrapOk(await lsFiles(this.#git._context, this.#repositoryRoot, sanitizePath(path)));
     }
 
-    async apply(patch: string, reverse?: boolean): Promise<void> {
-        const args = ["apply", patch];
-
-        if (reverse) {
-            args.push("-R");
-        }
-
-        try {
-            await this.exec(args);
-        } catch (err) {
-            if (err instanceof GitError && /patch does not apply/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.PatchDoesNotApply;
-            }
-
-            throw err;
-        }
-    }
-
     async diffWithHEAD(path: string): Promise<string> {
         return unwrapOk(await unstagedDiff(this.#git._context, this.#repositoryRoot, path));
     }
 
     async diffIndexWithHEAD(path: string): Promise<string> {
         return unwrapOk(await stagedDiff(this.#git._context, this.#repositoryRoot, path));
-    }
-
-    async getMergeBase(ref1: string, ref2: string): Promise<string> {
-        const args = ["merge-base", ref1, ref2];
-        const result = await this.exec(args);
-
-        return result.stdout.trim();
-    }
-
-    async hashObject(data: string): Promise<string> {
-        const args = ["hash-object", "-w", "--stdin"];
-        const result = await this.exec(args, { input: data });
-
-        return result.stdout.trim();
     }
 
     async add(paths: string[], opts?: { update?: boolean }): Promise<void> {
@@ -656,11 +623,6 @@ export class Repository {
         await this.exec(args);
     }
 
-    async setBranchUpstream(name: string, upstream: string): Promise<void> {
-        const args = ["branch", "--set-upstream-to", upstream, name];
-        await this.exec(args);
-    }
-
     async deleteRef(ref: string): Promise<void> {
         const args = ["update-ref", "-d", ref];
         await this.exec(args);
@@ -736,18 +698,8 @@ export class Repository {
         }
     }
 
-    async addRemote(name: string, url: string): Promise<void> {
-        const args = ["remote", "add", name, url];
-        await this.exec(args);
-    }
-
     async removeRemote(name: string): Promise<void> {
         const args = ["remote", "remove", name];
-        await this.exec(args);
-    }
-
-    async renameRemote(name: string, newName: string): Promise<void> {
-        const args = ["remote", "rename", name, newName];
         await this.exec(args);
     }
 
@@ -955,20 +907,6 @@ export class Repository {
     async cherryPick(commitHash: string): Promise<void> {
         const args = ["cherry-pick", commitHash];
         await this.exec(args);
-    }
-
-    async blame(path: string): Promise<string> {
-        try {
-            const args = ["blame", sanitizePath(path)];
-            const result = await this.exec(args);
-            return result.stdout.trim();
-        } catch (err) {
-            if (err instanceof GitError && /^fatal: no such path/.test(err.stderr || "")) {
-                err.gitErrorCode = GitErrorCodes.NoPathFound;
-            }
-
-            throw err;
-        }
     }
 
     async createStash(message?: string, includeUntracked?: boolean): Promise<void> {
@@ -1218,15 +1156,6 @@ export class Repository {
             type: RefType.Head,
             upstream: detail.upstream,
         };
-    }
-
-    async getBranches(query: BranchQuery): Promise<Ref[]> {
-        const refs = await this.getRefs({
-            contains: query.contains,
-            count: query.count,
-            glob: query.pattern ? `refs/${query.pattern}` : undefined,
-        });
-        return refs.filter(value => (value.type !== RefType.Tag) && (query.remote || !value.remote));
     }
 
     async getSquashMessage(): Promise<string | undefined> {
