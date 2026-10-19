@@ -215,7 +215,7 @@ importers:
         specifier: npm:typescript@^7.0.2
         version: typescript@7.0.2
       renovate:
-        specifier: ^44.164.7
+        specifier: ^44.164.9
         version: 44.166.0(supports-color@7.2.0)(typanion@3.14.0)
 
   .github/actions/bazel-hidden-lockfile:
