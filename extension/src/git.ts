@@ -62,7 +62,7 @@ import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
-import { getAllConfig, getConfig, setConfig } from "./repository/repository-class/config.js";
+import { getConfig } from "./repository/repository-class/config.js";
 import { splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
 
@@ -344,14 +344,6 @@ export class Repository {
 
     stream(args: string[], options: SpawnOptions = {}): cp.ChildProcess {
         return this.git.stream(this.#repositoryRoot, args, options);
-    }
-
-    async config(key: string, value: string): Promise<void> {
-        return await setConfig(this, key, value);
-    }
-
-    async getConfigs(): Promise<{ key: string; value: string }[]> {
-        return await getAllConfig(this);
     }
 
     async buffer(object: string): Promise<Buffer> {

@@ -42,7 +42,6 @@ import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
 import { clean as cleanImpl } from "./clean.js";
 import { commit as commitImpl } from "./commit.js";
-import { getConfig as getConfigImpl, getConfigs as getConfigsImpl, getGlobalConfig } from "./config.js";
 import { createRebaseCommitBox } from "./createRebaseCommitBox.js";
 import { createStateBox } from "./createStateBox.js";
 import { fetch as fetchImpl } from "./fetch.js";
@@ -225,7 +224,7 @@ export function createRepository(
             }
 
             // Its `.git/config` write may go unreported while the watcher is suspended.
-            if (operation === Operation.Config || operation === Operation.Remote) {
+            if (operation === Operation.Remote) {
                 invalidateConfigLookups();
             }
 
@@ -500,15 +499,6 @@ export function createRepository(
         getCommitTemplate() {
             return run(Operation.GetCommitTemplate, async () => repository.getCommitTemplate());
         },
-        getConfig(key) {
-            return getConfigImpl(repository, key);
-        },
-        getConfigs() {
-            return getConfigsImpl(run, repository);
-        },
-        getGlobalConfig(key) {
-            return getGlobalConfig(repository, key);
-        },
         getInputTemplate() {
             return inputTemplate.get();
         },
@@ -683,9 +673,6 @@ export function createRepository(
         root: repoRoot,
         setBranchUpstream(name, upstream) {
             return run(Operation.SetBranchUpstream, () => repository.setBranchUpstream(name, upstream));
-        },
-        setConfig(key, value) {
-            return run(Operation.Config, () => repository.config(key, value));
         },
         sourceControlUI,
         stage(resource, contents) {

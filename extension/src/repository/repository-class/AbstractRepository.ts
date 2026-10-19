@@ -55,9 +55,6 @@ export type AbstractRepository = {
     readonly getBranch: (name: string) => Promise<Branch>;
     readonly getBranches: (query: BranchQuery) => Promise<Ref[]>;
     readonly getCommit: (ref: string) => Promise<Commit>;
-    readonly getConfig: (key: string) => Promise<string>;
-    readonly getConfigs: () => Promise<{ key: string; value: string }[]>;
-    readonly getGlobalConfig: (key: string) => Promise<string>;
     readonly getMergeBase: (ref1: string, ref2: string) => Promise<string>;
     readonly getObjectDetails: (
         ref: string,
@@ -105,7 +102,6 @@ export type AbstractRepository = {
     readonly rm: (resources: Uri[]) => Promise<void>;
     readonly root: string;
     readonly setBranchUpstream: (name: string, upstream: string) => Promise<void>;
-    readonly setConfig: (key: string, value: string) => Promise<void>;
     readonly sourceControlUI: SourceControlUIGroup;
     readonly stage: (resource: Uri, contents: string) => Promise<void>;
     readonly submodules: readonly Submodule[];
