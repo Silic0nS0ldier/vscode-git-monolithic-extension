@@ -29,6 +29,12 @@ if [[ "$trust" == "untrusted" ]]; then
     trust_args=()
 fi
 
+# `--test_env=ITEST_COVERAGE=1`: the extension host inherits this (the server strips
+# `NODE_OPTIONS`, but not this) and writes V8 coverage on exit. The harness collects it.
+if [[ "${ITEST_COVERAGE:-}" == "1" ]]; then
+    export NODE_V8_COVERAGE="${TEST_TMPDIR:-/tmp}/v8-coverage"
+fi
+
 # The extension under test is opt-in: it stays dormant while VS Code's builtin git
 # extension is enabled, so without this the test would drive the builtin instead.
 # Disabling AI features keeps the workbench from spawning an agent host process.
