@@ -36,7 +36,6 @@ ts_project(
         ":node_modules/just-debounce",
         ":node_modules/monolithic-git-interop",
         ":node_modules/onetime",
-        ":node_modules/throat",
         ":node_modules/watcher",
     ],
 )

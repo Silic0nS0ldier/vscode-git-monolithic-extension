@@ -63,7 +63,7 @@ TypeScript (all packages extend the root [tsconfig.json](tsconfig.json), which i
 - `packages/git` **never throws from public API** — it returns `Result` tuples from
   [packages/git/src/func-result.ts](packages/git/src/func-result.ts); use `isOk`/`isErr`/`unwrap`.
   Typed error nesting stays ≤1 level deep (TS performance). Read `CODE_STYLE.md` before touching it.
-- Import `debounce`/`throat` from [extension/src/package-patches/](extension/src/package-patches),
+- Import `debounce` from [extension/src/package-patches/](extension/src/package-patches),
   never from the package directly (CJS/ESM interop shims).
 - Runtime strings go through `i18n.Translations.*` in
   [extension/src/i18n/l10n.ts](extension/src/i18n/l10n.ts); only manifest `%key%` strings live in
