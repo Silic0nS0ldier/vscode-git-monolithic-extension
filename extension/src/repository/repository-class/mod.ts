@@ -38,6 +38,7 @@ import { RepositoryState, type RepositoryStateOptions } from "../RepositoryState
 import { retryRun } from "../retryRun.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 import { buffer as bufferImpl } from "./buffer.js";
+import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
 import { clean as cleanImpl } from "./clean.js";
 import { commit as commitImpl } from "./commit.js";
@@ -369,9 +370,14 @@ export function createRepository(
     ): Promise<T> {
         return remoteOperations.schedule({ key: JSON.stringify(key), signal }, task);
     }
+    // Asked before queuing (from the remote refs fetched so far) so the dialog never holds up other remote operations.
+    const confirmPullIfMaybeRebased = () => checkIfMaybeRebased(run, repository, HEAD.get()?.name);
     const branchKey = (head: Branch | undefined) => [head?.name, head?.upstream?.remote, head?.upstream?.name];
-    const syncScheduled = (head: Branch, rebase: boolean) =>
-        withSyncCancellation(repoRoot, signal =>
+    const syncScheduled = async (head: Branch, rebase: boolean) => {
+        if (!(await confirmPullIfMaybeRebased())) {
+            return;
+        }
+        await withSyncCancellation(repoRoot, signal =>
             scheduleRemote(
                 [rebase ? "syncRebase" : "sync", ...branchKey(head)],
                 taskSignal =>
@@ -389,6 +395,7 @@ export function createRepository(
                     ),
                 signal,
             ));
+    };
 
     const finalRepository: AbstractRepository = {
         get HEAD() {
@@ -553,19 +560,24 @@ export function createRepository(
         popStash(index) {
             return run(Operation.Stash, () => repository.popStash(index));
         },
-        pull(head, unshallow) {
-            return scheduleRemote(
+        async pull(head, unshallow) {
+            if (!(await confirmPullIfMaybeRebased())) {
+                return;
+            }
+            await scheduleRemote(
                 ["pull", ...branchKey(head), unshallow],
-                () => pullImpl(run, repoRoot, repository, HEAD.get(), sourceControlUI, head, unshallow),
+                () => pullImpl(run, repoRoot, repository, sourceControlUI, head, unshallow),
             );
         },
-        pullFrom(rebase, remote, branch, unshallow) {
-            return scheduleRemote(["pullFrom", rebase, remote, branch, unshallow], () =>
+        async pullFrom(rebase, remote, branch, unshallow) {
+            if (!(await confirmPullIfMaybeRebased())) {
+                return;
+            }
+            await scheduleRemote(["pullFrom", rebase, remote, branch, unshallow], () =>
                 pullFromImpl(
                     run,
                     repoRoot,
                     repository,
-                    HEAD.get(),
                     sourceControlUI,
                     rebase,
                     remote,
@@ -573,10 +585,13 @@ export function createRepository(
                     unshallow,
                 ));
         },
-        pullWithRebase(head) {
-            return scheduleRemote(
+        async pullWithRebase(head) {
+            if (!(await confirmPullIfMaybeRebased())) {
+                return;
+            }
+            await scheduleRemote(
                 ["pullWithRebase", ...branchKey(head)],
-                () => pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, HEAD.get(), head),
+                () => pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, head),
             );
         },
         push(head, forcePushMode) {

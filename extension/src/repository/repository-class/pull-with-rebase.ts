@@ -6,14 +6,13 @@ import type { RunFn } from "./run.js";
 import { getUpstreamRemoteAndBranch } from "./upstream.js";
 
 export const pullWithRebase = (
-    run: RunFn<void> & RunFn<boolean>,
+    run: RunFn<void>,
     repoRoot: string,
     repository: Repository,
     sourceControlUI: SourceControlUIGroup,
-    HEAD: Branch | undefined,
     head: Branch | undefined,
 ) => {
     const { remote, branch } = getUpstreamRemoteAndBranch(head);
 
-    return pullFrom(run, repoRoot, repository, HEAD, sourceControlUI, true, remote, branch);
+    return pullFrom(run, repoRoot, repository, sourceControlUI, true, remote, branch);
 };
