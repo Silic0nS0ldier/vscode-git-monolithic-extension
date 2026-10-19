@@ -1,12 +1,11 @@
 import type { Branch, ForcePushModeOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";
-import { throttle } from "../../util/throttle.js";
 import { Operation } from "../Operations.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
 import { pushInternal } from "./push-internal.js";
 import type { RunFn } from "./run.js";
 
-export const push = throttle(1, async (
+export const push = async (
     run: RunFn<void>,
     repository: Repository,
     finalRepository: AbstractRepository,
@@ -34,4 +33,4 @@ export const push = throttle(1, async (
                 forcePushMode,
             ),
     );
-});
+};

@@ -10,7 +10,7 @@ import {
     window,
     workspace,
 } from "vscode";
-import { type Branch, GitErrorCodes, type Remote } from "../../api/git.js";
+import { type Branch, type ForcePushModeOptions, GitErrorCodes, type Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import type { Repository as BaseRepository } from "../../git.js";
 import { GitError } from "../../git/error.js";
@@ -21,10 +21,10 @@ import { create as createSourceControlUI } from "../../ui/source-control.js";
 import { toGitUri } from "../../uri.js";
 import { createBox } from "../../util/box.js";
 import { createCachedLookup } from "../../util/cached-lookup.js";
+import { coalesce } from "../../util/coalesce.js";
 import * as config from "../../util/config.js";
 import { dispose } from "../../util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "../../util/events.js";
-import { throttle } from "../../util/throttle.js";
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
@@ -181,7 +181,7 @@ export function createRepository(
         disposables,
     );
 
-    const updateModelState = throttle(1, async () => {
+    const updateModelState = coalesce(async () => {
         return updateModelStateImpl(
             repository,
             HEAD,
@@ -251,11 +251,9 @@ export function createRepository(
         }
     }
 
-    // TODO This should fire on first hit, then again on leading edge if there is another call
-    const runRefresh = throttle(1, () => run<void>(Operation.Refresh));
+    const runRefresh = coalesce(() => run<void>(Operation.Refresh));
 
-    // TODO This should fire on first hit, then again on leading edge if there is another call
-    const autoRefreshWhenIdle = throttle(1, async () => {
+    const autoRefreshWhenIdle = coalesce(async () => {
         await whenIdleAndFocused();
         await runRefresh();
         const cooldown = config.autoRefreshCooldown();
@@ -429,11 +427,10 @@ export function createRepository(
         fetch(options) {
             return fetchImpl(repoRoot, run, repository, options);
         },
-        fetchAll: throttle(1, () => fetchImpl(repoRoot, run, repository, { all: true })),
-        fetchDefault: throttle(1, (options = {}) => fetchImpl(repoRoot, run, repository, { silent: options.silent })),
-        fetchPrune: throttle(1, () => fetchImpl(repoRoot, run, repository, { prune: true })),
-        fetchUpstreams: throttle(
-            1,
+        fetchAll: coalesce(() => fetchImpl(repoRoot, run, repository, { all: true })),
+        fetchDefault: coalesce((options = {}) => fetchImpl(repoRoot, run, repository, { silent: options.silent })),
+        fetchPrune: coalesce(() => fetchImpl(repoRoot, run, repository, { prune: true })),
+        fetchUpstreams: coalesce(
             (scope, options = {}) => run(Operation.Fetch, () => repository.fetchUpstreams(scope, options)),
         ),
         findTrackingBranches(upstreamRef) {
@@ -511,9 +508,9 @@ export function createRepository(
         popStash(index) {
             return run(Operation.Stash, () => repository.popStash(index));
         },
-        pull(head, unshallow) {
-            return pullImpl(run, repoRoot, repository, HEAD.get(), sourceControlUI, head, unshallow);
-        },
+        pull: coalesce((head?: Branch, unshallow?: boolean) =>
+            pullImpl(run, repoRoot, repository, HEAD.get(), sourceControlUI, head, unshallow)
+        ),
         pullFrom(rebase, remote, branch, unshallow) {
             return pullFromImpl(
                 run,
@@ -527,12 +524,12 @@ export function createRepository(
                 unshallow,
             );
         },
-        pullWithRebase(head) {
-            return pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, HEAD.get(), head);
-        },
-        push(head, forcePushMode) {
-            return pushImpl(run, repository, finalRepository, head, forcePushMode);
-        },
+        pullWithRebase: coalesce((head: Branch | undefined) =>
+            pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, HEAD.get(), head)
+        ),
+        push: coalesce((head: Branch, forcePushMode?: ForcePushModeOptions) =>
+            pushImpl(run, repository, finalRepository, head, forcePushMode)
+        ),
         pushFollowTags(remote, forcePushMode) {
             return run(
                 Operation.Push,
@@ -627,8 +624,8 @@ export function createRepository(
         get submodules() {
             return submodules.get();
         },
-        sync(head) {
-            return syncImpl(
+        sync: coalesce((head: Branch) =>
+            syncImpl(
                 run,
                 repoRoot,
                 sourceControlUI,
@@ -637,13 +634,12 @@ export function createRepository(
                 remotes.get(),
                 finalRepository,
                 head,
-            );
-        },
+            )
+        ),
         get syncLabel() {
             return syncLabelImpl(HEAD.get(), remotes.get());
         },
-        syncRebase: throttle(
-            1,
+        syncRebase: coalesce(
             (head: Branch) =>
                 syncInternal(
                     run,

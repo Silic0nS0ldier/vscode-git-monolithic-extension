@@ -17,10 +17,10 @@ import type { Model, ModelChangeEvent, OriginalResourceChangeEvent } from "./mod
 import { debounce } from "./package-patches/just-debounce.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { fromGitUri, toGitUri } from "./uri.js";
+import { coalesce } from "./util/coalesce.js";
 import { EmptyDisposable } from "./util/disposals.js";
 import { eventToPromise, filterEvent } from "./util/events.js";
 import { isDescendant, pathEquals } from "./util/paths.js";
-import { throttle } from "./util/throttle.js";
 
 interface CacheRow {
     uri: Uri;
@@ -90,7 +90,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
         this.#onDidChangeFileEmitter.fire([{ type: FileChangeType.Changed, uri: gitUri }]);
     }
 
-    #fireChangeEvents = throttle(1, async () => {
+    #fireChangeEvents = coalesce(async () => {
         if (!window.state.focused) {
             const onDidFocusWindow = filterEvent(window.onDidChangeWindowState, e => e.focused);
             await eventToPromise(onDidFocusWindow);
