@@ -25,6 +25,7 @@ import { coalesce } from "../../util/coalesce.js";
 import * as config from "../../util/config.js";
 import { dispose } from "../../util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "../../util/events.js";
+import { createScheduler } from "../../util/scheduler.js";
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
@@ -357,6 +358,9 @@ export function createRepository(
     const onDidChangeOriginalResourceEmitter = new EventEmitter<Uri>();
     const onDidChangeOriginalResource = onDidChangeOriginalResourceEmitter.event;
 
+    // Remote operations (fetch, pull, push, sync) run one at a time so they don't contend for git's locks.
+    const remoteOperations = createScheduler();
+
     const finalRepository: AbstractRepository = {
         get HEAD() {
             return HEAD.get();
@@ -424,13 +428,13 @@ export function createRepository(
         dropStash(index) {
             return run(Operation.Stash, () => repository.dropStash(index));
         },
-        fetch(options) {
-            return fetchImpl(repoRoot, run, repository, options);
-        },
-        fetchAll: coalesce(() => fetchImpl(repoRoot, run, repository, { all: true })),
-        fetchDefault: coalesce((options = {}) => fetchImpl(repoRoot, run, repository, { silent: options.silent })),
-        fetchPrune: coalesce(() => fetchImpl(repoRoot, run, repository, { prune: true })),
-        fetchUpstreams: coalesce(
+        fetch: remoteOperations.exclusive(options => fetchImpl(repoRoot, run, repository, options)),
+        fetchAll: remoteOperations.coalesced(() => fetchImpl(repoRoot, run, repository, { all: true })),
+        fetchDefault: remoteOperations.coalesced((options = {}) =>
+            fetchImpl(repoRoot, run, repository, { silent: options.silent })
+        ),
+        fetchPrune: remoteOperations.coalesced(() => fetchImpl(repoRoot, run, repository, { prune: true })),
+        fetchUpstreams: remoteOperations.coalesced(
             (scope, options = {}) => run(Operation.Fetch, () => repository.fetchUpstreams(scope, options)),
         ),
         findTrackingBranches(upstreamRef) {
@@ -508,11 +512,11 @@ export function createRepository(
         popStash(index) {
             return run(Operation.Stash, () => repository.popStash(index));
         },
-        pull: coalesce((head?: Branch, unshallow?: boolean) =>
+        pull: remoteOperations.coalesced((head?: Branch, unshallow?: boolean) =>
             pullImpl(run, repoRoot, repository, HEAD.get(), sourceControlUI, head, unshallow)
         ),
-        pullFrom(rebase, remote, branch, unshallow) {
-            return pullFromImpl(
+        pullFrom: remoteOperations.exclusive((rebase, remote, branch, unshallow) =>
+            pullFromImpl(
                 run,
                 repoRoot,
                 repository,
@@ -522,16 +526,16 @@ export function createRepository(
                 remote,
                 branch,
                 unshallow,
-            );
-        },
-        pullWithRebase: coalesce((head: Branch | undefined) =>
+            )
+        ),
+        pullWithRebase: remoteOperations.coalesced((head: Branch | undefined) =>
             pullWithRebaseImpl(run, repoRoot, repository, sourceControlUI, HEAD.get(), head)
         ),
-        push: coalesce((head: Branch, forcePushMode?: ForcePushModeOptions) =>
+        push: remoteOperations.coalesced((head: Branch, forcePushMode?: ForcePushModeOptions) =>
             pushImpl(run, repository, finalRepository, head, forcePushMode)
         ),
-        pushFollowTags(remote, forcePushMode) {
-            return run(
+        pushFollowTags: remoteOperations.exclusive((remote, forcePushMode) =>
+            run(
                 Operation.Push,
                 () =>
                     pushInternal(
@@ -543,10 +547,10 @@ export function createRepository(
                         true,
                         forcePushMode,
                     ),
-            );
-        },
-        pushTags(remote, forcePushMode) {
-            return run(
+            )
+        ),
+        pushTags: remoteOperations.exclusive((remote, forcePushMode) =>
+            run(
                 Operation.Push,
                 () =>
                     pushInternal(
@@ -559,10 +563,10 @@ export function createRepository(
                         forcePushMode,
                         true,
                     ),
-            );
-        },
-        pushTo(remote, name, setUpstream = false, forcePushMode) {
-            return run(
+            )
+        ),
+        pushTo: remoteOperations.exclusive((remote, name, setUpstream = false, forcePushMode) =>
+            run(
                 Operation.Push,
                 () =>
                     pushInternal(
@@ -574,8 +578,8 @@ export function createRepository(
                         undefined,
                         forcePushMode,
                     ),
-            );
-        },
+            )
+        ),
         rebase(branch) {
             return run(Operation.Rebase, () => repository.rebase(branch));
         },
@@ -624,7 +628,7 @@ export function createRepository(
         get submodules() {
             return submodules.get();
         },
-        sync: coalesce((head: Branch) =>
+        sync: remoteOperations.coalesced((head: Branch) =>
             syncImpl(
                 run,
                 repoRoot,
@@ -639,7 +643,7 @@ export function createRepository(
         get syncLabel() {
             return syncLabelImpl(HEAD.get(), remotes.get());
         },
-        syncRebase: coalesce(
+        syncRebase: remoteOperations.coalesced(
             (head: Branch) =>
                 syncInternal(
                     run,
