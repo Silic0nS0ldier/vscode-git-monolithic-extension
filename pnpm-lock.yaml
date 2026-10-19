@@ -292,9 +292,6 @@ importers:
       onetime:
         specifier: ^8.0.0
         version: 8.0.0
-      throat:
-        specifier: ^6.0.2
-        version: 6.0.2
       watcher:
         specifier: ^2.3.1
         version: 2.3.1(patch_hash=aa7937374fa215a4c53d3c965a60db1da36cac88fabf716f76bb672746fc4983)
@@ -4194,9 +4191,6 @@ packages:
   textextensions@6.11.0:
     resolution: {integrity: sha512-tXJwSr9355kFJI3lbCkPpUH5cP8/M0GGy2xLO34aZCjMXBaK3SoPnZwr/oWmo1FdCnELcs4npdCIOFtq9W3ruQ==}
     engines: {node: '>=4'}
-
-  throat@6.0.2:
-    resolution: {integrity: sha512-WKexMoJj3vEuK0yFEapj8y64V0A6xcuPuK9Gt1d0R+dzCSJc0lHqQytAbSB4cDAK0dWh4T0E2ETkoLE2WZ41OQ==}
 
   time-zone@1.0.0:
     resolution: {integrity: sha512-TIsDdtKo6+XrPtiTm1ssmMngN1sAhyKnTO2kunQWqNPWIVvCm15Wmw4SWInwTVgJ5u/Tr04+8Ei9TNcw4x4ONA==}
@@ -8943,8 +8937,6 @@ snapshots:
   textextensions@6.11.0:
     dependencies:
       editions: 6.22.0
-
-  throat@6.0.2: {}
 
   time-zone@1.0.0: {}
 

@@ -25,7 +25,6 @@ import type { Askpass } from "./askpass.js";
 import type { Git } from "./git.js";
 import * as i18n from "./i18n/mod.js";
 import { debounce } from "./package-patches/just-debounce.js";
-import { throat } from "./package-patches/throat.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { isAbstractRepository } from "./repository/repository-class/isAbstractRepository.js";
 import { createRepository } from "./repository/repository-class/mod.js";
@@ -35,6 +34,7 @@ import * as config from "./util/config.js";
 import { dispose } from "./util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "./util/events.js";
 import { isDescendant, pathEquals } from "./util/paths.js";
+import { throttle } from "./util/throttle.js";
 
 class RepositoryPick implements QuickPickItem {
     get label(): string {
@@ -297,7 +297,7 @@ export class Model {
         }));
     }
 
-    openRepository = throat(1, async (repoPath: string) => {
+    openRepository = throttle(1, async (repoPath: string) => {
         if (this.getRepository(repoPath)) {
             return;
         }

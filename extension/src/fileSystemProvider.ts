@@ -15,12 +15,12 @@ import {
 } from "vscode";
 import type { Model, ModelChangeEvent, OriginalResourceChangeEvent } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
-import { throat } from "./package-patches/throat.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
 import { fromGitUri, toGitUri } from "./uri.js";
 import { EmptyDisposable } from "./util/disposals.js";
 import { eventToPromise, filterEvent } from "./util/events.js";
 import { isDescendant, pathEquals } from "./util/paths.js";
+import { throttle } from "./util/throttle.js";
 
 interface CacheRow {
     uri: Uri;
@@ -90,7 +90,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
         this.#onDidChangeFileEmitter.fire([{ type: FileChangeType.Changed, uri: gitUri }]);
     }
 
-    #fireChangeEvents = throat(1, async () => {
+    #fireChangeEvents = throttle(1, async () => {
         if (!window.state.focused) {
             const onDidFocusWindow = filterEvent(window.onDidChangeWindowState, e => e.focused);
             await eventToPromise(onDidFocusWindow);

@@ -16,7 +16,6 @@ import type { Repository as BaseRepository } from "../../git.js";
 import { GitError } from "../../git/error.js";
 import type { Submodule } from "../../git/Submodule.js";
 import * as i18n from "../../i18n/mod.js";
-import { throat } from "../../package-patches/throat.js";
 import { StatusBarCommands } from "../../statusbar.js";
 import { create as createSourceControlUI } from "../../ui/source-control.js";
 import { toGitUri } from "../../uri.js";
@@ -25,6 +24,7 @@ import { createCachedLookup } from "../../util/cached-lookup.js";
 import * as config from "../../util/config.js";
 import { dispose } from "../../util/disposals.js";
 import { anyEvent, eventToPromise, filterEvent } from "../../util/events.js";
+import { throttle } from "../../util/throttle.js";
 import { createDotGitWatcher } from "../../watch/dot-git-watcher.js";
 import { createWorkingTreeWatcher } from "../../watch/working-tree-watcher.js";
 import { FileEventLogger } from "../FileEventLogger.js";
@@ -181,7 +181,7 @@ export function createRepository(
         disposables,
     );
 
-    const updateModelState = throat(1, async () => {
+    const updateModelState = throttle(1, async () => {
         return updateModelStateImpl(
             repository,
             HEAD,
@@ -252,10 +252,10 @@ export function createRepository(
     }
 
     // TODO This should fire on first hit, then again on leading edge if there is another call
-    const runRefresh = throat(1, () => run<void>(Operation.Refresh));
+    const runRefresh = throttle(1, () => run<void>(Operation.Refresh));
 
     // TODO This should fire on first hit, then again on leading edge if there is another call
-    const autoRefreshWhenIdle = throat(1, async () => {
+    const autoRefreshWhenIdle = throttle(1, async () => {
         await whenIdleAndFocused();
         await runRefresh();
         const cooldown = config.autoRefreshCooldown();
@@ -429,10 +429,10 @@ export function createRepository(
         fetch(options) {
             return fetchImpl(repoRoot, run, repository, options);
         },
-        fetchAll: throat(1, () => fetchImpl(repoRoot, run, repository, { all: true })),
-        fetchDefault: throat(1, (options = {}) => fetchImpl(repoRoot, run, repository, { silent: options.silent })),
-        fetchPrune: throat(1, () => fetchImpl(repoRoot, run, repository, { prune: true })),
-        fetchUpstreams: throat(
+        fetchAll: throttle(1, () => fetchImpl(repoRoot, run, repository, { all: true })),
+        fetchDefault: throttle(1, (options = {}) => fetchImpl(repoRoot, run, repository, { silent: options.silent })),
+        fetchPrune: throttle(1, () => fetchImpl(repoRoot, run, repository, { prune: true })),
+        fetchUpstreams: throttle(
             1,
             (scope, options = {}) => run(Operation.Fetch, () => repository.fetchUpstreams(scope, options)),
         ),
@@ -642,7 +642,7 @@ export function createRepository(
         get syncLabel() {
             return syncLabelImpl(HEAD.get(), remotes.get());
         },
-        syncRebase: throat(
+        syncRebase: throttle(
             1,
             (head: Branch) =>
                 syncInternal(
