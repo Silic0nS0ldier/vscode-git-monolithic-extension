@@ -27,6 +27,15 @@ const SCENARIO_TIMEOUT_MS = 60_000;
 /** Lets the waits inside a scenario, which share its deadline, report before the scenario does. */
 const SCENARIO_GRACE_MS = 2_000;
 
+/** The coverage hook: closing the workbench, waiting for the extension host's dump, and writing the reports. */
+const COVERAGE_TIMEOUT_MS = 40_000;
+
+/**
+ * Kept back from {@link COVERAGE_TIMEOUT_MS} for mapping coverage to the sources and writing the
+ * reports (well under a second locally), so a missing dump reports itself before the hook times out.
+ */
+const COVERAGE_REPORT_MS = 10_000;
+
 /** Bazel's clock covers starting the services before this process, and stopping them after. */
 const SERVICE_OVERHEAD_MS = 30_000;
 
@@ -148,23 +157,26 @@ export async function connect(): Promise<Browser> {
 let workbench: Page | undefined;
 
 // Registered on import, so it runs ahead of each suite's own `after` closing the browser.
-after(async () => {
-    const dir = process.env["TEST_UNDECLARED_OUTPUTS_DIR"];
-    if (!COVERAGE_ENABLED || workbench === undefined || dir === undefined) {
-        return;
-    }
-    // Closing the workbench asks the extension host to deactivate and exit, which is when
-    // Node writes its coverage.
-    await workbench.close();
-    const rawDir = rawCoverageDir(testTmpDir());
-    const dumps = await pollUntil(
-        `the extension host to write its coverage to ${rawDir}`,
-        async () => await readExtensionDumps(rawDir),
-        hasExtensionHostDump,
-        ACTION_TIMEOUT_MS,
-    );
-    await writeCoverage(dumps, join(dir, "coverage"));
-}, { timeout: ACTION_TIMEOUT_MS + CAPTURE_GRACE_MS });
+if (COVERAGE_ENABLED) {
+    after(async () => {
+        const dir = process.env["TEST_UNDECLARED_OUTPUTS_DIR"];
+        if (workbench === undefined || dir === undefined) {
+            return;
+        }
+        const waitUntil = Date.now() + COVERAGE_TIMEOUT_MS - COVERAGE_REPORT_MS;
+        // Closing the workbench asks the extension host to deactivate and exit, which is when
+        // Node writes its coverage.
+        await workbench.close();
+        const rawDir = rawCoverageDir(testTmpDir());
+        const dumps = await pollUntil(
+            `the extension host to write its coverage to ${rawDir}`,
+            async () => await readExtensionDumps(rawDir),
+            hasExtensionHostDump,
+            waitUntil - Date.now(),
+        );
+        await writeCoverage(dumps, join(dir, "coverage"));
+    }, { timeout: COVERAGE_TIMEOUT_MS });
+}
 
 export async function openWorkbench(browser: Browser): Promise<Page> {
     const context = browser.contexts()[0] ?? await browser.newContext();

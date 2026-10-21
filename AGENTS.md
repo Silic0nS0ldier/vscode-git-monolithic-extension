@@ -112,8 +112,11 @@ Pass `--test_env=ITEST_SCREENSHOTS=1` to capture every scenario while authoring 
 
 Pass `--test_env=ITEST_COVERAGE=1` to collect V8 coverage of the extension into
 `test.outputs/coverage/`: one `coverage-*.json` per process that ran its code (the extension host,
-plus askpass if prompted), in the `NODE_V8_COVERAGE` format, of the shipped bundle, not mapped back
-to sources; and `summary.txt` (byte coverage and never-called functions).
+plus askpass if prompted), in the `NODE_V8_COVERAGE` format, of the shipped bundle; `summary.txt`
+(byte coverage and never-called functions of the bundle); and `sources/`, the same mapped back to
+the original sources (`index.html`, `lcov.info`, `coverage-final.json`, `summary.txt`). The mapping
+uses the hidden source maps `rollup_bundle` writes to `bundle_/sourcemaps/`, which embed the sources
+and never reach the VSIX.
 
 `openWorkbench` returns only once the repository's first status refresh has landed, so scenarios
 never absorb activation time. Every harness wait (`pollUntil`, Playwright's default timeout, each

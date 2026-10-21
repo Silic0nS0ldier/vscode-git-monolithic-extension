@@ -4,11 +4,16 @@
  * `code-server.sh` sets `NODE_V8_COVERAGE`, which the server passes on to the extension
  * host, so V8 counts from before the extension loads. Node writes the counts out when the
  * process exits normally, which the extension host does once the workbench closes. Coverage
- * is of the bundle as shipped; nothing here maps it back to the TypeScript sources.
+ * is of the bundle as shipped, and is then mapped back to the original sources through the
+ * bundle's source maps, which are built alongside it but left out of the VSIX.
  */
+import istanbulCoverage from "istanbul-lib-coverage";
+import istanbulReport from "istanbul-lib-report";
+import istanbulReports from "istanbul-reports";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import v8ToIstanbul from "v8-to-istanbul";
 
 /** `--test_env=ITEST_COVERAGE=1` collects coverage of the extension host. */
 export const COVERAGE_ENABLED = process.env["ITEST_COVERAGE"] === "1";
@@ -26,6 +31,14 @@ interface FunctionCoverage {
     functionName: string;
     ranges: CoverageRange[];
     isBlockCoverage: boolean;
+}
+
+interface SourceMap {
+    version: 3;
+    mappings: string;
+    names: string[];
+    sources: string[];
+    sourcesContent: (string | null)[];
 }
 
 interface ScriptCoverage {
@@ -75,10 +88,16 @@ export function hasExtensionHostDump(dumps: Dumps): boolean {
 }
 
 /**
- * Writes every dump to `outDir`, one file per process, plus a summary. Other processes
- * running the extension's code, such as askpass, inherit `NODE_V8_COVERAGE` too.
+ * Writes every dump to `outDir`, one file per process, plus a summary, then the same
+ * mapped back to the original sources in `outDir/sources`. Other processes running the
+ * extension's code, such as askpass, inherit `NODE_V8_COVERAGE` too.
  */
 export async function writeCoverage(dumps: Dumps, outDir: string): Promise<void> {
+    await writeBundleCoverage(dumps, outDir);
+    await writeSourceCoverage(dumps, join(outDir, "sources"));
+}
+
+async function writeBundleCoverage(dumps: Dumps, outDir: string): Promise<void> {
     await mkdir(outDir, { recursive: true });
     const summaries: string[] = [];
     for (const [file, scripts] of dumps) {
@@ -90,6 +109,91 @@ export async function writeCoverage(dumps: Dumps, outDir: string): Promise<void>
         );
     }
     await writeFile(join(outDir, "summary.txt"), summaries.join("\n"));
+}
+
+/**
+ * The bundle as built, which the test depends on for its source maps (`sourcemaps/`
+ * mirrors the bundle's layout). `ITEST_BUNDLE` lists the bundle's outputs as runfiles.
+ */
+function bundleDir(): string {
+    const runfiles = process.env["JS_BINARY__RUNFILES"] ?? process.env["RUNFILES_DIR"];
+    const sourcemaps = (process.env["ITEST_BUNDLE"] ?? "").split(" ").find(path => path.endsWith("/sourcemaps"));
+    if (runfiles === undefined || sourcemaps === undefined) {
+        throw new Error("ITEST_BUNDLE or the runfiles directory is unset; run this via the service_test target");
+    }
+    return dirname(join(runfiles, sourcemaps));
+}
+
+/** Where a script sits in the bundle, e.g. `main.js` or `chunks/<name>.js`. */
+function bundlePath(url: string): string {
+    const path = url.slice(url.indexOf(EXTENSION_DIR) + 1);
+    // `<publisher>.<name>-<version>/src/<bundle path>`
+    return path.split("/").slice(2).join("/");
+}
+
+/**
+ * Maps every dump through the bundle's source maps and writes istanbul reports: `index.html`,
+ * `lcov.info`, `coverage-final.json` and `summary.txt`. Sources are named relative to the
+ * repository (npm packages as `node_modules/<package>/...`), and their text comes from the
+ * maps, which embed it.
+ */
+async function writeSourceCoverage(dumps: Dumps, outDir: string): Promise<void> {
+    const bundle = bundleDir();
+    const coverageMap = istanbulCoverage.createCoverageMap();
+    const sourceText = new Map<string, string>();
+
+    for (const scripts of dumps.values()) {
+        for (const script of scripts) {
+            const path = bundlePath(script.url);
+            const source = await readFile(fileURLToPath(script.url), "utf8");
+            if (source !== await readFile(join(bundle, path), "utf8")) {
+                throw new Error(`The installed ${path} differs from the bundle its source maps were built with`);
+            }
+            const map = JSON.parse(await readFile(join(bundle, "sourcemaps", `${path}.map`), "utf8")) as SourceMap;
+            // A source whose text the map lacks still gets an (empty) entry, rather than
+            // being looked for on disk.
+            map.sourcesContent = map.sources.map((name, index) => {
+                const text = map.sourcesContent[index] ?? "";
+                sourceText.set(name, text);
+                return text;
+            });
+
+            // Sources resolve against the script's directory. Placing the script at `/`, which
+            // is never read since its source is given, keeps their names once `/` is stripped.
+            const converter = v8ToIstanbul("/bundle.js", 0, {
+                source,
+                originalSource: "",
+                sourceMap: { sourcemap: map },
+            });
+            await converter.load();
+            converter.applyCoverage(script.functions);
+            coverageMap.merge(
+                Object.fromEntries(
+                    Object.entries(converter.toIstanbul()).map(([file, data]) => {
+                        const name = relative("/", file);
+                        return [name, { ...data, path: name }];
+                    }),
+                ),
+            );
+        }
+    }
+
+    await mkdir(outDir, { recursive: true });
+    const context = istanbulReport.createContext({
+        dir: outDir,
+        coverageMap,
+        sourceFinder: (path: string) => sourceText.get(path) ?? "",
+    });
+    for (
+        const report of [
+            istanbulReports.create("html"),
+            istanbulReports.create("lcovonly"),
+            istanbulReports.create("json"),
+            istanbulReports.create("text", { file: "summary.txt" }),
+        ]
+    ) {
+        report.execute(context);
+    }
 }
 
 /**

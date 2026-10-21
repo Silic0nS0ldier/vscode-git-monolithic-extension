@@ -37,6 +37,8 @@ def _rollup_bundle(name, srcs, entry_points, external_modules, **kwargs):
         out_dirs = [
             "%s_/chunks" % name,
             "%s_/assets" % name,
+            # Kept apart so packaging the JS does not pick them up.
+            "%s_/sourcemaps" % name,
         ],
         chdir = native.package_name(),
         mnemonic = "RollupBundle",
@@ -67,6 +69,8 @@ rollup_bundle = macro(
     },
     doc = """
         Create a JS bundle using an opinionated Rollup configuration.
+        Source maps are written to `<name>_/sourcemaps` without a `sourceMappingURL`
+        comment, and follow those of the inputs back to their original sources.
         Circular dependency warnings wholly within node_modules are suppressed;
         cycles involving project sources and other warnings remain visible.
     """,

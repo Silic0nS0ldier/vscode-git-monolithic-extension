@@ -2,7 +2,9 @@ import commonjs__ from "@rollup/plugin-commonjs";
 import json__ from "@rollup/plugin-json";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { cli } from "cleye";
+import * as path from "node:path";
 import { rollup } from "rollup";
+import sourcemaps from "rollup-plugin-sourcemaps2";
 import { nodeBuiltinPrefixPlugin } from "./node-builtin-prefix-plugin.js";
 import { typescriptHelperWarningsPlugin } from "./typescript-helper-warnings-plugin.js";
 import { isDependencyCycle } from "./warnings.js";
@@ -65,6 +67,9 @@ const bundle = await (async () => {
                 nodeResolve(),
                 commonjs(),
                 json(),
+                // Follows the inputs' own source maps (e.g. from `tsc`). Last among the loaders,
+                // since it loads every file it matches.
+                sourcemaps({ include: /\.[cm]?js$/ }),
                 typescriptHelperWarningsPlugin(),
             ],
             external: externalModules,
@@ -86,13 +91,36 @@ const bundle = await (async () => {
     }
 })();
 
+function entryFileNames(chunkInfo: { name: string }): string {
+    return chunkInfo.name.replace("dist/", "") + ".js";
+}
+
+/**
+ * Sources are named by where they sit in Bazel's output tree (e.g. `extension/src/main.ts`),
+ * rather than relative to the bundle, and npm packages by their package name, not their
+ * location in the store.
+ */
+function sourcemapPathTransform(relativeSourcePath: string, sourcemapPath: string): string {
+    const absolute = path.resolve(path.dirname(sourcemapPath), relativeSourcePath);
+    const binDir = process.env["BAZEL_BINDIR"];
+    const binIndex = binDir === undefined ? -1 : absolute.lastIndexOf(`/${binDir}/`);
+    const relative = binIndex === -1
+        ? path.relative(process.cwd(), absolute)
+        : absolute.slice(binIndex + binDir!.length + 2);
+    return relative.replace(/(^|\/)node_modules\/\.aspect_rules_js\/[^/]+\/node_modules\//g, "$1node_modules/");
+}
+
 try {
     await bundle.write({
         dir: outDir,
         // TODO Formalise this in the CLI API
-        entryFileNames: (chunkInfo) => {
-            return chunkInfo.name.replace("dist/", "") + ".js";
-        },
+        entryFileNames,
+        // Source maps leave the JS untouched and go to their own directory, mirroring the JS
+        // layout, so that packaging the JS never picks them up.
+        sourcemap: "hidden",
+        sourcemapFileNames: (chunkInfo) =>
+            "sourcemaps/" + (chunkInfo.isEntry ? entryFileNames(chunkInfo) : "chunks/[name].js") + ".map",
+        sourcemapPathTransform,
         format: "esm",
         generatedCode: "es2015",
         // Bazel wants all outputs to be pre-declared, so chunks and assets

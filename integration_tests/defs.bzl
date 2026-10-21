@@ -50,8 +50,13 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         data = [
             package_json,
             lib,
+            # Its source maps map coverage (`ITEST_COVERAGE=1`) back to the sources.
+            "//extension:bundle",
         ],
         entry_point = entry_point,
+        env = {
+            "ITEST_BUNDLE": "$(rlocationpaths //extension:bundle)",
+        },
         node_options = [
             "--test-reporter=spec",
             "--test-reporter-destination=stdout",

@@ -25,6 +25,7 @@ ts_project(
     declaration = True,
     out_dir = "dist",
     root_dir = "src",
+    source_map = True,
     tsconfig = ":tsconfig",
     deps = [
         ":node_modules/@types/node",
@@ -59,6 +60,7 @@ rollup_bundle(
     ],
     visibility = [
         "//extension/vsix:__pkg__",
+        "//integration_tests:__pkg__",
         "//integration_tests/electron_host:__pkg__",
     ],
 )
@@ -72,6 +74,7 @@ ts_project(
     declaration = True,
     out_dir = "dist",
     root_dir = "src",
+    source_map = True,
     tsconfig = ":tsconfig",
     deps = [
         ":lib",

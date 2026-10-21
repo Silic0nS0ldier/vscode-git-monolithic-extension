@@ -33,6 +33,7 @@ ts_project(
         ":node_modules/@types/node",
         ":node_modules/cleye",
         ":node_modules/rollup",
+        ":node_modules/rollup-plugin-sourcemaps2",
     ],
 )
 
