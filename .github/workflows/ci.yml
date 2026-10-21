@@ -18,7 +18,7 @@ jobs:
     permissions:
       contents: write
       actions: read
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       commit_hash: ${{ steps.get_commit.outputs.COMMIT_HASH }}
     steps:
@@ -56,7 +56,7 @@ jobs:
       - id: get_commit
         run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   build_and_test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     concurrency:
       group: build-and-test
       cancel-in-progress: false
@@ -136,7 +136,7 @@ jobs:
     # `renovate_tasks` is skipped on most runs, and a skip propagates down the whole `needs` chain
     # unless a status function is used, so `build_and_test` is checked explicitly.
     if: ${{ !cancelled() && needs.build_and_test.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: build_and_test
     permissions:
       contents: read
@@ -189,7 +189,7 @@ jobs:
       - uses: facebook/install-dotslash@v2
       - run: ./.devcontainer/dotslash/jscpd .
   dprint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ !cancelled() }}
     needs: renovate_tasks
     steps:
@@ -208,7 +208,7 @@ jobs:
     # GITHUB_TOKEN pushes do not trigger another run, and native checks stay on the original SHA.
     # Wait for job conclusions (including post steps), then mirror them onto the commit we tested.
     if: ${{ always() && needs.renovate_tasks.outputs.commit_hash != '' && needs.renovate_tasks.outputs.commit_hash != github.event.pull_request.head.sha }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [renovate_tasks, build_and_test, jscpd, dprint]
     permissions:
       checks: write
