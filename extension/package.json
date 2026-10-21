@@ -14,6 +14,7 @@
     "devDependencies": {
         "@types/node": "catalog:vscode",
         "@types/vscode": "1.140.0",
-        "ava": "catalog:"
+        "ava": "catalog:",
+        "monolithic-vscode-manifest": "workspace:^"
     }
 }

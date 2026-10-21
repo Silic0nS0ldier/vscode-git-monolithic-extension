@@ -14,7 +14,16 @@ exports_files(
 js_library(
     name = "manifest",
     srcs = ["package.json"],
-    visibility = ["//integration_tests:__pkg__"],
+    visibility = [
+        "//extension:__pkg__",
+        "//integration_tests:__pkg__",
+    ],
+)
+
+js_library(
+    name = "nls",
+    srcs = ["package.nls.json"],
+    visibility = ["//extension:__pkg__"],
 )
 
 # Copy bundled sources to src/

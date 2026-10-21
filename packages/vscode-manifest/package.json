@@ -1,0 +1,23 @@
+{
+    "private": true,
+    "name": "monolithic-vscode-manifest",
+    "description": "Models a VSCode extension manifest and the code that implements it, and checks they agree.",
+    "version": "0.0.0",
+    "type": "module",
+    "exports": {
+        "./*": {
+            "import": "./dist/*.js",
+            "types": "./dist/*.d.ts"
+        }
+    },
+    "devDependencies": {
+        "@types/node": "catalog:",
+        "ava": "catalog:"
+    },
+    "dependencies": {
+        "typescript": "npm:@typescript/typescript6@^6.0.2"
+    },
+    "scripts": {
+        "prepare": "sh ../bazelify-dist.sh :lib"
+    }
+}
