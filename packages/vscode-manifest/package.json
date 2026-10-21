@@ -15,7 +15,7 @@
         "ava": "catalog:"
     },
     "dependencies": {
-        "typescript": "npm:@typescript/typescript6@^6.0.2"
+        "typescript": "7.1.0-beta"
     },
     "scripts": {
         "prepare": "sh ../bazelify-dist.sh :lib"

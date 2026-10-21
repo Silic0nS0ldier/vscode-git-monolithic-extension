@@ -1,3 +1,4 @@
+import { API } from "typescript/sync";
 import type { Location } from "./location.js";
 import { type IdReference, type Manifest, parseManifest } from "./manifest.js";
 import { type NlsEntry, parseNls } from "./nls.js";
@@ -178,8 +179,9 @@ export interface ProjectInput {
  * Parses and checks a whole extension. Parse failures are reported as diagnostics rather than thrown.
  */
 export function checkProject({ manifest, nls, sources, options }: ProjectInput): Diagnostic[] {
-    const parsedManifest = parseManifest(manifest.file, manifest.text);
-    const parsedNls = parseNls(nls.file, nls.text);
+    using api = new API();
+    const parsedManifest = parseManifest(api, manifest.file, manifest.text);
+    const parsedNls = parseNls(api, nls.file, nls.text);
 
     const parseErrors: Diagnostic[] = [];
     for (const [file, error] of [[manifest.file, parsedManifest.error], [nls.file, parsedNls.error]] as const) {
@@ -194,7 +196,7 @@ export function checkProject({ manifest, nls, sources, options }: ProjectInput):
     return check({
         manifest: parsedManifest.manifest,
         nls: parsedNls.entries,
-        sources: sources.map(s => scanSource(s.file, s.text, options)),
+        sources: sources.map(s => scanSource(api, s.file, s.text, options)),
     });
 }
 

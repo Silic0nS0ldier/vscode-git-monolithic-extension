@@ -1,4 +1,17 @@
-import ts from "typescript";
+import { type CallExpression, type Expression, type Node, ScriptKind, SyntaxKind } from "typescript/ast";
+import {
+    isBinaryExpression,
+    isCallExpression,
+    isConditionalExpression,
+    isIdentifier,
+    isNoSubstitutionTemplateLiteral,
+    isParenthesizedExpression,
+    isPropertyAccessExpression,
+    isPropertyAssignment,
+    isStringLiteral,
+    isVariableDeclaration,
+} from "typescript/ast/is";
+import type { API } from "typescript/sync";
 import { createLocator, type Location } from "./location.js";
 import type { IdReference } from "./manifest.js";
 
@@ -29,68 +42,73 @@ export interface SourceCommands {
 
 const REGISTER_FUNCTIONS = new Set(["registerCommand", "registerTextEditorCommand"]);
 
-function calleeName(call: ts.CallExpression): string | undefined {
+function isStringLiteralLike(node: Node) {
+    return isStringLiteral(node) || isNoSubstitutionTemplateLiteral(node);
+}
+
+function calleeName(call: CallExpression): string | undefined {
     const callee = call.expression;
-    if (ts.isIdentifier(callee)) {
+    if (isIdentifier(callee)) {
         return callee.text;
     }
-    if (ts.isPropertyAccessExpression(callee)) {
+    if (isPropertyAccessExpression(callee)) {
         return callee.name.text;
     }
     return undefined;
 }
 
-function nameOf(node: ts.Node): string | undefined {
-    return ts.isIdentifier(node) || ts.isStringLiteral(node) ? node.text : undefined;
+function nameOf(node: Node): string | undefined {
+    return isIdentifier(node) || isStringLiteral(node) ? node.text : undefined;
 }
 
 /**
  * Finds command registrations and references in one TypeScript source file.
  * Only string literals are understood; ids built at runtime are invisible.
  */
-export function scanSource(file: string, text: string, options: SourceScanOptions): SourceCommands {
+export function scanSource(api: API, file: string, text: string, options: SourceScanOptions): SourceCommands {
     const { commandPrefix } = options;
     const idFactories = new Set(options.idFactories);
-    const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+    using retained = api.createSourceFile(file, text, { scriptKind: ScriptKind.TS });
+    const source = retained.sourceFile;
     const locate = createLocator(file, text);
-    const locateNode = (node: ts.Node): Location => locate(node.getStart(source), node.getEnd());
+    const locateNode = (node: Node): Location => locate(node.getStart(source), node.getEnd());
 
     const registrations: CommandRegistration[] = [];
     const references: IdReference[] = [];
 
-    function visit(node: ts.Node): void {
-        if (ts.isCallExpression(node)) {
+    function visit(node: Node): void {
+        if (isCallExpression(node)) {
             const name = calleeName(node);
             const arg = node.arguments[0];
             if (name === "executeCommand" && arg !== undefined) {
                 addReferences(arg);
-            } else if (name !== undefined && arg !== undefined && ts.isStringLiteralLike(arg)) {
+            } else if (name !== undefined && arg !== undefined && isStringLiteralLike(arg)) {
                 if (idFactories.has(name)) {
                     registrations.push({ id: commandPrefix + arg.text, location: locateNode(arg), kind: "id-factory" });
                 } else if (REGISTER_FUNCTIONS.has(name) && arg.text.startsWith(commandPrefix)) {
                     registrations.push({ id: arg.text, location: locateNode(arg), kind: "register-command" });
                 }
             }
-        } else if (ts.isPropertyAssignment(node) || ts.isVariableDeclaration(node)) {
+        } else if (isPropertyAssignment(node) || isVariableDeclaration(node)) {
             if (node.initializer && nameOf(node.name) === "command") {
                 addReferences(node.initializer);
             }
-        } else if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
-            const target = ts.isPropertyAccessExpression(node.left) ? node.left.name : node.left;
+        } else if (isBinaryExpression(node) && node.operatorToken.kind === SyntaxKind.EqualsToken) {
+            const target = isPropertyAccessExpression(node.left) ? node.left.name : node.left;
             if (nameOf(target) === "command") {
                 addReferences(node.right);
             }
         }
-        ts.forEachChild(node, visit);
+        node.forEachChild(visit);
     }
 
-    function addReferences(expression: ts.Expression): void {
-        if (ts.isParenthesizedExpression(expression)) {
+    function addReferences(expression: Expression): void {
+        if (isParenthesizedExpression(expression)) {
             addReferences(expression.expression);
-        } else if (ts.isConditionalExpression(expression)) {
+        } else if (isConditionalExpression(expression)) {
             addReferences(expression.whenTrue);
             addReferences(expression.whenFalse);
-        } else if (ts.isStringLiteralLike(expression) && expression.text.startsWith(commandPrefix)) {
+        } else if (isStringLiteralLike(expression) && expression.text.startsWith(commandPrefix)) {
             references.push({ id: expression.text, location: locateNode(expression) });
         }
     }

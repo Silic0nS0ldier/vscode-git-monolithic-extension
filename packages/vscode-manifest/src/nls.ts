@@ -1,3 +1,4 @@
+import type { API } from "typescript/sync";
 import { getProperties, type ParseError, parseJson } from "./json.js";
 import type { Location } from "./location.js";
 
@@ -14,8 +15,8 @@ export type NlsParseResult =
 /**
  * Parses a `package.nls.json` string table.
  */
-export function parseNls(file: string, text: string): NlsParseResult {
-    const parsed = parseJson(file, text);
+export function parseNls(api: API, file: string, text: string): NlsParseResult {
+    const parsed = parseJson(api, file, text);
     if (parsed.error) {
         return { error: parsed.error };
     }

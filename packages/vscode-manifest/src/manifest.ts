@@ -1,3 +1,4 @@
+import type { API } from "typescript/sync";
 import { getItems, getProperties, getProperty, getString, type JsonNode, type ParseError, parseJson } from "./json.js";
 import type { Location } from "./location.js";
 
@@ -46,8 +47,8 @@ const NLS_PLACEHOLDER = /^%(.+)%$/;
 /**
  * Parses an extension's `package.json` into the contributions that matter for command bookkeeping.
  */
-export function parseManifest(file: string, text: string): ManifestParseResult {
-    const parsed = parseJson(file, text);
+export function parseManifest(api: API, file: string, text: string): ManifestParseResult {
+    const parsed = parseJson(api, file, text);
     if (parsed.error) {
         return { error: parsed.error };
     }
