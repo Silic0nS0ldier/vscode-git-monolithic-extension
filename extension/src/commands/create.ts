@@ -24,6 +24,7 @@ export function createCommand(
     outputChannel: OutputChannel,
     commandErrors: CommandErrorOutputTextDocumentContentProvider,
     id: string,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- See the TODO on `ScmCommand.method`.
     method: Function,
     options: ScmCommandOptions,
 ): (...args: unknown[]) => Promise<unknown> {
