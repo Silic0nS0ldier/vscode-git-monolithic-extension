@@ -251,6 +251,9 @@ importers:
       rollup:
         specifier: ^4.64.10
         version: 4.64.10
+      rollup-plugin-sourcemaps2:
+        specifier: ^0.5.10
+        version: 0.5.10(@types/node@25.9.9)(rollup@4.64.10)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -308,10 +311,31 @@ importers:
 
   integration_tests:
     dependencies:
+      istanbul-lib-coverage:
+        specifier: ^3.2.2
+        version: 3.2.2
+      istanbul-lib-report:
+        specifier: ^3.0.1
+        version: 3.0.1
+      istanbul-reports:
+        specifier: ^3.2.0
+        version: 3.2.0
       playwright-core:
         specifier: ^1.64.1
         version: 1.64.1
+      v8-to-istanbul:
+        specifier: ^9.3.0
+        version: 9.3.0
     devDependencies:
+      '@types/istanbul-lib-coverage':
+        specifier: ^2.0.6
+        version: 2.0.6
+      '@types/istanbul-lib-report':
+        specifier: ^3.0.3
+        version: 3.0.3
+      '@types/istanbul-reports':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@types/node':
         specifier: 'catalog:'
         version: 25.9.9
@@ -694,8 +718,15 @@ packages:
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
 
+  '@jridgewell/resolve-uri@3.1.2':
+    resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
+    engines: {node: '>=6.0.0'}
+
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
+
+  '@jridgewell/trace-mapping@0.3.31':
+    resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
@@ -1448,6 +1479,15 @@ packages:
       rollup:
         optional: true
 
+  '@rollup/pluginutils@5.4.0':
+    resolution: {integrity: sha512-MfPp06CjRLfXQ3wY0R8vJDYBy/MvVcc9OulEfR0B8Iv9ko+GCNaRZ+EpJYFl27LhKsZK0o420sYCRHCjfCgeUg==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+
   '@rollup/rollup-android-arm-eabi@4.64.10':
     resolution: {integrity: sha512-oJ9ZfVIZjSjts0ZIYA48+5T0vurE5fQfX/Liad2U52Y6EN99x/OCdjGGuKMDP6jSk2i2lY6jwwA3X0drEc4PBg==}
     cpu: [arm]
@@ -1705,6 +1745,15 @@ packages:
 
   '@types/http-cache-semantics@4.2.0':
     resolution: {integrity: sha512-L3LgimLHXtGkWikKnsPg0/VFx9OGZaC+eN1u4r+OB1XRqH3meBIAVC2zr1WdMH+RHmnRkqliQAOHNJ/E0j/e0Q==}
+
+  '@types/istanbul-lib-coverage@2.0.6':
+    resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
+
+  '@types/istanbul-lib-report@3.0.3':
+    resolution: {integrity: sha512-NQn7AHQnk/RSLOxrBbGyJM/aVQ+pjj5HCgasFxc0K/KhoATfQ/47AyUl15I2yBUpihjmas+a+VJBOqecrFH+uA==}
+
+  '@types/istanbul-reports@3.0.4':
+    resolution: {integrity: sha512-pk2B1NWalF9toCRu6gjBzR69syFjP4Od8WRAX+0mmf9lAjCRicLOWc+ZrxZHx/0XRjotgkF9t6iaMJ+aXcOdZQ==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -2386,6 +2435,9 @@ packages:
     resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
     engines: {node: ^14.18.0 || >=16.10.0}
 
+  convert-source-map@2.0.0:
+    resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
+
   convert-to-spaces@2.0.1:
     resolution: {integrity: sha512-rcQ1bsQO9799wq24uE5AM2tAILy4gXGIK/njFWcVQkGNZ96edlpY+A7bjwvzjYvLDyzmG1MmMLZhpcsb+klNMQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -2966,6 +3018,9 @@ packages:
     resolution: {integrity: sha512-A91dYTeIB6NoXG+PxTQpCCDDnfHsW9kc06Lvpu1TEe9gnd6ZFeiBoRO9JvzEv6xK7EX97/dUE8g/vBMTqTS3CA==}
     engines: {node: '>=14'}
 
+  html-escaper@2.0.2:
+    resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
+
   http-cache-semantics@4.2.0:
     resolution: {integrity: sha512-dTxcvPXqPvXBQpq5dUr6mEMJX4oIEFv6bwom3FDwKRDsuIjjJGANqhBuoAn9c1RQJIdAKav33ED65E2ys+87QQ==}
 
@@ -3133,6 +3188,18 @@ packages:
   isexe@4.0.0:
     resolution: {integrity: sha512-FFUtZMpoZ8RqHS3XeXEmHWLA4thH+ZxCv2lOiPIn1Xc7CxrqhWzNSDzD+/chS/zbYezmiwWLdQC09JdQKmthOw==}
     engines: {node: '>=20'}
+
+  istanbul-lib-coverage@3.2.2:
+    resolution: {integrity: sha512-O8dpsF+r0WV/8MNRKfnmrtCWhuKjxrq2w+jpzBL5UZKTi2LeVWnWOmWRxFlesJONmc+wLAGvKQZEOanko0LFTg==}
+    engines: {node: '>=8'}
+
+  istanbul-lib-report@3.0.1:
+    resolution: {integrity: sha512-GCfE1mtsHGOELCU8e/Z7YWzpmybrx/+dSTfLrvY8qRmaY6zXTKWn6WQIjaAFw069icm6GVMNkgu0NzI4iPZUNw==}
+    engines: {node: '>=10'}
+
+  istanbul-reports@3.2.0:
+    resolution: {integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==}
+    engines: {node: '>=8'}
 
   istextorbinary@9.5.0:
     resolution: {integrity: sha512-5mbUj3SiZXCuRf9fT3ibzbSSEWiy63gFfksmGfdOzujPjW3k+z8WvIBxcJHBoQNlaZaiyB25deviif2+osLmLw==}
@@ -3320,6 +3387,10 @@ packages:
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
+
+  make-dir@4.0.0:
+    resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
+    engines: {node: '>=10'}
 
   markdown-it@15.0.2:
     resolution: {integrity: sha512-q4IGxMv56jCqT4OCRCADBoDP3LO4MhmTXjFbphHPXs4g3j9Xg5RDnxqN8IF/3vIWEU+VCnUq+7JUg/cfy2E6Qw==}
@@ -3982,6 +4053,16 @@ packages:
     resolution: {integrity: sha512-CHhPh+UNHD2GTXNYhPWLnU8ONHdI+5DI+4EYIAOaiD63rHeYlZvyh8P+in5999TTSFgUYuKUAjzRI4mdh/p+2A==}
     engines: {node: '>=8.0'}
 
+  rollup-plugin-sourcemaps2@0.5.10:
+    resolution: {integrity: sha512-e8/om9nmkaBNcCNqN3SPhyVQOmDiDJRgNeukDi8pFNjJR6XYn+iE0IkigaUQZ/bN4rVgjbKvH7DvD1IKq0e39g==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      '@types/node': '>=18.0.0'
+      rollup: '>=4'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   rollup@4.64.10:
     resolution: {integrity: sha512-8N52YH1B5JzBP+B1rkcBERG7rfRTGAM0RmUpyd76yyRfTljuG452GCNbVm6MPzs1+gXBha6Rw5/oHRFohOpfDg==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
@@ -4358,6 +4439,10 @@ packages:
   url-join@5.0.0:
     resolution: {integrity: sha512-n2huDr9h9yzd6exQVnH/jU5mr+Pfx08LRXXZhkLLetAMESRj+anQsTAh940iMrIetKAmry9coFuZQ2jY8/p3WA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  v8-to-istanbul@9.3.0:
+    resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
+    engines: {node: '>=10.12.0'}
 
   validate-npm-package-name@5.0.0:
     resolution: {integrity: sha512-YuKoXDAhBYxY7SfOKxHBDoSyENFeW5VvIIQp2TGQuit8gpK6MnWaQelBKxso72DoxTZfZdcP3W90LqpSkgPzLQ==}
@@ -5136,7 +5221,14 @@ snapshots:
     dependencies:
       minipass: 7.1.3
 
+  '@jridgewell/resolve-uri@3.1.2': {}
+
   '@jridgewell/sourcemap-codec@1.5.5': {}
+
+  '@jridgewell/trace-mapping@0.3.31':
+    dependencies:
+      '@jridgewell/resolve-uri': 3.1.2
+      '@jridgewell/sourcemap-codec': 1.5.5
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
@@ -5806,6 +5898,14 @@ snapshots:
     optionalDependencies:
       rollup: 4.64.10
 
+  '@rollup/pluginutils@5.4.0(rollup@4.64.10)':
+    dependencies:
+      '@types/estree': 1.0.9
+      estree-walker: 2.0.2
+      picomatch: 4.0.7
+    optionalDependencies:
+      rollup: 4.64.10
+
   '@rollup/rollup-android-arm-eabi@4.64.10':
     optional: true
 
@@ -6016,6 +6116,16 @@ snapshots:
   '@types/estree@1.0.9': {}
 
   '@types/http-cache-semantics@4.2.0': {}
+
+  '@types/istanbul-lib-coverage@2.0.6': {}
+
+  '@types/istanbul-lib-report@3.0.3':
+    dependencies:
+      '@types/istanbul-lib-coverage': 2.0.6
+
+  '@types/istanbul-reports@3.0.4':
+    dependencies:
+      '@types/istanbul-lib-report': 3.0.3
 
   '@types/json-schema@7.0.15': {}
 
@@ -6747,6 +6857,8 @@ snapshots:
 
   consola@3.4.2: {}
 
+  convert-source-map@2.0.0: {}
+
   convert-to-spaces@2.0.1: {}
 
   core-js-pure@3.50.0: {}
@@ -7408,6 +7520,8 @@ snapshots:
 
   hpagent@1.2.0: {}
 
+  html-escaper@2.0.2: {}
+
   http-cache-semantics@4.2.0: {}
 
   http-proxy-agent@7.0.2(supports-color@7.2.0):
@@ -7537,6 +7651,19 @@ snapshots:
 
   isexe@4.0.0:
     optional: true
+
+  istanbul-lib-coverage@3.2.2: {}
+
+  istanbul-lib-report@3.0.1:
+    dependencies:
+      istanbul-lib-coverage: 3.2.2
+      make-dir: 4.0.0
+      supports-color: 7.2.0
+
+  istanbul-reports@3.2.0:
+    dependencies:
+      html-escaper: 2.0.2
+      istanbul-lib-report: 3.0.1
 
   istextorbinary@9.5.0:
     dependencies:
@@ -7718,6 +7845,10 @@ snapshots:
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  make-dir@4.0.0:
+    dependencies:
+      semver: 7.8.5
 
   markdown-it@15.0.2:
     dependencies:
@@ -8703,6 +8834,13 @@ snapshots:
       semver-compare: 1.0.0
       sprintf-js: 1.1.3
 
+  rollup-plugin-sourcemaps2@0.5.10(@types/node@25.9.9)(rollup@4.64.10):
+    dependencies:
+      '@rollup/pluginutils': 5.4.0(rollup@4.64.10)
+      rollup: 4.64.10
+    optionalDependencies:
+      '@types/node': 25.9.9
+
   rollup@4.64.10:
     dependencies:
       '@types/estree': 1.0.9
@@ -9107,6 +9245,12 @@ snapshots:
   url-join@4.0.1: {}
 
   url-join@5.0.0: {}
+
+  v8-to-istanbul@9.3.0:
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      '@types/istanbul-lib-coverage': 2.0.6
+      convert-source-map: 2.0.0
 
   validate-npm-package-name@5.0.0:
     dependencies:

@@ -30,6 +30,7 @@ ts_project(
     declaration = True,
     out_dir = "dist",
     root_dir = "src",
+    source_map = True,
     tsconfig = ":tsconfig",
     deps = [
         ":node_modules/@types/node",
@@ -58,6 +59,7 @@ ts_project(
     declaration = True,
     out_dir = "dist",
     root_dir = "src",
+    source_map = True,
     tsconfig = ":tsconfig",
     deps = [
         ":lib",
@@ -82,6 +84,7 @@ ts_project(
     declaration = True,
     out_dir = "dist",
     root_dir = "src",
+    source_map = True,
     tsconfig = ":tsconfig",
     deps = [
         ":lib",
@@ -110,6 +113,7 @@ test_suite(
         declaration = True,
         out_dir = "dist",
         root_dir = "src",
+        source_map = True,
         tsconfig = ":tsconfig",
         deps = [
             ":lib",

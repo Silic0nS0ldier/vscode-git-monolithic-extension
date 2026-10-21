@@ -1,3 +1,8 @@
 {
-    "extends": "../../tsconfig.json"
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        // Self-contained source maps let coverage of the bundle be mapped back to the sources.
+        "inlineSources": true,
+        "sourceMap": true
+    }
 }

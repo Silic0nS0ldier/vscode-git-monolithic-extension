@@ -168,8 +168,15 @@ ts_project(
     root_dir = "src",
     tsconfig = ":tsconfig",
     deps = [
+        ":node_modules/@types/istanbul-lib-coverage",
+        ":node_modules/@types/istanbul-lib-report",
+        ":node_modules/@types/istanbul-reports",
         ":node_modules/@types/node",
+        ":node_modules/istanbul-lib-coverage",
+        ":node_modules/istanbul-lib-report",
+        ":node_modules/istanbul-reports",
         ":node_modules/playwright-core",
+        ":node_modules/v8-to-istanbul",
     ],
 )
 
