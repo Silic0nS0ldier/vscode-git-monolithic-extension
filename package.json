@@ -9,7 +9,7 @@
         "typescript-eslint": "^8.71.2"
     },
     "devDependencies": {
-        "@typescript/native": "npm:typescript@^7.0.2",
+        "@typescript/native": "npm:typescript@7.1.0-beta",
         "renovate": "^44.165.0"
     }
 }

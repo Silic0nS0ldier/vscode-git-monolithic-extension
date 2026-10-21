@@ -3,7 +3,9 @@
 Models a VSCode extension manifest (`package.json`), its `package.nls.json` string table, and the command
 registrations and references in the extension's TypeScript source, then checks that they agree.
 
-Everything is pure (text in, data out) and nothing throws; unparsable input becomes a `parse-error` diagnostic.
+Everything is text in, data out, and unparsable input becomes a `parse-error` diagnostic rather than an exception.
+Parsing uses the TypeScript 7.1 API (`typescript/sync` + `typescript/ast`), which runs the compiler out of process: the
+`parse*`/`scanSource` functions take an `API` instance, and `checkProject` creates (and disposes) one itself.
 Every declaration, reference and diagnostic carries a `Location` (file, UTF-16 offsets, 1-based line/column), so
 the same model can later back editor features such as go-to-definition, hover and completion for the manifest.
 
