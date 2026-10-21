@@ -113,6 +113,14 @@ interface ICloneOptions {
     readonly recursive?: boolean;
 }
 
+/** `git clone --progress` stages, each as `[pattern, offset, weight]` towards an overall percentage. */
+const CLONE_PROGRESS_STAGES: readonly (readonly [RegExp, number, number])[] = [
+    [/Counting objects:\s*(\d+)%/i, 0, 0.1],
+    [/Compressing objects:\s*(\d+)%/i, 10, 0.1],
+    [/Receiving objects:\s*(\d+)%/i, 20, 0.4],
+    [/Resolving deltas:\s*(\d+)%/i, 60, 0.4],
+];
+
 export class Git {
     readonly path: string;
     readonly userAgent: string;
@@ -150,7 +158,7 @@ export class Git {
     }
 
     async clone(url: string, options: ICloneOptions, abortSignal?: AbortSignal): Promise<string> {
-        const baseFolderName = decodeURI(url).replace(/[\/]+$/, "").replace(/^.*[\/\\]/, "").replace(/\.git$/, "")
+        const baseFolderName = decodeURI(url).replace(/\/+$/, "").replace(/^.*[/\\]/, "").replace(/\.git$/, "")
             || "repository";
 
         // Ensure the parent exists first
@@ -183,15 +191,12 @@ export class Git {
 
             const onLine = (line: string): void => {
                 // TODO Handle unchecked index access (deferred as currently misses silently degrade to `undefined`)
-                let match: [unknown, string] | null = null;
-                if (match = /Counting objects:\s*(\d+)%/i.exec(line) as [unknown, string] | null) {
-                    totalProgress = Math.floor(parseInt(match[1]) * 0.1);
-                } else if (match = /Compressing objects:\s*(\d+)%/i.exec(line) as [unknown, string] | null) {
-                    totalProgress = 10 + Math.floor(parseInt(match[1]) * 0.1);
-                } else if (match = /Receiving objects:\s*(\d+)%/i.exec(line) as [unknown, string] | null) {
-                    totalProgress = 20 + Math.floor(parseInt(match[1]) * 0.4);
-                } else if (match = /Resolving deltas:\s*(\d+)%/i.exec(line) as [unknown, string] | null) {
-                    totalProgress = 60 + Math.floor(parseInt(match[1]) * 0.4);
+                for (const [regex, offset, weight] of CLONE_PROGRESS_STAGES) {
+                    const match = regex.exec(line) as [unknown, string] | null;
+                    if (match) {
+                        totalProgress = offset + Math.floor(parseInt(match[1]) * weight);
+                        break;
+                    }
                 }
 
                 if (totalProgress !== previousProgress) {
@@ -217,7 +222,7 @@ export class Git {
         };
 
         try {
-            let command = ["clone", url.includes(" ") ? encodeURI(url) : url, folderPath, "--progress"];
+            const command = ["clone", url.includes(" ") ? encodeURI(url) : url, folderPath, "--progress"];
             if (options.recursive) {
                 command.push("--recursive");
             }
@@ -655,7 +660,7 @@ export class Repository {
     }
 
     async deleteTag(name: string): Promise<void> {
-        let args = ["tag", "-d", name];
+        const args = ["tag", "-d", name];
         await this.exec(args);
     }
 
@@ -1192,7 +1197,7 @@ export class Repository {
             // https://github.com/git/git/blob/3a0f269e7c82aa3a87323cb7ae04ac5f129f036b/path.c#L612
             const homedir = os.homedir();
             let templatePath = templateSetting
-                .replace(/^~([^\/]*)\//, (_, user) => `${user ? path.join(path.dirname(homedir), user) : homedir}/`);
+                .replace(/^~([^/]*)\//, (_, user) => `${user ? path.join(path.dirname(homedir), user) : homedir}/`);
 
             if (!path.isAbsolute(templatePath)) {
                 templatePath = path.join(this.#repositoryRoot, templatePath);

@@ -141,7 +141,7 @@ async function smartCommit(
         }
     }
 
-    let message = await getCommitMessage();
+    const message = await getCommitMessage();
 
     if (!message && !normalisedOpts.amend) {
         return false;
@@ -182,20 +182,17 @@ export async function commitWithAnyInput(
         let _message: string | undefined = message;
 
         if (!_message) {
-            let value: string | undefined = undefined;
-
             if (opts && opts.amend && repository.HEAD && repository.HEAD.commit) {
                 return undefined;
             }
 
             const branchName = repository.headShortName;
-            let placeHolder = i18n.Translations.commitMessage(branchName);
+            const placeHolder = i18n.Translations.commitMessage(branchName);
 
             _message = await window.showInputBox({
                 ignoreFocusOut: true,
                 placeHolder,
                 prompt: i18n.Translations.provideCommitMessage(),
-                value,
             });
         }
 

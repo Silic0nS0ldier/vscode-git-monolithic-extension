@@ -8,7 +8,7 @@ import { getSCMResource } from "../../../helpers.js";
 
 export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
     async function openHEADFile(arg?: Resource | Uri): Promise<void> {
-        let resource: Resource | undefined = undefined;
+        let resource: Resource | undefined;
         const preview = !(arg instanceof Resource);
 
         if (arg instanceof Resource) {

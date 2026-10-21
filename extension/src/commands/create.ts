@@ -141,11 +141,12 @@ async function handleError(
                 type = "warning";
                 options.modal = false;
                 break;
-            case GitErrorCodes.AuthenticationFailed:
+            case GitErrorCodes.AuthenticationFailed: {
                 const regex = /Authentication failed for '(.*)'/i;
                 const match = regex.exec(err.stderr || String(err));
                 message = i18n.Translations.authFailed(match?.[1]);
                 break;
+            }
             case GitErrorCodes.NoUserNameConfigured:
             case GitErrorCodes.NoUserEmailConfigured:
                 message = i18n.Translations.missingUserInfo();
@@ -158,7 +159,7 @@ async function handleError(
                         ),
                 );
                 break;
-            default:
+            default: {
                 const hint: string | undefined = (err.stderr || err.message || String(err))
                     .replace(/^error: /mi, "")
                     // TODO Ideally we don't target specific tools like Husky
@@ -168,6 +169,7 @@ async function handleError(
 
                 message = i18n.Translations.gitError(hint);
                 break;
+            }
         }
     }
 

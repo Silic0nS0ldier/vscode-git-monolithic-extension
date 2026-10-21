@@ -80,7 +80,7 @@ function getRightResource(resourceState: ResourceState, indexGroup: SourceContro
         case Status.MODIFIED:
         case Status.UNTRACKED:
         case Status.IGNORED:
-        case Status.INTENT_TO_ADD:
+        case Status.INTENT_TO_ADD: {
             const uriString = resourceState.resourceUri.toString();
             const [indexStatus] = indexGroup.resourceStates.get().filter(r =>
                 r.state.resourceUri.toString() === uriString
@@ -91,6 +91,7 @@ function getRightResource(resourceState: ResourceState, indexGroup: SourceContro
             }
 
             return resourceState.resourceUri;
+        }
 
         case Status.BOTH_ADDED:
         case Status.BOTH_MODIFIED:

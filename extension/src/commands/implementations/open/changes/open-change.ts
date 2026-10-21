@@ -14,7 +14,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
                 resources = [resource];
             }
         } else {
-            let resource: Resource | undefined = undefined;
+            let resource: Resource | undefined;
 
             if (arg instanceof Resource) {
                 resource = arg;

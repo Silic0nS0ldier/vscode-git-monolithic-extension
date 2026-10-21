@@ -97,7 +97,7 @@ export function getGitErrorCode(stderr: string): string | undefined {
         return GitErrorCodes.CantAccessRemote;
     } else if (/branch '.+' is not fully merged/.test(stderr)) {
         return GitErrorCodes.BranchNotFullyMerged;
-    } else if (/Couldn\'t find remote ref/.test(stderr)) {
+    } else if (/Couldn't find remote ref/.test(stderr)) {
         return GitErrorCodes.NoRemoteReference;
     } else if (/A branch named '.+' already exists/.test(stderr)) {
         return GitErrorCodes.BranchAlreadyExists;
