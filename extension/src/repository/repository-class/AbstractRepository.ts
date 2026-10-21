@@ -10,9 +10,10 @@ import type { OperationResult } from "../OperationResult.js";
 import type { OperationOptions } from "../Operations.js";
 import type { Operations } from "../Operations.js";
 import type { RepositoryStateOptions } from "../RepositoryState.js";
+import type { AbstractRepositorySymbol } from "./isAbstractRepository.js";
 
 export type AbstractRepository = {
-    readonly __type: Symbol;
+    readonly __type: typeof AbstractRepositorySymbol;
     readonly ignore: (files: Uri[]) => Promise<void>;
     readonly getInputTemplate: () => Promise<string>;
     readonly headShortName: string | undefined;
