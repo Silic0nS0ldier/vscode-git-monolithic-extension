@@ -10,6 +10,9 @@ export default defineConfig(
     eslint.configs.recommended,
     tseslint.configs.recommended,
     {
+        linterOptions: {
+            reportUnusedDisableDirectives: "error",
+        },
         rules: {
             // Mirror the exemptions of TypeScript's `noUnusedLocals`/`noUnusedParameters`.
             "@typescript-eslint/no-unused-vars": ["error", {
