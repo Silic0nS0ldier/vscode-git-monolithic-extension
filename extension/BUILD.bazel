@@ -80,6 +80,7 @@ ts_project(
         ":lib",
         ":node_modules/@types/node",
         ":node_modules/ava",
+        ":node_modules/monolithic-vscode-manifest",
     ],
 )
 
@@ -91,7 +92,10 @@ bin.ava_test(
     data = [
         "package.json",
         ":lib_tests",
-    ],
+        # Read by src/manifest.test.ts
+        "//extension/vsix:manifest",
+        "//extension/vsix:nls",
+    ] + glob(["src/**/*.ts"]),
 )
 
 eslint_test(

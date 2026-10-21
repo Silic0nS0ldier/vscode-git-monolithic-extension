@@ -19,6 +19,9 @@ packages/wasm  (Rust → wasm)  ──▶  packages/git  ──▶  extension  �
   dependency**. Subpath exports only.
 - `extension` — the extension source. `src/main.ts` only re-exports from `src/lifecycle/`.
 - `extension/vsix` — manifest, nls, assets. Bazel copies the rollup output in; no TS of its own.
+- `packages/vscode-manifest` — npm package `monolithic-vscode-manifest`. Models the manifest, nls
+  and command registrations/references in source (with locations), and checks they agree. Used
+  only by tests and tooling ([extension/src/manifest.test.ts](extension/src/manifest.test.ts)).
 - `build_defs` — custom Bazel rules (`rollup_bundle`, `vsix_package`, `rust_wasm_bindgen`,
   `node_bin`, `git_bin`, `lint`).
 - `integration_tests` — headless browser tests driving code-server.
@@ -93,6 +96,11 @@ Fork-specific naming (never use the upstream `git.` namespace):
    passed explicitly, there is no DI container.
 4. `extension/vsix/package.json`: `contributes.commands` + `contributes.menus` entries.
 5. `extension/vsix/package.nls.json`: `"command.<name>": "..."`.
+
+`//extension:tests` checks steps 1–5 agree (declared ⇔ registered, every command reachable, every
+reference and `%key%` resolves, no unused nls keys). It only sees string-literal ids. Pre-existing
+problems are listed in `KNOWN_ISSUES` in [extension/src/manifest.test.ts](extension/src/manifest.test.ts);
+remove an entry when fixing it (stale entries fail the test), never add one for new code.
 
 ## Tests
 
