@@ -36,7 +36,7 @@ export async function checkExecutableBitFromCommand(
     try {
         const permNum = from_str_radix(perm, 8);
         return ok(permHasExecutableBit(permNum));
-    } catch (e) {
+    } catch {
         return err(createError(ERROR_GENERIC, `Could not parse permission octal: "${perm}"`));
     }
 }

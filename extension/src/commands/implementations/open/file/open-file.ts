@@ -64,7 +64,7 @@ export async function openFile(
         let document;
         try {
             document = await workspace.openTextDocument(uri);
-        } catch (error) {
+        } catch {
             await commands.executeCommand("vscode.open", uri, {
                 ...opts,
                 override: arg instanceof Resource && arg.state.type === Status.BOTH_MODIFIED ? false : undefined,

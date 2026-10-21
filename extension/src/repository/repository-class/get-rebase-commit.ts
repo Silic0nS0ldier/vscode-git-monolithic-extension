@@ -18,7 +18,7 @@ export async function getRebaseCommit(
             return undefined;
         }
         return await repository.getCommit(rebaseHead.trim());
-    } catch (err) {
+    } catch {
         return undefined;
     }
 }

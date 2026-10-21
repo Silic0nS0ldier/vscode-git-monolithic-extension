@@ -9,4 +9,14 @@ import tseslint from "typescript-eslint";
 export default defineConfig(
     eslint.configs.recommended,
     tseslint.configs.recommended,
+    {
+        rules: {
+            // Mirror the exemptions of TypeScript's `noUnusedLocals`/`noUnusedParameters`.
+            "@typescript-eslint/no-unused-vars": ["error", {
+                argsIgnorePattern: "^_",
+                destructuredArrayIgnorePattern: "^_",
+                ignoreUsingDeclarations: true,
+            }],
+        },
+    },
 );
