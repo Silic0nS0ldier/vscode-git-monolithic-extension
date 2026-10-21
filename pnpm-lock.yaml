@@ -249,7 +249,7 @@ importers:
         specifier: 'catalog:'
         version: 2.7.0
       rollup:
-        specifier: ^4.64.9
+        specifier: ^4.64.10
         version: 4.64.10
     devDependencies:
       '@types/node':
