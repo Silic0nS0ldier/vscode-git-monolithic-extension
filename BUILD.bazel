@@ -28,6 +28,7 @@ js_library(
     visibility = ["//build_defs/lint:__pkg__"],
     deps = [
         ":node_modules/@eslint/js",
+        ":node_modules/eslint",
         ":node_modules/typescript-eslint",
     ],
 )
