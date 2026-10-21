@@ -270,17 +270,17 @@ export class Resource implements SourceControlResourceState {
     }
 
     get decorations(): SourceControlResourceDecorations {
-        const light = this.#useIcons ? { iconPath: getIconPath(this.#type, "light") } : undefined;
-        const dark = this.#useIcons ? { iconPath: getIconPath(this.#type, "dark") } : undefined;
-        const tooltip = getStatusText(this.#type);
-        const strikeThrough = getStateStrikethrough(this.#type);
+        const type = this.state.type;
+        const light = this.#useIcons ? { iconPath: getIconPath(type, "light") } : undefined;
+        const dark = this.#useIcons ? { iconPath: getIconPath(type, "dark") } : undefined;
+        const tooltip = getStatusText(type);
+        const strikeThrough = getStateStrikethrough(type);
         const faded = false;
         return { dark, faded, light, strikeThrough, tooltip };
     }
 
     #normalisedResourceUri: () => Uri;
     #repoRoot: string;
-    #type: StatusOptions;
     #useIcons: boolean;
 
     constructor(
@@ -296,22 +296,20 @@ export class Resource implements SourceControlResourceState {
     ) {
         this.#normalisedResourceUri = normalisedResourceUri;
         this.#repoRoot = repoRoot;
-        this.#type = type;
         this.#useIcons = useIcons;
-        const self = this;
         const resources = onetime((): [Uri | undefined, Uri | undefined] =>
-            getResources(self.state, self.#repoRoot, submodules, sourceControlUI.stagedGroup)
+            getResources(this.state, repoRoot, submodules, sourceControlUI.stagedGroup)
         );
         this.state = {
             get leftUri(): Uri | undefined {
                 return resources()[0];
             },
-            async open(): Promise<void> {
-                const command = self.command;
+            open: async (): Promise<void> => {
+                const command = this.command;
                 await commands.executeCommand<void>(command.command, ...(command.arguments || []));
             },
-            async openChange(): Promise<void> {
-                const command = resolveChangeCommand(self);
+            openChange: async (): Promise<void> => {
+                const command = resolveChangeCommand(this);
                 await commands.executeCommand<void>(command.command, ...(command.arguments || []));
             },
             get original(): Uri {
@@ -322,24 +320,24 @@ export class Resource implements SourceControlResourceState {
             },
             get resourceDecoration(): FileDecoration {
                 const res = new FileDecoration(
-                    getStateLetter(self.#type),
-                    getStatusText(self.#type),
-                    getStateColor(self.#type),
+                    getStateLetter(type),
+                    getStatusText(type),
+                    getStateColor(type),
                 );
-                res.propagate = self.#type !== Status.DELETED && self.#type !== Status.INDEX_DELETED;
+                res.propagate = type !== Status.DELETED && type !== Status.INDEX_DELETED;
                 return res;
             },
             get resourceGroupType(): ResourceGroupTypeOptions {
                 return resourceGroupType;
             },
             get resourceUri(): Uri {
-                return self.resourceUri;
+                return normalisedResourceUri();
             },
             get rightUri(): Uri | undefined {
                 return resources()[1];
             },
             get type(): StatusOptions {
-                return self.#type;
+                return type;
             },
         };
     }
