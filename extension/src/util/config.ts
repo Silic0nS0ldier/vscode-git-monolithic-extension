@@ -73,7 +73,8 @@ export const openAfterClone = createConfigOption<"always" | "alwaysNewWindow" | 
     "prompt",
 );
 export const defaultCloneDirectory = createConfigOption<string>("defaultCloneDirectory", "~/");
-export const promptToSaveFilesBeforeCommit = createConfigOption<"always" | "staged" | "never">(
+// Booleans are legacy values, still accepted from existing user settings.
+export const promptToSaveFilesBeforeCommit = createConfigOption<"always" | "staged" | "never" | boolean>(
     "promptToSaveFilesBeforeCommit",
     "always",
 );

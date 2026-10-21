@@ -1,6 +1,15 @@
 import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import { inspect } from "node:util";
-import { commands, type MessageOptions, type OutputChannel, Uri, window, workspace } from "vscode";
+import {
+    commands,
+    type MessageOptions,
+    type OutputChannel,
+    type SourceControl,
+    type SourceControlResourceGroup,
+    Uri,
+    window,
+    workspace,
+} from "vscode";
 import { GitErrorCodes } from "../api/git.js";
 import { GitError } from "../git/error.js";
 import * as i18n from "../i18n/mod.js";
@@ -17,15 +26,15 @@ export function createCommand(
     id: string,
     method: Function,
     options: ScmCommandOptions,
-): (...args: any[]) => any {
-    const result = (...args: any[]): Promise<any> => {
-        let result: Promise<any>;
+): (...args: unknown[]) => Promise<unknown> {
+    const result = (...args: unknown[]): Promise<unknown> => {
+        let result: Promise<unknown>;
 
         if (!options.repository) {
             result = Promise.resolve(method(...args));
         } else {
             // try to guess the repository based on the first argument
-            const repository = model.getRepository(args[0]);
+            const repository = isRepositoryHint(args[0]) ? model.getRepository(args[0]) : undefined;
             let repositoryPromise: Promise<AbstractRepository | undefined>;
 
             if (repository) {
@@ -56,6 +65,15 @@ export function createCommand(
     };
 
     return result;
+}
+
+function isRepositoryHint(arg: unknown): arg is SourceControl | SourceControlResourceGroup | string | Uri {
+    if (typeof arg === "string" || arg instanceof Uri) {
+        return true;
+    }
+    // Interfaces can't be checked with `instanceof`, so match a distinguishing member. A false positive is harmless as
+    // `getRepository` matches these by identity.
+    return typeof arg === "object" && arg !== null && ("inputBox" in arg || "resourceStates" in arg);
 }
 
 async function handleError(

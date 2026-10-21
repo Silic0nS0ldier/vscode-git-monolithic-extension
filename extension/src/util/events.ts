@@ -2,17 +2,17 @@ import type { Disposable, Event } from "vscode";
 import { combinedDisposable } from "./disposals.js";
 
 export function fireEvent<T>(event: Event<T>): Event<T> {
-    return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) =>
-        event(_ => (listener as any).call(thisArgs), null, disposables);
+    return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) =>
+        event(_ => (listener as () => unknown).call(thisArgs), null, disposables);
 }
 
 export function filterEvent<T>(event: Event<T>, filter: (e: T) => boolean): Event<T> {
-    return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) =>
+    return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) =>
         event(e => filter(e) && listener.call(thisArgs, e), null, disposables);
 }
 
 export function anyEvent<T>(...events: Event<T>[]): Event<T> {
-    return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => {
+    return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) => {
         const result = combinedDisposable(events.map(event => event(i => listener.call(thisArgs, i))));
 
         if (disposables) {
@@ -24,7 +24,7 @@ export function anyEvent<T>(...events: Event<T>[]): Event<T> {
 }
 
 export function onceEvent<T>(event: Event<T>): Event<T> {
-    return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => {
+    return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) => {
         const result = event(
             e => {
                 result.dispose();
@@ -39,7 +39,7 @@ export function onceEvent<T>(event: Event<T>): Event<T> {
 }
 
 export function debounceEvent<T>(event: Event<T>, delay: number): Event<T> {
-    return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => {
+    return (listener: (e: T) => unknown, thisArgs?: unknown, disposables?: Disposable[]) => {
         let timer: NodeJS.Timeout;
         return event(
             e => {

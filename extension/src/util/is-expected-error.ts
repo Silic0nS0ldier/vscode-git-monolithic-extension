@@ -1,4 +1,4 @@
-type Constructor<T> = new(...args: any[]) => T;
+type Constructor<T> = new(...args: never[]) => T;
 
 export function isExpectedError<TErr extends Error>(
     err: unknown,

@@ -17,9 +17,9 @@ async function smartCommit(
 
     // TODO Leftovers
     // migration
-    if (promptToSaveFilesBeforeCommit as any === true) {
+    if (promptToSaveFilesBeforeCommit === true) {
         promptToSaveFilesBeforeCommit = "always";
-    } else if (promptToSaveFilesBeforeCommit as any === false) {
+    } else if (promptToSaveFilesBeforeCommit === false) {
         promptToSaveFilesBeforeCommit = "never";
     }
 

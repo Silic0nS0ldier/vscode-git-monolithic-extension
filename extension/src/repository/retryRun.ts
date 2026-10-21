@@ -13,7 +13,7 @@ function isOperationRetrySafe(err: GitError, operation: OperationOptions): boole
 
 export async function retryRun<T>(
     operation: OperationOptions,
-    runOperation: () => Promise<T> = (): Promise<T> => Promise.resolve<any>(null),
+    runOperation: () => Promise<T>,
 ): Promise<T> {
     let attempt = 0;
 

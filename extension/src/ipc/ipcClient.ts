@@ -15,7 +15,7 @@ export class IPCClient {
         this.#ipcHandlePath = ipcHandlePath;
     }
 
-    call(request: any): Promise<any> {
+    call(request: unknown): Promise<unknown> {
         const opts: http.RequestOptions = {
             method: "POST",
             path: `/${this.#handlerName}`,
