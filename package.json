@@ -6,7 +6,7 @@
         "eslint": "^10.13.0",
         "knip": "^6.42.0",
         "typescript": "npm:@typescript/typescript6@^6.0.2",
-        "typescript-eslint": "^8.71.2"
+        "typescript-eslint": "^8.72.0"
     },
     "devDependencies": {
         "@typescript/native": "npm:typescript@7.1.0-beta",
