@@ -26,6 +26,7 @@ export function parseCommits(data: string): Result<Commit[], GenericError> {
     const commits: Commit[] = [];
 
     // Re-created on each call to avoid stale lastIndex across invocations.
+    // eslint-disable-next-line no-control-regex -- `\x00` matches the NUL that `-z` terminates each record with.
     const commitRegex = /([0-9a-f]{40})\n(.*)\n(.*)\n(.*)\n(.*)\n(.*)(?:\n([^]*?))?(?:\x00)/gm;
     let match: RegExpExecArray | null;
 
