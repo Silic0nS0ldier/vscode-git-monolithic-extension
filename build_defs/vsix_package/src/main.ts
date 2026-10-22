@@ -75,11 +75,11 @@ function createOutputCapture() {
     const captured: Buffer[] = [];
     const origStdoutWrite = process.stdout.write;
     const origStderrWrite = process.stderr.write;
-    process.stdout.write = (chunk: any) => {
+    process.stdout.write = (chunk: string | Uint8Array) => {
         captured.push(Buffer.from(chunk));
         return true;
     };
-    process.stderr.write = (chunk: any) => {
+    process.stderr.write = (chunk: string | Uint8Array) => {
         captured.push(Buffer.from(chunk));
         return true;
     };

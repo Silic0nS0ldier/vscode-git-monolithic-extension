@@ -48,7 +48,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     // Repoter disabled, for now
     // const { name, version, aiKey } = require('../package.json') as { name: string, version: string, aiKey: string };
     // const telemetryReporter = new TelemetryReporter(name, version, aiKey);
-    const telemetryReporter = new Proxy<TelemetryReporter>({} as any, {
+    const telemetryReporter = new Proxy<TelemetryReporter>({} as TelemetryReporter, {
         get() {
             return () => {};
         },

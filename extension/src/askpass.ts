@@ -28,7 +28,16 @@ export class Askpass implements IIPCHandler {
         }
     }
 
-    async handle({ request, host }: { request: string; host: string }): Promise<string> {
+    async handle(payload: unknown): Promise<string> {
+        if (
+            typeof payload !== "object" || payload === null
+            || !("request" in payload) || typeof payload.request !== "string"
+            || !("host" in payload) || typeof payload.host !== "string"
+        ) {
+            throw new Error("Invalid askpass request");
+        }
+        const { request, host } = payload;
+
         const enabled = config.enabled();
 
         if (!enabled) {

@@ -1,11 +1,17 @@
 import { Transform, Writable } from "node:stream";
 
-function stringifyChunk(chunk: any, encoding: BufferEncoding): string {
+function stringifyChunk(chunk: unknown, encoding: BufferEncoding): string {
     try {
-        return Buffer.from(chunk).toString(encoding);
+        if (typeof chunk === "string") {
+            return Buffer.from(chunk).toString(encoding);
+        }
+        if (chunk instanceof Uint8Array) {
+            return Buffer.from(chunk).toString(encoding);
+        }
     } catch {
-        return String(chunk);
+        // Fall back to the default string conversion.
     }
+    return String(chunk);
 }
 
 function clampLength(str: string): string {

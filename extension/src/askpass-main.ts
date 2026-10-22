@@ -27,6 +27,9 @@ function main(argv: string[]): void {
     const ipcClient = new IPCClient("askpass");
 
     ipcClient.call({ host, request }).then(res => {
+        if (typeof res !== "string") {
+            return fatal("Invalid response");
+        }
         fs.writeFileSync(output, res + "\n");
         setTimeout(() => process.exit(0), 0);
     }).catch(err => fatal(err));

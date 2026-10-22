@@ -442,22 +442,15 @@ export class Model {
         return pick && pick.repository;
     }
 
-    getRepository(sourceControl: SourceControl): AbstractRepository | undefined;
-    getRepository(resourceGroup: SourceControlResourceGroup): AbstractRepository | undefined;
-    getRepository(path: string): AbstractRepository | undefined;
-    getRepository(resource: Uri): AbstractRepository | undefined;
-    getRepository(hint: any): AbstractRepository | undefined {
+    getRepository(hint: SourceControl | SourceControlResourceGroup | string | Uri): AbstractRepository | undefined {
         const liveRepository = this.#getOpenRepository(hint);
         return liveRepository && liveRepository.repository;
     }
 
     /** @todo This API is horrific, it should not be needed. */
-    #getOpenRepository(repository: AbstractRepository): OpenRepository | undefined;
-    #getOpenRepository(sourceControl: SourceControl): OpenRepository | undefined;
-    #getOpenRepository(resourceGroup: SourceControlResourceGroup): OpenRepository | undefined;
-    #getOpenRepository(path: string): OpenRepository | undefined;
-    #getOpenRepository(resource: Uri): OpenRepository | undefined;
-    #getOpenRepository(hint: any): OpenRepository | undefined {
+    #getOpenRepository(
+        hint: AbstractRepository | SourceControl | SourceControlResourceGroup | string | Uri,
+    ): OpenRepository | undefined {
         let normalisedHint = hint;
         if (!normalisedHint) {
             return undefined;
@@ -512,13 +505,8 @@ export class Model {
                 return liveRepository;
             }
 
-            if (
-                normalisedHint === repository.sourceControlUI.mergeGroup
-                || normalisedHint === repository.sourceControlUI.stagedGroup
-                || normalisedHint === repository.sourceControlUI.trackedGroup
-            ) {
-                return liveRepository;
-            }
+            // TODO Resolve resource groups. `sourceControlUI` holds `withUX(...)` wrappers rather than the
+            // `SourceControlResourceGroup` instances VS Code passes back, so identity comparisons never match.
         }
 
         return undefined;

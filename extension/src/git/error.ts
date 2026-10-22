@@ -1,9 +1,9 @@
 import { GitErrorCodes } from "../api/git.js";
 
-export function cpErrorHandler(cb: (reason?: any) => void): (reason?: any) => void {
+export function cpErrorHandler(cb: (reason?: unknown) => void): (reason?: unknown) => void {
     return err => {
         let normalisedErr = err;
-        if (/ENOENT/.test(err.message)) {
+        if (err instanceof Error && /ENOENT/.test(err.message)) {
             normalisedErr = new GitError({
                 error: err,
                 gitErrorCode: GitErrorCodes.NotAGitRepository,
@@ -69,7 +69,7 @@ export class GitError extends Error {
         );
 
         if (this.error) {
-            result += (<any> this.error).stack;
+            result += this.error.stack;
         }
 
         return result;

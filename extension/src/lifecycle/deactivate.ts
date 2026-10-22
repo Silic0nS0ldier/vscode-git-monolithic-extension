@@ -1,4 +1,4 @@
-export const deactivateTasks: { (): Promise<any> }[] = [];
+export const deactivateTasks: { (): Promise<unknown> }[] = [];
 
 export async function deactivate(): Promise<void> {
     const results = await Promise.allSettled(deactivateTasks.map(task => task()));

@@ -201,7 +201,7 @@ export function createRepository(
 
     async function run<T>(
         operation: OperationOptions,
-        runOperation: () => Promise<T> = (): Promise<T> => Promise.resolve<any>(null),
+        runOperation: () => Promise<T>,
     ): Promise<T> {
         if (state.get() !== RepositoryState.Idle) {
             throw new Error("Repository not initialized");
@@ -252,7 +252,7 @@ export function createRepository(
         }
     }
 
-    const runRefresh = coalesce(() => run<void>(Operation.Refresh));
+    const runRefresh = coalesce(() => run(Operation.Refresh, async () => {}));
 
     const autoRefreshWhenIdle = coalesce(async () => {
         await whenIdleAndFocused();
