@@ -139,6 +139,9 @@ export interface ScmCommandOptions {
 
 export interface ScmCommand {
     commandId: string;
+    // TODO Commands receive untyped arguments from VS Code, yet most declare typed parameters. Validate them (as
+    // `stage-selected-ranges.ts` does) so this can become a real function type.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     method: Function;
     options: ScmCommandOptions;
 }
