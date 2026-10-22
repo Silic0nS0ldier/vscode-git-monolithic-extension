@@ -50,7 +50,7 @@ export const tools = {
     buildozer: buildtools("buildozer"),
     dprint: {
         // renovate: datasource=github-releases depName=dprint/dprint
-        version: "0.63.0",
+        version: "0.64.0",
         platforms: {
             "linux-x86_64": {
                 url: "https://github.com/dprint/dprint/releases/download/{version}/dprint-x86_64-unknown-linux-gnu.zip",
