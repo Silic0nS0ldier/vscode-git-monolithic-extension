@@ -71,7 +71,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
             await lastQueue.catch(() => {/* Ignore errors from previous task */});
 
             try {
-                let newState = config.enabled() && !config.builtinGitEnabled();
+                const newState = config.enabled() && !config.builtinGitEnabled();
 
                 if (newState === extensionEnablementState) {
                     return;

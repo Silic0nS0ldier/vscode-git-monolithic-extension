@@ -115,8 +115,8 @@ class SyncStatusBar {
         const HEAD = this.#state.HEAD;
         let icon = "$(sync)";
         let text = "";
-        let command = "";
-        let tooltip = "";
+        let command: string;
+        let tooltip: string;
 
         if (HEAD && HEAD.name && HEAD.commit) {
             if (HEAD.upstream) {

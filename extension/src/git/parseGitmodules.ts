@@ -3,7 +3,6 @@ import type { Submodule } from "./Submodule.js";
 export function parseGitmodules(raw: string): Submodule[] {
     const regex = /\r?\n/g;
     let position = 0;
-    let match: RegExpExecArray | null = null;
 
     const result: Submodule[] = [];
     let submodule: Partial<Submodule> = {};
@@ -46,7 +45,7 @@ export function parseGitmodules(raw: string): Submodule[] {
         }
     }
 
-    while (match = regex.exec(raw)) {
+    for (const match of raw.matchAll(regex)) {
         parseLine(raw.substring(position, match.index));
         position = match.index + match[0].length;
     }

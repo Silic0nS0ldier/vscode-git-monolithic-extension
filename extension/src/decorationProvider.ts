@@ -147,7 +147,7 @@ class GitDecorationProvider implements FileDecorationProvider {
     }
 
     #onDidGitStatusChange(): void {
-        let newDecorations = new Map<string, FileDecoration>();
+        const newDecorations = new Map<string, FileDecoration>();
 
         this.#collectSubmoduleDecorationData(newDecorations);
         collectDecorationData(this.#repository.sourceControlUI.stagedGroup, newDecorations);
