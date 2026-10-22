@@ -204,7 +204,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 
         try {
             return await repository.buffer(sanitizeRef(ref, path, repository), path);
-        } catch (err) {
+        } catch {
             return new Uint8Array(0);
         }
     }
