@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import type { QuickPickItem } from "vscode";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";

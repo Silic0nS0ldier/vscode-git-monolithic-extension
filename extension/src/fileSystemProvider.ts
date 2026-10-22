@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import {
     Disposable,
     type Event,

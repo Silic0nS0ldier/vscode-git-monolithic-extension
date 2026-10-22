@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import type { QuickPickItem } from "vscode";
 import type { Ref } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
