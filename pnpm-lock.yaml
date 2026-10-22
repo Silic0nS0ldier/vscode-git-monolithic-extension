@@ -202,7 +202,7 @@ importers:
         specifier: ^10.13.0
         version: 10.13.0(jiti@2.7.0)(supports-color@7.2.0)
       knip:
-        specifier: ^6.42.0
+        specifier: ^6.42.1
         version: 6.42.1
       typescript:
         specifier: npm:@typescript/typescript6@^6.0.2
