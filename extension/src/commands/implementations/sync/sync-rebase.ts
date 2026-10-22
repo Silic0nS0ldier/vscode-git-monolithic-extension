@@ -3,7 +3,7 @@ import { isCancelledError } from "../../../util/is-cancelled-error.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { sync } from "./helper.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"syncRebase"> {
     async function syncRebase(repository: AbstractRepository): Promise<void> {
         try {
             await sync(repository, true);

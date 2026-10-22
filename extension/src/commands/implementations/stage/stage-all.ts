@@ -4,7 +4,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import * as config from "../../../util/config.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"stageAll"> {
     async function stageAll(repository: AbstractRepository): Promise<void> {
         const mixed = config.untrackedChanges(Uri.file(repository.root)) === "mixed";
         const tracked = repository.sourceControlUI.trackedGroup.resourceStates.get();

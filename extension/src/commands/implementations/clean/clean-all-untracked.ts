@@ -2,7 +2,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { getUntrackedResources, makeCommandId, type ScmCommand } from "../../helpers.js";
 import { cleanUntrackedChanges } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"cleanAllUntracked"> {
     async function cleanAllUntracked(repository: AbstractRepository): Promise<void> {
         const resources = getUntrackedResources(repository);
 

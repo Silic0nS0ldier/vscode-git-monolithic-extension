@@ -2,7 +2,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { checkout } from "./checkout.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"checkoutDetached"> {
     async function checkoutDetached(repository: AbstractRepository, treeish?: string): Promise<boolean> {
         return checkout(repository, { detached: true, treeish });
     }

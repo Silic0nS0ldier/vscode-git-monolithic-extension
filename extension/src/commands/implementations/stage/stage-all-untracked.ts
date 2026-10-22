@@ -1,7 +1,7 @@
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { getUntrackedResources, makeCommandId, type ScmCommand } from "../../helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"stageAllUntracked"> {
     async function stageAllUntracked(repository: AbstractRepository): Promise<void> {
         const uris = getUntrackedResources(repository).map(r => r.state.resourceUri);
 

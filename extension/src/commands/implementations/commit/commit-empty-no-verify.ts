@@ -2,7 +2,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { commitEmpty } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"commitEmptyNoVerify"> {
     async function commitEmptyNoVerify(repository: AbstractRepository): Promise<void> {
         await commitEmpty(repository, true);
     }

@@ -20,7 +20,7 @@ class RebaseItem implements QuickPickItem {
     }
 }
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"rebase"> {
     async function rebase(repository: AbstractRepository): Promise<void> {
         const checkoutType = config.checkoutType();
         const includeRemotes = checkoutType === "all" || checkoutType === "remote" || checkoutType?.includes("remote");

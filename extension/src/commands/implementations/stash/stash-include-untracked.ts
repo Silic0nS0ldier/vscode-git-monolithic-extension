@@ -2,7 +2,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { createStash } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"stashIncludeUntracked"> {
     async function stashIncludeUntracked(repository: AbstractRepository): Promise<void> {
         await createStash(repository, true);
     }

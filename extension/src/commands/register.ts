@@ -1,6 +1,7 @@
 import { commands, Disposable, type OutputChannel, workspace } from "vscode";
 import type { Git } from "../git.js";
 import type { Model } from "../model.js";
+import type { CommandName } from "./command-names.gen.js";
 import { createCommand } from "./create.js";
 import { CommandErrorOutputTextDocumentContentProvider, type ScmCommand } from "./helpers.js";
 
@@ -34,13 +35,35 @@ import * as tag from "./implementations/tag/mod.js";
 import * as undoCommit from "./implementations/undo-commit.js";
 import * as unstage from "./implementations/unstage/mod.js";
 
+/** Commands registered outside `registerCommands`, e.g. because they must work before Git is found. */
+type RegisteredElsewhere = "showOutput";
+
+type NameOf<C> = C extends ScmCommand<infer N> ? N : never;
+type IsUnion<T, U = T> = T extends unknown ? ([U] extends [T] ? false : true) : never;
+type Unregistered<C> = Exclude<CommandName, NameOf<C> | RegisteredElsewhere>;
+/** Factories typed with several names (e.g. a `ScmCommand<CommandName>[]` annotation) would hide missing ones. */
+type Widened<C> = C extends unknown ? (true extends IsUnion<NameOf<C>> ? C : never) : never;
+
+/**
+ * Fails to compile, naming the commands, unless every command declared in the manifest is in `cmds` with its own
+ * literal name.
+ */
+function allCommands<C extends ScmCommand<CommandName>>(
+    cmds:
+        & C[]
+        & ([Unregistered<C>] extends [never] ? unknown : { missingCommands: Unregistered<C> })
+        & ([Widened<C>] extends [never] ? unknown : { widenedCommands: Widened<C> }),
+): ScmCommand<CommandName>[] {
+    return cmds;
+}
+
 export function registerCommands(
     model: Model,
     git: Git,
     outputChannel: OutputChannel,
     telemetryReporter: TelemetryReporter,
 ): Disposable {
-    const cmds: ScmCommand[] = [
+    const cmds = allCommands([
         ...branch.createCommands(),
         ...checkout.createCommands(),
         cherryPick.createCommand(),
@@ -69,7 +92,7 @@ export function registerCommands(
         ...tag.createCommands(),
         undoCommit.createCommand(),
         ...unstage.createCommands(model, outputChannel),
-    ];
+    ]);
 
     const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
 

@@ -19,8 +19,9 @@ export interface SourceScanOptions {
     /** Prefix shared by the extension's command ids, e.g. `git_monolithic.`. Other ids are not tracked. */
     readonly commandPrefix: string;
     /**
-     * Functions whose string-literal argument, prefixed with `commandPrefix`, is a command id that gets registered.
-     * e.g. `makeCommandId("stage")` registers `git_monolithic.stage`.
+     * Functions whose string-literal argument, prefixed with `commandPrefix`, is a command id.
+     * e.g. `makeCommandId("stage")` is `git_monolithic.stage`. A call counts as a registration, unless it is used where
+     * a reference is (`executeCommand(makeCommandId("stage"))`, `command: makeCommandId("stage")`).
      */
     readonly idFactories?: readonly string[];
 }
@@ -75,19 +76,40 @@ export function scanSource(api: API, file: string, text: string, options: Source
 
     const registrations: CommandRegistration[] = [];
     const references: IdReference[] = [];
+    // Start offsets of id-factory calls that are used as references, so they are not also counted as registrations.
+    const referencingCalls = new Set<number>();
+
+    function idFactoryArgument(node: Node) {
+        if (!isCallExpression(node)) {
+            return undefined;
+        }
+        const name = calleeName(node);
+        const arg = node.arguments[0];
+        return name !== undefined && idFactories.has(name) && arg !== undefined && isStringLiteralLike(arg)
+            ? arg
+            : undefined;
+    }
 
     function visit(node: Node): void {
         if (isCallExpression(node)) {
             const name = calleeName(node);
             const arg = node.arguments[0];
-            if (name === "executeCommand" && arg !== undefined) {
-                addReferences(arg);
-            } else if (name !== undefined && arg !== undefined && isStringLiteralLike(arg)) {
-                if (idFactories.has(name)) {
-                    registrations.push({ id: commandPrefix + arg.text, location: locateNode(arg), kind: "id-factory" });
-                } else if (REGISTER_FUNCTIONS.has(name) && arg.text.startsWith(commandPrefix)) {
-                    registrations.push({ id: arg.text, location: locateNode(arg), kind: "register-command" });
+            const factoryArg = idFactoryArgument(node);
+            if (factoryArg) {
+                if (!referencingCalls.has(node.getStart(source))) {
+                    registrations.push({
+                        id: commandPrefix + factoryArg.text,
+                        location: locateNode(factoryArg),
+                        kind: "id-factory",
+                    });
                 }
+            } else if (name === "executeCommand" && arg !== undefined) {
+                addReferences(arg);
+            } else if (
+                name !== undefined && REGISTER_FUNCTIONS.has(name) && arg !== undefined && isStringLiteralLike(arg)
+                && arg.text.startsWith(commandPrefix)
+            ) {
+                registrations.push({ id: arg.text, location: locateNode(arg), kind: "register-command" });
             }
         } else if (isPropertyAssignment(node) || isVariableDeclaration(node)) {
             if (node.initializer && nameOf(node.name) === "command") {
@@ -103,7 +125,11 @@ export function scanSource(api: API, file: string, text: string, options: Source
     }
 
     function addReferences(expression: Expression): void {
-        if (isParenthesizedExpression(expression)) {
+        const factoryArg = idFactoryArgument(expression);
+        if (factoryArg) {
+            referencingCalls.add(expression.getStart(source));
+            references.push({ id: commandPrefix + factoryArg.text, location: locateNode(factoryArg) });
+        } else if (isParenthesizedExpression(expression)) {
             addReferences(expression.expression);
         } else if (isConditionalExpression(expression)) {
             addReferences(expression.whenTrue);

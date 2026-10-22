@@ -12,6 +12,7 @@ import type { AbstractRepository } from "../repository/repository-class/Abstract
 import type { Resource } from "../repository/Resource.js";
 import { fromGitUri, isGitUri } from "../uri.js";
 import { isDescendant, pathEquals } from "../util/paths.js";
+import type { CommandName } from "./command-names.gen.js";
 
 export async function runByRepository(
     model: Model,
@@ -137,8 +138,8 @@ export interface ScmCommandOptions {
     diff?: boolean;
 }
 
-export interface ScmCommand {
-    commandId: string;
+export interface ScmCommand<N extends CommandName> {
+    commandId: CommandId<N>;
     // TODO Commands receive untyped arguments from VS Code, yet most declare typed parameters. Validate them (as
     // `stage-selected-ranges.ts` does) so this can become a real function type.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
@@ -162,8 +163,13 @@ export class CommandErrorOutputTextDocumentContentProvider implements TextDocume
     }
 }
 
-export function makeCommandId(command: string): string {
-    return "git_monolithic." + command;
+export type CommandId<N extends CommandName = CommandName> = `git_monolithic.${N}`;
+
+/**
+ * The full id of a command declared in the manifest. Use for both registering and referencing commands.
+ */
+export function makeCommandId<N extends CommandName>(command: N): CommandId<N> {
+    return `git_monolithic.${command}`;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { type Command, Disposable, type Event, EventEmitter, Uri, workspace } from "vscode";
 import type { Branch } from "./api/git.js";
+import { makeCommandId } from "./commands/helpers.js";
 import * as i18n from "./i18n/mod.js";
 import { Operation } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
@@ -23,7 +24,7 @@ class CheckoutStatusBar {
     get command(): Command | undefined {
         return {
             arguments: [this.#repository.sourceControlUI.sourceControl],
-            command: "git_monolithic.checkout",
+            command: makeCommandId("checkout"),
             title: `$(git-branch) ${this.#repository.headLabel}`,
             tooltip: i18n.Translations.checkout(),
         };
@@ -126,11 +127,11 @@ class SyncStatusBar {
 
                 const rebaseWhenSync = config.rebaseWhenSync(Uri.file(this.#repository.root));
 
-                command = rebaseWhenSync ? "git_monolithic.syncRebase" : "git_monolithic.sync";
+                command = rebaseWhenSync ? makeCommandId("syncRebase") : makeCommandId("sync");
                 tooltip = this.#repository.syncTooltip;
             } else {
                 icon = "$(cloud-upload)";
-                command = "git_monolithic.publish";
+                command = makeCommandId("publish");
                 tooltip = i18n.Translations.publishChanges();
             }
         } else {

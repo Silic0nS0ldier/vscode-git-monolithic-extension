@@ -8,7 +8,7 @@ import { normaliseResourceStates, runByRepository } from "../../helpers.js";
 export function createCommand(
     outputChannel: OutputChannel,
     model: Model,
-): ScmCommand {
+): ScmCommand<"unstage"> {
     async function unstage(...resourceStates: Resource[]): Promise<void> {
         const normalisedResourceStates = normaliseResourceStates(model, outputChannel, resourceStates);
 

@@ -88,7 +88,7 @@ export async function openFile(
     }
 }
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"openFile"> {
     async function openFileFn(arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]): Promise<void> {
         await openFile(model, outputChannel, arg, ...resourceStates);
     }

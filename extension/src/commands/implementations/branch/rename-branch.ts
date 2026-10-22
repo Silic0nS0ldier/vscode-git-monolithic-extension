@@ -6,7 +6,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { promptForBranchName } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"renameBranch"> {
     async function renameBranch(repository: AbstractRepository): Promise<void> {
         const currentBranchName = repository.HEAD && repository.HEAD.name;
         const branchName = await promptForBranchName(undefined, currentBranchName);

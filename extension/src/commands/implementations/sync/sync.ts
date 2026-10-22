@@ -15,7 +15,7 @@ export async function sync(repository: AbstractRepository): Promise<void> {
     }
 }
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"sync"> {
     async function syncFn(repository: AbstractRepository): Promise<void> {
         await sync(repository);
     }

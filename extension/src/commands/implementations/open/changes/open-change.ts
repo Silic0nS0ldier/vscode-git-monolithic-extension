@@ -4,7 +4,7 @@ import { Resource } from "../../../../repository/Resource.js";
 import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"openChange"> {
     async function openChange(arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]): Promise<void> {
         let resources: Resource[] | undefined = undefined;
 

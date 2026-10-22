@@ -3,7 +3,7 @@ import type { Model } from "../../model.js";
 import { Resource } from "../../repository/Resource.js";
 import { makeCommandId, normaliseResourceStates, runByRepository, type ScmCommand } from "../helpers.js";
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"ignore"> {
     async function ignore(...resourceStates: Resource[]): Promise<void> {
         const normalisedResourceStates = normaliseResourceStates(model, outputChannel, resourceStates);
 

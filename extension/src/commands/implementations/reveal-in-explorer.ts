@@ -2,7 +2,7 @@ import { commands, Uri } from "vscode";
 import type { Resource } from "../../repository/Resource.js";
 import { makeCommandId, type ScmCommand } from "../helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"revealInExplorer"> {
     async function revealInExplorer(resourceState: Resource): Promise<void> {
         if (!resourceState) {
             return;

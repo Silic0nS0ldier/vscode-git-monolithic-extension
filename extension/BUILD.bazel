@@ -1,4 +1,5 @@
-load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@aspect_rules_js//js:defs.bzl", "js_library", "js_run_binary")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//extension:ava/package_json.bzl", "bin")
@@ -11,6 +12,28 @@ js_library(
     name = "manifest",
     srcs = ["package.json"],
     visibility = ["//integration_tests:__pkg__"],
+)
+
+js_run_binary(
+    name = "command_names",
+    srcs = ["//extension/vsix:manifest"],
+    args = [
+        "--manifest",
+        "$(rootpath //extension/vsix:manifest)",
+        "--prefix",
+        "git_monolithic.",
+        "--from",
+        "extension/vsix/package.json",
+        "--update",
+        "'bazel run //extension:update_command_names'",
+    ],
+    stdout = "command-names.gen.ts",
+    tool = "//packages/vscode-manifest:generate_command_names",
+)
+
+write_source_files(
+    name = "update_command_names",
+    files = {"src/commands/command-names.gen.ts": ":command_names"},
 )
 
 ts_project(

@@ -4,7 +4,7 @@ import { makeCommandId, type ScmCommand } from "../helpers.js";
 
 export function createCommand(
     model: Model,
-): ScmCommand {
+): ScmCommand<"close"> {
     async function close(repository: AbstractRepository): Promise<void> {
         model.close(repository);
     }

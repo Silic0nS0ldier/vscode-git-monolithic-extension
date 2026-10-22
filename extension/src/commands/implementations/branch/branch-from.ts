@@ -2,7 +2,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { branch } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"branchFrom"> {
     async function branchFrom(repository: AbstractRepository): Promise<void> {
         await branch(repository, undefined, true);
     }

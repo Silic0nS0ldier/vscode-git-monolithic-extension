@@ -1,7 +1,7 @@
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { branch } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"branch"> {
     return {
         commandId: makeCommandId("branch"),
         method: branch,

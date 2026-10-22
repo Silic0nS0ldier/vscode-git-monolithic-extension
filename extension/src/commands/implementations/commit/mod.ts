@@ -1,4 +1,3 @@
-import type { ScmCommand } from "../../helpers.js";
 import * as commitAllAmendNoVerify from "./commit-all-amend-no-verify.js";
 import * as commitAllAmend from "./commit-all-amend.js";
 import * as commitAllNoVerify from "./commit-all-no-verify.js";
@@ -16,7 +15,7 @@ import * as commitStagedSigned from "./commit-staged-signed.js";
 import * as commitStaged from "./commit-staged.js";
 import * as commit from "./commit.js";
 
-export function createCommands(): ScmCommand[] {
+export function createCommands() {
     return [
         commit.createCommand(),
         commitAll.createCommand(),

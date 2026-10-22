@@ -6,7 +6,7 @@ import { Resource } from "../../../../repository/Resource.js";
 import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"openHEADFile"> {
     async function openHEADFile(arg?: Resource | Uri): Promise<void> {
         let resource: Resource | undefined;
         const preview = !(arg instanceof Resource);

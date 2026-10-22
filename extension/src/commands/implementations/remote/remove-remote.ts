@@ -3,7 +3,7 @@ import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"removeRemote"> {
     async function removeRemote(repository: AbstractRepository): Promise<string | void> {
         const remotes = repository.remotes;
 

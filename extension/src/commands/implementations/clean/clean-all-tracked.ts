@@ -3,7 +3,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { cleanTrackedChanges } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"cleanAllTracked"> {
     async function cleanAllTracked(repository: AbstractRepository): Promise<void> {
         const resources = repository.sourceControlUI.trackedGroup.resourceStates.get()
             .filter(r => r.state.type !== Status.UNTRACKED && r.state.type !== Status.IGNORED);
