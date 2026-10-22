@@ -12,7 +12,7 @@ export function createSpawn(endWith: "error" | "exit", options: {
         const cp: ChildProcess = {
             connected: true,
             kill: () => {
-                // @ts-expect-error
+                // @ts-expect-error `connected` is readonly to consumers; the stub flips it to simulate the kill.
                 cp.connected = false;
                 return true;
             },
@@ -21,14 +21,14 @@ export function createSpawn(endWith: "error" | "exit", options: {
                 if (event === "error" && endWith === "error") {
                     fn = async (): Promise<void> => {
                         if (cp.connected) {
-                            // @ts-expect-error
+                            // @ts-expect-error `event` does not narrow `listener` to the matching `once` overload.
                             listener(new Error());
                         }
                     };
                 } else if (event === "exit" && endWith === "exit") {
                     fn = async (): Promise<void> => {
                         if (cp.connected) {
-                            // @ts-expect-error
+                            // @ts-expect-error `event` does not narrow `listener` to the matching `once` overload.
                             listener(options.code ?? 0, "SIGQUIT");
                         }
                     };
