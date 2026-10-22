@@ -5,7 +5,7 @@ import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 import { openFile } from "./open-file.js";
 
 // TODO Merge with `openFile`, since they are identical
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"openFile2"> {
     async function openFile2(arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]): Promise<void> {
         await openFile(model, outputChannel, arg, ...resourceStates);
     }

@@ -67,6 +67,15 @@ test("Recognises registerCommand with a full id", t => {
     t.deepEqual(run(manifest, nlsFor("ext.a"), `commands.registerCommand("ext.a", () => {});`), []);
 });
 
+test("Counts id-factory calls used as command values as references, not registrations", t => {
+    const source = `
+        commands.registerCommand(makeCommandId("internal"), () => {});
+        commands.executeCommand(makeCommandId("internal"));
+        const item = { command: flag ? makeCommandId("internal") : makeCommandId("missing") };
+    `;
+    t.deepEqual(run({}, {}, source), [["unknown-command", "ext.missing"]]);
+});
+
 test("Ignores ids outside the command prefix", t => {
     const source = `commands.executeCommand("vscode.open"); commands.executeCommand("setContext", "ext.ctx", 1);`;
     t.deepEqual(run({}, {}, source), []);

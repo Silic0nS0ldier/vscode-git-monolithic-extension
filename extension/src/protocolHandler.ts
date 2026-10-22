@@ -1,5 +1,6 @@
 import * as querystring from "node:querystring";
 import { commands, Disposable, type OutputChannel, Uri, type UriHandler, window } from "vscode";
+import { makeCommandId } from "./commands/helpers.js";
 import { dispose } from "./util/disposals.js";
 
 export class GitProtocolHandler implements UriHandler {
@@ -25,7 +26,7 @@ export class GitProtocolHandler implements UriHandler {
             this.#outputChannel.appendLine("[WARN] Failed to open URI: " + uri.toString());
         }
 
-        commands.executeCommand("git_monolithic.clone", data.url);
+        commands.executeCommand(makeCommandId("clone"), data.url);
     }
 
     dispose(): void {

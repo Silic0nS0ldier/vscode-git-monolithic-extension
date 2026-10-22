@@ -1,7 +1,6 @@
-import type { ScmCommand } from "../../helpers.js";
 import * as removeRemote from "./remove-remote.js";
 
-export function createCommands(): ScmCommand[] {
+export function createCommands() {
     return [
         removeRemote.createCommand(),
     ];

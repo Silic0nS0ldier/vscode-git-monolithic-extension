@@ -89,7 +89,7 @@ export async function checkout(
     return true;
 }
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"checkout"> {
     async function checkoutFn(repository: AbstractRepository, treeish?: string): Promise<boolean> {
         return checkout(repository, { treeish });
     }

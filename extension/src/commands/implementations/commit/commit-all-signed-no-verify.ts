@@ -2,7 +2,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { commitWithAnyInput } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"commitAllSignedNoVerify"> {
     async function commitAllSignedNoVerify(repository: AbstractRepository): Promise<void> {
         await commitWithAnyInput(repository, { all: true, noVerify: true, signoff: true });
     }

@@ -2,7 +2,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { push as pushFn, PushType } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"push"> {
     async function push(repository: AbstractRepository): Promise<void> {
         await pushFn(repository, { pushType: PushType.Push });
     }

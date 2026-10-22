@@ -14,7 +14,7 @@ export async function stashPopLatest(repository: AbstractRepository): Promise<vo
     await repository.popStash();
 }
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"stashPopLatest"> {
     return {
         commandId: makeCommandId("stashPopLatest"),
         method: stashPopLatest,

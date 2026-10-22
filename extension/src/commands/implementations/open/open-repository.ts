@@ -6,7 +6,7 @@ import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
 export function createCommand(
     model: Model,
-): ScmCommand {
+): ScmCommand<"openRepository"> {
     async function openRepository(repoPath?: string): Promise<void> {
         let normalisedRepoPath = repoPath;
         if (!normalisedRepoPath) {

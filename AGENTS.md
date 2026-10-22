@@ -89,18 +89,26 @@ Fork-specific naming (never use the upstream `git.` namespace):
 
 ## Adding a command
 
-1. `extension/src/commands/implementations/<name>.ts` (kebab-case) exporting `createCommand(...)`
-   that returns a `ScmCommand` with `commandId: makeCommandId("<name>")`.
-2. Add to the group `mod.ts` if it lives in a subfolder.
-3. Register in [extension/src/commands/register.ts](extension/src/commands/register.ts) — deps are
+1. `extension/vsix/package.json`: `contributes.commands` + `contributes.menus` entries.
+2. `extension/vsix/package.nls.json`: `"command.<name>": "..."`.
+3. `bazel run //extension:update_command_names` to regenerate
+   [command-names.gen.ts](extension/src/commands/command-names.gen.ts) (`CommandName`, the declared
+   ids). A diff test fails while it is stale.
+4. `extension/src/commands/implementations/<name>.ts` (kebab-case) exporting `createCommand(...)`
+   that returns a `ScmCommand<"<name>">` with `commandId: makeCommandId("<name>")`.
+5. Add to the group `mod.ts` if it lives in a subfolder.
+6. Register in [extension/src/commands/register.ts](extension/src/commands/register.ts) — deps are
    passed explicitly, there is no DI container.
-4. `extension/vsix/package.json`: `contributes.commands` + `contributes.menus` entries.
-5. `extension/vsix/package.nls.json`: `"command.<name>": "..."`.
 
-`//extension:tests` checks steps 1–5 agree (declared ⇔ registered, every command reachable, every
-reference and `%key%` resolves, no unused nls keys). It only sees string-literal ids. Pre-existing
-problems are listed in `KNOWN_ISSUES` in [extension/src/manifest.test.ts](extension/src/manifest.test.ts);
-remove an entry when fixing it (stale entries fail the test), never add one for new code.
+`makeCommandId` only accepts declared names, so use it for references too (`executeCommand`,
+`command:` properties) rather than raw `"git_monolithic.*"` strings. `register.ts` fails to
+compile, naming the command, if a declared command is not registered; group `mod.ts` factories
+must not annotate their return type, or the names are widened and that check is lost.
+
+`//extension:tests` also checks menus, keybindings, reachability and nls keys against the source.
+It only sees string-literal ids. Pre-existing problems are listed in `KNOWN_ISSUES` in
+[extension/src/manifest.test.ts](extension/src/manifest.test.ts); remove an entry when fixing it
+(stale entries fail the test), never add one for new code.
 
 ## Tests
 

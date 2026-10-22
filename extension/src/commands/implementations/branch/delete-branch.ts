@@ -34,7 +34,7 @@ class BranchDeleteItem implements QuickPickItem {
     }
 }
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"deleteBranch"> {
     async function deleteBranch(repository: AbstractRepository, branchName: string, force?: boolean): Promise<void> {
         let normalisedBranchName = branchName;
         let run: (force?: boolean) => Promise<void>;

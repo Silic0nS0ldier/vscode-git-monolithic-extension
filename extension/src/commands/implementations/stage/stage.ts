@@ -9,7 +9,7 @@ import { categorizeResourceByResolution, stageConflicts, stageDeletionConflict }
 export function createCommand(
     outputChannel: OutputChannel,
     model: Model,
-): ScmCommand {
+): ScmCommand<"stage"> {
     async function stage(...resourceStates: Resource[]): Promise<void> {
         outputChannel.appendLine(`git.stage ${resourceStates.length}`);
 

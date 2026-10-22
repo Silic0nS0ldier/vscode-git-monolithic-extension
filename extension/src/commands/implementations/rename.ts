@@ -3,7 +3,7 @@ import { Uri, window } from "vscode";
 import type { AbstractRepository } from "../../repository/repository-class/AbstractRepository.js";
 import { makeCommandId, type ScmCommand } from "../helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"rename"> {
     async function rename(repository: AbstractRepository, fromUri: Uri | undefined): Promise<void> {
         const normalisedFromUri = fromUri ?? window.activeTextEditor?.document.uri;
 

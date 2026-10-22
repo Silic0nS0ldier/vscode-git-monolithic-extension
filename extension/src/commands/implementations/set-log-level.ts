@@ -9,7 +9,7 @@ type LogLevelQuickPickOption = {
 
 export function createCommand(
     outputChannel: OutputChannel,
-): ScmCommand {
+): ScmCommand<"setLogLevel"> {
     async function setLogLevel(): Promise<void> {
         const createItem = (logLevel: LogLevelOptions): LogLevelQuickPickOption => ({
             description: Log.logLevel === logLevel ? i18n.Translations.current() : undefined,

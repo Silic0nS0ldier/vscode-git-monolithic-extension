@@ -14,7 +14,7 @@ function takeFirstIfOnlyMember<T>(arr: readonly T[]): T | null {
     return null;
 }
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"clean"> {
     async function clean(...resourceStates: Resource[]): Promise<void> {
         const normalisedResourceStates = normaliseResourceStates(model, outputChannel, resourceStates);
 

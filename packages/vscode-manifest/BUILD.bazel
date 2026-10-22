@@ -1,3 +1,4 @@
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("@aspect_rules_js//npm:defs.bzl", "npm_package")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
@@ -33,6 +34,13 @@ ts_project(
     ],
 )
 
+js_binary(
+    name = "generate_command_names",
+    data = [":lib"],
+    entry_point = "dist/generate-command-names.js",
+    visibility = ["//extension:__pkg__"],
+)
+
 ts_config(
     name = "tsconfig",
     src = "tsconfig.json",
@@ -50,6 +58,7 @@ ts_project(
     deps = [
         ":lib",
         ":node_modules/ava",
+        ":node_modules/typescript",
     ],
 )
 

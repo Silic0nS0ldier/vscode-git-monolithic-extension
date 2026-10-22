@@ -2,7 +2,7 @@ import { Status } from "../../../api/git.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"stageAllTracked"> {
     async function stageAllTracked(repository: AbstractRepository): Promise<void> {
         const resources = repository.sourceControlUI.trackedGroup.resourceStates.get()
             .filter(r => r.state.type !== Status.UNTRACKED && r.state.type !== Status.IGNORED);

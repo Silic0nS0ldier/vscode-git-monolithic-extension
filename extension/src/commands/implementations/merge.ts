@@ -20,7 +20,7 @@ class MergeItem implements QuickPickItem {
     }
 }
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"merge"> {
     async function merge(repository: AbstractRepository): Promise<void> {
         const checkoutType = config.checkoutType();
         const includeRemotes = checkoutType === "all" || checkoutType === "remote" || checkoutType?.includes("remote");

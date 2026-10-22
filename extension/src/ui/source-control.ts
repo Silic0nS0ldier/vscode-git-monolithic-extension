@@ -9,6 +9,7 @@ import {
     type SourceControlResourceState,
     Uri,
 } from "vscode";
+import { makeCommandId } from "../commands/helpers.js";
 import * as i18n from "../i18n/mod.js";
 import type { Resource } from "../repository/Resource.js";
 import type { Box } from "../util/box.js";
@@ -25,7 +26,7 @@ export function create(repoRoot: string, quickDiffProvider: QuickDiffProvider): 
     const sourceControl = scm.createSourceControl("gitm", "Git", rootUri);
     sourceControl.acceptInputCommand = {
         arguments: [sourceControl],
-        command: "git_monolithic.commit",
+        command: makeCommandId("commit"),
         title: i18n.Translations.commit(),
     };
     sourceControl.quickDiffProvider = quickDiffProvider;

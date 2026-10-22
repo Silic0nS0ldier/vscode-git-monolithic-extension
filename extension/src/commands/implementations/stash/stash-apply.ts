@@ -3,7 +3,7 @@ import type { AbstractRepository } from "../../../repository/repository-class/Ab
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { pickStash } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"stashApply"> {
     async function stashApply(repository: AbstractRepository): Promise<void> {
         const placeHolder = i18n.Translations.pickStashToApply();
         const stash = await pickStash(repository, placeHolder);

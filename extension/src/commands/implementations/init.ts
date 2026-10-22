@@ -8,7 +8,7 @@ import { makeCommandId, type ScmCommand } from "../helpers.js";
 export function createCommand(
     git: Git,
     model: Model,
-): ScmCommand {
+): ScmCommand<"init"> {
     async function init(skipFolderPrompt = false): Promise<void> {
         let repositoryPath: string | undefined = undefined;
         let askToOpen = true;

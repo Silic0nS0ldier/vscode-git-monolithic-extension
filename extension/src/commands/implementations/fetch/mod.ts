@@ -1,9 +1,8 @@
-import type { ScmCommand } from "../../helpers.js";
 import * as fetchAll from "./fetch-all.js";
 import * as fetchPrune from "./fetch-prune.js";
 import * as fetch from "./fetch.js";
 
-export function createCommands(): ScmCommand[] {
+export function createCommands() {
     return [
         fetch.createCommand(),
         fetchAll.createCommand(),

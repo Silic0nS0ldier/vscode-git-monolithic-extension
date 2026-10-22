@@ -42,7 +42,7 @@ export async function cleanAll(repository: AbstractRepository): Promise<void> {
     }
 }
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"cleanAll"> {
     return {
         commandId: makeCommandId("cleanAll"),
         method: cleanAll,

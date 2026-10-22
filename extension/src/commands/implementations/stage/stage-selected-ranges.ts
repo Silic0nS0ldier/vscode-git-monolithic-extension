@@ -22,7 +22,7 @@ function getEOLChar(eol: EndOfLine): string {
 // "past" diff state shows as git:/... and is readonly
 // This command relies on some hackery, as the original implementation relies on an experimental
 // API surface that will be removed in favour of something different.
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand {
+export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"stageSelectedRanges"> {
     async function stageSelectedRanges(fileUri: unknown, ..._rest: unknown[]): Promise<void> {
         assert(fileUri instanceof Uri, "API has changed");
 

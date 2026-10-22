@@ -3,7 +3,7 @@ import { Resource } from "../../../repository/Resource.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { categorizeResourceByResolution, stageConflicts, stageDeletionConflict } from "./helpers.js";
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"stageAllMerge"> {
     async function stageAllMerge(repository: AbstractRepository): Promise<void> {
         const resources = repository.sourceControlUI.mergeGroup.resourceStates.get().filter(s =>
             s instanceof Resource

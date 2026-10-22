@@ -32,7 +32,7 @@ export async function publish(repository: AbstractRepository): Promise<void> {
     }
 }
 
-export function createCommand(): ScmCommand {
+export function createCommand(): ScmCommand<"publish"> {
     async function publishFn(repository: AbstractRepository): Promise<void> {
         await publish(repository);
     }
