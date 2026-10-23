@@ -41,7 +41,6 @@
     "command.commitAllNoVerify": "Commit All (No Verify)",
     "command.commitAllSignedNoVerify": "Commit All (Signed Off, No Verify)",
     "command.commitAllAmendNoVerify": "Commit All (Amend, No Verify)",
-    "command.restoreCommitTemplate": "Restore Commit Template",
     "command.undoCommit": "Undo Last Commit",
     "command.checkout": "Checkout to...",
     "command.checkoutDetached": "Checkout to (Detached)...",

@@ -25,7 +25,6 @@ import * as rebase from "./implementations/rebase/mod.js";
 import * as refresh from "./implementations/refresh.js";
 import * as remote from "./implementations/remote/mod.js";
 import * as rename from "./implementations/rename.js";
-import * as restoreCommitTemplate from "./implementations/restore-commit-template.js";
 import * as revealInExplorer from "./implementations/reveal-in-explorer.js";
 import * as setLogLevel from "./implementations/set-log-level.js";
 import * as stage from "./implementations/stage/mod.js";
@@ -83,7 +82,6 @@ export function registerCommands(
         refresh.createCommand(),
         ...remote.createCommands(),
         rename.createCommand(),
-        restoreCommitTemplate.createCommand(),
         revealInExplorer.createCommand(),
         setLogLevel.createCommand(outputChannel),
         ...stage.createCommands(model, outputChannel),

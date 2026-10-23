@@ -36,8 +36,7 @@ after(async () => {
 const scenario = createScenario(() => page);
 
 scenario("the commit template is pre-filled into the input box, comment stripped", async () => {
-    // `restoreCommitTemplate` is hidden from the palette (`"when": "false"`): the template
-    // reaches the input box on its own, via `commitTemplate` on every model refresh.
+    // The template reaches the input box on its own, via `commitTemplate` on every model refresh.
     const view = await openScmView(page);
 
     const text = await pollUntil("the template to be restored", () => scmInputText(view), value => value !== "");
