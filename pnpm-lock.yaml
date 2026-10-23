@@ -281,8 +281,8 @@ importers:
         specifier: ^1.5.2
         version: 1.5.2(tslib@2.8.1)
       core-js-pure:
-        specifier: ^3.50.0
-        version: 3.50.0
+        specifier: ^3.51.0
+        version: 3.51.0
       ignore:
         specifier: ^7.0.13
         version: 7.0.13
@@ -2463,6 +2463,9 @@ packages:
 
   core-js-pure@3.50.0:
     resolution: {integrity: sha512-6GP3Pxz4IKyWjAfa747vIu/jilB5z29JWROLqH/b+pXVcpgh6tM06ZIBwSuglgVqzDYURhOK6oEzTrG0bCHitA==}
+
+  core-js-pure@3.51.0:
+    resolution: {integrity: sha512-NE4SFDJ+qzQeqHG2vVSNwopzS6zZNPYJ5kinIqs+OofTqGzOmICgT89E/yvS9XY7rwb3eU1utWXTJ9nVFqv74A==}
 
   croner@10.0.1:
     resolution: {integrity: sha512-ixNtAJndqh173VQ4KodSdJEI6nuioBWI0V1ITNKhZZsO0pEMoDxz539T4FTTbSZ/xIOSuDnzxLVRqBVSvPNE2g==}
@@ -6886,6 +6889,8 @@ snapshots:
   convert-to-spaces@2.0.1: {}
 
   core-js-pure@3.50.0: {}
+
+  core-js-pure@3.51.0: {}
 
   croner@10.0.1: {}
 
