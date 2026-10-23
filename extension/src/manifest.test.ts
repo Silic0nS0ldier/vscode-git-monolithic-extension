@@ -6,7 +6,6 @@ import { globSync, readFileSync } from "node:fs";
  * Pre-existing problems, as `<code> <subject>`. Entries must be removed once fixed; stale entries fail the test.
  */
 const KNOWN_ISSUES = new Set([
-    "unreachable-command git_monolithic.restoreCommitTemplate",
     "unused-nls-key config.discardAllScope",
     "unused-nls-key config.alwaysShowStagedChangesResourceGroup",
     "unused-nls-key config.untrackedChanges",

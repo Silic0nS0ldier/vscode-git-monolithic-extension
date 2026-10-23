@@ -63,7 +63,6 @@ export type CommandName =
     | "removeRemote"
     | "rename"
     | "renameBranch"
-    | "restoreCommitTemplate"
     | "revealInExplorer"
     | "setLogLevel"
     | "showOutput"

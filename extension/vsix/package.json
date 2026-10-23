@@ -295,12 +295,6 @@
                 "enablement": "config.git_monolithic.enabled"
             },
             {
-                "command": "git_monolithic.restoreCommitTemplate",
-                "title": "%command.restoreCommitTemplate%",
-                "category": "Git",
-                "enablement": "config.git_monolithic.enabled"
-            },
-            {
                 "command": "git_monolithic.undoCommit",
                 "title": "%command.undoCommit%",
                 "category": "Git",
@@ -714,10 +708,6 @@
                 {
                     "command": "git_monolithic.commitAllAmendNoVerify",
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && config.git_monolithic.allowNoVerifyCommit && git_monolithic.context.openRepositoryCount != 0"
-                },
-                {
-                    "command": "git_monolithic.restoreCommitTemplate",
-                    "when": "false"
                 },
                 {
                     "command": "git_monolithic.revealInExplorer",
