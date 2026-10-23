@@ -284,8 +284,8 @@ importers:
         specifier: ^3.50.0
         version: 3.50.0
       ignore:
-        specifier: ^7.0.12
-        version: 7.0.12
+        specifier: ^7.0.13
+        version: 7.0.13
       just-debounce:
         specifier: ^1.1.0
         version: 1.1.0
@@ -3076,6 +3076,10 @@ packages:
 
   ignore@7.0.12:
     resolution: {integrity: sha512-/8UvqAPU9DGTI9k4mxtf49U37Isfwr8Uts96+SBHIkFxPJnHS0Ew4f00sM4Scd8V8EjM0jUNtVDdv1kPdt35lg==}
+    engines: {node: '>= 4'}
+
+  ignore@7.0.13:
+    resolution: {integrity: sha512-2E8Q6rh+1RRSq/YdaGsNfXsEZy9FVqv6BSSrkmZJP7BnaoPnRfKL+YaofPvP+5rzdk144qSm6i4+hvPgUcbV4Q==}
     engines: {node: '>= 4'}
 
   import-in-the-middle@3.3.2:
@@ -7579,6 +7583,8 @@ snapshots:
   ignore@5.3.2: {}
 
   ignore@7.0.12: {}
+
+  ignore@7.0.13: {}
 
   import-in-the-middle@3.3.2:
     dependencies:
