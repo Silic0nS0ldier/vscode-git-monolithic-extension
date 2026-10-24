@@ -34,7 +34,7 @@ const buildtools = name => ({
 export const tools = {
     bazel: {
         // renovate: datasource=github-releases depName=bazelbuild/bazelisk
-        version: "v1.29.0",
+        version: "v1.30.0",
         platforms: {
             "linux-x86_64": {
                 url: "https://github.com/bazelbuild/bazelisk/releases/download/{version}/bazelisk-linux-amd64",
