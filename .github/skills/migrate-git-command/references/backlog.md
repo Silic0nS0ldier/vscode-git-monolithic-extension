@@ -24,8 +24,8 @@ parser was deleted rather than migrated — nothing called it.
 
 `add [-A|-u] -- <paths>` → `api/add/mod.ts` is done, baselined by the `add` suite.
 `rm -- <paths>` → `api/rm/mod.ts` is done, baselined by the `rm` suite.
+`reset --hard|--soft <treeish>` → `api/reset/mod.ts` is done, baselined by the `reset` suite.
 
-- `reset --hard|--soft <treeish>` → `api/reset/mod.ts`
 - revert: `branch` probe + `reset -q <treeish> -- <paths>` / `rm --cached -r`
   → `api/reset/paths.ts`, `api/rm/cached.ts`
 - `checkout -q [--track][--detach] [treeish] [-- paths]`, `checkout -- .`
