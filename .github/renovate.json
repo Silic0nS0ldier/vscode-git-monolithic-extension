@@ -175,8 +175,8 @@
                 "@typescript/native",
                 "typescript"
             ],
-            "ignoreUnstable": true,
-            "description": "TypeScript native (TS 7) is pinned to dev pre-releases (e.g. 7.1.0-beta). Ignore newer pre-release versions, which are published frequently and are unstable."
+            "allowedVersions": "!/-dev\\./",
+            "description": "TypeScript native (TS 7) is pinned to a beta pre-release (e.g. 7.1.0-beta). ignoreUnstable does not apply because the current version is itself unstable, so disallow the frequently-published -dev.* builds via allowedVersions instead."
         },
         {
             "matchManagers": [
