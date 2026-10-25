@@ -172,6 +172,17 @@
                 "npm"
             ],
             "matchDepNames": [
+                "@typescript/native",
+                "typescript"
+            ],
+            "ignoreUnstable": true,
+            "description": "TypeScript native (TS 7) is pinned to dev pre-releases (e.g. 7.1.0-beta). Ignore newer pre-release versions, which are published frequently and are unstable."
+        },
+        {
+            "matchManagers": [
+                "npm"
+            ],
+            "matchDepNames": [
                 "renovate"
             ],
             "schedule": [
