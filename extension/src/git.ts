@@ -12,6 +12,7 @@ import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/lis
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
+import { reset as gitReset } from "monolithic-git-interop/api/reset/mod";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showCdup } from "monolithic-git-interop/api/rev-parse/show-cdup";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
@@ -669,8 +670,12 @@ export class Repository {
     }
 
     async reset(treeish: string, hard: boolean = false): Promise<void> {
-        const args = ["reset", hard ? "--hard" : "--soft", treeish];
-        await this.exec(args);
+        const result = await gitReset(this.#git._context, this.#repositoryRoot, treeish, {
+            env: cliEnv(this.git.env, "reset"),
+            mode: hard ? "hard" : "soft",
+        });
+
+        throwOnCliError(result, "reset");
     }
 
     async revert(treeish: string, paths: string[]): Promise<void> {
