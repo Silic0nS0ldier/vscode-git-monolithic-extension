@@ -168,8 +168,8 @@ catalogs:
       specifier: ^25.9.9
       version: 25.9.9
     ava:
-      specifier: ^8.1.0
-      version: 8.1.0
+      specifier: ^8.1.1
+      version: 8.1.2
     cleye:
       specifier: ^2.7.0
       version: 2.7.0
@@ -232,7 +232,7 @@ importers:
         version: 25.9.9
       ava:
         specifier: 'catalog:'
-        version: 8.1.0(rollup@4.65.0)(supports-color@7.2.0)
+        version: 8.1.2(rollup@4.65.0)(supports-color@7.2.0)
 
   build_defs/rollup_bundle:
     dependencies:
@@ -307,7 +307,7 @@ importers:
         version: 1.140.0
       ava:
         specifier: 'catalog:'
-        version: 8.1.0(rollup@4.65.0)(supports-color@7.2.0)
+        version: 8.1.2(rollup@4.65.0)(supports-color@7.2.0)
       monolithic-vscode-manifest:
         specifier: workspace:^
         version: link:../packages/vscode-manifest
@@ -363,7 +363,7 @@ importers:
         version: 6.5.0
       ava:
         specifier: 'catalog:'
-        version: 8.1.0(rollup@4.65.0)(supports-color@7.2.0)
+        version: 8.1.2(rollup@4.65.0)(supports-color@7.2.0)
       into-stream:
         specifier: ^9.1.0
         version: 9.1.0
@@ -379,7 +379,7 @@ importers:
         version: 25.9.9
       ava:
         specifier: 'catalog:'
-        version: 8.1.0(rollup@4.65.0)(supports-color@7.2.0)
+        version: 8.1.2(rollup@4.65.0)(supports-color@7.2.0)
 
   packages/wasm:
     devDependencies:
@@ -2196,8 +2196,8 @@ packages:
   async-sema@3.1.1:
     resolution: {integrity: sha512-tLRNUXati5MFePdAk8dw7Qt7DpxPB60ofAgn8WRhW6a2rcimZnYBP9oxHiv0OHy+Wz7kPMG+t4LGdt31+4EmGg==}
 
-  ava@8.1.0:
-    resolution: {integrity: sha512-qGT7MZBJK4PSgrfg0yYIWRl9+LoXTIgNuGgrQ4PrIlQN2OpUae1gLmyEqZbUyTjR2J113sRreoqXTE0NqudwIw==}
+  ava@8.1.2:
+    resolution: {integrity: sha512-oJnF53liq0Sf5K0AzZ7GwkH6HxwgsqukGMIOb/hV9QnTKlzj3lV6EXLHJksvlBcHOop6cqdAWa00u8uzqwpxFg==}
     engines: {node: ^22.20 || ^24.12 || >=26}
     hasBin: true
     peerDependencies:
@@ -2624,8 +2624,8 @@ packages:
   email-addresses@5.0.0:
     resolution: {integrity: sha512-4OIPYlA6JXqtVn8zpHpGiI7vE6EQOAg16aGnDMIAlZVinnoZ8208tW1hAbjWydgN/4PLTT9q+O1K6AH/vALJGw==}
 
-  emittery@2.1.0:
-    resolution: {integrity: sha512-cPP/ddRdWhEQz7+R/QJi22O2iA73YuNWJRgDM2SUVEKA3XRPiv9f5cfGb508s+124sEBlnewHq/CiSOuIyewHg==}
+  emittery@2.2.0:
+    resolution: {integrity: sha512-zpmLSuVIqrtTPDR2IYiTbxXB6XgrS7+rRk5uT4w6qgmxeNvtdnSaAOGNNbVokgm+0F6zrRufshUfSlnsPc7d8g==}
     engines: {node: '>=22'}
 
   emoji-regex@10.6.0:
@@ -3939,6 +3939,10 @@ packages:
     resolution: {integrity: sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==}
     engines: {node: '>=14'}
     hasBin: true
+
+  pretty-ms@10.0.0:
+    resolution: {integrity: sha512-6BWuxY2dCNgT45VnGzZcfNy7WeLqXiZqhhy4aHThTE6KI56R2ZBw9HQ7spPFKYchDizvJbPxTEknIpmW4FSmQA==}
+    engines: {node: '>=22'}
 
   pretty-ms@9.3.1:
     resolution: {integrity: sha512-HzMy3Geq23nVALD/M2LliU+F+M+gVNsvkQWWqeBZ8HDiCgzo6YPJ/Omrmtq24EFrIsk0a3EkQGEd7bDOo+IhGA==}
@@ -6591,7 +6595,7 @@ snapshots:
 
   async-sema@3.1.1: {}
 
-  ava@8.1.0(rollup@4.65.0)(supports-color@7.2.0):
+  ava@8.1.2(rollup@4.65.0)(supports-color@7.2.0):
     dependencies:
       '@vercel/nft': 1.11.0(rollup@4.65.0)(supports-color@7.2.0)
       acorn: 8.19.0
@@ -6611,7 +6615,7 @@ snapshots:
       concordance: 5.0.4
       currently-unhandled: 0.4.1
       debug: 4.4.3(supports-color@7.2.0)
-      emittery: 2.1.0
+      emittery: 2.2.0
       figures: 6.1.0
       globby: 16.2.4
       ignore-by-default: 2.1.0
@@ -6625,7 +6629,7 @@ snapshots:
       package-config: 5.0.0
       picomatch: 4.0.7
       plur: 6.0.0
-      pretty-ms: 9.3.1
+      pretty-ms: 10.0.0
       resolve-cwd: 3.0.0
       slash: 5.1.0
       stack-utils: 2.0.6
@@ -7040,7 +7044,7 @@ snapshots:
 
   email-addresses@5.0.0: {}
 
-  emittery@2.1.0: {}
+  emittery@2.2.0: {}
 
   emoji-regex@10.6.0: {}
 
@@ -7443,7 +7447,7 @@ snapshots:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       fast-glob: 3.3.3
-      ignore: 7.0.12
+      ignore: 7.0.13
       is-path-inside: 4.0.0
       micromatch: 4.0.8
       slash: 5.1.0
@@ -8556,6 +8560,8 @@ snapshots:
   prelude-ls@1.2.1: {}
 
   prettier@3.9.10: {}
+
+  pretty-ms@10.0.0: {}
 
   pretty-ms@9.3.1:
     dependencies:
