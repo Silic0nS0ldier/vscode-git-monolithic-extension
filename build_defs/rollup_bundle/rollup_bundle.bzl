@@ -4,8 +4,12 @@ Rollup bundle rule.
 
 load("@aspect_rules_js//js:defs.bzl", "js_run_binary")
 
-def _rollup_bundle(name, srcs, entry_points, external_modules, **kwargs):
-    # type: (string, list[string], list[string], list[string]) -> None
+def _rollup_bundle(
+        name: str,
+        srcs: select[list[Label]],
+        entry_points: list[str],
+        external_modules: list[str],
+        **kwargs: Any) -> None:
     args = ["--out-dir", name + "_"]
     outs = []
 

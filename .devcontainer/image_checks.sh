@@ -13,7 +13,7 @@ fail() {
 
 # DotSlash stubs resolve and cache their payload on first run, which needs
 # network access, so only the stub plumbing is checked here.
-for tool in bazel buildifier buildozer dprint gh jscpd node pnpm rustup starpls unused-deps; do
+for tool in bazel buildifier buildozer dprint gh jscpd node pnpm rustup unused-deps; do
   [[ -x "/usr/bin/${tool}" ]] || fail "/usr/bin/${tool} is missing or not executable"
   read -r shebang < "/usr/bin/${tool}"
   [[ "${shebang}" == "#!/usr/bin/env dotslash" ]] || fail "/usr/bin/${tool} is not a DotSlash stub"
