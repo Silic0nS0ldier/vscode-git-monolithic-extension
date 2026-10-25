@@ -126,13 +126,10 @@ extension writes asynchronously.
 A failing scenario saves a screenshot to `.bazel/testlogs/integration_tests/<suite>_test/test.outputs/`.
 Pass `--test_env=ITEST_SCREENSHOTS=1` to capture every scenario while authoring or debugging.
 
-Pass `--test_env=ITEST_COVERAGE=1` to collect V8 coverage of the extension into
-`test.outputs/coverage/`: one `coverage-*.json` per process that ran its code (the extension host,
-plus askpass if prompted), in the `NODE_V8_COVERAGE` format, of the shipped bundle; `summary.txt`
-(byte coverage and never-called functions of the bundle); and `sources/`, the same mapped back to
-the original sources (`index.html`, `lcov.info`, `coverage-final.json`, `summary.txt`). The mapping
-uses the hidden source maps `rollup_bundle` writes to `bundle_/sourcemaps/`, which embed the sources
-and never reach the VSIX.
+`bazel coverage` collects V8 coverage of the extension from each process that ran its code (the
+extension host, plus askpass if prompted) and maps it back to the original sources via the hidden
+source maps `rollup_bundle` writes to `bundle_/sourcemaps/`, which embed the sources and never reach
+the VSIX. `//extension:bundle` is only a test dependency when coverage is enabled.
 
 `openWorkbench` returns only once the repository's first status refresh has landed, so scenarios
 never absorb activation time. Every harness wait (`pollUntil`, Playwright's default timeout, each
