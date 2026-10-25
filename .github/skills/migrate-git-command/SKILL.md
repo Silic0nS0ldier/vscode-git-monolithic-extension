@@ -1,7 +1,7 @@
 ---
 name: migrate-git-command
-description: 'Migrate a raw git CLI invocation out of the VSCode extension into the `monolithic-git-interop` package (`packages/git/src/api/*`). Use when moving `this.exec([...])` / `this.stream([...])` calls from `extension/src/git.ts` or `extension/src/git/git-class/*` into the git wrapper, when adding a new `packages/git` API module, or when asked to "migrate <git command> to packages/git". Covers the baseline-integration-test-first workflow, the `Result` module shape, ava + `.it.test.ts` test pairing, call-site rewiring, and the verification loop.'
-argument-hint: 'the git command to migrate, e.g. "cat-file -s" or "stash push"'
+description: 'Migrate a raw git CLI invocation out of the VSCode extension into the `monolithic-git-interop` package (`packages/git/src/api/*`). Use when moving `this.exec([...])` / `this.stream([...])` calls from `extension/src/git.ts` or `extension/src/git/git-class/*` into the git wrapper, when adding a new `packages/git` API module, when asked to "migrate <git command> to packages/git", or to take the next item off the migration backlog. Covers the baseline-integration-test-first workflow, the `Result` module shape, ava + `.it.test.ts` test pairing, call-site rewiring, and the verification loop.'
+argument-hint: 'the git command to migrate, e.g. "cat-file -s" or "stash push" (omit to take the next backlog item)'
 ---
 
 # Migrating a git command into `packages/git`
@@ -27,6 +27,9 @@ deferred pending API design.
 
 ### 1. Locate the invocation and its real UI entry point
 
+If no command was named, re-derive the backlog (search for the raw calls below), then take the
+first remaining entry in [backlog.md](./references/backlog.md).
+
 Search `extension/src/` for the raw call (`this.exec([`, `this.stream([`). Note the exact
 argv, the env, the error codes mapped from stdout/stderr, and the output-channel logging.
 
@@ -40,15 +43,21 @@ If no UI path can be driven headlessly, say so and agree an exception before con
 (example: `rev-parse --show-cdup` only runs when workspace trust is off, which needed an
 `UNTRUSTED_SUITES` entry — a code-server started without `--disable-workspace-trust`).
 
+Check whether a suite already drives that entry point: search `integration_tests/src/` for
+its UI label. A scenario that only opens a picker or declines a prompt does not run the
+command. An existing suite is a baseline to keep green, not a reason to skip writing one —
+add a dedicated suite for the paths it misses (the `commit` suite already ran `reset --soft`
+once; the `reset` suite added merge commits and unstaged and untracked changes).
+
 ### 2. Write the extension integration test FIRST
 
 This is the behaviour baseline. It must pass **before** any production code changes.
 
 1. `integration_tests/fixtures/<family>.sh` — shapes the repository. Start with
-   `#!/usr/bin/env bash`, `# shellcheck shell=bash`, `set -euo pipefail`; args are
-   `$1` = git binary, `$2` = workspace. Model
+   `#!/usr/bin/env bash`, `# shellcheck shell=bash`, `set -euo pipefail`; the first
+   positional argument is the git binary and the second the workspace. Model
    [fixtures/refs.sh](../../../integration_tests/fixtures/refs.sh). Use a local bare repo as
-   the "remote"; nothing may touch the network.
+   the "remote"; nothing may touch the network. **Make it executable** (`chmod 755`).
 2. `integration_tests/src/<family>.test.ts` — `before` opens the workbench, `createScenario`
    runs the ordered scenarios. Scenarios in a file share one editor and one repository.
 3. No BUILD edit: [integration_tests/BUILD.bazel](../../../integration_tests/BUILD.bazel)
@@ -75,7 +84,8 @@ Two files, both picked up automatically by the BUILD globs:
 - Integration helpers come from
   [api/helpers.it.stub.ts](../../../packages/git/src/api/helpers.it.stub.ts): `gitCtx`,
   `await using repo = await tempGitRepo(true)`, `run(cwd, args, env?)`, `read(cwd, args)`.
-  Name tests `<fn>.name + " - does the thing"`.
+  `true` adds an initial commit; use `tempGitRepo()` to test an unborn branch or a root
+  commit. Name tests `<fn>.name + " - does the thing"`.
 - If the module needs to dispatch on error _type_ (not just `isErr`), write that test first —
   a stub-only suite hides type-erasure bugs.
 
@@ -101,7 +111,11 @@ Rules ([CODE_STYLE.md](../../../packages/git/CODE_STYLE.md)):
 - **`detach()` every field extracted by regex from a large buffer** — V8 `SlicedString`s pin
   the entire buffer otherwise. This is a real leak, not a theoretical one.
 - Preserve behaviour exactly: argv, error codes and logging stay identical. If the original
-  has a bug, reproduce it and leave a `// TODO` naming the discrepancy and the fix.
+  has a bug, reproduce it, leave a `// TODO` naming the discrepancy and the fix, and pin it
+  with an `.it.test.ts` case (`reset` keeps its missing `--`).
+- A variant no UI path reaches is kept if the `Repository` interface exposes it (cover it with
+  package tests only, like `reset --hard`) and deleted if nothing calls it (like the
+  path-less `diff` family).
 
 Add the subpath to `exports` in
 [packages/git/package.json](../../../packages/git/package.json) only if the generic
@@ -113,6 +127,9 @@ Add the subpath to `exports` in
   `import { list as listRefs } from "monolithic-git-interop/api/for-each-ref/list";`
 - The extension is the error boundary: `unwrapOk(...)` to throw, or `isErr`/`unwrap` to map
   onto `GitErrorCodes` in `extension/src/git/error.ts`.
+- For a command with no output, follow `add`, `rm` and `reset` in `git.ts`: pass
+  `env: cliEnv(this.git.env, "<command>")` and end with `throwOnCliError(result, "<command>")`.
+  This keeps the environment and the `GitError` that callers see the same as before.
 - Delete the now-unreachable branch in `extension/src/git.ts` and any parser file it used.
   Leaving them behind fails `knip`.
 - If a call site outside `git.ts` used `repository.exec` directly, give it a named
@@ -132,15 +149,24 @@ dprint fmt
 ```
 
 `--local_test_jobs=1` is required: parallel browser suites starve browserless.
-`--nocache_test_results` rules out a stale-cache pass.
+`--nocache_test_results` rules out a stale-cache pass. Confirm every scenario actually ran:
+`grep ✔ .bazel/testlogs/integration_tests/<family>_test/test.log`.
 
-### 7. Stop for review
+### 7. Update the backlog and stop for review
+
+Move the command to the _Done_ table in [backlog.md](./references/backlog.md), naming its
+baseline suite, and drop any entry that re-deriving showed to be stale. This goes in the same
+commit.
 
 One command per commit. Do not batch. Summarise: the git command, the new module, the call
 sites rewired, the code deleted, and the baseline suite that passed untouched.
 
 ## Traps
 
+- A fixture without the executable bit fails the whole suite before any scenario runs, with
+  only `panic: exit status 126` from `svcinit` at the end of `test.log`.
+- Skill arguments are substituted into this file, so a literal dollar-digit placeholder in
+  prose is replaced by an empty string. Write "the first argument" instead.
 - A same-named existing package function may not have matching semantics. `config read()` is
   scope-forced (`--local`/`--global`); the extension's unscoped `git config --get` needed a
   new `readEffective()`. Check constraints before declaring a "pure rewire".

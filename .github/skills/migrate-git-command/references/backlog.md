@@ -1,72 +1,101 @@
-# Remaining migration backlog
+# Migration backlog
 
-Derived from `extension/src/git.ts` as of 2026-08-15. **Re-derive if it looks wrong**: search
-`extension/src/` for `this.exec([` / `this.stream([`; each remaining call is a candidate.
+Derived from [extension/src/git.ts](../../../../extension/src/git.ts) on 2026-10-25. **Re-derive
+before trusting it**: every `this.exec(` / `this.stream(` call left in `extension/src/` is a
+candidate, and an entry here with no matching call is stale.
 
-Scope is limited to SCM-UI-reachable commands. `blame`, `apply`, `merge-base` and public
-`hashObject` are backlog. Stdin-driven commands (`commit --file -`,
-`hash-object --stdin` + its `update-index --cacheinfo` pair, `check-ignore --stdin`) are
-excluded pending API design review.
+Scope is SCM-UI-reachable commands. Work top to bottom; phases are ordered by risk.
+
+## Out of scope
+
+Stdin-driven commands, pending API design review:
+
+- `commit --file -` (`commit`)
+- `hash-object --stdin -w` + `update-index --cacheinfo` (`stage`)
+- `check-ignore -v -z --stdin` (`repository-class/check-ignore.ts`)
 
 ## Done
 
-Phase 0 enablers (`scm_itest` macro, typed `NonZeroExitDetails`, the `untrusted` suite mode)
-and Phase 1 reads: `for-each-ref` list + branch, `show -s --format`, `stash list`,
-`config --get commit.template`, `log --oneline --cherry`, `rev-parse --show-cdup`.
+| Command                                  | Module                              | Baseline suite    |
+| ---------------------------------------- | ----------------------------------- | ----------------- |
+| `for-each-ref` (list, single branch)     | `for-each-ref/list.ts`, `branch.ts` | `refs`            |
+| `show -s --format`                       | `show.ts`                           | `commit`          |
+| `stash list`                             | `stash/list.ts`                     | `stash`           |
+| `config --get commit.template`           | `config/read.ts` (`readEffective`)  | `commit-template` |
+| `log --oneline --cherry`                 | `log/cherry.ts`                     | `pull`            |
+| `rev-parse --show-cdup`                  | `rev-parse/show-cdup.ts`            | `untrusted`       |
+| `cat-file -s`                            | `cat-file/size.ts`                  | `object`          |
+| `diff [--cached] -- <path>`              | `diff/path.ts`                      | `diff`            |
+| `fetch [remote [ref]] [--all] [--prune]` | `fetch/mod.ts`                      | `fetch`           |
+| `add -A\|-u -- <paths>`                  | `add/mod.ts`                        | `add`             |
+| `rm -- <paths>`                          | `rm/mod.ts`                         | `rm`              |
+| `reset --soft\|--hard <treeish>`         | `reset/mod.ts`                      | `reset`           |
 
-Phase 2 is complete: `cat-file -s`, baselined by the `object` suite, and
-`diff [--cached] -- <path>` → `api/diff/path.ts`, baselined by the `diff` suite. The
-unreachable half of the `diff` family (`diff [--cached]` with no path, `diff <ref>`,
-`diff <a>...<b>`, `diff <blob> <blob>`) plus the `--name-status -z --diff-filter=ADMR`
-parser was deleted rather than migrated — nothing called it.
+Older migrations (`init`, `rev-parse --show-toplevel`/`--git-dir`, `symbolic-ref`, `status`,
+`ls-files`, `ls-tree`, `clean`, remotes listing, tracking branches) predate the baseline-first
+workflow and have no dedicated suite.
 
-## Phase 3 — index & worktree mutations
+The unreachable half of the `diff` family (`diff [--cached]` with no path, `diff <ref>`,
+`diff <a>...<b>`, `diff <blob> <blob>`, the `--name-status` parser) was deleted, not migrated.
 
-`add [-A|-u] -- <paths>` → `api/add/mod.ts` is done, baselined by the `add` suite.
-`rm -- <paths>` → `api/rm/mod.ts` is done, baselined by the `rm` suite.
-`reset --hard|--soft <treeish>` → `api/reset/mod.ts` is done, baselined by the `reset` suite.
+## Remaining
 
-- revert: `branch` probe + `reset -q <treeish> -- <paths>` / `rm --cached -r`
-  → `api/reset/paths.ts`, `api/rm/cached.ts`
-- `checkout -q [--track][--detach] [treeish] [-- paths]`, `checkout -- .`
-  → `api/checkout/mod.ts`
-- `mv <from> <to>` → `api/mv/mod.ts`
-- `update-ref -d <ref>` → `api/update-ref/delete.ts`
-- `submodule update -- <paths>` (chunked) → `api/submodule/update.ts`
+Each entry is `git.ts` method: command → target module. "Reached by" names the UI entry point
+and any existing suite that already drives it — extend or reuse that baseline rather than
+duplicating it.
 
-## Phase 4 — branch & tag mutations
+### Phase 3 — index & worktree mutations
 
-- `checkout -q -b <n> --no-track` / `branch -q <n>` → `api/branch/create.ts`
-- `branch -d|-D` → `api/branch/delete.ts`
-- `branch -m` → `api/branch/rename.ts`
-- `branch --set-upstream-to` → `api/branch/set-upstream.ts`
-- `tag [-a -m]` / `tag -d` → `api/tag/create.ts`, `api/tag/delete.ts`
+- `revert`: a `git branch` probe, then `reset -q <treeish> -- <paths>`, or `rm --cached -r --
+  <paths>` when there are no branches; chunked, `.` when no paths; a "needs merge" failure on
+  stdout is swallowed → `reset/paths.ts`, `rm/cached.ts`. Reached by _Unstage Changes_ (the
+  `scm` suite's unstage scenario drives the `reset -q` path) and by _Undo Last Commit_ on a
+  root commit (the `rm --cached` path, after `deleteRef`).
+- `deleteRef`: `update-ref -d <ref>` → `update-ref/delete.ts`. Reached only by _Undo Last
+  Commit_ on a root commit; migrate alongside `revert`.
+- `checkout`: `checkout -q [--track] [--detach] [treeish] [-- <paths>]`, paths chunked; maps
+  "Please commit your changes or stash them" → `checkout/mod.ts`.
+- `move`: `mv <from> <to>` → `mv/mod.ts`.
+- `updateSubmodules`: `submodule update -- <paths>`, chunked → `submodule/update.ts`. Needs
+  `GIT_EXEC_PATH` (see the skill's traps).
 
-## Phase 5 — stash mutations
+### Phase 4 — branch & tag mutations
+
+- `branch`: `checkout -q -b <name> --no-track [ref]` / `branch -q <name> [ref]` →
+  `branch/create.ts`
+- `deleteBranch`: `branch -d|-D <name>` → `branch/delete.ts`
+- `renameBranch`: `branch -m <name>` → `branch/rename.ts`
+- `tag`: `tag [-a <name> -m <message>|<name>]` → `tag/create.ts`
+- `deleteTag`: `tag -d <name>` → `tag/delete.ts`
+
+### Phase 5 — stash mutations
 
 Error codes to preserve: `NoLocalChanges`, `NoStashFound`, `LocalChangesOverwritten`,
-`StashConflict`.
+`StashConflict` (the last is matched on **stdout**). The `stash` suite only lists stashes; it
+does not pop one.
 
-- `stash push [-u] [-m]` → `api/stash/push.ts`
-- `stash pop|apply [stash@{n}]` → `api/stash/restore.ts`
-- `stash drop [stash@{n}]` → `api/stash/drop.ts`
+- `createStash`: `stash push [-u] [-m <message>]` → `stash/push.ts`
+- `popStash` / `applyStash`: `stash pop|apply [stash@{n}]` → `stash/restore.ts`
+- `dropStash`: `stash drop [stash@{n}]` → `stash/drop.ts`
 
-## Phase 6 — merge & rebase
+### Phase 6 — merge & rebase
 
-- `merge <ref>` → `api/merge/mod.ts`. Conflict is detected from **stdout**, not stderr, so
-  this needs typed `CLIErrors` dispatch through `readToBuffer`.
-- `rebase <branch>` → `api/rebase/mod.ts`
-- `rebase --abort` / `--continue` → `api/rebase/abort.ts`, `api/rebase/continue.ts`
-- `cherry-pick <hash>` → `api/cherry-pick/mod.ts`
+- `merge`: `merge <ref>` → `merge/mod.ts`. Conflict is detected from **stdout**, not stderr,
+  so this needs typed `CLIErrors` dispatch through `readToBuffer`.
+- `rebase`: `rebase <branch>` → `rebase/mod.ts`
+- `rebaseAbort` / `rebaseContinue`: `rebase --abort|--continue` → `rebase/abort.ts`,
+  `rebase/continue.ts`
+- `cherryPick`: `cherry-pick <hash>` → `cherry-pick/mod.ts`
 
-## Phase 7 — network
+### Phase 7 — network
 
-Fixtures create a local bare remote; no external network.
+Fixtures create a local bare remote; no external network. The `pull` suite drives _Pull_ and
+_Sync_ but declines the rebased-branch warning, so neither the pull nor the push runs.
 
-- `fetch [remote [ref]] [--all] [--prune] [--depth=n]` → `api/fetch/mod.ts`
-- `pull [--tags][--unshallow][-r][remote branch]` → `api/pull/mod.ts`
-- `push [--force-with-lease|--force][-u][--follow-tags][--tags]` → `api/push/mod.ts`
-- `remote add|remove|rename` → `api/repository/remotes/{add,remove,rename}.ts`
-- `clone --progress [--recursive]` → `api/clone/mod.ts`. Progress rides the
-  `CLIContext.stderr` writable; keep the `\r`-split line parser and the `GIT_HTTP_USER_AGENT`
-  env var.
+- `pull`: `pull [--tags] [--unshallow] [-r] [remote branch]` with `GIT_HTTP_USER_AGENT` →
+  `pull/mod.ts`
+- `push`: `push [--force-with-lease|--force] [-u] [--follow-tags] [--tags] [remote [name]]`
+  with `GIT_HTTP_USER_AGENT` → `push/mod.ts`
+- `removeRemote`: `remote remove <name>` → `repository/remotes/remove.ts`
+- `clone`: `clone <url> <folder> --progress [--recursive]` → `clone/mod.ts`. Progress rides
+  the `CLIContext.stderr` writable; keep the `\r`-split line parser and `GIT_HTTP_USER_AGENT`.
