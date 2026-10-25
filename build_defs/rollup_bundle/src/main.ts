@@ -96,9 +96,9 @@ function entryFileNames(chunkInfo: { name: string }): string {
 }
 
 /**
- * Sources are named by where they sit in Bazel's output tree (e.g. `extension/src/main.ts`),
- * rather than relative to the bundle, and npm packages by their package name, not their
- * location in the store.
+ * Sources are named by where they sit in the repository (e.g. `extension/src/main.ts`,
+ * `packages/git/src/api/commit.ts`), rather than relative to the bundle, and third-party
+ * npm packages by their package name, not their location in the store.
  */
 function sourcemapPathTransform(relativeSourcePath: string, sourcemapPath: string): string {
     const absolute = path.resolve(path.dirname(sourcemapPath), relativeSourcePath);
@@ -107,7 +107,10 @@ function sourcemapPathTransform(relativeSourcePath: string, sourcemapPath: strin
     const relative = binIndex === -1
         ? path.relative(process.cwd(), absolute)
         : absolute.slice(binIndex + binDir!.length + 2);
-    return relative.replace(/(^|\/)node_modules\/\.aspect_rules_js\/[^/]+\/node_modules\//g, "$1node_modules/");
+    return relative
+        .replace(/(^|\/)node_modules\/\.aspect_rules_js\/[^/]+\/node_modules\//g, "$1node_modules/")
+        .replace(/^node_modules\/monolithic-git-interop\//, "packages/git/")
+        .replace(/^node_modules\/monolithic-git-wasm\//, "packages/wasm/");
 }
 
 try {

@@ -27,6 +27,11 @@ selects.config_setting_group(
     ],
 )
 
+config_setting(
+    name = "coverage_enabled",
+    values = {"collect_code_coverage": "true"},
+)
+
 filegroup(
     name = "code_server_binary",
     srcs = select({

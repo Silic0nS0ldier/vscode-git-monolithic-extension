@@ -1,0 +1,43 @@
+Do not build the compiler-rt profile runtime on freestanding (`os:none`) targets.
+
+`compiler-rt`'s `profile` library requires hosted C headers (`unistd.h`, `errno.h`, `string.h`)
+that `os:none` targets such as `wasm32-unknown-unknown` do not provide. `bazel coverage` sets
+`collect_code_coverage` across transitions, which selected `clang_rt.profile.static` into the
+wasm32 resource directory even though nothing on `os:none` links it.
+
+--- a/runtimes/BUILD.bazel
++++ b/runtimes/BUILD.bazel
+@@ -40,12 +40,29 @@ config_setting(
+     visibility = ["//visibility:public"],
+ )
+ 
++selects.config_setting_group(
++    name = "_hosted_os",
++    match_any = [
++        "@platforms//os:linux",
++        "@platforms//os:macos",
++        "@platforms//os:windows",
++    ],
++)
++
+ config_setting(
+-    name = "coverage_enabled",
++    name = "_collect_code_coverage",
+     values = {
+         "collect_code_coverage": "true",
+     },
++)
++
++selects.config_setting_group(
++    name = "coverage_enabled",
++    match_all = [
++        ":_hosted_os",
++        ":_collect_code_coverage",
++    ],
+     visibility = ["//visibility:public"],
+ )
+ 
+ selects.config_setting_group(
+
+
+

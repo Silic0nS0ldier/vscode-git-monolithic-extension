@@ -29,9 +29,10 @@ if [[ "$trust" == "untrusted" ]]; then
     trust_args=()
 fi
 
-# `--test_env=ITEST_COVERAGE=1`: the extension host inherits this (the server strips
-# `NODE_OPTIONS`, but not this) and writes V8 coverage on exit. The harness collects it.
-if [[ "${ITEST_COVERAGE:-}" == "1" ]]; then
+# `bazel coverage` sets `COVERAGE_DIR`: the extension host inherits `NODE_V8_COVERAGE`
+# (the server strips `NODE_OPTIONS`, but not this) and writes V8 coverage on exit.
+# The harness maps it back to the sources for Bazel's lcov merger.
+if [[ -n "${COVERAGE_DIR:-}" ]]; then
     export NODE_V8_COVERAGE="${TEST_TMPDIR:-/tmp}/v8-coverage"
 fi
 

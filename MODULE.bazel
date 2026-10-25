@@ -139,7 +139,10 @@ single_version_override(
 single_version_override(
     module_name = "llvm",
     patch_strip = 1,
-    patches = ["//:patches/llvm/0.8.23/0001_repo_contents_cache.patch"],
+    patches = [
+        "//:patches/llvm/0.8.23/0001_repo_contents_cache.patch",
+        "//:patches/llvm/0.8.23/0002_no_wasm_profile_runtime.patch",
+    ],
     version = "0.8.23",
 )
 
