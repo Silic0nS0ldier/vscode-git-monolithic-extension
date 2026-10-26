@@ -58,6 +58,24 @@ export async function resolveRef(ref: string): Promise<string | undefined> {
     }
 }
 
+/** The branch ref `HEAD` points at, or undefined when `HEAD` is detached. */
+export async function symbolicHead(): Promise<string | undefined> {
+    try {
+        return (await git("symbolic-ref", "--quiet", "HEAD")).trim();
+    } catch {
+        return undefined;
+    }
+}
+
+/** Value of a key in the repository's own config, or undefined when it is unset. */
+export async function localConfig(key: string): Promise<string | undefined> {
+    try {
+        return (await git("config", "--local", "--get", key)).trim();
+    } catch {
+        return undefined;
+    }
+}
+
 /** Object name of a revision, abbreviated the way the SCM UI renders it. */
 export async function shortCommit(rev: string): Promise<string> {
     return (await git("rev-parse", rev)).trim().slice(0, 8);
