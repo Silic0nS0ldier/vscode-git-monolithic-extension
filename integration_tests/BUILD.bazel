@@ -107,6 +107,9 @@ itest_service(
     expected_start_duration = "10s",
     http_health_check_address = "http://127.0.0.1:$${PORT}/meta?token=" + BROWSERLESS_TOKEN,
     hygienic = False,
+    # After the browser exits, the launcher still deletes the container and its bundle, which
+    # can outlast the 1s default on a slow runner and end in a needless SIGKILL.
+    shutdown_timeout = "10s",
     target_compatible_with = LINUX_ONLY,
 )
 

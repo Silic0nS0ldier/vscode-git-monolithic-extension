@@ -98,6 +98,16 @@ single_version_override(
     version = "6.7.5",
 )
 
+# `svcinit` panics when a service's process group is already gone (ESRCH) as it is stopped,
+# before its exit is recorded. Wait for that, and tolerate a missing exit in the report.
+# Not yet fixed upstream; drop once it is.
+single_version_override(
+    module_name = "rules_itest",
+    patch_strip = 1,
+    patches = ["//:patches/rules_itest/0.0.61/0001_wait_for_exit_on_esrch.patch"],
+    version = "0.0.61",
+)
+
 single_version_override(
     module_name = "rules_go",
     patch_strip = 1,
