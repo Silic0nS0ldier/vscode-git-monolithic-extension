@@ -47,7 +47,10 @@ def _vsix_package_impl(ctx):
         outputs = [out],
         mnemonic = "VsixPackage",
     )
-    return [DefaultInfo(files = depset([out]))]
+    return [
+        DefaultInfo(files = depset([out])),
+        OutputGroupInfo(unpacked = depset([inputs_dir])),
+    ]
 
 vsix_package = rule(
     implementation = _vsix_package_impl,

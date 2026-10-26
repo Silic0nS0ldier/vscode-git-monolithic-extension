@@ -77,7 +77,7 @@ sh_binary(
     data = [
         ":code_server_binary",
         ":code_server_dist",
-        "//extension/vsix:git_monolithic",
+        "//extension/vsix:git_monolithic_unpacked",
     ],
     target_compatible_with = LINUX_ONLY,
 )
@@ -124,14 +124,14 @@ service_test(
             name = prefix + "code_server_service",
             args = [
                 "$(rootpath :code_server_binary)",
-                "$(rootpath //extension/vsix:git_monolithic)",
+                "$(rootpath //extension/vsix:git_monolithic_unpacked)",
                 "$${PORT}",
                 trust,
             ],
             autoassign_port = True,
             data = [
                 ":code_server_binary",
-                "//extension/vsix:git_monolithic",
+                "//extension/vsix:git_monolithic_unpacked",
             ],
             exe = ":code_server",
             expected_start_duration = "5s",
