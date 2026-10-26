@@ -673,6 +673,11 @@ export class Repository {
     }
 
     async clean(paths: string[]): Promise<void> {
+        // Without paths `git clean` empties the whole work tree, and discarding only tracked changes passes none.
+        if (paths.length === 0) {
+            return;
+        }
+
         unwrapOk(await gitClean(this.#git._context, this.#repositoryRoot, paths, { quiet: true }));
     }
 
