@@ -1,6 +1,7 @@
 import { add as gitAdd } from "monolithic-git-interop/api/add/mod";
 import { hasAny as hasAnyBranch } from "monolithic-git-interop/api/branch/has-any";
 import { size as objectSize } from "monolithic-git-interop/api/cat-file/size";
+import { checkout as gitCheckout } from "monolithic-git-interop/api/checkout/mod";
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
 import { staged as stagedDiff, unstaged as unstagedDiff } from "monolithic-git-interop/api/diff/path";
@@ -490,28 +491,14 @@ export class Repository {
         paths: string[],
         opts: { track?: boolean; detached?: boolean } = Object.create(null),
     ): Promise<void> {
-        const args = ["checkout", "-q"];
-
-        if (opts.track) {
-            args.push("--track");
-        }
-
-        if (opts.detached) {
-            args.push("--detach");
-        }
-
-        if (treeish) {
-            args.push(treeish);
-        }
+        const result = await gitCheckout(this.#git._context, this.#repositoryRoot, treeish, paths, {
+            detach: opts.detached,
+            env: cliEnv(this.git.env, "checkout"),
+            track: opts.track,
+        });
 
         try {
-            if (paths && paths.length > 0) {
-                for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
-                    await this.exec([...args, "--", ...chunk]);
-                }
-            } else {
-                await this.exec(args);
-            }
+            throwOnCliError(result, "checkout");
         } catch (err) {
             if (err instanceof GitError && /Please,? commit your changes or stash them/.test(err.stderr || "")) {
                 err.gitErrorCode = GitErrorCodes.DirtyWorkTree;

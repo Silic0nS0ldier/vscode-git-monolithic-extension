@@ -1,6 +1,6 @@
 # Migration backlog
 
-Derived from [extension/src/git.ts](../../../../extension/src/git.ts) on 2026-10-25. **Re-derive
+Derived from [extension/src/git.ts](../../../../extension/src/git.ts) on 2026-10-26. **Re-derive
 before trusting it**: every `this.exec(` / `this.stream(` call left in `extension/src/` is a
 candidate, and an entry here with no matching call is stale.
 
@@ -16,24 +16,25 @@ Stdin-driven commands, pending API design review:
 
 ## Done
 
-| Command                                  | Module                              | Baseline suite    |
-| ---------------------------------------- | ----------------------------------- | ----------------- |
-| `for-each-ref` (list, single branch)     | `for-each-ref/list.ts`, `branch.ts` | `refs`            |
-| `show -s --format`                       | `show.ts`                           | `commit`          |
-| `stash list`                             | `stash/list.ts`                     | `stash`           |
-| `config --get commit.template`           | `config/read.ts` (`readEffective`)  | `commit-template` |
-| `log --oneline --cherry`                 | `log/cherry.ts`                     | `pull`            |
-| `rev-parse --show-cdup`                  | `rev-parse/show-cdup.ts`            | `untrusted`       |
-| `cat-file -s`                            | `cat-file/size.ts`                  | `object`          |
-| `diff [--cached] -- <path>`              | `diff/path.ts`                      | `diff`            |
-| `fetch [remote [ref]] [--all] [--prune]` | `fetch/mod.ts`                      | `fetch`           |
-| `add -A\|-u -- <paths>`                  | `add/mod.ts`                        | `add`             |
-| `rm -- <paths>`                          | `rm/mod.ts`                         | `rm`              |
-| `reset --soft\|--hard <treeish>`         | `reset/mod.ts`                      | `reset`           |
-| `branch` (any-branch probe)              | `branch/has-any.ts`                 | `unstage`         |
-| `reset -q <treeish> -- <paths>`          | `reset/paths.ts`                    | `unstage`         |
-| `rm --cached -r -- <paths>`              | `rm/cached.ts`                      | `unstage`         |
-| `update-ref -d <ref>`                    | `update-ref/delete.ts`              | `unstage`         |
+| Command                                                   | Module                              | Baseline suite    |
+| --------------------------------------------------------- | ----------------------------------- | ----------------- |
+| `for-each-ref` (list, single branch)                      | `for-each-ref/list.ts`, `branch.ts` | `refs`            |
+| `show -s --format`                                        | `show.ts`                           | `commit`          |
+| `stash list`                                              | `stash/list.ts`                     | `stash`           |
+| `config --get commit.template`                            | `config/read.ts` (`readEffective`)  | `commit-template` |
+| `log --oneline --cherry`                                  | `log/cherry.ts`                     | `pull`            |
+| `rev-parse --show-cdup`                                   | `rev-parse/show-cdup.ts`            | `untrusted`       |
+| `cat-file -s`                                             | `cat-file/size.ts`                  | `object`          |
+| `diff [--cached] -- <path>`                               | `diff/path.ts`                      | `diff`            |
+| `fetch [remote [ref]] [--all] [--prune]`                  | `fetch/mod.ts`                      | `fetch`           |
+| `add -A\|-u -- <paths>`                                   | `add/mod.ts`                        | `add`             |
+| `rm -- <paths>`                                           | `rm/mod.ts`                         | `rm`              |
+| `reset --soft\|--hard <treeish>`                          | `reset/mod.ts`                      | `reset`           |
+| `branch` (any-branch probe)                               | `branch/has-any.ts`                 | `unstage`         |
+| `reset -q <treeish> -- <paths>`                           | `reset/paths.ts`                    | `unstage`         |
+| `rm --cached -r -- <paths>`                               | `rm/cached.ts`                      | `unstage`         |
+| `update-ref -d <ref>`                                     | `update-ref/delete.ts`              | `unstage`         |
+| `checkout -q [--track] [--detach] [treeish] [-- <paths>]` | `checkout/mod.ts`                   | `checkout`        |
 
 Older migrations (`init`, `rev-parse --show-toplevel`/`--git-dir`, `symbolic-ref`, `status`,
 `ls-files`, `ls-tree`, `clean`, remotes listing, tracking branches) predate the baseline-first
@@ -50,8 +51,6 @@ duplicating it.
 
 ### Phase 3 — index & worktree mutations
 
-- `checkout`: `checkout -q [--track] [--detach] [treeish] [-- <paths>]`, paths chunked; maps
-  "Please commit your changes or stash them" → `checkout/mod.ts`.
 - `move`: `mv <from> <to>` → `mv/mod.ts`.
 - `updateSubmodules`: `submodule update -- <paths>`, chunked → `submodule/update.ts`. Needs
   `GIT_EXEC_PATH` (see the skill's traps).
