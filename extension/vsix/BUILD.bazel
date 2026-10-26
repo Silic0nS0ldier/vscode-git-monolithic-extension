@@ -86,6 +86,12 @@ vsix_package(
         ":copy_bundle_main",
         ":copy_license",
     ],
+)
+
+filegroup(
+    name = "git_monolithic_unpacked",
+    srcs = [":git_monolithic"],
+    output_group = "unpacked",
     visibility = ["//integration_tests:__pkg__"],
 )
 

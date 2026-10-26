@@ -20,8 +20,8 @@ import v8ToIstanbul from "v8-to-istanbul";
 /** `bazel coverage` sets `COVERAGE_DIR` for the test action. */
 export const COVERAGE_DIR = process.env["COVERAGE_DIR"];
 
-/** Install directories are named `<publisher>.<name>-<version>`. */
-const EXTENSION_DIR = "/siliconsoldier.git-monolithic-";
+/** Root of the unpacked extension directory (`//extension/vsix:git_monolithic_unpacked`). */
+const EXTENSION_DIR = "/extension/vsix/git_monolithic_inputs_dir/";
 
 interface CoverageRange {
     startOffset: number;
@@ -104,9 +104,8 @@ function bundleDir(): string {
 
 /** Where a script sits in the bundle, e.g. `main.js` or `chunks/<name>.js`. */
 function bundlePath(url: string): string {
-    const path = url.slice(url.indexOf(EXTENSION_DIR) + 1);
-    // `<publisher>.<name>-<version>/src/<bundle path>`
-    return path.split("/").slice(2).join("/");
+    // `.../extension/vsix/git_monolithic_inputs_dir/src/<bundle path>`
+    return url.slice(url.indexOf(EXTENSION_DIR) + EXTENSION_DIR.length + "src/".length);
 }
 
 /**
@@ -125,7 +124,7 @@ export async function writeCoverage(dumps: Dumps, outDir: string): Promise<void>
             const path = bundlePath(script.url);
             const source = await readFile(fileURLToPath(script.url), "utf8");
             if (source !== await readFile(join(bundle, path), "utf8")) {
-                throw new Error(`The installed ${path} differs from the bundle its source maps were built with`);
+                throw new Error(`The loaded ${path} differs from the bundle its source maps were built with`);
             }
             const map = JSON.parse(await readFile(join(bundle, "sourcemaps", `${path}.map`), "utf8")) as SourceMap;
             // A source whose text the map lacks still gets an (empty) entry, rather than

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-# Installs the extension under test into a throwaway profile, then serves it.
+# Links the unpacked extension under test into a throwaway profile, then serves it.
 # Run as an `itest_service`; see BUILD.bazel.
 set -euo pipefail
 
 code_server="$(realpath "$1")"
-vsix="$(realpath "$2")"
+extension="$(realpath "$2")"
 port="$3"
 trust="$4"
 
@@ -16,6 +16,7 @@ unset VSCODE_IPC_HOOK_CLI VSCODE_PID VSCODE_GIT_IPC_HANDLE
 state="${TEST_TMPDIR:-/tmp}/code-server"
 rm -rf "$state"
 mkdir -p "$state/user/User" "$state/extensions"
+ln -s "$extension" "$state/extensions/siliconsoldier.git-monolithic-dev"
 
 # `--disable-workspace-trust` forces the folder to be trusted. An untrusted suite drops the
 # flag and silences the prompt instead, so the workbench opens straight into Restricted Mode
@@ -70,8 +71,6 @@ common=(
     --disable-telemetry
     --disable-update-check
 )
-
-"$code_server" "${common[@]}" --install-extension "$vsix" --force
 
 exec "$code_server" "${common[@]}" \
     --auth none \
