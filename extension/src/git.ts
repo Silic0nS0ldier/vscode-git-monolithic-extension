@@ -1,4 +1,5 @@
 import { add as gitAdd } from "monolithic-git-interop/api/add/mod";
+import { hasAny as hasAnyBranch } from "monolithic-git-interop/api/branch/has-any";
 import { size as objectSize } from "monolithic-git-interop/api/cat-file/size";
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
@@ -13,9 +14,11 @@ import { findTrackingBranches } from "monolithic-git-interop/api/repository/find
 import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
 import { reset as gitReset } from "monolithic-git-interop/api/reset/mod";
+import { resetPaths } from "monolithic-git-interop/api/reset/paths";
 import { gitDir } from "monolithic-git-interop/api/rev-parse/git-dir";
 import { showCdup } from "monolithic-git-interop/api/rev-parse/show-cdup";
 import { showToplevel } from "monolithic-git-interop/api/rev-parse/show-toplevel";
+import { rmCached } from "monolithic-git-interop/api/rm/cached";
 import { rm as gitRm } from "monolithic-git-interop/api/rm/mod";
 import { commit as showCommit, show } from "monolithic-git-interop/api/show";
 import { list as listStashes } from "monolithic-git-interop/api/stash/list";
@@ -26,6 +29,7 @@ import {
     trackedWithBranch,
 } from "monolithic-git-interop/api/status/tracked-with-branch";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
+import { deleteRef as gitDeleteRef } from "monolithic-git-interop/api/update-ref/delete";
 import type { CLIErrors, GitContext } from "monolithic-git-interop/cli";
 import * as gitErrors from "monolithic-git-interop/errors";
 import { unwrapOk } from "monolithic-git-interop/errors";
@@ -630,8 +634,11 @@ export class Repository {
     }
 
     async deleteRef(ref: string): Promise<void> {
-        const args = ["update-ref", "-d", ref];
-        await this.exec(args);
+        const result = await gitDeleteRef(this.#git._context, this.#repositoryRoot, ref, {
+            env: cliEnv(this.git.env, "update-ref"),
+        });
+
+        throwOnCliError(result, "update-ref");
     }
 
     async merge(ref: string): Promise<void> {
@@ -679,33 +686,27 @@ export class Repository {
     }
 
     async revert(treeish: string, paths: string[]): Promise<void> {
-        const result = await this.exec(["branch"]);
-        let args: string[];
-
         // In case there are no branches, we must use rm --cached
-        if (!result.stdout) {
-            args = ["rm", "--cached", "-r"];
-        } else {
-            args = ["reset", "-q", treeish];
-        }
+        const useReset = unwrapOk(await hasAnyBranch(this.#git._context, this.#repositoryRoot));
+        const gitCommand = useReset ? "reset" : "rm";
+        const options = { env: cliEnv(this.git.env, gitCommand) };
 
-        try {
-            if (paths && paths.length > 0) {
-                for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
-                    await this.exec([...args, "--", ...chunk]);
-                }
-            } else {
-                await this.exec([...args, "--", "."]);
-            }
-        } catch (err) {
+        const result = useReset
+            ? await resetPaths(this.#git._context, this.#repositoryRoot, treeish, paths, options)
+            : await rmCached(this.#git._context, this.#repositoryRoot, paths, options);
+
+        if (isErr(result)) {
+            const error = unwrap(result);
             // In case there are merge conflicts to be resolved, git reset will output
             // some "needs merge" data. We try to get around that.
-            if (err instanceof GitError && /([^:]+: needs merge\n)+/m.test(err.stdout || "")) {
+            if (
+                error.type === gitErrors.ERROR_NON_ZERO_EXIT && /([^:]+: needs merge\n)+/m.test(error.cause.stdout)
+            ) {
                 return;
             }
-
-            throw err;
         }
+
+        throwOnCliError(result, gitCommand);
     }
 
     async removeRemote(name: string): Promise<void> {
