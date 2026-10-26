@@ -30,6 +30,10 @@ Stdin-driven commands, pending API design review:
 | `add -A\|-u -- <paths>`                  | `add/mod.ts`                        | `add`             |
 | `rm -- <paths>`                          | `rm/mod.ts`                         | `rm`              |
 | `reset --soft\|--hard <treeish>`         | `reset/mod.ts`                      | `reset`           |
+| `branch` (any-branch probe)              | `branch/has-any.ts`                 | `unstage`         |
+| `reset -q <treeish> -- <paths>`          | `reset/paths.ts`                    | `unstage`         |
+| `rm --cached -r -- <paths>`              | `rm/cached.ts`                      | `unstage`         |
+| `update-ref -d <ref>`                    | `update-ref/delete.ts`              | `unstage`         |
 
 Older migrations (`init`, `rev-parse --show-toplevel`/`--git-dir`, `symbolic-ref`, `status`,
 `ls-files`, `ls-tree`, `clean`, remotes listing, tracking branches) predate the baseline-first
@@ -46,13 +50,6 @@ duplicating it.
 
 ### Phase 3 — index & worktree mutations
 
-- `revert`: a `git branch` probe, then `reset -q <treeish> -- <paths>`, or `rm --cached -r --
-  <paths>` when there are no branches; chunked, `.` when no paths; a "needs merge" failure on
-  stdout is swallowed → `reset/paths.ts`, `rm/cached.ts`. Reached by _Unstage Changes_ (the
-  `scm` suite's unstage scenario drives the `reset -q` path) and by _Undo Last Commit_ on a
-  root commit (the `rm --cached` path, after `deleteRef`).
-- `deleteRef`: `update-ref -d <ref>` → `update-ref/delete.ts`. Reached only by _Undo Last
-  Commit_ on a root commit; migrate alongside `revert`.
 - `checkout`: `checkout -q [--track] [--detach] [treeish] [-- <paths>]`, paths chunked; maps
   "Please commit your changes or stash them" → `checkout/mod.ts`.
 - `move`: `mv <from> <to>` → `mv/mod.ts`.
