@@ -1,0 +1,56 @@
+--- a/cmd/svcinit/main.go
++++ b/cmd/svcinit/main.go
+@@ -332,6 +332,10 @@
+ 			buf.WriteString("Target\tUser Time\tSystem Time\n")
+ 			states := mustStopAllForExit()
+ 			for label, state := range states {
++				if state == nil {
++					buf.WriteString(fmt.Sprintf("%s\t-\t-\n", label))
++					continue
++				}
+ 				buf.WriteString(fmt.Sprintf("%s\t%s\t%s\n",
+ 					label, state.UserTime(), state.SystemTime()))
+ 			}
+--- a/runner/service_instance.go
++++ b/runner/service_instance.go
+@@ -240,6 +240,7 @@
+ 
+ 	err := killGroup(s.cmd, signal)
+ 	if isGone(err) {
++		s.waitUntilDone()
+ 		return nil
+ 	}
+ 
+@@ -285,14 +286,13 @@
+ 				err := killGroup(s.cmd, syscall.SIGKILL)
+ 				if err != nil {
+ 					if isGone(err) {
++						s.waitUntilDone()
+ 						err = nil
+ 					}
+ 					return err
+ 				}
+ 
+-				for !s.isDone() {
+-					time.Sleep(5 * time.Millisecond)
+-				}
++				s.waitUntilDone()
+ 
+ 				if s.EnforceForcefulShutdown {
+ 					return fmt.Errorf("%s did not handle SIGTERM within it's shutdown timeout. Consider raising it's `shutdown_timeout` attribute or set `shutdown_signal` to SIGKILL if graceful shutdown is not needed", s.Label)
+@@ -339,6 +339,15 @@
+ 	return s.done && s.cmd.ProcessState != nil
+ }
+ 
++// waitUntilDone blocks until the goroutine waiting on the process has recorded its exit.
++// A process group can be gone (ESRCH) before that happens, and callers of Stop read
++// ProcessState as soon as it returns.
++func (s *ServiceInstance) waitUntilDone() {
++	for !s.isDone() {
++		time.Sleep(5 * time.Millisecond)
++	}
++}
++
+ func (s *ServiceInstance) isRunning() bool {
+ 	s.mu.Lock()
+ 	defer s.mu.Unlock()
