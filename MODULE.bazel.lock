@@ -264,10 +264,10 @@
     "https://bcr.bazel.build/modules/rules_python/1.8.0/source.json": "356397eed5b46971d8c585c92098d70495078a80bf18bebcb4209f44b495f3e6",
     "https://bcr.bazel.build/modules/rules_robolectric/4.14.1.2/MODULE.bazel": "d44fec647d0aeb67b9f3b980cf68ba634976f3ae7ccd6c07d790b59b87a4f251",
     "https://bcr.bazel.build/modules/rules_robolectric/4.14.1.2/source.json": "37c10335f2361c337c5c1f34ed36d2da70534c23088062b33a8bdaab68aa9dea",
-    "https://bcr.bazel.build/modules/rules_rust/0.74.0/MODULE.bazel": "6e6fa04d7c8202f9cd63205ec9f96da39382a4ac971ee1d7a900fe8e1f68be17",
-    "https://bcr.bazel.build/modules/rules_rust/0.74.0/source.json": "04eac31b4536eb23dd8e8e8ca7e079d3c1c4ac99934d38aa54bbae36917c7507",
-    "https://bcr.bazel.build/modules/rules_rust_wasm_bindgen/0.74.0/MODULE.bazel": "7ae872ee570d2d004f8d1e0b5734008c901dd517f22ab0de5820a2a534c16b6a",
-    "https://bcr.bazel.build/modules/rules_rust_wasm_bindgen/0.74.0/source.json": "19876c5d1613e2a0077b8bab9272024bcb316b93af5c83274d0bf3e9adbb3850",
+    "https://bcr.bazel.build/modules/rules_rust/0.75.0/MODULE.bazel": "77452ad75faf65400abc8d0956033d5732c68d39478c9ac064288d3f484f6e34",
+    "https://bcr.bazel.build/modules/rules_rust/0.75.0/source.json": "6205a2156646606f99828f217931f4cd5c68f3ada35916dab6601020358bfc63",
+    "https://bcr.bazel.build/modules/rules_rust_wasm_bindgen/0.75.0/MODULE.bazel": "2da21af41a035b2c603b2b8fe768d63746df1bae69fadd2d762c0436cd601ac8",
+    "https://bcr.bazel.build/modules/rules_rust_wasm_bindgen/0.75.0/source.json": "f0ce711d9162d4fda731e58d2939358d70bc35ac641c9890f998e6852842cec2",
     "https://bcr.bazel.build/modules/rules_shell/0.2.0/MODULE.bazel": "fda8a652ab3c7d8fee214de05e7a9916d8b28082234e8d2c0094505c5268ed3c",
     "https://bcr.bazel.build/modules/rules_shell/0.3.0/MODULE.bazel": "de4402cd12f4cc8fda2354fce179fdb068c0b9ca1ec2d2b17b3e21b24c1a937b",
     "https://bcr.bazel.build/modules/rules_shell/0.4.1/MODULE.bazel": "00e501db01bbf4e3e1dd1595959092c2fadf2087b2852d3f553b5370f5633592",
@@ -739,7 +739,7 @@
     },
     "@@rules_rust+//crate_universe:extensions.bzl%crate": {
       "general": {
-        "bzlTransitiveDigest": "s/aaQIaXkEVV1rxDshUWrNpioRNp6s9IDuTwjkw+GI0=",
+        "bzlTransitiveDigest": "SewJmwN4gY/NLowSSuRntOzH5N/jK2AF70IemwcKGeA=",
         "usagesDigest": "5CvpLkY2zu/Ni6rD9iyzafDQcdLnA9M2e6JRPyZGO3M=",
         "recordedInputs": [
           "ENV:CARGO_BAZEL_DEBUG \\0",
@@ -763,6 +763,7 @@
           "REPO_MAPPING:rules_rust+,bazel_skylib bazel_skylib+",
           "REPO_MAPPING:rules_rust+,bazel_tools bazel_tools",
           "REPO_MAPPING:rules_rust+,rules_cc rules_cc+",
+          "REPO_MAPPING:rules_rust+,rules_rust rules_rust+",
           "FILE:@@//Cargo.lock a7f2cc24a59650a37577660823794b8fd96fa68d44879a24a7ab8c1e3fabe594",
           "FILE:@@//Cargo.toml de861724db8570c17eb1fba62ae6270f1388bb11e8a6010c95add0e71456a270",
           "FILE:@@//packages/wasm/Cargo.toml 4b2833c58efbb7f8750e8bff7b6920714da50bb8b54ce28232c7af4a2f737d7b"
@@ -942,8 +943,8 @@
     },
     "@@rules_rust+//crate_universe/private:internal_extensions.bzl%cu_nr": {
       "general": {
-        "bzlTransitiveDigest": "U8O7NULPbNlGH9Glt9ySVMHmD8bFLretCq7UIj8qY8Y=",
-        "usagesDigest": "4dw/cIJewItx4oko/d40Bhs66452HpnJ7nsPL5yRKGk=",
+        "bzlTransitiveDigest": "0D62T//0vhq1ow9MBHuch5l21+/kCItpwNSzLunwpmI=",
+        "usagesDigest": "vD4NBsh5cIWs2e0NJGvApu3hom0S7OIAZVNdd2flpaM=",
         "recordedInputs": [
           "REPO_MAPPING:apple_support+,bazel_skylib bazel_skylib+",
           "REPO_MAPPING:bazel_features+,bazel_features_globals bazel_features++version_extension+bazel_features_globals",
@@ -1025,7 +1026,7 @@
               "binary": "cargo-bazel",
               "cargo_lockfile": "@@rules_rust+//crate_universe:Cargo.lock",
               "cargo_toml": "@@rules_rust+//crate_universe:Cargo.toml",
-              "version": "1.98.0",
+              "version": "1.99.1",
               "rust_toolchain_cargo_template": "@rust_host_tools//:bin/{tool}",
               "rust_toolchain_rustc_template": "@rust_host_tools//:bin/{tool}",
               "compressed_windows_toolchain_names": false,
