@@ -507,7 +507,7 @@ register_toolchains(
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "devcontainers_base_ubuntu",
-    digest = "sha256:32f08d689904c6de7967f9a80b0ae9abc9411aeafbac420ca0adfd10297ac9cf",
+    digest = "sha256:b1e3b08610ae0b2599f57c3a492eebc93d1d26dbaefb4a0bad0caa7149e4ec95",
     # Follows latest LTS release
     image = "mcr.microsoft.com/devcontainers/base:ubuntu",
     platforms = [
@@ -552,7 +552,7 @@ apt.sources_list(
         "resolute-updates",
     ],
     types = ["deb"],
-    uris = ["https://snapshot.ubuntu.com/ubuntu/20261028T163425Z"],
+    uris = ["https://snapshot.ubuntu.com/ubuntu/20261028T183401Z"],
 )
 apt.install(
     dependency_set = "devcontainer_apt",

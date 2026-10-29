@@ -1209,26 +1209,26 @@
     },
     "@@rules_distroless+//apt:extensions.bzl%apt": {
       "formats": {
-        "resolute-security/main/amd64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "unavailable",
-        "resolute-security/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": ".xz",
-        "resolute-security/main/arm64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "unavailable",
-        "resolute-security/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": ".xz",
-        "resolute-updates/main/amd64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "unavailable",
-        "resolute-updates/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": ".xz",
-        "resolute-updates/main/arm64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "unavailable",
-        "resolute-updates/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": ".xz",
-        "resolute/main/amd64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "unavailable",
-        "resolute/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": ".xz",
-        "resolute/main/arm64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "unavailable",
-        "resolute/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": ".xz"
+        "resolute-security/main/amd64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "unavailable",
+        "resolute-security/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": ".xz",
+        "resolute-security/main/arm64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "unavailable",
+        "resolute-security/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": ".xz",
+        "resolute-updates/main/amd64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "unavailable",
+        "resolute-updates/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": ".xz",
+        "resolute-updates/main/arm64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "unavailable",
+        "resolute-updates/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": ".xz",
+        "resolute/main/amd64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "unavailable",
+        "resolute/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": ".xz",
+        "resolute/main/arm64/Contents/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "unavailable",
+        "resolute/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": ".xz"
       },
       "indices": {
-        "resolute-security/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "sha256-eBCgjqdvhgGhQxRJtEIrZn/R6ImYosSyp3aKL3wVWgk=",
-        "resolute-security/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "sha256-XUhpxBOxG2Su8yHBSCWyZoZr/lHgpOZ3vpq8Cl7EKc4=",
-        "resolute-updates/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "sha256-zYXVkNI2FNowyXufARhqVMNUZYAmEwssinu+6qF/F/c=",
-        "resolute-updates/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "sha256-+S4HPQyj2iIn83yse+uLQOX7PskVcVGHbkYza3Lvg3Q=",
-        "resolute/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "sha256-7ZrEHLJj767MWgagdC3FZXDi+1/5TE8uSy+9zd1zzyQ=",
-        "resolute/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T163425Z": "sha256-U3cVgX2e13zJGfUSPtuRpI2a6Xq/BViKjxggjMcifgg="
+        "resolute-security/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "sha256-eBCgjqdvhgGhQxRJtEIrZn/R6ImYosSyp3aKL3wVWgk=",
+        "resolute-security/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "sha256-XUhpxBOxG2Su8yHBSCWyZoZr/lHgpOZ3vpq8Cl7EKc4=",
+        "resolute-updates/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "sha256-zYXVkNI2FNowyXufARhqVMNUZYAmEwssinu+6qF/F/c=",
+        "resolute-updates/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "sha256-+S4HPQyj2iIn83yse+uLQOX7PskVcVGHbkYza3Lvg3Q=",
+        "resolute/main/amd64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "sha256-7ZrEHLJj767MWgagdC3FZXDi+1/5TE8uSy+9zd1zzyQ=",
+        "resolute/main/arm64/Packages/https://snapshot.ubuntu.com/ubuntu/20261028T183401Z": "sha256-U3cVgX2e13zJGfUSPtuRpI2a6Xq/BViKjxggjMcifgg="
       }
     },
     "@@rules_go+//go:extensions.bzl%go_sdk": {
