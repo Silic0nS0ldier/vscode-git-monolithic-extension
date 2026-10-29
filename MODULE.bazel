@@ -427,35 +427,35 @@ _DUGITE_RELEASE = "v2.56.0-2"
 
 # Asset names embed the git source commit, which is not derivable from the release tag.
 # Kept in sync with _DUGITE_RELEASE by .github/workflows/update_bazel_git.mjs.
-_DUGITE_ASSET_VERSION = "v2.56.0-7ce66f8"
+_DUGITE_ASSET_VERSION = "v2.56.0-a44aeca"
 
 _DUGITE_URL_PREFIX = "https://github.com/desktop/dugite-native/releases/download/" + _DUGITE_RELEASE + "/dugite-native-" + _DUGITE_ASSET_VERSION + "-"
 
 http_archive(
     name = "dugite_linux_x64",
     build_file_content = _DUGITE_BUILD_FILE,
-    sha256 = "8d2d7a4449229f97344da4615b22119352f02801c317bed540df5255b335487f",
+    sha256 = "1efd8ce0516b670b6b6d0f49ecaf395ceb8cf7fff3f5857259763d97a1238df9",
     url = _DUGITE_URL_PREFIX + "ubuntu-x64.tar.gz",
 )
 
 http_archive(
     name = "dugite_linux_arm64",
     build_file_content = _DUGITE_BUILD_FILE,
-    sha256 = "3f6effa04c5fe68bcd3c6fcefc4ac7f9d608736c49c748e07fa0e7ba84e2d099",
+    sha256 = "d5ce120515bf3013a014e6a918aa87ec0f7a6f5f9687c48d50127e637cb9b6c2",
     url = _DUGITE_URL_PREFIX + "ubuntu-arm64.tar.gz",
 )
 
 http_archive(
     name = "dugite_darwin_x64",
     build_file_content = _DUGITE_BUILD_FILE,
-    sha256 = "f294895790a98405b2900d55160945d4d0ce92492891aac4b95f2c7085220fa3",
+    sha256 = "52cc663281e1ec2f1d76ba781193ca4847e62dbbf767f6c99ec9ec5b978a7659",
     url = _DUGITE_URL_PREFIX + "macOS-x64.tar.gz",
 )
 
 http_archive(
     name = "dugite_darwin_arm64",
     build_file_content = _DUGITE_BUILD_FILE,
-    sha256 = "ab756ab9a15241f14b6c0a0386c704a998bb710a837ab35dc55d4747a90f2ca0",
+    sha256 = "1110de343de11cc6f469b782b60f36217b9199b5e06875dd65baa26dd60563c7",
     url = _DUGITE_URL_PREFIX + "macOS-arm64.tar.gz",
 )
 
