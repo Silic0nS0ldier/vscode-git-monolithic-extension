@@ -35,7 +35,7 @@ jobs:
       # needs write.
       actions: write
     steps:
-      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@e6f84229f5b6ef8b72a517d826fc3d0eb5db8d9e
+      - uses: Silic0nS0ldier/bazel-github-actions-cache-v2/optimise@960a66a18563a42f17d5f4a6f9146af42a4cb97b
         with:
           dry-run: ${{ github.event_name != 'workflow_dispatch' || inputs.dry-run }}
           github-token: ${{ github.token }}
