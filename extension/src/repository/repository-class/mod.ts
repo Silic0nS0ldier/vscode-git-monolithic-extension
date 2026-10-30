@@ -484,6 +484,9 @@ export function createRepository(
         getCommitTemplate() {
             return run(Operation.GetCommitTemplate, async () => repository.getCommitTemplate());
         },
+        getIdentity() {
+            return repository.getIdentity();
+        },
         getInputTemplate() {
             return inputTemplate.get();
         },
@@ -647,6 +650,9 @@ export function createRepository(
             return run(Operation.Remove, () => repository.rm(resources.map(r => r.fsPath)));
         },
         root: repoRoot,
+        setIdentity(scope, identity) {
+            return repository.setIdentity(scope, identity);
+        },
         sourceControlUI,
         stage(resource, contents) {
             return stageImpl(repository, run, onDidChangeOriginalResourceEmitter, resource, contents);

@@ -6,6 +6,7 @@ import { checkout as gitCheckout } from "monolithic-git-interop/api/checkout/mod
 import { newBranch as checkoutNewBranch } from "monolithic-git-interop/api/checkout/new-branch";
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
+import { write as writeConfig } from "monolithic-git-interop/api/config/write";
 import { staged as stagedDiff, unstaged as unstagedDiff } from "monolithic-git-interop/api/diff/path";
 import { fetch as gitFetch } from "monolithic-git-interop/api/fetch/mod";
 import { branch as branchDetail } from "monolithic-git-interop/api/for-each-ref/branch";
@@ -49,6 +50,7 @@ import * as path from "node:path";
 import type { OutputChannel, Progress } from "vscode";
 import {
     type Branch,
+    type CommitIdentity,
     type CommitOptions,
     ForcePushMode,
     type ForcePushModeOptions,
@@ -546,6 +548,8 @@ export class Repository {
             args.splice(0, 0, "-c", "user.useConfigOnly=true");
         }
 
+        args.splice(0, 0, ...identityConfigArgs(opts.identity));
+
         try {
             await this.exec(args, !opts.amend || message ? { input: message || "" } : {});
         } catch (commitErr) {
@@ -557,8 +561,8 @@ export class Repository {
         await this.exec(["rebase", "--abort"]);
     }
 
-    async rebaseContinue(): Promise<void> {
-        const args = ["rebase", "--continue"];
+    async rebaseContinue(identity?: CommitIdentity): Promise<void> {
+        const args = [...identityConfigArgs(identity), "rebase", "--continue"];
 
         try {
             await this.exec(args);
@@ -1199,6 +1203,28 @@ export class Repository {
         }
     }
 
+    /** The `user.name` and `user.email` git would commit with, whichever are set. */
+    async getIdentity(): Promise<Partial<CommitIdentity>> {
+        const [name, email] = await Promise.all(
+            ["user.name", "user.email"].map(async key => {
+                const result = await readConfigEffective(this.#git._context, this.#repositoryRoot, key);
+                return isOk(result) ? unwrap(result) : undefined;
+            }),
+        );
+
+        return { email, name };
+    }
+
+    /** Saves `identity` as `user.name` and `user.email`, in this repository's config or the user's. */
+    async setIdentity(scope: "local" | "global", identity: CommitIdentity): Promise<void> {
+        for (const [key, value] of [["user.name", identity.name], ["user.email", identity.email]] as const) {
+            const result = await writeConfig(this.#git._context, this.#repositoryRoot, scope, key, value, {
+                env: cliEnv(this.git.env, "config"),
+            });
+            throwOnCliError(result, "config");
+        }
+    }
+
     async getCommit(ref: string): Promise<Commit> {
         const commit = unwrapOk(await showCommit(this.#git._context, this.#repositoryRoot, ref));
 
@@ -1236,6 +1262,15 @@ export class Repository {
 // TODO: Support core.commentChar
 function stripCommitMessageComments(message: string): string {
     return message.replace(/^\s*#.*$\n?/gm, "").trim();
+}
+
+/** Config overrides committing as `identity`; they reach the commits `rebase` makes too. */
+function identityConfigArgs(identity: CommitIdentity | undefined): string[] {
+    if (!identity) {
+        return [];
+    }
+
+    return ["-c", `user.name=${identity.name}`, "-c", `user.email=${identity.email}`];
 }
 
 /** The shapes `getHEAD` and `getBranch` produce, so either source compares equal. */

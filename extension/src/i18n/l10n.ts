@@ -71,6 +71,48 @@ export function missingUserInfo(): string {
     );
 }
 
+export function identityNamePrompt(): string {
+    return l10n.t("Git doesn't know who you are. Enter the name to commit as.");
+}
+
+export function identityNamePlaceholder(): string {
+    return l10n.t("Your Name");
+}
+
+export function identityEmailPrompt(): string {
+    return l10n.t("Git doesn't know who you are. Enter the email to commit as.");
+}
+
+export function identityEmailPlaceholder(): string {
+    return l10n.t("you@example.com");
+}
+
+export function identityValueRequired(): string {
+    return l10n.t("A value is required.");
+}
+
+export function confirmCommitIdentity(name: string, email: string): string {
+    return l10n.t("Commit as {0} <{1}>?", name, email);
+}
+
+export function confirmCommitIdentityDetail(): string {
+    return l10n.t(
+        "Save these details as 'user.name' and 'user.email' for this repository or for every repository, or use them for this commit only.",
+    );
+}
+
+export function commitIdentityOnce(): string {
+    return l10n.t("Commit Once");
+}
+
+export function saveIdentityToRepository(): string {
+    return l10n.t("Save to Repository and Commit");
+}
+
+export function saveIdentityToUser(): string {
+    return l10n.t("Save to User and Commit");
+}
+
 export function learnMore(): string {
     return l10n.t("Learn More");
 }

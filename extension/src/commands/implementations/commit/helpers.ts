@@ -1,11 +1,47 @@
 import { Uri, window } from "vscode";
-import { type CommitOptions, Status } from "../../../api/git.js";
+import { type CommitOptions, GitErrorCodes, Status } from "../../../api/git.js";
+import { GitError } from "../../../git/error.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import * as config from "../../../util/config.js";
 import { getDocumentsToSaveBeforeChange } from "../../helpers.js";
 import { push, PushType } from "../push/helpers.js";
 import { sync } from "../sync/sync.js";
+import { promptForCommitIdentity } from "./identity-prompt.js";
+
+/**
+ * Commits, and if git doesn't know who to commit as, asks and tries once more. Resolves to false
+ * when the user backs out of being asked.
+ */
+async function commitPromptingForIdentity(
+    repository: AbstractRepository,
+    message: string | undefined,
+    opts: CommitOptions,
+): Promise<boolean> {
+    try {
+        await repository.commit(message, opts);
+        return true;
+    } catch (err) {
+        if (!(err instanceof GitError && err.gitErrorCode === GitErrorCodes.IdentityUnknown)) {
+            throw err;
+        }
+    }
+
+    const choice = await promptForCommitIdentity(repository);
+
+    if (!choice) {
+        return false;
+    }
+
+    if (choice.action === "once") {
+        await repository.commit(message, { ...opts, identity: choice.identity });
+    } else {
+        await repository.setIdentity(choice.action, choice.identity);
+        await repository.commit(message, opts);
+    }
+
+    return true;
+}
 
 async function smartCommit(
     repository: AbstractRepository,
@@ -155,7 +191,9 @@ async function smartCommit(
         normalisedOpts.all = "tracked";
     }
 
-    await repository.commit(message, normalisedOpts);
+    if (!(await commitPromptingForIdentity(repository, message, normalisedOpts))) {
+        return false;
+    }
 
     const postCommitCommand = config.postCommitCommand(repositoryUri);
 

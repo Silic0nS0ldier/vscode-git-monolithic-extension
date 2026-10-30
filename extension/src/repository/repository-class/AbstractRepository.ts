@@ -1,5 +1,13 @@
 import type { Disposable, Event, Uri } from "vscode";
-import type { Branch, CommitOptions, FetchOptions, ForcePushModeOptions, Ref, Remote } from "../../api/git.js";
+import type {
+    Branch,
+    CommitIdentity,
+    CommitOptions,
+    FetchOptions,
+    ForcePushModeOptions,
+    Ref,
+    Remote,
+} from "../../api/git.js";
 import type { RefQuery } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
 import type { UpstreamScope } from "../../git/repository-class/fetch-targets.js";
@@ -50,6 +58,8 @@ export type AbstractRepository = {
     readonly getRefs: (opts?: RefQuery) => Promise<Ref[]>;
     readonly getStashes: () => Promise<Stash[]>;
     readonly getCommitTemplate: () => Promise<string>;
+    /** The `user.name` and `user.email` git would commit with, whichever are set. */
+    readonly getIdentity: () => Promise<Partial<CommitIdentity>>;
     readonly HEAD: Branch | undefined;
     readonly headLabel: string;
     readonly merge: (ref: string) => Promise<void>;
@@ -86,6 +96,8 @@ export type AbstractRepository = {
     readonly revert: (resources: Uri[]) => Promise<void>;
     readonly rm: (resources: Uri[]) => Promise<void>;
     readonly root: string;
+    /** Saves `identity` as `user.name` and `user.email`, in this repository's config or the user's. */
+    readonly setIdentity: (scope: "local" | "global", identity: CommitIdentity) => Promise<void>;
     readonly sourceControlUI: SourceControlUIGroup;
     readonly stage: (resource: Uri, contents: string) => Promise<void>;
     readonly submodules: readonly Submodule[];
