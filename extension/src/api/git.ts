@@ -108,6 +108,7 @@ type GitErrorCodesOptions =
     | "Conflict"
     | "DirtyWorkTree"
     | "GitNotFound"
+    | "IdentityUnknown"
     | "InvalidBranchName"
     | "IsInSubmodule"
     | "LocalChangesOverwritten"
@@ -118,8 +119,6 @@ type GitErrorCodesOptions =
     | "NotAGitRepository"
     | "NotAtRepositoryRoot"
     | "NoUpstreamBranch"
-    | "NoUserEmailConfigured"
-    | "NoUserNameConfigured"
     | "PermissionDenied"
     | "PushRejected"
     | "RemoteConnectionError"
@@ -141,6 +140,7 @@ export const GitErrorCodes: Record<GitErrorCodesOptions, GitErrorCodesOptions> =
     Conflict: "Conflict",
     DirtyWorkTree: "DirtyWorkTree",
     GitNotFound: "GitNotFound",
+    IdentityUnknown: "IdentityUnknown",
     InvalidBranchName: "InvalidBranchName",
     IsInSubmodule: "IsInSubmodule",
     LocalChangesOverwritten: "LocalChangesOverwritten",
@@ -149,8 +149,6 @@ export const GitErrorCodes: Record<GitErrorCodesOptions, GitErrorCodesOptions> =
     NoRemoteRepositorySpecified: "NoRemoteRepositorySpecified",
     NoStashFound: "NoStashFound",
     NoUpstreamBranch: "NoUpstreamBranch",
-    NoUserEmailConfigured: "NoUserEmailConfigured",
-    NoUserNameConfigured: "NoUserNameConfigured",
     NotAGitRepository: "NotAGitRepository",
     NotAtRepositoryRoot: "NotAtRepositoryRoot",
     PermissionDenied: "PermissionDenied",

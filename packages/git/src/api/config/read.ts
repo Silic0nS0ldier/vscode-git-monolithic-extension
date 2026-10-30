@@ -17,7 +17,7 @@ export async function read(
     scope: Scope,
     key: string,
 ): Promise<Result<ConfigValue, ReadToErrors>> {
-    const result = await readToString({ cli: git.cli, cwd }, [`--${scope}`, "--show-scope", key]);
+    const result = await readToString({ cli: git.cli, cwd }, ["config", `--${scope}`, "--show-scope", key]);
 
     if (isErr(result)) {
         return result;
@@ -63,7 +63,7 @@ export async function readAll(
     cwd: string,
     scope: Scope,
 ): Promise<Result<ConfigEntry[], ReadToErrors>> {
-    const result = await readToString({ cli: git.cli, cwd }, [`--${scope}`, "--show-scope", "--list"]);
+    const result = await readToString({ cli: git.cli, cwd }, ["config", `--${scope}`, "--show-scope", "--list"]);
 
     if (isErr(result)) {
         return result;

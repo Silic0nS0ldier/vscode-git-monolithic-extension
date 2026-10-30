@@ -148,8 +148,7 @@ async function handleError(
                 message = i18n.Translations.authFailed(match?.[1]);
                 break;
             }
-            case GitErrorCodes.NoUserNameConfigured:
-            case GitErrorCodes.NoUserEmailConfigured:
+            case GitErrorCodes.IdentityUnknown:
                 message = i18n.Translations.missingUserInfo();
                 choices.set(
                     i18n.Translations.learnMore(),
