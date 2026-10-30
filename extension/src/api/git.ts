@@ -75,6 +75,11 @@ export const Status: Record<StatusOptions, StatusOptions> = {
     UNTRACKED: "UNTRACKED",
 };
 
+export interface CommitIdentity {
+    name: string;
+    email: string;
+}
+
 export interface CommitOptions {
     all?: boolean | "tracked";
     amend?: boolean;
@@ -83,6 +88,8 @@ export interface CommitOptions {
     empty?: boolean;
     noVerify?: boolean;
     requireUserConfig?: boolean;
+    /** Commits as this identity, overriding `user.name` and `user.email` for this commit only. */
+    identity?: CommitIdentity;
 }
 
 export interface FetchOptions {

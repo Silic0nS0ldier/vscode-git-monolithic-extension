@@ -21,7 +21,7 @@ export async function commit(
                 await repository.add([], addOpts);
             }
 
-            await repository.rebaseContinue();
+            await repository.rebaseContinue(opts.identity);
         });
     } else {
         await run(Operation.Commit, async () => {

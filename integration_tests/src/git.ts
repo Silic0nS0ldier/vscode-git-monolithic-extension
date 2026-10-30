@@ -94,6 +94,27 @@ export async function unsetLocalConfig(key: string): Promise<void> {
     await git("config", "--local", "--unset", key);
 }
 
+/** Value of a key in the user config the editor's git sees, or undefined when it is unset. */
+export async function userConfig(key: string): Promise<string | undefined> {
+    // code-server.sh points `HOME` here.
+    const file = join(testTmpDir(), "code-server", ".gitconfig");
+    try {
+        return (await git("config", "--file", file, "--get", key)).trim();
+    } catch {
+        return undefined;
+    }
+}
+
+/** `HEAD`'s author and committer, each as `Name <email>`. */
+export async function headIdentities(): Promise<{ author: string; committer: string }> {
+    const [author = "", committer = ""] = (await git("log", "-1", "--format=%an <%ae>%n%cn <%ce>")).trim().split("\n");
+    return { author, committer };
+}
+
+export async function stage(...paths: string[]): Promise<void> {
+    await git("add", "--", ...paths);
+}
+
 /**
  * Pushes a new commit onto `origin/main`'s tip with no relation to any local commit, so
  * `--cherry` sees a unique entry ahead of whatever it already reports as equivalent.
