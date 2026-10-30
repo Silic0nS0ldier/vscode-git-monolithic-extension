@@ -71,7 +71,6 @@ import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
-import { getConfig } from "./repository/repository-class/config.js";
 import { isExpectedError } from "./util/is-expected-error.js";
 
 interface MutableRemote extends Remote {
@@ -550,7 +549,7 @@ export class Repository {
         try {
             await this.exec(args, !opts.amend || message ? { input: message || "" } : {});
         } catch (commitErr) {
-            await this.#handleCommitError(commitErr);
+            this.#handleCommitError(commitErr);
         }
     }
 
@@ -564,32 +563,15 @@ export class Repository {
         try {
             await this.exec(args);
         } catch (commitErr) {
-            await this.#handleCommitError(commitErr);
+            this.#handleCommitError(commitErr);
         }
     }
 
-    async #handleCommitError(commitErr: unknown): Promise<void> {
+    #handleCommitError(commitErr: unknown): never {
         if (
             commitErr instanceof GitError && /not possible because you have unmerged files/.test(commitErr.stderr || "")
         ) {
             commitErr.gitErrorCode = GitErrorCodes.UnmergedChanges;
-            throw commitErr;
-        }
-
-        try {
-            await getConfig(this, "user.name");
-        } catch (err) {
-            const gitErr = new GitError({}, { cause: new AggregateError([commitErr, err]) });
-            gitErr.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
-            throw gitErr;
-        }
-
-        try {
-            await getConfig(this, "user.email");
-        } catch (err) {
-            const gitErr = new GitError({}, { cause: new AggregateError([commitErr, err]) });
-            gitErr.gitErrorCode = GitErrorCodes.NoUserEmailConfigured;
-            throw gitErr;
         }
 
         throw commitErr;
@@ -820,8 +802,6 @@ export class Repository {
             if (err instanceof GitError) {
                 if (/^CONFLICT \([^)]+\): \b/m.test(err.stdout || "")) {
                     err.gitErrorCode = GitErrorCodes.Conflict;
-                } else if (/Please tell me who you are\./.test(err.stderr || "")) {
-                    err.gitErrorCode = GitErrorCodes.NoUserNameConfigured;
                 } else if (/Could not read from remote repository/.test(err.stderr || "")) {
                     err.gitErrorCode = GitErrorCodes.RemoteConnectionError;
                 } else if (

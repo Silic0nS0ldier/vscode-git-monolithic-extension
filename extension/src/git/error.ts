@@ -105,6 +105,10 @@ export function getGitErrorCode(stderr: string): string | undefined {
         return GitErrorCodes.InvalidBranchName;
     } else if (/Please,? commit your changes or stash them/.test(stderr)) {
         return GitErrorCodes.DirtyWorkTree;
+    } else if (/^\*\*\* Please tell me who you are\.$/m.test(stderr)) {
+        // Any command writing a commit (commit, merge, cherry-pick, stash, ...) without `user.name`
+        // and `user.email` it can use.
+        return GitErrorCodes.IdentityUnknown;
     }
 
     return undefined;

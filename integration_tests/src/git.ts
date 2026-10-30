@@ -90,6 +90,10 @@ export async function setLocalConfig(key: string, value: string): Promise<void> 
     await git("config", key, value);
 }
 
+export async function unsetLocalConfig(key: string): Promise<void> {
+    await git("config", "--local", "--unset", key);
+}
+
 /**
  * Pushes a new commit onto `origin/main`'s tip with no relation to any local commit, so
  * `--cherry` sees a unique entry ahead of whatever it already reports as equivalent.
