@@ -11,6 +11,7 @@ import { list as listRefs, type RefKind } from "monolithic-git-interop/api/for-e
 import { cherry } from "monolithic-git-interop/api/log/cherry";
 import { lsFiles, type LsFilesEntry } from "monolithic-git-interop/api/ls-files/list";
 import { lsTree, type LsTreeEntry } from "monolithic-git-interop/api/ls-tree/list";
+import { mv as gitMv } from "monolithic-git-interop/api/mv/mod";
 import { findTrackingBranches } from "monolithic-git-interop/api/repository/find-tracking-branches";
 import { init } from "monolithic-git-interop/api/repository/init";
 import { get as getRemotes } from "monolithic-git-interop/api/repository/remotes/get";
@@ -616,8 +617,11 @@ export class Repository {
     }
 
     async move(from: string, to: string): Promise<void> {
-        const args = ["mv", from, to];
-        await this.exec(args);
+        const result = await gitMv(this.#git._context, this.#repositoryRoot, from, to, {
+            env: cliEnv(this.git.env, "mv"),
+        });
+
+        throwOnCliError(result, "mv");
     }
 
     async deleteRef(ref: string): Promise<void> {

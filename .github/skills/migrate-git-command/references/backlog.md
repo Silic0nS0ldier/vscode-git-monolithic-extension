@@ -35,6 +35,7 @@ Stdin-driven commands, pending API design review:
 | `rm --cached -r -- <paths>`                               | `rm/cached.ts`                      | `unstage`         |
 | `update-ref -d <ref>`                                     | `update-ref/delete.ts`              | `unstage`         |
 | `checkout -q [--track] [--detach] [treeish] [-- <paths>]` | `checkout/mod.ts`                   | `checkout`        |
+| `mv <from> <to>`                                          | `mv/mod.ts`                         | `mv`              |
 
 Older migrations (`init`, `rev-parse --show-toplevel`/`--git-dir`, `symbolic-ref`, `status`,
 `ls-files`, `ls-tree`, `clean`, remotes listing, tracking branches) predate the baseline-first
@@ -51,7 +52,6 @@ duplicating it.
 
 ### Phase 3 — index & worktree mutations
 
-- `move`: `mv <from> <to>` → `mv/mod.ts`.
 - `updateSubmodules`: `submodule update -- <paths>`, chunked → `submodule/update.ts`. Needs
   `GIT_EXEC_PATH` (see the skill's traps).
 
