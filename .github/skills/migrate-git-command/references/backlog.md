@@ -16,27 +16,28 @@ Stdin-driven commands, pending API design review:
 
 ## Done
 
-| Command                                                   | Module                              | Baseline suite    |
-| --------------------------------------------------------- | ----------------------------------- | ----------------- |
-| `for-each-ref` (list, single branch)                      | `for-each-ref/list.ts`, `branch.ts` | `refs`            |
-| `show -s --format`                                        | `show.ts`                           | `commit`          |
-| `stash list`                                              | `stash/list.ts`                     | `stash`           |
-| `config --get commit.template`                            | `config/read.ts` (`readEffective`)  | `commit-template` |
-| `log --oneline --cherry`                                  | `log/cherry.ts`                     | `pull`            |
-| `rev-parse --show-cdup`                                   | `rev-parse/show-cdup.ts`            | `untrusted`       |
-| `cat-file -s`                                             | `cat-file/size.ts`                  | `object`          |
-| `diff [--cached] -- <path>`                               | `diff/path.ts`                      | `diff`            |
-| `fetch [remote [ref]] [--all] [--prune]`                  | `fetch/mod.ts`                      | `fetch`           |
-| `add -A\|-u -- <paths>`                                   | `add/mod.ts`                        | `add`             |
-| `rm -- <paths>`                                           | `rm/mod.ts`                         | `rm`              |
-| `reset --soft\|--hard <treeish>`                          | `reset/mod.ts`                      | `reset`           |
-| `branch` (any-branch probe)                               | `branch/has-any.ts`                 | `unstage`         |
-| `reset -q <treeish> -- <paths>`                           | `reset/paths.ts`                    | `unstage`         |
-| `rm --cached -r -- <paths>`                               | `rm/cached.ts`                      | `unstage`         |
-| `update-ref -d <ref>`                                     | `update-ref/delete.ts`              | `unstage`         |
-| `checkout -q [--track] [--detach] [treeish] [-- <paths>]` | `checkout/mod.ts`                   | `checkout`        |
-| `mv <from> <to>`                                          | `mv/mod.ts`                         | `mv`              |
-| `submodule update -- <paths>`                             | `submodule/update.ts`               | `submodule`       |
+| Command                                                             | Module                                       | Baseline suite    |
+| ------------------------------------------------------------------- | -------------------------------------------- | ----------------- |
+| `for-each-ref` (list, single branch)                                | `for-each-ref/list.ts`, `branch.ts`          | `refs`            |
+| `show -s --format`                                                  | `show.ts`                                    | `commit`          |
+| `stash list`                                                        | `stash/list.ts`                              | `stash`           |
+| `config --get commit.template`                                      | `config/read.ts` (`readEffective`)           | `commit-template` |
+| `log --oneline --cherry`                                            | `log/cherry.ts`                              | `pull`            |
+| `rev-parse --show-cdup`                                             | `rev-parse/show-cdup.ts`                     | `untrusted`       |
+| `cat-file -s`                                                       | `cat-file/size.ts`                           | `object`          |
+| `diff [--cached] -- <path>`                                         | `diff/path.ts`                               | `diff`            |
+| `fetch [remote [ref]] [--all] [--prune]`                            | `fetch/mod.ts`                               | `fetch`           |
+| `add -A\|-u -- <paths>`                                             | `add/mod.ts`                                 | `add`             |
+| `rm -- <paths>`                                                     | `rm/mod.ts`                                  | `rm`              |
+| `reset --soft\|--hard <treeish>`                                    | `reset/mod.ts`                               | `reset`           |
+| `branch` (any-branch probe)                                         | `branch/has-any.ts`                          | `unstage`         |
+| `reset -q <treeish> -- <paths>`                                     | `reset/paths.ts`                             | `unstage`         |
+| `rm --cached -r -- <paths>`                                         | `rm/cached.ts`                               | `unstage`         |
+| `update-ref -d <ref>`                                               | `update-ref/delete.ts`                       | `unstage`         |
+| `checkout -q [--track] [--detach] [treeish] [-- <paths>]`           | `checkout/mod.ts`                            | `checkout`        |
+| `mv <from> <to>`                                                    | `mv/mod.ts`                                  | `mv`              |
+| `submodule update -- <paths>`                                       | `submodule/update.ts`                        | `submodule`       |
+| `checkout -q -b <name> --no-track [ref]` / `branch -q <name> [ref]` | `checkout/new-branch.ts`, `branch/create.ts` | `branch`          |
 
 Older migrations (`init`, `rev-parse --show-toplevel`/`--git-dir`, `symbolic-ref`, `status`,
 `ls-files`, `ls-tree`, `clean`, remotes listing, tracking branches) predate the baseline-first
@@ -53,8 +54,6 @@ duplicating it.
 
 ### Phase 4 — branch & tag mutations
 
-- `branch`: `checkout -q -b <name> --no-track [ref]` / `branch -q <name> [ref]` →
-  `branch/create.ts`
 - `deleteBranch`: `branch -d|-D <name>` → `branch/delete.ts`
 - `renameBranch`: `branch -m <name>` → `branch/rename.ts`
 - `tag`: `tag [-a <name> -m <message>|<name>]` → `tag/create.ts`

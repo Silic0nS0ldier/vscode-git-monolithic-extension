@@ -1,7 +1,9 @@
 import { add as gitAdd } from "monolithic-git-interop/api/add/mod";
+import { create as createBranch } from "monolithic-git-interop/api/branch/create";
 import { hasAny as hasAnyBranch } from "monolithic-git-interop/api/branch/has-any";
 import { size as objectSize } from "monolithic-git-interop/api/cat-file/size";
 import { checkout as gitCheckout } from "monolithic-git-interop/api/checkout/mod";
+import { newBranch as checkoutNewBranch } from "monolithic-git-interop/api/checkout/new-branch";
 import { clean as gitClean } from "monolithic-git-interop/api/clean/mod";
 import { readEffective as readConfigEffective } from "monolithic-git-interop/api/config/read";
 import { staged as stagedDiff, unstaged as unstagedDiff } from "monolithic-git-interop/api/diff/path";
@@ -594,13 +596,21 @@ export class Repository {
     }
 
     async branch(name: string, checkout: boolean, ref?: string): Promise<void> {
-        const args = checkout ? ["checkout", "-q", "-b", name, "--no-track"] : ["branch", "-q", name];
-
-        if (ref) {
-            args.push(ref);
+        if (checkout) {
+            const result = await checkoutNewBranch(this.#git._context, this.#repositoryRoot, name, {
+                env: cliEnv(this.git.env, "checkout"),
+                noTrack: true,
+                startPoint: ref,
+            });
+            throwOnCliError(result, "checkout");
+            return;
         }
 
-        await this.exec(args);
+        const result = await createBranch(this.#git._context, this.#repositoryRoot, name, {
+            env: cliEnv(this.git.env, "branch"),
+            startPoint: ref,
+        });
+        throwOnCliError(result, "branch");
     }
 
     async deleteBranch(name: string, force?: boolean): Promise<void> {
