@@ -414,10 +414,13 @@ export async function openScmView(page: Page): Promise<Locator> {
     return view;
 }
 
-/** The row of the SCM list whose resource label is exactly `fileName`. */
+/**
+ * The row of the SCM list whose resource label is exactly `fileName`. Repository header rows are
+ * excluded, since a submodule's header carries the same label as its row in the parent.
+ */
 export function resourceRow(view: Locator, fileName: string): Locator {
     return view.locator(".monaco-list-row").filter({
-        has: view.page().locator(".label-name").filter({ hasText: exactly(fileName) }),
+        has: view.page().locator(".resource .label-name").filter({ hasText: exactly(fileName) }),
     });
 }
 

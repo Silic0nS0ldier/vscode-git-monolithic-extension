@@ -36,6 +36,7 @@ Stdin-driven commands, pending API design review:
 | `update-ref -d <ref>`                                     | `update-ref/delete.ts`              | `unstage`         |
 | `checkout -q [--track] [--detach] [treeish] [-- <paths>]` | `checkout/mod.ts`                   | `checkout`        |
 | `mv <from> <to>`                                          | `mv/mod.ts`                         | `mv`              |
+| `submodule update -- <paths>`                             | `submodule/update.ts`               | `submodule`       |
 
 Older migrations (`init`, `rev-parse --show-toplevel`/`--git-dir`, `symbolic-ref`, `status`,
 `ls-files`, `ls-tree`, `clean`, remotes listing, tracking branches) predate the baseline-first
@@ -49,11 +50,6 @@ The unreachable half of the `diff` family (`diff [--cached]` with no path, `diff
 Each entry is `git.ts` method: command → target module. "Reached by" names the UI entry point
 and any existing suite that already drives it — extend or reuse that baseline rather than
 duplicating it.
-
-### Phase 3 — index & worktree mutations
-
-- `updateSubmodules`: `submodule update -- <paths>`, chunked → `submodule/update.ts`. Needs
-  `GIT_EXEC_PATH` (see the skill's traps).
 
 ### Phase 4 — branch & tag mutations
 

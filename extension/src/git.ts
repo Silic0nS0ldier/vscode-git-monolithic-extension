@@ -31,6 +31,7 @@ import {
     trackedWithBranch,
 } from "monolithic-git-interop/api/status/tracked-with-branch";
 import { untracked } from "monolithic-git-interop/api/status/untracked";
+import { update as updateSubmodules } from "monolithic-git-interop/api/submodule/update";
 import { deleteRef as gitDeleteRef } from "monolithic-git-interop/api/update-ref/delete";
 import type { CLIErrors, GitContext } from "monolithic-git-interop/cli";
 import * as gitErrors from "monolithic-git-interop/errors";
@@ -69,11 +70,7 @@ import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
 import { getConfig } from "./repository/repository-class/config.js";
-import { splitInChunks } from "./util.js";
 import { isExpectedError } from "./util/is-expected-error.js";
-
-// https://github.com/microsoft/vscode/issues/65693
-const MAX_CLI_LENGTH = 30000;
 
 interface MutableRemote extends Remote {
     fetchUrl?: string;
@@ -1223,11 +1220,11 @@ export class Repository {
     }
 
     async updateSubmodules(paths: string[]): Promise<void> {
-        const args = ["submodule", "update"];
+        const result = await updateSubmodules(this.#git._context, this.#repositoryRoot, paths, {
+            env: cliEnv(this.git.env, "submodule"),
+        });
 
-        for (const chunk of splitInChunks(paths.map(sanitizePath), MAX_CLI_LENGTH)) {
-            await this.exec([...args, "--", ...chunk]);
-        }
+        throwOnCliError(result, "submodule");
     }
 
     async getSubmodules(): Promise<Submodule[]> {
