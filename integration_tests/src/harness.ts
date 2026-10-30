@@ -241,6 +241,36 @@ export async function openPicker(page: Page, label: string, placeholder: string)
 }
 
 /**
+ * Runs a command that replaces the palette with an input box of its own, identified by the
+ * value it opens with since the widget itself never closes in between. Returns the input.
+ */
+export async function openInputBox(page: Page, label: string, value: string): Promise<Locator> {
+    await invokeCommand(page, label);
+
+    const input = page.locator(QUICK_INPUT).locator("input").first();
+    await pollUntil(`the input box to open with '${value}'`, () => input.inputValue(), current => current === value);
+
+    return input;
+}
+
+/** Opens a workspace file, by its path relative to the workspace, as the active editor. */
+export async function openFile(page: Page, relativePath: string): Promise<void> {
+    const quickOpen = page.locator(QUICK_INPUT);
+
+    await page.keyboard.press("Control+P");
+    await quickOpen.waitFor({ state: "visible" });
+    await page.keyboard.type(relativePath);
+
+    // Recently opened files are listed before the typed filter applies, so wait for the match itself.
+    const name = relativePath.split("/").at(-1) ?? relativePath;
+    await pickerRow(quickOpen, name).first().click();
+    await quickOpen.waitFor({ state: "hidden" });
+
+    await page.locator(".part.editor .tab.active .label-name").filter({ hasText: exactly(name) })
+        .waitFor({ state: "visible" });
+}
+
+/**
  * Opens a quick pick from a status bar entry, identified by its placeholder since the
  * widget itself never closes in between.
  */
