@@ -3,24 +3,24 @@
   "name": "unused-deps",
   "platforms": {
     "linux-x86_64": {
-      "size": 9630268,
+      "size": 9547122,
       "hash": "sha256",
-      "digest": "99ba9c955c6307b8a5db7e9e4587878e823f1a0fc8fd18d38051fc0020f95305",
+      "digest": "cdbd4babc5394e014e760fa0592a32c8130585090f140f40b3fcfbfc2c3067c4",
       "path": "unused-deps",
       "providers": [
         {
-          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.1.0/unused-deps-linux-amd64"
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.2.0/unused-deps-linux-amd64"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 9197942,
+      "size": 9109996,
       "hash": "sha256",
-      "digest": "2af257dd3c90d39f10e8a55b40aeb6d34b0524d91884760df2e43558fa657251",
+      "digest": "43016a302d6bf94ab1001f9db36de858cddd513a51cd9edc088b2fbd19b088b3",
       "path": "unused-deps",
       "providers": [
         {
-          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.1.0/unused-deps-linux-arm64"
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.2.0/unused-deps-linux-arm64"
         }
       ]
     }

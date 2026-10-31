@@ -3,24 +3,24 @@
   "name": "buildozer",
   "platforms": {
     "linux-x86_64": {
-      "size": 9916016,
+      "size": 9840357,
       "hash": "sha256",
-      "digest": "3513b8b23619f5fb7ccad546e955af6e318475582ce7b6f2b47b634bd3b8dcbd",
+      "digest": "0cfa2633184880ad5139bad3133fdf1a11ce3b7d37ba3eae9a85374a613c4779",
       "path": "buildozer",
       "providers": [
         {
-          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.1.0/buildozer-linux-amd64"
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.2.0/buildozer-linux-amd64"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 9473662,
+      "size": 9384251,
       "hash": "sha256",
-      "digest": "add0e7e45e10231746c6bb193e466361183dfe9d2df8f951b62c49a047508f30",
+      "digest": "82bc376fafedd281579beb400be430d4c3f0104c1a8502d10e0cb7ec2c8cb5bd",
       "path": "buildozer",
       "providers": [
         {
-          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.1.0/buildozer-linux-arm64"
+          "url": "https://github.com/bazelbuild/buildtools/releases/download/v10.2.0/buildozer-linux-arm64"
         }
       ]
     }
