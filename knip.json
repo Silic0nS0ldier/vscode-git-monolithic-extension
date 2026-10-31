@@ -5,6 +5,9 @@
             "entry": [
                 ".github/skills/*/scripts/*.mjs"
             ],
+            "ignoreBinaries": [
+                "bazel"
+            ],
             "ignoreDependencies": [
                 "@typescript/native",
                 "renovate"

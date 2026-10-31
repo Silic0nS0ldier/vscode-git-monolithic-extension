@@ -1,78 +1,155 @@
 ---
 name: shrink-extension-core
-description: 'Shrink the extension "core" — the code every integration test suite gets whatever commands it uses — so per-suite pruning of the bundle pays off. Use when breaking up the monolithic `Repository` class (`extension/src/git.ts`) or the repository object (`AbstractRepository`, built in `repository-class/mod.ts`), extracting a repository operation into `extension/src/repository/operations/`, making a command prunable, replacing the exhaustive `Operation` switches with per-operation descriptors, making config options tree-shakeable, measuring the core bundle, or taking the next item off the core-shrinking backlog.'
-argument-hint: 'the repository member or backlog item, e.g. "popStash" or "F2" (omit to take the next backlog item)'
+description: 'Move code out of the extension core, the part of the bundle every integration test suite gets whatever commands it uses, so that changing an operation reruns only the suites that use it. Use this skill when breaking up the `Repository` class in `extension/src/git.ts` or the repository object (`AbstractRepository`), moving a repository operation such as `move` or `popStash` out to the commands that use it, making a command prunable, measuring the core bundle, or taking an item off the core-shrinking backlog, even if the request only asks to slim down `git.ts` or `repository-class/mod.ts`. Not for migrating raw git calls into `packages/git` (use migrate-git-command), building the per-suite pruning itself, or shrinking the shipped VSIX.'
 ---
 
 # Shrinking the extension core
 
-Integration test suites are meant to each get a bundle holding only the commands they use, so that a change reruns
-only the suites whose bundle bytes it changed. That only pays off for code reachable _solely_ through commands.
-Everything reachable from activation without any command — the **core** — is in every suite's bundle, so changing it
-reruns every suite. This skill moves code out of the core, one refactor at a time, without changing behaviour.
+Each integration test suite is to get a bundle with only the commands it uses, so that a change reruns only the
+suites whose bundle it changes. That gains nothing for code every bundle contains: the **core**, everything reachable
+from activation without running a command. This skill moves code out of the core one backlog item at a time, without
+changing behaviour.
 
-Read [AGENTS.md](../../../AGENTS.md) first if not already loaded. Baseline suites are written as in
-[migrate-git-command](../migrate-git-command/SKILL.md) step 2. [references/backlog.md](./references/backlog.md) holds
-the items and their status.
+## What keeps code in the core
 
-## What decides whether code is core
+Rollup leaves a module out of a bundle when nothing reachable uses it, but it cannot leave out:
 
-Rollup prunes by reachability, statement by statement. Measured on this codebase, a bundle that does not register a
-command is byte-identical whatever happens to:
+- **members of the repository object**, which `createRepository` (`repository/repository-class/mod.ts`) hands to
+  every command and core feature: each member ships, used or not, with everything it calls;
+- **methods of the git-layer `Repository` class** in `git.ts`;
+- **code that lists every operation or setting**: the `switch`es in `repository/Operations.ts` (until F2) and the
+  top-level `createConfigOption(...)` calls in `util/config.ts` (until F3).
 
-- the command's own modules, and helpers only it uses (including exports of shared modules such as
-  `commands/helpers.ts`);
-- strings only it uses (`i18n/l10n.ts` exports one function per string);
-- unused properties of object literals that never escape (`GitErrorCodes`).
+So an operation leaves the core by becoming a function in its own module under `extension/src/repository/operations/`,
+imported only by commands and other operations, and by deleting its member: a member left behind to delegate keeps
+everything it calls in the core.
 
-It cannot prune:
+## Rules
 
-- **members of an object that escapes** — the repository object returned by `createRepository` is handed to every
-  command and core feature, so every member ships;
-- **class methods** — every method of the git-layer `Repository` in `git.ts` ships;
-- **top-level calls it cannot prove pure** — each `createConfigOption(...)` in `util/config.ts`;
-- **anything core enumerates at runtime** — the exhaustive `switch`es over `Operation` in `repository/Operations.ts`
-  name every operation, so adding one edits core.
+- Change no behaviour. Keep the operation kind passed to `run`, since core reacts to some kinds (`Remote` invalidates
+  config lookups, `Push` notifies, `retryRun` retries Pull, Sync and Fetch). Keep the `scheduleRemote` key, which
+  decides what queued requests merge. Keep the prompts, their order, and the errors thrown.
+- Baseline suites pass unedited. If one fails, the change altered behaviour: fix the change, not the suite.
+- Core, meaning anything outside `repository/operations/` and `commands/implementations/`, never imports a value
+  from `repository/operations/`; that would put the operation back in the core. Type imports are fine.
+- One backlog item per commit, then stop for review.
+- Run every command from the repository root.
 
-Types are free: `import type`, type aliases and union types never reach the bundle. Only runtime references count.
+## Workflow
 
-So an operation is prunable when it is a free function in its own module, imported only by the commands that use it.
+Track progress with this checklist:
 
-## When to use
+- [ ] Step 1: Pick the item and confirm its users
+- [ ] Step 2: Confirm a baseline suite performs it
+- [ ] Step 3: Record the core bundle size
+- [ ] Step 4: Move the repository layer
+- [ ] Step 5: Move the git layer, if migrated
+- [ ] Step 6: Validate until everything passes
+- [ ] Step 7: Update the backlog, commit, and report
 
-- "Extract `<member>` from the repository" / "break up `Repository`" / "make `<command>` prunable".
-- Any item in [backlog.md](./references/backlog.md), including the foundation items F1–F4.
-- Reviewing such a change for missed steps.
+A foundation item (F1–F4) says in the backlog what it involves and when it is done; do steps 3, 6 and 7 around it.
 
-Do **not** use to change behaviour, or to migrate a raw `this.exec`/`this.stream` call into `packages/git` — that is
-[migrate-git-command](../migrate-git-command/SKILL.md). A member that core itself calls is not a candidate; the
-backlog lists those under _Stays core_.
+### 1. Pick the item and confirm its users
 
-## Measuring
-
-[scripts/core-bundle.mjs](./scripts/core-bundle.mjs) bundles the extension with no commands registered (or only those
-given with `--keep`) and reports what is left, by source path. It first checks it can reproduce Bazel's bundle byte
-for byte, so its numbers are the real ones.
+Read [references/backlog.md](references/backlog.md). Take the item asked for, or else the first one in its _Order_
+that is not done. If it is an extraction and F1 is not done, F1 is part of it. For each member the item names, run:
 
 ```sh
-bazel build --remote_download_outputs=all //extension:lib //extension:bundle //build_defs/rollup_bundle:bin
-node .github/skills/shrink-extension-core/scripts/core-bundle.mjs \
-    --absent extension/src/repository/operations/move.ts \
-    --absent packages/git/src/api/mv/mod.ts
+node .github/skills/shrink-extension-core/scripts/repository-callers.mjs --member <member> --files
 ```
 
-`--absent <path>` fails (exit 1) while that module still renders bytes in the core; `--absent-text <text>` fails while
-a literal still appears. [scripts/repository-callers.mjs](./scripts/repository-callers.mjs) lists who uses each
-repository member and git-layer method, resolved with the type checker (`--files` names the command modules).
+The member's core users must be `-`: every user must be under `commands/implementations/` or `repository/operations/`.
+If core uses it, move it to _Stays core_ in the backlog with the reason, and stop. Note which git-layer methods it
+calls, and whether they still run raw git (`this.exec` or `this.stream`, directly or through a private helper).
 
-## Target shape
+### 2. Confirm a baseline suite performs it
 
-The repository layer (`run(Operation.X, ...)` wrappers in `repository-class/mod.ts`, and the helpers in
-`repository-class/` they call) and, once migrated, the git layer (the `git.ts` method) move into
-`extension/src/repository/operations/<kebab-name>.ts`. The module exports a function named after the member it
-replaces, taking the repository first:
+Each command using the member needs an integration suite that performs the operation; opening a picker or declining
+a prompt does not count. Check the suites the backlog names, in `integration_tests/src/`. If none performs it, write
+one first, following step 2 of [migrate-git-command](../migrate-git-command/SKILL.md), and commit it on its own.
+
+### 3. Record the core bundle size
+
+```sh
+node .github/skills/shrink-extension-core/scripts/core-bundle.mjs --top 0
+```
+
+Note the core bundle size. If the git layer is migrated, also note each `packages/git` module it imports that nothing
+else does, for step 6; the backlog's `mv/mod` is `packages/git/src/api/mv/mod.ts`, and
+`grep -rn 'monolithic-git-interop/api/mv/mod"' extension/src` shows its importers.
+
+### 4. Move the repository layer
+
+1. Create `extension/src/repository/operations/<member-in-kebab-case>.ts`, exporting a function named after the
+   member that takes the repository first (see _Example_). Move the member's body there from the object literal in
+   `repository-class/mod.ts`, replacing closure variables with the primitives F1 adds to the repository.
+2. Move a `repository-class/` helper used only by this operation into the new module. Put one shared with other
+   operations in its own module under `repository/operations/`, not back in core.
+3. Delete the member from `AbstractRepository` and from the object literal.
+4. Rewire the commands from step 1: `repository.move(from, to)` becomes `move(repository, from, to)`.
+
+### 5. Move the git layer, if migrated
+
+If the `git.ts` method no longer runs raw git and nothing outside the moved code calls it, move it into the
+operations module and delete it from the class. Otherwise leave it, and record in the backlog that the git layer is
+pending: a raw method waits for [migrate-git-command](../migrate-git-command/SKILL.md), and a method core also calls
+stays core.
+
+### 6. Validate until everything passes
+
+Run these, fix what fails, and rerun until all pass:
+
+```sh
+bazel test //extension:tests
+bazel test //integration_tests:<suite>_test --local_test_jobs=1 --nocache_test_results
+bazel test //... --local_test_jobs=1
+knip
+dprint fmt
+```
+
+`--local_test_jobs=1` runs one browser suite at a time: several at once starve each other, and exhaust the memory of
+an 8 GB machine. `--nocache_test_results` rules out a stale pass.
+
+Then check the core. For an operation, nothing under `repository/operations/` may be core, nor may any `packages/git`
+module noted in step 3:
+
+```sh
+node .github/skills/shrink-extension-core/scripts/core-bundle.mjs --top 0 \
+    --absent extension/src/repository/operations/ --absent <packages/git module>
+```
+
+A command using the operation must still reach it, so this must **fail**, with exit code 1. `<command>` is the id
+the command's module passes to `makeCommandId`.
+
+```sh
+node .github/skills/shrink-extension-core/scripts/core-bundle.mjs --top 0 --keep <command> \
+    --absent extension/src/repository/operations/<module>.ts
+```
+
+For a foundation item, run the checks its _Done when_ names instead.
+
+### 7. Update the backlog, commit, and report
+
+In the backlog, delete the item's paragraph or table row, first moving any note a later item needs to that item, and
+add the item to _Done_ with the core bundle size before and after and anything left for later. Correct anything step
+1 showed to be stale. Commit it all as one commit, then report:
+
+```markdown
+**<item>**: moved <members> to <modules>.
+
+- Commands rewired: <files>
+- Git layer: moved | pending, because <reason>
+- Baseline suites, passed unedited: <suites>
+- Core bundle: <before> → <after> bytes
+```
+
+## Example
+
+`move`, the first extraction, as F1 leaves it: F1 adds `run` and `baseRepository` to the repository, and moves
+`throwOnCliError` out of `git.ts`. Its git layer was already migrated, so it moved too.
 
 ```ts
+// extension/src/repository/operations/move.ts
 import { mv as gitMv } from "monolithic-git-interop/api/mv/mod";
 import { throwOnCliError } from "../../git/cli-error.js";
 import { cliEnv } from "../../git/git-class/cli-env.js";
@@ -80,101 +157,30 @@ import { Operation } from "../Operations.js";
 import type { AbstractRepository } from "../repository-class/AbstractRepository.js";
 
 export function move(repository: AbstractRepository, from: string, to: string): Promise<void> {
-    const base = repository.baseRepository;
+    const { git, root } = repository.baseRepository;
     return repository.run(Operation.Move, async () => {
-        const result = await gitMv(base.git._context, base.root, from, to, { env: cliEnv(base.git.env, "mv") });
+        const result = await gitMv(git._context, root, from, to, { env: cliEnv(git.env, "mv") });
         throwOnCliError(result, "mv");
     });
 }
 ```
 
-Commands import it: `await repository.move(from, to)` becomes `await move(repository, from, to)`. Core (anything
-outside `repository/operations/` and `commands/implementations/`) never value-imports from `repository/operations/`.
+## Scripts
 
-`run`, `scheduleRemote` and `baseRepository` are the core primitives backlog item F1 exposes on `AbstractRepository`;
-`throwOnCliError` moves out of `git.ts` with the first git-layer move. Expose any further primitive an operation needs
-as a narrow, named member (`fireOriginalResourceChange(uri)`), never an internal emitter or box. After F2, pass the
-operation's descriptor instead of `Operation.Move`.
+Both print usage with `--help` and structured output with `--json`. Exit code 2 means a usage or setup error; the
+message says what to do.
 
-## Procedure
+- `scripts/repository-callers.mjs`: who uses each repository member and git-layer method, from the type checker.
+- `scripts/core-bundle.mjs`: builds, then reports what is left of the bundle with no commands, or only those given
+  with `--keep`. `--absent` and `--absent-text` checks exit 1 while code is still there.
 
-### 1. Pick the item and re-derive it
+## Gotchas
 
-If no item was named, take the first open one in [backlog.md](./references/backlog.md) (foundation items first). Run
-`repository-callers.mjs --files`. Confirm every user of the member is a command module or a helper only commands
-use; if core uses it, move it to _Stays core_ with the reason and stop. Note the git-layer methods it reaches and
-whether they still run raw git (`this.exec`/`this.stream`, directly or through a private helper).
-
-### 2. Make sure a baseline suite runs it
-
-Each command calling the member needs a suite that actually performs the operation — a scenario that only opens a
-picker or declines a prompt does not count. The backlog names the known ones; check them in `integration_tests/src/`.
-If none exists, write it first, exactly as in migrate-git-command step 2, and land it as its own commit when
-non-trivial.
-
-### 3. Measure before
-
-Rebuild as in _Measuring_ and run `core-bundle.mjs --top 0` with an `--absent` for each module the item should push
-out of the core (the `repository-class/` helper, the `packages/git` API module). Expect failures; note the core bundle
-size for the backlog.
-
-### 4. Move the repository layer
-
-1. Create the operations module. Copy the member's body from the object literal in `repository-class/mod.ts`,
-   replacing closure variables with the F1 primitives. A `repository-class/` helper used only by this operation moves
-   with it (`git mv`); one shared by several operations moves to its own module under `repository/operations/`, never
-   back into core. A `finalRepository` argument becomes the `repository` parameter.
-2. Delete the member from `AbstractRepository` and from the object literal. An unused member still ships — it has to
-   go.
-3. Rewire every command found in step 1.
-4. Preserve behaviour exactly: the operation passed to `run`, the `scheduleRemote` key (it decides which queued
-   requests merge), the order of prompts, the errors thrown.
-
-### 5. Move the git layer, if it is migrated
-
-Move a `git.ts` method into the operations module (or a sibling) and delete it from the class only when it no longer
-runs raw git **and** the callers script shows no user outside the code being moved. Otherwise leave it, and record
-in the backlog that the git layer is pending: a raw method stays in `git.ts`, where migrate-git-command finds it, and
-a method core also uses (`getRefs`, `getCommit`) stays core. A method other operations also use (the stash calls in
-`maybe-auto-stash.ts`, which pull and sync run) moves to its own module under `repository/operations/` once all of
-them have moved.
-
-### 6. Prove it
-
-The baseline suites must pass **unedited**.
-
-```sh
-bazel test //extension:tests
-bazel test //integration_tests:<suite>_test --local_test_jobs=1 --nocache_test_results
-bazel test //...
-knip
-dprint fmt
-bazel build --remote_download_outputs=all //extension:lib //extension:bundle //build_defs/rollup_bundle:bin
-node .github/skills/shrink-extension-core/scripts/core-bundle.mjs --top 0 --absent <each moved module>
-node .github/skills/shrink-extension-core/scripts/core-bundle.mjs --top 0 --keep <a command using it> --absent <it>
-```
-
-The last run must **fail**: kept, the command has to reach the module. If it passes, the command no longer calls the
-moved code.
-
-### 7. Update the backlog and stop for review
-
-Move the item to _Done_ with the core bundle size before and after, and correct anything re-deriving showed to be
-stale. Same commit. One item per commit; do not batch. Summarise: the members removed, the modules created or moved,
-the commands rewired, the baseline suites that passed untouched, and the core bundle delta.
-
-## Traps
-
-- Command factories run at activation, and a pruned bundle never calls those of unselected commands. A factory must
-  therefore only build its `{ commandId, method, options }` descriptor; anything else it did would silently vanish.
-- Module-level statements in an operations module ship with every bundle that imports it. Keep them to declarations;
-  per-repository state belongs on the repository, not in module scope.
-- `core-bundle.mjs` reporting that the unmodified build does not match usually means stale outputs: rebuild with
-  `--remote_download_outputs=all`. If it persists, the script's copy of the Rollup options in
-  `build_defs/rollup_bundle/src/main.ts` has drifted — update its mirror.
-- `--absent` takes source paths (`extension/src/....ts`, `packages/git/src/....ts`); a path in neither bundle is
-  reported with `?`, not silently passed.
+- Command factories run at activation, and a pruned bundle skips those of commands it leaves out. A factory must
+  only build its `{ commandId, method, options }` descriptor; anything more would silently go missing.
+- Module-level statements in an operations module run wherever it is imported. Keep them to declarations, and keep
+  per-repository state on the repository.
 - Core classes reach the repository through `this.#repository` (`statusbar.ts`, `autofetch.ts`); the callers script
-  counts those as core users.
-- Skill arguments are substituted into this file, so a literal dollar-digit placeholder in prose is replaced by an
-  empty string. Write "the first argument" instead.
+  counts those uses as core.
+- A git-layer method also called from another operation's helper moves only once all its callers have:
+  `maybe-auto-stash.ts` calls the stash methods for pull and sync.
