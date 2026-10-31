@@ -5,6 +5,7 @@ import { cli } from "cleye";
 import * as path from "node:path";
 import { rollup } from "rollup";
 import sourcemaps from "rollup-plugin-sourcemaps2";
+import { moduleReplacementPlugin } from "./module-replacement-plugin.js";
 import { nodeBuiltinPrefixPlugin } from "./node-builtin-prefix-plugin.js";
 import { typescriptHelperWarningsPlugin } from "./typescript-helper-warnings-plugin.js";
 import { isDependencyCycle } from "./warnings.js";
@@ -23,6 +24,10 @@ const argv = cli({
         externalModule: {
             type: [String],
             placeholder: "<module-name>",
+        },
+        replaceModule: {
+            type: [String],
+            placeholder: "<path>=<file>",
         },
         outDir: {
             type: String,
@@ -47,6 +52,14 @@ const entryPoints = (() => {
     }
 })();
 const externalModules = argv.flags.externalModule;
+const moduleReplacements = argv.flags.replaceModule.map((replacement): readonly [string, string] => {
+    const separator = replacement.indexOf("=");
+    if (separator <= 0 || separator === replacement.length - 1) {
+        console.error(`Invalid module replacement '${replacement}'; expected <path>=<file>.`);
+        process.exit(1);
+    }
+    return [replacement.slice(0, separator), replacement.slice(separator + 1)];
+});
 const outDir = (() => {
     if (argv.flags.outDir) {
         return argv.flags.outDir;
@@ -62,6 +75,7 @@ const bundle = await (async () => {
         return await rollup({
             input: entryPoints,
             plugins: [
+                moduleReplacementPlugin(moduleReplacements),
                 nodeBuiltinPrefixPlugin(),
                 wasmSourcePhasePlugin(),
                 nodeResolve(),
@@ -92,7 +106,7 @@ const bundle = await (async () => {
 })();
 
 function entryFileNames(chunkInfo: { name: string }): string {
-    return chunkInfo.name.replace("dist/", "") + ".js";
+    return path.basename(chunkInfo.name) + ".js";
 }
 
 /**

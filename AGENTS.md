@@ -77,6 +77,9 @@ Bazel:
 
 - `srcs` are **globbed**, so adding a source file needs no BUILD edit. Edit BUILD only for a new
   npm dep (`":node_modules/<pkg>"`), a new entry point, a new test suite, or a new package.
+- `rollup_bundle` names entry outputs by basename. Its `replace_modules` maps replacement-file labels to module paths
+  relative to the action's package working directory; replacements keep the original module ID, and unmatched paths
+  fail the build.
 - Prefer symbolic macros (`macro(...)`) over legacy macros for new rules — see
   [integration_tests/defs.bzl](integration_tests/defs.bzl).
 

@@ -80,6 +80,17 @@ js_test(
     entry_point = "dist/warnings.test.js",
 )
 
+js_test(
+    name = "module_replacement_plugin_test",
+    size = "small",
+    args = ["--test"],
+    data = [
+        "package.json",
+        ":lib_tests",
+    ],
+    entry_point = "dist/module-replacement-plugin.test.js",
+)
+
 eslint_test(
     name = "eslint",
     size = "small",
