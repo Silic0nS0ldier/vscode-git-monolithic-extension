@@ -10,6 +10,6 @@
     },
     "devDependencies": {
         "@typescript/native": "npm:typescript@7.1.0-beta",
-        "renovate": "44.198.1"
+        "renovate": "44.198.2"
     }
 }
