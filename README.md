@@ -23,17 +23,6 @@ For release
      --config=release
    ```
 
-## Dependency updates
-
-Direct npm dependencies and pnpm catalogs use exact versions. Renovate preserves these pins, and
-`pnpm add` saves exact versions. Workspace references and compatibility ranges (such as engines and
-peer dependencies) remain ranges; package extensions describe indirect dependencies.
-
-Renovate waits three days before proposing updates. pnpm enforces the same delay (`minimumReleaseAge: 4320`,
-in minutes), including for indirect dependencies and lockfile generation, and fails rather than falling
-back to releases that are too recent. Keep both configurations aligned. Version-specific exceptions in
-`pnpm-workspace.yaml` are reserved for intentional security fixes or workarounds.
-
 ## Terminology
 
 - Tracked Changes - Changes to files already present in the current git commit-ish.
