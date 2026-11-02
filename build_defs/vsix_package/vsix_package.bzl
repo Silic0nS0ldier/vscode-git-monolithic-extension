@@ -15,8 +15,8 @@ _vscode_ext_transition = transition(
     outputs = ["//command_line_option:platforms"],
 )
 
-def _vsix_package_impl(ctx):
-    # type: (ctx) -> None
+def _copy_inputs(ctx, replace_prefixes = {}):
+    # type: (ctx, dict) -> File
     inputs_dir = ctx.actions.declare_directory(ctx.label.name + "_inputs_dir")
     copy_to_directory_bin = ctx.toolchains["@aspect_bazel_lib//lib:copy_to_directory_toolchain_type"].copy_to_directory_info.bin
     copy_to_directory_bin_action(
@@ -24,8 +24,38 @@ def _vsix_package_impl(ctx):
         name = ctx.label.name,
         dst = inputs_dir,
         files = ctx.files.srcs,
+        replace_prefixes = replace_prefixes,
         copy_to_directory_bin = copy_to_directory_bin,
     )
+    return inputs_dir
+
+def _vsix_unpacked_impl(ctx):
+    # type: (ctx) -> list
+    inputs_dir = _copy_inputs(ctx, ctx.attr.replace_prefixes)
+    return [DefaultInfo(files = depset([inputs_dir]))]
+
+vsix_unpacked = rule(
+    implementation = _vsix_unpacked_impl,
+    attrs = {
+        "srcs": attr.label_list(
+            mandatory = True,
+            allow_files = True,
+            doc = "A list of source files to assemble into an unpacked extension.",
+        ),
+        "replace_prefixes": attr.string_dict(
+            doc = "A mapping of source path prefixes to replace in the unpacked extension.",
+        ),
+    },
+    toolchains = ["@aspect_bazel_lib//lib:copy_to_directory_toolchain_type"],
+    cfg = _vscode_ext_transition,
+    doc = """
+        Assemble an unpacked Visual Studio Code extension without packaging it.
+    """,
+)
+
+def _vsix_package_impl(ctx):
+    # type: (ctx) -> list
+    inputs_dir = _copy_inputs(ctx)
 
     out = ctx.actions.declare_file("%s.vsix" % ctx.label.name)
 

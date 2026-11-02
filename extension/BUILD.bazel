@@ -71,6 +71,9 @@ ts_project(
     root_dir = "src",
     source_map = True,
     tsconfig = ":tsconfig",
+    visibility = [
+        "//integration_tests:__pkg__",
+    ],
     deps = [
         ":node_modules/@types/node",
         ":node_modules/@types/vscode",
@@ -145,6 +148,7 @@ bin.ava_test(
         ":lib_tests",
         # Read by src/manifest.test.ts
         "//extension/vsix:manifest",
+        "//extension/vsix:itest_manifest",
         "//extension/vsix:nls",
     ] + glob(["src/**/*.ts"]),
 )
