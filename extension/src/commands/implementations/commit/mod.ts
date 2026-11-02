@@ -1,3 +1,5 @@
+import { pruned } from "../../pruned.js";
+import * as selected from "../../selection.gen.js";
 import * as commitAllAmendNoVerify from "./commit-all-amend-no-verify.js";
 import * as commitAllAmend from "./commit-all-amend.js";
 import * as commitAllNoVerify from "./commit-all-no-verify.js";
@@ -17,21 +19,29 @@ import * as commit from "./commit.js";
 
 export function createCommands() {
     return [
-        commit.createCommand(),
-        commitAll.createCommand(),
-        commitAllAmend.createCommand(),
-        commitAllAmendNoVerify.createCommand(),
-        commitAllNoVerify.createCommand(),
-        commitAllSigned.createCommand(),
-        commitAllSignedNoVerify.createCommand(),
-        commitEmpty.createCommand(),
-        commitEmptyNoVerify.createCommand(),
-        commitNoVerify.createCommand(),
-        commitStaged.createCommand(),
-        commitStagedAmend.createCommand(),
-        commitStagedAmendNoVerify.createCommand(),
-        commitStagedNoVerify.createCommand(),
-        commitStagedSigned.createCommand(),
-        commitStagedSignedNoVerify.createCommand(),
+        selected.commit ? commit.createCommand() : pruned("commit"),
+        selected.commitAll ? commitAll.createCommand() : pruned("commitAll"),
+        selected.commitAllAmend ? commitAllAmend.createCommand() : pruned("commitAllAmend"),
+        selected.commitAllAmendNoVerify
+            ? commitAllAmendNoVerify.createCommand()
+            : pruned("commitAllAmendNoVerify"),
+        selected.commitAllNoVerify ? commitAllNoVerify.createCommand() : pruned("commitAllNoVerify"),
+        selected.commitAllSigned ? commitAllSigned.createCommand() : pruned("commitAllSigned"),
+        selected.commitAllSignedNoVerify
+            ? commitAllSignedNoVerify.createCommand()
+            : pruned("commitAllSignedNoVerify"),
+        selected.commitEmpty ? commitEmpty.createCommand() : pruned("commitEmpty"),
+        selected.commitEmptyNoVerify ? commitEmptyNoVerify.createCommand() : pruned("commitEmptyNoVerify"),
+        selected.commitNoVerify ? commitNoVerify.createCommand() : pruned("commitNoVerify"),
+        selected.commitStaged ? commitStaged.createCommand() : pruned("commitStaged"),
+        selected.commitStagedAmend ? commitStagedAmend.createCommand() : pruned("commitStagedAmend"),
+        selected.commitStagedAmendNoVerify
+            ? commitStagedAmendNoVerify.createCommand()
+            : pruned("commitStagedAmendNoVerify"),
+        selected.commitStagedNoVerify ? commitStagedNoVerify.createCommand() : pruned("commitStagedNoVerify"),
+        selected.commitStagedSigned ? commitStagedSigned.createCommand() : pruned("commitStagedSigned"),
+        selected.commitStagedSignedNoVerify
+            ? commitStagedSignedNoVerify.createCommand()
+            : pruned("commitStagedSignedNoVerify"),
     ];
 }
