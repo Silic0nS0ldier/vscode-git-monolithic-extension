@@ -165,20 +165,20 @@ settings:
 catalogs:
   default:
     '@types/node':
-      specifier: ^26.6.6
+      specifier: 26.6.6
       version: 26.6.6
     ava:
-      specifier: ^8.2.0
+      specifier: 8.2.0
       version: 8.2.0
     cleye:
-      specifier: ^2.7.0
+      specifier: 2.7.0
       version: 2.7.0
     get-stream:
-      specifier: ^9.0.1
+      specifier: 9.0.1
       version: 9.0.1
   vscode:
     '@types/node':
-      specifier: ^24.13.3
+      specifier: 24.13.3
       version: 24.13.3
 
 overrides:
@@ -196,35 +196,35 @@ importers:
   .:
     dependencies:
       '@eslint/js':
-        specifier: ^10.0.1
+        specifier: 10.0.1
         version: 10.0.1(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))
       eslint:
-        specifier: ^10.13.0
+        specifier: 10.13.0
         version: 10.13.0(jiti@2.7.0)(supports-color@7.2.0)
       knip:
-        specifier: ^6.44.0
-        version: 6.44.1
+        specifier: 6.44.0
+        version: 6.44.0
       typescript:
-        specifier: npm:@typescript/typescript6@^6.0.2
+        specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
       typescript-eslint:
-        specifier: ^8.72.1
+        specifier: 8.72.1
         version: 8.72.1(@typescript/typescript6@6.0.2)(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
     devDependencies:
       '@typescript/native':
         specifier: npm:typescript@7.1.0-beta
         version: typescript@7.1.0-beta
       renovate:
-        specifier: ^44.198.0
-        version: 44.198.3(supports-color@7.2.0)(typanion@3.14.0)
+        specifier: 44.198.1
+        version: 44.198.1(supports-color@7.2.0)(typanion@3.14.0)
 
   .github/actions/bazel-hidden-lockfile:
     dependencies:
       '@actions/cache':
-        specifier: ^6.3.0
+        specifier: 6.3.0
         version: 6.3.0(supports-color@7.2.0)
       '@actions/core':
-        specifier: ^3.0.1
+        specifier: 3.0.1
         version: 3.0.1
     devDependencies:
       '@types/node':
@@ -237,22 +237,22 @@ importers:
   build_defs/rollup_bundle:
     dependencies:
       '@rollup/plugin-commonjs':
-        specifier: ^29.0.3
+        specifier: 29.0.3
         version: 29.0.3(rollup@4.66.0)
       '@rollup/plugin-json':
-        specifier: ^6.1.0
+        specifier: 6.1.0
         version: 6.1.0(rollup@4.66.0)
       '@rollup/plugin-node-resolve':
-        specifier: ^16.0.3
+        specifier: 16.0.3
         version: 16.0.3(rollup@4.66.0)
       cleye:
         specifier: 'catalog:'
         version: 2.7.0
       rollup:
-        specifier: ^4.66.0
+        specifier: 4.66.0
         version: 4.66.0
       rollup-plugin-sourcemaps2:
-        specifier: ^0.5.10
+        specifier: 0.5.10
         version: 0.5.10(@types/node@26.6.6)(rollup@4.66.0)
     devDependencies:
       '@types/node':
@@ -262,7 +262,7 @@ importers:
   build_defs/vsix_package:
     dependencies:
       '@vscode/vsce':
-        specifier: ^4.1.0
+        specifier: 4.1.0
         version: 4.1.0(supports-color@7.2.0)
       cleye:
         specifier: 'catalog:'
@@ -278,25 +278,25 @@ importers:
         specifier: 0.0.2-7
         version: 0.0.2-7
       '@vscode/extension-telemetry':
-        specifier: ^1.5.2
+        specifier: 1.5.2
         version: 1.5.2(tslib@2.8.1)
       core-js-pure:
-        specifier: ^3.51.0
+        specifier: 3.51.0
         version: 3.51.0
       ignore:
-        specifier: ^7.0.14
+        specifier: 7.0.14
         version: 7.0.14
       just-debounce:
-        specifier: ^1.1.0
+        specifier: 1.1.0
         version: 1.1.0
       monolithic-git-interop:
         specifier: workspace:^
         version: link:../packages/git
       onetime:
-        specifier: ^8.0.0
+        specifier: 8.0.0
         version: 8.0.0
       watcher:
-        specifier: ^2.3.1
+        specifier: 2.3.1
         version: 2.3.1(patch_hash=aa7937374fa215a4c53d3c965a60db1da36cac88fabf716f76bb672746fc4983)
     devDependencies:
       '@types/node':
@@ -315,29 +315,29 @@ importers:
   integration_tests:
     dependencies:
       istanbul-lib-coverage:
-        specifier: ^3.2.2
+        specifier: 3.2.2
         version: 3.2.2
       istanbul-lib-report:
-        specifier: ^3.0.1
+        specifier: 3.0.1
         version: 3.0.1
       istanbul-reports:
-        specifier: ^3.2.0
+        specifier: 3.2.0
         version: 3.2.0
       playwright-core:
-        specifier: ^1.64.1
+        specifier: 1.64.1
         version: 1.64.1
       v8-to-istanbul:
-        specifier: ^9.3.0
+        specifier: 9.3.0
         version: 9.3.0
     devDependencies:
       '@types/istanbul-lib-coverage':
-        specifier: ^2.0.6
+        specifier: 2.0.6
         version: 2.0.6
       '@types/istanbul-lib-report':
-        specifier: ^3.0.3
+        specifier: 3.0.3
         version: 3.0.3
       '@types/istanbul-reports':
-        specifier: ^3.0.4
+        specifier: 3.0.4
         version: 3.0.4
       '@types/node':
         specifier: 'catalog:'
@@ -349,7 +349,7 @@ importers:
         specifier: catalog:vscode
         version: 24.13.3
       compare-versions:
-        specifier: ^6.1.1
+        specifier: 6.1.1
         version: 6.1.1
       get-stream:
         specifier: 'catalog:'
@@ -359,13 +359,13 @@ importers:
         version: link:../wasm
     devDependencies:
       '@bazel/runfiles':
-        specifier: ^6.5.0
+        specifier: 6.5.0
         version: 6.5.0
       ava:
         specifier: 'catalog:'
         version: 8.2.0(rollup@4.66.0)(supports-color@7.2.0)
       into-stream:
-        specifier: ^9.1.0
+        specifier: 9.1.0
         version: 9.1.0
 
   packages/vscode-manifest:
@@ -3314,8 +3314,8 @@ packages:
     resolution: {integrity: sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==}
     engines: {node: '>= 8'}
 
-  knip@6.44.1:
-    resolution: {integrity: sha512-Hbd8nvkIsNgFfXgC7Jsb5LHv7jj6VwA3tmfHd53XPX2z9Vc9RnAZqV0BIiP4OrtYqKwCoLseFHQZerb1bNlbSw==}
+  knip@6.44.0:
+    resolution: {integrity: sha512-mT0fl71Mqrko91azUO2Jw/uhYKwldORKT4liRq6yV0ZAtt6G2eYusdnvx8eBSQJDjvhRGKkpKUUx+vUG6syV4w==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
@@ -4005,8 +4005,8 @@ packages:
   remark@15.0.1:
     resolution: {integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==}
 
-  renovate@44.198.3:
-    resolution: {integrity: sha512-YyPGgGOPjH0EMZPZ6URPS5ucfXq4WaNN/7YWR0qiNlwI+Jool7dRpfsggutv53AZWMf+Guzgbe4ywNhqnWtywg==}
+  renovate@44.198.1:
+    resolution: {integrity: sha512-HCCTWG+LIrbqLpCsIZ4ws8lIToE79B0HpidreqflvMrEjHSPPpv9MyH2n7L1b/e0/nF0zNiQwxuIN6m1xUCwvg==}
     engines: {node: ^24.11.0, pnpm: ^11.0.0}
     hasBin: true
 
@@ -4344,10 +4344,6 @@ packages:
     resolution: {integrity: sha512-NoSdpq/WEiAg5sjmBkmV/hfxv6HJH4NqPNrqjtSO5CwRmpsDfaf4begxW34KdJykH/l1yHtwBWQkCRdoXO8mPA==}
     engines: {node: '>=20'}
 
-  type-fest@5.8.0:
-    resolution: {integrity: sha512-YGYEVz3Fm5iy/AybuA0oyNFq7H4CgQNfRp/qfe8nurE1kuCeNm3/vfm9X4Mtl+qLyaKJUh5xrFZwogr41SMjYA==}
-    engines: {node: '>=20'}
-
   type-flag@4.5.2:
     resolution: {integrity: sha512-v8O8xoLq3W6eKKYZvlyvk8LI46ryYkfnKrjGVdJzO+1LsxUu1ztvVAKFzQpphKQgS0ucinnbAiEGUbvibQmt/A==}
 
@@ -4385,10 +4381,6 @@ packages:
     resolution: {integrity: sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==}
     engines: {node: '>=0.8.0'}
     hasBin: true
-
-  uint8array-extras@1.5.0:
-    resolution: {integrity: sha512-rvKSBiC5zqCCiDZ9kAOszZcDvdAHwwIKJG33Ykj43OKcWsnmcBRL09YTU4nOeHZ8Y2a7l1MgTd08SBe9A8Qj6A==}
-    engines: {node: '>=18'}
 
   uint8array-extras@1.6.0:
     resolution: {integrity: sha512-8iAasVS4wUx0gPLjH8Xtz2PeDzTSiy8QiLGu2DT3X5GU+egFEQhpnbtkehbAwjvDcxIERmCYcysiODFmE3Ud0Q==}
@@ -4625,9 +4617,6 @@ packages:
   yoctocolors@2.2.0:
     resolution: {integrity: sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==}
     engines: {node: '>=18'}
-
-  zod@4.6.5:
-    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
   zod@4.6.7:
     resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
@@ -7483,8 +7472,8 @@ snapshots:
       keyv: 5.6.0
       lowercase-keys: 4.0.1
       responselike: 4.0.2
-      type-fest: 5.8.0
-      uint8array-extras: 1.5.0
+      type-fest: 5.10.0
+      uint8array-extras: 1.6.0
 
   got@16.1.0:
     dependencies:
@@ -7790,7 +7779,7 @@ snapshots:
 
   klona@2.0.6: {}
 
-  knip@6.44.1:
+  knip@6.44.0:
     dependencies:
       formatly: 0.11.4
       get-tsconfig: 4.14.3
@@ -7803,7 +7792,7 @@ snapshots:
       tinyglobby: 0.2.17
       unbash: 6.0.1
       yaml: 2.9.1
-      zod: 4.6.5
+      zod: 4.6.7
 
   levn@0.4.1:
     dependencies:
@@ -8663,7 +8652,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  renovate@44.198.3(supports-color@7.2.0)(typanion@3.14.0):
+  renovate@44.198.1(supports-color@7.2.0)(typanion@3.14.0):
     dependencies:
       '@aws-sdk/client-codecommit': 3.1139.0
       '@aws-sdk/client-ec2': 3.1139.0
@@ -9135,10 +9124,6 @@ snapshots:
     dependencies:
       tagged-tag: 1.0.0
 
-  type-fest@5.8.0:
-    dependencies:
-      tagged-tag: 1.0.0
-
   type-flag@4.5.2: {}
 
   typed-rest-client@1.8.11:
@@ -9200,8 +9185,6 @@ snapshots:
 
   uglify-js@3.19.3:
     optional: true
-
-  uint8array-extras@1.5.0: {}
 
   uint8array-extras@1.6.0: {}
 
@@ -9425,8 +9408,6 @@ snapshots:
   yocto-queue@1.2.2: {}
 
   yoctocolors@2.2.0: {}
-
-  zod@4.6.5: {}
 
   zod@4.6.7: {}
 

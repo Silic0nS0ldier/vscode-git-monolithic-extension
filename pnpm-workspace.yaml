@@ -5,6 +5,11 @@ packages:
   - extension
   - integration_tests
 
+# Keep artifact resolution (including transitive dependencies) aligned with Renovate's three-day delay.
+minimumReleaseAge: 4320
+minimumReleaseAgeStrict: true
+saveExact: true
+
 allowBuilds: 
   '@vscode/vsce-sign': false
   core-js-pure: false
@@ -14,14 +19,14 @@ allowBuilds:
   re2: false
 
 catalog:
-  '@types/node': ^26.6.6
-  ava: ^8.2.0
-  cleye: ^2.7.0
-  get-stream: ^9.0.1
+  '@types/node': 26.6.6
+  ava: 8.2.0
+  cleye: 2.7.0
+  get-stream: 9.0.1
 
 catalogs:
   vscode:
-    '@types/node': ^24.13.3
+    '@types/node': 24.13.3
 
 packageExtensions:
   # Imported by the generated twirp client but not declared.
