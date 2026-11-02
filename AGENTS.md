@@ -96,12 +96,14 @@ Fork-specific naming (never use the upstream `git.` namespace):
 2. `extension/vsix/package.nls.json`: `"command.<name>": "..."`.
 3. `bazel run //extension:update_command_names` to regenerate
    [command-names.gen.ts](extension/src/commands/command-names.gen.ts) (`CommandName`, the declared
-   ids). A diff test fails while it is stale.
+   ids) and [selection.gen.ts](extension/src/commands/selection.gen.ts) (all commands selected in
+   production). A diff test fails while either is stale.
 4. `extension/src/commands/implementations/<name>.ts` (kebab-case) exporting `createCommand(...)`
    that returns a `ScmCommand<"<name>">` with `commandId: makeCommandId("<name>")`.
-5. Add to the group `mod.ts` if it lives in a subfolder.
-6. Register in [extension/src/commands/register.ts](extension/src/commands/register.ts) — deps are
-   passed explicitly, there is no DI container.
+5. Add to the group `mod.ts` if it lives in a subfolder, registering it with
+   `selected.<name> ? <module>.createCommand(...) : pruned("<name>")`.
+6. Register in [extension/src/commands/register.ts](extension/src/commands/register.ts) using the
+   same selection conditional — deps are passed explicitly, there is no DI container.
 
 `makeCommandId` only accepts declared names, so use it for references too (`executeCommand`,
 `command:` properties) rather than raw `"git_monolithic.*"` strings. `register.ts` fails to

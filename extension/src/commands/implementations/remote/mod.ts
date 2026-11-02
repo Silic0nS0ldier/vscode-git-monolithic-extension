@@ -1,7 +1,9 @@
+import { pruned } from "../../pruned.js";
+import * as selected from "../../selection.gen.js";
 import * as removeRemote from "./remove-remote.js";
 
 export function createCommands() {
     return [
-        removeRemote.createCommand(),
+        selected.removeRemote ? removeRemote.createCommand() : pruned("removeRemote"),
     ];
 }

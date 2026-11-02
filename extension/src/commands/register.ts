@@ -4,6 +4,8 @@ import type { Model } from "../model.js";
 import type { CommandName } from "./command-names.gen.js";
 import { createCommand } from "./create.js";
 import { CommandErrorOutputTextDocumentContentProvider, type ScmCommand } from "./helpers.js";
+import { pruned } from "./pruned.js";
+import * as selected from "./selection.gen.js";
 
 import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import * as branch from "./implementations/branch/mod.js";
@@ -65,30 +67,30 @@ export function registerCommands(
     const cmds = allCommands([
         ...branch.createCommands(),
         ...checkout.createCommands(),
-        cherryPick.createCommand(),
+        selected.cherryPick ? cherryPick.createCommand() : pruned("cherryPick"),
         ...clean.createCommands(model, outputChannel),
         ...clone.createCommands(telemetryReporter, git),
-        close.createCommand(model),
+        selected.close ? close.createCommand(model) : pruned("close"),
         ...commit.createCommands(),
         ...fetch.createCommands(),
-        ignore.createCommand(model, outputChannel),
-        init.createCommand(git, model),
-        merge.createCommand(),
+        selected.ignore ? ignore.createCommand(model, outputChannel) : pruned("ignore"),
+        selected.init ? init.createCommand(git, model) : pruned("init"),
+        selected.merge ? merge.createCommand() : pruned("merge"),
         ...open.createCommands(model, outputChannel),
-        publish.createCommand(),
+        selected.publish ? publish.createCommand() : pruned("publish"),
         ...pull.createCommands(),
         ...push.createCommands(),
         ...rebase.createCommands(),
-        refresh.createCommand(),
+        selected.refresh ? refresh.createCommand() : pruned("refresh"),
         ...remote.createCommands(),
-        rename.createCommand(),
-        revealInExplorer.createCommand(),
-        setLogLevel.createCommand(outputChannel),
+        selected.rename ? rename.createCommand() : pruned("rename"),
+        selected.revealInExplorer ? revealInExplorer.createCommand() : pruned("revealInExplorer"),
+        selected.setLogLevel ? setLogLevel.createCommand(outputChannel) : pruned("setLogLevel"),
         ...stage.createCommands(model, outputChannel),
         ...stash.createCommands(),
         ...sync.createCommands(),
         ...tag.createCommands(),
-        undoCommit.createCommand(),
+        selected.undoCommit ? undoCommit.createCommand() : pruned("undoCommit"),
         ...unstage.createCommands(model, outputChannel),
     ]);
 

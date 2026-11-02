@@ -1,3 +1,5 @@
+import { pruned } from "../../pruned.js";
+import * as selected from "../../selection.gen.js";
 import * as pushForce from "./push-force.js";
 import * as pushTags from "./push-tags.js";
 import * as pushToForce from "./push-to-force.js";
@@ -8,12 +10,12 @@ import * as push from "./push.js";
 
 export function createCommands() {
     return [
-        push.createCommand(),
-        pushForce.createCommand(),
-        pushTags.createCommand(),
-        pushTo.createCommand(),
-        pushToForce.createCommand(),
-        pushWithTags.createCommand(),
-        pushWithTagsForce.createCommand(),
+        selected.push ? push.createCommand() : pruned("push"),
+        selected.pushForce ? pushForce.createCommand() : pruned("pushForce"),
+        selected.pushTags ? pushTags.createCommand() : pruned("pushTags"),
+        selected.pushTo ? pushTo.createCommand() : pruned("pushTo"),
+        selected.pushToForce ? pushToForce.createCommand() : pruned("pushToForce"),
+        selected.pushWithTags ? pushWithTags.createCommand() : pruned("pushWithTags"),
+        selected.pushWithTagsForce ? pushWithTagsForce.createCommand() : pruned("pushWithTagsForce"),
     ];
 }
