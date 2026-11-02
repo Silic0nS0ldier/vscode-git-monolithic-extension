@@ -1,5 +1,5 @@
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
-load("@aspect_rules_js//js:defs.bzl", "js_library", "js_run_binary")
+load("@aspect_rules_js//js:defs.bzl", "js_library", "js_run_binary", "js_test")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@npm//extension:ava/package_json.bzl", "bin")
@@ -31,9 +31,30 @@ js_run_binary(
     tool = "//packages/vscode-manifest:generate_command_names",
 )
 
+js_run_binary(
+    name = "command_selection",
+    srcs = ["//extension/vsix:manifest"],
+    args = [
+        "--manifest",
+        "$(rootpath //extension/vsix:manifest)",
+        "--prefix",
+        "git_monolithic.",
+        "--from",
+        "extension/vsix/package.json",
+        "--update",
+        "'bazel run //extension:update_command_names'",
+        "--selection",
+    ],
+    stdout = "command-selection.gen.ts",
+    tool = "//packages/vscode-manifest:generate_command_names",
+)
+
 write_source_files(
     name = "update_command_names",
-    files = {"src/commands/command-names.gen.ts": ":command_names"},
+    files = {
+        "src/commands/command-names.gen.ts": ":command_names",
+        "src/commands/selection.gen.ts": ":command_selection",
+    },
 )
 
 ts_project(
@@ -86,6 +107,13 @@ rollup_bundle(
         "//integration_tests:__pkg__",
         "//integration_tests/electron_host:__pkg__",
     ],
+)
+
+js_test(
+    name = "bundle_not_pruned_test",
+    args = ["$(rootpath :bundle_/main.js)"],
+    data = [":bundle_/main.js"],
+    entry_point = "src/commands/bundle-not-pruned.test.mjs",
 )
 
 ts_project(

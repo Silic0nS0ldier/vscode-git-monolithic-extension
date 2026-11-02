@@ -1,13 +1,14 @@
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { API } from "typescript/sync";
-import { generateCommandNamesModule } from "./codegen.js";
+import { generateCommandNamesModule, generateCommandSelectionModule } from "./codegen.js";
 import { parseManifest } from "./manifest.js";
 
 /**
- * Prints the `CommandName` module for a manifest to stdout.
+ * Prints the `CommandName` or command-selection module for a manifest to stdout.
  *
  * Usage: generate-command-names --manifest <package.json> --prefix <prefix> --from <label> --update <command>
+ *        [--selection [--select <command>]...]
  */
 function main(): number {
     const { values } = parseArgs({
@@ -16,9 +17,11 @@ function main(): number {
             prefix: { type: "string" },
             from: { type: "string" },
             update: { type: "string" },
+            selection: { type: "boolean" },
+            select: { type: "string", multiple: true },
         },
     });
-    const { manifest: file, prefix, from, update } = values;
+    const { manifest: file, prefix, from, update, selection, select } = values;
     if (!file || !prefix || !from || !update) {
         console.error(
             "Usage: generate-command-names --manifest <file> --prefix <prefix> --from <label> --update <cmd>",
@@ -34,11 +37,19 @@ function main(): number {
         return 1;
     }
 
-    const result = generateCommandNamesModule(parsed.manifest, {
+    if (!selection && select?.length) {
+        console.error("--select requires --selection.");
+        return 2;
+    }
+
+    const options = {
         commandPrefix: prefix,
         generatedFrom: from,
         updateCommand: update,
-    });
+    };
+    const result = selection
+        ? generateCommandSelectionModule(parsed.manifest, { ...options, selectedCommands: select })
+        : generateCommandNamesModule(parsed.manifest, options);
     if (result.errors) {
         result.errors.forEach(e => console.error(e));
         return 1;
