@@ -40,33 +40,33 @@
     "binaries": [
       {
         "kind": "archive",
-        "url": "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.129/wasm-bindgen-0.2.129-aarch64-unknown-linux-musl.tar.gz",
-        "file": "wasm-bindgen-0.2.129-aarch64-unknown-linux-musl/wasm-bindgen",
-        "sha256": "2ed4351c35dd9440308bbb02767d47ea278efe851a52465300f3c94f5b6c2a87",
+        "url": "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.130/wasm-bindgen-0.2.130-aarch64-unknown-linux-musl.tar.gz",
+        "file": "wasm-bindgen-0.2.130-aarch64-unknown-linux-musl/wasm-bindgen",
+        "sha256": "99ffc93ce80081b91632e2b539b782821a8f3439ab0fddc645287462b2f55d3d",
         "os": "linux",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.129/wasm-bindgen-0.2.129-x86_64-unknown-linux-musl.tar.gz",
-        "file": "wasm-bindgen-0.2.129-x86_64-unknown-linux-musl/wasm-bindgen",
-        "sha256": "82d12bb940e2d4e72e0d5605387fc1b8ca179044e012b620f0ce4e7440e8320e",
+        "url": "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.130/wasm-bindgen-0.2.130-x86_64-unknown-linux-musl.tar.gz",
+        "file": "wasm-bindgen-0.2.130-x86_64-unknown-linux-musl/wasm-bindgen",
+        "sha256": "9687f3bb551b9f66f37ed32a40d7913a00f7962db653054e56857bc306c3227f",
         "os": "linux",
         "cpu": "x86_64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.129/wasm-bindgen-0.2.129-aarch64-apple-darwin.tar.gz",
-        "file": "wasm-bindgen-0.2.129-aarch64-apple-darwin/wasm-bindgen",
-        "sha256": "81d4a23d56b3c3eb8187658329116d50e0b228a93b343825fb71f70179051cd1",
+        "url": "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.130/wasm-bindgen-0.2.130-aarch64-apple-darwin.tar.gz",
+        "file": "wasm-bindgen-0.2.130-aarch64-apple-darwin/wasm-bindgen",
+        "sha256": "b90ddb9357f584b1af897d58ad77e4cce2b48fc17e2a967bc249a87f72809444",
         "os": "macos",
         "cpu": "arm64"
       },
       {
         "kind": "archive",
-        "url": "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.129/wasm-bindgen-0.2.129-x86_64-apple-darwin.tar.gz",
-        "file": "wasm-bindgen-0.2.129-x86_64-apple-darwin/wasm-bindgen",
-        "sha256": "7e028879a68ec53dae14048b55cc5215f6df75b17a9c1426fac8fa086d3202fd",
+        "url": "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.130/wasm-bindgen-0.2.130-x86_64-apple-darwin.tar.gz",
+        "file": "wasm-bindgen-0.2.130-x86_64-apple-darwin/wasm-bindgen",
+        "sha256": "eb209c115b7cb95832423c1aa3f4d06d6c53f63ef74fc4b6fb79ef0b2eea5f10",
         "os": "macos",
         "cpu": "x86_64"
       }
