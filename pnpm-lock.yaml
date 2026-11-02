@@ -249,7 +249,7 @@ importers:
         specifier: 'catalog:'
         version: 2.7.0
       rollup:
-        specifier: ^4.65.1
+        specifier: ^4.66.0
         version: 4.66.0
       rollup-plugin-sourcemaps2:
         specifier: ^0.5.10
