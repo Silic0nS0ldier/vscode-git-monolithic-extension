@@ -29,6 +29,19 @@
     ],
     "packageRules": [
         {
+            "matchManagers": [
+                "npm"
+            ],
+            "matchDepTypes": [
+                "dependencies",
+                "devDependencies",
+                "optionalDependencies",
+                "/^pnpm\\.catalog\\./"
+            ],
+            "rangeStrategy": "pin",
+            "description": "Pin direct registry dependencies so lockfile resolution cannot advance beyond the reviewed update target."
+        },
+        {
             "matchDatasources": [
                 "*"
             ],
