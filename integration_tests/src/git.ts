@@ -111,8 +111,21 @@ export async function headIdentities(): Promise<{ author: string; committer: str
     return { author, committer };
 }
 
+/** The extension refreshes the index (taking `index.lock`) when files change, so a write may race it; retry that. */
 export async function stage(...paths: string[]): Promise<void> {
-    await git("add", "--", ...paths);
+    const deadline = Date.now() + GIT_TIMEOUT_MS;
+    for (;;) {
+        try {
+            await git("add", "--", ...paths);
+            return;
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "";
+            if (!message.includes("index.lock") || Date.now() >= deadline) {
+                throw error;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
 }
 
 /**
