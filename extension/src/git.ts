@@ -43,11 +43,10 @@ import type { AllServices } from "monolithic-git-interop/services";
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, type Result, unwrap } from "monolithic-git-interop/util/result";
 import type * as cp from "node:child_process";
-import { EventEmitter } from "node:events";
 import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { OutputChannel, Progress } from "vscode";
+import type { Progress } from "vscode";
 import {
     type Branch,
     type CommitIdentity,
@@ -73,6 +72,7 @@ import { getHEAD } from "./git/repository-class/get-head.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
+import { error, info, trace } from "./tracing.js";
 import { isExpectedError } from "./util/is-expected-error.js";
 
 interface MutableRemote extends Remote {
@@ -87,7 +87,6 @@ interface IGitOptions {
     version: string;
     context: GitContext;
     env?: { [key: string]: string };
-    outputChannel: OutputChannel;
 }
 
 const REF_TYPES: Record<RefKind, RefTypeOptions> = {
@@ -142,17 +141,12 @@ export class Git {
         return this.#env;
     }
 
-    #onOutputEmitter = new EventEmitter();
-    get onOutput(): EventEmitter {
-        return this.#onOutputEmitter;
-    }
-
     constructor(options: IGitOptions) {
         this.path = options.gitPath;
         this.version = options.version;
         this.userAgent = options.userAgent;
         this._context = options.context;
-        this.#services = createServices(msg => options.outputChannel.appendLine(msg));
+        this.#services = createServices(msg => info(msg));
         this.#env = options.env || {};
     }
 
@@ -276,21 +270,11 @@ export class Git {
     }
 
     stream(cwd: string, args: string[], options: SpawnOptions = {}): cp.ChildProcess {
-        return internalSpawn(this.path, this.#env, this.#log.bind(this), args, { cwd, ...options, log_mode: "stream" });
+        return internalSpawn(this.path, this.#env, args, { cwd, ...options, log_mode: "stream" });
     }
 
     async #exec(args: string[], options: SpawnOptions): Promise<IExecutionResult<string>> {
-        return internalExec(this.path, this.#env, this.#log.bind(this), args, options);
-    }
-
-    #log(output: string): void {
-        this.#onOutputEmitter.emit("log", output);
-    }
-
-    // For repository abstraction
-    // TODO Give `Repository` it's own logger
-    log(output: string) {
-        this.#log(output);
+        return internalExec(this.path, this.#env, args, options);
     }
 }
 
@@ -361,14 +345,14 @@ export class Repository {
         const result = await show(this.#git._context, this.#repositoryRoot, object);
 
         if (isErr(result)) {
-            const error = unwrap(result);
-            const details = error.type === gitErrors.ERROR_NON_ZERO_EXIT ? error.cause : undefined;
+            const err = unwrap(result);
+            const details = err.type === gitErrors.ERROR_NON_ZERO_EXIT ? err.cause : undefined;
             const gitError = new GitError({
                 exitCode: details?.exitCode ?? undefined,
                 message: "Could not show object.",
                 stderr: details?.stderr,
             });
-            this.git.log(`Failed to get object ${object}: ${unwrap(result)}`);
+            error(`Failed to get object ${object}: ${err}`);
             throw gitError;
         }
 
@@ -444,7 +428,7 @@ export class Repository {
 
         const pid = child.pid;
         const invocId = `CMD_3_${runCounter++}`;
-        this.git.log(`${invocId} > (PID = ${pid}) ${child.spawnfile} ${child.spawnargs.join(" ")}`);
+        trace(`${invocId} > (PID = ${pid}) ${child.spawnfile} ${child.spawnargs.join(" ")}`);
 
         const result = await exec(child);
 
@@ -453,11 +437,11 @@ export class Repository {
         });
 
         if (isErr(result)) {
-            this.git.log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
+            trace(`${invocId} < FAILED (PID = ${pid}; Duration = ${durationStr})`);
             throw unwrap(result);
         }
 
-        this.git.log(`${invocId} < SUCCESS (PID = ${pid}; Duration = ${durationStr})`);
+        trace(`${invocId} < SUCCESS (PID = ${pid}; Duration = ${durationStr})`);
         const { exitCode, stdout } = unwrap(result);
         const hash = stdout.toString("utf8");
 

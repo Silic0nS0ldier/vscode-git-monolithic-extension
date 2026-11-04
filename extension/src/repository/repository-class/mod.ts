@@ -1,15 +1,6 @@
 import { join } from "node:path";
 import { setTimeout as timeout } from "node:timers/promises";
-import {
-    Disposable,
-    EventEmitter,
-    type Memento,
-    type OutputChannel,
-    type QuickDiffProvider,
-    Uri,
-    window,
-    workspace,
-} from "vscode";
+import { Disposable, EventEmitter, type Memento, type QuickDiffProvider, Uri, window, workspace } from "vscode";
 import { type Branch, GitErrorCodes, type Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
 import type { Repository as BaseRepository } from "../../git.js";
@@ -64,17 +55,16 @@ import { updateModelState as updateModelStateImpl } from "./update-model-state.j
 export function createRepository(
     repository: BaseRepository,
     globalState: Memento,
-    outputChannel: OutputChannel,
 ): AbstractRepository {
     const disposables: Disposable[] = [];
     const repoRoot = repository.root;
     const dotGit = repository.dotGit;
 
-    const workingTreeWatcher = createWorkingTreeWatcher(repoRoot, dotGit, outputChannel);
+    const workingTreeWatcher = createWorkingTreeWatcher(repoRoot, dotGit);
     disposables.push(workingTreeWatcher);
     const onWorkingTreeFileChange = workingTreeWatcher.event;
 
-    const dotGitFileWatcher = createDotGitWatcher(dotGit, outputChannel);
+    const dotGitFileWatcher = createDotGitWatcher(dotGit);
     disposables.push(dotGitFileWatcher);
     const onDotGitFileChange = dotGitFileWatcher.event;
 
@@ -294,7 +284,7 @@ export function createRepository(
     // Relevate repository changes should trigger virtual document change events
     onDotGitFileChange(onDidChangeRepositoryEmitter.fire, onDidChangeRepositoryEmitter, disposables);
 
-    disposables.push(new FileEventLogger(onWorkingTreeFileChange, onDotGitFileChange, outputChannel));
+    disposables.push(new FileEventLogger(onWorkingTreeFileChange, onDotGitFileChange));
 
     function headShortName(): string | undefined {
         const valueHEAD = HEAD.get();

@@ -64,7 +64,6 @@ export type CommandName =
     | "rename"
     | "renameBranch"
     | "revealInExplorer"
-    | "setLogLevel"
     | "showOutput"
     | "stage"
     | "stageAll"

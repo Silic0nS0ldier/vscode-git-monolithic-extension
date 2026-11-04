@@ -2,7 +2,7 @@ import { fromEnvironment, fromPath, type GitContext, type PersistentCLIContext }
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
-import type { OutputChannel } from "vscode";
+import { trace } from "../tracing.js";
 import { snoopOnStream, SnoopStream } from "../util/snoop-stream.js";
 
 export interface IGit {
@@ -11,8 +11,11 @@ export interface IGit {
     context: GitContext;
 }
 
-export async function findGit(outputChannel: OutputChannel, hints: string[]): Promise<IGit> {
-    const services = createServices(msg => outputChannel.appendLine(msg));
+export async function findGit(hints: string[]): Promise<IGit> {
+    const services = createServices(
+        // TODO Use tiered logging instead of always using trace
+        msg => trace(msg),
+    );
 
     const persistentContext: PersistentCLIContext = { env: process.env, timeout: 30_000 };
 
@@ -40,14 +43,14 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                 const invocId = `CMD_0_${runCounter++}`;
 
                 // Log input
-                outputChannel.appendLine(`${invocId} > git ${args.join(" ")}`);
+                trace(`${invocId} > git ${args.join(" ")}`);
 
                 // Log output
-                const stdoutLog = (msg: string): void => outputChannel.appendLine(`${invocId} < [STDOUT] ${msg}`);
+                const stdoutLog = (msg: string): void => trace(`${invocId} < [STDOUT] ${msg}`);
                 const stdout = cliContext.stdout
                     ? snoopOnStream(cliContext.stdout, stdoutLog)
                     : new SnoopStream(stdoutLog);
-                const stderrLog = (msg: string): void => outputChannel.appendLine(`${invocId} < [STDERR] ${msg}`);
+                const stderrLog = (msg: string): void => trace(`${invocId} < [STDERR] ${msg}`);
                 const stderr = cliContext.stderr
                     ? snoopOnStream(cliContext.stderr, stderrLog)
                     : new SnoopStream(stderrLog);
@@ -76,11 +79,11 @@ export async function findGit(outputChannel: OutputChannel, hints: string[]): Pr
                 // Log result
                 if (isErr(result)) {
                     const err = unwrap(result);
-                    outputChannel.appendLine(
-                        `${invocId} < ERROR (PID = ${pid}, Duration = ${durationStr}) ${err.type.description}`,
+                    trace(
+                        `${invocId} < FAILED (PID = ${pid}, Duration = ${durationStr}) ${err.type.description}`,
                     );
                 } else {
-                    outputChannel.appendLine(`${invocId} < SUCCESS (PID = ${pid}, Duration = ${durationStr})`);
+                    trace(`${invocId} < SUCCESS (PID = ${pid}, Duration = ${durationStr})`);
                 }
 
                 return result;

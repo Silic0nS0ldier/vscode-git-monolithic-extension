@@ -1,17 +1,17 @@
-import { type OutputChannel, Uri } from "vscode";
+import { Uri } from "vscode";
 import type { Model } from "../../../model.js";
 import { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
+import { trace } from "../../../tracing.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { getSCMResource, runByRepository } from "../../helpers.js";
 import { categorizeResourceByResolution, stageConflicts, stageDeletionConflict } from "./helpers.js";
 
 export function createCommand(
-    outputChannel: OutputChannel,
     model: Model,
 ): ScmCommand<"stage"> {
     async function stage(...resourceStates: Resource[]): Promise<void> {
-        outputChannel.appendLine(`git.stage ${resourceStates.length}`);
+        trace(`git.stage ${resourceStates.length}`);
 
         let normalisedResourceStates = resourceStates.filter(s => !!s);
 
@@ -19,9 +19,9 @@ export function createCommand(
             normalisedResourceStates.length === 0
             || (normalisedResourceStates[0] && !(normalisedResourceStates[0].state.resourceUri instanceof Uri))
         ) {
-            const resource = getSCMResource(model, outputChannel);
+            const resource = getSCMResource(model);
 
-            outputChannel.appendLine(
+            trace(
                 `git.stage.getSCMResource ${resource ? resource.state.resourceUri.toString() : null}`,
             );
 
@@ -54,7 +54,7 @@ export function createCommand(
         const untracked = selection.filter(s => s.state.resourceGroupType === ResourceGroupType.Untracked);
         const scmResources = [...workingTree, ...untracked, ...resolved, ...unresolved];
 
-        outputChannel.appendLine(`git.stage.scmResources ${scmResources.length}`);
+        trace(`git.stage.scmResources ${scmResources.length}`);
         if (!scmResources.length) {
             return;
         }

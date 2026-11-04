@@ -1,4 +1,5 @@
 import { isErr, unwrap } from "monolithic-git-interop/util/result";
+import { trace } from "../../tracing.js";
 import { getGitErrorCode, GitError } from "../error.js";
 import { exec, type IExecutionResult } from "../exec.js";
 import type { SpawnOptions } from "../SpawnOptions.js";
@@ -9,12 +10,11 @@ let runCounter = 0;
 export async function internalExec(
     gitPath: string,
     env: { [key: string]: string },
-    log: (msg: string) => void,
     args: string[],
     options: SpawnOptions,
 ): Promise<IExecutionResult<string>> {
     const start = Date.now();
-    const child = internalSpawn(gitPath, env, log, args, options);
+    const child = internalSpawn(gitPath, env, args, options);
 
     if (options.onSpawn) {
         options.onSpawn(child);
@@ -29,28 +29,28 @@ export async function internalExec(
 
     const pid = child.pid;
     const invocId = `CMD_1_${runCounter++}`;
-    log(`${invocId} > (PID = ${pid}) ${child.spawnfile} ${child.spawnargs.join(" ")}`);
+    trace(`${invocId} > (PID = ${pid}) ${child.spawnfile} ${child.spawnargs.join(" ")}`);
 
     const execResult = await exec(child, options.abortSignal);
 
     const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format({ milliseconds: Date.now() - start });
 
     if (isErr(execResult)) {
-        log(`${invocId} < ERROR (PID = ${pid}; Duration = ${durationStr})`);
+        trace(`${invocId} < FAILED (PID = ${pid}; Duration = ${durationStr})`);
         throw unwrap(execResult);
     }
 
     const bufferResult = unwrap(execResult);
 
     if (bufferResult.stderr.length > 0) {
-        log(`${invocId} [${options.log_mode}] < [STDERR] ${JSON.stringify(bufferResult.stderr)}\n`);
+        trace(`${invocId} [${options.log_mode}] < [STDERR] ${JSON.stringify(bufferResult.stderr)}\n`);
     }
     let out = JSON.stringify(bufferResult.stdout.toString("utf-8"));
     if (out.length > 150) {
         out = out.slice(0, 150) + `" (${out.length - 150} chars hidden)`;
     }
-    log(`${invocId} [${options.log_mode}] < [STDOUT] ${out}\n`);
-    log(`${invocId} < SUCCESS (PID = ${pid}; Duration = ${durationStr})`);
+    trace(`${invocId} [${options.log_mode}] < [STDOUT] ${out}\n`);
+    trace(`${invocId} < SUCCESS (PID = ${pid}; Duration = ${durationStr})`);
 
     const result: IExecutionResult<string> = {
         exitCode: bufferResult.exitCode,

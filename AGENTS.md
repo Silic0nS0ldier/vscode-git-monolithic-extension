@@ -72,6 +72,10 @@ TypeScript (all packages extend the root [tsconfig.json](tsconfig.json), which i
 - Runtime strings go through `i18n.Translations.*` in
   [extension/src/i18n/l10n.ts](extension/src/i18n/l10n.ts); only manifest `%key%` strings live in
   `extension/vsix/package.nls.json`.
+- Log through the level functions in [extension/src/tracing.ts](extension/src/tracing.ts), never
+  `outputChannel.appendLine`. Message text must not contain words the Output view's `log` grammar
+  highlights as a level (`[WARN]`, `Error`, `error:`, …). Both are enforced by the `logging/*` eslint
+  rules in [build_defs/lint/eslint-plugin-logging.mjs](build_defs/lint/eslint-plugin-logging.mjs).
 - Formatting is dprint: 4 spaces, LF, 120 columns.
 
 Bazel:

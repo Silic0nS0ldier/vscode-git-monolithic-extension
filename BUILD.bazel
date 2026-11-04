@@ -30,5 +30,6 @@ js_library(
         ":node_modules/@eslint/js",
         ":node_modules/eslint",
         ":node_modules/typescript-eslint",
+        "//build_defs/lint:eslint_plugin_logging",
     ],
 )

@@ -1,4 +1,5 @@
 import * as cp from "node:child_process";
+import { trace } from "../../tracing.js";
 import { sanitizePath } from "../helpers.js";
 import type { SpawnOptions } from "../SpawnOptions.js";
 import { cliEnv } from "./cli-env.js";
@@ -6,7 +7,6 @@ import { cliEnv } from "./cli-env.js";
 export function internalSpawn(
     gitPath: string,
     env: { [key: string]: string },
-    log: (msg: string) => void,
     args: string[],
     options: SpawnOptions = {},
 ): cp.ChildProcess {
@@ -32,7 +32,7 @@ export function internalSpawn(
     try {
         return cp.spawn(gitPath, args, options);
     } catch (e) {
-        log(`LAUNCH_FAILED > ${cmd}`);
+        trace(`LAUNCH_FAILED > ${cmd}`);
         throw e;
     }
 }

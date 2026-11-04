@@ -1,18 +1,17 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
+import { Disposable, type Event, EventEmitter, Uri } from "vscode";
+import { trace } from "../tracing.js";
 import { type SuspendHandle, watch } from "./watch.js";
 
 class DotGitEventEmitter extends EventEmitter<Uri> {
     #lastGitIndexDigest: string | null = null;
     #gitIndexPath: string;
-    #outputChannel: OutputChannel;
 
-    constructor(dotGitDir: string, outputChannel: OutputChannel) {
+    constructor(dotGitDir: string) {
         super();
         this.#gitIndexPath = path.join(dotGitDir, "index");
-        this.#outputChannel = outputChannel;
     }
 
     override fire(data: Uri): void {
@@ -29,7 +28,7 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
 
         if (currentIndexDigest === this.#lastGitIndexDigest) {
             // Index content most likely unchanged
-            this.#outputChannel.appendLine("Index file content appears unchanged, skipping event.");
+            trace("Index file content appears unchanged, skipping event.");
             return;
         }
 
@@ -42,7 +41,6 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
 // This is a lot more efficient then watching everything, and avoids workarounds for aids like watchman as an fsmonitor
 export function createDotGitWatcher(
     dotGitDir: string,
-    outputChannel: OutputChannel,
 ): { event: Event<Uri>; suspend: () => SuspendHandle } & Disposable {
     const rootWatcher = watch(
         [
@@ -76,11 +74,10 @@ export function createDotGitWatcher(
         ],
         () => false,
         [],
-        outputChannel,
         "dot-git",
     );
 
-    const emitter = new DotGitEventEmitter(dotGitDir, outputChannel);
+    const emitter = new DotGitEventEmitter(dotGitDir);
     const disposable = Disposable.from(rootWatcher, emitter);
 
     rootWatcher.event((uri) => emitter.fire(uri));

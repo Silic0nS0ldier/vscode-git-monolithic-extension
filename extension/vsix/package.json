@@ -36,12 +36,6 @@
                 "enablement": "config.git_monolithic.enabled"
             },
             {
-                "command": "git_monolithic.setLogLevel",
-                "title": "%command.setLogLevel%",
-                "category": "Git",
-                "enablement": "config.git_monolithic.enabled"
-            },
-            {
                 "command": "git_monolithic.clone",
                 "title": "%command.clone%",
                 "category": "Git",
@@ -548,10 +542,6 @@
                 {
                     "command": "git_monolithic.stageSelectedRanges",
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"
-                },
-                {
-                    "command": "git_monolithic.setLogLevel",
-                    "when": "config.git_monolithic.enabled && !git_monolithic.context.missing"
                 },
                 {
                     "command": "git_monolithic.clone",

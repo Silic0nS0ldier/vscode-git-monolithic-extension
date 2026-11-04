@@ -28,7 +28,6 @@ import * as refresh from "./implementations/refresh.js";
 import * as remote from "./implementations/remote/mod.js";
 import * as rename from "./implementations/rename.js";
 import * as revealInExplorer from "./implementations/reveal-in-explorer.js";
-import * as setLogLevel from "./implementations/set-log-level.js";
 import * as stage from "./implementations/stage/mod.js";
 import * as stash from "./implementations/stash/mod.js";
 import * as sync from "./implementations/sync/mod.js";
@@ -68,15 +67,15 @@ export function registerCommands(
         ...branch.createCommands(),
         ...checkout.createCommands(),
         selected.cherryPick ? cherryPick.createCommand() : pruned("cherryPick"),
-        ...clean.createCommands(model, outputChannel),
+        ...clean.createCommands(model),
         ...clone.createCommands(telemetryReporter, git),
         selected.close ? close.createCommand(model) : pruned("close"),
         ...commit.createCommands(),
         ...fetch.createCommands(),
-        selected.ignore ? ignore.createCommand(model, outputChannel) : pruned("ignore"),
+        selected.ignore ? ignore.createCommand(model) : pruned("ignore"),
         selected.init ? init.createCommand(git, model) : pruned("init"),
         selected.merge ? merge.createCommand() : pruned("merge"),
-        ...open.createCommands(model, outputChannel),
+        ...open.createCommands(model),
         selected.publish ? publish.createCommand() : pruned("publish"),
         ...pull.createCommands(),
         ...push.createCommands(),
@@ -85,13 +84,12 @@ export function registerCommands(
         ...remote.createCommands(),
         selected.rename ? rename.createCommand() : pruned("rename"),
         selected.revealInExplorer ? revealInExplorer.createCommand() : pruned("revealInExplorer"),
-        selected.setLogLevel ? setLogLevel.createCommand(outputChannel) : pruned("setLogLevel"),
-        ...stage.createCommands(model, outputChannel),
+        ...stage.createCommands(model),
         ...stash.createCommands(),
         ...sync.createCommands(),
         ...tag.createCommands(),
         selected.undoCommit ? undoCommit.createCommand() : pruned("undoCommit"),
-        ...unstage.createCommands(model, outputChannel),
+        ...unstage.createCommands(model),
     ]);
 
     const commandErrors = new CommandErrorOutputTextDocumentContentProvider();

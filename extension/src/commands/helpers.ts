@@ -1,15 +1,9 @@
-import {
-    type OutputChannel,
-    type TextDocument,
-    type TextDocumentContentProvider,
-    Uri,
-    window,
-    workspace,
-} from "vscode";
+import { type TextDocument, type TextDocumentContentProvider, Uri, window, workspace } from "vscode";
 import { Status } from "../api/git.js";
 import type { Model } from "../model.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../repository/Resource.js";
+import { debug } from "../tracing.js";
 import { fromGitUri, isGitUri } from "../uri.js";
 import { isDescendant, pathEquals } from "../util/paths.js";
 import type { CommandName } from "./command-names.gen.js";
@@ -64,7 +58,6 @@ export async function runByRepository(
  */
 export function normaliseResourceStates(
     model: Model,
-    outputChannel: OutputChannel,
     resourceStates: readonly Resource[],
 ): Resource[] {
     const normalised = resourceStates.filter((s): s is Resource => !!s);
@@ -73,7 +66,7 @@ export function normaliseResourceStates(
         normalised.length === 0
         || (normalised[0] && !(normalised[0].state.resourceUri instanceof Uri))
     ) {
-        const resource = getSCMResource(model, outputChannel);
+        const resource = getSCMResource(model);
 
         if (!resource) {
             return [];
@@ -87,16 +80,15 @@ export function normaliseResourceStates(
 
 export function getSCMResource(
     model: Model,
-    outputChannel: OutputChannel,
     uri?: Uri,
 ): Resource | undefined {
     let normalisedUri = uri ? uri : (window.activeTextEditor?.document.uri);
 
-    outputChannel.appendLine(`git.getSCMResource.uri ${normalisedUri && normalisedUri.toString()}`);
-
+    let debugMsg = `git.getSCMResource.uri ${normalisedUri?.toString()}`;
     for (const r of model.repositories.map(r => r.root)) {
-        outputChannel.appendLine(`repo root ${r}`);
+        debugMsg += `\nrepo root ${r}`;
     }
+    debug(debugMsg);
 
     if (!normalisedUri) {
         return undefined;

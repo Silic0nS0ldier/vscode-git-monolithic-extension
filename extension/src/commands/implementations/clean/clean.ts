@@ -1,4 +1,4 @@
-import { type OutputChannel, window } from "vscode";
+import { window } from "vscode";
 import { Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { Model } from "../../../model.js";
@@ -14,9 +14,9 @@ function takeFirstIfOnlyMember<T>(arr: readonly T[]): T | null {
     return null;
 }
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"clean"> {
+export function createCommand(model: Model): ScmCommand<"clean"> {
     async function clean(...resourceStates: Resource[]): Promise<void> {
-        const normalisedResourceStates = normaliseResourceStates(model, outputChannel, resourceStates);
+        const normalisedResourceStates = normaliseResourceStates(model, resourceStates);
 
         const scmResources = normalisedResourceStates.filter(s =>
             s instanceof Resource

@@ -1,7 +1,8 @@
 import * as fs from "node:fs";
 import { inspect } from "node:util";
-import { Disposable, type Event, EventEmitter, type OutputChannel, Uri } from "vscode";
+import { Disposable, type Event, EventEmitter, Uri } from "vscode";
 import BaseWatcher from "watcher";
+import { error, trace, warn } from "../tracing.js";
 import * as config from "../util/config.js";
 
 type TargetEvent = Parameters<BaseWatcher["event"]>[0];
@@ -26,7 +27,6 @@ export function watch(
     locks: string[],
     ignoreFn: (path: string) => boolean,
     important: string[],
-    outputChannel: OutputChannel,
     id: string,
 ): Watcher {
     const onFileChangeEmitter = new EventEmitter<Uri>();
@@ -60,9 +60,9 @@ export function watch(
 
                 if (lockEvents.size > 0) {
                     // Locks gone, fire remembered events
-                    outputChannel.appendLine(`TRACE: ${id} watcher releasing ${lockEvents.size} important events`);
+                    trace(`${id} watcher releasing ${lockEvents.size} important events`);
                     for (const [recallPath, recallEt] of lockEvents) {
-                        outputChannel.appendLine(`TRACE: ${id} watcher recalled event "${recallEt}" "${recallPath}"`);
+                        trace(`${id} watcher recalled event "${recallEt}" "${recallPath}"`);
                         onFileChangeEmitter.fire(Uri.file(recallPath));
                     }
                     lockEvents.clear();
@@ -71,15 +71,14 @@ export function watch(
                 // Filter directory events, only files are of interest
                 // TODO Do the individual files also get updated?
                 if (isWatchableEvent(et)) {
-                    outputChannel.appendLine(`TRACE: ${id} watcher event "${et}" "${path}"`);
+                    trace(`${id} watcher event "${et}" "${path}"`);
                     onFileChangeEmitter.fire(Uri.file(path));
                 }
             },
         );
 
-        // TODO Use unified logger
         watcher.on("error", err => {
-            outputChannel.appendLine(`${id} watcher error: ${inspect(err)}`);
+            error(`${id} watcher failed: ${inspect(err)}`);
         });
 
         return watcher;
@@ -89,15 +88,11 @@ export function watch(
 
     async function release(): Promise<void> {
         if (disposed) {
-            outputChannel.appendLine(
-                `WARN: ${id} watcher suspend handle disposed after watcher was disposed\n${new Error().stack}`,
-            );
+            warn(`${id} watcher suspend handle disposed after watcher was disposed\n${new Error().stack}`);
             return;
         }
         if (suspendCount === 0) {
-            outputChannel.appendLine(
-                `WARN: ${id} watcher suspend handle disposed with no active suspend\n${new Error().stack}`,
-            );
+            warn(`${id} watcher suspend handle disposed with no active suspend\n${new Error().stack}`);
             return;
         }
         suspendCount--;
@@ -105,7 +100,7 @@ export function watch(
             return;
         }
 
-        outputChannel.appendLine(`TRACE: ${id} watcher resuming, re-creating underlying watcher`);
+        trace(`${id} watcher resuming, re-creating underlying watcher`);
         watcher = createWatcher();
         await whenReady(watcher);
     }
@@ -121,23 +116,21 @@ export function watch(
         event: onFileChangeEmitter.event,
         refresh() {
             if (disposed) {
-                outputChannel.appendLine(`WARN: ${id} watcher refresh() called after dispose\n${new Error().stack}`);
+                warn(`${id} watcher refresh() called after dispose\n${new Error().stack}`);
                 return;
             }
             if (suspendCount > 0) {
                 // Watcher is intentionally closed. The resume path always recreates
                 // (which picks up any updated ignore rules), so an explicit refresh
                 // here would be redundant and wasteful.
-                outputChannel.appendLine(
-                    `TRACE: ${id} watcher refresh requested while suspended; will be applied by resume`,
+                trace(
+                    `${id} watcher refresh requested while suspended; will be applied by resume`,
                 );
                 return;
             }
             if (watcher.isClosed()) {
-                outputChannel.appendLine(
-                    `TRACE: ${id} watcher refresh requested but watcher is closed, skipping refresh\n${
-                        new Error().stack
-                    }`,
+                trace(
+                    `${id} watcher refresh requested but watcher is closed, skipping refresh\n${new Error().stack}`,
                 );
                 return;
             }
@@ -146,13 +139,13 @@ export function watch(
         },
         suspend(): SuspendHandle {
             if (disposed) {
-                outputChannel.appendLine(`WARN: ${id} watcher suspend() called after dispose\n${new Error().stack}`);
+                warn(`${id} watcher suspend() called after dispose\n${new Error().stack}`);
                 // Return an inert handle so `await using` at the callsite is still well-formed.
                 return { [Symbol.asyncDispose]: async () => {} };
             }
             suspendCount++;
             if (suspendCount === 1) {
-                outputChannel.appendLine(`TRACE: ${id} watcher suspending, closing underlying watcher`);
+                trace(`${id} watcher suspending, closing underlying watcher`);
                 if (!watcher.isClosed()) {
                     watcher.close();
                 }

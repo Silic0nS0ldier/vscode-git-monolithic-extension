@@ -1,4 +1,3 @@
-import type { OutputChannel } from "vscode";
 import type { Model } from "../../../model.js";
 import { pruned } from "../../pruned.js";
 import * as selected from "../../selection.gen.js";
@@ -9,15 +8,15 @@ import * as stageAll from "./stage-all.js";
 import * as stageSelectedRanges from "./stage-selected-ranges.js";
 import * as stage from "./stage.js";
 
-export function createCommands(model: Model, outputChannel: OutputChannel) {
+export function createCommands(model: Model) {
     return [
-        selected.stage ? stage.createCommand(outputChannel, model) : pruned("stage"),
+        selected.stage ? stage.createCommand(model) : pruned("stage"),
         selected.stageAll ? stageAll.createCommand() : pruned("stageAll"),
         selected.stageAllMerge ? stageAllMerge.createCommand() : pruned("stageAllMerge"),
         selected.stageAllTracked ? stageAllTracked.createCommand() : pruned("stageAllTracked"),
         selected.stageAllUntracked ? stageAllUntracked.createCommand() : pruned("stageAllUntracked"),
         selected.stageSelectedRanges
-            ? stageSelectedRanges.createCommand(model, outputChannel)
+            ? stageSelectedRanges.createCommand(model)
             : pruned("stageSelectedRanges"),
     ];
 }
