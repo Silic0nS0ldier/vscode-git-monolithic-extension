@@ -31,29 +31,10 @@ js_run_binary(
     tool = "//packages/vscode-manifest:generate_command_names",
 )
 
-js_run_binary(
-    name = "command_selection",
-    srcs = ["//extension/vsix:manifest"],
-    args = [
-        "--manifest",
-        "$(rootpath //extension/vsix:manifest)",
-        "--prefix",
-        "git_monolithic.",
-        "--from",
-        "extension/vsix/package.json",
-        "--update",
-        "'bazel run //extension:update_command_names'",
-        "--selection",
-    ],
-    stdout = "command-selection.gen.ts",
-    tool = "//packages/vscode-manifest:generate_command_names",
-)
-
 write_source_files(
     name = "update_command_names",
     files = {
         "src/commands/command-names.gen.ts": ":command_names",
-        "src/commands/selection.gen.ts": ":command_selection",
     },
 )
 
@@ -110,6 +91,43 @@ rollup_bundle(
         "//integration_tests:__pkg__",
         "//integration_tests/electron_host:__pkg__",
     ],
+)
+
+js_run_binary(
+    name = "pruning_test_selection",
+    srcs = ["//extension/vsix:manifest"],
+    args = [
+        "--manifest",
+        "$(rootpath //extension/vsix:manifest)",
+        "--prefix",
+        "git_monolithic.",
+        "--from",
+        "extension/vsix/package.json",
+        "--update",
+        "test",
+        "--selection",
+        "--select",
+        "cherryPick",
+    ],
+    stdout = "pruning-test-selection.js",
+    tool = "//packages/vscode-manifest:generate_command_names",
+)
+
+rollup_bundle(
+    name = "pruning_test_bundle",
+    srcs = [":lib"],
+    command_implementations = "dist/commands/implementations",
+    command_selection = ":pruning_test_selection",
+    entry_points = ["dist/main.js"],
+    external_modules = ["vscode"],
+    tags = ["manual"],
+)
+
+js_test(
+    name = "command_pruning_bundle_test",
+    args = ["$(rootpath :pruning_test_bundle_/main.js)"],
+    data = [":pruning_test_bundle_/main.js"],
+    entry_point = "src/commands/command-pruning-bundle.test.mjs",
 )
 
 js_test(

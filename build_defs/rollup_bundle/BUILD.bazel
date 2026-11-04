@@ -32,6 +32,7 @@ ts_project(
         ":node_modules/@rollup/plugin-node-resolve",
         ":node_modules/@types/node",
         ":node_modules/cleye",
+        ":node_modules/magic-string",
         ":node_modules/rollup",
         ":node_modules/rollup-plugin-sourcemaps2",
     ],
@@ -89,6 +90,17 @@ js_test(
         ":lib_tests",
     ],
     entry_point = "dist/module-replacement-plugin.test.js",
+)
+
+js_test(
+    name = "command_pruning_plugin_test",
+    size = "small",
+    args = ["--test"],
+    data = [
+        "package.json",
+        ":lib_tests",
+    ],
+    entry_point = "dist/command-pruning-plugin.test.js",
 )
 
 eslint_test(

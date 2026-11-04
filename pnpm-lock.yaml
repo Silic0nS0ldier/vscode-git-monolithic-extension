@@ -248,6 +248,9 @@ importers:
       cleye:
         specifier: 'catalog:'
         version: 2.7.0
+      magic-string:
+        specifier: 0.30.21
+        version: 0.30.21
       rollup:
         specifier: 4.67.3
         version: 4.67.3
