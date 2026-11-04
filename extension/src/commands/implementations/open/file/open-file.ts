@@ -1,6 +1,5 @@
 import {
     commands,
-    type OutputChannel,
     type SourceControlResourceState,
     type TextDocumentShowOptions,
     Uri,
@@ -17,7 +16,6 @@ import { getSCMResource } from "../../../helpers.js";
 
 export async function openFile(
     model: Model,
-    outputChannel: OutputChannel,
     arg?: Resource | Uri,
     ...resourceStates: SourceControlResourceState[]
 ): Promise<void> {
@@ -36,7 +34,7 @@ export async function openFile(
 
         if (!(resource instanceof Resource)) {
             // can happen when called from a keybinding
-            resource = getSCMResource(model, outputChannel);
+            resource = getSCMResource(model);
         }
 
         if (resource) {
@@ -88,9 +86,9 @@ export async function openFile(
     }
 }
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"openFile"> {
+export function createCommand(model: Model): ScmCommand<"openFile"> {
     async function openFileFn(arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]): Promise<void> {
-        await openFile(model, outputChannel, arg, ...resourceStates);
+        await openFile(model, arg, ...resourceStates);
     }
 
     return {

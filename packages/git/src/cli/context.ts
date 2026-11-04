@@ -9,7 +9,6 @@ export type CLIContext = {
     readonly env?: { readonly [x: string]: string | undefined };
     readonly cwd: string;
     readonly timeout?: number;
-    /** @todo Use native types once VSCode at NodeJS 15. */
     readonly signal?: AbortSignal;
     readonly onSpawn?: (pid: number) => void;
 };

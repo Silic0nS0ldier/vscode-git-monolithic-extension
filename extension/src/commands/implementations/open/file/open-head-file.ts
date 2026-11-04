@@ -1,12 +1,12 @@
 import * as path from "node:path";
-import { commands, type OutputChannel, type TextDocumentShowOptions, Uri, window } from "vscode";
+import { commands, type TextDocumentShowOptions, Uri, window } from "vscode";
 import * as i18n from "../../../../i18n/mod.js";
 import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
 import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"openHEADFile"> {
+export function createCommand(model: Model): ScmCommand<"openHEADFile"> {
     async function openHEADFile(arg?: Resource | Uri): Promise<void> {
         let resource: Resource | undefined;
         const preview = !(arg instanceof Resource);
@@ -14,9 +14,9 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
         if (arg instanceof Resource) {
             resource = arg;
         } else if (arg instanceof Uri) {
-            resource = getSCMResource(model, outputChannel, arg);
+            resource = getSCMResource(model, arg);
         } else {
-            resource = getSCMResource(model, outputChannel);
+            resource = getSCMResource(model);
         }
 
         if (!resource) {

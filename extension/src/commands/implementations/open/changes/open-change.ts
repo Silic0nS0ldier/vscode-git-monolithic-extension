@@ -1,15 +1,15 @@
-import { type OutputChannel, type SourceControlResourceState, Uri } from "vscode";
+import { type SourceControlResourceState, Uri } from "vscode";
 import type { Model } from "../../../../model.js";
 import { Resource } from "../../../../repository/Resource.js";
 import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 import { getSCMResource } from "../../../helpers.js";
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"openChange"> {
+export function createCommand(model: Model): ScmCommand<"openChange"> {
     async function openChange(arg?: Resource | Uri, ...resourceStates: SourceControlResourceState[]): Promise<void> {
         let resources: Resource[] | undefined = undefined;
 
         if (arg instanceof Uri) {
-            const resource = getSCMResource(model, outputChannel, arg);
+            const resource = getSCMResource(model, arg);
             if (resource !== undefined) {
                 resources = [resource];
             }
@@ -19,7 +19,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
             if (arg instanceof Resource) {
                 resource = arg;
             } else {
-                resource = getSCMResource(model, outputChannel);
+                resource = getSCMResource(model);
             }
 
             if (resource) {

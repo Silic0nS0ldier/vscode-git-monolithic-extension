@@ -63,7 +63,6 @@ export const removeRemote = true;
 export const rename = true;
 export const renameBranch = true;
 export const revealInExplorer = true;
-export const setLogLevel = true;
 export const showOutput = true;
 export const stage = true;
 export const stageAll = true;

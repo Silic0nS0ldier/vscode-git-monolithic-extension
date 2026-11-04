@@ -1,5 +1,5 @@
-import type { Event, OutputChannel, Uri } from "vscode";
-import { Log, LogLevel, type LogLevelOptions } from "../logging/log.js";
+import type { Event, Uri } from "vscode";
+import { debug } from "../tracing.js";
 import { combinedDisposable, EmptyDisposable, type IDisposable } from "../util/disposals.js";
 
 export class FileEventLogger {
@@ -7,32 +7,22 @@ export class FileEventLogger {
     #logLevelDisposable: IDisposable = EmptyDisposable;
     #onWorkspaceWorkingTreeFileChange: Event<Uri>;
     #onDotGitFileChange: Event<Uri>;
-    #outputChannel: OutputChannel;
 
     constructor(
         onWorkspaceWorkingTreeFileChange: Event<Uri>,
         onDotGitFileChange: Event<Uri>,
-        outputChannel: OutputChannel,
     ) {
         this.#onWorkspaceWorkingTreeFileChange = onWorkspaceWorkingTreeFileChange;
         this.#onDotGitFileChange = onDotGitFileChange;
-        this.#outputChannel = outputChannel;
-        this.#logLevelDisposable = Log.onDidChangeLogLevel(this.#onDidChangeLogLevel, this);
-        this.#onDidChangeLogLevel(Log.logLevel);
+        this.#onDidChangeLogLevel();
     }
 
-    #onDidChangeLogLevel(level: LogLevelOptions): void {
+    #onDidChangeLogLevel(): void {
         this.#eventDisposable.dispose();
 
-        if (level > LogLevel.Debug) {
-            return;
-        }
-
         this.#eventDisposable = combinedDisposable([
-            this.#onWorkspaceWorkingTreeFileChange(uri =>
-                this.#outputChannel.appendLine(`[debug] [wt] Change: ${uri.fsPath}`)
-            ),
-            this.#onDotGitFileChange(uri => this.#outputChannel.appendLine(`[debug] [.git] Change: ${uri.fsPath}`)),
+            this.#onWorkspaceWorkingTreeFileChange(uri => debug(`[wt] Change: ${uri.fsPath}`)),
+            this.#onDotGitFileChange(uri => debug(`[.git] Change: ${uri.fsPath}`)),
         ]);
     }
 

@@ -15,6 +15,7 @@ import { GitError } from "../git/error.js";
 import * as i18n from "../i18n/mod.js";
 import type { Model } from "../model.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
+import { error } from "../tracing.js";
 import type { CommandErrorOutputTextDocumentContentProvider, ScmCommandOptions } from "./helpers.js";
 
 // TODO Remove argument injection logic, it complicates code and hides potential errors
@@ -86,7 +87,7 @@ async function handleError(
         ? rawErr
         : new Error("Error running command", { cause: rawErr as Error });
 
-    outputChannel.appendLine("[ERROR] " + inspect(err));
+    error(inspect(err));
 
     const options: MessageOptions = {
         modal: true,

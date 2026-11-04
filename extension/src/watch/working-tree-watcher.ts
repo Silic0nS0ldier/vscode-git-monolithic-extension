@@ -2,16 +2,16 @@ import ignore from "ignore";
 import fs from "node:fs";
 import path from "node:path";
 import { inspect } from "node:util";
-import { Disposable, type Event, type OutputChannel, Uri } from "vscode";
+import { Disposable, type Event, Uri } from "vscode";
+import { error, trace } from "../tracing.js";
 import { createIgnoreFnFromList, type SuspendHandle, watch } from "./watch.js";
 
 export function createWorkingTreeWatcher(
     repoRoot: string,
     dotGit: string,
-    outputChannel: OutputChannel,
 ): { event: Event<Uri>; suspend: () => SuspendHandle } & Disposable {
     const rootGitIgnorePath = path.join(repoRoot, ".gitignore");
-    let rootGitIgnoreFn: ignore.Ignore = loadGitIgnore(rootGitIgnorePath, outputChannel);
+    let rootGitIgnoreFn: ignore.Ignore = loadGitIgnore(rootGitIgnorePath);
 
     const wellKnownIgnoreFn = createIgnoreFnFromList([dotGit]);
 
@@ -33,9 +33,7 @@ export function createWorkingTreeWatcher(
             const ignored = rootGitIgnoreFn.ignores(relativePath);
             return ignored;
         } catch (e) {
-            outputChannel.appendLine(
-                `ERROR: Path '${targetPath}' triggered an error in 'ignore' package: ` + inspect(e),
-            );
+            error(`Path '${targetPath}' triggered an error in 'ignore' package: ` + inspect(e));
         }
         return false;
     };
@@ -60,15 +58,14 @@ export function createWorkingTreeWatcher(
             // Ensure .gitignore changes are always reported
             rootGitIgnorePath,
         ],
-        outputChannel,
         "working-tree",
     );
 
     workingTreeWatcher.event(uri => {
         if (uri.fsPath === rootGitIgnorePath) {
             // Refresh gitignore handler
-            outputChannel.appendLine(`TRACE: ${rootGitIgnorePath} changed, reloading ignore rules`);
-            rootGitIgnoreFn = loadGitIgnore(rootGitIgnorePath, outputChannel);
+            trace(`${rootGitIgnorePath} changed, reloading ignore rules`);
+            rootGitIgnoreFn = loadGitIgnore(rootGitIgnorePath);
             workingTreeWatcher.refresh();
         }
     });
@@ -76,19 +73,19 @@ export function createWorkingTreeWatcher(
     return workingTreeWatcher;
 }
 
-function loadGitIgnore(ignorePath: string, outputChannel: OutputChannel): ignore.Ignore {
+function loadGitIgnore(ignorePath: string): ignore.Ignore {
     const ig = ignore();
     if (!fs.existsSync(ignorePath)) {
-        outputChannel.appendLine(`TRACE: No .gitignore found at ${ignorePath}`);
+        trace(`No .gitignore found at ${ignorePath}`);
         return ig;
     }
     try {
         const content = fs.readFileSync(ignorePath, "utf8");
-        outputChannel.appendLine(`TRACE: Using .gitignore at ${ignorePath}`);
-        outputChannel.appendLine(content);
+        trace(`Using .gitignore at ${ignorePath}`);
+        trace(content);
         ig.add(content);
     } catch {
-        outputChannel.appendLine(`TRACE: Unable to load .gitignore at ${ignorePath}`);
+        trace(`Unable to load .gitignore at ${ignorePath}`);
     }
     return ig;
 }

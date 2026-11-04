@@ -29,21 +29,28 @@ import * as i18n from "../i18n/mod.js";
 import { Model } from "../model.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
+import { error, info, setOutputChannel, unsetOutputChannel, warn } from "../tracing.js";
 import { createInlayHintsProvider } from "../ui/inlay-hints-provider.js";
 import * as config from "../util/config.js";
-import { toDisposable } from "../util/disposals.js";
 import { filterEvent } from "../util/events.js";
 import { hasDotGit } from "../util/has-dot-git.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
 
 export async function activate(context: ExtensionContext): Promise<void> {
-    const outputChannel = window.createOutputChannel("Git Monolithic");
+    // TODO Many parts of the extension reference this `outputChannel` instance, need to be mindful that noting uses it after disposal.
+    const outputChannel = window.createOutputChannel("Git Monolithic", { log: true });
+    setOutputChannel(outputChannel);
 
-    outputChannel.appendLine("Monolithic Git for VSCode is starting...");
+    info("Monolithic Git for VSCode is starting...");
 
     const disposables: Disposable[] = [];
-    context.subscriptions.push(new Disposable(() => Disposable.from(...disposables).dispose()));
+    context.subscriptions.push(
+        new Disposable(() => {
+            Disposable.from(...disposables).dispose();
+            unsetOutputChannel();
+        }),
+    );
 
     commands.registerCommand(
         makeCommandId("showOutput"),
@@ -86,14 +93,14 @@ export async function activate(context: ExtensionContext): Promise<void> {
                 extensionEnablementState = newState;
 
                 if (extensionEnablementState) {
-                    outputChannel.appendLine("Config changed, activating Git Monolithic extension...");
+                    info("Config changed, activating Git Monolithic extension...");
                     await enableExtension(context, outputChannel, telemetryReporter);
                 } else {
-                    outputChannel.appendLine("Config changed, deactivating Git Monolithic extension...");
+                    info("Config changed, deactivating Git Monolithic extension...");
                     disableExtension();
                 }
             } catch (err) {
-                outputChannel.appendLine(`[ERROR] Failed to process config change: ${inspect(err)}`);
+                error(`Failed to process config change: ${inspect(err)}`);
             }
 
             // Running of disposals does not handle async tasks and behaviour around errors is unknown
@@ -105,12 +112,12 @@ export async function activate(context: ExtensionContext): Promise<void> {
     });
 
     if (extensionEnablementState) {
-        outputChannel.appendLine("Activating Git Monolithic extension...");
+        info("Activating Git Monolithic extension...");
         await enableExtension(context, outputChannel, telemetryReporter);
     } else if (!config.enabled()) {
-        outputChannel.appendLine("Git Monolithic is inactive because `git_monolithic.enabled` is false.");
+        warn("Git Monolithic is inactive because `git_monolithic.enabled` is false.");
     } else {
-        outputChannel.appendLine(
+        warn(
             "Git Monolithic is inactive because VSCode's builtin git extension is enabled. "
                 + "Set `git.enabled` to false to use Git Monolithic.",
         );
@@ -129,7 +136,7 @@ async function enableExtension(
 ): Promise<void> {
     try {
         const [model, modelDisposable] = await createModel(context, outputChannel, telemetryReporter);
-        const inlayHintsProvider = createInlayHintsProvider(model, outputChannel);
+        const inlayHintsProvider = createInlayHintsProvider(model);
         const fileInlayDisposable = languages.registerInlayHintsProvider({ scheme: "file" }, inlayHintsProvider);
 
         extensionDisposable = Disposable.from(modelDisposable, fileInlayDisposable);
@@ -138,7 +145,7 @@ async function enableExtension(
             throw err;
         }
 
-        outputChannel.appendLine("[WARN] " + inspect(err));
+        warn(inspect(err));
 
         commands.executeCommand("setContext", "git_monolithic.context.missing", true);
         warnAboutMissingGit();
@@ -166,36 +173,25 @@ async function createModel(
         pathHints = pathHints.filter(p => path.isAbsolute(p));
     }
 
-    const info = await findGit(outputChannel, pathHints);
-    outputChannel.appendLine(i18n.Translations.usingGit(info.version, info.path));
+    const gitInfo = await findGit(pathHints);
+    info(i18n.Translations.usingGit(gitInfo.version, gitInfo.path));
 
-    const askpass = await Askpass.create(outputChannel);
+    const askpass = await Askpass.create();
     disposables.push(askpass);
 
     const environment = askpass.getEnv();
     disposables.push(registerTerminalEnvironmentManager(context, environment));
 
     const git = new Git({
-        context: info.context,
+        context: gitInfo.context,
         env: environment,
-        gitPath: info.path,
+        gitPath: gitInfo.path,
         userAgent:
-            `git/${info.version} (${os.version()} ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
-        version: info.version,
-        outputChannel,
+            `git/${gitInfo.version} (${os.version()} ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
+        version: gitInfo.version,
     });
-    const onOutput = (str: string): void => {
-        const lines = str.split(/\r?\n/mg);
 
-        while (/^\s*$/.test(lines.at(-1)!)) {
-            lines.pop();
-        }
-
-        outputChannel.appendLine(lines.join("\n"));
-    };
-    git.onOutput.addListener("log", onOutput);
-
-    const model = new Model(git, context.globalState, outputChannel);
+    const model = new Model(git, context.globalState);
     disposables.push(model);
 
     const onRepository = async (): Promise<void> =>
@@ -208,8 +204,6 @@ async function createModel(
     model.onDidCloseRepository(onRepository, null, disposables);
     onRepository();
 
-    disposables.push(toDisposable(() => git.onOutput.removeListener("log", onOutput)));
-
     const disposeCommands = registerCommands(model, git, outputChannel, telemetryReporter);
     disposables.push(
         disposeCommands,
@@ -217,10 +211,10 @@ async function createModel(
         // Find a better way
         new GitFileSystemProvider(model),
         addDecorations(model),
-        new GitProtocolHandler(outputChannel),
+        new GitProtocolHandler(),
     );
 
-    checkGitVersion(info);
+    checkGitVersion(gitInfo);
 
     return [model, Disposable.from(...disposables)];
 }

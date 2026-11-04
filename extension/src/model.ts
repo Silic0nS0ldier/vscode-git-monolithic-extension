@@ -10,7 +10,6 @@ import {
     type Event,
     EventEmitter,
     type Memento,
-    type OutputChannel,
     type QuickPickItem,
     type SourceControl,
     type SourceControlResourceGroup,
@@ -28,6 +27,7 @@ import type { AbstractRepository } from "./repository/repository-class/AbstractR
 import { isAbstractRepository } from "./repository/repository-class/isAbstractRepository.js";
 import { createRepository } from "./repository/repository-class/mod.js";
 import { RepositoryState } from "./repository/RepositoryState.js";
+import { error, info, warn } from "./tracing.js";
 import { fromGitUri } from "./uri.js";
 import * as config from "./util/config.js";
 import { dispose } from "./util/disposals.js";
@@ -115,15 +115,12 @@ export class Model {
 
     #disposables: Disposable[] = [];
     #globalState: Memento;
-    #outputChannel: OutputChannel;
 
     constructor(
         readonly git: Git,
         globalState: Memento,
-        outputChannel: OutputChannel,
     ) {
         this.#globalState = globalState;
-        this.#outputChannel = outputChannel;
         workspace.onDidChangeWorkspaceFolders(this.#onDidChangeWorkspaceFolders, this, this.#disposables);
         window.onDidChangeVisibleTextEditors(this.#onDidChangeVisibleTextEditors, this, this.#disposables);
         workspace.onDidChangeConfiguration(this.#onDidChangeConfiguration, this, this.#disposables);
@@ -177,10 +174,7 @@ export class Model {
                 }
 
                 if (path.isAbsolute(scanPath)) {
-                    this.#outputChannel.appendLine(
-                        "[WARN] "
-                            + i18n.Translations.notSupported(),
-                    );
+                    warn(i18n.Translations.notSupported());
                     continue;
                 }
 
@@ -336,21 +330,20 @@ export class Model {
             const repository = createRepository(
                 this.git.open(repositoryRoot, dotGit),
                 this.#globalState,
-                this.#outputChannel,
             );
 
             this.#open(repository);
             await repository.autoRefresh();
         } catch (ex) {
             // noop
-            this.#outputChannel.appendLine(
+            error(
                 `Opening repository for path='${repoPath}' failed; ex=${inspect(ex)}`,
             );
         }
     });
 
     #open(repository: AbstractRepository): void {
-        this.#outputChannel.appendLine(`Open repository: ${repository.root}`);
+        info(`Open repository: ${repository.root}`);
 
         const onDidDisappearRepository = filterEvent(
             repository.onDidChangeState,
@@ -416,7 +409,7 @@ export class Model {
             return;
         }
 
-        this.#outputChannel.appendLine(`Close repository: ${repository.root}`);
+        info(`Close repository: ${repository.root}`);
         openRepository.dispose();
     }
 

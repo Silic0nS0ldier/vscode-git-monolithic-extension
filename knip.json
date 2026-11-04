@@ -3,7 +3,8 @@
     "workspaces": {
         ".": {
             "entry": [
-                ".github/skills/*/scripts/*.mjs"
+                ".github/skills/*/scripts/*.mjs",
+                "build_defs/lint/*.test.mjs"
             ],
             "ignoreBinaries": [
                 "bazel"

@@ -1,3 +1,20 @@
+load("@aspect_rules_js//js:defs.bzl", "js_library", "js_test")
 load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
 
 eslint_bin.eslint_binary(name = "eslint")
+
+js_library(
+    name = "eslint_plugin_logging",
+    srcs = ["eslint-plugin-logging.mjs"],
+    visibility = ["//:__pkg__"],
+)
+
+js_test(
+    name = "eslint_plugin_logging_test",
+    size = "small",
+    data = [
+        ":eslint_plugin_logging",
+        "//:node_modules/eslint",
+    ],
+    entry_point = "eslint-plugin-logging.test.mjs",
+)

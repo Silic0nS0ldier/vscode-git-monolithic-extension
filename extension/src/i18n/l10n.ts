@@ -1,6 +1,5 @@
 import path from "node:path";
 import { l10n, type TextDocument, type Uri } from "vscode";
-import type { LogLevelOptions } from "../logging/log.js";
 import type { Resource } from "../repository/Resource.js";
 
 function takeFirstIfOnlyMember<T>(arr: readonly T[]): T | null {
@@ -577,18 +576,6 @@ export function stageDeletedByUs(fileUri: Uri): string {
         "File '{0}' was deleted by us and modified by them.\n\nWhat would you like to do?",
         path.basename(fileUri.fsPath),
     );
-}
-
-export function current(): string {
-    return l10n.t("Current");
-}
-
-export function selectLogLevel(): string {
-    return l10n.t("Select log level");
-}
-
-export function logLevelChanged(logLevel: LogLevelOptions): string {
-    return l10n.t("Log level changed to: {0}", logLevel);
 }
 
 export function noRemotesAdded(): string {

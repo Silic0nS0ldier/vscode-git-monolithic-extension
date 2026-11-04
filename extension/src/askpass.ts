@@ -1,7 +1,8 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { type InputBoxOptions, type OutputChannel, window } from "vscode";
+import { type InputBoxOptions, window } from "vscode";
 import { createIPCServer, type IIPCHandler, type IIPCServer } from "./ipc/ipcServer.js";
+import { error } from "./tracing.js";
 import * as config from "./util/config.js";
 import { EmptyDisposable, type IDisposable } from "./util/disposals.js";
 
@@ -12,11 +13,11 @@ export class Askpass implements IIPCHandler {
     #disposable: IDisposable = EmptyDisposable;
     #ipc?: IIPCServer;
 
-    static async create(outputChannel: OutputChannel): Promise<Askpass> {
+    static async create(): Promise<Askpass> {
         try {
             return new Askpass(await createIPCServer());
         } catch (err) {
-            outputChannel.appendLine(`[error] Failed to create git askpass IPC: ${err}`);
+            error(`Failed to create git askpass IPC: ${err}`);
             return new Askpass();
         }
     }

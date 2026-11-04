@@ -3,6 +3,7 @@
 import eslint from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
+import logging from "./build_defs/lint/eslint-plugin-logging.mjs";
 
 // TODO: Adopt type-aware linting (`tseslint.configs.recommendedTypeChecked`), which needs each lint action to see its
 // tsconfig and type dependencies.
@@ -22,6 +23,14 @@ export default defineConfig(
                 destructuredArrayIgnorePattern: "^_",
                 ignoreUsingDeclarations: true,
             }],
+        },
+    },
+    {
+        files: ["extension/src/**"],
+        plugins: { logging },
+        rules: {
+            "logging/message-content": "error",
+            "logging/no-output-channel-append": "error",
         },
     },
 );

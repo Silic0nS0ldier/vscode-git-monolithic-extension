@@ -1,9 +1,10 @@
 import assert from "node:assert";
 import { inspect } from "node:util";
-import { EndOfLine, type OutputChannel, Uri, window } from "vscode";
+import { EndOfLine, Uri, window } from "vscode";
 import { computeLineChanges, type LineChange } from "../../../line-changes.js";
 import type { Model } from "../../../model.js";
 import { intersectDiffWithRange, toLineRanges } from "../../../staging.js";
+import { trace } from "../../../tracing.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { stageChanges } from "./helpers.js";
 
@@ -22,7 +23,7 @@ function getEOLChar(eol: EndOfLine): string {
 // "past" diff state shows as git:/... and is readonly
 // This command relies on some hackery, as the original implementation relies on an experimental
 // API surface that will be removed in favour of something different.
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"stageSelectedRanges"> {
+export function createCommand(model: Model): ScmCommand<"stageSelectedRanges"> {
     async function stageSelectedRanges(fileUri: unknown, ..._rest: unknown[]): Promise<void> {
         assert(fileUri instanceof Uri, "API has changed");
 
@@ -71,7 +72,7 @@ export function createCommand(model: Model, outputChannel: OutputChannel): ScmCo
             );
         }
         const changes = diffResult.changes;
-        outputChannel.appendLine(inspect(changes));
+        trace(inspect(changes));
 
         // Convert selections into line changes
         const selectedLines = toLineRanges(selections, current);

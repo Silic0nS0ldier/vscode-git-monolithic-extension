@@ -1,11 +1,10 @@
-import { type OutputChannel } from "vscode";
 import type { Model } from "../../model.js";
 import { Resource } from "../../repository/Resource.js";
 import { makeCommandId, normaliseResourceStates, runByRepository, type ScmCommand } from "../helpers.js";
 
-export function createCommand(model: Model, outputChannel: OutputChannel): ScmCommand<"ignore"> {
+export function createCommand(model: Model): ScmCommand<"ignore"> {
     async function ignore(...resourceStates: Resource[]): Promise<void> {
-        const normalisedResourceStates = normaliseResourceStates(model, outputChannel, resourceStates);
+        const normalisedResourceStates = normaliseResourceStates(model, resourceStates);
 
         const resources = normalisedResourceStates
             .filter(s => s instanceof Resource)
