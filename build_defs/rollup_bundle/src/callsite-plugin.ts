@@ -8,6 +8,9 @@ import { repositoryPath } from "./repository-path.js";
 
 const SCOPE = "__callsiteScope";
 const BINDING_PREFIX = "__git_monolithic_callsite";
+// Keeps call-site names (see `extension/src/tracing.ts`) unambiguous and matchable by `.*`: no line terminators, and
+// no `:` or `@`, which separate the file from what follows it.
+const CALLSITE_FILE = /^[A-Za-z0-9._/-]+$/;
 
 type Node = estree.Node & { start: number; end: number; [SCOPE]?: AttachedScope };
 
@@ -15,6 +18,7 @@ type Node = estree.Node & { start: number; end: number; [SCOPE]?: AttachedScope 
  * Passes each call to a logger function its call site: a static `{ file, line, column }` object, declared once per
  * call at the top of the calling module and added as an extra final argument. `file` is the repository-relative path
  * of the original source, and `line` and `column` are 1-based positions in it, found through the incoming source maps.
+ * `file` may only contain ASCII letters, digits, `.`, `_`, `/` and `-`; any other character fails the build.
  *
  * Logger functions must be imported by name and only ever called directly, with exactly the one argument written in
  * source; any other use would silently go without a call site, so it fails the build.
@@ -76,6 +80,12 @@ export function callsitePlugin(loggerModule: string, functions: readonly string[
                 const original = originalPositionFor(trace, { line, column: call.start - lineStarts[line - 1]! });
                 if (original.source === null) this.error(`No source mapping for log call`, call.start);
                 const file = repositoryPath(path.resolve(path.dirname(id), original.source));
+                if (!CALLSITE_FILE.test(file)) {
+                    this.error(
+                        `Log call source path ${JSON.stringify(file)} has characters outside ${CALLSITE_FILE.source}`,
+                        call.start,
+                    );
+                }
                 const callsite = `{ file: ${JSON.stringify(file)}, line: ${original.line}, column: ${
                     original.column + 1
                 } }`;

@@ -1,4 +1,6 @@
 import assert from "node:assert";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { after, before } from "node:test";
 import type { Page } from "playwright-core";
 import { headSubject, setLocalConfig, status } from "./git.js";
@@ -16,6 +18,7 @@ import {
     resourceRow,
     scmView,
     showGitOutput,
+    workspaceDir,
 } from "./harness.js";
 
 const COMMIT_MESSAGE = "Commit from the SCM input box";
@@ -119,4 +122,21 @@ scenario("a remote added outside the editor offers to publish the branch", async
     await setLocalConfig("remote.origin.url", "https://example.invalid/repository.git");
 
     await publish.waitFor({ state: "visible" });
+});
+
+scenario("an invalid log call site filter is reported, and all calls are logged", async () => {
+    // Last, as the settings file is an untracked change in the repository.
+    await mkdir(join(workspaceDir(), ".vscode"));
+    await writeFile(
+        join(workspaceDir(), ".vscode", "settings.json"),
+        JSON.stringify({ "git_monolithic.log.callsiteFilter": ["extension/src/.*", "["] }),
+    );
+    await showGitOutput(page);
+
+    assert.match(
+        await filteredOutputPanelText(page, "Logging all calls"),
+        /Logging all calls, as `git_monolithic\.log\.callsiteFilter` has an invalid regular expression/u,
+    );
+
+    await closeOutputPanel(page);
 });

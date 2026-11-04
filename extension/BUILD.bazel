@@ -152,6 +152,16 @@ js_test(
     entry_point = "src/commands/bundle-not-pruned.test.mjs",
 )
 
+js_test(
+    name = "bundle_callsites_test",
+    args = ["$(rootpath :bundle_/main.js)"],
+    data = [
+        ":bundle_/main.js",
+        ":node_modules/acorn",
+    ],
+    entry_point = "src/bundle-callsites.test.mjs",
+)
+
 ts_project(
     name = "lib_tests",
     srcs = glob(["src/**/*.test.ts"]) + glob(
