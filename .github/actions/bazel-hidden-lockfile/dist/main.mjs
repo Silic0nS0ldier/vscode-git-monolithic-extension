@@ -2868,6 +2868,7 @@ function requireDispatcherBase () {
 	if (hasRequiredDispatcherBase) return dispatcherBase;
 	hasRequiredDispatcherBase = 1;
 
+	const buffer = require$$0__default;
 	const Dispatcher = requireDispatcher();
 	const {
 	  ClientDestroyedError,
@@ -2880,6 +2881,7 @@ function requireDispatcherBase () {
 	const kOnClosed = Symbol('onClosed');
 	const kInterceptedDispatch = Symbol('Intercepted Dispatch');
 	const kWebSocketOptions = Symbol('webSocketOptions');
+	const kEventSourceOptions = Symbol('eventSourceOptions');
 
 	class DispatcherBase extends Dispatcher {
 	  constructor (opts) {
@@ -2890,12 +2892,19 @@ function requireDispatcherBase () {
 	    this[kClosed] = false;
 	    this[kOnClosed] = [];
 	    this[kWebSocketOptions] = opts?.webSocket ?? {};
+	    this[kEventSourceOptions] = opts?.eventSource ?? {};
 	  }
 
 	  get webSocketOptions () {
 	    return {
 	      maxFragments: this[kWebSocketOptions].maxFragments ?? 131072,
 	      maxPayloadSize: this[kWebSocketOptions].maxPayloadSize ?? 128 * 1024 * 1024
+	    }
+	  }
+
+	  get eventSourceOptions () {
+	    return {
+	      maxEventSize: this[kEventSourceOptions].maxEventSize ?? buffer.kStringMaxLength
 	    }
 	  }
 
@@ -9516,8 +9525,6 @@ function requireClientH1 () {
 	  socket[kParser] = new Parser(client, socket, llhttpInstance);
 
 	  addListener(socket, 'error', function (err) {
-	    assert(err.code !== 'ERR_TLS_CERT_ALTNAME_INVALID');
-
 	    const parser = this[kParser];
 
 	    // On Mac OS, we get an ECONNRESET even if there is a full body to be forwarded
@@ -10448,8 +10455,6 @@ function requireClientH2 () {
 	  socket[kHTTP2Session] = session;
 
 	  util.addListener(socket, 'error', function (err) {
-	    assert(err.code !== 'ERR_TLS_CERT_ALTNAME_INVALID');
-
 	    this[kError] = err;
 
 	    this[kClient][kOnError](err);
@@ -10523,8 +10528,6 @@ function requireClientH2 () {
 	}
 
 	function onHttp2SessionError (err) {
-	  assert(err.code !== 'ERR_TLS_CERT_ALTNAME_INVALID');
-
 	  this[kSocket][kError] = err;
 	  this[kClient][kOnError](err);
 	}
@@ -11472,9 +11475,10 @@ function requireClient () {
 	    // h2
 	    maxConcurrentStreams,
 	    allowH2,
-	    webSocket
+	    webSocket,
+	    eventSource
 	  } = {}) {
-	    super({ webSocket });
+	    super({ webSocket, eventSource });
 
 	    if (keepAlive !== undefined) {
 	      throw new InvalidArgumentError('unsupported keepAlive, use pipelining=0 instead')
@@ -12719,7 +12723,7 @@ function requireAgent () {
 	}
 
 	class Agent extends DispatcherBase {
-	  constructor ({ factory = defaultFactory, maxRedirections = 0, connect, ...options } = {}) {
+	  constructor ({ factory = defaultFactory, maxRedirections = 0, connect, tls, ...options } = {}) {
 	    if (typeof factory !== 'function') {
 	      throw new InvalidArgumentError('factory must be a function.')
 	    }
@@ -12738,11 +12742,15 @@ function requireAgent () {
 	      connect = { ...connect };
 	    }
 
+	    if (tls && typeof tls !== 'function') {
+	      tls = { ...tls };
+	    }
+
 	    this[kInterceptors] = options.interceptors?.Agent && Array.isArray(options.interceptors.Agent)
 	      ? options.interceptors.Agent
 	      : [createRedirectInterceptor({ maxRedirections })];
 
-	    this[kOptions] = { ...util.deepClone(options), connect };
+	    this[kOptions] = { ...util.deepClone(options), connect, tls };
 	    this[kOptions].interceptors = options.interceptors
 	      ? { ...options.interceptors }
 	      : undefined;
@@ -21285,8 +21293,10 @@ function requireFetch () {
 	  // 19. Run these steps in parallel:
 
 	  //    1. Run these steps, but abort when fetchParams is canceled:
-	  fetchParams.controller.onAborted = onAborted;
-	  fetchParams.controller.on('terminated', onAborted);
+	  if (!fetchParams.controller.resume) {
+	    fetchParams.controller.on('terminated', onAborted);
+	  }
+
 	  fetchParams.controller.resume = async () => {
 	    // 1. While true
 	    while (true) {
@@ -21455,8 +21465,6 @@ function requireFetch () {
 	          }
 	          location = headersList.get('location', true);
 
-	          this.body = new Readable({ read: resume });
-
 	          const decoders = [];
 
 	          const willFollow = location && request.redirect === 'follow' &&
@@ -21474,7 +21482,7 @@ function requireFetch () {
 	            // CVE fix similar to urllib3 (GHSA-gm62-xv2j-4w53) and curl (CVE-2022-32206).
 	            const maxContentEncodings = 5;
 	            if (codings.length > maxContentEncodings) {
-	              reject(new Error(`too many content-encodings in response: ${codings.length}, maximum allowed is ${maxContentEncodings}`));
+	              this.abort(new Error(`too many content-encodings in response: ${codings.length}, maximum allowed is ${maxContentEncodings}`));
 	              return true
 	            }
 
@@ -21506,6 +21514,8 @@ function requireFetch () {
 	              }
 	            }
 	          }
+
+	          this.body = new Readable({ read: resume });
 
 	          const onError = this.onError.bind(this);
 
@@ -21551,10 +21561,6 @@ function requireFetch () {
 	        onComplete () {
 	          if (this.abort) {
 	            fetchParams.controller.off('terminated', this.abort);
-	          }
-
-	          if (fetchParams.controller.onAborted) {
-	            fetchParams.controller.off('terminated', fetchParams.controller.onAborted);
 	          }
 
 	          fetchParams.controller.ended = true;
@@ -26354,6 +26360,20 @@ function requireReceiver () {
 	        if (isControlFrame(this.#info.opcode)) {
 	          this.#loop = this.parseControlFrame(body);
 	          this.#state = parserStates.INFO;
+
+	          // If the automatic PONG/CLOSE reply filled the socket's write buffer,
+	          // stop parsing and resume on drain so a PING flood cannot grow the
+	          // outbound queue without bound.
+	          const socket = this.ws[kResponse].socket;
+	          if (this.#loop && socket.writableNeedDrain) {
+	            this.#loop = false;
+	            socket.once('drain', () => {
+	              if (this.destroyed) return
+	              this.#loop = true;
+	              this.run(callback);
+	            });
+	            return
+	          }
 	        } else {
 	          if (!this.#info.compressed) {
 	            if (!this.writeFragments(body)) {
@@ -27385,6 +27405,7 @@ var hasRequiredEventsourceStream;
 function requireEventsourceStream () {
 	if (hasRequiredEventsourceStream) return eventsourceStream;
 	hasRequiredEventsourceStream = 1;
+	const buffer = require$$0__default;
 	const { Transform } = require$$0__default$1;
 	const { isASCIINumber, isValidLastEventId } = requireUtil();
 
@@ -27409,10 +27430,18 @@ function requireEventsourceStream () {
 	 */
 	const SPACE = 0x20;
 
+	const defaultMaxEventSize = buffer.kStringMaxLength;
+
 	const DATA = Buffer.from('data');
 	const EVENT = Buffer.from('event');
 	const ID = Buffer.from('id');
 	const RETRY = Buffer.from('retry');
+
+	// Each data field creates a string node, and each unconsumed input chunk keeps
+	// a Buffer wrapper. The absolute ceiling protects the large default byte limit.
+	const minParserItems = 1024;
+	const maxParserItems = 131072;
+	const bytesPerParserItem = 128;
 
 	function isASCIINumberBytes (buffer, start) {
 	  if (start >= buffer.length) {
@@ -27450,6 +27479,12 @@ function requireEventsourceStream () {
 	  }
 
 	  return true
+	}
+
+	function createMaxEventSizeExceededError () {
+	  const error = new Error('EventSource message size exceeded');
+	  error.aborted = false;
+	  return error
 	}
 
 	/**
@@ -27500,6 +27535,13 @@ function requireEventsourceStream () {
 	  pos = 0
 	  lineChunkIndex = 0
 	  linePos = 0
+	  lineLength = 0
+	  eventSize = 0
+	  eventFieldSizes = { data: 0, event: 0, id: 0, retry: 0 }
+	  dataLineCount = 0
+	  maxEventSize
+	  maxDataLines
+	  maxBufferedChunks
 
 	  event = {
 	    data: undefined,
@@ -27510,6 +27552,7 @@ function requireEventsourceStream () {
 
 	  /**
 	   * @param {object} options
+	   * @param {number} [options.maxEventSize]
 	   * @param {eventSourceSettings} options.eventSourceSettings
 	   * @param {Function} [options.push]
 	   */
@@ -27521,6 +27564,12 @@ function requireEventsourceStream () {
 	    super(options);
 
 	    this.state = options.eventSourceSettings || {};
+	    this.maxEventSize = options.maxEventSize ?? defaultMaxEventSize;
+	    const parserItemLimit = this.maxEventSize > 0
+	      ? Math.min(maxParserItems, Math.max(minParserItems, Math.floor(this.maxEventSize / bytesPerParserItem)))
+	      : 0;
+	    this.maxDataLines = parserItemLimit;
+	    this.maxBufferedChunks = parserItemLimit;
 	    if (options.push) {
 	      this.push = options.push;
 	    }
@@ -27538,6 +27587,14 @@ function requireEventsourceStream () {
 	      return
 	    }
 
+	    // A leading line ending can immediately release the currently buffered
+	    // line, even when it uses the final allowed chunk slot.
+	    if (this.maxEventSize > 0 &&
+	        this.chunks.length >= this.maxBufferedChunks &&
+	        chunk[0] !== LF && chunk[0] !== CR) {
+	      callback(createMaxEventSizeExceededError());
+	      return
+	    }
 	    this.chunks.push(chunk);
 
 	    // Strip leading byte-order-mark if we opened the stream and started
@@ -27616,7 +27673,12 @@ function requireEventsourceStream () {
 
 	        // In any case, we can process the line as we reached an
 	        // end-of-line character
-	        this.parseLine(this.readLine(), this.event);
+	        try {
+	          this.parseLine(this.readLine(), this.event);
+	        } catch (error) {
+	          callback(error);
+	          return
+	        }
 	        this.consumeCurrentByte();
 	        // A line was processed and this could be the end of the event. We need
 	        // to check if the next line is empty to determine if the event is
@@ -27625,15 +27687,28 @@ function requireEventsourceStream () {
 	        continue
 	      }
 
+	      // readLine() is only called after CR or LF. Reject an unfinished line
+	      // before it can retain an unbounded number of decoded chunks. The seven
+	      // extra bytes allow the longest field prefix ("event: " or "retry: ").
+	      if (this.maxEventSize > 0 && ++this.lineLength > this.maxEventSize + 7) {
+	        callback(createMaxEventSizeExceededError());
+	        return
+	      }
 	      this.advanceCursor();
 	    }
 
 	    callback();
 	  }
 
+	  _destroy (error, callback) {
+	    this.chunks.length = 0;
+	    this.clearEvent();
+	    super._destroy(error, callback);
+	  }
+
 	  /**
 	   * @param {Buffer} line
-	   * @param {EventStreamEvent} event
+	   * @param {EventSourceStreamEvent} event
 	   */
 	  parseLine (line, event) {
 	    // If the line is empty (a blank line)
@@ -27667,6 +27742,13 @@ function requireEventsourceStream () {
 	    }
 
 	    if (isFieldName(line, fieldLength, DATA)) {
+	      if (this.maxEventSize > 0 && this.dataLineCount >= this.maxDataLines) {
+	        throw createMaxEventSizeExceededError()
+	      }
+	      const valueBytes = line.length - valueStart;
+	      const dataSize = this.eventFieldSizes.data + (event.data === undefined ? 0 : 1) + valueBytes;
+	      this.setEventFieldSize('data', dataSize);
+
 	      const value = line.toString('utf8', valueStart);
 
 	      if (event.data === undefined) {
@@ -27674,11 +27756,13 @@ function requireEventsourceStream () {
 	      } else {
 	        event.data += `\n${value}`;
 	      }
+	      this.dataLineCount++;
 	      return
 	    }
 
 	    if (isFieldName(line, fieldLength, RETRY)) {
 	      if (isASCIINumberBytes(line, valueStart)) {
+	        this.setEventFieldSize('retry', line.length - valueStart);
 	        event.retry = line.toString('utf8', valueStart);
 	      }
 	      return
@@ -27686,18 +27770,27 @@ function requireEventsourceStream () {
 
 	    if (isFieldName(line, fieldLength, ID)) {
 	      if (isValidLastEventIdBytes(line, valueStart)) {
+	        this.setEventFieldSize('id', line.length - valueStart);
 	        event.id = line.toString('utf8', valueStart);
 	      }
 	      return
 	    }
 
 	    if (isFieldName(line, fieldLength, EVENT)) {
-	      const value = line.toString('utf8', valueStart);
-
-	      if (value.length > 0) {
-	        event.event = value;
+	      if (valueStart < line.length) {
+	        this.setEventFieldSize('event', line.length - valueStart);
+	        event.event = line.toString('utf8', valueStart);
 	      }
 	    }
+	  }
+
+	  setEventFieldSize (field, size) {
+	    const eventSize = this.eventSize - this.eventFieldSizes[field] + size;
+	    if (this.maxEventSize > 0 && eventSize > this.maxEventSize) {
+	      throw createMaxEventSizeExceededError()
+	    }
+	    this.eventSize = eventSize;
+	    this.eventFieldSizes[field] = size;
 	  }
 
 	  /**
@@ -27730,6 +27823,12 @@ function requireEventsourceStream () {
 	    this.event.event = undefined;
 	    this.event.id = undefined;
 	    this.event.retry = undefined;
+	    this.eventSize = 0;
+	    this.dataLineCount = 0;
+	    this.eventFieldSizes.data = 0;
+	    this.eventFieldSizes.event = 0;
+	    this.eventFieldSizes.id = 0;
+	    this.eventFieldSizes.retry = 0;
 	  }
 
 	  hasPendingEvent () {
@@ -27765,14 +27864,16 @@ function requireEventsourceStream () {
 	  syncLineStartToCursor () {
 	    this.lineChunkIndex = this.chunkIndex;
 	    this.linePos = this.pos;
+	    this.lineLength = 0;
 	    this.dropConsumedChunks();
 	  }
 
 	  dropConsumedChunks () {
-	    while (this.lineChunkIndex > 0) {
-	      this.chunks.shift();
-	      this.lineChunkIndex--;
-	      this.chunkIndex--;
+	    if (this.lineChunkIndex > 0) {
+	      const consumed = this.lineChunkIndex;
+	      this.chunks.splice(0, consumed);
+	      this.lineChunkIndex = 0;
+	      this.chunkIndex -= consumed;
 	    }
 
 	    if (this.chunkIndex === this.chunks.length) {
@@ -27898,6 +27999,7 @@ function requireEventsource () {
 	const { delay } = requireUtil();
 	const { kEnumerableProperty } = requireUtil$7();
 	const { environmentSettingsObject } = requireUtil$6();
+	const { getGlobalDispatcher } = requireGlobal();
 
 	let experimentalWarned = false;
 
@@ -28179,6 +28281,7 @@ function requireEventsource () {
 
 	      const eventSourceStream = new EventSourceStream({
 	        eventSourceSettings: this.#state,
+	        maxEventSize: this.#dispatcher.eventSourceOptions?.maxEventSize,
 	        push: (event) => {
 	          this.dispatchEvent(createFastMessageEvent(
 	            event.type,
@@ -28357,7 +28460,8 @@ function requireEventsource () {
 	  },
 	  {
 	    key: 'dispatcher', // undici only
-	    converter: webidl.converters.any
+	    converter: webidl.converters.any,
+	    defaultValue: () => getGlobalDispatcher()
 	  }
 	]);
 
@@ -30729,6 +30833,24 @@ const EXPANSION_MAX = 100_000;
 // realistic expansion (100k results hitting `EXPANSION_MAX` measure ~1M
 // characters) so legitimate input is unaffected.
 const EXPANSION_MAX_LENGTH = 4_000_000;
+// `expand_` recurses once per level of brace *nesting* - both when expanding a
+// set's comma members and when re-wrapping a set whose body is a single part.
+// The CVE-2026-14257 fix made the *tail* iterative (recursion on `m.post`, one
+// level per chained group), which left nesting depth unbounded: about 3,100
+// levels of `{{{...a,b...}}}` - only ~6KB of input - exhausted the native stack
+// and crashed the process. `EXPANSION_MAX_DEPTH` bounds how deep the parser
+// will follow nesting. It sits far above any realistic pattern and well below
+// the depth at which the stack runs out.
+const EXPANSION_MAX_DEPTH = 1_000;
+// Bash keeps a quirk where a brace group followed by a comma set still expands
+// (`{a},b}`). The parser implements it by rewriting the string and restarting
+// the scan, absorbing one `}` per pass. `n` trailing braces therefore cost `n`
+// full passes over a string that itself grows by one `escClose` sentinel each
+// time - quadratic in `n`, with a ~26x constant from the sentinel's length.
+// 128KB of `'{a}' + '}'.repeat(n) + ',z}'` blocked the event loop for 27
+// seconds to produce two results. `EXPANSION_MAX_REWRITES` bounds how many
+// times the scan may restart. Real `{a},b}` input needs a handful.
+const EXPANSION_MAX_REWRITES = 1_000;
 function numeric(str) {
     return !isNaN(str) ? parseInt(str, 10) : str.charCodeAt(0);
 }
@@ -30748,36 +30870,52 @@ function unescapeBraces(str) {
         .replace(escCommaPattern, ',')
         .replace(escPeriodPattern, '.');
 }
+// Like `target.push(...items)` but doesn't overflow the stack
+function pushAll(target, items) {
+    for (let i = 0; i < items.length; i++) {
+        target.push(items[i]);
+    }
+}
 /**
  * Basically just str.split(","), but handling cases
  * where we have nested braced sections, which should be
  * treated as individual members, like {a,{b,c},d}
  */
 function parseCommaParts(str) {
-    if (!str) {
-        return [''];
-    }
     const parts = [];
-    const m = balanced('{', '}', str);
-    if (!m) {
-        return str.split(',');
+    // Walk the brace groups iteratively. Recursing on `post` once per group let a
+    // chain of them exhaust the stack - the parsing-side counterpart to
+    // the `expand_` overflow fixed for CVE-2026-14257, and not something `max` or
+    // `maxLength` can bound, since it happens before expansion.
+    //
+    // The part the next chunk continues
+    let carry = '';
+    for (;;) {
+        const m = balanced('{', '}', str);
+        if (!m) {
+            const tail = str.split(',');
+            tail[0] = carry + tail[0];
+            pushAll(parts, tail);
+            return parts;
+        }
+        const { pre, body, post } = m;
+        const p = pre.split(',');
+        p[0] = carry + p[0];
+        p[p.length - 1] += '{' + body + '}';
+        if (!post.length) {
+            pushAll(parts, p);
+            return parts;
+        }
+        carry = p.pop();
+        pushAll(parts, p);
+        str = post;
     }
-    const { pre, body, post } = m;
-    const p = pre.split(',');
-    p[p.length - 1] += '{' + body + '}';
-    const postParts = parseCommaParts(post);
-    if (post.length) {
-        p[p.length - 1] += postParts.shift();
-        p.push.apply(p, postParts);
-    }
-    parts.push.apply(parts, p);
-    return parts;
 }
 function expand(str, options = {}) {
     if (!str) {
         return [];
     }
-    const { max = EXPANSION_MAX, maxLength = EXPANSION_MAX_LENGTH } = options;
+    const { max = EXPANSION_MAX, maxLength = EXPANSION_MAX_LENGTH, maxDepth = EXPANSION_MAX_DEPTH, maxRewrites = EXPANSION_MAX_REWRITES, } = options;
     // I don't know why Bash 4.3 does this, but it does.
     // Anything starting with {} will have the first two bytes preserved
     // but *only* at the top level, so {},a}b will not expand to anything,
@@ -30787,7 +30925,7 @@ function expand(str, options = {}) {
     if (str.slice(0, 2) === '{}') {
         str = '\\{\\}' + str.slice(2);
     }
-    return expand_(escapeBraces(str), max, maxLength, true).map(unescapeBraces);
+    return expand_(escapeBraces(str), max, maxLength, maxDepth, 0, maxRewrites, true).map(unescapeBraces);
 }
 function embrace(str) {
     return '{' + str + '}';
@@ -30828,7 +30966,7 @@ function combine(acc, pre, values, max, maxLength, dropEmpties) {
 }
 // The expansion values of a single numeric (`1..5`) or alphabetic (`a..e..2`)
 // sequence body.
-function expandSequence(body, isAlphaSequence, max) {
+function expandSequence(body, isAlphaSequence, max, maxLength) {
     const n = body.split(/\.\./);
     const N = [];
     // A sequence body always splits into two or three parts, but the compiler
@@ -30851,6 +30989,7 @@ function expandSequence(body, isAlphaSequence, max) {
         test = gte;
     }
     const pad = n.some(isPadded);
+    let length = 0;
     for (let i = x; test(i, y) && N.length < max; i += incr) {
         let c;
         if (isAlphaSequence) {
@@ -30874,11 +31013,20 @@ function expandSequence(body, isAlphaSequence, max) {
                 }
             }
         }
+        if (length + c.length > maxLength)
+            break;
         N.push(c);
+        length += c.length;
     }
     return N;
 }
-function expand_(str, max, maxLength, isTop) {
+function expand_(str, max, maxLength, maxDepth, depth, maxRewrites, isTop) {
+    // Too deeply nested to keep following: treat the rest as literal, the same
+    // way a group that cannot expand is already handled. Truncating rather than
+    // throwing keeps `expand` total, matching `max` and `maxLength`.
+    if (depth > maxDepth) {
+        return [str];
+    }
     // Consume the string's top-level brace groups left to right, threading a
     // running set of combined prefixes (`acc`). Expanding the tail iteratively -
     // rather than recursing on `m.post` once per group - keeps the native stack
@@ -30890,6 +31038,9 @@ function expand_(str, max, maxLength, isTop) {
     // comma set - a sequence like `{a..\}` may legitimately yield ''. The drop
     // is on the final strings, so it is applied to whichever `combine` produces
     // them (the one with no brace set left in the tail).
+    // How many times the `{a},b}` rewrite below has restarted the scan. Each pass
+    // re-reads the whole string, so leaving this unbounded is quadratic.
+    let rewrites = 0;
     let dropEmpties = false;
     let firstGroup = true;
     for (;;) {
@@ -30914,7 +31065,8 @@ function expand_(str, max, maxLength, isTop) {
         const isOptions = m.body.indexOf(',') >= 0;
         if (!isSequence && !isOptions) {
             // {a},b}
-            if (m.post.match(/,(?!,).*\}/)) {
+            if (rewrites < maxRewrites && m.post.match(/,(?!,).*\}/)) {
+                rewrites++;
                 str = m.pre + '{' + m.body + escClose + m.post;
                 isTop = true;
                 continue;
@@ -30928,13 +31080,13 @@ function expand_(str, max, maxLength, isTop) {
         }
         let values;
         if (isSequence) {
-            values = expandSequence(m.body, isAlphaSequence, max);
+            values = expandSequence(m.body, isAlphaSequence, max, maxLength);
         }
         else {
             let n = parseCommaParts(m.body);
             if (n.length === 1 && n[0] !== undefined) {
                 // x{{a,b}}y ==> x{a}y x{b}y
-                n = expand_(n[0], max, maxLength, false).map(embrace);
+                n = expand_(n[0], max, maxLength, maxDepth, depth + 1, maxRewrites, false).map(embrace);
                 //XXX is this necessary? Can't seem to hit it in tests.
                 /* c8 ignore start */
                 if (n.length === 1) {
@@ -30946,9 +31098,32 @@ function expand_(str, max, maxLength, isTop) {
                 }
                 /* c8 ignore stop */
             }
+            // Values that `combine` is going to drop as empty produce no result, so
+            // they must not count against `max` - otherwise `{a,,b}` with `max: 2`
+            // would stop at `['a', '']` and yield one result instead of two. Skipping
+            // them outright keeps `values` bounded while leaving `max` a bound on
+            // *kept* results.
+            let dropsEmpties = dropEmpties && !m.post.length && !pre;
+            for (let d = 0; dropsEmpties && d < acc.length; d++) {
+                if (acc[d]) {
+                    dropsEmpties = false;
+                }
+            }
             values = [];
-            for (let j = 0; j < n.length; j++) {
-                values.push.apply(values, expand_(n[j], max, maxLength, false));
+            let valuesLength = 0;
+            outer: for (let j = 0; j < n.length; j++) {
+                const expanded = expand_(n[j], max, maxLength, maxDepth, depth + 1, maxRewrites, false);
+                for (let k = 0; k < expanded.length; k++) {
+                    const v = expanded[k];
+                    if (dropsEmpties && !v)
+                        continue;
+                    if (values.length >= max ||
+                        valuesLength + v.length > maxLength) {
+                        break outer;
+                    }
+                    values.push(v);
+                    valuesLength += v.length;
+                }
             }
         }
         acc = combine(acc, pre, values, max, maxLength, dropEmpties && !m.post.length);
