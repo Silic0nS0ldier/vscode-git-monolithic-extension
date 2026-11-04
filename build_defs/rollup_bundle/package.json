@@ -6,7 +6,7 @@
         "@rollup/plugin-json": "6.1.0",
         "@rollup/plugin-node-resolve": "16.0.3",
         "cleye": "catalog:",
-        "magic-string": "0.30.21",
+        "magic-string": "1.4.5",
         "rollup": "4.67.3",
         "rollup-plugin-sourcemaps2": "0.5.10"
     },
