@@ -1994,6 +1994,17 @@
                     "default": false,
                     "description": "%config.useCommitInputAsStashMessage%"
                 },
+                "git_monolithic.log.callsiteFilter": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        ".*"
+                    ],
+                    "scope": "window",
+                    "markdownDescription": "%config.log.callsiteFilter%"
+                },
                 "git_monolithic.githubAuthentication": {
                     "deprecationMessage": "This setting is now deprecated, please use `github.gitAuthentication` instead."
                 },

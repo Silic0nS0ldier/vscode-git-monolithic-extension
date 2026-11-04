@@ -68,6 +68,7 @@ export const terminalAuthentication = createConfigOption<boolean>("terminalAuthe
 export const checkoutType = createConfigOption<string | string[]>("checkoutType", []);
 export const branchWhitespaceChar = createConfigOption<string>("branchWhitespaceChar", "");
 export const branchValidationRegex = createConfigOption<string>("branchValidationRegex", "");
+export const logCallsiteFilter = createConfigOption<string[]>("log.callsiteFilter", [".*"]);
 export const openAfterClone = createConfigOption<"always" | "alwaysNewWindow" | "whenNoFolderOpen" | "prompt">(
     "openAfterClone",
     "prompt",

@@ -74,7 +74,9 @@ TypeScript (all packages extend the root [tsconfig.json](tsconfig.json), which i
   `extension/vsix/package.nls.json`.
 - Import the [extension/src/tracing.ts](extension/src/tracing.ts) log functions by name and call them directly
   with only the message. The bundle passes each call its source location as an extra argument
-  ([callsite-plugin.ts](build_defs/rollup_bundle/src/callsite-plugin.ts)) and fails on any other use.
+  ([callsite-plugin.ts](build_defs/rollup_bundle/src/callsite-plugin.ts)) and fails on any other use. The
+  `git_monolithic.log.callsiteFilter` setting selects calls by it; `//extension:bundle_callsites_test` fails if any
+  bundled log call loses its call site.
 - Log through the level functions in [extension/src/tracing.ts](extension/src/tracing.ts), never
   `outputChannel.appendLine`. Message text must not contain words the Output view's `log` grammar
   highlights as a level (`[WARN]`, `Error`, `error:`, …). Both are enforced by the `logging/*` eslint

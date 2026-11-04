@@ -159,3 +159,43 @@ test("Fails when the logger module is not part of the bundle", async () => {
         await assert.rejects(build(), /Logger module '.*tracing\.js' is not part of the bundle/);
     });
 });
+
+test("Rejects source paths with characters outside the allowed set", async () => {
+    for (
+        const source of [
+            "../src/new\nline.ts",
+            "../src/trailing.ts\n",
+            "../src/trailing.ts\r",
+            "../src/trailing.ts\u2028",
+            "../src/sp ace.ts",
+            "../src/co:lon.ts",
+            "../src/a@b.ts",
+        ]
+    ) {
+        const directory = await mkdtemp(path.join(tmpdir(), "rollup-callsite-"));
+        try {
+            const dist = path.join(directory, "dist");
+            await mkdir(dist);
+            await writeFile(path.join(dist, "tracing.js"), LOGGER);
+            await writeFile(path.join(dist, "entry.js"), "");
+            const code = `import { trace } from "./tracing.js";\ntrace("x");\n`;
+            const build = rollup({
+                input: path.join(dist, "entry.js"),
+                plugins: [
+                    {
+                        name: "mapped-source",
+                        load(id) {
+                            if (path.basename(id) !== "entry.js") return null;
+                            return { code, map: new MagicString(code).generateMap({ hires: true, source }) };
+                        },
+                    },
+                    callsitePlugin(path.join(dist, "tracing.js"), ["trace"]),
+                ],
+                onwarn: () => {},
+            });
+            await assert.rejects(build, /has characters outside/, JSON.stringify(source));
+        } finally {
+            await rm(directory, { recursive: true, force: true });
+        }
+    }
+});

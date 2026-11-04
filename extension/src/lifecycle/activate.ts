@@ -27,28 +27,31 @@ import * as i18n from "../i18n/mod.js";
 import { Model } from "../model.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
-import { error, info, setOutputChannel, unsetOutputChannel, warn } from "../tracing.js";
+import { error, info, setCallsiteFilter, setOutputChannel, unsetOutputChannel, warn } from "../tracing.js";
 import { createInlayHintsProvider } from "../ui/inlay-hints-provider.js";
 import * as config from "../util/config.js";
 import { filterEvent } from "../util/events.js";
 import { hasDotGit } from "../util/has-dot-git.js";
 import { isExpectedError } from "../util/is-expected-error.js";
 import { deactivateTasks } from "./deactivate.js";
+import { watchLogFilter } from "./log-filter.js";
 
 export async function activate(context: ExtensionContext): Promise<void> {
     // TODO Many parts of the extension reference this `outputChannel` instance, need to be mindful that noting uses it after disposal.
     const outputChannel = window.createOutputChannel("Git Monolithic", { log: true });
     setOutputChannel(outputChannel);
 
-    info("Monolithic Git for VSCode is starting...");
-
     const disposables: Disposable[] = [];
     context.subscriptions.push(
         new Disposable(() => {
             Disposable.from(...disposables).dispose();
             unsetOutputChannel();
+            setCallsiteFilter(undefined);
         }),
     );
+    disposables.push(watchLogFilter());
+
+    info("Monolithic Git for VSCode is starting...");
 
     const showOutputCommand = showOutput.createCommand(outputChannel);
     commands.registerCommand(showOutputCommand.commandId, showOutputCommand.method);

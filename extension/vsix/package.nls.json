@@ -148,6 +148,7 @@
     "config.alwaysSignOff": "Controls the signoff flag for all commits.",
     "config.ignoreSubmodules": "Ignore modifications to submodules in the file tree.",
     "config.ignoredRepositories": "List of git repositories to ignore.",
+    "config.log.callsiteFilter": "Regular expressions selecting which log calls are written to the output channel. A call is written if any of them matches the whole of its source location, `<file>:<line>:<column>` with the file relative to the extension repository root (e.g. `extension/src/git.ts:120:9`). Use `[\"extension/src/watch/.*\", \"extension/src/git\\\\.ts:.*\"]` to log only calls in that directory and file. An empty list writes none. The output channel's log level still applies.",
     "config.scanRepositories": "List of paths to search for git repositories in.",
     "config.showProgress": "Controls whether git actions should show progress.",
     "config.rebaseWhenSync": "Force git to use rebase when running the sync command.",

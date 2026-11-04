@@ -317,6 +317,9 @@ importers:
       '@types/vscode':
         specifier: 1.144.0
         version: 1.144.0
+      acorn:
+        specifier: 8.19.0
+        version: 8.19.0
       ava:
         specifier: 'catalog:'
         version: 8.3.0(rollup@4.67.3)(supports-color@7.2.0)
