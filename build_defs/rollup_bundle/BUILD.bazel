@@ -27,9 +27,12 @@ ts_project(
     tsconfig = ":tsconfig",
     visibility = [":__pkg__"],
     deps = [
+        ":node_modules/@jridgewell/trace-mapping",
         ":node_modules/@rollup/plugin-commonjs",
         ":node_modules/@rollup/plugin-json",
         ":node_modules/@rollup/plugin-node-resolve",
+        ":node_modules/@rollup/pluginutils",
+        ":node_modules/@types/estree",
         ":node_modules/@types/node",
         ":node_modules/cleye",
         ":node_modules/magic-string",
@@ -55,6 +58,7 @@ ts_project(
     deps = [
         ":lib",
         ":node_modules/@types/node",
+        ":node_modules/magic-string",
         ":node_modules/rollup",
     ],
 )
@@ -90,6 +94,17 @@ js_test(
         ":lib_tests",
     ],
     entry_point = "dist/module-replacement-plugin.test.js",
+)
+
+js_test(
+    name = "callsite_plugin_test",
+    size = "small",
+    args = ["--test"],
+    data = [
+        "package.json",
+        ":lib_tests",
+    ],
+    entry_point = "dist/callsite-plugin.test.js",
 )
 
 js_test(
