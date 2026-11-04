@@ -17,10 +17,8 @@ import {
     type WorkspaceFolder,
 } from "vscode";
 import { Askpass } from "../askpass.js";
-import { makeCommandId } from "../commands/helpers.js";
-import { pruned } from "../commands/pruned.js";
+import * as showOutput from "../commands/implementations/show-output.js";
 import { registerCommands } from "../commands/register.js";
-import * as selected from "../commands/selection.gen.js";
 import { addDecorations } from "../decorationProvider.js";
 import { GitFileSystemProvider } from "../fileSystemProvider.js";
 import { Git } from "../git.js";
@@ -52,10 +50,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
         }),
     );
 
-    commands.registerCommand(
-        makeCommandId("showOutput"),
-        selected.showOutput ? () => outputChannel.show() : () => pruned("showOutput").method(),
-    );
+    const showOutputCommand = showOutput.createCommand(outputChannel);
+    commands.registerCommand(showOutputCommand.commandId, showOutputCommand.method);
     disposables.push(outputChannel);
 
     // Repoter disabled, for now

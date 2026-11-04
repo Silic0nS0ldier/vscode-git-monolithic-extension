@@ -4,8 +4,6 @@ import type { Model } from "../model.js";
 import type { CommandName } from "./command-names.gen.js";
 import { createCommand } from "./create.js";
 import { CommandErrorOutputTextDocumentContentProvider, type ScmCommand } from "./helpers.js";
-import { pruned } from "./pruned.js";
-import * as selected from "./selection.gen.js";
 
 import type { TelemetryReporter } from "@vscode/extension-telemetry";
 import * as branch from "./implementations/branch/mod.js";
@@ -66,29 +64,29 @@ export function registerCommands(
     const cmds = allCommands([
         ...branch.createCommands(),
         ...checkout.createCommands(),
-        selected.cherryPick ? cherryPick.createCommand() : pruned("cherryPick"),
+        cherryPick.createCommand(),
         ...clean.createCommands(model),
         ...clone.createCommands(telemetryReporter, git),
-        selected.close ? close.createCommand(model) : pruned("close"),
+        close.createCommand(model),
         ...commit.createCommands(),
         ...fetch.createCommands(),
-        selected.ignore ? ignore.createCommand(model) : pruned("ignore"),
-        selected.init ? init.createCommand(git, model) : pruned("init"),
-        selected.merge ? merge.createCommand() : pruned("merge"),
+        ignore.createCommand(model),
+        init.createCommand(git, model),
+        merge.createCommand(),
         ...open.createCommands(model),
-        selected.publish ? publish.createCommand() : pruned("publish"),
+        publish.createCommand(),
         ...pull.createCommands(),
         ...push.createCommands(),
         ...rebase.createCommands(),
-        selected.refresh ? refresh.createCommand() : pruned("refresh"),
+        refresh.createCommand(),
         ...remote.createCommands(),
-        selected.rename ? rename.createCommand() : pruned("rename"),
-        selected.revealInExplorer ? revealInExplorer.createCommand() : pruned("revealInExplorer"),
+        rename.createCommand(),
+        revealInExplorer.createCommand(),
         ...stage.createCommands(model),
         ...stash.createCommands(),
         ...sync.createCommands(),
         ...tag.createCommands(),
-        selected.undoCommit ? undoCommit.createCommand() : pruned("undoCommit"),
+        undoCommit.createCommand(),
         ...unstage.createCommands(model),
     ]);
 

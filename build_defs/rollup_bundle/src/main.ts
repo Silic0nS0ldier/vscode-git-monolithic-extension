@@ -5,6 +5,7 @@ import { cli } from "cleye";
 import * as path from "node:path";
 import { rollup } from "rollup";
 import sourcemaps from "rollup-plugin-sourcemaps2";
+import { commandPruningPlugin } from "./command-pruning-plugin.js";
 import { moduleReplacementPlugin } from "./module-replacement-plugin.js";
 import { nodeBuiltinPrefixPlugin } from "./node-builtin-prefix-plugin.js";
 import { typescriptHelperWarningsPlugin } from "./typescript-helper-warnings-plugin.js";
@@ -29,6 +30,8 @@ const argv = cli({
             type: [String],
             placeholder: "<path>=<file>",
         },
+        commandSelection: { type: String, placeholder: "<file>" },
+        commandImplementations: { type: String, placeholder: "<dir>" },
         outDir: {
             type: String,
             placeholder: "<dir>",
@@ -52,6 +55,11 @@ const entryPoints = (() => {
     }
 })();
 const externalModules = argv.flags.externalModule;
+const { commandSelection, commandImplementations } = argv.flags;
+if (Boolean(commandSelection) !== Boolean(commandImplementations)) {
+    console.error("--command-selection and --command-implementations must be used together.");
+    process.exit(1);
+}
 const moduleReplacements = argv.flags.replaceModule.map((replacement): readonly [string, string] => {
     const separator = replacement.indexOf("=");
     if (separator <= 0 || separator === replacement.length - 1) {
@@ -76,6 +84,9 @@ const bundle = await (async () => {
             input: entryPoints,
             plugins: [
                 moduleReplacementPlugin(moduleReplacements),
+                ...(commandSelection && commandImplementations
+                    ? [commandPruningPlugin(commandSelection, commandImplementations)]
+                    : []),
                 nodeBuiltinPrefixPlugin(),
                 wasmSourcePhasePlugin(),
                 nodeResolve(),
