@@ -72,6 +72,9 @@ TypeScript (all packages extend the root [tsconfig.json](tsconfig.json), which i
 - Runtime strings go through `i18n.Translations.*` in
   [extension/src/i18n/l10n.ts](extension/src/i18n/l10n.ts); only manifest `%key%` strings live in
   `extension/vsix/package.nls.json`.
+- Import the [extension/src/tracing.ts](extension/src/tracing.ts) log functions by name and call them directly
+  with only the message. The bundle passes each call its source location as an extra argument
+  ([callsite-plugin.ts](build_defs/rollup_bundle/src/callsite-plugin.ts)) and fails on any other use.
 - Log through the level functions in [extension/src/tracing.ts](extension/src/tracing.ts), never
   `outputChannel.appendLine`. Message text must not contain words the Output view's `log` grammar
   highlights as a level (`[WARN]`, `Error`, `error:`, …). Both are enforced by the `logging/*` eslint

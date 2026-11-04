@@ -6,6 +6,15 @@ load("@npm//extension:ava/package_json.bzl", "bin")
 load("//build_defs/lint:linters.bzl", "eslint_test")
 load("//build_defs/rollup_bundle:rollup_bundle.bzl", "rollup_bundle")
 
+# Functions of `src/tracing.ts` that the bundles pass call sites to.
+LOG_FUNCTIONS = [
+    "trace",
+    "debug",
+    "info",
+    "warn",
+    "error",
+]
+
 npm_link_all_packages(name = "node_modules")
 
 js_library(
@@ -79,6 +88,8 @@ ts_config(
 rollup_bundle(
     name = "bundle",
     srcs = [":lib"],
+    callsite_functions = LOG_FUNCTIONS,
+    callsite_module = "dist/tracing.js",
     entry_points = [
         "dist/main.js",
         "dist/askpass-main.js",
@@ -86,6 +97,7 @@ rollup_bundle(
     external_modules = [
         "vscode",
     ],
+    unsafe_treeshake = True,
     visibility = [
         "//extension/vsix:__pkg__",
         "//integration_tests:__pkg__",
@@ -116,11 +128,14 @@ js_run_binary(
 rollup_bundle(
     name = "pruning_test_bundle",
     srcs = [":lib"],
+    callsite_functions = LOG_FUNCTIONS,
+    callsite_module = "dist/tracing.js",
     command_implementations = "dist/commands/implementations",
     command_selection = ":pruning_test_selection",
     entry_points = ["dist/main.js"],
     external_modules = ["vscode"],
     tags = ["manual"],
+    unsafe_treeshake = True,
 )
 
 js_test(

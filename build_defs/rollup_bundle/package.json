@@ -2,15 +2,18 @@
     "private": true,
     "type": "module",
     "dependencies": {
+        "@jridgewell/trace-mapping": "0.3.31",
         "@rollup/plugin-commonjs": "29.0.3",
         "@rollup/plugin-json": "6.1.0",
         "@rollup/plugin-node-resolve": "16.0.3",
+        "@rollup/pluginutils": "5.4.0",
         "cleye": "catalog:",
         "magic-string": "0.30.21",
         "rollup": "4.67.3",
         "rollup-plugin-sourcemaps2": "0.5.10"
     },
     "devDependencies": {
+        "@types/estree": "1.0.10",
         "@types/node": "catalog:"
     }
 }
