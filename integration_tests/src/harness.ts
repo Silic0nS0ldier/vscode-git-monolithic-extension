@@ -204,13 +204,32 @@ export async function openWorkbench(browser: Browser): Promise<Page> {
 /** Types a command into the palette and runs it. */
 async function invokeCommand(page: Page, label: string): Promise<void> {
     const palette = page.locator(QUICK_INPUT);
-
-    await page.keyboard.press("Control+Shift+P");
-    await palette.waitFor({ state: "visible" });
-    await page.keyboard.type(label);
-
     const row = pickerRow(palette, label);
-    await row.first().waitFor({ state: "visible" });
+    const deadline = deadlineIn(ACTION_TIMEOUT_MS);
+
+    // VS Code evaluates `commandPalette` menu `when` clauses when the palette opens and
+    // does not re-evaluate them while the palette is open. If a context key (such as
+    // `resourceScheme` or an extension-set context) lands just after `Control+Shift+P`,
+    // close and reopen the palette so the menu items are re-evaluated.
+    for (let attemptTimeoutMs = 2_000;; attemptTimeoutMs = Math.min(attemptTimeoutMs * 2, 10_000)) {
+        await page.keyboard.press("Control+Shift+P");
+        await palette.waitFor({ state: "visible" });
+        await page.keyboard.type(label);
+
+        try {
+            const remainingMs = playwrightTimeout(deadline);
+            await row.first().waitFor({
+                state: "visible",
+                timeout: remainingMs <= attemptTimeoutMs ? remainingMs : attemptTimeoutMs,
+            });
+            break;
+        } catch (error) {
+            if (Date.now() >= deadline) {
+                throw error;
+            }
+            await closePicker(page);
+        }
+    }
 
     // The builtin git extension contributes commands under labels identical to ours, and
     // hides only some of them, so an ambiguous label has to fail rather than pick one.
@@ -267,6 +286,10 @@ export async function openFile(page: Page, relativePath: string): Promise<void> 
     await quickOpen.waitFor({ state: "hidden" });
 
     await page.locator(".part.editor .tab.active .label-name").filter({ hasText: exactly(name) })
+        .waitFor({ state: "visible" });
+    // The tab header renders before the editor body finishes loading and receives focus,
+    // which is when VS Code updates `resourceScheme` and `window.activeTextEditor`.
+    await page.locator(".part.editor .monaco-editor:focus-within .view-lines").first()
         .waitFor({ state: "visible" });
 }
 
@@ -363,6 +386,7 @@ export async function closeOutputPanel(page: Page): Promise<void> {
 
 export async function closeAllEditors(page: Page): Promise<void> {
     await runCommand(page, "View: Close All Editors");
+    await page.locator(".part.editor .tab").first().waitFor({ state: "hidden" });
 }
 
 /**
