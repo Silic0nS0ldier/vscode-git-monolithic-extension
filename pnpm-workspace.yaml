@@ -8,6 +8,8 @@ packages:
 # Keep artifact resolution (including transitive dependencies) aligned with Renovate's three-day delay.
 minimumReleaseAge: 4320
 minimumReleaseAgeStrict: true
+minimumReleaseAgeExclude:
+  - '@types/vscode@1.145.0'
 saveExact: true
 
 allowBuilds: 

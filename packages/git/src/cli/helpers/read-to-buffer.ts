@@ -14,6 +14,8 @@ export type ReadToContext = {
     cli: CLI;
     cwd: string;
     timeout?: number;
+    signal?: AbortSignal;
+    input?: string | Uint8Array;
 };
 
 export type ReadToErrors =
@@ -40,9 +42,12 @@ export async function readToBuffer(
     try {
         const cliAction = context.cli({
             cwd: context.cwd,
-            signal: abortController.signal,
+            signal: context.signal
+                ? AbortSignal.any([context.signal, abortController.signal])
+                : abortController.signal,
             stdout,
             timeout: context.timeout,
+            input: context.input,
         }, args);
         // Throws on max buffer hit
         const streamReader = getStreamAsBuffer(stdout, { maxBuffer });

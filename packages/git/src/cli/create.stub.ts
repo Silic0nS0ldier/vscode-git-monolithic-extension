@@ -1,5 +1,5 @@
 import intoStream from "into-stream";
-import { Readable } from "node:stream";
+import { PassThrough, Readable, type Writable } from "node:stream";
 import type { ChildProcess, SpawnFn } from "./create.js";
 
 export function createSpawn(endWith: "error" | "exit", options: {
@@ -7,12 +7,14 @@ export function createSpawn(endWith: "error" | "exit", options: {
     err?: string;
     delay?: number;
     code?: number;
+    stdin?: Writable;
     /** Called for each `kill`, including those made after the process ended. */
     onKill?: (signal: number | NodeJS.Signals | undefined) => void;
 } = {}): SpawnFn {
     return () => {
         let running = true;
         const cp: ChildProcess = {
+            stdin: options.stdin ?? new PassThrough(),
             kill: signal => {
                 options.onKill?.(signal);
                 const wasRunning = running;

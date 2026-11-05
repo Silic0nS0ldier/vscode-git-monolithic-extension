@@ -231,7 +231,7 @@ async function navigate(page: Page, url: string, deadline: number): Promise<void
     }
 }
 
-export async function openWorkbench(browser: Browser): Promise<Page> {
+export async function openWorkbench(browser: Browser, workspaceFile?: string): Promise<Page> {
     const context = browser.contexts()[0] ?? await browser.newContext();
     const page = await context.newPage();
     // Fail inside the hook's own timeout, so the failure is captured rather than cut short.
@@ -240,7 +240,7 @@ export async function openWorkbench(browser: Browser): Promise<Page> {
 
     try {
         const editorUrl = new URL(`http://127.0.0.1:${assignedPort("code_server_service")}/`);
-        editorUrl.searchParams.set("folder", workspaceDir());
+        editorUrl.searchParams.set(workspaceFile ? "workspace" : "folder", workspaceFile ?? workspaceDir());
         await navigate(page, editorUrl.toString(), loadDeadline);
         await page.locator(".monaco-workbench").waitFor({ state: "visible" });
 
@@ -471,6 +471,35 @@ export async function diffEditorSides(page: Page): Promise<{ original: string; m
     }
 
     return { modified: await side("modified"), original: await side("original") };
+}
+
+export async function selectMenuItem(page: Page, title: string): Promise<void> {
+    const item = page.getByRole("menuitem", { name: title, exact: true });
+    await item.hover();
+    await page.keyboard.press("Enter");
+    await page.locator(".monaco-menu").waitFor({ state: "hidden" });
+}
+
+export async function loadTimelinePage(page: Page): Promise<boolean> {
+    const tree = page.locator(".timeline-tree-view");
+    const rows = tree.locator(".monaco-list-row");
+    await tree.locator(".monaco-list").focus();
+    await page.keyboard.press("End");
+    await pollUntil(
+        "the bottom of the Timeline page to render",
+        () => rows.last().getAttribute("data-last-element"),
+        last => last === "true",
+    );
+    const more = rows.filter({ hasText: "Load more" });
+    if (!await more.count()) return false;
+    const size = await rows.last().getAttribute("aria-setsize");
+    await more.click();
+    await pollUntil(
+        "the next Timeline page to arrive",
+        () => rows.first().getAttribute("aria-setsize"),
+        next => next !== null && next !== size,
+    );
+    return true;
 }
 
 /**

@@ -6,7 +6,7 @@
     "license": "MIT",
     "version": "0.7.1",
     "engines": {
-        "vscode": "^1.144.0"
+        "vscode": "^1.145.0"
     },
     "extensionKind": [
         "workspace"
@@ -29,6 +29,37 @@
     },
     "contributes": {
         "commands": [
+            {
+                "command": "git_monolithic.timelineOpenDiff",
+                "title": "%command.timelineOpenDiff%",
+                "icon": "$(compare-changes)",
+                "category": "Git Monolithic"
+            },
+            {
+                "command": "git_monolithic.timelineViewCommit",
+                "title": "%command.timelineViewCommit%",
+                "category": "Git Monolithic"
+            },
+            {
+                "command": "git_monolithic.timelineCopyCommitId",
+                "title": "%command.timelineCopyCommitId%",
+                "category": "Git Monolithic"
+            },
+            {
+                "command": "git_monolithic.timelineCopyCommitMessage",
+                "title": "%command.timelineCopyCommitMessage%",
+                "category": "Git Monolithic"
+            },
+            {
+                "command": "git_monolithic.timelineSelectForCompare",
+                "title": "%command.timelineSelectForCompare%",
+                "category": "Git Monolithic"
+            },
+            {
+                "command": "git_monolithic.timelineCompareWithSelected",
+                "title": "%command.timelineCompareWithSelected%",
+                "category": "Git Monolithic"
+            },
             {
                 "command": "git_monolithic.stageSelectedRanges",
                 "title": "%command.stageSelectedRanges%",
@@ -538,7 +569,45 @@
             }
         ],
         "menus": {
+            "timeline/item/context": [
+                {
+                    "command": "git_monolithic.timelineOpenDiff",
+                    "group": "1_actions@1",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /gitm:file\\b/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineViewCommit",
+                    "group": "1_actions@2",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /^gitm:.*:commit$/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineCompareWithSelected",
+                    "group": "3_compare@1",
+                    "when": "config.git_monolithic.enabled && git_monolithic.timeline.selectedForCompare && timelineItem =~ /gitm:file\\b/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineSelectForCompare",
+                    "group": "3_compare@2",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /gitm:file\\b/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineCopyCommitId",
+                    "group": "5_copy@1",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /^gitm:.*:commit$/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineCopyCommitMessage",
+                    "group": "5_copy@2",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /^gitm:.*:commit$/ && !listMultiSelection"
+                }
+            ],
             "commandPalette": [
+                { "command": "git_monolithic.timelineOpenDiff", "when": "false" },
+                { "command": "git_monolithic.timelineViewCommit", "when": "false" },
+                { "command": "git_monolithic.timelineCopyCommitId", "when": "false" },
+                { "command": "git_monolithic.timelineCopyCommitMessage", "when": "false" },
+                { "command": "git_monolithic.timelineSelectForCompare", "when": "false" },
+                { "command": "git_monolithic.timelineCompareWithSelected", "when": "false" },
                 {
                     "command": "git_monolithic.stageSelectedRanges",
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"
@@ -1521,6 +1590,29 @@
         "configuration": {
             "title": "Git Monolithic",
             "properties": {
+                "git_monolithic.timeline.date": {
+                    "type": "string",
+                    "enum": ["committed", "authored"],
+                    "enumDescriptions": [
+                        "%config.timeline.date.committed%",
+                        "%config.timeline.date.authored%"
+                    ],
+                    "default": "committed",
+                    "description": "%config.timeline.date%",
+                    "scope": "window"
+                },
+                "git_monolithic.timeline.showAuthor": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.timeline.showAuthor%",
+                    "scope": "window"
+                },
+                "git_monolithic.timeline.showUncommitted": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "%config.timeline.showUncommitted%",
+                    "scope": "window"
+                },
                 "git_monolithic.enabled": {
                     "type": "boolean",
                     "scope": "resource",

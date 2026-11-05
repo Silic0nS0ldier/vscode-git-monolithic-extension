@@ -6,6 +6,8 @@ import { detach } from "../helpers/detach.js";
 /** Fields: hash, author name, author email, author date (unix), commit date (unix), parents, body. */
 export const COMMIT_FORMAT = "%H%n%aN%n%aE%n%at%n%ct%n%P%n%B";
 
+export type CommitShortStat = { files: number; insertions: number; deletions: number };
+
 export type Commit = {
     hash: string;
     authorName: string;
@@ -14,6 +16,8 @@ export type Commit = {
     commitDate: Date;
     parents: string[];
     message: string;
+    shortStat?: CommitShortStat;
+    filePath?: string;
 };
 
 /**
@@ -27,10 +31,25 @@ export function parseCommits(data: string): Result<Commit[], GenericError> {
 
     // Re-created on each call to avoid stale lastIndex across invocations.
     // eslint-disable-next-line no-control-regex -- `\x00` matches the NUL that `-z` terminates each record with.
-    const commitRegex = /([0-9a-f]{40})\n(.*)\n(.*)\n(.*)\n(.*)\n(.*)(?:\n([^]*?))?(?:\x00)/gm;
-    let match: RegExpExecArray | null;
+    const commitRegex = /\b([0-9a-f]{64}|[0-9a-f]{40})\n(.*)\n(.*)\n(.*)\n(.*)\n(.*)(?:\n([^]*?))?(?:\x00)/gm;
+    // eslint-disable-next-line no-control-regex
+    const numstatRegex = /^\n?(?:-|\d+)\t(?:-|\d+)\t(?:\x00[^\x00]*\x00([^\x00]+)|([^\x00]+))\x00/;
+    const matches: RegExpExecArray[] = [];
+    for (let match = commitRegex.exec(data); match !== null; match = commitRegex.exec(data)) {
+        matches.push(match);
+        // Filenames may contain complete commit-shaped text. Consume their NUL fields before finding another header.
+        let position = commitRegex.lastIndex;
+        for (
+            let entry = numstatRegex.exec(data.slice(position));
+            entry !== null;
+            entry = numstatRegex.exec(data.slice(position))
+        ) {
+            position += entry[0].length;
+        }
+        commitRegex.lastIndex = position;
+    }
 
-    while ((match = commitRegex.exec(data)) !== null) {
+    for (const [index, match] of matches.entries()) {
         const [, hash, authorName, authorEmail, authorDateStr, commitDateStr, parents, rawMessage = ""] = match;
 
         // Invariant: All expected fields are populated, issues here point to flaw in regex.
@@ -44,7 +63,7 @@ export function parseCommits(data: string): Result<Commit[], GenericError> {
         try {
             const authorDateNum = from_str_radix(authorDateStr, 10);
             const commitDateNum = from_str_radix(commitDateStr, 10);
-            commits.push({
+            const commit: Commit = {
                 authorDate: new Date(authorDateNum * 1000),
                 authorEmail: detach(authorEmail),
                 authorName: detach(authorName),
@@ -52,7 +71,25 @@ export function parseCommits(data: string): Result<Commit[], GenericError> {
                 hash: detach(hash),
                 message: detach(message),
                 parents: parents ? detach(parents).split(" ") : [],
-            });
+            };
+            const suffix = data.slice(match.index + match[0].length, matches[index + 1]?.index ?? data.length);
+            // `-z --numstat` uses extra NUL fields for renames, and never quotes unusual filenames.
+            const numstat = suffix.match(numstatRegex);
+            const filePath = numstat?.[1] ?? numstat?.[2];
+            if (filePath) {
+                commit.filePath = detach(filePath);
+            }
+            const stats = suffix.slice(suffix.lastIndexOf("\0") + 1).match(
+                /^\s+(\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?\s*$/m,
+            );
+            if (stats?.[1]) {
+                commit.shortStat = {
+                    files: from_str_radix(stats[1], 10),
+                    insertions: stats[2] ? from_str_radix(stats[2], 10) : 0,
+                    deletions: stats[3] ? from_str_radix(stats[3], 10) : 0,
+                };
+            }
+            commits.push(commit);
         } catch (e) {
             return err(createError(ERROR_GENERIC, `Could not parse commit dates for "${hash}": ${e}`));
         }

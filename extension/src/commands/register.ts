@@ -30,6 +30,7 @@ import * as stage from "./implementations/stage/mod.js";
 import * as stash from "./implementations/stash/mod.js";
 import * as sync from "./implementations/sync/mod.js";
 import * as tag from "./implementations/tag/mod.js";
+import * as timeline from "./implementations/timeline/mod.js";
 import * as undoCommit from "./implementations/undo-commit.js";
 import * as unstage from "./implementations/unstage/mod.js";
 
@@ -61,6 +62,7 @@ export function registerCommands(
     outputChannel: OutputChannel,
     telemetryReporter: TelemetryReporter,
 ): Disposable {
+    const disposables: Disposable[] = [];
     const cmds = allCommands([
         ...branch.createCommands(),
         ...checkout.createCommands(),
@@ -86,13 +88,12 @@ export function registerCommands(
         ...stash.createCommands(),
         ...sync.createCommands(),
         ...tag.createCommands(),
+        ...timeline.createCommands(model, git, disposables),
         undoCommit.createCommand(),
         ...unstage.createCommands(model),
     ]);
 
     const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
-
-    const disposables: Disposable[] = [];
 
     try {
         for (const { commandId, method, options } of cmds) {

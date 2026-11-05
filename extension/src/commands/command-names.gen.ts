@@ -80,6 +80,12 @@ export type CommandName =
     | "stashPopLatest"
     | "sync"
     | "syncRebase"
+    | "timelineCompareWithSelected"
+    | "timelineCopyCommitId"
+    | "timelineCopyCommitMessage"
+    | "timelineOpenDiff"
+    | "timelineSelectForCompare"
+    | "timelineViewCommit"
     | "undoCommit"
     | "unstage"
     | "unstageAll";
