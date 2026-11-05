@@ -1,5 +1,7 @@
 import { runfiles } from "@bazel/runfiles";
 import assert from "node:assert";
+import { execFileSync } from "node:child_process";
+import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -65,6 +67,28 @@ export async function writeUntrackedPastCliLimit(repoPath: string): Promise<stri
     assert.ok(totalLength > 30000, `pathspec should exceed chunk limit, got ${totalLength}`);
 
     return paths;
+}
+
+/**
+ * Makes listing untracked files hang: the walk opens `sub/.gitignore`, a FIFO with no writer.
+ * Other status lookups never read it. Disposing releases any git still blocked on it.
+ */
+export async function blockUntrackedListing(repoPath: string) {
+    const dir = path.join(repoPath, "sub");
+    await fs.mkdir(dir);
+    const fifo = path.join(dir, ".gitignore");
+    execFileSync("mkfifo", [fifo]);
+
+    return {
+        async [Symbol.asyncDispose]() {
+            try {
+                // Fails with ENXIO when nothing is blocked reading it, which is the expected case.
+                await (await fs.open(fifo, fsConstants.O_WRONLY | fsConstants.O_NONBLOCK)).close();
+            } catch {
+                // Nothing to release.
+            }
+        },
+    };
 }
 
 export async function tempGitRepo(initialCommit: boolean = false) {

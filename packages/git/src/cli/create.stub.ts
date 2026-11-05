@@ -7,27 +7,31 @@ export function createSpawn(endWith: "error" | "exit", options: {
     err?: string;
     delay?: number;
     code?: number;
+    /** Called for each `kill`, including those made after the process ended. */
+    onKill?: (signal: number | NodeJS.Signals | undefined) => void;
 } = {}): SpawnFn {
     return () => {
+        let running = true;
         const cp: ChildProcess = {
-            connected: true,
-            kill: () => {
-                // @ts-expect-error `connected` is readonly to consumers; the stub flips it to simulate the kill.
-                cp.connected = false;
-                return true;
+            kill: signal => {
+                options.onKill?.(signal);
+                const wasRunning = running;
+                running = false;
+                return wasRunning;
             },
             once: (event, listener) => {
                 let fn: (() => Promise<void>) | null = null;
                 if (event === "error" && endWith === "error") {
                     fn = async (): Promise<void> => {
-                        if (cp.connected) {
+                        if (running) {
                             // @ts-expect-error `event` does not narrow `listener` to the matching `once` overload.
                             listener(new Error());
                         }
                     };
                 } else if (event === "exit" && endWith === "exit") {
                     fn = async (): Promise<void> => {
-                        if (cp.connected) {
+                        if (running) {
+                            running = false;
                             // @ts-expect-error `event` does not narrow `listener` to the matching `once` overload.
                             listener(options.code ?? 0, "SIGQUIT");
                         }

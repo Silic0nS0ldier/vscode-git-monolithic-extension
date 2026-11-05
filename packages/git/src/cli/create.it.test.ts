@@ -2,8 +2,9 @@ import assert from "node:assert";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
-import { gitCtx, tempGitRepo } from "../api/helpers.it.stub.js";
-import { ERROR_NON_ZERO_EXIT } from "../errors.js";
+import { setTimeout as delay } from "node:timers/promises";
+import { blockUntrackedListing, gitCtx, tempGitRepo } from "../api/helpers.it.stub.js";
+import { ERROR_CANCELLED, ERROR_NON_ZERO_EXIT, ERROR_TIMEOUT } from "../errors.js";
 import { isErr, unwrap } from "../func-result.js";
 
 async function run(cwd: string, args: string[]): Promise<void> {
@@ -59,4 +60,57 @@ test("non-zero exit reports conflicts from stdout", async () => {
     // both streams are captured.
     assert.strictEqual(details.exitCode, 1);
     assert.match(details.stdout, /^CONFLICT \([^)]+\): /mu);
+});
+
+const HANGING_ARGS = ["ls-files", "-z", "--others", "--exclude-standard"];
+
+function isRunning(pid: number): boolean {
+    try {
+        process.kill(pid, 0);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/** A killed process is reaped asynchronously, so give it a moment to disappear. */
+async function assertEnds(pid: number): Promise<void> {
+    const deadline = Date.now() + 2_000;
+    while (isRunning(pid)) {
+        assert.ok(Date.now() < deadline, `git (pid ${pid}) is still running`);
+        await delay(10);
+    }
+}
+
+test("a git that outlives its timeout is killed", async () => {
+    await using repo = await tempGitRepo(true);
+    await using _blocked = await blockUntrackedListing(repo.path);
+    let pid = -1;
+
+    const result = await gitCtx.cli({ cwd: repo.path, onSpawn: p => pid = p, timeout: 250 }, HANGING_ARGS);
+
+    assert.ok(isErr(result));
+    assert.strictEqual(unwrap(result).type, ERROR_TIMEOUT);
+    await assertEnds(pid);
+});
+
+test("a cancelled git is killed", async () => {
+    await using repo = await tempGitRepo(true);
+    await using _blocked = await blockUntrackedListing(repo.path);
+    const controller = new AbortController();
+    let pid = -1;
+
+    const pending = gitCtx.cli({
+        cwd: repo.path,
+        onSpawn: p => {
+            pid = p;
+            setTimeout(() => controller.abort(), 50);
+        },
+        signal: controller.signal,
+    }, HANGING_ARGS);
+
+    const result = await pending;
+    assert.ok(isErr(result));
+    assert.strictEqual(unwrap(result).type, ERROR_CANCELLED);
+    await assertEnds(pid);
 });
