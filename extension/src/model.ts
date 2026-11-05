@@ -310,34 +310,50 @@ export class Model {
             }
         }
 
+        // TODO Replace with a do expression once https://github.com/tc39/proposal-do-expressions advances.
+        const repository = await (async (): Promise<AbstractRepository | undefined> => {
+            try {
+                const rawRoot = await this.git.getRepositoryRoot(repoPath);
+
+                // This can happen whenever `path` has the wrong case sensitivity in
+                // case insensitive file systems
+                // https://github.com/microsoft/vscode/issues/33498
+                const repositoryRoot = Uri.file(rawRoot).fsPath;
+
+                if (this.getRepository(repositoryRoot)) {
+                    return undefined;
+                }
+
+                if (shouldRepositoryBeIgnored(rawRoot)) {
+                    return undefined;
+                }
+
+                const dotGit = await this.git.getRepositoryDotGit(repositoryRoot);
+                const repository = createRepository(
+                    this.git.open(repositoryRoot, dotGit),
+                    this.#globalState,
+                );
+
+                this.#open(repository);
+                return repository;
+            } catch (ex) {
+                error(
+                    `Opening repository for path='${repoPath}' failed; ex=${inspect(ex)}`,
+                );
+                return undefined;
+            }
+        })();
+
+        if (!repository) {
+            return;
+        }
+
+        // The repository stays open, and later refreshes can still succeed.
         try {
-            const rawRoot = await this.git.getRepositoryRoot(repoPath);
-
-            // This can happen whenever `path` has the wrong case sensitivity in
-            // case insensitive file systems
-            // https://github.com/microsoft/vscode/issues/33498
-            const repositoryRoot = Uri.file(rawRoot).fsPath;
-
-            if (this.getRepository(repositoryRoot)) {
-                return;
-            }
-
-            if (shouldRepositoryBeIgnored(rawRoot)) {
-                return;
-            }
-
-            const dotGit = await this.git.getRepositoryDotGit(repositoryRoot);
-            const repository = createRepository(
-                this.git.open(repositoryRoot, dotGit),
-                this.#globalState,
-            );
-
-            this.#open(repository);
             await repository.autoRefresh();
         } catch (ex) {
-            // noop
             error(
-                `Opening repository for path='${repoPath}' failed; ex=${inspect(ex)}`,
+                `Initial refresh of repository '${repository.root}' failed; ex=${inspect(ex)}`,
             );
         }
     });
