@@ -77,6 +77,7 @@ export async function blockUntrackedListing(repoPath: string) {
     const dir = path.join(repoPath, "sub");
     await fs.mkdir(dir);
     const fifo = path.join(dir, ".gitignore");
+    // Node cannot create a FIFO itself (https://github.com/nodejs/node/issues/38344), so this runs the system tool.
     execFileSync("mkfifo", [fifo]);
 
     return {
