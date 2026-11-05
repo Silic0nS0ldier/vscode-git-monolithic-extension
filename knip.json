@@ -7,8 +7,7 @@
                 "build_defs/lint/*.test.mjs"
             ],
             "ignoreBinaries": [
-                "bazel",
-                "mkfifo"
+                "bazel"
             ],
             "ignoreDependencies": [
                 "@typescript/native",
@@ -27,6 +26,9 @@
         "packages/git": {
             "entry": [
                 "src/api/**/mod.ts"
+            ],
+            "ignoreBinaries": [
+                "mkfifo"
             ],
             "project": [
                 "src/**/*.ts"
