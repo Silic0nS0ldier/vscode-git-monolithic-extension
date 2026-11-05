@@ -131,10 +131,14 @@ export class Git {
     readonly path: string;
     readonly userAgent: string;
     readonly version: string;
-    // This is deliberately leaked to help migrate to new library
-    readonly _context: GitContext;
+    #context: GitContext;
     readonly #services: AllServices;
     #env: { [key: string]: string };
+
+    // This is deliberately leaked to help migrate to new library
+    get _context(): GitContext {
+        return this.#context;
+    }
 
     /** Extension-owned environment additions, chiefly the askpass wiring. */
     get env(): { readonly [key: string]: string } {
@@ -145,9 +149,14 @@ export class Git {
         this.path = options.gitPath;
         this.version = options.version;
         this.userAgent = options.userAgent;
-        this._context = options.context;
+        this.#context = options.context;
         this.#services = createServices(msg => info(msg));
         this.#env = options.env || {};
+    }
+
+    /** Swaps in a context for later invocations, such as one created with a new timeout. */
+    replaceContext(context: GitContext): void {
+        this.#context = context;
     }
 
     open(repository: string, dotGit: string): Repository {

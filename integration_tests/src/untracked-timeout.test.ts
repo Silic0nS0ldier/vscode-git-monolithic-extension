@@ -17,6 +17,7 @@ import {
     resourceRow,
     runCommand,
     scmView,
+    showGitOutput,
     workspaceDir,
 } from "./harness.js";
 
@@ -102,4 +103,30 @@ scenario("a lookup failing after one succeeded notifies again", async () => {
 
     await notification(page, TIMED_OUT).waitFor({ state: "visible", timeout: 20_000 });
     await groupName(scmView(page), "Untracked \\(refresh failed\\)").waitFor({ state: "visible" });
+});
+
+scenario("a changed timeout applies to later git commands, without reopening the repository", async () => {
+    const view = scmView(page);
+    await writeFile(
+        join(workspaceDir(), ".vscode", "settings.json"),
+        JSON.stringify({ "git_monolithic.commandTimeout": 1000 }),
+    );
+    await showGitOutput(page);
+    await filteredOutputPanelText(page, "Git commands now stop after 1000ms");
+    await closeOutputPanel(page);
+
+    // A success first, so the next failure is notified again.
+    await rm(blockingIgnoreFile());
+    await writeFile(blockingIgnoreFile(), "");
+    await runCommand(page, "Git: Refresh");
+    await resourceRow(view, "untracked.txt").waitFor({ state: "visible", timeout: 20_000 });
+
+    await rm(blockingIgnoreFile());
+    await promisify(execFile)("mkfifo", [blockingIgnoreFile()]);
+    const started = Date.now();
+    await runCommand(page, "Git: Refresh");
+
+    await notification(page, /took longer than the git command timeout \(1s\)/u).waitFor({ state: "visible" });
+    // Well short of the 5s the lookup would take under the previous timeout.
+    assert.ok(Date.now() - started < 4_000, `the lookup took ${Date.now() - started}ms to time out`);
 });

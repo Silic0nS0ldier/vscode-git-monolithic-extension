@@ -47,7 +47,6 @@ export type ContextCreationErrors =
 // TODO Investigate if and how to monitor stdio globally (without causing memory issues)
 export type PersistentCLIContext = {
     readonly env: { readonly [x: string]: string | undefined };
-    /** Read on every invocation, so a getter can change it after the context is created. */
     readonly timeout: number;
 };
 

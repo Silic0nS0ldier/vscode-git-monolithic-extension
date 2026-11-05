@@ -1,4 +1,5 @@
 import type { TelemetryReporter } from "@vscode/extension-telemetry";
+import type { PersistentCLIContext } from "monolithic-git-interop/cli";
 import * as os from "node:os";
 import * as path from "node:path";
 import { setTimeout } from "node:timers/promises";
@@ -172,7 +173,11 @@ async function createModel(
         pathHints = pathHints.filter(p => path.isAbsolute(p));
     }
 
-    const gitInfo = await findGit(pathHints);
+    const persistentContext = (): PersistentCLIContext => ({
+        env: process.env,
+        timeout: config.commandTimeout(),
+    });
+    const gitInfo = await findGit(pathHints, persistentContext());
     info(i18n.Translations.usingGit(gitInfo.version, gitInfo.path));
 
     const askpass = await Askpass.create();
@@ -189,6 +194,27 @@ async function createModel(
             `git/${gitInfo.version} (${os.version()} ${os.release()}; ${os.platform()} ${os.arch()}) vscode/${vscodeVersion} (${env.appName})`,
         version: gitInfo.version,
     });
+
+    // A context is fixed once created, so a changed timeout takes a new one.
+    let contextGeneration = 0;
+    filterEvent(workspace.onDidChangeConfiguration, e => config.commandTimeout.affected(e))(
+        async () => {
+            const generation = ++contextGeneration;
+            const newPersistentContext = persistentContext();
+            try {
+                const newContext = await gitInfo.recreateContext(newPersistentContext);
+                // A later change may have been applied while this one was being created.
+                if (generation === contextGeneration) {
+                    git.replaceContext(newContext);
+                    info(`Git commands now stop after ${newPersistentContext.timeout}ms`);
+                }
+            } catch (ex) {
+                warn(`Keeping the previous git command timeout, as applying the new one failed; ex=${inspect(ex)}`);
+            }
+        },
+        null,
+        disposables,
+    );
 
     const model = new Model(git, context.globalState);
     disposables.push(model);
