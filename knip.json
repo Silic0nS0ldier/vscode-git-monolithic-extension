@@ -7,7 +7,8 @@
                 "build_defs/lint/*.test.mjs"
             ],
             "ignoreBinaries": [
-                "bazel"
+                "bazel",
+                "mkfifo"
             ],
             "ignoreDependencies": [
                 "@typescript/native",
