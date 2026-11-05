@@ -1586,6 +1586,12 @@
                     "markdownDescription": "%config.watcherDebounce%",
                     "default": 500
                 },
+                "git_monolithic.commandTimeout": {
+                    "type": "number",
+                    "minimum": 1,
+                    "markdownDescription": "%config.commandTimeout%",
+                    "default": 30000
+                },
                 "git_monolithic.autofetch": {
                     "type": [
                         "boolean",

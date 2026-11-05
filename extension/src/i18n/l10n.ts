@@ -163,6 +163,25 @@ export function untrackedChanges(): string {
     return l10n.t("Untracked");
 }
 
+export function refreshFailedAnnotation(): string {
+    return l10n.t("(refresh failed)");
+}
+
+export function untrackedRefreshFailed(repoName: string): string {
+    return l10n.t(
+        "Could not list the untracked files of '{0}'. They are left out of Source Control until a refresh succeeds.",
+        repoName,
+    );
+}
+
+export function untrackedRefreshTimedOut(repoName: string, timeoutSeconds: number): string {
+    return l10n.t(
+        "Listing the untracked files of '{0}' took longer than the git command timeout ({1}s). They are left out of Source Control until a refresh succeeds.",
+        repoName,
+        timeoutSeconds,
+    );
+}
+
 export function rebasing(): string {
     return l10n.t("Rebasing");
 }

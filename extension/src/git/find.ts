@@ -3,6 +3,7 @@ import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
 import { trace } from "../tracing.js";
+import * as config from "../util/config.js";
 import { snoopOnStream, SnoopStream } from "../util/snoop-stream.js";
 
 export interface IGit {
@@ -17,7 +18,13 @@ export async function findGit(hints: string[]): Promise<IGit> {
         msg => trace(msg),
     );
 
-    const persistentContext: PersistentCLIContext = { env: process.env, timeout: 30_000 };
+    const persistentContext: PersistentCLIContext = {
+        env: process.env,
+        // Read on every invocation, so a change applies without reopening the repository.
+        get timeout() {
+            return config.commandTimeout();
+        },
+    };
 
     for (const hint of hints) {
         const result = await fromPath(path.resolve(hint), persistentContext, services);
