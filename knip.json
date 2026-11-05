@@ -27,6 +27,9 @@
             "entry": [
                 "src/api/**/mod.ts"
             ],
+            "ignoreBinaries": [
+                "mkfifo"
+            ],
             "project": [
                 "src/**/*.ts"
             ]

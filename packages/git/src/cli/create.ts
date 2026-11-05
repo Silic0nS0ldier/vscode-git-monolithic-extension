@@ -24,7 +24,7 @@ export type ChildProcess = {
     readonly stderr: Readable;
     once(event: "error", listener: (error: Error) => void): ChildProcess;
     once(event: "exit", listener: (code: number, signal: NodeJS.Signals) => void): ChildProcess;
-    readonly connected: boolean;
+    /** Does nothing once the process has exited. */
     kill(signal?: number | NodeJS.Signals): boolean;
     readonly pid?: number;
 };
@@ -98,9 +98,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         const externalSignal = context.signal;
 
         if (externalSignal?.aborted) {
-            if (cp.connected) {
-                cp.kill();
-            }
+            cp.kill();
             return err(createError(ERROR_CANCELLED, { ...cmdContext, stderr: stderrTail.text() }));
         }
 
@@ -124,11 +122,8 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         const result = await Promise.race([onAbort, onError, onExit]);
 
         if (isErr(result)) {
-            // End process
-            if (cp.connected) {
-                // TODO monitor for errors killing
-                cp.kill();
-            }
+            // A timed out or cancelled git can run on indefinitely; it is not given the chance.
+            cp.kill();
             // TODO Refine generic error into something more specific
             return result;
         }

@@ -11,7 +11,8 @@ import { create } from "./create.js";
 import { createSpawn } from "./create.stub.js";
 
 test("Basic case", async t => {
-    const spawn = createSpawn("exit");
+    const kills: unknown[] = [];
+    const spawn = createSpawn("exit", { onKill: signal => kills.push(signal) });
     const cli = create(
         "/git",
         { env: {}, timeout: 1000 },
@@ -19,10 +20,12 @@ test("Basic case", async t => {
     );
     const res = await cli({ cwd: "/" }, ["foobar"]);
     t.true(isOk(res));
+    t.deepEqual(kills, [], "a process that exits on its own is left alone");
 });
 
 test("Timeout", async t => {
-    const spawn = createSpawn("exit", { delay: 250 });
+    const kills: unknown[] = [];
+    const spawn = createSpawn("exit", { delay: 250, onKill: signal => kills.push(signal) });
     const cli = create(
         "/git",
         { env: {}, timeout: 1 },
@@ -33,6 +36,8 @@ test("Timeout", async t => {
     if (isErr(res)) {
         t.is(unwrap(res).type, ERROR_TIMEOUT);
     }
+    // Killed with the default signal, SIGTERM.
+    t.deepEqual(kills, [undefined]);
 });
 
 test("Child process error", async t => {
@@ -50,7 +55,8 @@ test("Child process error", async t => {
 });
 
 test("Aborted before", async t => {
-    const spawn = createSpawn("exit");
+    const kills: unknown[] = [];
+    const spawn = createSpawn("exit", { delay: 250, onKill: signal => kills.push(signal) });
     const cli = create(
         "/git",
         { env: {}, timeout: 250 },
@@ -63,10 +69,12 @@ test("Aborted before", async t => {
     if (isErr(res)) {
         t.is(unwrap(res).type, ERROR_CANCELLED);
     }
+    t.deepEqual(kills, [undefined]);
 });
 
 test("Aborted during", async t => {
-    const spawn = createSpawn("exit", { delay: 250 });
+    const kills: unknown[] = [];
+    const spawn = createSpawn("exit", { delay: 250, onKill: signal => kills.push(signal) });
     const cli = create(
         "/git",
         { env: {}, timeout: 250 },
@@ -86,6 +94,7 @@ test("Aborted during", async t => {
     if (isErr(res)) {
         t.is(unwrap(res).type, ERROR_CANCELLED);
     }
+    t.deepEqual(kills, [undefined]);
 });
 
 test("Non-zero exit", async t => {
