@@ -176,8 +176,8 @@
     "https://bcr.bazel.build/modules/rules_apple/4.1.0/MODULE.bazel": "76e10fd4a48038d3fc7c5dc6e63b7063bbf5304a2e3bd42edda6ec660eebea68",
     "https://bcr.bazel.build/modules/rules_apple/4.1.0/source.json": "8ee81e1708756f81b343a5eb2b2f0b953f1d25c4ab3d4a68dc02754872e80715",
     "https://bcr.bazel.build/modules/rules_buf/0.5.2/MODULE.bazel": "5f2492d284ab9bedf2668178303abf5f3cd7d8cdf85d768951008e88456e9c6a",
-    "https://bcr.bazel.build/modules/rules_buf/0.5.4/MODULE.bazel": "735754ce5c8ed7ddf38201b8d937cc8f055dd7218e8a7c0d5b2b539d9cc66e44",
-    "https://bcr.bazel.build/modules/rules_buf/0.5.4/source.json": "b8a3f87ad9d763749d0c00f6eb9d58119fd1ad6219f604dab49424e93322d65a",
+    "https://bcr.bazel.build/modules/rules_buf/0.6.1/MODULE.bazel": "2b9c201def38504d6a964b40d8e85ee09dc79d1885c96901072117a50329ce13",
+    "https://bcr.bazel.build/modules/rules_buf/0.6.1/source.json": "1c6ed36071c3ce4e55748c230b045ee95c3751183bc6ad6010f315663f4251aa",
     "https://bcr.bazel.build/modules/rules_cc/0.0.1/MODULE.bazel": "cb2aa0747f84c6c3a78dad4e2049c154f08ab9d166b1273835a8174940365647",
     "https://bcr.bazel.build/modules/rules_cc/0.0.10/MODULE.bazel": "ec1705118f7eaedd6e118508d3d26deba2a4e76476ada7e0e3965211be012002",
     "https://bcr.bazel.build/modules/rules_cc/0.0.13/MODULE.bazel": "0e8529ed7b323dad0775ff924d2ae5af7640b23553dfcd4d34344c7e7a867191",
@@ -466,8 +466,8 @@
     },
     "@@rules_buf+//buf:extensions.bzl%buf": {
       "general": {
-        "bzlTransitiveDigest": "qaWIudWjTCBkhyxrZzetZHLzCq+4bxrda9KyVihKNTg=",
-        "usagesDigest": "d5FPUOdhaaP9fdKT0lFDRnc3p3u80C8LJqKAkXIHMB4=",
+        "bzlTransitiveDigest": "FL2N8s6tI8OFD+z4HrSeZSUuJMODG/MK4rpo57Igv/Q=",
+        "usagesDigest": "tAtYcj8HoiqNmPykOyqyGKHL0pyK7S1A7VlkAiWhIYA=",
         "recordedInputs": [
           "REPO_MAPPING:rules_buf+,bazel_tools bazel_tools"
         ],
@@ -475,8 +475,8 @@
           "rules_buf_toolchains": {
             "repoRuleId": "@@rules_buf+//buf/internal:toolchain.bzl%buf_download_releases",
             "attributes": {
-              "version": "v1.47.2",
-              "sha256": "1b37b75dc0a777a0cba17fa2604bc9906e55bb4c578823d8b7a8fe3fc9fe4439"
+              "version": "v1.75.0",
+              "sha256": "b05b543026f48418579c3e37b9c4f9b776b895085e453775ded018a06e631823"
             }
           }
         }
