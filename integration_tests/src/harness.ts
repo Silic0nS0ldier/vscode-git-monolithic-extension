@@ -3,11 +3,19 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import test, { after } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
-import { type Browser, chromium, type Locator, type Page } from "playwright-core";
+import { type Browser, chromium, errors, type Locator, type Page, type Request, type Response } from "playwright-core";
 import { COVERAGE_DIR, hasExtensionHostDump, rawCoverageDir, readExtensionDumps, writeCoverage } from "./coverage.js";
 
 /** Timeout of the `before` hook opening the workbench. Generous: a cold extension host boot dominates it. */
 export const LOAD_TIMEOUT_MS = 120_000;
+
+/**
+ * Everything is served locally, so the workbench's scripts load within 5s of the first request even on CI (p99 3.5s
+ * over 320 runs). A navigation still going well past that has gone wrong, as when `workbench.js` once got no
+ * response at all and the page never recovered, so it is abandoned and tried again.
+ */
+const NAVIGATION_TIMEOUT_MS = 10_000;
+const NAVIGATION_ATTEMPTS = 2;
 
 /** Left for capturing a screenshot once a wait inside a node:test hook or scenario gives up. */
 const CAPTURE_GRACE_MS = 10_000;
@@ -172,16 +180,68 @@ if (COVERAGE_DIR !== undefined) {
     }, { timeout: COVERAGE_TIMEOUT_MS });
 }
 
+/** Requests that have not finished, and how far each got, to tell a server that never answered from a slow body. */
+function trackPendingRequests(page: Page): { describe: () => string; dispose: () => void } {
+    const pending = new Map<Request, "awaiting response" | "receiving body">();
+    const onRequest = (request: Request): void => void pending.set(request, "awaiting response");
+    const onResponse = (response: Response): void => void pending.set(response.request(), "receiving body");
+    const onDone = (request: Request): void => void pending.delete(request);
+
+    page.on("request", onRequest);
+    page.on("response", onResponse);
+    page.on("requestfinished", onDone);
+    page.on("requestfailed", onDone);
+
+    return {
+        describe: () =>
+            pending.size === 0
+                ? "no requests pending"
+                : [...pending].map(([request, state]) => `${request.url()} (${state})`).join(", "),
+        dispose: (): void => {
+            page.off("request", onRequest);
+            page.off("response", onResponse);
+            page.off("requestfinished", onDone);
+            page.off("requestfailed", onDone);
+        },
+    };
+}
+
+async function navigate(page: Page, url: string, deadline: number): Promise<void> {
+    for (let attempt = 1;; attempt++) {
+        const pending = trackPendingRequests(page);
+        try {
+            await page.goto(url, {
+                timeout: Math.min(NAVIGATION_TIMEOUT_MS, playwrightTimeout(deadline)),
+                waitUntil: "domcontentloaded",
+            });
+            return;
+        } catch (error) {
+            const stuck = `loading the workbench timed out on attempt ${attempt}; ${pending.describe()}`;
+            if (!(error instanceof errors.TimeoutError)) {
+                throw error;
+            }
+            if (attempt >= NAVIGATION_ATTEMPTS || Date.now() >= deadline) {
+                throw new Error(stuck, { cause: error });
+            }
+            // Reported even when the retry succeeds, so how often this happens stays visible in the test log.
+            console.warn(`${stuck}, retrying`);
+        } finally {
+            pending.dispose();
+        }
+    }
+}
+
 export async function openWorkbench(browser: Browser): Promise<Page> {
     const context = browser.contexts()[0] ?? await browser.newContext();
     const page = await context.newPage();
     // Fail inside the hook's own timeout, so the failure is captured rather than cut short.
-    page.setDefaultTimeout(playwrightTimeout(deadlineIn(LOAD_TIMEOUT_MS - CAPTURE_GRACE_MS)));
+    const loadDeadline = deadlineIn(LOAD_TIMEOUT_MS - CAPTURE_GRACE_MS);
+    page.setDefaultTimeout(playwrightTimeout(loadDeadline));
 
     try {
         const editorUrl = new URL(`http://127.0.0.1:${assignedPort("code_server_service")}/`);
         editorUrl.searchParams.set("folder", workspaceDir());
-        await page.goto(editorUrl.toString(), { waitUntil: "domcontentloaded" });
+        await navigate(page, editorUrl.toString(), loadDeadline);
         await page.locator(".monaco-workbench").waitFor({ state: "visible" });
 
         // The checkout entry is labelled by the repository's first status refresh. Waiting
