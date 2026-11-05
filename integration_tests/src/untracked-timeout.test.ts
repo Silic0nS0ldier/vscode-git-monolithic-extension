@@ -95,6 +95,7 @@ scenario("once untracked files can be listed again, they are shown", async () =>
 
 scenario("a lookup failing after one succeeded notifies again", async () => {
     await rm(blockingIgnoreFile());
+    // Node cannot create a FIFO itself (https://github.com/nodejs/node/issues/38344), so this runs the system tool.
     await promisify(execFile)("mkfifo", [blockingIgnoreFile()]);
 
     await runCommand(page, "Git: Refresh");
