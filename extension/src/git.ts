@@ -136,6 +136,7 @@ export class Git {
     #env: { [key: string]: string };
 
     // This is deliberately leaked to help migrate to new library
+    // TODO Remove once all consumers have migrated off using the `Repository` class directly.
     get _context(): GitContext {
         return this.#context;
     }
@@ -164,7 +165,7 @@ export class Git {
     }
 
     async init(repository: string): Promise<void> {
-        return unwrapOk(await init(this._context, repository));
+        return unwrapOk(await init(this.#context, repository));
     }
 
     async clone(url: string, options: ICloneOptions, abortSignal?: AbortSignal): Promise<string> {
@@ -262,16 +263,16 @@ export class Git {
     }
 
     async getRepositoryRoot(repositoryPath: string): Promise<string> {
-        return unwrapOk(await showToplevel(this._context, repositoryPath, this.#services));
+        return unwrapOk(await showToplevel(this.#context, repositoryPath, this.#services));
     }
 
     async getRepositoryDotGit(repositoryPath: string): Promise<string> {
-        return unwrapOk(await gitDir(this._context, repositoryPath));
+        return unwrapOk(await gitDir(this.#context, repositoryPath));
     }
 
     /** Empty at the top of a work tree, and wherever there is no work tree at all. */
     async getPathToWorkTreeRoot(repositoryPath: string): Promise<string> {
-        return unwrapOk(await showCdup(this._context, repositoryPath));
+        return unwrapOk(await showCdup(this.#context, repositoryPath));
     }
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
