@@ -87,7 +87,12 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
     let latest: readonly Resource[] = [];
     let resourceStrings = new Set<string>();
     let pendingApply: ReturnType<typeof setTimeout> | undefined;
+    let refreshFailed = false;
     const baseLabel = group.label;
+
+    function emptyAnnotation(): string {
+        return refreshFailed ? i18n.Translations.refreshFailedAnnotation() : "(empty)";
+    }
 
     function apply(): void {
         clearTimeout(pendingApply);
@@ -107,7 +112,7 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
                 annotations.push("(too many files)");
             }
         } else {
-            annotations.push("(empty)");
+            annotations.push(emptyAnnotation());
         }
 
         group.resourceStates = [...resources];
@@ -163,7 +168,7 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
                     annotations.push("(too many changes)");
                 }
             } else {
-                annotations.push("(empty)");
+                annotations.push(emptyAnnotation());
             }
 
             group.resourceStates = fadedResources;
@@ -172,7 +177,13 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
             pendingApply = setTimeout(apply, layoutShiftDelay);
         },
     };
-    return { latestResourceStates: () => latest, resourceStates };
+    return {
+        latestResourceStates: () => latest,
+        resourceStates,
+        setRefreshFailed(failed): void {
+            refreshFailed = failed;
+        },
+    };
 }
 
 export type SourceControlResourceGroupUI = {
@@ -180,4 +191,6 @@ export type SourceControlResourceGroupUI = {
     readonly resourceStates: Box<readonly Resource[]>;
     /** The latest refresh, which `resourceStates` holds back while a layout shift is pending. */
     readonly latestResourceStates: () => readonly Resource[];
+    /** Labels an empty group as having failed to refresh. Takes effect with the next `resourceStates.set`. */
+    readonly setRefreshFailed: (failed: boolean) => void;
 };

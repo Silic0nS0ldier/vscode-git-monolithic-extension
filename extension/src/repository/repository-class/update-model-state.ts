@@ -11,6 +11,7 @@ import * as config from "../../util/config.js";
 import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType, type ResourceGroupTypeOptions } from "../ResourceGroupType.js";
 import { getRebaseCommit } from "./get-rebase-commit.js";
+import type { UntrackedFailureReporter } from "./untracked-failure.js";
 import { pigeonholeFileStatus } from "./update-model-state/pigeonhole-file-status.js";
 
 function arraysEqualBy<T>(a: readonly T[], b: readonly T[], eq: (x: T, y: T) => boolean): boolean {
@@ -89,6 +90,7 @@ export async function updateModelState(
     sourceControlUI: SourceControlUIGroup,
     getInputTemplate: () => Promise<string>,
     getRemotes: () => Promise<Remote[]>,
+    untrackedFailure: UntrackedFailureReporter,
 ): Promise<void> {
     const ignoreSubmodules = config.ignoreSubmodules(Uri.file(repository.root));
 
@@ -109,9 +111,11 @@ export async function updateModelState(
     // Could use placeholder like "(empty)"
     // UI currently handles this using a heuristic
     const pendingTracked = repository.getStatusTrackedAndHEAD({ ignoreSubmodules });
-    const pendingUntrackedStatus = repository.getStatusUntracked();
-    // Awaited after the tracked groups are set, which an earlier failure below would skip.
-    pendingUntrackedStatus.catch(() => {});
+    // A failure is reported rather than thrown, so it cannot hold back the rest of the refresh.
+    const pendingUntrackedStatus = repository.getStatusUntracked().then(
+        files => ({ files }),
+        (reason: unknown) => ({ reason }),
+    );
     const useIcons = !config.decorationsEnabled();
 
     // Only a detached HEAD is labelled with a tag, and only the first one matters, so the
@@ -171,14 +175,19 @@ export async function updateModelState(
 
     // handle untracked
     const untrackedStatus = await pendingUntrackedStatus;
-    for (const untrackedFile of untrackedStatus) {
-        untracked.push(
-            createResource(
-                ResourceGroupType.Untracked,
-                Uri.file(path.join(repoRoot, untrackedFile)),
-                Status.UNTRACKED,
-            ),
-        );
+    if ("reason" in untrackedStatus) {
+        untrackedFailure.failed(untrackedStatus.reason);
+    } else {
+        untrackedFailure.succeeded();
+        for (const untrackedFile of untrackedStatus.files) {
+            untracked.push(
+                createResource(
+                    ResourceGroupType.Untracked,
+                    Uri.file(path.join(repoRoot, untrackedFile)),
+                    Status.UNTRACKED,
+                ),
+            );
+        }
     }
 
     sourceControlUI.untrackedGroup.resourceStates.set(untracked);

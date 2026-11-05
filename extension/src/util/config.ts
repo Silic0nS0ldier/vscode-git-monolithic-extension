@@ -116,6 +116,7 @@ export const autoRefreshDebounce = createConfigOption<number>("autorefreshDeboun
 export const autoRefreshCooldown = createConfigOption<number>("autorefreshCooldown", 5000 /** milliseconds */);
 export const layoutShiftDelay = createConfigOption<number>("layoutShiftDelay", 900 /** milliseconds */);
 export const watcherDebounce = createConfigOption<number>("watcherDebounce", 500 /** milliseconds */);
+export const commandTimeout = createConfigOption<number>("commandTimeout", 30_000 /** milliseconds */);
 export const showCommitInput = createConfigOption<boolean>("showCommitInput", true);
 export const fetchOnPull = createConfigOption<boolean>("fetchOnPull", false);
 export const pullTags = createConfigOption<boolean>("pullTags", true);

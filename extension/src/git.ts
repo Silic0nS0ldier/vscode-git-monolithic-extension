@@ -131,10 +131,15 @@ export class Git {
     readonly path: string;
     readonly userAgent: string;
     readonly version: string;
-    // This is deliberately leaked to help migrate to new library
-    readonly _context: GitContext;
+    #context: GitContext;
     readonly #services: AllServices;
     #env: { [key: string]: string };
+
+    // This is deliberately leaked to help migrate to new library
+    // TODO Remove once all consumers have migrated off using the `Repository` class directly.
+    get _context(): GitContext {
+        return this.#context;
+    }
 
     /** Extension-owned environment additions, chiefly the askpass wiring. */
     get env(): { readonly [key: string]: string } {
@@ -145,9 +150,14 @@ export class Git {
         this.path = options.gitPath;
         this.version = options.version;
         this.userAgent = options.userAgent;
-        this._context = options.context;
+        this.#context = options.context;
         this.#services = createServices(msg => info(msg));
         this.#env = options.env || {};
+    }
+
+    /** Swaps in a context for later invocations, such as one created with a new timeout. */
+    replaceContext(context: GitContext): void {
+        this.#context = context;
     }
 
     open(repository: string, dotGit: string): Repository {
@@ -155,7 +165,7 @@ export class Git {
     }
 
     async init(repository: string): Promise<void> {
-        return unwrapOk(await init(this._context, repository));
+        return unwrapOk(await init(this.#context, repository));
     }
 
     async clone(url: string, options: ICloneOptions, abortSignal?: AbortSignal): Promise<string> {
@@ -253,16 +263,16 @@ export class Git {
     }
 
     async getRepositoryRoot(repositoryPath: string): Promise<string> {
-        return unwrapOk(await showToplevel(this._context, repositoryPath, this.#services));
+        return unwrapOk(await showToplevel(this.#context, repositoryPath, this.#services));
     }
 
     async getRepositoryDotGit(repositoryPath: string): Promise<string> {
-        return unwrapOk(await gitDir(this._context, repositoryPath));
+        return unwrapOk(await gitDir(this.#context, repositoryPath));
     }
 
     /** Empty at the top of a work tree, and wherever there is no work tree at all. */
     async getPathToWorkTreeRoot(repositoryPath: string): Promise<string> {
-        return unwrapOk(await showCdup(this._context, repositoryPath));
+        return unwrapOk(await showCdup(this.#context, repositoryPath));
     }
 
     async exec(cwd: string, args: string[], options: SpawnOptions = {}): Promise<IExecutionResult<string>> {
