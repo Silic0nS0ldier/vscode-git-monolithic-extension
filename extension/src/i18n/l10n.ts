@@ -14,6 +14,38 @@ export function yes(): string {
     return l10n.t("Yes");
 }
 
+export function timelineSource(): string {
+    return l10n.t("Git Monolithic History");
+}
+
+export function openComparison(): string {
+    return l10n.t("Open Comparison");
+}
+
+export function openCommit(): string {
+    return l10n.t("Open Commit");
+}
+
+export function timelineYou(): string {
+    return l10n.t("You");
+}
+
+export function timelineUncommittedChanges(): string {
+    return l10n.t("Uncommitted Changes");
+}
+
+export function timelineStats(files: number, insertions: number, deletions: number): string {
+    return l10n.t("{0} file(s) changed, {1} insertion(s), {2} deletion(s)", files, insertions, deletions);
+}
+
+export function timelineDiffTitle(name: string, previous: string, current: string): string {
+    return l10n.t("{0} ({1}) ↔ {0} ({2})", name, previous, current);
+}
+
+export function timelineCompareTitle(left: string, right: string): string {
+    return l10n.t("{0} ↔ {1}", left, right);
+}
+
 export function no(): string {
     return l10n.t("No");
 }
