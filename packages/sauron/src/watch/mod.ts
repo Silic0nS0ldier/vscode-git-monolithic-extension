@@ -1,7 +1,7 @@
 import { err, isErr, ok, type Result, unwrap } from "monolithic-git-interop/util/result";
 import type { Backend, BackendError, RawEvent, Stat } from "../backend/mod.js";
 import { createNodeBackend } from "../backend/node.js";
-import { ignoreNothing, type Ignorer, type IgnoreScope } from "../ignore/mod.js";
+import { type DirectoryLocation, ignoreNothing, type Ignorer, type IgnoreScope } from "../ignore/mod.js";
 import {
     type AbsolutePath,
     type EntryKind,
@@ -168,11 +168,12 @@ export function watch(options: WatchOptions): Result<Watcher, WatchSetupError> {
 }
 
 type DirNode = {
-    readonly path: AbsolutePath;
-    readonly name: FileName | null;
-    readonly relative: RelativePath | null;
-    readonly parent: DirNode | null;
-    readonly ignorer: Ignorer;
+    /** Path, name, relative path and parent change when a moved directory is adopted at its new place. */
+    path: AbsolutePath;
+    name: FileName | null;
+    relative: RelativePath | null;
+    parent: DirNode | null;
+    ignorer: Ignorer;
     readonly controller: AbortController;
     readonly children: Map<FileName, DirNode>;
     /** Last listing. Events for names outside it wait for a rescan to apply ignore rules. */
@@ -185,6 +186,37 @@ type DirNode = {
     rescanRunning: boolean;
     rescanPending: boolean;
     rescanDeep: boolean;
+    /**
+     * {@link Stat.id} of the watched directory. Only known for directories with watched subdirectories, which
+     * are worth keeping watched when moved; anything else is cheaper to watch again.
+     */
+    id: string | null;
+    /** Name when its watch was registered, which libuv names events about the directory itself after. */
+    readonly watchedAs: FileName | null;
+    /**
+     * Moved away (or being adopted where it moved to), so its paths are stale. Its watches are kept, events only
+     * mark it for a rescan once adopted, and nothing is listed.
+     */
+    orphaned: boolean;
+    /** Times it has been orphaned, so work started before a move can tell it is stale. */
+    moves: number;
+    /**
+     * Was being listed when moved. The listing, or subdirectories watched since, may be of whatever replaced it
+     * at its old path, so it is not reused.
+     */
+    suspect: boolean;
+    /** Had events while orphaned, which only mark it for a rescan. Reported as a subtree once in place. */
+    missed: boolean;
+    /** The orphan's own move is still to be reported to it (as an event named after itself), and is dropped. */
+    expectSelf: boolean;
+    /**
+     * Had an event named after itself since it was last listed. A deleted directory has two (before its parent
+     * is told), a moved one only one (after), so it may have been deleted: its watch is dead, and an inode
+     * number reused by a new directory must not lead to it. Also set by an entry named like the directory.
+     */
+    maybeDeleted: boolean;
+    /** Names being matched against orphans. A `rename` of one while matching means the match is stale. */
+    adopting: Map<FileName, { valid: boolean }> | null;
 };
 
 /**
@@ -252,6 +284,10 @@ function ancestorsOf(dir: AbsolutePath, real: AbsolutePath | null): Map<Absolute
     return chain;
 }
 
+function isRelocatable(ignorer: Ignorer, from: DirectoryLocation, to: DirectoryLocation): boolean {
+    return ignorer.relocatable?.(from, to) ?? false;
+}
+
 type StatusKey = "crawl" | "activity" | "suspension";
 
 type Config = {
@@ -276,6 +312,8 @@ function createWatcher(config: Config): Watcher {
     const rootStates = new Map<AbsolutePath, RootState>();
     /** Keyed by path, or by `anchorKey(root)` for an anchor. */
     const failures = new Map<string, Failure>();
+    /** Moved subtrees that may reappear within a root, by {@link DirNode.id}. Torn down once rescans settle. */
+    const orphans = new Map<string, DirNode>();
     const closed = Promise.withResolvers<CloseReason>();
 
     // Delivery state. Status events conflate (latest per key wins), notices queue (bounded).
@@ -389,11 +427,40 @@ function createWatcher(config: Config): Watcher {
             .finally(() => {
                 inflight.delete(tracked);
                 rescans.delete(tracked);
+                if (rescans.size === 0 && orphans.size > 0) {
+                    // Every rescan the move scheduled is done, so where it went is not watched.
+                    discardOrphans();
+                }
             });
         inflight.add(tracked);
         if (isRescan) {
             rescans.add(tracked);
         }
+    }
+
+    let orphanCheck = false;
+
+    /**
+     * Discards orphans after the events being handled, unless a rescan may yet find them. Normally the rescan
+     * a move schedules does that, but one may not start (e.g. while its directory's failures back off).
+     */
+    function checkOrphans(): void {
+        if (!orphanCheck) {
+            orphanCheck = true;
+            setImmediate(() => {
+                orphanCheck = false;
+                if (rescans.size === 0) {
+                    discardOrphans();
+                }
+            });
+        }
+    }
+
+    function discardOrphans(): void {
+        for (const orphan of orphans.values()) {
+            teardown(orphan);
+        }
+        orphans.clear();
     }
 
     async function drain(tasks: Set<Promise<void>>): Promise<void> {
@@ -528,10 +595,14 @@ function createWatcher(config: Config): Watcher {
         }
     }
 
-    async function visit(node: DirNode, entries: ReadonlyMap<FileName, EntryKind>): Promise<IgnoreScope> {
+    async function visit(
+        node: DirNode,
+        entries: ReadonlyMap<FileName, EntryKind>,
+        ignorer = node.ignorer,
+    ): Promise<IgnoreScope> {
         const signal = node.controller.signal;
         try {
-            return await node.ignorer.visit({
+            return await ignorer.visit({
                 path: node.path,
                 relative: node.relative,
                 entries,
@@ -547,14 +618,34 @@ function createWatcher(config: Config): Watcher {
         }
     }
 
+    /** Whether `node` moved since `path` and `moves` were taken, so what was read through `path` is stale. */
+    function movedSince(node: DirNode, path: AbsolutePath, moves: number): boolean {
+        return node.orphaned || node.moves !== moves || node.path !== path;
+    }
+
     /** Lists `node`, applies ignore rules and reconciles subdirectory watches. */
     async function populate(node: DirNode, reportNew: boolean): Promise<void> {
         const signal = node.controller.signal;
+        const { path, moves } = node;
         // Names arriving after this point are handled by the rescan they schedule.
         const pendingNames = node.pendingNames;
         node.pendingNames = new Set();
-        const listed = await limit(() => backend.readdir(node.path, signal));
+        // A deletion before this point fails the listing; one after it sets this again.
+        node.maybeDeleted = false;
+        const stale = () => {
+            // Listed again once adopted where it moved to, if it is.
+            pendingNames.forEach(name => node.pendingNames.add(name));
+            node.rescanPending = true;
+        };
+        const listed = await limit(() => backend.readdir(path, signal));
+        // Events queued before the listing completed are handled first. A move among them orphans the node, as
+        // the listing may be of whatever is at its old path by now.
+        await nextMacrotask();
         if (signal.aborted) {
+            return;
+        }
+        if (movedSince(node, path, moves)) {
+            stale();
             return;
         }
         if (isErr(listed)) {
@@ -580,6 +671,10 @@ function createWatcher(config: Config): Watcher {
         if (signal.aborted) {
             return;
         }
+        if (movedSince(node, path, moves)) {
+            stale();
+            return;
+        }
         node.ignored = scope.ignored;
         node.childIgnorer = scope.child ?? node.ignorer;
         node.entries = entries;
@@ -602,10 +697,146 @@ function createWatcher(config: Config): Watcher {
             }
             const child = join(node.path, name);
             if (failures.size === 0 || !blocked(child)) {
-                crawls.push(crawl(child, node, name, reportNew));
+                crawls.push(
+                    orphans.size > 0 ? adoptOrCrawl(child, node, name, reportNew) : crawl(child, node, name, reportNew),
+                );
             }
         }
+        if (node.id === null && node.parent !== null && node.children.size + crawls.length > 0) {
+            crawls.push(identify(node));
+        }
         await Promise.all(crawls);
+    }
+
+    /** Records the identity of `node`, so it can be found again if moved. */
+    async function identify(node: DirNode): Promise<void> {
+        const signal = node.controller.signal;
+        const { path, moves } = node;
+        const statted = await backend.lstat(path, signal);
+        // As for listings. Were the directory replaced after its watch was registered, the event orphaning or
+        // detaching the node is handled first, so the node never takes on the replacement's identity.
+        await nextMacrotask();
+        if (signal.aborted || movedSince(node, path, moves) || isErr(statted)) {
+            return;
+        }
+        const stat = unwrap(statted);
+        if (stat?.kind === "directory") {
+            node.id = stat.id;
+        }
+    }
+
+    /** Keeps the watches of a subtree that was moved away, in case it reappears within a root. */
+    function orphan(node: DirNode): void {
+        if (node.name !== null && node.parent?.children.get(node.name) === node) {
+            node.parent.children.delete(node.name);
+        }
+        const previous = orphans.get(node.id!);
+        if (previous !== undefined && previous !== node) {
+            teardown(previous);
+        }
+        orphans.set(node.id!, node);
+        node.expectSelf = true;
+        const mark = (n: DirNode) => {
+            n.orphaned = true;
+            n.moves++;
+            n.suspect ||= n.rescanRunning;
+            n.children.forEach(mark);
+        };
+        mark(node);
+    }
+
+    /**
+     * Watches a directory found at `path`: the orphan that moved there if its identity matches one, otherwise
+     * it is crawled.
+     */
+    async function adoptOrCrawl(path: AbsolutePath, parent: DirNode, name: FileName, isNew: boolean): Promise<void> {
+        const token = { valid: true };
+        (parent.adopting ??= new Map()).set(name, token);
+        const { path: parentPath, moves } = parent;
+        const statted = await backend.lstat(path, parent.controller.signal);
+        // Lets a `rename` of `name` queued before the stat completed invalidate the token.
+        await nextMacrotask();
+        if (parent.adopting?.get(name) === token) {
+            parent.adopting.delete(name);
+            if (parent.adopting.size === 0) {
+                parent.adopting = null;
+            }
+        }
+        if (
+            closeReason !== null || parent.controller.signal.aborted || movedSince(parent, parentPath, moves)
+            || parent.children.has(name)
+        ) {
+            // Whoever moved or detached the parent lists it again, or another listing got there first.
+            return;
+        }
+        const stat = token.valid && !isErr(statted) ? unwrap(statted) : null;
+        const found = stat?.kind === "directory" ? orphans.get(stat.id) : undefined;
+        if (found === undefined || found.controller.signal.aborted) {
+            return crawl(path, parent, name, isNew);
+        }
+        orphans.delete(stat!.id);
+        found.parent = parent;
+        found.name = name;
+        parent.children.set(name, found);
+        await relocate(found, parent.childIgnorer, true);
+    }
+
+    /**
+     * Moves `node` (whose parent and name are already updated) and its subtree to their new paths. Ignore rules
+     * are applied again only where the ignorer cannot vouch that the move makes no difference, using the last
+     * listings rather than listing again.
+     */
+    async function relocate(node: DirNode, ignorer: Ignorer, isMoved: boolean): Promise<void> {
+        const from: DirectoryLocation = { path: node.path, relative: node.relative };
+        node.path = join(node.parent!.path, node.name!);
+        node.relative = joinRelative(node.parent!.relative, node.name!);
+        const to: DirectoryLocation = { path: node.path, relative: node.relative };
+        if (isMoved) {
+            recordSubtree(node.path);
+        }
+        if (node.suspect) {
+            // Crawled afresh.
+            detach(node);
+            scheduleRescan(node.parent!, false);
+            return;
+        }
+        const crawls: Promise<void>[] = [];
+        const unchanged = node.ignorer === ignorer && isRelocatable(node.ignorer, from, to)
+            && (node.childIgnorer === node.ignorer || isRelocatable(node.childIgnorer, from, to));
+        if (!unchanged) {
+            const moves = node.moves;
+            const scope = await visit(node, node.entries, ignorer);
+            if (node.controller.signal.aborted || node.moves !== moves) {
+                // Moved again meanwhile; its subtree is relocated once adopted again.
+                return;
+            }
+            node.ignorer = ignorer;
+            node.ignored = scope.ignored;
+            node.childIgnorer = scope.child ?? ignorer;
+            for (const [name, child] of node.children) {
+                if (node.ignored.has(name)) {
+                    detach(child);
+                }
+            }
+            for (const [name, kind] of node.entries) {
+                if (kind === "directory" && !node.ignored.has(name) && !node.children.has(name)) {
+                    crawls.push(crawl(join(node.path, name), node, name, true));
+                }
+            }
+        }
+        node.orphaned = false;
+        node.expectSelf = false;
+        if (node.missed) {
+            node.missed = false;
+            recordSubtree(node.path);
+        }
+        startRescans(node);
+        await Promise.all([
+            ...crawls,
+            ...[...node.children.values()].filter(child => child.orphaned).map(child =>
+                relocate(child, node.childIgnorer, false)
+            ),
+        ]);
     }
 
     /** Watches first, then lists, so nothing created in between is missed. */
@@ -631,6 +862,15 @@ function createWatcher(config: Config): Watcher {
             rescanRunning: true,
             rescanPending: false,
             rescanDeep: false,
+            id: null,
+            watchedAs: name,
+            orphaned: false,
+            moves: 0,
+            suspect: false,
+            missed: false,
+            expectSelf: false,
+            maybeDeleted: false,
+            adopting: null,
         };
         const watched = backend.watch(path, event => onRaw(node, event), node.controller.signal);
         if (isErr(watched)) {
@@ -640,6 +880,9 @@ function createWatcher(config: Config): Watcher {
             // directory, so is retried like any other failure in case that keeps happening.
             if (error.type !== "not-found" || parent === null) {
                 failed(path, path, backendError("watch-failed", error), () => retryPath(path));
+            } else {
+                // Unless the parent itself moved since it was listed, which it may only be told of later.
+                scheduleRescan(parent, false);
             }
             return Promise.resolve();
         }
@@ -668,8 +911,8 @@ function createWatcher(config: Config): Watcher {
 
     function startRescans(node: DirNode): void {
         if (
-            node.rescanPending && !node.rescanRunning && !node.controller.signal.aborted && closeReason === null
-            && (failures.size === 0 || !blocked(node.path))
+            node.rescanPending && !node.rescanRunning && !node.orphaned && !node.controller.signal.aborted
+            && closeReason === null && (failures.size === 0 || !blocked(node.path))
         ) {
             node.rescanRunning = true;
             // Deferred until every event from the same read is handled. That coalesces them, and lets a
@@ -687,7 +930,9 @@ function createWatcher(config: Config): Watcher {
     /** At most one rescan runs per directory; events during it coalesce into one more. */
     async function runRescans(node: DirNode): Promise<void> {
         try {
-            while (node.rescanPending && !node.controller.signal.aborted && !blocked(node.path)) {
+            while (
+                node.rescanPending && !node.orphaned && !node.controller.signal.aborted && !blocked(node.path)
+            ) {
                 node.rescanPending = false;
                 if (node.rescanDeep) {
                     node.rescanDeep = false;
@@ -704,6 +949,10 @@ function createWatcher(config: Config): Watcher {
 
     function onRaw(node: DirNode, event: RawEvent): void {
         if (closeReason !== null || node.controller.signal.aborted) {
+            return;
+        }
+        if (node.orphaned) {
+            onOrphanEvent(node, event);
             return;
         }
         if (event.type === "lost") {
@@ -723,6 +972,9 @@ function createWatcher(config: Config): Watcher {
             recordSubtree(node.path);
             scheduleRescan(node, false);
             return;
+        }
+        if (type === "rename" && name === node.watchedAs) {
+            node.maybeDeleted = true;
         }
         if (node.ignorer.triggers?.has(name)) {
             // Ignore rules for this subtree may have changed.
@@ -748,13 +1000,51 @@ function createWatcher(config: Config): Watcher {
             const child = node.children.get(name);
             if (child !== undefined) {
                 recordSubtree(child.path);
-                detach(child);
+                if (child.id !== null && !child.rescanRunning && !child.maybeDeleted) {
+                    // Moved, as far as can be told. Kept watched in case it moved within a root.
+                    orphan(child);
+                    checkOrphans();
+                } else {
+                    detach(child);
+                }
             } else {
+                const adopting = node.adopting?.get(name);
+                if (adopting !== undefined) {
+                    adopting.valid = false;
+                }
                 recordPath(join(node.path, name));
             }
             scheduleRescan(node, false);
         } else {
             recordPath(join(node.path, name));
+        }
+    }
+
+    /** Events in a moved subtree only mark what to list again, should it be adopted. */
+    function onOrphanEvent(node: DirNode, event: RawEvent): void {
+        const isSelf = event.type === "rename" && event.name === node.watchedAs;
+        if (isSelf && node.expectSelf) {
+            // The move itself.
+            node.expectSelf = false;
+            return;
+        }
+        if (event.type === "lost" || isSelf) {
+            // Lost, or likely deleted (see `maybeDeleted`): crawled afresh by its parent, if it is adopted.
+            if (node.id !== null && orphans.get(node.id) === node) {
+                orphans.delete(node.id);
+            }
+            detach(node);
+            if (node.parent?.orphaned === true) {
+                node.parent.rescanPending = true;
+            }
+            return;
+        }
+        node.rescanPending = true;
+        // A listing would not show what changed in an existing file, and the subtree reported on adoption may be
+        // delivered before this node is in place.
+        node.missed = true;
+        if (event.name !== null && node.ignorer.triggers?.has(event.name)) {
+            node.rescanDeep = true;
         }
     }
 
@@ -1016,6 +1306,7 @@ function createWatcher(config: Config): Watcher {
                 teardown(root);
             }
             roots.clear();
+            discardOrphans();
             for (const root of rootStates.values()) {
                 root.anchor?.controller.abort();
             }
