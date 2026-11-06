@@ -1,10 +1,18 @@
-import { err, isOk, ok, unwrap } from "monolithic-git-interop/util/result";
+import { err, isOk, ok, type Result, unwrap } from "monolithic-git-interop/util/result";
 import fs from "node:fs";
 import { type AbsolutePath, type EntryKind, type FileName, fileName } from "../path.js";
-import type { Backend, BackendError } from "./mod.js";
+import type { Backend, BackendError, Stat } from "./mod.js";
+
+// The flags are undefined where unsupported (Windows), where neither FIFOs nor these devices are a concern.
+const { O_RDONLY, O_NONBLOCK, O_NOFOLLOW } = fs.constants as Partial<typeof fs.constants>;
+const OPEN_REGULAR = (O_RDONLY ?? 0) | (O_NONBLOCK ?? 0) | (O_NOFOLLOW ?? 0);
+
+function errorCode(cause: unknown): string | undefined {
+    return (cause as NodeJS.ErrnoException | null)?.code;
+}
 
 function toBackendError(path: AbsolutePath, cause: unknown): BackendError {
-    const code = (cause as NodeJS.ErrnoException | null)?.code;
+    const code = errorCode(cause);
     switch (code) {
         case "ENOENT":
         case "ENOTDIR":
@@ -18,7 +26,7 @@ function toBackendError(path: AbsolutePath, cause: unknown): BackendError {
     }
 }
 
-function kindOf(entry: fs.Dirent): EntryKind {
+function kindOf(entry: Pick<fs.Dirent, "isDirectory" | "isFile" | "isSymbolicLink">): EntryKind {
     if (entry.isDirectory()) {
         return "directory";
     }
@@ -29,6 +37,23 @@ function kindOf(entry: fs.Dirent): EntryKind {
         return "symlink";
     }
     return "other";
+}
+
+async function statEntry(
+    target: AbsolutePath,
+    signal: AbortSignal,
+    follow: boolean,
+): Promise<Result<Stat | null, BackendError>> {
+    try {
+        signal.throwIfAborted();
+        const options = { bigint: true } as const;
+        const stats = follow ? await fs.promises.stat(target, options) : await fs.promises.lstat(target, options);
+        return ok({ kind: kindOf(stats), id: `${stats.dev}:${stats.ino}` });
+    } catch (e) {
+        const error = toBackendError(target, e);
+        // A symlink loop resolves to nothing, like a dangling symlink.
+        return error.type === "not-found" || errorCode(e) === "ELOOP" ? ok(null) : err(error);
+    }
 }
 
 /**
@@ -73,23 +98,29 @@ export function createNodeBackend(): Backend {
                 return err(toBackendError(dir, e));
             }
         },
-        async stat(target, signal) {
+        stat: (target, signal) => statEntry(target, signal, true),
+        lstat: (target, signal) => statEntry(target, signal, false),
+        async readText(file, signal) {
+            let handle: fs.promises.FileHandle | undefined;
             try {
                 signal.throwIfAborted();
-                const stats = await fs.promises.stat(target, { bigint: true });
-                const kind = stats.isDirectory() ? "directory" : stats.isFile() ? "file" : "other";
-                return ok({ kind, id: `${stats.dev}:${stats.ino}` });
-            } catch (e) {
-                const error = toBackendError(target, e);
-                return error.type === "not-found" ? ok(null) : err(error);
-            }
-        },
-        async readText(file, signal) {
-            try {
-                return ok(await fs.promises.readFile(file, { encoding: "utf8", signal }));
+                // Opening a FIFO blocks and a device may never stop reading (or act on being opened), so only
+                // regular files are opened. Non-blocking and not following symlinks in case it was replaced since.
+                if (!(await fs.promises.lstat(file)).isFile()) {
+                    return ok(null);
+                }
+                handle = await fs.promises.open(file, OPEN_REGULAR);
+                if (!(await handle.stat()).isFile()) {
+                    return ok(null);
+                }
+                return ok(await handle.readFile({ encoding: "utf8", signal }));
             } catch (e) {
                 const error = toBackendError(file, e);
-                return error.type === "not-found" ? ok(null) : err(error);
+                // ELOOP: replaced by a symlink. ENXIO: replaced by a socket.
+                const code = errorCode(e);
+                return error.type === "not-found" || code === "ELOOP" || code === "ENXIO" ? ok(null) : err(error);
+            } finally {
+                await handle?.close().catch(() => {});
             }
         },
     };

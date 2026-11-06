@@ -6,7 +6,7 @@ export type DirectoryVisit = {
     /** `null` for a watch root. */
     readonly relative: RelativePath | null;
     readonly entries: ReadonlyMap<FileName, EntryKind>;
-    /** Reads an entry of this directory as UTF-8. `null` if missing or unreadable. */
+    /** Reads an entry of this directory as UTF-8. `null` if missing, unreadable or not a regular file. */
     readText(name: FileName): Promise<string | null>;
     readonly signal: AbortSignal;
 };

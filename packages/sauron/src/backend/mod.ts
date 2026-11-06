@@ -31,8 +31,13 @@ export type Backend = {
     /** Watches `dir` until `signal` aborts. */
     watch(dir: AbsolutePath, listener: (event: RawEvent) => void, signal: AbortSignal): Result<void, BackendError>;
     readdir(dir: AbsolutePath, signal: AbortSignal): Promise<Result<ReadonlyMap<FileName, EntryKind>, BackendError>>;
-    /** Follows symlinks. `null` when nothing exists at `target`. */
+    /** Follows symlinks. `null` when nothing exists at `target` (including a dangling symlink or a loop). */
     stat(target: AbsolutePath, signal: AbortSignal): Promise<Result<Stat | null, BackendError>>;
-    /** `null` when the file does not exist. */
+    /** Like {@link stat}, but a symlink is reported as one rather than followed. */
+    lstat(target: AbsolutePath, signal: AbortSignal): Promise<Result<Stat | null, BackendError>>;
+    /**
+     * `null` unless `file` is a regular file. Never follows symlinks (as git does for `.gitignore`), and never
+     * opens FIFOs, sockets or devices, which could block or never end.
+     */
     readText(file: AbsolutePath, signal: AbortSignal): Promise<Result<string | null, BackendError>>;
 };
