@@ -818,3 +818,82 @@ test("rescan reports the scope and re-crawls it", async t => {
     await eventually(() => fake.watchCalls.get(p("/repo/a/b")) === 2);
     t.pass();
 });
+
+test("symlinks and special files are reported, but never watched, listed or read", async t => {
+    const fake = createFakeBackend();
+    fake.special("/repo/a/.gitignore", "symlink");
+    fake.special("/repo/b/.gitignore", "other");
+    fake.special("/repo/dir-link", "symlink");
+    fake.special("/repo/fifo", "other");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/a", "/repo/b"]);
+    t.deepEqual([...fake.readdirAttempts.keys()].sort(), ["/repo", "/repo/a", "/repo/b"]);
+    t.deepEqual([...fake.readTextCalls.keys()], []);
+
+    fake.special("/repo/socket", "other");
+    fake.touch("/repo/fifo");
+    fake.remove("/repo/dir-link");
+
+    const changes = await until(watcher, "changes");
+    t.deepEqual(all(changes), ["/repo/dir-link", "/repo/fifo", "/repo/socket"]);
+    t.deepEqual([...fake.readTextCalls.keys()], []);
+});
+
+test("a .gitignore replaced by a special file stops applying, without being read", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/.gitignore", "*.log");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+    t.is(fake.readTextCalls.get(p("/repo/.gitignore")), 1);
+
+    fake.special("/repo/.gitignore", "other");
+    t.true((await until(watcher, "changes")).subtrees.has(p("/repo")));
+
+    fake.write("/repo/x.log");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/x.log"]);
+    t.is(fake.readTextCalls.get(p("/repo/.gitignore")), 1);
+});
+
+test("a metadata change to a file is reported as that file", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/f");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.touch("/repo/f");
+
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/f"]);
+});
+
+test("a metadata change to a directory re-crawls it, as it may have been replaced", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/b");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.touch("/repo/a");
+
+    const changes = await until(watcher, "changes");
+    t.deepEqual(sorted(changes.subtrees), ["/repo/a"]);
+    await eventually(() => fake.watchCalls.get(p("/repo/a/b")) === 2);
+    t.true(fake.watched.has(p("/repo/a/b")));
+});
+
+test("a root that is a symlink is watched as one when root symlinks are not followed", async t => {
+    const fake = createFakeBackend();
+    fake.special("/repo", "symlink");
+    await using watcher = start(fake, { followRootSymlinks: false });
+    await crawled(watcher);
+    t.deepEqual(sorted(fake.watched), ["/"]);
+
+    fake.touch("/repo");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo"]);
+
+    // Replaced by a directory, it is crawled like any other directory root.
+    fake.remove("/repo");
+    fake.mkdir("/repo/a");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo"]);
+    await eventually(() => fake.watched.has(p("/repo/a")));
+    t.pass();
+});

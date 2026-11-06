@@ -78,6 +78,16 @@ bin.ava_test(
     ],
 )
 
+ts_project(
+    name = "lib_integration_stubs",
+    srcs = glob(["src/**/*.it.stub.ts"]) + ["package.json"],
+    declaration = True,
+    out_dir = "dist",
+    root_dir = "src",
+    tsconfig = ":tsconfig",
+    deps = [":node_modules/@types/node"],
+)
+
 INTEGRATION_TESTS = [(
     "integration_test/" + file,
     file,
@@ -102,6 +112,7 @@ test_suite(
         tsconfig = ":tsconfig",
         deps = [
             ":lib",
+            ":lib_integration_stubs",
             ":node_modules/monolithic-git-interop",
             ":node_modules/watcher",
         ],
@@ -119,6 +130,9 @@ test_suite(
             ":" + test_name + "_lib",
         ],
         entry_point = entry_point,
+        # The patch reimplements `lstat` and `readdir` to keep symlinks from escaping the sandbox, which changes
+        # the very symlink behaviour these tests observe (e.g. a symlink loop fails the whole listing).
+        patch_node_fs = False,
     )
     for (test_name, _, entry_point) in INTEGRATION_TESTS
 ]
@@ -169,6 +183,7 @@ eslint_test(
     srcs = [
         ":bench_lib",
         ":lib",
+        ":lib_integration_stubs",
         ":lib_tests",
     ] + [":" + test_name + "_lib" for (test_name, _, _) in INTEGRATION_TESTS],
 )

@@ -37,11 +37,12 @@
     "results": {
         "sauron": {
             "crawl": {
+                "fs.promises.lstat": 1,
+                "fs.promises.open": 1,
                 "fs.promises.readdir": 1556,
-                "fs.promises.readFile": 1,
                 "fs.promises.stat": 2,
                 "fs.watch": 1557,
-                "fs.total": 3116,
+                "fs.total": 3117,
                 "coverage.functions": 389061,
                 "coverage.blocks": 457568,
                 "inotify.watches": 1557,

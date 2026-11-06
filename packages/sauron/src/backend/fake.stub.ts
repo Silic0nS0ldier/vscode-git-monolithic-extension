@@ -2,7 +2,7 @@ import { err, isErr, ok, unwrap } from "monolithic-git-interop/util/result";
 import { type AbsolutePath, absolutePath, type EntryKind, type FileName, parent } from "../path.js";
 import type { Backend, BackendError, RawEvent } from "./mod.js";
 
-type Entry = { readonly kind: "directory"; readonly id: string } | {
+type Entry = { readonly kind: "directory" | "symlink" | "other"; readonly id: string } | {
     readonly kind: "file";
     readonly id: string;
     content: string;
@@ -11,12 +11,16 @@ type Entry = { readonly kind: "directory"; readonly id: string } | {
 export type FakeBackend = Backend & {
     mkdir(path: string): void;
     write(path: string, content?: string): void;
+    /** Creates a symlink (always dangling, as `stat` does not follow it) or a FIFO, socket or device. */
+    special(path: string, kind: "symlink" | "other"): void;
+    /** Changes an entry's metadata, e.g. its permissions. */
+    touch(path: string): void;
     remove(path: string): void;
     /** Directories with an active watch. */
     readonly watched: ReadonlySet<AbsolutePath>;
     /** Number of watches ever registered per directory. */
     readonly watchCalls: ReadonlyMap<AbsolutePath, number>;
-    /** Number of `stat` calls so far. */
+    /** Number of `stat` and `lstat` calls so far. */
     readonly statCalls: number;
     /** Makes `watch` fail for matching directories. */
     failWatch: ((dir: AbsolutePath) => BackendError["type"] | null) | null;
@@ -32,6 +36,8 @@ export type FakeBackend = Backend & {
     readonly watchAttempts: ReadonlyMap<AbsolutePath, number>;
     /** Number of `readdir` calls per directory, including failed ones. */
     readonly readdirAttempts: ReadonlyMap<AbsolutePath, number>;
+    /** Number of `readText` calls per path. */
+    readonly readTextCalls: ReadonlyMap<AbsolutePath, number>;
     /** Ends the watches on `dir` with an error, as a platform watcher may. */
     breakWatch(dir: string): void;
     /** Emits an event without a name to the watches on `dir`. */
@@ -63,6 +69,7 @@ export function createFakeBackend(): FakeBackend {
     const watchCalls = new Map<AbsolutePath, number>();
     const watchAttempts = new Map<AbsolutePath, number>();
     const readdirAttempts = new Map<AbsolutePath, number>();
+    const readTextCalls = new Map<AbsolutePath, number>();
     let statCalls = 0;
 
     function emit(target: AbsolutePath, type: "rename" | "change"): void {
@@ -96,6 +103,7 @@ export function createFakeBackend(): FakeBackend {
         afterWatch: null,
         watchAttempts,
         readdirAttempts,
+        readTextCalls,
         breakWatch(raw) {
             const dir = p(raw);
             const dead = [...listeners.get(dir) ?? []];
@@ -128,6 +136,22 @@ export function createFakeBackend(): FakeBackend {
             mkdir(parent(target)!);
             entries.set(target, { kind: "file", id: newId(), content });
             emit(target, "rename");
+        },
+        special(raw, kind) {
+            const target = p(raw);
+            mkdir(parent(target)!);
+            const replaced = entries.has(target);
+            if (replaced) {
+                backend.remove(raw);
+            }
+            entries.set(target, { kind, id: newId() });
+            emit(target, "rename");
+        },
+        touch(raw) {
+            const target = p(raw);
+            const entry = entries.get(target);
+            // Like Node, which reports metadata changes to a directory as `rename` (inotify sets IN_ISDIR).
+            emit(target, entry?.kind === "directory" ? "rename" : "change");
         },
         remove(raw) {
             const target = p(raw);
@@ -183,7 +207,7 @@ export function createFakeBackend(): FakeBackend {
             }
             return ok(result);
         },
-        async stat(target) {
+        async lstat(target) {
             statCalls++;
             await new Promise(resolve => setImmediate(resolve));
             const failure = backend.failStat?.(target) ?? null;
@@ -193,7 +217,21 @@ export function createFakeBackend(): FakeBackend {
             const entry = entries.get(target);
             return ok(entry === undefined ? null : { kind: entry.kind, id: entry.id });
         },
+        async stat(target) {
+            statCalls++;
+            await new Promise(resolve => setImmediate(resolve));
+            const failure = backend.failStat?.(target) ?? null;
+            if (failure !== null) {
+                return err({ type: failure, path: target, cause: new Error(`injected ${failure}`) });
+            }
+            const entry = entries.get(target);
+            if (entry === undefined || entry.kind === "symlink") {
+                return ok(null);
+            }
+            return ok({ kind: entry.kind, id: entry.id });
+        },
         async readText(file) {
+            increment(readTextCalls, file);
             await new Promise(resolve => setImmediate(resolve));
             const entry = entries.get(file);
             return ok(entry?.kind === "file" ? entry.content : null);

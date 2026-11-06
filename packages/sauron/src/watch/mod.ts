@@ -67,6 +67,12 @@ export type WatchOptions = {
      * re-created. Roots nested inside another root are dropped.
      */
     readonly roots: readonly [AbsolutePath, ...AbsolutePath[]];
+    /**
+     * Whether a root that is a symlink is resolved to its target (default), which is watched while the symlink
+     * dangles or loops as if the root were missing. Otherwise the symlink itself is watched like a file root, and
+     * its target is never read. Symlinks within a root are never followed.
+     */
+    readonly followRootSymlinks?: boolean;
     readonly ignore?: Ignorer;
     readonly signal?: AbortSignal;
     /** Milliseconds. A batch is released after `quiet` without changes, or `maxWait` after it began. */
@@ -151,6 +157,7 @@ export function watch(options: WatchOptions): Result<Watcher, WatchSetupError> {
         backend: options.backend ?? createNodeBackend(),
         collapseAt,
         concurrency,
+        followRootSymlinks: options.followRootSymlinks ?? true,
         ignore: options.ignore ?? ignoreNothing,
         maxWait,
         quiet,
@@ -219,6 +226,7 @@ type Config = {
     readonly backend: Backend;
     readonly collapseAt: number;
     readonly concurrency: number;
+    readonly followRootSymlinks: boolean;
     readonly ignore: Ignorer;
     readonly maxWait: number;
     readonly quiet: number;
@@ -806,7 +814,9 @@ function createWatcher(config: Config): Watcher {
                     backendError("stat-failed", error),
                     () => scheduleResolve(root, true, true),
                 );
-            const statted = await backend.stat(root.path, signal);
+            const statted = config.followRootSymlinks
+                ? await backend.stat(root.path, signal)
+                : await backend.lstat(root.path, signal);
             if (signal.aborted) {
                 return;
             }

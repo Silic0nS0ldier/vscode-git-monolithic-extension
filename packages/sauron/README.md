@@ -11,8 +11,8 @@ never throws (it returns `Result` tuples from `monolithic-git-interop/util/resul
 - **Suspension.** Ref-counted handles that work with `await using`. Directories stay watched while suspended, so
   resuming does not re-crawl.
 - **Teardown.** `await using`, an `AbortSignal`, or leaving a `for await` loop.
-- **Any root.** A root may be a directory (watched recursively) or a file. It need not exist yet, and may be removed,
-  replaced or re-created.
+- **Any root.** A root may be a directory (watched recursively), a file or a symlink (followed or not, see
+  `followRootSymlinks`). It need not exist yet, and may be removed, replaced or re-created.
 - **Ignoring.** Rules are applied one directory at a time and chain from parent to child, as nested `.gitignore`
   files do. Ignored directories are never watched or descended into.
 - **Branded strings.** `AbsolutePath`, `RelativePath` and `FileName` are distinct types at compile time and plain
@@ -131,6 +131,29 @@ Built-ins: `gitignore({ patterns })` (nested `.gitignore` files plus extra root 
   rescans before resuming, so the next `changes` batch covers everything that happened while suspended.
 - **Backends.** `Backend` abstracts the platform. `createNodeBackend()` registers one non-recursive `fs.watch` per
   directory, because Node's `recursive: true` is emulated in userland on Linux. Tests use an in-memory backend.
+
+## Special entries and metadata
+
+[src/watch/special.it.test.ts](src/watch/special.it.test.ts) covers these on a real file system (Linux).
+
+- **Symlinks, FIFOs, sockets and devices** are reported like files when created, removed or changed. They are never
+  followed, watched, listed or read, so loops and links out of the tree are harmless. A `.gitignore` that is one of
+  them is not read, as git does not read it either. A root may be any of them. A root that is a symlink is followed
+  by default, and is treated as missing while it dangles or loops. With `followRootSymlinks: false` the symlink itself
+  is watched like a file root: changes to it are reported, and its target is never read.
+- **Type changes** (e.g. a file replaced by a FIFO, or a directory by a symlink) are reported. A directory is
+  watched once it appears and no longer once replaced.
+- **Metadata** changes are reported: permissions, owner and group, atime and mtime set explicitly, extended
+  attributes, and changes to ctime alone (e.g. `chmod` to the same mode), which git compares. Reads are not, so git
+  reading files cannot cause a feedback loop. A creation time only changes when the entry is replaced, which is
+  reported.
+- **Directory metadata.** Node reports a metadata change to a directory as `rename` (inotify sets `IN_ISDIR`), so it
+  is handled as a possible replacement: the directory is crawled again and reported as a subtree. That is costly for
+  a large directory, but comparing identities instead could keep a dead watch when an inode number is reused.
+- **Hardlinks** are entries of their own. A write through one is reported for that link only, as inotify reports the
+  path written through. Its other links are not reported, whether in or outside the tree. Knowing them would need an
+  `lstat` per file, and would still miss links created after the crawl.
+- **Reflinks** (clones) are separate files that share blocks until written, so they need nothing special.
 
 ## Benchmark
 
