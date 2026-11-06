@@ -6,6 +6,7 @@
  * late batch from one step cannot satisfy the next.
  */
 import { isErr, unwrap } from "monolithic-git-interop/util/result";
+import { from_str_radix } from "monolithic-git-wasm";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import type net from "node:net";
@@ -95,6 +96,24 @@ async function notReported(change: () => Promise<unknown>, ...targets: AbsoluteP
     for (const target of targets) {
         assert.ok(!covers(seen, target), `${target} was reported`);
     }
+}
+
+/**
+ * Whether a group is mapped into this user namespace. In one (as Bazel's sandbox uses), unmapped groups are listed
+ * as the overflow gid, which `chown` rejects with EINVAL.
+ */
+async function groupMapped(): Promise<(gid: number) => boolean> {
+    const map = await fs.readFile("/proc/self/gid_map", "utf8").catch(() => null);
+    if (map === null) {
+        return () => true;
+    }
+    // Each line is "<first gid inside> <first gid outside> <count>".
+    const ranges = map.trim().split("\n").map(line => {
+        const [inside = "", , count = ""] = line.trim().split(/\s+/);
+        const start = from_str_radix(inside, 10);
+        return { start, end: start + from_str_radix(count, 10) };
+    });
+    return gid => ranges.some(({ start, end }) => gid >= start && gid < end);
 }
 
 async function started(
@@ -328,7 +347,8 @@ describe(
             // Only its ctime changes, which git compares (core.trustctime).
             await step(() => fs.chmod(f, 0o600), target);
             // Changing the owner needs privileges, but changing the group to another of the user's groups does not.
-            const otherGroup = process.getgroups?.().find(group => group !== before.gid);
+            const mapped = await groupMapped();
+            const otherGroup = process.getgroups?.().find(group => group !== before.gid && mapped(group));
             t.diagnostic(otherGroup === undefined ? "no other group to change to" : `changing group to ${otherGroup}`);
             await step(() => fs.chown(f, before.uid, otherGroup ?? before.gid), target);
             await step(() => fs.utimes(f, new Date(1e12), before.mtime), target);

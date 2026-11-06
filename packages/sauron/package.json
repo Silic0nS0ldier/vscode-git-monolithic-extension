@@ -13,6 +13,7 @@
     "devDependencies": {
         "@bazel/runfiles": "6.5.0",
         "ava": "catalog:",
+        "monolithic-git-wasm": "workspace:^",
         "watcher": "^2.3.1"
     },
     "dependencies": {
