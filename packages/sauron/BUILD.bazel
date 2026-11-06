@@ -115,6 +115,7 @@ test_suite(
             ":lib_integration_stubs",
             ":node_modules/@bazel/runfiles",
             ":node_modules/monolithic-git-interop",
+            ":node_modules/monolithic-git-wasm",
             ":node_modules/watcher",
         ],
     )
