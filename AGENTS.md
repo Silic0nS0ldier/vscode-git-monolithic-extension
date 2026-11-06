@@ -18,8 +18,7 @@ packages/wasm  (Rust → wasm)  ──▶  packages/git  ──▶  extension  �
 - `packages/git` — npm package `monolithic-git-interop`. Pure git-CLI wrapper, **no VSCode
   dependency**. Subpath exports only.
 - `extension` — the extension source. `src/main.ts` only re-exports from `src/lifecycle/`.
-- `extension/vsix` — manifest, nls, assets, and Bazel rules for shipped and test-only unpacked extensions. Bazel copies
-  the rollup output in; no TS of its own.
+- `extension/vsix` — manifest, nls, assets. Bazel copies the rollup output in; no TS of its own.
 - `packages/vscode-manifest` — npm package `monolithic-vscode-manifest`. Models the manifest, nls
   and command registrations/references in source (with locations), and checks they agree. Used
   only by tests and tooling ([extension/src/manifest.test.ts](extension/src/manifest.test.ts)).

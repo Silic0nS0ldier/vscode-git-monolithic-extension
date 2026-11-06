@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-# Links the unpacked extension under test into a throwaway profile, then serves it.
+# Unpacks a prepared code-server state directory (see build-code-server-state.sh), then serves it.
 # Run as an `itest_service`; see BUILD.bazel.
 set -euo pipefail
 
 code_server="$(realpath "$1")"
-extension="$(realpath "$2")"
+archive="$(realpath "$2")"
 port="$3"
 trust="$4"
 
@@ -15,18 +15,13 @@ unset VSCODE_IPC_HOOK_CLI VSCODE_PID VSCODE_GIT_IPC_HANDLE
 
 state="${TEST_TMPDIR:-/tmp}/code-server"
 rm -rf "$state"
-mkdir -p "$state/user/User" "$state/extensions"
-ln -s "$extension" "$state/extensions/siliconsoldier.git-monolithic-dev"
+mkdir -p "$state"
+tar --extract --file "$archive" --directory "$state"
 
 # `--disable-workspace-trust` forces the folder to be trusted. An untrusted suite drops the
-# flag and silences the prompt instead, so the workbench opens straight into Restricted Mode
-# and the extension takes its reduced discovery path.
-trust_settings=""
+# flag, and its state silences the prompt instead.
 trust_args=(--disable-workspace-trust)
 if [[ "$trust" == "untrusted" ]]; then
-    trust_settings=',
-    "security.workspace.trust.startupPrompt": "never",
-    "security.workspace.trust.banner": "never"'
     trust_args=()
 fi
 
@@ -37,27 +32,6 @@ if [[ -n "${COVERAGE_DIR:-}" ]]; then
     export NODE_V8_COVERAGE="${TEST_TMPDIR:-/tmp}/v8-coverage"
 fi
 
-# The extension under test is opt-in: it stays dormant while VS Code's builtin git
-# extension is enabled, so without this the test would drive the builtin instead.
-# Disabling AI features keeps the workbench from spawning an agent host process.
-# The refresh delays, layout shift delay and watcher debounce guard large repositories, which no suite uses.
-cat >"$state/user/User/settings.json" <<JSON
-{
-    "chat.disableAIFeatures": true,
-    "git.enabled": false,
-    "git_monolithic.autorefreshCooldown": 0,
-    "git_monolithic.autorefreshDebounce": 0,
-    "git_monolithic.enabled": true,
-    "git_monolithic.layoutShiftDelay": 0,
-    "git_monolithic.watcherDebounce": 0,
-    "workbench.startupEditor": "none",
-    "workbench.secondarySideBar.defaultVisibility": "hidden"${trust_settings}
-}
-JSON
-
-# code-server reads (and creates) ~/.config/code-server/config.yaml unless pointed
-# elsewhere. An empty file keeps the developer's own settings out of the test.
-: >"$state/config.yaml"
 export HOME="$state"
 
 # Without a serviceUrl the workbench skips the gallery entirely; otherwise it spends a
