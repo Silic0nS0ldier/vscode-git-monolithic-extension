@@ -81,6 +81,8 @@ jobs:
       # Ubuntu 24.04 confines unprivileged user namespaces with AppArmor, which denies runc
       # (//.devcontainer:image_test) the CAP_SYS_ADMIN it needs to unshare the mount namespace.
       - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Check configured queries
+        run: bazel cquery //build_defs/node_bin:node
       # Any later Bazel command deletes `command.log`, so resolve the path before building.
       - run: echo "OUTPUT_BASE=$(bazel info output_base)" >> "$GITHUB_ENV"
       # Later steps use `!cancelled()` so they still run after a failure, which keeps the failing
