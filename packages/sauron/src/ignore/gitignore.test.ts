@@ -40,6 +40,20 @@ test("a nested .gitignore can re-include what a parent excluded", async t => {
     t.deepEqual(sorted(sub.ignored), ["drop.log"]);
 });
 
+test("a parent's rules decide the entries of a directory a nested .gitignore re-included by the entry alone", async t => {
+    const root = await visit(gitignore(), null, { ".gitignore": "file", v: "directory" }, {
+        ".gitignore": "v/*\nv/*/*.log\nv/*/[d]rop",
+    });
+    const v = await visit(root.child!, "v", { ".gitignore": "file", w: "directory", "*": "directory", u: "file" }, {
+        ".gitignore": "!w/\n!\\*/",
+    });
+    t.deepEqual(sorted(v.ignored), [".gitignore", "u"]);
+    for (const dir of ["v/w", "v/*"]) {
+        const scope = await visit(v.child!, dir, { keep: "file", "x.log": "file", drop: "file", sub: "directory" });
+        t.deepEqual(sorted(scope.ignored), ["drop", "x.log"], dir);
+    }
+});
+
 test("nested patterns are anchored to their own directory", async t => {
     const ignorer = gitignore();
     const root = await visit(ignorer, null, { a: "directory" });

@@ -104,7 +104,11 @@ const ignoreNodeModules: Ignorer = {
 ```
 
 Built-ins: `gitignore({ patterns })` (nested `.gitignore` files plus extra root patterns, such as
-`.git/info/exclude`), `ignorePaths(paths)`, `ignoreAll(...ignorers)` and `ignoreNothing`.
+`.git/info/exclude`), `ignorePaths(paths)`, `ignoreAll(...ignorers)` and `ignoreNothing`. `gitignore()` decides as
+`git ls-files --others --exclude-standard` does, taking each watch root as the top of the repository;
+[src/ignore/gitignore.it.test.ts](src/ignore/gitignore.it.test.ts) compares the two. Roots are meant to be the top
+of a repository, so by design `.gitignore` files above a root are not read, just as git does not read those above
+its work tree.
 
 Changes to an ignored entry are dropped, except that creating or removing one lists its directory again: rules may
 depend on the kind of entry (e.g. `cache/` ignores only a directory), which only those can change.
@@ -215,6 +219,8 @@ detection (the extension disables it).
 - Native recursive backends (FSEvents, `ReadDirectoryChangesW`) and watchman/fsmonitor.
 - A polling fallback for `degraded` subtrees.
 - Caching `.gitignore` contents across rescans of the same directory.
+- Reporting a `.gitignore` that cannot be read (e.g. no permission). It is treated as absent without any event, so
+  what it would ignore is silently watched and reported.
 
 ## Considered and rejected
 

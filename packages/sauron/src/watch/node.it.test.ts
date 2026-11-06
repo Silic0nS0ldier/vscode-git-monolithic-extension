@@ -91,3 +91,43 @@ test("suspension releases changes in one batch", async () => {
     }
     await changesCovering(...Array.from({ length: 20 }, (_, i) => abs("src", `bulk-${i}.ts`)));
 });
+
+let probes = 0;
+
+/**
+ * Waits for the rules to settle on whether `name` (in `src`) is ignored. A batch can be released before the rescan
+ * a `.gitignore` change starts has applied the new rules, so each attempt writes it again beside a marker.
+ */
+async function untilIgnored(name: string, ignored: boolean): Promise<void> {
+    for (let attempt = 0; attempt < 50; attempt++) {
+        const marker = `probe-${probes++}.ts`;
+        await fs.writeFile(path.join(root, "src", name), `${attempt}`);
+        await fs.writeFile(path.join(root, "src", marker), "");
+        const seen = await changesCovering(abs("src", marker));
+        if (seen.has(abs("src", name)) !== ignored && !seen.has(abs("src"))) {
+            return;
+        }
+    }
+    assert.fail(`${name} was never ${ignored ? "ignored" : "reported"}`);
+}
+
+test("a .gitignore saved atomically (written aside, then renamed over) applies", async () => {
+    await untilIgnored("x.gen", false);
+    await fs.writeFile(path.join(root, "src", ".gitignore.tmp"), "*.gen\n");
+    await fs.rename(path.join(root, "src", ".gitignore.tmp"), path.join(root, "src", ".gitignore"));
+    await changesCovering(abs("src", ".gitignore"));
+    await untilIgnored("x.gen", true);
+});
+
+test("a .gitignore edited in place applies its new rules", async () => {
+    await fs.writeFile(path.join(root, "src", ".gitignore"), "*.out\n");
+    await changesCovering(abs("src", ".gitignore"));
+    await untilIgnored("x.gen", false);
+    await untilIgnored("x.out", true);
+});
+
+test("a removed .gitignore stops applying", async () => {
+    await fs.rm(path.join(root, "src", ".gitignore"));
+    await changesCovering(abs("src", ".gitignore"));
+    await untilIgnored("x.out", false);
+});

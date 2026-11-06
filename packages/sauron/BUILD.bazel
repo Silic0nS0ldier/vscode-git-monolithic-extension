@@ -113,11 +113,20 @@ test_suite(
         deps = [
             ":lib",
             ":lib_integration_stubs",
+            ":node_modules/@bazel/runfiles",
             ":node_modules/monolithic-git-interop",
             ":node_modules/watcher",
         ],
     )
     for (test_name, src, _) in INTEGRATION_TESTS
+]
+
+# Integration tests comparing against a real git binary.
+GIT_TESTS = ["src/ignore/gitignore.it.test.ts"]
+
+GIT = [
+    "//build_defs/git_bin:dist",
+    "//build_defs/git_bin:git",
 ]
 
 [
@@ -128,13 +137,18 @@ test_suite(
         data = [
             "package.json",
             ":" + test_name + "_lib",
-        ],
+        ] + (GIT if src in GIT_TESTS else []),
         entry_point = entry_point,
+        env = {
+            # The repository holding git is platform dependent, so its runfiles path cannot be hardcoded.
+            "GIT_BIN_RLOCATION": "$(rlocationpath //build_defs/git_bin:git)",
+        } if src in GIT_TESTS else {},
+        no_copy_to_bin = GIT if src in GIT_TESTS else [],
         # The patch reimplements `lstat` and `readdir` to keep symlinks from escaping the sandbox, which changes
         # the very symlink behaviour these tests observe (e.g. a symlink loop fails the whole listing).
         patch_node_fs = False,
     )
-    for (test_name, _, entry_point) in INTEGRATION_TESTS
+    for (test_name, src, entry_point) in INTEGRATION_TESTS
 ]
 
 ts_project(
