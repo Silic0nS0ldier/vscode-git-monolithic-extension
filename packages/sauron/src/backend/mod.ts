@@ -35,6 +35,8 @@ export type Backend = {
     stat(target: AbsolutePath, signal: AbortSignal): Promise<Result<Stat | null, BackendError>>;
     /** Like {@link stat}, but a symlink is reported as one rather than followed. */
     lstat(target: AbsolutePath, signal: AbortSignal): Promise<Result<Stat | null, BackendError>>;
+    /** What the symlink at `target` contains. `null` when nothing is there, or it is not a symlink. */
+    readlink(target: AbsolutePath, signal: AbortSignal): Promise<Result<string | null, BackendError>>;
     /** Resolves every symlink in `target`. `null` when nothing exists there (including a dangling symlink). */
     realpath(target: AbsolutePath, signal: AbortSignal): Promise<Result<AbsolutePath | null, BackendError>>;
     /**

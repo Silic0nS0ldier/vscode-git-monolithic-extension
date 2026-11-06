@@ -292,6 +292,11 @@ export function createFakeBackend(): FakeBackend {
             }
             return ok({ kind: entry.kind, id: entry.id });
         },
+        async readlink() {
+            // Symlinks here lead nowhere.
+            await new Promise(resolve => setImmediate(resolve));
+            return ok(null);
+        },
         async realpath(target) {
             await new Promise(resolve => setImmediate(resolve));
             const failure = backend.failStat?.(target) ?? null;

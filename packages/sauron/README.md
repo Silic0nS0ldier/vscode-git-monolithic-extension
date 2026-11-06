@@ -142,6 +142,11 @@ depend on the kind of entry (e.g. `cache/` ignores only a directory), which only
   directory above the anchor is watched too, up to the file system root, as is the way to where a symlink root
   leads. Any of them seeing the next directory on the way to the root change checks the root by identity. That is
   one watch per level, whatever the size of the tree. One that cannot be watched (e.g. not readable) is skipped.
+- **Dangling root symlinks.** While a followed root does not resolve, its symlinks are followed as far as they lead
+  (from each one's real directory, as the kernel does, and at most 40, its limit). The nearest existing directory
+  on the way to where it would be, and each symlink on the way, are watched like ancestors. So the root is found once
+  its target is created (one directory at a time, re-anchoring deeper each time), a symlink on the way is pointed
+  elsewhere, or a loop is broken.
 - **Failures.** Nothing is retried synchronously, so a failure that recurs at once cannot loop. A watch that fails
   to register or is lost (Node closes a watch that errors), a listing or a `stat` that fails, and an anchor that
   fails are retried after a backoff, through the tree as it is by then. After `retry.attempts` the path is reported
@@ -160,7 +165,8 @@ depend on the kind of entry (e.g. `cache/` ignores only a directory), which only
 - **Symlinks, FIFOs, sockets and devices** are reported like files when created, removed or changed. They are never
   followed, watched, listed or read, so loops and links out of the tree are harmless. A `.gitignore` that is one of
   them is not read, as git does not read it either. A root may be any of them. A root that is a symlink is followed
-  by default, and is treated as missing while it dangles or loops. With `followRootSymlinks: false` the symlink itself
+  by default, and is treated as missing while it dangles or loops, until its target appears or the loop is broken.
+  With `followRootSymlinks: false` the symlink itself
   is watched like a file root: changes to it are reported, and its target is never read.
 - **Type changes** (e.g. a file replaced by a FIFO, or a directory by a symlink) are reported. A directory is
   watched once it appears and no longer once replaced.
@@ -206,8 +212,6 @@ detection (the extension disables it).
 - A polling fallback for `degraded` subtrees.
 - Caching `.gitignore` contents across rescans of the same directory.
 - Reporting symlink target changes (symlinks are reported but never followed).
-- Noticing a dangling root symlink's target appear. Only the symlink itself and the directories above it are
-  watched while it dangles, so its target is picked up once one of those changes, or on `rescan()`.
 
 ## Considered and rejected
 

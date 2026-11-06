@@ -1,9 +1,11 @@
 import { err, isErr, ok, type Result, unwrap } from "monolithic-git-interop/util/result";
+import { posix } from "node:path";
 import type { Backend, BackendError, RawEvent, Stat } from "../backend/mod.js";
 import { createNodeBackend } from "../backend/node.js";
 import { type DirectoryLocation, ignoreNothing, type Ignorer, type IgnoreScope } from "../ignore/mod.js";
 import {
     type AbsolutePath,
+    absolutePath,
     type EntryKind,
     type FileName,
     isWithin,
@@ -68,8 +70,8 @@ export type WatchOptions = {
      */
     readonly roots: readonly [AbsolutePath, ...AbsolutePath[]];
     /**
-     * Whether a root that is a symlink is resolved to its target (default), which is watched while the symlink
-     * dangles or loops as if the root were missing. Otherwise the symlink itself is watched like a file root, and
+     * Whether a root that is a symlink is resolved to its target (default). While the symlink dangles or loops the
+     * root is missing, and is watched for where it would be to appear. Otherwise the symlink itself is watched like a file root, and
      * its target is never read. Symlinks within a root are never followed.
      */
     readonly followRootSymlinks?: boolean;
@@ -113,6 +115,8 @@ const DEFAULT_RETRY: RetryPolicy = { attempts: 5, delay: 100, maxDelay: 10_000, 
 const MAX_NOTICES = 100;
 /** Bounds re-checks when the tree keeps changing while a root's anchor moves. */
 const MAX_RESOLVE_ATTEMPTS = 16;
+/** Symlinks followed when finding where a dangling root would be, as Linux allows in one lookup (`ELOOP`). */
+const MAX_SYMLINKS = 40;
 
 function nextMacrotask(): Promise<void> {
     return new Promise(resolve => setImmediate(resolve));
@@ -228,10 +232,14 @@ type RootState = {
     kind: "pending" | "directory" | "file";
     /** {@link Stat.id} when last resolved. */
     id: string | null;
-    /** `real` is where the root resolves to through symlinks, when that is elsewhere. */
+    /**
+     * `real` is where the root is (or would be) through symlinks, and each symlink on the way, when that is
+     * elsewhere. `key` identifies what is watched, which also depends on how much of the way exists.
+     */
     anchor: {
         readonly dir: AbsolutePath;
-        readonly real: AbsolutePath | null;
+        readonly real: readonly AbsolutePath[];
+        readonly key: string;
         readonly controller: AbortController;
     } | null;
     resolveRunning: boolean;
@@ -267,8 +275,8 @@ function selfName(dir: AbsolutePath): string | null {
     return parent(dir) === null ? null : dir.slice(dir.lastIndexOf("/") + 1);
 }
 
-/** Directories above `dir` (and above `real`) to the file system root, with the names leading towards them. */
-function ancestorsOf(dir: AbsolutePath, real: AbsolutePath | null): Map<AbsolutePath, Set<string>> {
+/** Directories above `dir` (and above each of `real`) to the file system root, with the names leading to them. */
+function ancestorsOf(dir: AbsolutePath, real: readonly AbsolutePath[]): Map<AbsolutePath, Set<string>> {
     const chain = new Map<AbsolutePath, Set<string>>();
     const add = (target: AbsolutePath, from: AbsolutePath | null) => {
         for (let current = from; current !== null; current = parent(current)) {
@@ -278,8 +286,8 @@ function ancestorsOf(dir: AbsolutePath, real: AbsolutePath | null): Map<Absolute
         }
     };
     add(dir, parent(dir));
-    if (real !== null) {
-        add(real, parent(real));
+    for (const target of real) {
+        add(target, parent(target));
     }
     return chain;
 }
@@ -1048,6 +1056,59 @@ function createWatcher(config: Config): Watcher {
         }
     }
 
+    /**
+     * Where a root that does not resolve would be: each symlink on the way (followed from its real directory, as
+     * the kernel does), then the path it leads to. `nearest` is the deepest directory that exists on the way.
+     */
+    async function danglingTarget(
+        path: AbsolutePath,
+        signal: AbortSignal,
+    ): Promise<Result<{ way: AbsolutePath[]; nearest: AbsolutePath | null }, BackendError>> {
+        const way: AbsolutePath[] = [];
+        let current = path;
+        for (let hop = 0; hop < MAX_SYMLINKS && !signal.aborted; hop++) {
+            const found = await nearestDirectory(parent(current), signal);
+            if (isErr(found)) {
+                return found;
+            }
+            const dir = unwrap(found);
+            if (dir === null) {
+                // Nothing on the way exists.
+                return ok({ way, nearest: null });
+            }
+            const resolved = await backend.realpath(dir, signal);
+            if (isErr(resolved)) {
+                return resolved;
+            }
+            const nearest = unwrap(resolved);
+            if (nearest === null) {
+                // Just vanished, which the anchor sees.
+                return ok({ way, nearest: null });
+            }
+            // `dir` is strictly above `current`. From the real directory: the first step that is missing or not
+            // a directory, and the whole way.
+            const rest = current.slice(dir.length + (dir.endsWith("/") ? 0 : 1));
+            const step = join(nearest, nextSegment(dir, current) as FileName);
+            const target = join(nearest, rest as FileName);
+            const link = await backend.readlink(step, signal);
+            if (isErr(link)) {
+                return link;
+            }
+            const contents = unwrap(link);
+            const next = contents === null
+                ? null
+                : absolutePath(posix.resolve(nearest, contents) + target.slice(step.length));
+            if (next === null || isErr(next)) {
+                way.push(target);
+                return ok({ way, nearest });
+            }
+            way.push(step);
+            current = unwrap(next);
+        }
+        // A loop, as far as can be told. The symlinks on the way are watched, so changing one is seen.
+        return ok({ way, nearest: null });
+    }
+
     async function nearestDirectory(
         start: AbsolutePath | null,
         signal: AbortSignal,
@@ -1061,14 +1122,14 @@ function createWatcher(config: Config): Watcher {
         return ok(null);
     }
 
-    function moveAnchor(root: RootState, dir: AbsolutePath | null, real: AbsolutePath | null): void {
+    function moveAnchor(root: RootState, dir: AbsolutePath | null, real: readonly AbsolutePath[], key: string): void {
         root.anchor?.controller.abort();
         if (dir === null) {
             root.anchor = null;
             return;
         }
         const controller = new AbortController();
-        root.anchor = { dir, real, controller };
+        root.anchor = { dir, real, key, controller };
         const next = nextSegment(dir, root.path);
         const self = selfName(dir);
         const isParent = parent(root.path) === dir;
@@ -1128,8 +1189,9 @@ function createWatcher(config: Config): Watcher {
         }
         succeeded(anchorKey(root));
         // Moving any directory above the anchor moves the root, but only the directory holding the moved one
-        // sees it, so each is watched. So is the way to where a symlink root leads. Best effort: one that cannot
-        // be watched (e.g. not readable) is skipped, as it only matters if it is moved.
+        // sees it, so each is watched. So is the way to where a symlink root leads, or would lead while it dangles.
+        // Best effort: one that cannot be watched (e.g. not readable, or not there yet) is skipped, as it only
+        // matters if it is moved, or once something on the way to it is created, which re-anchors.
         for (const [ancestor, names] of ancestorsOf(dir, real)) {
             if (controller.signal.aborted) {
                 break;
@@ -1186,8 +1248,20 @@ function createWatcher(config: Config): Watcher {
                 }
                 anchor = unwrap(nearest);
             }
-            let real: AbsolutePath | null = null;
-            if (stat !== null) {
+            let real: readonly AbsolutePath[] = [];
+            let nearest: AbsolutePath | null = null;
+            if (stat === null && config.followRootSymlinks) {
+                const dangling = await danglingTarget(root.path, signal);
+                if (signal.aborted) {
+                    return;
+                }
+                if (isErr(dangling)) {
+                    retryLater(unwrap(dangling));
+                    return;
+                }
+                ({ nearest } = unwrap(dangling));
+                real = unwrap(dangling).way.filter(target => target !== root.path);
+            } else if (stat !== null) {
                 // Where the root actually is, in case a symlink leads there. Not followed beyond the root's own
                 // directory unless root symlinks are.
                 const dir = parent(root.path);
@@ -1204,10 +1278,11 @@ function createWatcher(config: Config): Watcher {
                 const located = path === null || target === root.path
                     ? path
                     : join(path, nextSegment(target, root.path) as FileName);
-                real = located === root.path ? null : located;
+                real = located === null || located === root.path ? [] : [located];
             }
-            if (anchor !== (root.anchor?.dir ?? null) || real !== (root.anchor?.real ?? null)) {
-                moveAnchor(root, anchor, real);
+            const key = anchor === null ? null : [anchor, nearest ?? "", ...real].join("\0");
+            if (key !== (root.anchor?.key ?? null)) {
+                moveAnchor(root, anchor, real, key ?? "");
                 // Look again, as the root may have changed before the anchor was in place.
                 continue;
             }
