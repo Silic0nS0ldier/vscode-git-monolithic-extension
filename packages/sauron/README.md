@@ -103,6 +103,9 @@ const ignoreNodeModules: Ignorer = {
 Built-ins: `gitignore({ patterns })` (nested `.gitignore` files plus extra root patterns, such as
 `.git/info/exclude`), `ignorePaths(paths)`, `ignoreAll(...ignorers)` and `ignoreNothing`.
 
+Changes to an ignored entry are dropped, except that creating or removing one lists its directory again: rules may
+depend on the kind of entry (e.g. `cache/` ignores only a directory), which only those can change.
+
 > Git still reports changes to _tracked_ files that match an ignore pattern. `gitignore()` does not see those
 > changes.
 
