@@ -333,10 +333,10 @@ test("a root inside missing directories is watched once created", async t => {
     fake.mkdir("/x");
     await using watcher = start(fake, { roots: [p("/x/y/z")] });
     await crawled(watcher);
-    t.deepEqual(sorted(fake.watched), ["/x"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/x"]);
 
     fake.mkdir("/x/y");
-    await eventually(() => fake.watched.has(p("/x/y")) && !fake.watched.has(p("/x")));
+    await eventually(() => fake.watched.has(p("/x/y")));
     fake.write("/x/y/z/file");
 
     const changes = await until(watcher, "changes");
@@ -345,24 +345,24 @@ test("a root inside missing directories is watched once created", async t => {
     t.pass();
 });
 
-test("anchors are released as they move, and only the root's parent stays watched", async t => {
+test("anchors follow the root as it appears, and only the root's ancestors stay watched", async t => {
     const fake = createFakeBackend();
     fake.mkdir("/x");
     await using watcher = start(fake, { roots: [p("/x/y/z")] });
     await crawled(watcher);
-    t.deepEqual(sorted(fake.watched), ["/x"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/x"]);
 
     fake.mkdir("/x/y");
     await eventually(() => fake.watched.has(p("/x/y")));
-    t.deepEqual(sorted(fake.watched), ["/x/y"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/x", "/x/y"]);
 
     fake.mkdir("/x/y/z/w");
     await eventually(() => fake.watched.has(p("/x/y/z/w")));
-    t.deepEqual(sorted(fake.watched), ["/x/y", "/x/y/z", "/x/y/z/w"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/x", "/x/y", "/x/y/z", "/x/y/z/w"]);
 
     // Removed again: everything below the new anchor is released.
     fake.remove("/x/y");
-    await eventually(() => sorted(fake.watched).join() === "/x");
+    await eventually(() => sorted(fake.watched).join() === "/,/x");
     t.pass();
 });
 
@@ -380,7 +380,7 @@ test("unrelated activity next to a missing root is ignored", async t => {
     await new Promise(resolve => setTimeout(resolve, 50));
 
     t.is(fake.statCalls, stats, "no re-check of the root");
-    t.deepEqual(sorted(fake.watched), ["/x"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/x"]);
     fake.mkdir("/x/y/z");
     // The first batch holds only the root; anything unrelated would have been reported before or with it.
     t.deepEqual(all(await until(watcher, "changes")), ["/x/y/z"]);
@@ -440,7 +440,7 @@ test("a file root reports changes to that file only", async t => {
     fake.write("/repo/b");
     await using watcher = start(fake, { roots: [p("/repo/a")] });
     await crawled(watcher);
-    t.deepEqual(sorted(fake.watched), ["/repo"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo"]);
 
     fake.write("/repo/b", "changed");
     fake.write("/repo/c");
@@ -622,6 +622,23 @@ test("a removed anchor moves up instead of going quiet", async t => {
     fake.mkdir("/x/y/z");
 
     t.deepEqual(all(await until(watcher, "changes")), ["/x/y/z"]);
+});
+
+test("moving a directory above the root's parent reports the root gone, and releases the moved watches", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/a/b/root/sub");
+    await using watcher = start(fake, { roots: [p("/a/b/root")] });
+    await crawled(watcher);
+    t.deepEqual(sorted(fake.watched), ["/", "/a", "/a/b", "/a/b/root", "/a/b/root/sub"]);
+
+    fake.rename("/a", "/a2");
+
+    t.deepEqual(all(await until(watcher, "changes")), ["/a/b/root"]);
+    await eventually(() => sorted(fake.watched).join() === "/");
+
+    fake.mkdir("/a/b/root");
+    t.deepEqual(all(await until(watcher, "changes")), ["/a/b/root"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/a", "/a/b", "/a/b/root"]);
 });
 
 test("a retry watches the directory that replaced the one that failed", async t => {

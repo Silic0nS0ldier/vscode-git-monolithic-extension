@@ -152,7 +152,11 @@ async function main(subjectName: SubjectName, mode: Mode, outputFile: string): P
 
     await measure(run, "close", () => null, { during: () => subject!.close(), notify: false });
 
-    const output: ChildOutput = { metrics: run.metrics, info, problems: run.problems };
+    let rootAncestors = 0;
+    for (let dir = fixture.root; dir !== path.dirname(dir); dir = path.dirname(dir)) {
+        rootAncestors++;
+    }
+    const output: ChildOutput = { metrics: run.metrics, info, problems: run.problems, rootAncestors };
     fs.writeFileSync(outputFile, JSON.stringify(output));
     fs.rmSync(workdir, { recursive: true, force: true });
 }

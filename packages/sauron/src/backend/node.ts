@@ -1,6 +1,6 @@
 import { err, isOk, ok, type Result, unwrap } from "monolithic-git-interop/util/result";
 import fs from "node:fs";
-import { type AbsolutePath, type EntryKind, type FileName, fileName } from "../path.js";
+import { type AbsolutePath, absolutePath, type EntryKind, type FileName, fileName } from "../path.js";
 import type { Backend, BackendError, Stat } from "./mod.js";
 
 // The flags are undefined where unsupported (Windows), where neither FIFOs nor these devices are a concern.
@@ -100,6 +100,18 @@ export function createNodeBackend(): Backend {
         },
         stat: (target, signal) => statEntry(target, signal, true),
         lstat: (target, signal) => statEntry(target, signal, false),
+        async realpath(target, signal) {
+            try {
+                signal.throwIfAborted();
+                const resolved = absolutePath(await fs.promises.realpath(target));
+                return isOk(resolved)
+                    ? ok(unwrap(resolved))
+                    : err({ type: "other", path: target, cause: unwrap(resolved) });
+            } catch (e) {
+                const error = toBackendError(target, e);
+                return error.type === "not-found" || errorCode(e) === "ELOOP" ? ok(null) : err(error);
+            }
+        },
         async readText(file, signal) {
             let handle: fs.promises.FileHandle | undefined;
             try {

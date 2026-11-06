@@ -94,10 +94,10 @@ test("anchors follow a missing root down, ignore unrelated activity, and are rel
         assert.deepEqual(changes, []);
 
         fs.mkdirSync(p);
-        await until(() => watched(top, p).join() === p, show);
+        await until(() => watched(top, p).join() === [top, p].join(), show);
 
         fs.mkdirSync(r, { recursive: true });
-        await until(() => watched(top, p, q, r).join() === [q, r].join(), show);
+        await until(() => watched(top, p, q, r).join() === [top, p, q, r].join(), show);
         await until(() => changes.length > 0, () => "The root's creation was not reported");
         assert.deepEqual(changes, [{ type: "changes", paths: new Set(), subtrees: new Set([r as AbsolutePath]) }]);
     } finally {
@@ -161,7 +161,7 @@ test("moving the directory holding a root reports the root gone and releases the
         fs.mkdirSync(path.join(root, "sub"), { recursive: true });
         const recreated = [top, path.join(top, "p"), root, path.join(root, "sub")];
         await until(
-            () => watched(...recreated).join() === recreated.slice(1).join(),
+            () => watched(...recreated).join() === recreated.join(),
             () => `watched: ${JSON.stringify(watched(...recreated).map(dir => path.relative(top, dir)))}`,
         );
     } finally {
