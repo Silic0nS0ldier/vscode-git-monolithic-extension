@@ -35,6 +35,8 @@ export type FakeBackend = Backend & {
     readdirDelay: ((dir: AbsolutePath) => number) | null;
     /** Makes `stat` fail for matching paths. */
     failStat: ((target: AbsolutePath) => BackendError["type"] | null) | null;
+    /** Gives new entries the identities of removed ones first, as file systems reuse inode numbers. */
+    reuseIds: boolean;
     /** Called after a watch is registered, e.g. to break it. */
     afterWatch: ((dir: AbsolutePath) => void) | null;
     /** Number of `watch` calls per directory, including failed ones. */
@@ -68,9 +70,21 @@ function nameOf(path: AbsolutePath): FileName {
 /** In-memory file system emitting events the way a non-recursive platform watcher would. */
 export function createFakeBackend(): FakeBackend {
     let nextId = 0;
-    const newId = () => String(nextId++);
-    const entries = new Map<AbsolutePath, Entry>([[p("/"), { kind: "directory", id: newId() }]]);
+    const freedIds: string[] = [];
+    const newId = () => (backend.reuseIds ? freedIds.shift() : undefined) ?? String(nextId++);
+    const entries = new Map<AbsolutePath, Entry>([[p("/"), { kind: "directory", id: String(nextId++) }]]);
     const listeners = new Map<AbsolutePath, Set<(event: RawEvent) => void>>();
+    /** libuv names events about a watched directory itself after the path it was watched as. */
+    const watchedAs = new WeakMap<(event: RawEvent) => void, FileName>();
+
+    /** Tells the watches on `dir` about the directory itself, `count` times. */
+    function emitSelf(dir: AbsolutePath, count: number): void {
+        for (const listener of listeners.get(dir) ?? []) {
+            for (let i = 0; i < count; i++) {
+                listener({ type: "rename", name: watchedAs.get(listener) ?? nameOf(dir) });
+            }
+        }
+    }
     const watchCalls = new Map<AbsolutePath, number>();
     const watchAttempts = new Map<AbsolutePath, number>();
     const readdirAttempts = new Map<AbsolutePath, number>();
@@ -101,6 +115,7 @@ export function createFakeBackend(): FakeBackend {
     }
 
     const backend: FakeBackend = {
+        reuseIds: false,
         failWatch: null,
         failReaddir: null,
         failStat: null,
@@ -155,22 +170,25 @@ export function createFakeBackend(): FakeBackend {
         touch(raw) {
             const target = p(raw);
             const entry = entries.get(target);
-            // Like Node, which reports metadata changes to a directory as `rename` (inotify sets IN_ISDIR).
+            // Like Node, which reports metadata changes to a directory as `rename` (inotify sets IN_ISDIR), to
+            // the directory holding it and then to the directory itself.
             emit(target, entry?.kind === "directory" ? "rename" : "change");
+            if (entry?.kind === "directory") {
+                emitSelf(target, 1);
+            }
         },
         remove(raw) {
             const target = p(raw);
             const prefix = target + "/";
             const removed = [...entries.keys()].filter(key => key === target || key.startsWith(prefix));
-            // Like `rm -r` and inotify: deepest first, each reported to its directory, and a watched directory
-            // reports its own deletion (libuv names it after the directory itself).
+            // Like `rm -r` and inotify: deepest first. A watched directory is told first, twice (IN_DELETE_SELF,
+            // IN_IGNORED), then the directory holding it.
             removed.sort((a, b) => b.length - a.length);
             for (const key of removed) {
+                freedIds.push(entries.get(key)!.id);
                 entries.delete(key);
+                emitSelf(key, 2);
                 emit(key, "rename");
-                for (const listener of listeners.get(key) ?? []) {
-                    listener({ type: "rename", name: nameOf(key) });
-                }
             }
         },
         rename(rawFrom, rawTo) {
@@ -188,11 +206,8 @@ export function createFakeBackend(): FakeBackend {
                     throw new Error(`Cannot replace ${to}`);
                 }
                 entries.delete(to);
-                const dead = [...listeners.get(to) ?? []];
+                emitSelf(to, 2);
                 listeners.delete(to);
-                for (const listener of dead) {
-                    listener({ type: "rename", name: nameOf(to) });
-                }
             }
             const prefix = from + "/";
             const keys = [...entries.keys()].filter(key => key === from || key.startsWith(prefix));
@@ -209,12 +224,10 @@ export function createFakeBackend(): FakeBackend {
             for (const [key, set] of movedListeners) {
                 listeners.set((to + key.slice(from.length)) as AbsolutePath, set);
             }
-            // As inotify: the old name, the new name, then the moved directory itself (named as it was watched).
+            // As inotify: the old name, the new name, then the moved directory itself, once.
             emit(from, "rename");
             emit(to, "rename");
-            for (const listener of listeners.get(to) ?? []) {
-                listener({ type: "rename", name: nameOf(from) });
-            }
+            emitSelf(to, 1);
         },
         watch(dir, listener, signal) {
             increment(watchAttempts, dir);
@@ -232,6 +245,7 @@ export function createFakeBackend(): FakeBackend {
                 listeners.set(dir, set);
             }
             set.add(listener);
+            watchedAs.set(listener, nameOf(dir));
             signal.addEventListener("abort", () => set.delete(listener), { once: true });
             backend.afterWatch?.(dir);
             return ok(undefined);

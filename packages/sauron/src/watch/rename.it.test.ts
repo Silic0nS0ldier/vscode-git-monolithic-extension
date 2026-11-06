@@ -8,6 +8,14 @@ import { absolutePath, gitignore, watch, type Watcher, type WatchEvent } from ".
 
 const skip = process.platform !== "linux" && "Reads inotify state from /proc";
 
+/** Every directory sauron's backend registered a watch for, in order. */
+const registrations: string[] = [];
+const originalWatch = fs.watch;
+fs.watch = ((...args: Parameters<typeof fs.watch>) => {
+    registrations.push(String(args[0]));
+    return originalWatch(...args);
+}) as typeof fs.watch;
+
 /** `major:minor:inode` of every inode this process watches, from inotify's fdinfo (kernel `dev_t` encoding). */
 function watchedInodes(): string[] {
     const inodes: string[] = [];
@@ -61,6 +69,8 @@ type Session = {
      * `extra` (absolute), with nothing watched twice.
      */
     watching(dirs: readonly string[], extra?: readonly string[]): Promise<void>;
+    /** Directories (relative to the test directory) newly watched since the last call, or since the crawl. */
+    registered(): string[];
     /** Waits for the next `changes` event, as paths relative to the test directory. */
     nextChanges(): Promise<{ paths: string[]; subtrees: string[] }>;
 };
@@ -101,6 +111,7 @@ async function session(
         fs.rmSync(top, { recursive: true, force: true });
     });
     await crawled.promise;
+    registrations.length = 0;
     const rel = (target: string) => path.relative(top, target) || ".";
     return {
         top,
@@ -122,6 +133,9 @@ async function session(
                 assert.ok(performance.now() < deadline, describe());
                 await new Promise(resolve => setTimeout(resolve, 10));
             }
+        },
+        registered() {
+            return registrations.splice(0).map(rel).sort();
         },
         async nextChanges() {
             if (changes.length === 0) {
@@ -166,6 +180,7 @@ test("a directory renamed within its parent is watched at its new path only", { 
 
     assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/a", "root/b"] });
     await s.watching(["root", "root/b", "root/b/sub", "root/b/sub/deep"], above(s));
+    assert.deepEqual(s.registered(), [], "the moved watches are kept");
     fs.writeFileSync(s.at("root/b/sub/deep/new"), "");
     assert.deepEqual(await s.nextChanges(), { paths: ["root/b/sub/deep/new"], subtrees: [] });
 });
@@ -178,6 +193,7 @@ test("a directory moved to another watched parent is watched there only", { skip
 
     assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/x/a", "root/y/a"] });
     await s.watching(["root", "root/x", "root/y", "root/y/a", "root/y/a/sub"], above(s));
+    assert.deepEqual(s.registered(), [], "the moved watches are kept");
 });
 
 test("a directory moved out of the root is released", { skip }, async () => {
@@ -200,6 +216,7 @@ test("a directory moved into the root is crawled", { skip }, async () => {
 
     assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/a"] });
     await s.watching(["root", "root/a", "root/a/sub"], above(s));
+    assert.deepEqual(s.registered(), ["root/a", "root/a/sub"]);
 });
 
 test("a directory renamed to an ignored name is released", { skip }, async () => {
@@ -249,10 +266,12 @@ test("a directory moved under different .gitignore rules is watched as they say"
     fs.renameSync(s.at("root/a"), s.at("root/x/a"));
     assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/a", "root/x/a"] });
     await s.watching(["root", "root/x", "root/x/a", "root/x/a/keep"], above(s));
+    assert.deepEqual(s.registered(), [], "what is still watched is kept");
 
     fs.renameSync(s.at("root/x/a"), s.at("root/a"));
     assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/a", "root/x/a"] });
     await s.watching(["root", "root/a", "root/a/gen", "root/a/gen/deep", "root/a/keep", "root/x"], above(s));
+    assert.deepEqual(s.registered(), ["root/a/gen", "root/a/gen/deep"], "only what is no longer ignored is new");
 });
 
 test("a directory renamed in place of an ignored file the rules keep as a directory is crawled", { skip }, async () => {
@@ -313,4 +332,82 @@ test("a root symlink is reported gone when its target is renamed", { skip }, asy
 
     assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root"] });
     await s.watching([], above(s));
+});
+
+test("a directory moved where a pattern anchored above it applies is visited again", { skip }, async () => {
+    const s = await session(
+        at => {
+            mkdirs(at, "root/a/gen/deep", "root/a/src");
+            fs.writeFileSync(at("root/.gitignore"), "/b/gen\n*.log\n");
+        },
+        "root",
+        { ignore: true },
+    );
+
+    fs.renameSync(s.at("root/a"), s.at("root/b"));
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/a", "root/b"] });
+    await s.watching(["root", "root/b", "root/b/src"], above(s));
+    assert.deepEqual(s.registered(), []);
+});
+
+test("a .gitignore within a moved directory still applies there", { skip }, async () => {
+    const s = await session(
+        at => {
+            mkdirs(at, "root/a/out", "root/a/src/out", "root/deeper");
+            fs.writeFileSync(at("root/a/.gitignore"), "/out\n*.tmp\n");
+        },
+        "root",
+        { ignore: true },
+    );
+    await s.watching(["root", "root/a", "root/a/src", "root/a/src/out", "root/deeper"], above(s));
+
+    fs.renameSync(s.at("root/a"), s.at("root/deeper/b"));
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/a", "root/deeper/b"] });
+    await s.watching(["root", "root/deeper", "root/deeper/b", "root/deeper/b/src", "root/deeper/b/src/out"], above(s));
+    assert.deepEqual(s.registered(), []);
+    fs.writeFileSync(s.at("root/deeper/b/src/x.tmp"), "");
+    fs.writeFileSync(s.at("root/deeper/b/src/y"), "");
+    assert.deepEqual(await s.nextChanges(), { paths: ["root/deeper/b/src/y"], subtrees: [] });
+});
+
+test("a metadata change to a directory keeps its watches", { skip }, async () => {
+    const s = await session(at => mkdirs(at, "root/a/sub"), "root");
+
+    fs.chmodSync(s.at("root/a"), 0o700);
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/a"] });
+    await s.watching(["root", "root/a", "root/a/sub"], above(s));
+    assert.deepEqual(s.registered(), []);
+});
+
+test("a directory deleted and re-created at once is watched afresh, whatever its inode number", { skip }, async () => {
+    const s = await session(at => mkdirs(at, "root/a/sub/deep"), "root");
+
+    // File systems reuse freed inode numbers, so the new directories may have the old ones' identities.
+    fs.rmSync(s.at("root/a"), { recursive: true });
+    mkdirs(s.at, "root/a/sub/deep");
+
+    await s.watching(["root", "root/a", "root/a/sub", "root/a/sub/deep"], above(s));
+    assert.deepEqual(s.registered(), ["root/a", "root/a/sub", "root/a/sub/deep"]);
+    await s.nextChanges();
+    fs.writeFileSync(s.at("root/a/sub/deep/new"), "");
+    assert.deepEqual(await s.nextChanges(), { paths: ["root/a/sub/deep/new"], subtrees: [] });
+});
+
+test("directories swapped by renames keep their watches", { skip }, async () => {
+    const s = await session(at => mkdirs(at, "root/a/sub", "root/b/sub"), "root");
+    const [aSub, bSub] = [inodeOf(s.at("root/a/sub")), inodeOf(s.at("root/b/sub"))];
+
+    fs.renameSync(s.at("root/a"), s.at("root/tmp"));
+    fs.renameSync(s.at("root/b"), s.at("root/a"));
+    fs.renameSync(s.at("root/tmp"), s.at("root/b"));
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root/a", "root/b"] });
+    await s.watching(["root", "root/a", "root/a/sub", "root/b", "root/b/sub"], above(s));
+    assert.deepEqual([inodeOf(s.at("root/a/sub")), inodeOf(s.at("root/b/sub"))], [bSub, aSub]);
+    fs.writeFileSync(s.at("root/a/sub/x"), "");
+    fs.writeFileSync(s.at("root/b/sub/y"), "");
+    assert.deepEqual(await s.nextChanges(), { paths: ["root/a/sub/x", "root/b/sub/y"], subtrees: [] });
 });

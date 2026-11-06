@@ -90,7 +90,10 @@ available as `watcher.closed`.
 
 An `Ignorer` is visited once per directory with that directory's entries and their kinds. It returns the names to
 skip, plus optionally a different `Ignorer` for subdirectories. When a name in `triggers` changes (e.g.
-`.gitignore`), that directory's subtree is re-evaluated and reported as changed.
+`.gitignore`), that directory's subtree is re-evaluated and reported as changed. An optional `relocatable` tells
+whether a moved directory would be visited the same at its new place, so it need not be visited again. `gitignore()`
+vouches for that unless a pattern could apply differently there (e.g. one anchored at that depth, or `**`), or the
+rules come from a `.gitignore` within the moved directory.
 
 ```ts
 import { type Ignorer } from "sauron";
@@ -116,8 +119,19 @@ depend on the kind of entry (e.g. `cache/` ignores only a directory), which only
   depend on whether the entry is a directory) are applied before the change is reported.
 - **Rescans.** At most one rescan runs per directory; events that arrive meanwhile coalesce into one more.
   While any rescan is in flight, a batch only settles at `maxWait`, so a burst is not split across batches.
-  A `rename` of a watched subdirectory re-watches it, because a platform watch follows the original inode. Its old
-  contents are reported as a subtree.
+  A `rename` of a watched subdirectory reports its old path as a subtree. A platform watch follows the original
+  inode, so the old watches are wrong for whatever is at that path now.
+- **Moved directories.** Inotify tells the directory a subdirectory moved from and the one it moved to, but Node
+  drops what pairs the two events. So a moved directory's watches are kept aside, and a directory appearing anywhere
+  in the tree meanwhile is matched by identity (device and inode) and takes them over, reported as a subtree. Only
+  its old and new parents are listed again, and nothing inside it is unless the ignore rules may differ there
+  (`Ignorer.relocatable`); even then, the last listings are reused. A directory that never reappears is released once
+  rescans settle. Identities are recorded only for directories with watched subdirectories (one `lstat` each, after
+  the listing): anything else is as cheap to watch again. A listing (or `lstat`) is applied a macrotask after it
+  completes, so a move it raced with is seen first and the stale result dropped. Nothing is reused that may be wrong:
+  a directory that was being listed when it moved, or that may have been deleted (it was told of itself twice, which
+  a move does once), is watched afresh, so an inode number reused by a new directory cannot lead to a dead watch.
+  That includes a directory moved twice before it is found again.
 - **Roots.** Each root is anchored by a watch on its nearest existing ancestor (normally its parent). The anchor
   sees the root being created, removed or replaced, and a file root's changes. A removed root is reported as a
   subtree, and the anchor moves up until the root reappears. The anchor watch is in place before the root is
@@ -155,8 +169,8 @@ depend on the kind of entry (e.g. `cache/` ignores only a directory), which only
   reading files cannot cause a feedback loop. A creation time only changes when the entry is replaced, which is
   reported.
 - **Directory metadata.** Node reports a metadata change to a directory as `rename` (inotify sets `IN_ISDIR`), so it
-  is handled as a possible replacement: the directory is crawled again and reported as a subtree. That is costly for
-  a large directory, but comparing identities instead could keep a dead watch when an inode number is reused.
+  is handled as a possible replacement and reported as a subtree. Like a move, the directory is then found again by
+  identity, so it keeps its watches.
 - **Hardlinks** are entries of their own. A write through one is reported for that link only, as inotify reports the
   path written through. Its other links are not reported, whether in or outside the tree. Knowing them would need an
   `lstat` per file, and would still miss links created after the crawl.

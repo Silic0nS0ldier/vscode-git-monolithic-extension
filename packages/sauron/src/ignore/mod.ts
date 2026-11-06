@@ -1,10 +1,13 @@
-import { type AbsolutePath, type EntryKind, type FileName, join, type RelativePath } from "../path.js";
+import { type AbsolutePath, type EntryKind, type FileName, join, parent, type RelativePath } from "../path.js";
 
-/** A directory being crawled. */
-export type DirectoryVisit = {
+export type DirectoryLocation = {
     readonly path: AbsolutePath;
     /** `null` for a watch root. */
     readonly relative: RelativePath | null;
+};
+
+/** A directory being crawled. */
+export type DirectoryVisit = DirectoryLocation & {
     readonly entries: ReadonlyMap<FileName, EntryKind>;
     /** Reads an entry of this directory as UTF-8. `null` if missing, unreadable or not a regular file. */
     readText(name: FileName): Promise<string | null>;
@@ -26,11 +29,17 @@ export type Ignorer = {
     /** Entries whose change invalidates decisions for the visited directory's subtree. */
     readonly triggers?: ReadonlySet<FileName>;
     visit(dir: DirectoryVisit): IgnoreScope | Promise<IgnoreScope>;
+    /**
+     * Whether visiting a directory moved from `from` to `to` would give the same result, given the same entries,
+     * and whether the child ignorer it returned still applies there. A moved directory then keeps its watches
+     * without being visited again. Without it, a moved directory is visited again (but not listed again).
+     */
+    relocatable?(from: DirectoryLocation, to: DirectoryLocation): boolean;
 };
 
 const EMPTY: ReadonlySet<FileName> = new Set();
 
-export const ignoreNothing: Ignorer = { visit: () => ({ ignored: EMPTY }) };
+export const ignoreNothing: Ignorer = { visit: () => ({ ignored: EMPTY }), relocatable: () => true };
 
 /** Ignores an entry if any source does. */
 export function ignoreAll(...sources: readonly Ignorer[]): Ignorer {
@@ -50,6 +59,7 @@ export function ignoreAll(...sources: readonly Ignorer[]): Ignorer {
             const unchanged = children.every((c, i) => c === sources[i]);
             return unchanged ? { ignored } : { ignored, child: ignoreAll(...children) };
         },
+        relocatable: (from, to) => sources.every(s => s.relocatable?.(from, to) ?? false),
     };
 }
 
@@ -61,5 +71,6 @@ export function ignorePaths(paths: Iterable<AbsolutePath>): Ignorer {
             const ignored = new Set(dir.entries.keys().filter(name => set.has(join(dir.path, name))));
             return { ignored };
         },
+        relocatable: (from, to) => !set.values().some(p => parent(p) === from.path || parent(p) === to.path),
     };
 }

@@ -37,17 +37,17 @@
     "results": {
         "sauron": {
             "crawl": {
-                "fs.promises.lstat": 1,
+                "fs.promises.lstat": 260,
                 "fs.promises.open": 1,
                 "fs.promises.readdir": 1556,
                 "fs.promises.realpath": 2,
                 "fs.promises.stat": 2,
                 "fs.watch": 1559,
-                "fs.total": 3121,
-                "coverage.functions": 389061,
-                "coverage.blocks": 457568,
+                "fs.total": 3380,
+                "coverage.functions": 397887,
+                "coverage.blocks": 460219,
                 "inotify.watches": 1559,
-                "heap.retained": 7231160
+                "heap.retained": 7448832
             },
             "edit": {
                 "fs.total": 0,
@@ -57,26 +57,27 @@
             "burst": {
                 "fs.promises.readdir": 5,
                 "fs.total": 5,
-                "coverage.functions": 20425,
-                "coverage.blocks": 16855
+                "coverage.functions": 20415,
+                "coverage.blocks": 17361
             },
             "add-tree": {
+                "fs.promises.lstat": 6,
                 "fs.promises.readdir": 32,
                 "fs.watch": 31,
-                "fs.total": 63,
-                "coverage.functions": 3003,
-                "coverage.blocks": 3006
+                "fs.total": 69,
+                "coverage.functions": 3025,
+                "coverage.blocks": 3081
             },
             "remove-tree": {
                 "fs.promises.readdir": 1,
                 "fs.total": 1,
-                "coverage.functions": 39131,
-                "coverage.blocks": 49546,
+                "coverage.functions": 38611,
+                "coverage.blocks": 49895,
                 "inotify.watches": 1331
             },
             "close": {
                 "fs.total": 0,
-                "coverage.functions": 1337,
+                "coverage.functions": 1338,
                 "coverage.blocks": 1327
             }
         },

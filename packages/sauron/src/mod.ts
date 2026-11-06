@@ -2,6 +2,7 @@ export type { Backend, BackendError, RawEvent } from "./backend/mod.js";
 export { createNodeBackend } from "./backend/node.js";
 export { gitignore, type GitignoreOptions } from "./ignore/gitignore.js";
 export {
+    type DirectoryLocation,
     type DirectoryVisit,
     ignoreAll,
     ignoreNothing,

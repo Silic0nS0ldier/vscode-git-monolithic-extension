@@ -65,3 +65,27 @@ test("ignoreAll unions ignored entries and triggers", async t => {
     t.deepEqual(sorted(combined.triggers), [".gitignore"]);
     t.not(scope.child, undefined);
 });
+
+function at(relative: string): { path: ReturnType<typeof p>; relative: RelativePath } {
+    return { path: p(`/r/${relative}`), relative: relative as RelativePath };
+}
+
+test("a move is relocatable unless a pattern could apply differently at either place", t => {
+    const relocatable = (patterns: string[], from: string, to: string) =>
+        gitignore({ patterns }).relocatable!(at(from), at(to));
+    t.true(relocatable([], "a", "b"));
+    t.true(relocatable(["*.log", "build/"], "a/b", "c"), "basename patterns");
+    t.true(relocatable(["/top", "x/y"], "a/b", "c/d"), "anchored at other depths");
+    t.false(relocatable(["x/y/z"], "a/b", "x/y"), "may match an entry where it moved to");
+    t.false(relocatable(["x/y/z"], "x/y", "a/b"), "may have matched an entry where it moved from");
+    t.false(relocatable(["*.log"], "a/b", "c.log/d"), "ignored on the way to where it moved");
+    t.false(relocatable(["a/**/b"], "a/b", "c/d"), "`**` may match at any depth");
+    t.false(relocatable([" #lead/ing"], "a", "b"), "a leading space does not start a comment");
+    t.true(relocatable(["#lead/ing"], "a", "b"), "a comment");
+});
+
+test("rules from a .gitignore within a moved directory are not relocatable", async t => {
+    const a = await visit(gitignore(), "a", { ".gitignore": "file" }, { ".gitignore": "*.tmp" });
+    t.false(a.child!.relocatable!(at("a"), at("b")));
+    t.false(a.child!.relocatable!(at("a/sub"), at("b/sub")));
+});

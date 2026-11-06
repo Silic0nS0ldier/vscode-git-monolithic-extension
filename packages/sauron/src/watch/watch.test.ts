@@ -2,6 +2,7 @@ import test from "ava";
 import { isErr, unwrap } from "monolithic-git-interop/util/result";
 import { createFakeBackend, type FakeBackend, p } from "../backend/fake.stub.js";
 import { gitignore } from "../ignore/gitignore.js";
+import type { Ignorer } from "../ignore/mod.js";
 import type { AbsolutePath } from "../path.js";
 import { watch, type Watcher, type WatchEvent, type WatchOptions } from "./mod.js";
 
@@ -899,18 +900,20 @@ test("a metadata change to a file is reported as that file", async t => {
     t.deepEqual(all(await until(watcher, "changes")), ["/repo/f"]);
 });
 
-test("a metadata change to a directory re-crawls it, as it may have been replaced", async t => {
+test("a metadata change to a directory is reported as a subtree, and keeps its watches", async t => {
     const fake = createFakeBackend();
     fake.mkdir("/repo/a/b");
     await using watcher = start(fake);
     await crawled(watcher);
 
+    // Indistinguishable from the directory being replaced, until its identity is checked.
     fake.touch("/repo/a");
 
     const changes = await until(watcher, "changes");
     t.deepEqual(sorted(changes.subtrees), ["/repo/a"]);
-    await eventually(() => fake.watchCalls.get(p("/repo/a/b")) === 2);
-    t.true(fake.watched.has(p("/repo/a/b")));
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/a", "/repo/a/b"]);
+    t.is(fake.watchCalls.get(p("/repo/a")), 1);
+    t.is(fake.watchCalls.get(p("/repo/a/b")), 1);
 });
 
 test("a root that is a symlink is watched as one when root symlinks are not followed", async t => {
@@ -930,3 +933,228 @@ test("a root that is a symlink is watched as one when root symlinks are not foll
     await eventually(() => fake.watched.has(p("/repo/a")));
     t.pass();
 });
+
+/** Records the path of every directory `inner` (or an ignorer it hands down) visits. */
+function counting(inner: Ignorer, visits: string[]): Ignorer {
+    return {
+        ...inner.triggers === undefined ? {} : { triggers: inner.triggers },
+        relocatable: (from, to) => inner.relocatable?.(from, to) ?? false,
+        async visit(dir) {
+            visits.push(dir.path);
+            const scope = await inner.visit(dir);
+            return scope.child === undefined ? scope : { ignored: scope.ignored, child: counting(scope.child, visits) };
+        },
+    };
+}
+
+/** Directories watched at least once, and how often, below `dir`. */
+function watchedBelow(fake: FakeBackend, dir: string): Record<string, number> {
+    return Object.fromEntries(fake.watchCalls.entries().filter(([path]) => path.startsWith(dir + "/")));
+}
+
+test("a directory renamed within the root keeps its watches, and reports changes at its new path", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/sub/deep");
+    const visits: string[] = [];
+    await using watcher = start(fake, { ignore: counting(gitignore(), visits) });
+    await crawled(watcher);
+    visits.length = 0;
+
+    fake.rename("/repo/a", "/repo/b");
+
+    t.deepEqual(sorted((await until(watcher, "changes")).subtrees), ["/repo/a", "/repo/b"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/b", "/repo/b/sub", "/repo/b/sub/deep"]);
+    t.deepEqual(watchedBelow(fake, "/repo/b"), {});
+    // Only the directory holding it is listed (and visited) again, to find it there.
+    t.deepEqual(visits, ["/repo"]);
+    t.is(fake.readdirAttempts.get(p("/repo/a/sub")), 1);
+
+    fake.write("/repo/b/sub/deep/new");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/b/sub/deep/new"]);
+});
+
+test("a directory moved to another parent keeps its watches", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/x/a/sub");
+    fake.mkdir("/repo/y");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.rename("/repo/x/a", "/repo/y/a");
+
+    t.deepEqual(sorted((await until(watcher, "changes")).subtrees), ["/repo/x/a", "/repo/y/a"]);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/x", "/repo/y", "/repo/y/a", "/repo/y/a/sub"]);
+    t.deepEqual(watchedBelow(fake, "/repo/y"), {});
+});
+
+test("a directory moved out of the root has its watches released", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/sub");
+    fake.mkdir("/elsewhere");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.rename("/repo/a", "/elsewhere/a");
+
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/a"]);
+    await eventually(() => sorted(fake.watched).join() === "/,/repo");
+    t.pass();
+});
+
+test("a directory moved twice before it is found again is crawled afresh, as it may have been deleted", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/sub");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.rename("/repo/a", "/repo/tmp");
+    fake.rename("/repo/tmp", "/repo/a");
+
+    // `tmp` is gone before its directory is listed again, so is not reported.
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/a"]);
+    // Told of both moves, it cannot tell them from being deleted.
+    await eventually(() => fake.watchCalls.get(p("/repo/a/sub")) === 2);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/a", "/repo/a/sub"]);
+});
+
+test("a deleted directory is not mistaken for a new one that reuses its identity", async t => {
+    const fake = createFakeBackend();
+    fake.reuseIds = true;
+    fake.mkdir("/repo/a/sub");
+    await using watcher = start(fake);
+    await crawled(watcher);
+
+    fake.remove("/repo/a");
+    fake.mkdir("/repo/a/sub");
+
+    await eventually(() => fake.watchCalls.get(p("/repo/a/sub")) === 2);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/a", "/repo/a/sub"]);
+    await until(watcher, "changes");
+    fake.write("/repo/a/sub/new");
+    t.true((await collect(watcher)).includes("/repo/a/sub/new"));
+});
+
+test("a directory moved where ignore rules differ is visited again from its last listing", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/gen/deep");
+    fake.mkdir("/repo/a/keep");
+    fake.write("/repo/x/.gitignore", "gen/");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+
+    fake.rename("/repo/a", "/repo/x/a");
+    await until(watcher, "changes");
+    await eventually(() => !fake.watched.has(p("/repo/x/a/gen")));
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/x", "/repo/x/a", "/repo/x/a/keep"]);
+    t.deepEqual(watchedBelow(fake, "/repo/x"), {});
+    t.is(fake.readdirAttempts.get(p("/repo/a/keep")), 1);
+
+    // Moved back, `gen` is no longer ignored, so is crawled.
+    fake.rename("/repo/x/a", "/repo/a");
+    await eventually(() => fake.watched.has(p("/repo/a/gen/deep")));
+    t.is(fake.watchCalls.get(p("/repo/a/keep")), 1);
+});
+
+test("a pattern anchored where a directory moves is applied to it", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/gen/deep");
+    fake.write("/repo/.gitignore", "/b/gen\n*.log");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+
+    fake.rename("/repo/a", "/repo/b");
+
+    await eventually(() => !fake.watched.has(p("/repo/b/gen")) && fake.watched.has(p("/repo/b")));
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/b"]);
+});
+
+test("a .gitignore within a moved directory still applies there", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/a/.gitignore", "/out\n*.tmp");
+    fake.mkdir("/repo/a/out");
+    fake.mkdir("/repo/a/src/out");
+    fake.mkdir("/repo/deeper");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+    t.false(fake.watched.has(p("/repo/a/out")));
+
+    fake.rename("/repo/a", "/repo/deeper/b");
+    await until(watcher, "changes");
+
+    await eventually(() => fake.watched.has(p("/repo/deeper/b/src/out")));
+    t.false(fake.watched.has(p("/repo/deeper/b/out")));
+    fake.write("/repo/deeper/b/src/x.tmp");
+    fake.write("/repo/deeper/b/src/y");
+    t.deepEqual(await collect(watcher), ["/repo/deeper/b/src/y"]);
+});
+
+test("a directory being listed when it moves is crawled afresh where it went", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/sub");
+    await using watcher = start(fake);
+    await crawled(watcher);
+    fake.readdirDelay = dir => dir === p("/repo/a/sub") ? 30 : 0;
+
+    fake.mkdir("/repo/a/sub/new");
+    await new Promise(resolve => setTimeout(resolve, 5));
+    fake.rename("/repo/a", "/repo/b");
+    fake.mkdir("/repo/a/sub");
+
+    await eventually(() =>
+        sorted(fake.watched).join()
+            === ["/", "/repo", "/repo/a", "/repo/a/sub", "/repo/b", "/repo/b/sub", "/repo/b/sub/new"].join()
+    );
+    await until(watcher, "changes");
+    fake.write("/repo/b/sub/new/x");
+    fake.write("/repo/a/sub/y");
+    t.deepEqual(await collect(watcher), ["/repo/a/sub/y", "/repo/b/sub/new/x"]);
+});
+
+test("a change while a moved directory's ignore rules are applied again is reported", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/a/sub/f");
+    // Visiting where the directory moved to is slow, and always needed.
+    const slow: Ignorer = {
+        async visit(dir) {
+            if (dir.path.startsWith("/repo/b")) {
+                await new Promise(resolve => setTimeout(resolve, 60));
+            }
+            return { ignored: new Set() };
+        },
+    };
+    await using watcher = start(fake, { ignore: slow, settle: { quiet: 5, maxWait: 20 } });
+    await crawled(watcher);
+
+    fake.rename("/repo/a", "/repo/b");
+    t.deepEqual(sorted((await until(watcher, "changes")).subtrees), ["/repo/a", "/repo/b"]);
+    // Delivered before the subtree is in place, so this is only seen as a reason to list `sub` again, which
+    // would not show a change to an existing file.
+    fake.write("/repo/b/sub/f", "changed");
+
+    t.true(all(await until(watcher, "changes")).some(path => "/repo/b/sub/f".startsWith(path)));
+});
+
+test("a moved directory is released even when its old parent cannot be listed again", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/sub");
+    fake.mkdir("/elsewhere");
+    await using watcher = start(fake, { retry: { attempts: 0 } });
+    await crawled(watcher);
+    fake.failReaddir = dir => dir === p("/repo") ? "other" : null;
+    fake.write("/repo/x");
+    await until(watcher, "degraded");
+    // Until the failed rescan is over, so none is in flight.
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    fake.rename("/repo/a", "/elsewhere/a");
+
+    await eventually(() => sorted(fake.watched).join() === "/,/repo");
+    t.pass();
+});
+
+/** Paths reported in `changes` until things go quiet. */
+async function collect(watcher: Watcher): Promise<string[]> {
+    const events = record(watcher);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return changed(events);
+}
