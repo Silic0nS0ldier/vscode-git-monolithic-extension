@@ -57,10 +57,16 @@ filegroup(
 sh_library(
     name = "service_scripts",
     srcs = [
+        "build-code-server-state.sh",
         "build-workspace-fixture.sh",
         "code-server.sh",
         "workspace-fixture.sh",
     ] + glob(["fixtures/*.sh"]),
+)
+
+sh_binary(
+    name = "build_code_server_state",
+    srcs = ["build-code-server-state.sh"],
 )
 
 sh_binary(
@@ -83,7 +89,6 @@ sh_binary(
     data = [
         ":code_server_binary",
         ":code_server_dist",
-        "//extension/vsix:git_monolithic_unpacked",
     ],
     target_compatible_with = LINUX_ONLY,
 )
@@ -127,20 +132,41 @@ service_test(
 )
 
 # The editor opens the suite's workspace from the page URL, so only workspace trust varies.
+# The state is built ahead of time, installing the shipped VSIX so every suite tests the real package.
 [
     [
+        genrule(
+            name = prefix + "code_server_state",
+            srcs = ["//extension/vsix:git_monolithic"],
+            outs = [prefix + "code_server_state.tar"],
+            cmd = " ".join([
+                "$(execpath :build_code_server_state)",
+                "$(execpath :code_server_binary)",
+                "$(execpath //extension/vsix:git_monolithic)",
+                trust,
+                "$@",
+                "$(BSDTAR_BIN)",
+            ]),
+            target_compatible_with = LINUX_ONLY,
+            toolchains = ["@bsd_tar_toolchains//:resolved_toolchain"],
+            tools = [
+                ":build_code_server_state",
+                ":code_server_binary",
+                ":code_server_dist",
+            ],
+        ),
         itest_service(
             name = prefix + "code_server_service",
             args = [
                 "$(rootpath :code_server_binary)",
-                "$(rootpath //extension/vsix:git_monolithic_unpacked)",
+                "$(rootpath :%scode_server_state)" % prefix,
                 "$${PORT}",
                 trust,
             ],
             autoassign_port = True,
             data = [
                 ":code_server_binary",
-                "//extension/vsix:git_monolithic_unpacked",
+                ":" + prefix + "code_server_state",
             ],
             exe = ":code_server",
             expected_start_duration = "5s",

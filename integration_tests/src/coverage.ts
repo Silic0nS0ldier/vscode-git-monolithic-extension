@@ -20,8 +20,8 @@ import v8ToIstanbul from "v8-to-istanbul";
 /** `bazel coverage` sets `COVERAGE_DIR` for the test action. */
 export const COVERAGE_DIR = process.env["COVERAGE_DIR"];
 
-/** Root of the unpacked extension directory (`//extension/vsix:git_monolithic_unpacked`). */
-const EXTENSION_DIR = "/extension/vsix/git_monolithic_inputs_dir/";
+/** An extension installed into code-server's extensions directory, e.g. `siliconsoldier.git-monolithic-0.8.0/`. */
+const EXTENSION_DIR = /\/extensions\/siliconsoldier\.git-monolithic-[^/]+\//;
 
 interface CoverageRange {
     startOffset: number;
@@ -58,7 +58,7 @@ export function rawCoverageDir(testTmpDir: string): string {
 async function extensionScripts(file: string): Promise<ScriptCoverage[]> {
     try {
         const { result } = JSON.parse(await readFile(file, "utf8")) as { result: ScriptCoverage[] };
-        return result.filter(script => script.url.includes(EXTENSION_DIR));
+        return result.filter(script => EXTENSION_DIR.test(script.url));
     } catch {
         return [];
     }
@@ -104,8 +104,12 @@ function bundleDir(): string {
 
 /** Where a script sits in the bundle, e.g. `main.js` or `chunks/<name>.js`. */
 function bundlePath(url: string): string {
-    // `.../extension/vsix/git_monolithic_inputs_dir/src/<bundle path>`
-    return url.slice(url.indexOf(EXTENSION_DIR) + EXTENSION_DIR.length + "src/".length);
+    // `.../extensions/siliconsoldier.git-monolithic-<version>/src/<bundle path>`
+    const match = EXTENSION_DIR.exec(url);
+    if (match === null) {
+        throw new Error(`${url} is not in the installed extension`);
+    }
+    return url.slice(match.index + match[0].length + "src/".length);
 }
 
 /**

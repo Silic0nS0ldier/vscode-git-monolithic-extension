@@ -2,10 +2,9 @@ load("@aspect_bazel_lib//lib:copy_directory.bzl", "copy_directory")
 load("@aspect_bazel_lib//lib:copy_file.bzl", "copy_file")
 load("@aspect_bazel_lib//lib:output_files.bzl", "output_files")
 load("@aspect_rules_js//js:defs.bzl", "js_library")
-load("@jq.bzl//jq:jq.bzl", "jq")
 load("@rules_shell//shell:sh_library.bzl", "sh_library")
 load("//build_defs/lint:linters.bzl", "shellcheck_test")
-load("//build_defs/vsix_package:vsix_package.bzl", "vsix_package", "vsix_unpacked")
+load("//build_defs/vsix_package:vsix_package.bzl", "vsix_package")
 
 exports_files(
     ["package.json"],
@@ -25,31 +24,6 @@ js_library(
     name = "nls",
     srcs = ["package.nls.json"],
     visibility = ["//extension:__pkg__"],
-)
-
-jq(
-    name = "itest_manifest",
-    srcs = ["package.json"],
-    out = "itest-manifest/package.json",
-    filter = '.version = "0.0.0"',
-    visibility = [
-        "//extension:__pkg__",
-        "//integration_tests:__pkg__",
-    ],
-)
-
-filegroup(
-    name = "runtime_files",
-    srcs = [
-        "package.nls.json",
-        "src/askpass.sh",
-        "src/askpass-empty.sh",
-    ] + glob([
-        "languages/**",
-        "resources/**",
-        "syntaxes/**",
-    ]),
-    visibility = ["//integration_tests:__pkg__"],
 )
 
 # Copy bundled sources to src/
@@ -112,28 +86,6 @@ vsix_package(
         ":copy_bundle_main",
         ":copy_license",
     ],
-)
-
-filegroup(
-    name = "git_monolithic_unpacked",
-    srcs = [":git_monolithic"],
-    output_group = "unpacked",
-    visibility = ["//integration_tests:__pkg__"],
-)
-
-vsix_unpacked(
-    name = "git_monolithic_test_unpacked",
-    srcs = [
-        ":copy_bundle_askpass_main",
-        ":copy_bundle_assets",
-        ":copy_bundle_chunks",
-        ":copy_bundle_main",
-        ":itest_manifest",
-        ":runtime_files",
-    ],
-    replace_prefixes = {
-        "itest-manifest/package.json": "package.json",
-    },
     visibility = ["//integration_tests:__pkg__"],
 )
 

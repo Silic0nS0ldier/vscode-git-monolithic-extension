@@ -47,17 +47,3 @@ test("The manifest agrees with the commands the extension registers and referenc
     t.deepEqual(unexpected, [], "New manifest problems");
     t.deepEqual(stale, [], "Fixed problems still listed in KNOWN_ISSUES");
 });
-
-test("The integration test manifest differs only in version", t => {
-    const manifest = JSON.parse(readFileSync("vsix/package.json", "utf8")) as {
-        version: string;
-        [key: string]: unknown;
-    };
-    const itestManifest = JSON.parse(readFileSync("vsix/itest-manifest/package.json", "utf8")) as {
-        version: string;
-        [key: string]: unknown;
-    };
-
-    t.is(itestManifest.version, "0.0.0");
-    t.deepEqual({ ...itestManifest, version: manifest.version }, manifest);
-});
