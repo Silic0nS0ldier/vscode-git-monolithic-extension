@@ -168,6 +168,10 @@ depend on the kind of entry (e.g. `cache/` ignores only a directory), which only
   by default, and is treated as missing while it dangles or loops, until its target appears or the loop is broken.
   With `followRootSymlinks: false` the symlink itself
   is watched like a file root: changes to it are reported, and its target is never read.
+- **Symlink targets** (the path a symlink holds) are tracked, as git stores them. Linux cannot change one in place,
+  so pointing a symlink elsewhere replaces it, which is reported like any replacement: by `rm` and `ln -s`, or
+  atomically by renaming a new symlink over it (as `ln -sfn` does), even to the same path. What a symlink leads to
+  is never followed: a change there is only reported where it happens, if that is within a root.
 - **Type changes** (e.g. a file replaced by a FIFO, or a directory by a symlink) are reported. A directory is
   watched once it appears and no longer once replaced.
 - **Metadata** changes are reported: permissions, owner and group, atime and mtime set explicitly, extended
@@ -211,7 +215,6 @@ detection (the extension disables it).
 - Native recursive backends (FSEvents, `ReadDirectoryChangesW`) and watchman/fsmonitor.
 - A polling fallback for `degraded` subtrees.
 - Caching `.gitignore` contents across rescans of the same directory.
-- Reporting symlink target changes (symlinks are reported but never followed).
 
 ## Considered and rejected
 

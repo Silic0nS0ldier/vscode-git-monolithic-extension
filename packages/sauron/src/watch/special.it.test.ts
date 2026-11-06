@@ -211,6 +211,40 @@ describe(
             assert.ok(!covers(seen, at("pre", "loop", "via-loop")));
         });
 
+        it("a symlink is reported when its target changes, however it is replaced", TIMEOUT, async () => {
+            const dir = at("retarget");
+            const link = at("retarget", "link");
+            await step(() => fs.mkdir(dir), dir);
+            await step(() => fs.symlink("f", link), link);
+
+            await step(async () => {
+                await fs.rm(link);
+                await fs.symlink("g", link);
+            }, link);
+            // As `ln -sfn` does: a new symlink renamed over the old one.
+            await step(async () => {
+                await fs.symlink(outside, at("retarget", "tmp"));
+                await fs.rename(at("retarget", "tmp"), link);
+            }, link);
+            // Even to the same target: a new entry, whose change time git checks.
+            await step(async () => {
+                await fs.symlink(outside, at("retarget", "tmp"));
+                await fs.rename(at("retarget", "tmp"), link);
+            }, link);
+            assert.equal(await fs.readlink(link), outside);
+        });
+
+        it("what a symlink leads to is never reported through it", TIMEOUT, async () => {
+            const link = at("retarget", "to-file");
+            const file = at("retarget", "file");
+            await step(() => fs.writeFile(file, ""), file);
+            await step(() => fs.symlink("file", link), link);
+
+            const seen = await step(() => fs.writeFile(file, "changed"), file);
+            assert.ok(!covers(seen, link));
+            await notReported(() => fs.writeFile(path.join(outside, "file"), "changed"), at("retarget", "link"));
+        });
+
         it("a .gitignore that is a FIFO or socket is not read", TIMEOUT, async () => {
             await step(
                 () => fs.writeFile(path.join(root, "pre", "fifo-ignore", "a.txt"), ""),
@@ -466,6 +500,13 @@ describe(
             await fs.rm(link);
             await fs.symlink(outside, link);
             await reported(linkWatcher, abs(link));
+
+            // Pointed elsewhere as `ln -sfn` does, and back to the same target: each is a new symlink.
+            for (const to of [target, target]) {
+                await fs.symlink(to, `${link}.tmp`);
+                await fs.rename(`${link}.tmp`, link);
+                await reported(linkWatcher, abs(link));
+            }
         });
 
         it("no errors are reported, other than for the directory made unreadable", TIMEOUT, async () => {

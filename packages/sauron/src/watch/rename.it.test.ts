@@ -475,3 +475,21 @@ test("a root symlink in a loop resolves once the loop is broken", { skip }, asyn
     assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root"] });
     await s.watching(["a", "a/sub"], above(s));
 });
+
+test("a root symlink pointed elsewhere watches its new target only", { skip }, async () => {
+    const s = await session(at => {
+        mkdirs(at, "t1/sub", "t2/sub");
+        fs.symlinkSync("t1", at("root"));
+    }, "root");
+    await s.watching(["t1", "t1/sub"], above(s));
+
+    // As `ln -sfn` does: a new symlink renamed over the old one.
+    fs.symlinkSync("t2", s.at("tmp"));
+    fs.renameSync(s.at("tmp"), s.at("root"));
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root"] });
+    await s.watching(["t2", "t2/sub"], above(s));
+    fs.writeFileSync(s.at("t1/sub/old"), "");
+    fs.writeFileSync(s.at("t2/sub/new"), "");
+    assert.deepEqual(await s.nextChanges(), { paths: ["root/sub/new"], subtrees: [] });
+});
