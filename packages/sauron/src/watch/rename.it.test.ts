@@ -411,3 +411,67 @@ test("directories swapped by renames keep their watches", { skip }, async () => 
     fs.writeFileSync(s.at("root/b/sub/y"), "");
     assert.deepEqual(await s.nextChanges(), { paths: ["root/a/sub/x", "root/b/sub/y"], subtrees: [] });
 });
+
+test("a dangling root symlink is watched once its target appears", { skip }, async () => {
+    const s = await session(at => fs.symlinkSync("t", at("root")), "root");
+    await s.watching([], above(s));
+
+    mkdirs(s.at, "t/sub");
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root"] });
+    await s.watching(["t", "t/sub"], above(s));
+});
+
+test("a dangling root symlink's target is found as the directories on the way are created", { skip }, async () => {
+    const s = await session(at => fs.symlinkSync(at("a/b/t"), at("root")), "root");
+
+    fs.mkdirSync(s.at("a"));
+    await s.watching(["a"], above(s));
+    fs.mkdirSync(s.at("a/b"));
+    await s.watching(["a", "a/b"], above(s));
+    assert.deepEqual(s.changes, []);
+
+    fs.mkdirSync(s.at("a/b/t"));
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root"] });
+    await s.watching(["a", "a/b", "a/b/t"], above(s));
+});
+
+test("a dangling root symlink resolves once a symlink on the way is pointed elsewhere", { skip }, async () => {
+    const s = await session(at => {
+        mkdirs(at, "y/sub");
+        fs.symlinkSync("l2", at("root"));
+        fs.symlinkSync("x", at("l2"));
+    }, "root");
+
+    fs.symlinkSync("y", s.at("tmp"));
+    fs.renameSync(s.at("tmp"), s.at("l2"));
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root"] });
+    await s.watching(["y", "y/sub"], above(s));
+});
+
+test("a dangling root symlink resolves once a directory symlinked on the way appears", { skip }, async () => {
+    const s = await session(at => {
+        fs.symlinkSync("m/t", at("root"));
+        fs.symlinkSync("real", at("m"));
+    }, "root");
+
+    mkdirs(s.at, "real/t/sub");
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root"] });
+    await s.watching(["real", "real/t", "real/t/sub"], above(s));
+});
+
+test("a root symlink in a loop resolves once the loop is broken", { skip }, async () => {
+    const s = await session(at => {
+        fs.symlinkSync("a", at("root"));
+        fs.symlinkSync("root", at("a"));
+    }, "root");
+    await s.watching([], above(s));
+
+    fs.rmSync(s.at("a"));
+    mkdirs(s.at, "a/sub");
+
+    assert.deepEqual(await s.nextChanges(), { paths: [], subtrees: ["root"] });
+    await s.watching(["a", "a/sub"], above(s));
+});

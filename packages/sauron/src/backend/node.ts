@@ -100,6 +100,16 @@ export function createNodeBackend(): Backend {
         },
         stat: (target, signal) => statEntry(target, signal, true),
         lstat: (target, signal) => statEntry(target, signal, false),
+        async readlink(target, signal) {
+            try {
+                signal.throwIfAborted();
+                return ok(await fs.promises.readlink(target, "utf8"));
+            } catch (e) {
+                const error = toBackendError(target, e);
+                // EINVAL: not a symlink.
+                return error.type === "not-found" || errorCode(e) === "EINVAL" ? ok(null) : err(error);
+            }
+        },
         async realpath(target, signal) {
             try {
                 signal.throwIfAborted();
