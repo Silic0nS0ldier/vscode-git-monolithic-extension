@@ -385,6 +385,31 @@ importers:
         specifier: 9.1.0
         version: 9.1.0
 
+  packages/sauron:
+    dependencies:
+      '@types/node':
+        specifier: catalog:vscode
+        version: 24.13.3
+      ignore:
+        specifier: ^7.0.12
+        version: 7.0.14
+      monolithic-git-interop:
+        specifier: workspace:^
+        version: link:../git
+    devDependencies:
+      '@bazel/runfiles':
+        specifier: 6.5.0
+        version: 6.5.0
+      ava:
+        specifier: 'catalog:'
+        version: 8.3.0(rollup@4.67.4)(supports-color@7.2.0)
+      monolithic-git-wasm:
+        specifier: workspace:^
+        version: link:../wasm
+      watcher:
+        specifier: ^2.3.1
+        version: 2.3.1(patch_hash=aa7937374fa215a4c53d3c965a60db1da36cac88fabf716f76bb672746fc4983)
+
   packages/vscode-manifest:
     dependencies:
       typescript:
