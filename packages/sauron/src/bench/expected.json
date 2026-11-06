@@ -69,7 +69,7 @@
             "remove-tree": {
                 "fs.promises.readdir": 1,
                 "fs.total": 1,
-                "coverage.functions": 38872,
+                "coverage.functions": 39131,
                 "coverage.blocks": 49546,
                 "inotify.watches": 1329
             },

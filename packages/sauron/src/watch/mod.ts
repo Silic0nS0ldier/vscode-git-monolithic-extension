@@ -699,6 +699,11 @@ function createWatcher(config: Config): Watcher {
             return;
         }
         if (node.ignored.has(name)) {
+            // Rules may depend on the kind of entry, which only a `rename` (creation, removal) can change.
+            if (type === "rename") {
+                node.pendingNames.add(name);
+                scheduleRescan(node, false);
+            }
             return;
         }
         if (!node.entries.has(name)) {

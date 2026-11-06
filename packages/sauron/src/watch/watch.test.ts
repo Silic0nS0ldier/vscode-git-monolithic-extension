@@ -157,6 +157,22 @@ test("editing a .gitignore re-evaluates its subtree", async t => {
     t.pass();
 });
 
+test("an ignored entry replaced by an entry the rules keep is watched and reported", async t => {
+    const fake = createFakeBackend();
+    // Ignores a file named `cache`, but not a directory.
+    fake.write("/repo/.gitignore", "/cache\n!/cache/");
+    fake.write("/repo/cache");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+
+    fake.remove("/repo/cache");
+    fake.mkdir("/repo/cache/sub");
+
+    await eventually(() => fake.watched.has(p("/repo/cache/sub")));
+    const changes = await until(watcher, "changes");
+    t.deepEqual(all(changes), ["/repo/cache"]);
+});
+
 test("suspension holds changes back and releases them as one batch", async t => {
     const fake = createFakeBackend();
     fake.mkdir("/repo");
