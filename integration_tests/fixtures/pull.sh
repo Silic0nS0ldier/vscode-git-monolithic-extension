@@ -18,7 +18,7 @@ git commit --message "Base"
 remote="${workspace}-remote.git"
 rm -rf "$remote"
 "$git_bin" init --bare --initial-branch=main "$remote"
-git remote add origin "$remote"
+git remote add origin "../$remote"
 git push --set-upstream origin main
 
 echo "changed" >"$workspace/tracked.txt"
