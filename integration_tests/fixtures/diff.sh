@@ -12,9 +12,8 @@ workspace="$2"
 
 git() { "$git_bin" -C "$workspace" "$@"; }
 
-# Outside the workspace so it is not itself a change in the repository under test. The
-# fixture task owns this path, so a rerun has to clear whatever the last one left.
-origin="${TEST_TMPDIR:-/tmp}/diff-submodule-origin"
+# Outside the workspace so it is not itself a change in the repository under test.
+origin="diff-submodule-origin"
 rm -rf "$origin"
 "$git_bin" init --initial-branch=main "$origin"
 origin_git() { "$git_bin" -C "$origin" "$@"; }
@@ -41,9 +40,11 @@ git add .vscode/settings.json
 git commit --message "Initial commit"
 
 # `submodule add` clones, and cloning over the file transport is refused by default.
-git -c protocol.file.allow=always submodule add "$origin" sub
+git -c protocol.file.allow=always submodule add "../$origin" sub
+git config submodule.sub.url "../$origin"
 
 sub_git() { "$git_bin" -C "$workspace/sub" "$@"; }
+sub_git config remote.origin.url "../../$origin"
 
 sub_git checkout --quiet main~2
 git add .gitmodules sub

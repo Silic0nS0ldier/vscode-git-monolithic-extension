@@ -57,9 +57,15 @@ filegroup(
 sh_library(
     name = "service_scripts",
     srcs = [
+        "build-workspace-fixture.sh",
         "code-server.sh",
         "workspace-fixture.sh",
     ] + glob(["fixtures/*.sh"]),
+)
+
+sh_binary(
+    name = "build_workspace_fixture",
+    srcs = ["build-workspace-fixture.sh"],
 )
 
 sh_binary(

@@ -29,7 +29,7 @@ git commit --message "Base"
 origin="${workspace}-origin.git"
 rm -rf "$origin"
 "$git_bin" init --bare --initial-branch=main "$origin"
-git remote add origin "$origin"
+git remote add origin "../$origin"
 git push --set-upstream origin main
 git push origin main:feature main:topic main:untracked main:retired
 # A remote that was added rather than cloned has no `origin/HEAD` until this sets it.

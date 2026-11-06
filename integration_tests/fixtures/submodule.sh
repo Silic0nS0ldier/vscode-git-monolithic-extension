@@ -10,9 +10,8 @@ workspace="$2"
 
 git() { "$git_bin" -C "$workspace" "$@"; }
 
-# Outside the workspace so it is not itself a change in the repository under test. The
-# fixture task owns this path, so a rerun has to clear whatever the last one left.
-origin="${TEST_TMPDIR:-/tmp}/submodule-origin"
+# Outside the workspace so it is not itself a change in the repository under test.
+origin="submodule-origin"
 rm -rf "$origin"
 "$git_bin" init --initial-branch=main "$origin"
 origin_git() { "$git_bin" -C "$origin" "$@"; }
@@ -41,7 +40,13 @@ git commit --message "Initial commit"
 
 for sub in sub libs/other; do
     # `submodule add` clones, and cloning over the file transport is refused by default.
-    git -c protocol.file.allow=always submodule add "$origin" "$sub"
+    git -c protocol.file.allow=always submodule add "../$origin" "$sub"
+    git config "submodule.$sub.url" "../$origin"
+    relative_origin="../../$origin"
+    if [[ "$sub" == */* ]]; then
+        relative_origin="../$relative_origin"
+    fi
+    "$git_bin" -C "$workspace/$sub" config remote.origin.url "$relative_origin"
     "$git_bin" -C "$workspace/$sub" checkout --quiet main~1
     git add "$sub"
 done

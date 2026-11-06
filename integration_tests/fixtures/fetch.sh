@@ -18,7 +18,7 @@ git commit --message "Base"
 origin="${workspace}-origin.git"
 rm -rf "$origin"
 "$git_bin" init --bare --initial-branch=main "$origin"
-git remote add origin "$origin"
+git remote add origin "../$origin"
 git push --set-upstream origin main
 
 # Fetched while it exists so the workspace ends up with a remote-tracking ref that the
@@ -40,4 +40,5 @@ git update-ref refs/remotes/origin/main HEAD
 secondary="${workspace}-secondary.git"
 rm -rf "$secondary"
 "$git_bin" clone --bare "$workspace" "$secondary"
-git remote add secondary "$secondary"
+"$git_bin" -C "$secondary" config remote.origin.url "../$workspace"
+git remote add secondary "../$secondary"

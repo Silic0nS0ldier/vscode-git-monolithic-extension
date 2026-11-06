@@ -22,15 +22,35 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
         size = "small",
     )
 
+    native.genrule(
+        name = name + "_fixture",
+        srcs = [fixture],
+        outs = [name + "_fixture.tar"],
+        cmd = " ".join([
+            "$(location :build_workspace_fixture)",
+            "$(location //build_defs/git_bin:git)",
+            workspace_subdir,
+            "$(location %s)" % fixture,
+            "$@",
+            "$(BSDTAR_BIN)",
+        ]),
+        toolchains = ["@bsd_tar_toolchains//:resolved_toolchain"],
+        tools = [
+            ":build_workspace_fixture",
+            "//build_defs/git_bin:dist",
+            "//build_defs/git_bin:git",
+        ],
+        target_compatible_with = LINUX_ONLY,
+    )
+
     itest_task(
         name = name + "_fixture_task",
         args = [
             "$(rootpath //build_defs/git_bin:git)",
-            workspace_subdir,
-            "$(rootpath %s)" % fixture,
+            "$(rootpath :%s_fixture)" % name,
         ],
         data = [
-            fixture,
+            ":" + name + "_fixture",
             "//build_defs/git_bin:git",
         ],
         exe = ":workspace_fixture",
@@ -113,8 +133,9 @@ scm_itest = macro(
             configurable = False,
             doc = """
                 Script shaping the suite's repository. Run with the git binary and the
-                workspace directory as arguments, once `workspace-fixture.sh` has
-                initialised the repository.
+                workspace directory as arguments, once `build-workspace-fixture.sh` has
+                initialised the repository. The directory is relative to the fixture tree;
+                use relative URLs for sibling remotes so the archive can be relocated.
             """,
             mandatory = True,
         ),

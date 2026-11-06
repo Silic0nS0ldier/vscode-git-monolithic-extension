@@ -26,7 +26,7 @@ git switch main
 remote="${workspace}-remote.git"
 rm -rf "$remote"
 "$git_bin" init --bare --initial-branch=main "$remote"
-git remote add origin "$remote"
+git remote add origin "../$remote"
 git push --set-upstream origin main
 
 # Pushing updates `origin/feature`, so only the remote-tracking ref is left once the branch goes.
