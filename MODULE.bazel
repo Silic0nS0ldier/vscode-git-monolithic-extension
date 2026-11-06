@@ -50,7 +50,7 @@ use_repo(tar_toolchains, "bsd_tar_toolchains")
 # `repo_metadata(reproducible = True)`. Without it Bazel refetches them on every CI runner
 # instead of serving them from the remote repo contents cache.
 bazel_dep(name = "jq.bzl", version = "0.6.2")
-bazel_dep(name = "rules_buf", version = "0.5.4")
+bazel_dep(name = "rules_buf", version = "0.6.1")
 bazel_dep(name = "yq.bzl", version = "0.4.0")
 
 # Upstream marked only the `*_platform_repo` rules reproducible and stopped short of the
