@@ -11,6 +11,7 @@
         }
     },
     "devDependencies": {
+        "@bazel/runfiles": "6.5.0",
         "ava": "catalog:",
         "watcher": "^2.3.1"
     },

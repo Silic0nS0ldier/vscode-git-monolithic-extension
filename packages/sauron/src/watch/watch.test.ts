@@ -158,6 +158,96 @@ test("editing a .gitignore re-evaluates its subtree", async t => {
     t.pass();
 });
 
+test("a .gitignore added after the crawl releases what it ignores, only within its directory", async t => {
+    const fake = createFakeBackend();
+    fake.mkdir("/repo/a/gen/deep");
+    fake.mkdir("/repo/b/gen");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+    t.true(fake.watched.has(p("/repo/a/gen/deep")));
+
+    fake.write("/repo/a/.gitignore", "gen/");
+
+    t.deepEqual(sorted((await until(watcher, "changes")).subtrees), ["/repo/a"]);
+    await eventually(() => !fake.watched.has(p("/repo/a/gen")) && !fake.watched.has(p("/repo/a/gen/deep")));
+    t.true(fake.watched.has(p("/repo/b/gen")));
+    fake.write("/repo/a/gen/x");
+    fake.write("/repo/b/gen/y");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/b/gen/y"]);
+});
+
+test("a .gitignore removed after the crawl stops applying", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/a/.gitignore", "gen/\n*.log");
+    fake.mkdir("/repo/a/gen/deep");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+    t.false(fake.watched.has(p("/repo/a/gen")));
+
+    fake.remove("/repo/a/.gitignore");
+
+    t.deepEqual(sorted((await until(watcher, "changes")).subtrees), ["/repo/a"]);
+    await eventually(() => fake.watched.has(p("/repo/a/gen/deep")));
+    fake.write("/repo/a/x.log");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/a/x.log"]);
+});
+
+test("a .gitignore edited to ignore more releases what it now ignores", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/.gitignore", "*.log");
+    fake.mkdir("/repo/out/deep");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+    t.true(fake.watched.has(p("/repo/out/deep")));
+
+    fake.write("/repo/.gitignore", "*.log\n*.tmp\nout/");
+
+    t.true((await until(watcher, "changes")).subtrees.has(p("/repo")));
+    await eventually(() => !fake.watched.has(p("/repo/out")) && !fake.watched.has(p("/repo/out/deep")));
+    fake.write("/repo/x.tmp");
+    fake.write("/repo/out/x");
+    fake.write("/repo/x");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/x"]);
+});
+
+test("the deepest of several .gitignore files decides, and an edit to the top one reaches the bottom", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/.gitignore", "*.log");
+    fake.write("/repo/a/.gitignore", "!*.log");
+    fake.write("/repo/a/b/.gitignore", "drop.log");
+    fake.mkdir("/repo/a/b/c");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+
+    fake.write("/repo/x.log");
+    fake.write("/repo/a/y.log");
+    fake.write("/repo/a/b/drop.log");
+    fake.write("/repo/a/b/c/keep.log");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/a/b/c/keep.log", "/repo/a/y.log"]);
+
+    fake.write("/repo/.gitignore", "*.log\nc/");
+    t.true((await until(watcher, "changes")).subtrees.has(p("/repo")));
+    await eventually(() => !fake.watched.has(p("/repo/a/b/c")));
+    t.pass();
+});
+
+test("a directory a nested .gitignore re-included from its parent's rules is watched in full", async t => {
+    const fake = createFakeBackend();
+    fake.write("/repo/.gitignore", "v/*\n*.log");
+    fake.write("/repo/v/.gitignore", "!w/");
+    fake.mkdir("/repo/v/u");
+    fake.mkdir("/repo/v/w/deep");
+    await using watcher = start(fake, { ignore: gitignore() });
+    await crawled(watcher);
+    t.deepEqual(sorted(fake.watched), ["/", "/repo", "/repo/v", "/repo/v/w", "/repo/v/w/deep"]);
+
+    fake.write("/repo/v/u/x");
+    fake.write("/repo/v/w/x");
+    fake.write("/repo/v/w/x.log");
+    fake.write("/repo/v/w/deep/y");
+    t.deepEqual(all(await until(watcher, "changes")), ["/repo/v/w/deep/y", "/repo/v/w/x"]);
+});
+
 test("an ignored entry replaced by an entry the rules keep is watched and reported", async t => {
     const fake = createFakeBackend();
     // Ignores a file named `cache`, but not a directory.
