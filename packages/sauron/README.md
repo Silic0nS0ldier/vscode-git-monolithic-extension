@@ -124,6 +124,10 @@ depend on the kind of entry (e.g. `cache/` ignores only a directory), which only
   checked, so nothing created in between is missed. Unrelated activity next to a root costs a string comparison.
   If the anchor directory itself is removed or moved, the root is checked by identity (device and inode) and only
   re-crawled if it changed. Events without a name may hide a replacement, so they re-crawl it.
+- **Ancestors.** Moving a directory moves everything below it, but only the directory holding it is told. So every
+  directory above the anchor is watched too, up to the file system root, as is the way to where a symlink root
+  leads. Any of them seeing the next directory on the way to the root change checks the root by identity. That is
+  one watch per level, whatever the size of the tree. One that cannot be watched (e.g. not readable) is skipped.
 - **Failures.** Nothing is retried synchronously, so a failure that recurs at once cannot loop. A watch that fails
   to register or is lost (Node closes a watch that errors), a listing or a `stat` that fails, and an anchor that
   fails are retried after a backoff, through the tree as it is by then. After `retry.attempts` the path is reported
@@ -188,6 +192,8 @@ detection (the extension disables it).
 - A polling fallback for `degraded` subtrees.
 - Caching `.gitignore` contents across rescans of the same directory.
 - Reporting symlink target changes (symlinks are reported but never followed).
+- Noticing a dangling root symlink's target appear. Only the symlink itself and the directories above it are
+  watched while it dangles, so its target is picked up once one of those changes, or on `rescan()`.
 
 ## Considered and rejected
 

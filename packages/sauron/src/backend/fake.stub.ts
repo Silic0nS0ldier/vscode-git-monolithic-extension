@@ -16,6 +16,11 @@ export type FakeBackend = Backend & {
     /** Changes an entry's metadata, e.g. its permissions. */
     touch(path: string): void;
     remove(path: string): void;
+    /**
+     * Moves an entry, like `rename(2)`: replaces an empty directory or a non-directory at `to`, and keeps the
+     * moved directories' watches, which follow them to their new paths.
+     */
+    rename(from: string, to: string): void;
     /** Directories with an active watch. */
     readonly watched: ReadonlySet<AbsolutePath>;
     /** Number of watches ever registered per directory. */
@@ -168,6 +173,49 @@ export function createFakeBackend(): FakeBackend {
                 }
             }
         },
+        rename(rawFrom, rawTo) {
+            const from = p(rawFrom);
+            const to = p(rawTo);
+            const moved = entries.get(from);
+            if (moved === undefined || entries.get(parent(to)!)?.kind !== "directory" || to.startsWith(from + "/")) {
+                throw new Error(`Cannot rename ${from} to ${to}`);
+            }
+            const replaced = entries.get(to);
+            if (replaced !== undefined) {
+                const isDir = replaced.kind === "directory";
+                const hasChildren = entries.keys().some(key => key.startsWith(to + "/"));
+                if (isDir !== (moved.kind === "directory") || hasChildren) {
+                    throw new Error(`Cannot replace ${to}`);
+                }
+                entries.delete(to);
+                const dead = [...listeners.get(to) ?? []];
+                listeners.delete(to);
+                for (const listener of dead) {
+                    listener({ type: "rename", name: nameOf(to) });
+                }
+            }
+            const prefix = from + "/";
+            const keys = [...entries.keys()].filter(key => key === from || key.startsWith(prefix));
+            const movedListeners = keys.flatMap(key => {
+                const set = listeners.get(key);
+                listeners.delete(key);
+                return set === undefined ? [] : [[key, set] as const];
+            });
+            for (const key of keys) {
+                const entry = entries.get(key)!;
+                entries.delete(key);
+                entries.set((to + key.slice(from.length)) as AbsolutePath, entry);
+            }
+            for (const [key, set] of movedListeners) {
+                listeners.set((to + key.slice(from.length)) as AbsolutePath, set);
+            }
+            // As inotify: the old name, the new name, then the moved directory itself (named as it was watched).
+            emit(from, "rename");
+            emit(to, "rename");
+            for (const listener of listeners.get(to) ?? []) {
+                listener({ type: "rename", name: nameOf(from) });
+            }
+        },
         watch(dir, listener, signal) {
             increment(watchAttempts, dir);
             const failure = backend.failWatch?.(dir) ?? null;
@@ -229,6 +277,16 @@ export function createFakeBackend(): FakeBackend {
                 return ok(null);
             }
             return ok({ kind: entry.kind, id: entry.id });
+        },
+        async realpath(target) {
+            await new Promise(resolve => setImmediate(resolve));
+            const failure = backend.failStat?.(target) ?? null;
+            if (failure !== null) {
+                return err({ type: failure, path: target, cause: new Error(`injected ${failure}`) });
+            }
+            // Symlinks are always dangling here, so only a path without any resolves.
+            const kind = entries.get(target)?.kind;
+            return ok(kind === undefined || kind === "symlink" ? null : target);
         },
         async readText(file) {
             increment(readTextCalls, file);

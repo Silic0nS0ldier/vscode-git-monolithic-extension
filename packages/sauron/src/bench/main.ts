@@ -75,38 +75,48 @@ type Results = {
     readonly metrics: Record<SubjectName, Metrics>;
     readonly info: Record<SubjectName, Record<string, number>>;
     readonly problems: string[];
+    readonly rootAncestors: number;
 };
 
 async function runAll(): Promise<Results> {
     const metrics = {} as Record<SubjectName, Metrics>;
     const info = {} as Record<SubjectName, Record<string, number>>;
     const problems: string[] = [];
+    let rootAncestors = 0;
     // Sequential, so subjects do not compete for the CPU or the kernel's inotify queue.
     for (const subject of SUBJECTS) {
         const outputs = {} as Record<Mode, ChildOutput>;
         for (const mode of MODES) {
             outputs[mode] = await runChild(subject, mode);
             problems.push(...outputs[mode].problems.map(p => `${subject} (${mode}): ${p}`));
+            rootAncestors = outputs[mode].rootAncestors;
         }
         const merged = outputs.counts.metrics;
         merged["crawl"] = { ...merged["crawl"], "heap.retained": outputs.heap.metrics["crawl"]!["heap.retained"]! };
         metrics[subject] = merged;
         info[subject] = { "crawl.ms (counts)": outputs.counts.info["crawl.ms"]!, ...prefixed(outputs.heap.info) };
     }
-    return { metrics, info, problems };
+    return { metrics, info, problems, rootAncestors };
 }
 
 function prefixed(info: Record<string, number>): Record<string, number> {
     return Object.fromEntries(Object.entries(info).map(([key, value]) => [`${key} (heap)`, value]));
 }
 
-type Comparison = [name: string, sauron: number, watcher: number];
+/** `allowance` is how far sauron may exceed watcher. */
+type Comparison = [name: string, sauron: number, watcher: number, allowance: number];
 
-function comparisons(metrics: Record<SubjectName, Metrics>): Comparison[] {
+/**
+ * Sauron watches every directory above the root, so it notices the root being moved with one of them. That is
+ * one watch per ancestor more than watcher, whatever the size of the tree.
+ */
+function comparisons(results: Results): Comparison[] {
+    const { metrics } = results;
     const compare = (phase: string, metric: string): Comparison => [
         `${phase} ${metric}`,
         metrics.sauron[phase]?.[metric] ?? NaN,
         metrics.watcher[phase]?.[metric] ?? NaN,
+        metric === "inotify.watches" ? results.rootAncestors : 0,
     ];
     const phases = Object.keys(metrics.sauron);
     return [
@@ -210,9 +220,11 @@ if (process.argv.includes("--update")) {
     }
 
     test("sauron does no more work than watcher", () => {
-        const worse = comparisons(results.metrics)
-            .filter(([, sauron, watcher]) => !(sauron <= watcher))
-            .map(([metric, sauron, watcher]) => `${metric}: sauron ${sauron} > watcher ${watcher}`);
+        const worse = comparisons(results)
+            .filter(([, sauron, watcher, allowance]) => !(sauron <= watcher + allowance))
+            .map(([metric, sauron, watcher, allowance]) =>
+                `${metric}: sauron ${sauron} > watcher ${watcher}${allowance > 0 ? ` + ${allowance}` : ""}`
+            );
         assert.deepStrictEqual(worse, []);
     });
 }

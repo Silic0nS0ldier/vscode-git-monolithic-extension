@@ -76,7 +76,8 @@ Set per subject and metric family in `expected.json`. The allowed deviation is
 `sauron does no more work than watcher` requires sauron ≤ `watcher` for `fs.total` and `coverage.functions`
 in every phase, and for `inotify.watches` and `heap.retained` after the crawl. `coverage.blocks` is not
 compared: V8 omits blocks that ran as often as their enclosing range, so the count reflects code shape as much
-as work.
+as work. `inotify.watches` may exceed `watcher`'s by the number of directories above the root: sauron watches each,
+to notice the root being moved with one of them.
 
 ## Investigating
 

@@ -13,4 +13,6 @@ export type ChildOutput = {
     /** Informational only, never compared. */
     readonly info: Record<string, number>;
     readonly problems: readonly string[];
+    /** Directories above the watched root, up to `/`. */
+    readonly rootAncestors: number;
 };

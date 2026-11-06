@@ -196,7 +196,12 @@ type RootState = {
     kind: "pending" | "directory" | "file";
     /** {@link Stat.id} when last resolved. */
     id: string | null;
-    anchor: { readonly dir: AbsolutePath; readonly controller: AbortController } | null;
+    /** `real` is where the root resolves to through symlinks, when that is elsewhere. */
+    anchor: {
+        readonly dir: AbsolutePath;
+        readonly real: AbsolutePath | null;
+        readonly controller: AbortController;
+    } | null;
     resolveRunning: boolean;
     resolvePending: boolean;
     /** Whether a pending resolve may replace the tree. Otherwise it only verifies the root is unchanged. */
@@ -218,6 +223,33 @@ type Failure = {
 
 function anchorKey(root: RootState): string {
     return `${root.path}\0anchor`;
+}
+
+/** The name in `dir` on the way to `target`, which is within it. */
+function nextSegment(dir: AbsolutePath, target: AbsolutePath): string {
+    return target.slice(dir.length + (dir.endsWith("/") ? 0 : 1)).split("/", 1)[0]!;
+}
+
+/** libuv names events about a watched directory itself (removed, moved) after it. `null` for a file system root. */
+function selfName(dir: AbsolutePath): string | null {
+    return parent(dir) === null ? null : dir.slice(dir.lastIndexOf("/") + 1);
+}
+
+/** Directories above `dir` (and above `real`) to the file system root, with the names leading towards them. */
+function ancestorsOf(dir: AbsolutePath, real: AbsolutePath | null): Map<AbsolutePath, Set<string>> {
+    const chain = new Map<AbsolutePath, Set<string>>();
+    const add = (target: AbsolutePath, from: AbsolutePath | null) => {
+        for (let current = from; current !== null; current = parent(current)) {
+            const names = chain.get(current) ?? new Set();
+            names.add(nextSegment(current, target));
+            chain.set(current, names);
+        }
+    };
+    add(dir, parent(dir));
+    if (real !== null) {
+        add(real, parent(real));
+    }
+    return chain;
 }
 
 type StatusKey = "crawl" | "activity" | "suspension";
@@ -739,17 +771,16 @@ function createWatcher(config: Config): Watcher {
         return ok(null);
     }
 
-    function moveAnchor(root: RootState, dir: AbsolutePath | null): void {
+    function moveAnchor(root: RootState, dir: AbsolutePath | null, real: AbsolutePath | null): void {
         root.anchor?.controller.abort();
         if (dir === null) {
             root.anchor = null;
             return;
         }
         const controller = new AbortController();
-        root.anchor = { dir, controller };
-        const next = root.path.slice(dir.length + (dir.endsWith("/") ? 0 : 1)).split("/", 1)[0];
-        // libuv names events about the watched directory itself (removed, moved) after it.
-        const self = parent(dir) === null ? null : dir.slice(dir.lastIndexOf("/") + 1);
+        root.anchor = { dir, real, controller };
+        const next = nextSegment(dir, root.path);
+        const self = selfName(dir);
         const isParent = parent(root.path) === dir;
         // Kept in place while it is down, so resolving does not re-register it straight away. `missed` when it
         // was working, so the root may have been replaced unseen; otherwise checking it is unchanged suffices.
@@ -799,9 +830,32 @@ function createWatcher(config: Config): Watcher {
         }, controller.signal);
         if (isErr(watched)) {
             retryAnchor(backendError("watch-failed", unwrap(watched)), false);
-        } else if (!controller.signal.aborted) {
-            // Not if it was lost while registering.
-            succeeded(anchorKey(root));
+            return;
+        }
+        if (controller.signal.aborted) {
+            // Lost while registering.
+            return;
+        }
+        succeeded(anchorKey(root));
+        // Moving any directory above the anchor moves the root, but only the directory holding the moved one
+        // sees it, so each is watched. So is the way to where a symlink root leads. Best effort: one that cannot
+        // be watched (e.g. not readable) is skipped, as it only matters if it is moved.
+        for (const [ancestor, names] of ancestorsOf(dir, real)) {
+            if (controller.signal.aborted) {
+                break;
+            }
+            const ancestorSelf = selfName(ancestor);
+            backend.watch(ancestor, event => {
+                if (closeReason !== null || controller.signal.aborted) {
+                    return;
+                }
+                if (event.type === "lost") {
+                    retryAnchor({ type: "watch-lost", path: ancestor, cause: event.cause }, false);
+                } else if (event.name === null || names.has(event.name) || event.name === ancestorSelf) {
+                    // Only where the root is can change from up here; its own watches see what happens inside.
+                    scheduleResolve(root, false);
+                }
+            }, controller.signal);
         }
     }
 
@@ -842,8 +896,28 @@ function createWatcher(config: Config): Watcher {
                 }
                 anchor = unwrap(nearest);
             }
-            if (anchor !== (root.anchor?.dir ?? null)) {
-                moveAnchor(root, anchor);
+            let real: AbsolutePath | null = null;
+            if (stat !== null) {
+                // Where the root actually is, in case a symlink leads there. Not followed beyond the root's own
+                // directory unless root symlinks are.
+                const dir = parent(root.path);
+                const target = config.followRootSymlinks || dir === null ? root.path : dir;
+                const resolved = await backend.realpath(target, signal);
+                if (signal.aborted) {
+                    return;
+                }
+                if (isErr(resolved)) {
+                    retryLater(unwrap(resolved));
+                    return;
+                }
+                const path = unwrap(resolved);
+                const located = path === null || target === root.path
+                    ? path
+                    : join(path, nextSegment(target, root.path) as FileName);
+                real = located === root.path ? null : located;
+            }
+            if (anchor !== (root.anchor?.dir ?? null) || real !== (root.anchor?.real ?? null)) {
+                moveAnchor(root, anchor, real);
                 // Look again, as the root may have changed before the anchor was in place.
                 continue;
             }

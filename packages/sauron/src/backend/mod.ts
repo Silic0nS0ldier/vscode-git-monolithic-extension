@@ -35,6 +35,8 @@ export type Backend = {
     stat(target: AbsolutePath, signal: AbortSignal): Promise<Result<Stat | null, BackendError>>;
     /** Like {@link stat}, but a symlink is reported as one rather than followed. */
     lstat(target: AbsolutePath, signal: AbortSignal): Promise<Result<Stat | null, BackendError>>;
+    /** Resolves every symlink in `target`. `null` when nothing exists there (including a dangling symlink). */
+    realpath(target: AbsolutePath, signal: AbortSignal): Promise<Result<AbsolutePath | null, BackendError>>;
     /**
      * `null` unless `file` is a regular file. Never follows symlinks (as git does for `.gitignore`), and never
      * opens FIFOs, sockets or devices, which could block or never end.

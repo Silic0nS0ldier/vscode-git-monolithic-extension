@@ -40,12 +40,13 @@
                 "fs.promises.lstat": 1,
                 "fs.promises.open": 1,
                 "fs.promises.readdir": 1556,
+                "fs.promises.realpath": 2,
                 "fs.promises.stat": 2,
-                "fs.watch": 1557,
-                "fs.total": 3117,
+                "fs.watch": 1559,
+                "fs.total": 3121,
                 "coverage.functions": 389061,
                 "coverage.blocks": 457568,
-                "inotify.watches": 1557,
+                "inotify.watches": 1559,
                 "heap.retained": 7231160
             },
             "edit": {
@@ -71,7 +72,7 @@
                 "fs.total": 1,
                 "coverage.functions": 39131,
                 "coverage.blocks": 49546,
-                "inotify.watches": 1329
+                "inotify.watches": 1331
             },
             "close": {
                 "fs.total": 0,
