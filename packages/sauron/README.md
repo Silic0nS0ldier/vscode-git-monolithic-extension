@@ -185,3 +185,43 @@ detection (the extension disables it).
 - A polling fallback for `degraded` subtrees.
 - Caching `.gitignore` contents across rescans of the same directory.
 - Reporting symlink target changes (symlinks are reported but never followed).
+
+## Considered and rejected
+
+### fanotify (Linux)
+
+Investigated in November 2026 (kernel 7.0, Node.js 26.12 via `node:ffi`). fanotify only beats inotify with
+`FAN_MARK_MOUNT` or `FAN_MARK_FILESYSTEM`: one mark for a whole file system, so no crawl and no per-directory
+watches. Both need `CAP_SYS_ADMIN`. Without it (Linux 5.13+), fanotify allows only inode marks, so it still needs
+one mark per directory, like inotify. Without a recursive watch it has little to offer.
+
+It does work unprivileged with `FAN_REPORT_DFID_NAME`. Events identify the parent directory by file handle, so
+each watched directory's handle has to be recorded with `name_to_handle_at`. On overlayfs (e.g. devcontainers) that
+fails with `EOPNOTSUPP` unless `AT_HANDLE_FID` (Linux 6.5+) is passed.
+
+Prototype, 60,000 watched directories, one file written in each:
+
+| Approach                 | Register | Heap    | RSS    | Records per write |
+| ------------------------ | -------- | ------- | ------ | ----------------- |
+| `fs.watch` per directory | ~95 ms   | +28 MB  | +76 MB | 1                 |
+| inotify via `node:ffi`   | ~68 ms   | ~0      | +7 MB  | 2                 |
+| fanotify via `node:ffi`  | ~147 ms  | +1.2 MB | +24 MB | 1                 |
+
+Delivery time was the same for all three. inotify's 2 records per write are `IN_MODIFY` and `IN_CLOSE_WRITE`;
+`fs.watch` does not subscribe to the latter. fanotify merges them in the kernel. The memory saving comes from
+dropping Node's per-watch `FSWatcher`, so raw inotify gets it too, at lower registration cost.
+
+What fanotify would add:
+
+- A mark budget separate from inotify's, so it would not compete with VSCode's own file watcher.
+- `FAN_RENAME` (5.17+) pairs the old and new name in one event.
+- In-kernel merging of different event types on the same name.
+
+What it would cost:
+
+- `fs.fanotify.max_user_marks` is per user and shared across processes. Users raise
+  `fs.inotify.max_user_watches` for IDEs, but rarely this limit.
+- Linux 5.13+, or 6.5+ on overlayfs.
+
+Any syscall backend needs `node:ffi` (Node.js 26.1+) or a native addon. Electron 43 (VSCode 1.144) ships Node.js
+24.17, so on desktop it would need a native addon for each architecture.
