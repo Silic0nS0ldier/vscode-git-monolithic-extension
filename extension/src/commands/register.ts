@@ -62,7 +62,6 @@ export function registerCommands(
     outputChannel: OutputChannel,
     telemetryReporter: TelemetryReporter,
 ): Disposable {
-    const disposables: Disposable[] = [];
     const cmds = allCommands([
         ...branch.createCommands(),
         ...checkout.createCommands(),
@@ -88,12 +87,14 @@ export function registerCommands(
         ...stash.createCommands(),
         ...sync.createCommands(),
         ...tag.createCommands(),
-        ...timeline.createCommands(model, git, disposables),
+        ...timeline.createCommands(model, git),
         undoCommit.createCommand(),
         ...unstage.createCommands(model),
     ]);
 
     const commandErrors = new CommandErrorOutputTextDocumentContentProvider();
+
+    const disposables: Disposable[] = [];
 
     try {
         for (const { commandId, method, options } of cmds) {

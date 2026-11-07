@@ -17,6 +17,42 @@ cat >"$workspace/.vscode/settings.json" <<'JSON'
 JSON
 git add .vscode
 git commit --message "Configure Timeline fixture"
+configured="$(git rev-parse HEAD)"
+
+# Folder history whose two merged sides interleave by commit date, so a page can end on either side.
+commit_at() {
+    GIT_COMMITTER_DATE="2001-01-01T00:$1:00+00:00" git commit --message "$2"
+}
+mkdir -p "$workspace/merged"
+printf 'base\n' >"$workspace/merged/base.txt"
+git add merged
+commit_at 00 "Create merged folder"
+merged_base="$(git rev-parse HEAD)"
+git branch side
+for revision in 1 2 3 4; do
+    git switch main
+    printf 'main %s\n' "$revision" >>"$workspace/merged/main.txt"
+    git add merged/main.txt
+    commit_at "0$((revision * 2 - 1))" "Main $revision"
+    git switch side
+    printf 'side %s\n' "$revision" >>"$workspace/merged/side.txt"
+    git add merged/side.txt
+    commit_at "0$((revision * 2))" "Side $revision"
+done
+git switch main
+GIT_COMMITTER_DATE="2001-01-01T00:09:00+00:00" git merge --no-ff --message "Merge side" side
+git branch --delete side
+
+# A submodule recorded only in history, pointing at commits of this repository.
+mkdir -p "$workspace/modules"
+printf 'Held a submodule.\n' >"$workspace/modules/readme.txt"
+git add modules
+git update-index --add --cacheinfo "160000,$configured,modules/sub"
+git commit --message "Add submodule"
+git update-index --cacheinfo "160000,$merged_base,modules/sub"
+git commit --message "Update submodule"
+git rm --cached modules/sub
+git commit --message "Remove submodule"
 printf 'original\n' >"$workspace/history/old.txt"
 git add history/old.txt
 git commit --message "Create original file :sparkles:" --message "The complete commit body."

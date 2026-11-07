@@ -1,15 +1,15 @@
 import { commands, Uri } from "vscode";
 import * as i18n from "../../../i18n/mod.js";
+import { compareSelection } from "../../../timeline/compare-selection.js";
 import { GitTimelineItem, itemTitle } from "../../../timeline/item.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
-import type { CompareSelection } from "./select-for-compare.js";
 
-export function createCommand(selection: CompareSelection): ScmCommand<"timelineCompareWithSelected"> {
+export function createCommand(): ScmCommand<"timelineCompareWithSelected"> {
     return {
         commandId: makeCommandId("timelineCompareWithSelected"),
         options: { repository: false },
         async method(item: unknown, uri: unknown): Promise<void> {
-            const selected = selection.selected;
+            const selected = compareSelection();
             if (
                 !(item instanceof GitTimelineItem) || !(uri instanceof Uri) || !item.resourceUri
                 || !selected?.item.resourceUri || uri.toString() !== selected.uri.toString()

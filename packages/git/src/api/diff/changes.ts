@@ -8,9 +8,13 @@ export type Change = {
     status: "A" | "D" | "M" | "R" | "C" | "T" | "U";
     path: string;
     originalPath?: string;
+    /** Octal mode before the change, `000000` when absent. `160000` is a submodule. */
+    originalMode: string;
+    /** Octal mode after the change, `000000` when absent. `160000` is a submodule. */
+    mode: string;
 };
 
-/** Wraps `git diff --name-status -z --find-renames <from> <to> --`, without reading blob contents. */
+/** Wraps `git diff --raw -z --find-renames <from> <to> --`, without reading blob contents. */
 export async function changes(
     git: GitContext,
     cwd: string,
@@ -24,7 +28,7 @@ export async function changes(
     // 10 MiB of paths accommodates large commits without buffering their patches.
     const result = await readToBuffer(
         { cli: git.cli, cwd, signal },
-        ["diff", "--name-status", "-z", "--find-renames", from, to, "--"],
+        ["diff", "--raw", "-z", "--find-renames", from, to, "--"],
         10 * 1024 * 1024,
     );
     if (isErr(result)) return result;
@@ -33,18 +37,21 @@ export async function changes(
     const fields = output.split("\0");
     const entries: Change[] = [];
     for (let index = 0; index < fields.length - 1;) {
-        const code = fields[index++];
-        const status = code?.[0];
+        const header = /^:([0-7]{6}) ([0-7]{6}) [0-9a-f]+ [0-9a-f]+ ([ADMTU]|[RC]\d+)$/u.exec(fields[index++] ?? "");
         const first = fields[index++];
-        if (!first || !code || !/^(?:[ADMTU]|[RC]\d+)$/u.test(code)) {
+        const [, rawOriginalMode, rawMode, code] = header ?? [];
+        const status = code?.[0];
+        if (!first || !rawOriginalMode || !rawMode || !code) {
             return err(createError(ERROR_GENERIC, "Malformed NUL-delimited diff changes"));
         }
+        const originalMode = detach(rawOriginalMode);
+        const mode = detach(rawMode);
         if (status === "R" || status === "C") {
             const renamed = fields[index++];
             if (!renamed) return err(createError(ERROR_GENERIC, "Missing renamed diff path"));
-            entries.push({ status, originalPath: detach(first), path: detach(renamed) });
+            entries.push({ status, originalPath: detach(first), path: detach(renamed), originalMode, mode });
         } else if (status === "A" || status === "D" || status === "M" || status === "T" || status === "U") {
-            entries.push({ status, path: detach(first) });
+            entries.push({ status, path: detach(first), originalMode, mode });
         } else {
             return err(createError(ERROR_GENERIC, `Unsupported diff status ${code}`));
         }

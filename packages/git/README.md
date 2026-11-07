@@ -46,7 +46,7 @@ Not everything under `monolithic-git-interop/api/*` is so simple to consume, wit
 
 - `api/log/mod` provides bounded commit history, including path filtering, rename following, historical file paths,
   short statistics, revision cursors and skip-based paging. Pass an `AbortSignal` in the options to cancel a query.
-- `api/diff/changes` lists NUL-delimited changes between two revisions without loading their patches.
+- `api/diff/changes` lists NUL-delimited changes, with modes, between two revisions without loading their patches.
 - `api/hash-object/empty-tree` computes the empty tree for the repository's object format, including SHA-256.
 
 CLI contexts optionally accept `input` (a string or byte array), which is written to stdin followed by EOF.

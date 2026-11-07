@@ -493,11 +493,18 @@ export async function loadTimelinePage(page: Page): Promise<boolean> {
     const more = rows.filter({ hasText: "Load more" });
     if (!await more.count()) return false;
     const size = await rows.last().getAttribute("aria-setsize");
+    const lastRow = tree.locator(".monaco-list-row[data-last-element=\"true\"]");
     await more.click();
+    // A final page of one item takes the Load more row's place, leaving the size unchanged.
     await pollUntil(
         "the next Timeline page to arrive",
-        () => rows.first().getAttribute("aria-setsize"),
-        next => next !== null && next !== size,
+        async () => ({
+            size: await rows.first().getAttribute("aria-setsize"),
+            last: await lastRow.allInnerTexts(),
+        }),
+        next =>
+            next.size !== null
+            && (next.size !== size || (next.last.length === 1 && !/Load more|Loading/u.test(next.last[0] ?? ""))),
     );
     return true;
 }

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { appendFile, readFile, writeFile } from "node:fs/promises";
+import { appendFile, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { after, before } from "node:test";
 import type { Locator, Page } from "playwright-core";
-import { headSubject, resolveRef, stage, status } from "./git.js";
+import { headSubject, move, resolveRef, stage, status } from "./git.js";
 import {
     connect,
     createScenario,
@@ -33,11 +33,11 @@ const scenario = createScenario(() => page);
 const tree = (): Locator => page.locator(".timeline-tree-view");
 const row = (label: string): Locator => tree().locator(".monaco-list-row").filter({ hasText: label });
 
-async function openTimeline(): Promise<void> {
+async function openTimeline(file = "history/renamed.txt"): Promise<void> {
     await page.keyboard.press("Escape");
     const unpin = page.getByRole("button", { name: "Unpin Current Timeline", exact: true });
     if (await unpin.count()) await unpin.click();
-    await openFile(page, "history/renamed.txt");
+    await openFile(page, file);
     await runCommand(page, "View: Show Explorer");
     if (!await tree().isVisible()) {
         await page.locator(".pane-header.timeline-view").click();
@@ -45,6 +45,16 @@ async function openTimeline(): Promise<void> {
     await tree().locator(".monaco-list").focus();
     await page.keyboard.press("Home");
     await row("Revision 7").waitFor({ state: "visible" });
+}
+
+async function openFolderTimeline(name: string, firstRow: string): Promise<void> {
+    await runCommand(page, "View: Show Explorer");
+    const folder = page.locator(".explorer-folders-view .monaco-list-row").filter({
+        hasText: new RegExp(`^${name}$`, "u"),
+    });
+    await folder.click({ button: "right" });
+    await selectMenuItem(page, "Open Timeline");
+    await row(firstRow).waitFor({ state: "visible" });
 }
 
 async function action(label: string, command: string): Promise<void> {
@@ -200,14 +210,37 @@ scenario("working changes can be enabled and compared against the staged version
 });
 
 scenario("a folder Timeline opens the complete commit, including files outside that folder", async () => {
-    await runCommand(page, "View: Show Explorer");
-    const folder = page.locator(".explorer-folders-view .monaco-list-row").filter({ hasText: /^history$/u });
-    await folder.click({ button: "right" });
-    await selectMenuItem(page, "Open Timeline");
-    await row("Revision 7").waitFor({ state: "visible" });
+    await openFolderTimeline("history", "Revision 7");
     await action("Revision 7", "Open Commit");
     await page.locator(".part.editor").getByText("other.txt", { exact: true }).first().waitFor({ state: "visible" });
     assert.equal(await headSubject(), "Revision 7");
+});
+
+scenario("folder history pages through both sides of a merge", async () => {
+    await openFolderTimeline("merged", "Merge side");
+    for (let attempt = 0; attempt < 3; attempt++) {
+        if (!await loadTimelinePage(page)) break;
+    }
+    await pollUntil(
+        "every commit on both sides of the merge to be listed",
+        () => tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"),
+        size => size === "10",
+    );
+    await row("Main 1").waitFor({ state: "attached" });
+    await row("Create merged folder").waitFor({ state: "attached" });
+});
+
+scenario("opening a commit that updates a submodule shows the submodule commits it recorded", async () => {
+    await openFolderTimeline("modules", "Update submodule");
+    await action("Update submodule", "Open Commit");
+    const before = await resolveRef(":/Configure Timeline fixture");
+    const after = await resolveRef(":/Create merged folder");
+    assert.ok(before && after);
+    await pollUntil(
+        "both recorded submodule commits to be shown",
+        async () => (await page.locator(".part.editor").innerText()).replaceAll(/\s+/gu, " "),
+        text => text.includes(`Subproject commit ${before}`) && text.includes(`Subproject commit ${after}`),
+    );
 });
 
 scenario("one-item pages preserve working, staged and committed versions", async () => {
@@ -267,5 +300,29 @@ scenario("external index and working-tree writes refresh live entries without re
         sides =>
             sides.modified.includes("external-change") && !sides.original.includes("external-change")
             && sides.original.includes("working-only"),
+    );
+});
+
+scenario("a staged rename keeps the file's committed history", async () => {
+    await move("history/renamed.txt", "history/moved.txt");
+    await pollUntil(
+        "Git to stage the rename",
+        status,
+        state => state["history/renamed.txt -> history/moved.txt"]?.startsWith("R") === true,
+    );
+    await openTimeline("history/moved.txt");
+    await row("Staged").waitFor({ state: "visible" });
+});
+
+scenario("a deleted file's working version compares as empty", async () => {
+    await openTimeline("other.txt");
+    await rm(join(workspaceDir(), "other.txt"));
+    await pollUntil("Git to report the deletion", status, state => state["other.txt"] === " D");
+    await row("Uncommitted Changes").waitFor({ state: "visible" });
+    await action("Uncommitted Changes", "Open Changes");
+    await pollUntil(
+        "the deleted file to be compared with its committed content",
+        () => diffEditorSides(page),
+        sides => sides.original.includes("another changed file") && sides.modified === "",
     );
 });
