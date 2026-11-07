@@ -26,6 +26,7 @@ interface CacheRow {
     timestamp: number;
 }
 
+const COMMIT_HASH = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const THREE_MINUTES = 1000 * 60 * 3;
 const FIVE_MINUTES = 1000 * 60 * 5;
 
@@ -152,11 +153,14 @@ export class GitFileSystemProvider implements FileSystemProvider {
         }
 
         let size = 0;
-        try {
-            const details = await repository.getObjectDetails(sanitizeRef(ref, path, repository), path);
-            size = details.size;
-        } catch {
-            // noop
+        // A submodule URI's content is derived text, whose size its gitlink does not give.
+        if (!submoduleOf) {
+            try {
+                const details = await repository.getObjectDetails(sanitizeRef(ref, path, repository), path);
+                size = details.size;
+            } catch {
+                // noop
+            }
         }
         return { ctime: 0, mtime: this.#mtime, size: size, type: FileType.File };
     }
@@ -185,6 +189,14 @@ export class GitFileSystemProvider implements FileSystemProvider {
 
             if (ref === "index") {
                 return encoder.encode(await repository.diffIndexWithHEAD(path));
+            } else if (COMMIT_HASH.test(ref)) {
+                // Matches how `git diff` shows a submodule at a superproject revision.
+                try {
+                    const { object } = await repository.getObjectDetails(ref, path);
+                    return encoder.encode(`Subproject commit ${object}\n`);
+                } catch {
+                    return new Uint8Array(0);
+                }
             } else {
                 return encoder.encode(await repository.diffWithHEAD(path));
             }

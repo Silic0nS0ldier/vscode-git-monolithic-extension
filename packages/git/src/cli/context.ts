@@ -11,6 +11,8 @@ export type CLIContext = {
     readonly timeout?: number;
     readonly signal?: AbortSignal;
     readonly onSpawn?: (pid: number) => void;
+    /** Bytes to write to stdin, followed by EOF. An empty string explicitly supplies empty stdin. */
+    readonly input?: string | Uint8Array;
 };
 
 export type CLIErrors =

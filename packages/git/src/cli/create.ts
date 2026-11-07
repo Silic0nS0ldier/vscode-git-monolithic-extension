@@ -1,4 +1,4 @@
-import type { Readable } from "node:stream";
+import type { Readable, Writable } from "node:stream";
 import { setTimeout as delay } from "node:timers/promises";
 import {
     createError,
@@ -20,6 +20,7 @@ const OUTPUT_TAIL_LIMIT = 64 * 1024;
 const OUTPUT_DRAIN_TIMEOUT_MS = 500;
 
 export type ChildProcess = {
+    readonly stdin: Writable;
     readonly stdout: Readable;
     readonly stderr: Readable;
     once(event: "error", listener: (error: Error) => void): ChildProcess;
@@ -114,12 +115,22 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         const onError = new Promise<CLIResult>(resolve =>
             void cp.once("error", (error) => resolve(err(createError(ERROR_GENERIC, { cmdContext, error }))))
         );
+        const onInputError = new Promise<CLIResult>(resolve => {
+            if (context.input !== undefined) {
+                cp.stdin.once("error", error => resolve(err(createError(ERROR_GENERIC, { cmdContext, error }))));
+                try {
+                    cp.stdin.end(context.input);
+                } catch (error) {
+                    resolve(err(createError(ERROR_GENERIC, { cmdContext, error })));
+                }
+            }
+        });
         const onExit = new Promise<CLIResult>(resolve =>
             void cp.once("exit", (code, signal) => resolve(ok({ code, signal })))
         );
 
         // NOTE onExit must come last, unit tests rely on this (they are time optimised)
-        const result = await Promise.race([onAbort, onError, onExit]);
+        const result = await Promise.race([onAbort, onError, onInputError, onExit]);
 
         if (isErr(result)) {
             // A timed out or cancelled git can run on indefinitely; it is not given the chance.

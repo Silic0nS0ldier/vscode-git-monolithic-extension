@@ -47,7 +47,15 @@ test("Reads a single commit", async t => {
         t.is(unwrap(res)?.message, "Subject");
     }
 
-    t.deepEqual(calls, [["show", "-s", "--format=%H%n%aN%n%aE%n%at%n%ct%n%P%n%B", "-z", "HEAD"]]);
+    t.deepEqual(calls, [[
+        "-c",
+        "i18n.logOutputEncoding=UTF-8",
+        "show",
+        "-s",
+        "--format=%H%n%aN%n%aE%n%at%n%ct%n%P%n%B",
+        "-z",
+        "HEAD",
+    ]]);
 });
 
 test("Resolves to nothing when the output does not parse", async t => {

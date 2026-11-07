@@ -19,6 +19,31 @@ Staging of selected source is supported, but limited vs. the builtin implemenati
 
 This extension has undergone significant refactoring. While it may be a fork, it does not "follow" the builtin implementation.
 
+## Timeline
+
+Requires VSCode 1.145.0 or later. **Git Monolithic History** contributes file, folder and workspace history
+to the Explorer's Timeline view, using the stable API without proposed-API permissions.
+
+- File history follows renames, loads in pages, and opens comparisons against the preceding file revision.
+- **Open Commit** shows all files changed by a commit, including additions, deletions and renames.
+- **Select for Compare**, **Compare with Selected**, **Copy Commit ID** and **Copy Commit Message** are available
+  on the relevant Timeline entries. VSCode's **Compare Selected** can also compare file versions from other sources.
+  **Pin Current Timeline** keeps the file's history in view while selecting and opening versions.
+- **Open Timeline** on an Explorer folder shows that folder's history. **Pin Workspace Timeline** in the Timeline
+  title menu combines the histories of the repositories the extension has opened, showing commits that worktrees
+  share once. Its hovers omit change statistics, which would need a diff of every listed commit.
+- `git_monolithic.timeline.date` selects the committed date (default) or authored date.
+  `git_monolithic.timeline.showAuthor` defaults to `true`.
+- Staged entries are always shown. `git_monolithic.timeline.showUncommitted` defaults to `false`; enabling it adds
+  working-tree entries from the Tracked and Untracked status groups. Live entries reflect the current SCM status
+  view, including its large-repository display limits. Their timestamps are refresh/operation times, not an
+  audit trail of when changes were made. Live entries and commits share the requested page limit.
+
+Ported from VSCode's Git extension at 1.145.0, with cancellable, output-bounded Git queries and fork-specific
+commands, status groups and `gitm` content URIs. Commit views use the public `vscode.changes` command.
+The fork does not expose the builtin Git extension's history-details provider API, so hovers show local commit
+metadata and statistics, but not third-party avatars, remote action buttons or message-link providers.
+
 ## IMPORTANT
 
 ### `vscode.git`

@@ -1,5 +1,5 @@
 import { getStreamAsBuffer, MaxBufferError } from "get-stream";
-import { PassThrough } from "node:stream";
+import { PassThrough, Transform } from "node:stream";
 import {
     type BufferOverflowError,
     createError,
@@ -14,6 +14,10 @@ export type ReadToContext = {
     cli: CLI;
     cwd: string;
     timeout?: number;
+    signal?: AbortSignal;
+    input?: string | Uint8Array;
+    /** Keeps the returned part of each stdout chunk; only kept output counts toward `maxBuffer`. */
+    filter?: (chunk: Buffer) => Buffer | undefined;
 };
 
 export type ReadToErrors =
@@ -33,16 +37,26 @@ export async function readToBuffer(
     args: string[],
     maxBuffer: number,
 ): Promise<Result<Buffer, ReadToErrors>> {
-    const stdout = new PassThrough();
+    const { filter } = context;
+    const stdout = filter
+        ? new Transform({
+            transform(chunk: Buffer, _encoding, callback) {
+                callback(null, filter(chunk));
+            },
+        })
+        : new PassThrough();
     const abortController = new AbortController();
 
     // Read response
     try {
         const cliAction = context.cli({
             cwd: context.cwd,
-            signal: abortController.signal,
+            signal: context.signal
+                ? AbortSignal.any([context.signal, abortController.signal])
+                : abortController.signal,
             stdout,
             timeout: context.timeout,
+            input: context.input,
         }, args);
         // Throws on max buffer hit
         const streamReader = getStreamAsBuffer(stdout, { maxBuffer });
