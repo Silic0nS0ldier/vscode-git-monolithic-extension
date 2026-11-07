@@ -197,21 +197,21 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                     ? headCommit
                     : cursor?.hash;
                 const skip = cursor?.skip ?? 0;
-                const fetched = unwrapOk(
+                const commits = unwrapOk(
                     await log(contextFor(git, "log"), repository.root, {
                         path: `:(literal)${sanitizePath(logPath)}`,
                         hash: tip,
                         // `--skip` counts commits before `--follow` filters them and loses renames it skips past, so
-                        // file history re-reads the commits already shown instead.
+                        // file history re-reads the commits already shown and discards them unbuffered instead.
                         skip: folder && skip ? skip : undefined,
-                        maxEntries: (folder ? 0 : skip) + limit + 1,
+                        discard: !folder && skip ? skip : undefined,
+                        maxEntries: limit + 1,
                         follow: !folder,
                         filePaths: !folder,
                         shortStats: true,
                         signal,
                     }),
                 );
-                const commits = folder ? fetched : fetched.slice(skip);
                 const liveItems: GitTimelineItem[] = [];
                 if (live) {
                     const head = repository.HEAD?.commit ? "HEAD" : await tree(repository, signal);
