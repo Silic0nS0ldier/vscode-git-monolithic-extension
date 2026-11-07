@@ -33,7 +33,7 @@ const scenario = createScenario(() => page);
 const tree = (): Locator => page.locator(".timeline-tree-view");
 const row = (label: string): Locator => tree().locator(".monaco-list-row").filter({ hasText: label });
 
-async function openTimeline(file = "history/renamed.txt"): Promise<void> {
+async function openTimeline(file = "history/renamed.txt", firstRow = "Revision 7"): Promise<void> {
     await page.keyboard.press("Escape");
     const unpin = page.getByRole("button", { name: "Unpin Current Timeline", exact: true });
     if (await unpin.count()) await unpin.click();
@@ -44,7 +44,7 @@ async function openTimeline(file = "history/renamed.txt"): Promise<void> {
     }
     await tree().locator(".monaco-list").focus();
     await page.keyboard.press("Home");
-    await row("Revision 7").waitFor({ state: "visible" });
+    await row(firstRow).waitFor({ state: "visible" });
 }
 
 async function openFolderTimeline(name: string, firstRow: string): Promise<void> {
@@ -228,6 +228,22 @@ scenario("folder history pages through both sides of a merge", async () => {
     );
     await row("Main 1").waitFor({ state: "attached" });
     await row("Create merged folder").waitFor({ state: "attached" });
+});
+
+scenario("file history pages through both sides of a merge", async () => {
+    await openTimeline("merged/shared.txt", "Side 4");
+    for (let attempt = 0; attempt < 3; attempt++) {
+        if (!await loadTimelinePage(page)) break;
+    }
+    // `--follow` lists commits with a diff for the file, which git does not compute for a merge.
+    await pollUntil(
+        "every commit on both sides of the merge to be listed",
+        () => tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"),
+        size => size === "9",
+    );
+    for (const label of ["Side 1", "Main 1", "Create merged folder"]) {
+        await row(label).waitFor({ state: "attached" });
+    }
 });
 
 scenario("opening a commit that updates a submodule shows the submodule commits it recorded", async () => {

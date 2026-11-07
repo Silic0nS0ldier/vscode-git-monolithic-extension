@@ -42,20 +42,34 @@ scenario("workspace history merges detected repositories and loads subsequent pa
     await header.getByRole("button", { name: "More Actions..." }).click();
     await selectMenuItem(page, "Pin Workspace Timeline");
     await row("Secondary repository tip").waitFor({ state: "visible" });
-    for (let attempt = 0; attempt < 4; attempt++) {
+    assert.ok(await loadTimelinePage(page), "the first page of two must offer more history");
+    for (let attempt = 0; attempt < 8; attempt++) {
         if (!await loadTimelinePage(page)) break;
     }
-    for (
-        const label of [
-            "Primary repository tip",
+    // A page of only commits the worktree shares, sent with a cursor, would leave the Load more row loading.
+    assert.doesNotMatch(
+        (await tree().locator(".monaco-list-row[data-last-element=\"true\"]").allInnerTexts()).join("\n"),
+        /Load more|Loading/u,
+    );
+    // Eight distinct commits in eight rows, so the worktree's shared history is listed once and nothing is left to load.
+    assert.equal(await tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"), "8");
+    // The list only renders the rows in view, so check each end of it.
+    const ends = {
+        End: [
+            "Primary repository change 4",
+            "Primary repository change 3",
+            "Primary repository change 2",
             "Primary repository root",
-            "Secondary repository tip",
-            "Secondary repository root",
-        ]
-    ) {
-        await row(label).scrollIntoViewIfNeeded();
-        await row(label).waitFor({ state: "visible" });
-        assert.equal(await row(label).count(), 1, `${label} must appear exactly once`);
+            "Worktree tip",
+        ],
+        Home: ["Secondary repository tip", "Secondary repository root", "Primary repository tip"],
+    };
+    for (const [key, labels] of Object.entries(ends)) {
+        await tree().locator(".monaco-list").focus();
+        await page.keyboard.press(key);
+        for (const label of labels) {
+            await row(label).waitFor({ state: "attached" });
+        }
     }
 });
 

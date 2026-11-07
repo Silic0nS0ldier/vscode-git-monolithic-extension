@@ -19,12 +19,14 @@ git add .vscode
 git commit --message "Configure Timeline fixture"
 configured="$(git rev-parse HEAD)"
 
-# Folder history whose two merged sides interleave by commit date, so a page can end on either side.
+# Folder and file history whose two merged sides interleave by commit date, so a page can end on either side.
+# Both sides edit `shared.txt`, at opposite ends so that they merge cleanly.
 commit_at() {
     GIT_COMMITTER_DATE="2001-01-01T00:$1:00+00:00" git commit --message "$2"
 }
 mkdir -p "$workspace/merged"
 printf 'base\n' >"$workspace/merged/base.txt"
+printf 'top\nmiddle\nbottom\n' >"$workspace/merged/shared.txt"
 git add merged
 commit_at 00 "Create merged folder"
 merged_base="$(git rev-parse HEAD)"
@@ -32,11 +34,14 @@ git branch side
 for revision in 1 2 3 4; do
     git switch main
     printf 'main %s\n' "$revision" >>"$workspace/merged/main.txt"
-    git add merged/main.txt
+    { printf 'main %s\n' "$revision"; cat "$workspace/merged/shared.txt"; } >"$workspace/merged/shared.new"
+    mv "$workspace/merged/shared.new" "$workspace/merged/shared.txt"
+    git add merged/main.txt merged/shared.txt
     commit_at "0$((revision * 2 - 1))" "Main $revision"
     git switch side
     printf 'side %s\n' "$revision" >>"$workspace/merged/side.txt"
-    git add merged/side.txt
+    printf 'side %s\n' "$revision" >>"$workspace/merged/shared.txt"
+    git add merged/side.txt merged/shared.txt
     commit_at "0$((revision * 2))" "Side $revision"
 done
 git switch main

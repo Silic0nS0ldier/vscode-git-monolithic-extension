@@ -30,7 +30,8 @@ to the Explorer's Timeline view, using the stable API without proposed-API permi
   on the relevant Timeline entries. VSCode's **Compare Selected** can also compare file versions from other sources.
   **Pin Current Timeline** keeps the file's history in view while selecting and opening versions.
 - **Open Timeline** on an Explorer folder shows that folder's history. **Pin Workspace Timeline** in the Timeline
-  title menu combines the histories of the repositories the extension has opened.
+  title menu combines the histories of the repositories the extension has opened, showing commits that worktrees
+  share once. Its hovers omit change statistics, which would need a diff of every listed commit.
 - `git_monolithic.timeline.date` selects the committed date (default) or authored date.
   `git_monolithic.timeline.showAuthor` defaults to `true`.
 - Staged entries are always shown. `git_monolithic.timeline.showUncommitted` defaults to `false`; enabling it adds

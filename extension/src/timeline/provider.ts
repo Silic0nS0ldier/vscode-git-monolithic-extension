@@ -4,6 +4,7 @@ import type { Commit } from "monolithic-git-interop/api/commit";
 import { emptyTree } from "monolithic-git-interop/api/hash-object/empty-tree";
 import { log } from "monolithic-git-interop/api/log/mod";
 import { unwrapOk } from "monolithic-git-interop/errors";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { inspect } from "node:util";
 import {
@@ -25,6 +26,7 @@ import {
 import { Status } from "../api/git.js";
 import { makeCommandId } from "../commands/helpers.js";
 import type { Git } from "../git.js";
+import { sanitizePath } from "../git/helpers.js";
 import * as i18n from "../i18n/mod.js";
 import type { Model } from "../model.js";
 import { debounce } from "../package-patches/just-debounce.js";
@@ -38,7 +40,13 @@ import { clearCompareSelection, compareSelection } from "./compare-selection.js"
 import { createEmojifier } from "./emoji.js";
 import { contextFor } from "./git-context.js";
 import { GitTimelineItem, resolveOpenDiff } from "./item.js";
-import { getFileTimelinePage, getWorkspaceTimelinePage, parseFileCursor, parseWorkspaceCursor } from "./paging.js";
+import {
+    createWorkspaceSessions,
+    getFileTimelinePage,
+    parseFileCursor,
+    parseWorkspaceCursor,
+    readWorkspaceTimelinePage,
+} from "./paging.js";
 
 const PROVIDER_ID = "gitm-history";
 const PAGE_SIZE = 50;
@@ -50,6 +58,7 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
     const subscriptions = new Map<AbstractRepository, Disposable>();
     const operationDates = new Map<AbstractRepository, number>();
     const emptyTrees = new Map<string, string>();
+    const workspaceSessions = createWorkspaceSessions(8);
     const disposables: Disposable[] = [fileChanged, workspaceChanged];
     const emojify = createEmojifier(extensionUri);
     let registered = false;
@@ -181,24 +190,28 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                 if (!isDescendant(repository.root, logPath)) {
                     throw new Error("Timeline cursor is outside its repository");
                 }
-                // Folder history is not linear, so later pages continue from the same tip rather than a commit on one
-                // side of a merge.
+                // History is not linear, so later pages continue from the same tip rather than a commit on one side
+                // of a merge.
                 const headCommit = repository.HEAD?.commit;
-                const tip = folder && !cursor && headCommit && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(headCommit)
+                const tip = !cursor && headCommit && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(headCommit)
                     ? headCommit
                     : cursor?.hash;
-                const commits = unwrapOk(
+                const skip = cursor?.skip ?? 0;
+                const fetched = unwrapOk(
                     await log(contextFor(git, "log"), repository.root, {
-                        path: `:(literal)${logPath}`,
+                        path: `:(literal)${sanitizePath(logPath)}`,
                         hash: tip,
-                        skip: folder ? cursor?.skip : undefined,
-                        maxEntries: limit + 1,
+                        // `--skip` counts commits before `--follow` filters them and loses renames it skips past, so
+                        // file history re-reads the commits already shown instead.
+                        skip: folder && skip ? skip : undefined,
+                        maxEntries: (folder ? 0 : skip) + limit + 1,
                         follow: !folder,
                         filePaths: !folder,
                         shortStats: true,
                         signal,
                     }),
                 );
+                const commits = folder ? fetched : fetched.slice(skip);
                 const liveItems: GitTimelineItem[] = [];
                 if (live) {
                     const head = repository.HEAD?.commit ? "HEAD" : await tree(repository, signal);
@@ -215,7 +228,8 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                         );
                         entry.iconPath = new ThemeIcon("git-commit");
                         entry.tooltip = `${i18n.Translations.timelineYou()}\n${staged.decorations.tooltip ?? ""}`;
-                        entry.resourceUri = toGitUri(fileUri, "~");
+                        // `~` resolves through the rendered groups, which can lag status; `""` always reads the index.
+                        entry.resourceUri = toGitUri(fileUri, "");
                         entry.command = resolveOpenDiff(entry, fileUri);
                         liveItems.unshift(entry);
                     }
@@ -233,7 +247,7 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                             "working",
                             "gitm:file:working",
                             Uri.file(repository.root),
-                            toGitUri(staged ? fileUri : working.state.original, previousRef),
+                            toGitUri(staged ? fileUri : working.state.original, staged ? "" : head),
                         );
                         entry.iconPath = new ThemeIcon("circle-outline");
                         entry.tooltip = `${i18n.Translations.timelineYou()}\n${working.decorations.tooltip ?? ""}`;
@@ -273,21 +287,13 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                     }
                     items.push(entry);
                 }
-                const next = commits[page.commitCount];
-                if (folder) {
-                    return {
-                        items,
-                        cursor: next
-                            ? JSON.stringify({ hash: tip, path: logPath, skip: (cursor?.skip ?? 0) + page.commitCount })
-                            : undefined,
-                    };
-                }
                 return {
                     items,
-                    cursor: next || page.nextLiveOffset !== undefined
+                    cursor: commits[page.commitCount] || page.nextLiveOffset !== undefined
                         ? JSON.stringify({
-                            hash: next?.hash,
-                            path: next?.filePath ?? logPath,
+                            hash: tip,
+                            path: logPath,
+                            skip: skip + page.commitCount,
                             liveOffset: page.nextLiveOffset,
                         })
                         : undefined,
@@ -296,38 +302,29 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         provideWorkspaceTimeline: (options, token) =>
             request(token, async signal => {
                 const cursor = options.cursor ? parseWorkspaceCursor(options.cursor) : undefined;
-                const skips = cursor?.skips;
                 const limit = limitFor(options);
-                const repositories = model.repositories.filter(repository =>
-                    !skips || Object.hasOwn(skips, repository.root)
-                );
-                const logs = await Promise.all(repositories.map(async repository => ({
-                    repository,
-                    root: repository.root,
-                    skip: skips?.[repository.root] ?? 0,
-                    commits: unwrapOk(
-                        await log(contextFor(git, "log"), repository.root, {
-                            maxEntries: limit + 1,
-                            skip: skips?.[repository.root],
-                            shortStats: true,
-                            signal,
-                        }),
-                    ),
-                })));
-                const { page, next } = getWorkspaceTimelinePage(
-                    logs,
+                const session = cursor?.session ?? randomUUID();
+                const pageNumber = cursor?.page ?? 0;
+                const shown = workspaceSessions.open(session, pageNumber);
+                const repositories = new Map(model.repositories.map(repository => [repository.root, repository]));
+                const repositoryAt = (root: string): AbstractRepository => {
+                    const repository = repositories.get(root);
+                    if (!repository) throw new Error("Unknown workspace Timeline repository");
+                    return repository;
+                };
+                const skips = cursor?.skips ?? Object.fromEntries(model.repositories.map(({ root }) => [root, 0]));
+                const { page, skips: next } = await readWorkspaceTimelinePage(
+                    Object.fromEntries(Object.entries(skips).filter(([root]) => repositories.has(root))),
                     limit,
-                    (commit, index) => {
-                        const entry = logs[index];
-                        if (!entry) throw new Error("Unknown workspace Timeline repository");
-                        return timestamp(commit, entry.repository);
-                    },
-                    cursor?.seen,
+                    async (root, skip, maxEntries) =>
+                        unwrapOk(
+                            await log(contextFor(git, "log"), root, { maxEntries, skip: skip || undefined, signal }),
+                        ),
+                    (commit, root) => timestamp(commit, repositoryAt(root)),
+                    shown.seen,
                 );
-                const items = await Promise.all(page.map(async ({ log: index, commit }) => {
-                    const source = logs[index];
-                    if (!source) throw new Error("Unknown workspace Timeline repository");
-                    const repository = source.repository;
+                const items = await Promise.all(page.map(async ({ root, commit }) => {
+                    const repository = repositoryAt(root);
                     const entry = await item(
                         repository,
                         commit,
@@ -343,7 +340,11 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                     };
                     return entry;
                 }));
-                return { items, cursor: next ? JSON.stringify(next) : undefined };
+                shown.record(page.map(({ commit }) => commit.hash));
+                return {
+                    items,
+                    cursor: next ? JSON.stringify({ session, page: pageNumber + 1, skips: next }) : undefined,
+                };
             }),
     };
 
@@ -425,6 +426,7 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         subscriptions.clear();
         operationDates.clear();
         emptyTrees.clear();
+        workspaceSessions.clear();
         Disposable.from(...disposables).dispose();
     });
 }
