@@ -38,6 +38,18 @@ export function timelineDiffTitle(name: string, previous: string, current: strin
     return l10n.t("{0} ({1}) ↔ {0} ({2})", name, previous, current);
 }
 
+export function timelineCompareTitle(left: string, right: string): string {
+    return l10n.t("{0} ↔ {1}", left, right);
+}
+
+export function timelineSelectFirst(): string {
+    return l10n.t("Select a Timeline entry for comparison first.");
+}
+
+export function timelineDifferentFile(): string {
+    return l10n.t("The selected Timeline entry is for a different file. Select an entry for this file first.");
+}
+
 export function timelineDateAdjusted(): string {
     return l10n.t("Date adjusted for Git order");
 }

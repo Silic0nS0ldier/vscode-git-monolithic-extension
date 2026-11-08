@@ -33,6 +33,7 @@ import { error } from "../tracing.js";
 import { fromGitUri, toGitUri } from "../uri.js";
 import * as config from "../util/config.js";
 import { isDescendant, pathEquals } from "../util/paths.js";
+import { clearCompareSelection, compareSelection } from "./compare-selection.js";
 import { createEmojifier } from "./emoji.js";
 import { contextFor } from "./git-context.js";
 import { GitTimelineItem, resolveOpenDiff } from "./item.js";
@@ -322,7 +323,9 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         );
     }
     for (const repository of model.repositories) subscribe(repository);
+    clearCompareSelection();
     disposables.push(
+        new Disposable(clearCompareSelection),
         model.onDidOpenRepository(repository => {
             subscribe(repository);
             fireChanged();
@@ -332,6 +335,8 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
             subscriptions.delete(repository);
             operationDates.delete(repository);
             emptyTrees.delete(repository.root);
+            const selectedRoot = compareSelection()?.item.rootUri.fsPath;
+            if (selectedRoot && pathEquals(selectedRoot, repository.root)) clearCompareSelection();
             fireChanged();
         }),
         model.onDidChangeRepository(() => fireChanged()),

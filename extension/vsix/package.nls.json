@@ -45,6 +45,8 @@
     "command.timelineViewCommit": "Open Commit",
     "command.timelineCopyCommitId": "Copy Commit ID",
     "command.timelineCopyCommitMessage": "Copy Commit Message",
+    "command.timelineSelectForCompare": "Select for Compare",
+    "command.timelineCompareWithSelected": "Compare with Selected",
     "config.timeline.date": "Controls which date to use for items in the Timeline view.",
     "config.timeline.date.committed": "Use the committed date",
     "config.timeline.date.authored": "Use the authored date",
