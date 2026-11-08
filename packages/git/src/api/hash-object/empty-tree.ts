@@ -1,3 +1,4 @@
+import { Readable } from "node:stream";
 import type { GitContext } from "../../cli/context.js";
 import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
 import { createError, ERROR_GENERIC } from "../../errors.js";
@@ -10,7 +11,7 @@ export async function emptyTree(
     signal?: AbortSignal,
 ): Promise<Result<string, ReadToErrors>> {
     const result = await readToString(
-        { cli: git.cli, cwd, input: "", signal },
+        { cli: git.cli, cwd, stdin: Readable.from([]), signal },
         ["hash-object", "-t", "tree", "--stdin"],
     );
     if (isErr(result)) return result;

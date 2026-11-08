@@ -46,9 +46,9 @@ Not everything under `monolithic-git-interop/api/*` is so simple to consume, wit
 
 - `api/hash-object/empty-tree` computes the empty tree for the repository's object format, including SHA-256.
 
-CLI contexts optionally accept `input` (a string or byte array), which is written to stdin followed by EOF.
-`input: ""` explicitly supplies empty stdin. Buffer-reading helpers also accept a cancellation `signal`; buffer
-overflow cancellation is composed with, rather than replacing, that signal.
+CLI contexts optionally accept a `stdin` readable stream, which is piped to the process's stdin and closed once it
+ends. To supply a string or bytes, wrap them in a stream (e.g. `Readable.from([data])`). Buffer-reading helpers also
+accept a cancellation `signal`; buffer overflow cancellation is composed with, rather than replacing, that signal.
 
 ## Origins
 

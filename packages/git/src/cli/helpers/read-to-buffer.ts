@@ -1,5 +1,5 @@
 import { getStreamAsBuffer, MaxBufferError } from "get-stream";
-import { PassThrough } from "node:stream";
+import { PassThrough, type Readable } from "node:stream";
 import {
     type BufferOverflowError,
     createError,
@@ -15,7 +15,7 @@ export type ReadToContext = {
     cwd: string;
     timeout?: number;
     signal?: AbortSignal;
-    input?: string | Uint8Array;
+    stdin?: Readable;
 };
 
 export type ReadToErrors =
@@ -47,7 +47,7 @@ export async function readToBuffer(
                 : abortController.signal,
             stdout,
             timeout: context.timeout,
-            input: context.input,
+            stdin: context.stdin,
         }, args);
         // Throws on max buffer hit
         const streamReader = getStreamAsBuffer(stdout, { maxBuffer });

@@ -1,5 +1,6 @@
 import test from "ava";
 import intoStream from "into-stream";
+import { text } from "node:stream/consumers";
 import type { GitContext } from "../../cli/context.js";
 import { unwrapOk } from "../../errors.js";
 import { ok } from "../../func-result.js";
@@ -11,7 +12,7 @@ test("Computes the repository-format empty tree", async t => {
         path: "",
         version: "",
         cli: async (context, args) => {
-            t.is(context.input, "");
+            t.is(context.stdin && await text(context.stdin), "");
             t.deepEqual(args, ["hash-object", "-t", "tree", "--stdin"]);
             intoStream(hash + "\n").pipe(context.stdout!);
             return ok(undefined);

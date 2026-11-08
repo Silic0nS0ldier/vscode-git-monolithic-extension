@@ -1,4 +1,4 @@
-import type { Readable, Writable } from "node:stream";
+import { pipeline, type Readable, type Writable } from "node:stream";
 import { setTimeout as delay } from "node:timers/promises";
 import {
     createError,
@@ -115,14 +115,12 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         const onError = new Promise<CLIResult>(resolve =>
             void cp.once("error", (error) => resolve(err(createError(ERROR_GENERIC, { cmdContext, error }))))
         );
-        const onInputError = new Promise<CLIResult>(resolve => {
-            if (context.input !== undefined) {
-                cp.stdin.once("error", error => resolve(err(createError(ERROR_GENERIC, { cmdContext, error }))));
-                try {
-                    cp.stdin.end(context.input);
-                } catch (error) {
-                    resolve(err(createError(ERROR_GENERIC, { cmdContext, error })));
-                }
+        const onStdinError = new Promise<CLIResult>(resolve => {
+            if (context.stdin) {
+                // Destroys both streams on failure, including that of the supplied stream.
+                pipeline(context.stdin, cp.stdin, error => {
+                    if (error) resolve(err(createError(ERROR_GENERIC, { cmdContext, error })));
+                });
             }
         });
         const onExit = new Promise<CLIResult>(resolve =>
@@ -130,7 +128,7 @@ export function create(executablePath: string, persistentContext: PersistentCLIC
         );
 
         // NOTE onExit must come last, unit tests rely on this (they are time optimised)
-        const result = await Promise.race([onAbort, onError, onInputError, onExit]);
+        const result = await Promise.race([onAbort, onError, onStdinError, onExit]);
 
         if (isErr(result)) {
             // A timed out or cancelled git can run on indefinitely; it is not given the chance.
