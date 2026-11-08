@@ -12,6 +12,7 @@ import {
     window,
     workspace,
 } from "vscode";
+import { readSubmoduleCommit } from "./git/submodule-content.js";
 import type { Model, ModelChangeEvent, OriginalResourceChangeEvent } from "./model.js";
 import { debounce } from "./package-patches/just-debounce.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
@@ -26,6 +27,7 @@ interface CacheRow {
     timestamp: number;
 }
 
+const COMMIT_HASH = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const THREE_MINUTES = 1000 * 60 * 3;
 const FIVE_MINUTES = 1000 * 60 * 5;
 
@@ -152,11 +154,14 @@ export class GitFileSystemProvider implements FileSystemProvider {
         }
 
         let size = 0;
-        try {
-            const details = await repository.getObjectDetails(sanitizeRef(ref, path, repository), path);
-            size = details.size;
-        } catch {
-            // noop
+        // A submodule URI's content is derived text, whose size its gitlink does not give.
+        if (!submoduleOf) {
+            try {
+                const details = await repository.getObjectDetails(sanitizeRef(ref, path, repository), path);
+                size = details.size;
+            } catch {
+                // noop
+            }
         }
         return { ctime: 0, mtime: this.#mtime, size: size, type: FileType.File };
     }
@@ -185,6 +190,9 @@ export class GitFileSystemProvider implements FileSystemProvider {
 
             if (ref === "index") {
                 return encoder.encode(await repository.diffIndexWithHEAD(path));
+            } else if (COMMIT_HASH.test(ref)) {
+                // Matches how `git diff` shows a submodule at a superproject revision.
+                return await readSubmoduleCommit(() => repository.getObjectDetails(ref, path));
             } else {
                 return encoder.encode(await repository.diffWithHEAD(path));
             }

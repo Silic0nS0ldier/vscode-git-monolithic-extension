@@ -24,6 +24,7 @@ let page: Page;
 before(async () => {
     browser = await connect();
     page = await openWorkbench(browser);
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
 }, { timeout: LOAD_TIMEOUT_MS });
 after(async () => {
     await browser.close();
@@ -110,6 +111,25 @@ scenario("native Timeline multi-selection compares the historical resource URIs"
     );
 });
 
+scenario("committed entries copy their ID and message and open all changed files", async () => {
+    await openTimeline();
+    await action("Revision 7", "Copy Commit ID");
+    const head = await resolveRef("HEAD");
+    await pollUntil(
+        "the commit ID to reach the clipboard",
+        () => page.evaluate(() => navigator.clipboard.readText()),
+        text => text === head,
+    );
+    await action("Revision 7", "Copy Commit Message");
+    await pollUntil(
+        "the commit message to reach the clipboard",
+        () => page.evaluate(() => navigator.clipboard.readText()),
+        text => text === "Revision 7",
+    );
+    await action("Revision 7", "Open Commit");
+    await page.locator(".part.editor").getByText("other.txt", { exact: true }).first().waitFor({ state: "visible" });
+});
+
 scenario("author and date settings refresh labels and complete local commit metadata", async () => {
     await openTimeline();
     await setting("git_monolithic.timeline.showAuthor", false);
@@ -171,6 +191,12 @@ scenario("paging follows renames and retains emoji and the complete commit messa
         .filter({ hasText: "Create original file ✨" })
         .filter({ hasText: "The complete commit body." });
     await showHover("Create original file", hover);
+    await action("Create original file", "Copy Commit Message");
+    await pollUntil(
+        "the complete multiline message to reach the clipboard",
+        () => page.evaluate(() => navigator.clipboard.readText()),
+        text => text === "Create original file ✨\n\nThe complete commit body.",
+    );
     await action("Create original file", "Open Changes");
     const sides = await pollUntil(
         "the renamed file's original content to load",
@@ -178,6 +204,19 @@ scenario("paging follows renames and retains emoji and the complete commit messa
         sides => sides.modified === "original",
     );
     assert.equal(sides.original, "");
+});
+
+scenario("a file Timeline can open a historical submodule update", async () => {
+    await openTimeline("modules/sub", "Replace submodule with regular file");
+    await action("Update submodule", "Open Commit");
+    const before = await resolveRef(":/Configure Timeline fixture");
+    const after = await resolveRef(":/Create merged folder");
+    assert.ok(before && after);
+    await pollUntil(
+        "both recorded submodule commits to be shown",
+        async () => (await page.locator(".part.editor").innerText()).replaceAll(/\s+/gu, " "),
+        text => text.includes(`Subproject commit ${before}`) && text.includes(`Subproject commit ${after}`),
+    );
 });
 
 scenario("file history pages through both sides of a merge", async () => {

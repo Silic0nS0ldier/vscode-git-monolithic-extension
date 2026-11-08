@@ -26,6 +26,9 @@ Timeline view, using the stable API without proposed-API permissions. History fo
 opens comparisons against the preceding file revision. VSCode's **Compare Selected** can also compare file versions
 from other sources, and **Pin Current Timeline** keeps the file's history in view while selecting versions.
 
+**Open Commit** shows all files changed by a commit, including additions, deletions, renames, and submodules.
+**Copy Commit ID** and **Copy Commit Message** are available on committed Timeline entries.
+
 `git_monolithic.timeline.date` selects the committed date (default) or authored date; `git_monolithic.timeline.showAuthor`
 defaults to `true`. Topological Git traversal puts descendants before their ancestors when timestamps disagree. VSCode
 sorts by the timestamp it displays, so an entry whose timestamp was adjusted to preserve that order is marked
