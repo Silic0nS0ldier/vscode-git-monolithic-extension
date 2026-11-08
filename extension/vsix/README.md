@@ -33,6 +33,14 @@ another file prompts you to select a version of that file instead.
 Folders also have a committed Timeline; opening a folder entry shows the entire commit, including changes outside
 the folder. Folder history is paged from the original traversal tip and follows Git's topological order.
 
+The Timeline's **Pin Workspace Timeline** action shows committed history across detected repositories. Linked
+worktrees using the same Git directories and compatible traversal settings share one topological traversal, so commits
+reachable from several worktree tips appear once. Worktrees with relative or ambiguous Git environment overrides that
+may resolve to different object or history files remain separate. Separate Git stores, including independent clones
+with the same commits, remain separate histories and retain their own shallow boundaries, replacement refs, and
+repository attribution. Each store follows Git's traversal order; their interleaving is not guaranteed to be
+chronological. Workspace pages retain the captured tips until the Timeline refreshes.
+
 `git_monolithic.timeline.date` selects the committed date (default) or authored date; `git_monolithic.timeline.showAuthor`
 defaults to `true`. Topological Git traversal puts descendants before their ancestors when timestamps disagree. VSCode
 sorts by the timestamp it displays, so an entry whose timestamp was adjusted to preserve that order is marked

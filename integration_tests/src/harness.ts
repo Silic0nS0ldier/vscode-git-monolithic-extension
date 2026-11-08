@@ -231,7 +231,7 @@ async function navigate(page: Page, url: string, deadline: number): Promise<void
     }
 }
 
-export async function openWorkbench(browser: Browser): Promise<Page> {
+export async function openWorkbench(browser: Browser, workspaceFile?: string): Promise<Page> {
     const context = browser.contexts()[0] ?? await browser.newContext();
     const page = await context.newPage();
     // Fail inside the hook's own timeout, so the failure is captured rather than cut short.
@@ -240,7 +240,7 @@ export async function openWorkbench(browser: Browser): Promise<Page> {
 
     try {
         const editorUrl = new URL(`http://127.0.0.1:${assignedPort("code_server_service")}/`);
-        editorUrl.searchParams.set("folder", workspaceDir());
+        editorUrl.searchParams.set(workspaceFile ? "workspace" : "folder", workspaceFile ?? workspaceDir());
         await navigate(page, editorUrl.toString(), loadDeadline);
         await page.locator(".monaco-workbench").waitFor({ state: "visible" });
 
