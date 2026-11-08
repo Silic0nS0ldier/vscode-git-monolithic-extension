@@ -3,6 +3,7 @@ import { readToBuffer, type ReadToErrors } from "../../cli/helpers/read-to-buffe
 import { createError, ERROR_GENERIC, ERROR_NON_ZERO_EXIT } from "../../errors.js";
 import { err, isErr, ok, type Result, unwrap } from "../../func-result.js";
 import { type Commit, COMMIT_FORMAT, parseCommits } from "../commit.js";
+import { createRecordDiscarder } from "./discard.js";
 
 /** 10 MiB — generous ceiling for bounded log output. */
 const LOG_MAX_BUFFER = 10 * 1024 * 1024;
@@ -13,6 +14,11 @@ export type LogOptions = {
     /** Limit output to commits that touch this path. */
     path?: string;
     skip?: number;
+    /**
+     * Number of commits to read and drop before those returned, without buffering them. Unlike `skip`, which git
+     * applies before `follow` filters commits and so loses renames it skips past, git still walks and filters these.
+     */
+    discard?: number;
     hash?: string;
     follow?: boolean;
     filePaths?: boolean;
@@ -22,7 +28,7 @@ export type LogOptions = {
 
 /**
  * Returns a list of commits from the repository log.
- * Wraps `git -c i18n.logOutputEncoding=UTF-8 log -n<N> --format=<fmt> -z [--skip=N] [ref] [--shortstat] [--numstat] [--follow] -- [path]`.
+ * Wraps `git -c i18n.logOutputEncoding=UTF-8 log -n<N+discard> --format=<fmt> -z [--skip=N] [ref] [--shortstat] [--numstat] [--follow] -- [path]`.
  */
 export async function log(
     git: GitContext,
@@ -33,6 +39,8 @@ export async function log(
     if (
         !Number.isSafeInteger(maxEntries) || maxEntries < 1
         || (opts?.skip !== undefined && (!Number.isSafeInteger(opts.skip) || opts.skip < 0))
+        || (opts?.discard !== undefined && (!Number.isSafeInteger(opts.discard) || opts.discard < 0))
+        || !Number.isSafeInteger(maxEntries + (opts?.discard ?? 0))
         || opts?.hash?.startsWith("-") || (opts?.follow && !opts.path)
     ) {
         return err(createError(ERROR_GENERIC, "Invalid log paging or revision options"));
@@ -41,7 +49,7 @@ export async function log(
         "-c",
         "i18n.logOutputEncoding=UTF-8",
         "log",
-        `-n${maxEntries}`,
+        `-n${maxEntries + (opts?.discard ?? 0)}`,
         `--format=${COMMIT_FORMAT}`,
         "-z",
     ];
@@ -55,7 +63,16 @@ export async function log(
         args.push(opts.path);
     }
 
-    const result = await readToBuffer({ cli: git.cli, cwd, signal: opts?.signal }, args, LOG_MAX_BUFFER);
+    const result = await readToBuffer(
+        {
+            cli: git.cli,
+            cwd,
+            signal: opts?.signal,
+            filter: opts?.discard ? createRecordDiscarder(opts.discard) : undefined,
+        },
+        args,
+        LOG_MAX_BUFFER,
+    );
 
     if (isErr(result)) {
         const failure = unwrap(result);
