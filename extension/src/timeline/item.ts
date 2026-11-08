@@ -26,7 +26,7 @@ export class GitTimelineItem extends TimelineItem {
     }
 }
 
-function itemTitle(item: GitTimelineItem, uri: Uri): string {
+export function itemTitle(item: GitTimelineItem, uri: Uri): string {
     const basename = path.basename(uri.fsPath);
     if (item.ref === "") return i18n.Translations.gitTitleWorkingTree(basename);
     if (item.ref === "~") return i18n.Translations.gitTitleIndex(basename);
