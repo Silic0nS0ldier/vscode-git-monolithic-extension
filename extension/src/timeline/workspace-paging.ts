@@ -5,7 +5,7 @@ import { orderedTimestamp } from "./paging.js";
 const HASH = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const MAX_CONCURRENT_LOGS = 4;
 
-export type WorkspaceRevision = { root: string; tip: string; instance: string };
+type WorkspaceRevision = { root: string; tip: string; instance: string };
 export type WorkspaceSnapshot = WorkspaceRevision & {
     commonDir: string;
     objectsDir: string;
