@@ -46,9 +46,6 @@ Not everything under `monolithic-git-interop/api/*` is so simple to consume, wit
 
 TODO
 
-- `api/log/mod` provides bounded commit history, including path filtering, rename following, historical file paths,
-  short statistics, revision cursors and skip-based paging. Pass an `AbortSignal` in the options to cancel a query.
-
 ## Origins
 
 This package was created to power git interactions within the Monolithic Git extension for VSCode.
