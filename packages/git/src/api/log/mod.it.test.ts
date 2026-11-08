@@ -90,6 +90,27 @@ test(log.name + " - path filter", async () => {
     assert.strictEqual(commit.message, "Add a");
 });
 
+test(log.name + " - folder pages keep their traversal tip when HEAD changes", async () => {
+    await using repo = await tempGitRepo(true);
+    await fs.mkdir(path.join(repo.path, "folder"));
+    for (const name of ["First", "Second", "Third"]) {
+        await fs.writeFile(path.join(repo.path, "folder", `${name}.txt`), name);
+        await run(repo.path, ["add", "folder"]);
+        await run(repo.path, ["commit", "-m", name]);
+    }
+    await fs.writeFile(path.join(repo.path, "outside.txt"), "outside");
+    await run(repo.path, ["add", "outside.txt"]);
+    await run(repo.path, ["commit", "-m", "Outside"]);
+    const tip = await read(repo.path, ["rev-parse", "HEAD"]);
+    const options = { path: "folder", hash: tip, topoOrder: true };
+    const first = unwrapOk(await log(gitCtx, repo.path, { ...options, maxEntries: 2 }));
+    await fs.writeFile(path.join(repo.path, "folder", "new.txt"), "new");
+    await run(repo.path, ["add", "folder"]);
+    await run(repo.path, ["commit", "-m", "New HEAD"]);
+    const next = unwrapOk(await log(gitCtx, repo.path, { ...options, skip: 2, maxEntries: 2 }));
+    assert.deepStrictEqual([...first, ...next].map(commit => commit.message), ["Third", "Second", "First"]);
+});
+
 test(log.name + " - follows renamed files with their historical paths and statistics", async () => {
     await using repo = await tempGitRepo();
     const oldPath = "old\tname.txt";

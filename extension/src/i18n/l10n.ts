@@ -22,6 +22,10 @@ export function openComparison(): string {
     return l10n.t("Open Comparison");
 }
 
+export function openCommit(): string {
+    return l10n.t("Open Commit");
+}
+
 export function timelineYou(): string {
     return l10n.t("You");
 }

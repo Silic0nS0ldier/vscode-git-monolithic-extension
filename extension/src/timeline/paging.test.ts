@@ -1,5 +1,33 @@
 import test from "ava";
-import { getFileTimelinePage, orderedTimestamp, parseFileCursor, remainingLiveOffset } from "./paging.js";
+import {
+    getFileTimelinePage,
+    orderedTimestamp,
+    parseFileCursor,
+    readStableHistory,
+    remainingLiveOffset,
+} from "./paging.js";
+
+test("History resolves and rereads a stable tip when repository status has not supplied one", async t => {
+    const head = "a".repeat(40);
+    const reads: (string | undefined)[] = [];
+    const result = await readStableHistory(
+        undefined,
+        async tip => {
+            reads.push(tip);
+            return tip ? ["stable"] : ["possibly stale"];
+        },
+        async () => head,
+    );
+    t.deepEqual(result, { tip: head, commits: ["stable"] });
+    t.deepEqual(reads, [undefined, head]);
+
+    const empty = await readStableHistory(undefined, async () => [], async () => {
+        t.fail("An empty history does not need its unborn HEAD resolved");
+        return undefined;
+    });
+    t.deepEqual(empty, { tip: undefined, commits: [] });
+    await t.throwsAsync(readStableHistory(undefined, async () => ["commit"], async () => "--all"));
+});
 
 test("Live entries and commits share the file Timeline page budget", t => {
     const commits = Array.from({ length: 9 }, (_, index) => index);

@@ -30,6 +30,8 @@ from other sources, and **Pin Current Timeline** keeps the file's history in vie
 **Copy Commit ID** and **Copy Commit Message** are available on committed Timeline entries.
 **Select for Compare** and **Compare with Selected** compare two versions of the same file. Selecting an entry from
 another file prompts you to select a version of that file instead.
+Folders also have a committed Timeline; opening a folder entry shows the entire commit, including changes outside
+the folder. Folder history is paged from the original traversal tip and follows Git's topological order.
 
 `git_monolithic.timeline.date` selects the committed date (default) or authored date; `git_monolithic.timeline.showAuthor`
 defaults to `true`. Topological Git traversal puts descendants before their ancestors when timestamps disagree. VSCode

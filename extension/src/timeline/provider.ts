@@ -3,6 +3,7 @@
 import type { Commit } from "monolithic-git-interop/api/commit";
 import { emptyTree } from "monolithic-git-interop/api/hash-object/empty-tree";
 import { log } from "monolithic-git-interop/api/log/mod";
+import { head } from "monolithic-git-interop/api/rev-parse/head";
 import { unwrapOk } from "monolithic-git-interop/errors";
 import path from "node:path";
 import { inspect } from "node:util";
@@ -22,6 +23,7 @@ import {
     workspace,
 } from "vscode";
 import { Status } from "../api/git.js";
+import { makeCommandId } from "../commands/helpers.js";
 import type { Git } from "../git.js";
 import { sanitizePath } from "../git/helpers.js";
 import * as i18n from "../i18n/mod.js";
@@ -37,7 +39,13 @@ import { clearCompareSelection, compareSelection } from "./compare-selection.js"
 import { createEmojifier } from "./emoji.js";
 import { contextFor } from "./git-context.js";
 import { GitTimelineItem, resolveOpenDiff } from "./item.js";
-import { getFileTimelinePage, orderedTimestamp, parseFileCursor, remainingLiveOffset } from "./paging.js";
+import {
+    getFileTimelinePage,
+    orderedTimestamp,
+    parseFileCursor,
+    readStableHistory,
+    remainingLiveOffset,
+} from "./paging.js";
 
 const PROVIDER_ID = "gitm-history";
 const PAGE_SIZE = 50;
@@ -72,8 +80,9 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
     async function item(
         repository: AbstractRepository,
         commit: Commit,
+        contextValue: string,
         previousRef: string,
-        previousUri: Uri,
+        previousUri: Uri | undefined,
         date: number,
         orderDate: number,
     ): Promise<GitTimelineItem> {
@@ -86,7 +95,7 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
             message,
             orderDate,
             commit.hash,
-            "gitm:file:commit",
+            contextValue,
             rootUri,
             previousUri,
         );
@@ -155,14 +164,16 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                 const repository = model.getRepository(uri);
                 if (!repository) return { items: [] };
                 const fileUri = uri.scheme === "gitm" ? Uri.file(fromGitUri(uri).path) : uri;
+                let folder: boolean;
                 try {
-                    if (((await workspace.fs.stat(fileUri)).type & FileType.Directory) !== 0) return { items: [] };
+                    folder = ((await workspace.fs.stat(fileUri)).type & FileType.Directory) !== 0;
                 } catch (ex) {
                     if (!(ex instanceof FileSystemError) || ex.code !== "FileNotFound") throw ex;
+                    folder = false;
                 }
                 const limit = limitFor(options);
                 const cursor = options.cursor ? parseFileCursor(options.cursor) : undefined;
-                const live = !cursor || cursor.liveOffset !== undefined;
+                const live = !folder && (!cursor || cursor.liveOffset !== undefined);
                 // Rendered groups can lag status while their layout settles.
                 const groups = repository.sourceControlUI;
                 const staged = live
@@ -181,22 +192,28 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                     throw new Error("Timeline cursor is outside its repository");
                 }
                 const headCommit = repository.HEAD?.commit;
-                const tip = !cursor && headCommit && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(headCommit)
+                const initialTip = !cursor && headCommit && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(headCommit)
                     ? headCommit
                     : cursor?.hash;
                 const skip = cursor?.skip ?? 0;
-                const commits = unwrapOk(
-                    await log(contextFor(git, "log"), repository.root, {
-                        path: `:(literal)${sanitizePath(logPath)}`,
-                        hash: tip,
-                        discard: skip || undefined,
-                        maxEntries: limit + 1,
-                        topoOrder: true,
-                        follow: true,
-                        filePaths: true,
-                        shortStats: true,
-                        signal,
-                    }),
+                const { tip, commits } = await readStableHistory(
+                    initialTip,
+                    async hash =>
+                        unwrapOk(
+                            await log(contextFor(git, "log"), repository.root, {
+                                path: `:(literal)${sanitizePath(logPath)}`,
+                                hash,
+                                skip: folder ? skip || undefined : undefined,
+                                discard: folder ? undefined : skip || undefined,
+                                maxEntries: limit + 1,
+                                topoOrder: true,
+                                follow: !folder,
+                                filePaths: !folder,
+                                shortStats: true,
+                                signal,
+                            }),
+                        ),
+                    async () => unwrapOk(await head(contextFor(git, "rev-parse"), repository.root, signal)),
                 );
                 const liveItems: GitTimelineItem[] = [];
                 if (live) {
@@ -259,23 +276,34 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                 }
                 for (const [index, commit] of commits.slice(0, page.commitCount).entries()) {
                     const next = commits[index + 1];
-                    const previousRef = next?.hash ?? await tree(repository, signal);
+                    const previousRef = folder
+                        ? commit.parents[0] ?? await tree(repository, signal)
+                        : next?.hash ?? await tree(repository, signal);
                     const previousPath = next?.filePath ? Uri.file(path.join(repository.root, next.filePath)) : fileUri;
                     const date = timestamp(commit, repository);
                     const orderDate = orderedTimestamp(date, before);
                     const entry = await item(
                         repository,
                         commit,
+                        folder ? "gitm:folder:commit" : "gitm:file:commit",
                         previousRef,
-                        toGitUri(previousPath, previousRef),
+                        folder ? undefined : toGitUri(previousPath, previousRef),
                         date,
                         orderDate,
                     );
-                    const commitPath = commit.filePath
-                        ? Uri.file(path.join(repository.root, commit.filePath))
-                        : fileUri;
-                    entry.resourceUri = toGitUri(commitPath, commit.hash);
-                    entry.command = resolveOpenDiff(entry, fileUri);
+                    if (folder) {
+                        entry.command = {
+                            command: makeCommandId("timelineViewCommit"),
+                            title: i18n.Translations.openCommit(),
+                            arguments: [entry, uri, PROVIDER_ID],
+                        };
+                    } else {
+                        const commitPath = commit.filePath
+                            ? Uri.file(path.join(repository.root, commit.filePath))
+                            : fileUri;
+                        entry.resourceUri = toGitUri(commitPath, commit.hash);
+                        entry.command = resolveOpenDiff(entry, fileUri);
+                    }
                     items.push(entry);
                     before = orderDate;
                 }
