@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { appendFile, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { after, before } from "node:test";
-import type { Locator, Page } from "playwright-core";
+import { errors, type Locator, type Page } from "playwright-core";
 import { headSubject, move, resolveRef, stage, status } from "./git.js";
 import {
     connect,
@@ -145,30 +145,50 @@ scenario("author and date settings refresh labels and complete local commit meta
         () => row("Revision 7").innerText(),
         text => text.includes("Integration Test"),
     );
-    await setting("git_monolithic.timeline.date", "authored");
-    await pollUntil(
-        "authored dates to refresh the rows",
-        () => row("Revision 7").getAttribute("aria-label"),
-        label => label?.includes("years") === true,
-    );
-    await page.locator(".pane-header.timeline-view").hover();
-    await row("Revision 7").locator(".label-name").hover();
     const head = await resolveRef("HEAD");
     assert.ok(head);
-    await pollUntil(
-        "authored-date metadata and statistics to appear",
-        async () => (await page.locator(".monaco-hover").innerText()).replaceAll(/\s+/gu, " "),
-        text =>
-            text.includes("2001") && text.includes("itest@example.invalid") && text.includes(head)
-            && text.includes("1 file(s) changed"),
-    );
-    await page.locator(".pane-header.timeline-view").hover();
-    await setting("git_monolithic.timeline.date", "committed");
+    const committedLabel = await row("Revision 7").getAttribute("aria-label");
+    assert.ok(committedLabel);
+    async function assertRevisionHover(date: Date): Promise<void> {
+        const hover = page.locator(".monaco-hover")
+            .filter({ hasText: head })
+            .filter({ hasText: "Integration Test" })
+            .filter({ hasText: "itest@example.invalid" })
+            .filter({ hasText: "Revision 7" })
+            .filter({ hasText: "1 file(s) changed" })
+            .filter({ hasText: date.toLocaleString() });
+        // A refresh can replace the managed hover while the pointer is over the row.
+        for (let remaining = 3;; remaining--) {
+            await page.locator(".pane-header.timeline-view").hover();
+            await row("Revision 7").locator(".label-name").hover();
+            try {
+                await hover.waitFor({ state: "visible", timeout: 2_000 });
+                return;
+            } catch (ex) {
+                if (!(ex instanceof errors.TimeoutError) || remaining === 0) throw ex;
+            }
+        }
+    }
+
+    await setting("git_monolithic.timeline.date", "authored");
+    let authoredLabel: string | null = null;
+    try {
+        authoredLabel = await pollUntil(
+            "authored dates to refresh the rows",
+            () => row("Revision 7").getAttribute("aria-label"),
+            label => label !== null && label !== committedLabel,
+        );
+        await assertRevisionHover(new Date("2001-01-01T00:00:00Z"));
+    } finally {
+        await setting("git_monolithic.timeline.date", "committed");
+    }
     await pollUntil(
         "committed dates to replace the authored-date page",
         () => row("Revision 7").getAttribute("aria-label"),
-        label => label !== null && !label.includes("years"),
+        label => label !== null && label !== authoredLabel,
     );
+    await assertRevisionHover(new Date("2000-01-01T00:00:00Z"));
+    await page.locator(".pane-header.timeline-view").hover();
 });
 
 scenario("paging follows the rename into the original filename and retains the full commit message", async () => {
@@ -226,6 +246,7 @@ scenario("folder history pages through both sides of a merge", async () => {
         () => tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"),
         size => size === "10",
     );
+    await tree().locator(".monaco-list").press("End");
     await row("Main 1").waitFor({ state: "attached" });
     await row("Create merged folder").waitFor({ state: "attached" });
 });
@@ -241,6 +262,7 @@ scenario("file history pages through both sides of a merge", async () => {
         () => tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"),
         size => size === "9",
     );
+    await tree().locator(".monaco-list").press("End");
     for (const label of ["Side 1", "Main 1", "Create merged folder"]) {
         await row(label).waitFor({ state: "attached" });
     }

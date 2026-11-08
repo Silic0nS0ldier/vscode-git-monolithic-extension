@@ -39,7 +39,8 @@ commit_on "2020-01-05T00:00:00+00:00" git commit --all --message "Primary reposi
 
 # A worktree whose tip is dated before the history it shares, so its log is read through windows of commits the
 # primary repository already showed.
-git worktree add -b worktree "$worktree"
+# The fixture is archived and extracted elsewhere, so keep the worktree links relative.
+git worktree add --relative-paths -b worktree "../timeline-worktree"
 printf 'worktree\n' >"$worktree/worktree.txt"
 "$git_bin" -C "$worktree" add .
 commit_on "2019-01-01T00:00:00+00:00" "$git_bin" -C "$worktree" commit --message "Worktree tip"

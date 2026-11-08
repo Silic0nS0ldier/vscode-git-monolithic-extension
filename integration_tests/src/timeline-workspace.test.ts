@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { after, before } from "node:test";
-import type { Locator, Page } from "playwright-core";
+import { errors, type Locator, type Page } from "playwright-core";
 import { commitIn } from "./git.js";
 import {
     connect,
@@ -38,9 +38,19 @@ scenario("workspace history merges detected repositories and loads subsequent pa
     }
     await row("Primary repository tip").waitFor({ state: "visible" });
     const header = page.locator(".pane-header.timeline-view");
-    await header.hover();
-    await header.getByRole("button", { name: "More Actions..." }).click();
-    await selectMenuItem(page, "Pin Workspace Timeline");
+    // Repository discovery can refresh the view and close its menu before the action is selected.
+    for (let remaining = 3;; remaining--) {
+        await header.hover();
+        await header.getByRole("button", { name: "More Actions..." }).click();
+        try {
+            await page.getByRole("menuitem", { name: "Pin Workspace Timeline", exact: true })
+                .click({ timeout: 2_000 });
+            break;
+        } catch (ex) {
+            if (!(ex instanceof errors.TimeoutError) || remaining === 0) throw ex;
+            await page.keyboard.press("Escape");
+        }
+    }
     await row("Secondary repository tip").waitFor({ state: "visible" });
     assert.ok(await loadTimelinePage(page), "the first page of two must offer more history");
     for (let attempt = 0; attempt < 8; attempt++) {
