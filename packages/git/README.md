@@ -44,7 +44,9 @@ Not everything under `monolithic-git-interop/api/*` is so simple to consume, wit
 
 ## API
 
-- `api/hash-object/empty-tree` computes the empty tree for the repository's object format, including SHA-256.
+TODO
+
+## CLI
 
 CLI contexts optionally accept a `stdin` readable stream, which is piped to the process's stdin and closed once it
 ends. To supply a string or bytes, wrap them in a stream (e.g. `Readable.from([data])`). Buffer-reading helpers also
