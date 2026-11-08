@@ -1,3 +1,4 @@
+import type { Readable } from "node:stream";
 import type { CancelledError, GenericError, GitNotFoundError, NonZeroExitError, TimeoutError } from "../errors.js";
 import type { Result } from "../func-result.js";
 
@@ -11,6 +12,8 @@ export type CLIContext = {
     readonly timeout?: number;
     readonly signal?: AbortSignal;
     readonly onSpawn?: (pid: number) => void;
+    /** Piped to the process's stdin, which is closed once it ends. Streams are single use; supply a new one per call. */
+    readonly stdin?: Readable;
 };
 
 export type CLIErrors =

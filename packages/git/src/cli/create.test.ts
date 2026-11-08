@@ -1,4 +1,6 @@
 import test from "ava";
+import intoStream from "into-stream";
+import { PassThrough, Readable, Writable } from "node:stream";
 import {
     ERROR_CANCELLED,
     ERROR_GENERIC,
@@ -21,6 +23,57 @@ test("Basic case", async t => {
     const res = await cli({ cwd: "/" }, ["foobar"]);
     t.true(isOk(res));
     t.deepEqual(kills, [], "a process that exits on its own is left alone");
+});
+
+test("Supplied stdin is piped to the process and closed", async t => {
+    const stdin = new PassThrough();
+    const chunks: Buffer[] = [];
+    stdin.on("data", (chunk: Buffer) => chunks.push(chunk));
+    const cli = create("/git", { env: {}, timeout: 1000 }, {
+        child_process: { spawn: createSpawn("exit", { stdin, delay: 10 }) },
+        process: { env: {} },
+    });
+    t.true(isOk(await cli({ cwd: "/", stdin: intoStream(["pay", "load"]) }, ["hash-object", "--stdin"])));
+    t.true(stdin.writableEnded);
+    t.is(Buffer.concat(chunks).toString(), "payload");
+});
+
+test("Failures reading the supplied stdin stop the process and return an error", async t => {
+    const kills: unknown[] = [];
+    const stdin = new PassThrough();
+    const cli = create("/git", { env: {}, timeout: 1000 }, {
+        child_process: { spawn: createSpawn("exit", { stdin, delay: 10, onKill: signal => kills.push(signal) }) },
+        process: { env: {} },
+    });
+    const source = new Readable({
+        read(): void {
+            this.destroy(new Error("Cannot read source"));
+        },
+    });
+    const result = await cli({ cwd: "/", stdin: source }, ["hash-object", "--stdin"]);
+    t.true(isErr(result));
+    if (isErr(result)) t.is(unwrap(result).type, ERROR_GENERIC);
+    t.deepEqual(kills, [undefined]);
+    t.true(stdin.destroyed);
+});
+
+test("Failures writing to the process's stdin stop the process and return an error", async t => {
+    const kills: unknown[] = [];
+    const stdin = new Writable({
+        write(_chunk, _encoding, callback): void {
+            callback(new Error("Broken pipe"));
+        },
+    });
+    const cli = create("/git", { env: {}, timeout: 1000 }, {
+        child_process: { spawn: createSpawn("exit", { stdin, delay: 10, onKill: signal => kills.push(signal) }) },
+        process: { env: {} },
+    });
+    const source = intoStream("payload");
+    const result = await cli({ cwd: "/", stdin: source }, ["hash-object", "--stdin"]);
+    t.true(isErr(result));
+    if (isErr(result)) t.is(unwrap(result).type, ERROR_GENERIC);
+    t.deepEqual(kills, [undefined]);
+    t.true(source.destroyed);
 });
 
 test("Timeout", async t => {
