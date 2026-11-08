@@ -55,6 +55,10 @@ printf 'child\n' >>"$workspace/clock.txt"
 git add clock.txt
 GIT_AUTHOR_DATE="2002-01-02T00:00:00+00:00" GIT_COMMITTER_DATE="2002-01-02T00:00:00+00:00" \
     git commit --message "Clock child"
+printf 'future\n' >"$workspace/future.txt"
+git add future.txt
+GIT_AUTHOR_DATE="2099-01-01T00:00:00+00:00" GIT_COMMITTER_DATE="2099-01-01T00:00:00+00:00" \
+    git commit --message "Future change"
 printf 'original\n' >"$workspace/history/old.txt"
 git add history/old.txt
 git commit --message "Create original file :sparkles:" --message "The complete commit body."
@@ -71,5 +75,7 @@ for revision in $(seq 1 7); do
 done
 printf 'staged-only\n' >>"$workspace/history/renamed.txt"
 git add history/renamed.txt
+printf 'staged\n' >>"$workspace/future.txt"
+git add future.txt
 printf 'working-only\n' >>"$workspace/history/renamed.txt"
 printf 'untracked\n' >"$workspace/history/untracked.txt"

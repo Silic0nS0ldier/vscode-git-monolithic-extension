@@ -111,12 +111,21 @@ export async function headIdentities(): Promise<{ author: string; committer: str
     return { author, committer };
 }
 
-/** The extension refreshes the index (taking `index.lock`) when files change, so a write may race it; retry that. */
 export async function stage(...paths: string[]): Promise<void> {
+    await writeIndex("add", "--", ...paths);
+}
+
+/** Renames a tracked file and stages the rename, like `git mv`. */
+export async function move(from: string, to: string): Promise<void> {
+    await writeIndex("mv", "--", from, to);
+}
+
+/** The extension refreshes the index (taking `index.lock`) when files change, so a write may race it; retry that. */
+async function writeIndex(...args: string[]): Promise<void> {
     const deadline = Date.now() + GIT_TIMEOUT_MS;
     for (;;) {
         try {
-            await git("add", "--", ...paths);
+            await git(...args);
             return;
         } catch (error) {
             const message = error instanceof Error ? error.message : "";

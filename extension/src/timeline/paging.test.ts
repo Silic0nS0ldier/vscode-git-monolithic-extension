@@ -1,5 +1,49 @@
 import test from "ava";
-import { orderedTimestamp, parseFileCursor } from "./paging.js";
+import { getFileTimelinePage, orderedTimestamp, parseFileCursor, remainingLiveOffset } from "./paging.js";
+
+test("Live entries and commits share the file Timeline page budget", t => {
+    const commits = Array.from({ length: 9 }, (_, index) => index);
+    for (const liveCount of [0, 1, 2]) {
+        const page = getFileTimelinePage(commits, 5, liveCount);
+        t.is(page.liveCount, liveCount);
+        t.is(page.commitCount, 5 - liveCount);
+        t.is(page.nextLiveOffset, undefined);
+    }
+});
+
+test("One-item pages retain live entries before committed history", t => {
+    const commits = [0, 1];
+    t.deepEqual(getFileTimelinePage(commits, 1, 2), {
+        liveCount: 1,
+        commitCount: 0,
+        nextLiveOffset: 1,
+    });
+    t.deepEqual(getFileTimelinePage(commits, 1, 2, 1), {
+        liveCount: 1,
+        commitCount: 0,
+        nextLiveOffset: undefined,
+    });
+    t.deepEqual(getFileTimelinePage([0], 1, 0, 1), {
+        liveCount: 0,
+        commitCount: 1,
+        nextLiveOffset: undefined,
+    });
+});
+
+test("A status change between pages does not skip the remaining staged entry", t => {
+    const working = { ref: "" };
+    const staged = { ref: "~" };
+    t.is(remainingLiveOffset([working, staged], 1), 1);
+    t.is(remainingLiveOffset([staged], 1), 0);
+    t.is(remainingLiveOffset([working], 1), 1);
+    t.is(remainingLiveOffset([], 1), 0);
+    const offset = remainingLiveOffset([staged], 1);
+    t.deepEqual(getFileTimelinePage([0], 1, 1, offset), {
+        liveCount: 1,
+        commitCount: 0,
+        nextLiveOffset: undefined,
+    });
+});
 
 test("Timeline timestamps preserve Git traversal order across page boundaries", t => {
     t.is(orderedTimestamp(100), 100);
@@ -28,5 +72,15 @@ test("File Timeline cursors retain their tip, path, offset and ordering timestam
     for (const before of [null, 1.5, "1", 8_640_000_000_000_001]) {
         t.throws(() => parseFileCursor(JSON.stringify({ path: "file", skip: 1, before })));
     }
+    for (const liveOffset of [0, 2, -1, 1.5, "1", null]) {
+        t.throws(() => parseFileCursor(JSON.stringify({ path: "file", skip: 0, before: 99, liveOffset })));
+    }
+    t.deepEqual(parseFileCursor(JSON.stringify({ path: "file", skip: 0, before: 99, liveOffset: 1 })), {
+        hash: undefined,
+        path: "file",
+        skip: 0,
+        before: 99,
+        liveOffset: 1,
+    });
     t.throws(() => parseFileCursor("{\"path\":\"file\"}"));
 });

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { readFile, writeFile } from "node:fs/promises";
+import { appendFile, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { after, before } from "node:test";
 import { errors, type Locator, type Page } from "playwright-core";
-import { headSubject, resolveRef, status } from "./git.js";
+import { headSubject, move, resolveRef, stage, status } from "./git.js";
 import {
     connect,
     createScenario,
@@ -72,9 +72,9 @@ async function showHover(label: string, hover: Locator): Promise<void> {
     }
 }
 
-scenario("committed file history appears in bounded pages without live entries", async () => {
+scenario("file history includes staged changes but not working changes by default", async () => {
     await openTimeline();
-    assert.equal(await row("Staged").count(), 0);
+    await row("Staged").waitFor({ state: "visible" });
     assert.equal(await row("Uncommitted Changes").count(), 0);
     assert.equal(await row("Create original file").count(), 0, "the first request must remain paged");
     assert.equal(await headSubject(), "Revision 7");
@@ -217,4 +217,122 @@ scenario("out-of-order dates retain Git order across pages and explain the adjus
     } finally {
         await setting("timeline.pageSize", 5);
     }
+});
+
+scenario("a future-dated commit remains below a staged entry across pages", async () => {
+    await setting("timeline.pageSize", 1);
+    try {
+        await openTimeline("future.txt", "Staged");
+        assert.ok(await loadTimelinePage(page));
+        await row("Future change").waitFor({ state: "visible" });
+        assert.equal(await row("Staged").getAttribute("aria-posinset"), "1");
+        assert.equal(await row("Future change").getAttribute("aria-posinset"), "2");
+        assert.match(await row("Future change").innerText(), /Date adjusted for Git order/u);
+        const hover = page.locator(".monaco-hover")
+            .filter({ hasText: new Date("2099-01-01T00:00:00Z").toLocaleString() })
+            .filter({ hasText: "Relative date adjusted to preserve Git history order" });
+        await showHover("Future change", hover);
+    } finally {
+        await setting("timeline.pageSize", 5);
+    }
+});
+
+scenario("working changes can be enabled and compared against the staged version", async () => {
+    await openTimeline();
+    await setting("git_monolithic.timeline.showUncommitted", true);
+    await row("Uncommitted Changes").waitFor({ state: "visible" });
+    await action("Uncommitted Changes", "Open Changes");
+    const sides = await pollUntil(
+        "working and staged versions to be shown",
+        () => diffEditorSides(page),
+        sides => sides.modified.includes("working-only") && sides.original.includes("staged-only"),
+    );
+    assert.ok(!sides.original.includes("working-only"));
+    await openFile(page, "history/untracked.txt");
+    await page.locator(".pane-header.timeline-view").filter({ hasText: "untracked.txt" }).waitFor({ state: "visible" });
+    await row("Uncommitted Changes").waitFor({ state: "visible" });
+});
+
+scenario("one-item pages preserve working, staged and committed versions", async () => {
+    await openTimeline();
+    await setting("timeline.pageSize", 1);
+    await setting("git_monolithic.timeline.showAuthor", false);
+    await pollUntil(
+        "the updated workspace settings to apply",
+        () => row("Revision 7").innerText(),
+        text => !text.includes("Integration Test"),
+    );
+    await page.locator(".pane-header.timeline-view").getByRole("button", { name: "Refresh", exact: true }).click();
+    await pollUntil(
+        "the one-item Timeline page to render",
+        () => tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"),
+        size => size === "2",
+    );
+    await row("Uncommitted Changes").waitFor({ state: "visible" });
+    assert.equal(await row("Staged").count(), 0);
+    assert.ok(await loadTimelinePage(page));
+    await row("Staged").waitFor({ state: "visible" });
+    assert.ok(await loadTimelinePage(page));
+    await row("Revision 7").waitFor({ state: "visible" });
+    await setting("timeline.pageSize", 5);
+    await setting("git_monolithic.timeline.showAuthor", true);
+    await pollUntil(
+        "the restored workspace settings to apply",
+        () => row("Revision 7").innerText(),
+        text => text.includes("Integration Test"),
+    );
+    await page.locator(".pane-header.timeline-view").getByRole("button", { name: "Refresh", exact: true }).click();
+    await pollUntil(
+        "the default page budget to return",
+        () => tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"),
+        size => size === "6",
+    );
+});
+
+scenario("external index and working-tree writes refresh live entries without reopening the file", async () => {
+    await openTimeline();
+    await row("Uncommitted Changes").waitFor({ state: "visible" });
+    await stage("history/renamed.txt");
+    await pollUntil("the index to contain all file changes", status, state => state["history/renamed.txt"] === "M ");
+    await row("Uncommitted Changes").waitFor({ state: "hidden" });
+    await row("Staged").waitFor({ state: "visible" });
+    await appendFile(join(workspaceDir(), "history/renamed.txt"), "external-change\n");
+    await pollUntil(
+        "Git to report the external working change",
+        status,
+        state => state["history/renamed.txt"] === "MM",
+    );
+    await row("Uncommitted Changes").waitFor({ state: "visible" });
+    await action("Uncommitted Changes", "Open Changes");
+    await pollUntil(
+        "the live diff to contain only the external working change",
+        () => diffEditorSides(page),
+        sides =>
+            sides.modified.includes("external-change") && !sides.original.includes("external-change")
+            && sides.original.includes("working-only"),
+    );
+});
+
+scenario("a staged rename keeps the file's committed history", async () => {
+    await move("history/renamed.txt", "history/moved.txt");
+    await pollUntil(
+        "Git to stage the rename",
+        status,
+        state => state["history/renamed.txt -> history/moved.txt"]?.startsWith("R") === true,
+    );
+    await openTimeline("history/moved.txt");
+    await row("Staged").waitFor({ state: "visible" });
+});
+
+scenario("a deleted file's working version compares as empty", async () => {
+    await openTimeline("other.txt");
+    await rm(join(workspaceDir(), "other.txt"));
+    await pollUntil("Git to report the deletion", status, state => state["other.txt"] === " D");
+    await row("Uncommitted Changes").waitFor({ state: "visible" });
+    await action("Uncommitted Changes", "Open Changes");
+    await pollUntil(
+        "the deleted file to be compared with its committed content",
+        () => diffEditorSides(page),
+        sides => sides.original.includes("another changed file") && sides.modified === "",
+    );
 });

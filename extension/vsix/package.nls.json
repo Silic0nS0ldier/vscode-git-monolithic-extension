@@ -46,6 +46,7 @@
     "config.timeline.date.committed": "Use the committed date",
     "config.timeline.date.authored": "Use the authored date",
     "config.timeline.showAuthor": "Controls whether to show the commit author in the Timeline view.",
+    "config.timeline.showUncommitted": "Controls whether to show working-tree changes in the Timeline view. Staged changes are always shown.",
     "command.checkout": "Checkout to...",
     "command.checkoutDetached": "Checkout to (Detached)...",
     "command.branch": "Create Branch...",
