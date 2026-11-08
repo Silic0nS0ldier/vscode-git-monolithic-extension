@@ -61,6 +61,14 @@ test(commit.name, async () => {
     });
 });
 
+test(commit.name + " - decodes the message as UTF-8 regardless of git configuration", async () => {
+    await using repo = await tempGitRepo(true);
+    await run(repo.path, ["commit", "--allow-empty", "-m", "Café"]);
+    await run(repo.path, ["config", "i18n.logOutputEncoding", "UTF-16"]);
+
+    assert.strictEqual(unwrapOk(await commit(gitCtx, repo.path, "HEAD"))?.message, "Café");
+});
+
 test(commit.name + " - fails for an unknown revision", async () => {
     await using repo = await tempGitRepo(true);
 

@@ -19,14 +19,22 @@ export async function show(git: GitContext, cwd: string, object: string): Promis
 
 /**
  * Reads the commit a revision resolves to, without its diff. Resolves to `undefined` when
- * the output does not parse. Wraps `git show -s --format=<fmt> -z <ref>`.
+ * the output does not parse. Wraps `git -c i18n.logOutputEncoding=UTF-8 show -s --format=<fmt> -z <ref>`.
  */
 export async function commit(
     git: GitContext,
     cwd: string,
     ref: string,
 ): Promise<Result<Commit | undefined, ReadToErrors>> {
-    const result = await readToString({ cli: git.cli, cwd }, ["show", "-s", `--format=${COMMIT_FORMAT}`, "-z", ref]);
+    const result = await readToString({ cli: git.cli, cwd }, [
+        "-c",
+        "i18n.logOutputEncoding=UTF-8",
+        "show",
+        "-s",
+        `--format=${COMMIT_FORMAT}`,
+        "-z",
+        ref,
+    ]);
 
     if (isErr(result)) {
         return result;
