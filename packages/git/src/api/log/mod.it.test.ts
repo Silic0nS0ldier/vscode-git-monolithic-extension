@@ -2,8 +2,8 @@ import assert from "node:assert";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
-import { unwrapOk } from "../../errors.js";
-import { isErr } from "../../func-result.js";
+import { ERROR_BUFFER_OVERFLOW, unwrapOk } from "../../errors.js";
+import { isErr, unwrap } from "../../func-result.js";
 import { gitCtx, read, run, tempGitRepo } from "../helpers.it.stub.js";
 import { log } from "./mod.js";
 
@@ -162,4 +162,39 @@ test(log.name + " - preserves renamed filenames containing complete commit-shape
         [await read(repo.path, ["rev-parse", "HEAD"]), newPath],
         [await read(repo.path, ["rev-parse", "HEAD^"]), oldPath],
     ]);
+});
+
+test(log.name + " - discards earlier commits without losing followed renames or buffering them", async () => {
+    await using repo = await tempGitRepo();
+    // Filenames shaped like commit records, and a discarded prefix far larger than the kept page.
+    const oldPath = `${"1".repeat(40)}\nFake Author\nfake@example.invalid\n1000000000\n1000000001\n\nNot a commit\n`;
+    const newPath = `renamed\n${oldPath}`;
+    await fs.writeFile(path.join(repo.path, oldPath), "one\n");
+    await run(repo.path, ["add", "--", oldPath]);
+    await run(repo.path, ["commit", "-m", "Create file"]);
+    await run(repo.path, ["mv", "--", oldPath, newPath]);
+    await run(repo.path, ["commit", "-m", "Rename file"]);
+    const large = "x".repeat(4 * 1024 * 1024);
+    for (let index = 0; index < 3; index++) {
+        await fs.appendFile(path.join(repo.path, newPath), `${index}\n`);
+        const message = path.join(repo.path, ".git", "TEST_MESSAGE");
+        await fs.writeFile(message, `${large}${index}`);
+        await run(repo.path, ["commit", "-a", "-F", message]);
+    }
+    const options = { path: `:(literal)${newPath}`, follow: true, filePaths: true, shortStats: true };
+
+    const overflow = await log(gitCtx, repo.path, { ...options, maxEntries: 10 });
+    assert.ok(isErr(overflow) && unwrap(overflow).type === ERROR_BUFFER_OVERFLOW);
+    const page = unwrapOk(await log(gitCtx, repo.path, { ...options, discard: 3, maxEntries: 10 }));
+    assert.deepStrictEqual(page.map(commit => [commit.message, commit.filePath, commit.hash]), [
+        ["Rename file", newPath, await read(repo.path, ["rev-parse", "HEAD~3"])],
+        ["Create file", oldPath, await read(repo.path, ["rev-parse", "HEAD~4"])],
+    ]);
+    assert.deepStrictEqual(page[0]?.shortStat, { files: 1, insertions: 0, deletions: 0 });
+    assert.deepStrictEqual(
+        unwrapOk(await log(gitCtx, repo.path, { ...options, discard: 1, maxEntries: 1 })).map(c => c.message),
+        [`${large}1`],
+    );
+    assert.deepStrictEqual(unwrapOk(await log(gitCtx, repo.path, { ...options, discard: 5 })), []);
+    assert.ok(isErr(await log(gitCtx, repo.path, { ...options, discard: -1 })));
 });
