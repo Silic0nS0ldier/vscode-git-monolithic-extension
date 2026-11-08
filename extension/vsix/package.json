@@ -30,6 +30,12 @@
     "contributes": {
         "commands": [
             {
+                "command": "git_monolithic.timelineOpenDiff",
+                "title": "%command.timelineOpenDiff%",
+                "icon": "$(compare-changes)",
+                "category": "Git Monolithic"
+            },
+            {
                 "command": "git_monolithic.stageSelectedRanges",
                 "title": "%command.stageSelectedRanges%",
                 "category": "Git",
@@ -538,7 +544,15 @@
             }
         ],
         "menus": {
+            "timeline/item/context": [
+                {
+                    "command": "git_monolithic.timelineOpenDiff",
+                    "group": "1_actions@1",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /gitm:file\\b/ && !listMultiSelection"
+                }
+            ],
             "commandPalette": [
+                { "command": "git_monolithic.timelineOpenDiff", "when": "false" },
                 {
                     "command": "git_monolithic.stageSelectedRanges",
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"
@@ -1521,6 +1535,23 @@
         "configuration": {
             "title": "Git Monolithic",
             "properties": {
+                "git_monolithic.timeline.date": {
+                    "type": "string",
+                    "enum": ["committed", "authored"],
+                    "enumDescriptions": [
+                        "%config.timeline.date.committed%",
+                        "%config.timeline.date.authored%"
+                    ],
+                    "default": "committed",
+                    "description": "%config.timeline.date%",
+                    "scope": "window"
+                },
+                "git_monolithic.timeline.showAuthor": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%config.timeline.showAuthor%",
+                    "scope": "window"
+                },
                 "git_monolithic.enabled": {
                     "type": "boolean",
                     "scope": "resource",

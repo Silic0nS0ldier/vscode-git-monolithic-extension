@@ -473,6 +473,42 @@ export async function diffEditorSides(page: Page): Promise<{ original: string; m
     return { modified: await side("modified"), original: await side("original") };
 }
 
+export async function selectMenuItem(page: Page, title: string): Promise<void> {
+    const item = page.getByRole("menuitem", { name: title, exact: true });
+    await item.hover();
+    await page.keyboard.press("Enter");
+    await page.locator(".monaco-menu").waitFor({ state: "hidden" });
+}
+
+export async function loadTimelinePage(page: Page): Promise<boolean> {
+    const tree = page.locator(".timeline-tree-view");
+    const rows = tree.locator(".monaco-list-row");
+    await tree.locator(".monaco-list").focus();
+    await page.keyboard.press("End");
+    await pollUntil(
+        "the bottom of the Timeline page to render",
+        () => rows.last().getAttribute("data-last-element"),
+        last => last === "true",
+    );
+    const more = rows.filter({ hasText: "Load more" });
+    if (!await more.count()) return false;
+    const size = await rows.last().getAttribute("aria-setsize");
+    const lastRow = tree.locator(".monaco-list-row[data-last-element=\"true\"]");
+    await more.click();
+    // A final page of one item takes the Load more row's place, leaving the size unchanged.
+    await pollUntil(
+        "the next Timeline page to arrive",
+        async () => ({
+            size: await rows.first().getAttribute("aria-setsize"),
+            last: await lastRow.allInnerTexts(),
+        }),
+        next =>
+            next.size !== null
+            && (next.size !== size || (next.last.length === 1 && !/Load more|Loading/u.test(next.last[0] ?? ""))),
+    );
+    return true;
+}
+
 /**
  * A toast notification whose message matches `text`, e.g. from a non-modal
  * `window.showWarningMessage`.

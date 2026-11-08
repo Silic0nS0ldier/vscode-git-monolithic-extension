@@ -80,6 +80,7 @@ export type CommandName =
     | "stashPopLatest"
     | "sync"
     | "syncRebase"
+    | "timelineOpenDiff"
     | "undoCommit"
     | "unstage"
     | "unstageAll";
