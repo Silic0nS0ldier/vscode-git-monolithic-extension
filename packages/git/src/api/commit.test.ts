@@ -55,3 +55,32 @@ test("Yields nothing for empty output", t => {
         t.deepEqual(unwrap(res), []);
     }
 });
+
+test("Parses binary renamed paths and statistics without quoting filenames", t => {
+    const data = record(HASH, PARENT, "Rename\n")
+        + "\n0\t0\t\0old\tname\0new\nname\0\n 1 file changed, 0 insertions(+), 0 deletions(-)\n"
+        + record(PARENT, "", "Create\n") + "\n1\t0\told\tname\0\n 1 file changed, 1 insertion(+)\n";
+    const result = parseCommits(data);
+    t.true(isOk(result));
+    if (isOk(result)) {
+        t.deepEqual(unwrap(result).map(c => [c.filePath, c.shortStat]), [
+            ["new\nname", { files: 1, insertions: 0, deletions: 0 }],
+            ["old\tname", { files: 1, insertions: 1, deletions: 0 }],
+        ]);
+    }
+});
+
+test("Preserves complete SHA-256 commit hashes", t => {
+    const result = parseCommits(record("a".repeat(64), "", "Root\n"));
+    t.true(isOk(result));
+    if (isOk(result)) t.is(unwrap(result)[0]?.hash, "a".repeat(64));
+});
+
+test("Does not interpret a filename containing commit fields as another commit", t => {
+    const filePath = record(PARENT, "", "Not a commit\n").slice(0, -1);
+    const result = parseCommits(record(HASH, PARENT, "Real commit\n") + `\n1\t0\t${filePath}\0`);
+    t.true(isOk(result));
+    if (isOk(result)) {
+        t.deepEqual(unwrap(result).map(commit => [commit.hash, commit.filePath]), [[HASH, filePath]]);
+    }
+});
