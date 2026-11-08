@@ -238,9 +238,11 @@ scenario("a future-dated commit remains below a staged entry across pages", asyn
 });
 
 scenario("working changes can be enabled and compared against the staged version", async () => {
-    await openTimeline();
+    await openTimeline("history/renamed.txt", "Staged");
+    await page.locator(".pane-header.timeline-view").filter({ hasText: "renamed.txt" }).waitFor({ state: "visible" });
     await setting("git_monolithic.timeline.showUncommitted", true);
     await row("Uncommitted Changes").waitFor({ state: "visible" });
+    await row("Revision 7").waitFor({ state: "visible" });
     await action("Uncommitted Changes", "Open Changes");
     const sides = await pollUntil(
         "working and staged versions to be shown",
