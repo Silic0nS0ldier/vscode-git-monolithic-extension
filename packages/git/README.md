@@ -46,8 +46,6 @@ Not everything under `monolithic-git-interop/api/*` is so simple to consume, wit
 
 TODO
 
-- `api/diff/changes` lists NUL-delimited changes, with modes, between two revisions without loading their patches.
-
 ## Origins
 
 This package was created to power git interactions within the Monolithic Git extension for VSCode.
