@@ -17,6 +17,7 @@ cat >"$workspace/.vscode/settings.json" <<'JSON'
 JSON
 git add .vscode
 git commit --message "Configure Timeline fixture"
+configured="$(git rev-parse HEAD)"
 
 # Folder and file history whose two merged sides interleave by commit date, so a page can end on either side.
 # Both sides edit `shared.txt`, at opposite ends so that they merge cleanly.
@@ -28,6 +29,7 @@ printf 'base\n' >"$workspace/merged/base.txt"
 printf 'top\nmiddle\nbottom\n' >"$workspace/merged/shared.txt"
 git add merged
 GIT_COMMITTER_DATE="2003-01-01T00:00:00+00:00" git commit --message "Create merged folder"
+merged_base="$(git rev-parse HEAD)"
 git branch side
 for revision in 1 2 3 4; do
     git switch main
@@ -45,6 +47,17 @@ done
 git switch main
 GIT_COMMITTER_DATE="2001-01-01T00:09:00+00:00" git merge --no-ff --message "Merge side" side
 git branch --delete side
+
+# A historical submodule is later replaced by a file so its history is reachable from a file Timeline.
+mkdir -p "$workspace/modules"
+git update-index --add --cacheinfo "160000,$configured,modules/sub"
+git commit --message "Add submodule"
+git update-index --cacheinfo "160000,$merged_base,modules/sub"
+git commit --message "Update submodule"
+git rm --cached modules/sub
+printf 'regular file\n' >"$workspace/modules/sub"
+git add modules/sub
+git commit --message "Replace submodule with regular file"
 
 # The child's author and commit dates predate its parent's, despite its place in Git history.
 printf 'parent\n' >"$workspace/clock.txt"

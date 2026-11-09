@@ -87,7 +87,7 @@ export function registerCommands(
         ...stash.createCommands(),
         ...sync.createCommands(),
         ...tag.createCommands(),
-        ...timeline.createCommands(),
+        ...timeline.createCommands(model, git),
         undoCommit.createCommand(),
         ...unstage.createCommands(model),
     ]);

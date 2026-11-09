@@ -36,6 +36,21 @@
                 "category": "Git Monolithic"
             },
             {
+                "command": "git_monolithic.timelineViewCommit",
+                "title": "%command.timelineViewCommit%",
+                "category": "Git Monolithic"
+            },
+            {
+                "command": "git_monolithic.timelineCopyCommitId",
+                "title": "%command.timelineCopyCommitId%",
+                "category": "Git Monolithic"
+            },
+            {
+                "command": "git_monolithic.timelineCopyCommitMessage",
+                "title": "%command.timelineCopyCommitMessage%",
+                "category": "Git Monolithic"
+            },
+            {
                 "command": "git_monolithic.stageSelectedRanges",
                 "title": "%command.stageSelectedRanges%",
                 "category": "Git",
@@ -549,10 +564,28 @@
                     "command": "git_monolithic.timelineOpenDiff",
                     "group": "1_actions@1",
                     "when": "config.git_monolithic.enabled && timelineItem =~ /gitm:file\\b/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineViewCommit",
+                    "group": "1_actions@2",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /^gitm:.*:commit$/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineCopyCommitId",
+                    "group": "5_copy@1",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /^gitm:.*:commit$/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineCopyCommitMessage",
+                    "group": "5_copy@2",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /^gitm:.*:commit$/ && !listMultiSelection"
                 }
             ],
             "commandPalette": [
                 { "command": "git_monolithic.timelineOpenDiff", "when": "false" },
+                { "command": "git_monolithic.timelineViewCommit", "when": "false" },
+                { "command": "git_monolithic.timelineCopyCommitId", "when": "false" },
+                { "command": "git_monolithic.timelineCopyCommitMessage", "when": "false" },
                 {
                     "command": "git_monolithic.stageSelectedRanges",
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"
