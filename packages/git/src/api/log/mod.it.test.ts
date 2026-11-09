@@ -5,7 +5,7 @@ import test from "node:test";
 import { ERROR_BUFFER_OVERFLOW, unwrapOk } from "../../errors.js";
 import { isErr, unwrap } from "../../func-result.js";
 import { gitCtx, read, run, tempGitRepo } from "../helpers.it.stub.js";
-import { log } from "./mod.js";
+import { log, logWithSources } from "./mod.js";
 
 test(log.name + " - initial commit", async () => {
     await using repo = await tempGitRepo(true);
@@ -71,6 +71,42 @@ test(log.name + " - topological order keeps both sides of a merge before their n
     assert.strictEqual(topological[0], "Merge");
     assert.strictEqual(topological.at(-1), "Root");
     assert.deepStrictEqual(new Set(topological.slice(1, -1)), new Set(["Main", "Side"]));
+});
+
+test(logWithSources.name + " - pages shared multi-tip history once in Git order", async () => {
+    await using repo = await tempGitRepo();
+    const date = (value: string): Record<string, string> => ({
+        GIT_AUTHOR_DATE: value,
+        GIT_COMMITTER_DATE: value,
+    });
+    await run(repo.path, ["commit", "--allow-empty", "-m", "Newer-dated root"], date("2030-01-01T00:00:00Z"));
+    await run(repo.path, ["switch", "-c", "side"]);
+    await run(repo.path, ["commit", "--allow-empty", "-m", "Side"], date("2020-01-01T00:00:00Z"));
+    const side = await read(repo.path, ["rev-parse", "HEAD"]);
+    await run(repo.path, ["switch", "-"]);
+    await run(repo.path, ["commit", "--allow-empty", "-m", "Main"], date("2020-01-02T00:00:00Z"));
+    const main = await read(repo.path, ["rev-parse", "HEAD"]);
+    const options = { hashes: [side, main], maxEntries: 2 };
+    const first = unwrapOk(await logWithSources(gitCtx, repo.path, options));
+    await run(repo.path, ["commit", "--allow-empty", "-m", "Later HEAD"]);
+    const second = unwrapOk(await logWithSources(gitCtx, repo.path, { ...options, skip: 2 }));
+    const commits = [...first, ...second];
+    assert.deepStrictEqual(new Set(commits.slice(0, 2).map(commit => commit.message)), new Set(["Side", "Main"]));
+    assert.strictEqual(commits[2]?.message, "Newer-dated root");
+    assert.strictEqual(new Set(commits.map(commit => commit.hash)).size, 3);
+    assert.strictEqual(commits.find(commit => commit.message === "Side")?.source, side);
+    assert.strictEqual(commits.find(commit => commit.message === "Main")?.source, main);
+    assert.ok(commits.every(commit => commit.source === side || commit.source === main));
+    assert.ok(isErr(await logWithSources(gitCtx, repo.path, { ...options, signal: AbortSignal.abort() })));
+});
+
+test(logWithSources.name + " - preserves an empty commit message", async () => {
+    await using repo = await tempGitRepo();
+    await run(repo.path, ["commit", "--allow-empty", "--allow-empty-message", "-m", ""]);
+    const tip = await read(repo.path, ["rev-parse", "HEAD"]);
+    const commits = unwrapOk(await logWithSources(gitCtx, repo.path, { hashes: [tip] }));
+    assert.strictEqual(commits[0]?.source, tip);
+    assert.strictEqual(commits[0]?.message, "");
 });
 
 test(log.name + " - path filter", async () => {

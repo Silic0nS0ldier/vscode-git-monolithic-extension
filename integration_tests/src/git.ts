@@ -86,6 +86,11 @@ export async function commitIn(dir: string, rev: string): Promise<string> {
     return (await git("-C", dir, "rev-parse", rev)).trim();
 }
 
+/** Commits tracked changes in a workspace repository, retrying an index-lock race. */
+export async function commitAllIn(dir: string, message: string): Promise<void> {
+    await writeIndex("-C", dir, "commit", "-a", "-m", message);
+}
+
 export async function setLocalConfig(key: string, value: string): Promise<void> {
     await git("config", key, value);
 }

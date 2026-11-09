@@ -2,9 +2,12 @@
 
 import type { Commit } from "monolithic-git-interop/api/commit";
 import { emptyTree } from "monolithic-git-interop/api/hash-object/empty-tree";
-import { log } from "monolithic-git-interop/api/log/mod";
+import { log, logWithSources } from "monolithic-git-interop/api/log/mod";
+import { gitLayout } from "monolithic-git-interop/api/rev-parse/git-layout";
 import { head } from "monolithic-git-interop/api/rev-parse/head";
 import { unwrapOk } from "monolithic-git-interop/errors";
+import { randomUUID } from "node:crypto";
+import { realpath } from "node:fs/promises";
 import path from "node:path";
 import { inspect } from "node:util";
 import {
@@ -21,6 +24,7 @@ import {
     type TimelineProvider,
     Uri,
     workspace,
+    type WorkspaceTimelineProvider,
 } from "vscode";
 import { Status } from "../api/git.js";
 import { makeCommandId } from "../commands/helpers.js";
@@ -35,6 +39,7 @@ import { error } from "../tracing.js";
 import { fromGitUri, toGitUri } from "../uri.js";
 import * as config from "../util/config.js";
 import { isDescendant, pathEquals } from "../util/paths.js";
+import { throttle } from "../util/throttle.js";
 import { clearCompareSelection, compareSelection } from "./compare-selection.js";
 import { createEmojifier } from "./emoji.js";
 import { contextFor } from "./git-context.js";
@@ -46,22 +51,37 @@ import {
     readStableHistory,
     remainingLiveOffset,
 } from "./paging.js";
+import {
+    groupWorkspaceHistories,
+    parseWorkspaceCursor,
+    readWorkspaceTimelinePage,
+    usesWorktreeRelativeHistory,
+    validateWorkspaceRepositories,
+    workspaceRepository,
+    type WorkspaceSnapshot,
+} from "./workspace-paging.js";
 
 const PROVIDER_ID = "gitm-history";
 const PAGE_SIZE = 50;
 
 export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri): Disposable {
     const fileChanged = new EventEmitter<Uri | Uri[] | undefined>();
+    const workspaceChanged = new EventEmitter<void>();
     const shutdown = new AbortController();
     const subscriptions = new Map<AbstractRepository, Disposable>();
+    const repositoryInstances = new WeakMap<AbstractRepository, string>();
     const operationDates = new Map<AbstractRepository, number>();
+    const repositoryTips = new Map<AbstractRepository, string | undefined>();
     const emptyTrees = new Map<string, string>();
-    const disposables: Disposable[] = [fileChanged];
+    const disposables: Disposable[] = [fileChanged, workspaceChanged];
     const emojify = createEmojifier(extensionUri);
     let registered = false;
 
     const fireChanged = debounce(() => {
         if (!shutdown.signal.aborted) fileChanged.fire(undefined);
+    }, 500);
+    const fireWorkspaceChanged = debounce(() => {
+        if (!shutdown.signal.aborted) workspaceChanged.fire();
     }, 500);
 
     async function tree(repository: AbstractRepository, signal: AbortSignal): Promise<string> {
@@ -77,6 +97,12 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
             .getTime();
     }
 
+    function repositoryInstance(repository: AbstractRepository): string {
+        const instance = repositoryInstances.get(repository);
+        if (!instance) throw new Error("Workspace Timeline repository is not registered");
+        return instance;
+    }
+
     async function item(
         repository: AbstractRepository,
         commit: Commit,
@@ -85,6 +111,7 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         previousUri: Uri | undefined,
         date: number,
         orderDate: number,
+        showRepository = false,
     ): Promise<GitTimelineItem> {
         const rootUri = Uri.file(repository.root);
         const message = await emojify(commit.message);
@@ -101,6 +128,7 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         );
         result.iconPath = new ThemeIcon("git-commit");
         result.description = [
+            showRepository ? path.basename(repository.root) : undefined,
             config.timelineShowAuthor(rootUri) ? commit.authorName : undefined,
             adjusted ? i18n.Translations.timelineDateAdjusted() : undefined,
         ].filter(value => value !== undefined).join(" • ");
@@ -157,8 +185,9 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         return limit;
     }
 
-    const provider: TimelineProvider = {
+    const provider: TimelineProvider & WorkspaceTimelineProvider = {
         onDidChangeTimeline: fileChanged.event,
+        onDidChangeWorkspaceTimeline: workspaceChanged.event,
         provideTimeline: (uri, options, token) =>
             request(token, async signal => {
                 const repository = model.getRepository(uri);
@@ -320,31 +349,167 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                         : undefined,
                 };
             }),
+        provideWorkspaceTimeline: (options, token) =>
+            request(token, async signal => {
+                const cursor = options.cursor ? parseWorkspaceCursor(options.cursor) : undefined;
+                const limit = limitFor(options);
+                let histories = cursor?.histories;
+                if (!histories) {
+                    const isolateWorktrees = usesWorktreeRelativeHistory({ ...process.env, ...git.env });
+                    const snapshot = throttle(4, async (repository: AbstractRepository): Promise<
+                        WorkspaceSnapshot | undefined
+                    > => {
+                        signal.throwIfAborted();
+                        const current = repository.HEAD?.commit;
+                        const knownTip = current && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(current)
+                            ? current
+                            : undefined;
+                        const tip = knownTip ?? (await readStableHistory(
+                            undefined,
+                            async hash =>
+                                unwrapOk(
+                                    await log(contextFor(git, "log"), repository.root, {
+                                        hash,
+                                        maxEntries: 1,
+                                        signal,
+                                    }),
+                                ),
+                            async () => unwrapOk(await head(contextFor(git, "rev-parse"), repository.root, signal)),
+                        )).tip;
+                        if (!tip) return undefined;
+                        const layout = unwrapOk(
+                            await gitLayout(
+                                contextFor(git, "rev-parse"),
+                                repository.root,
+                                signal,
+                            ),
+                        );
+                        const [commonDir, objectsDir] = await Promise.all([
+                            realpath(layout.commonDir),
+                            realpath(layout.objectsDir),
+                        ]);
+                        return {
+                            root: repository.root,
+                            tip,
+                            commonDir,
+                            objectsDir,
+                            ...(isolateWorktrees ? { isolationRoot: repository.root } : {}),
+                            instance: repositoryInstance(repository),
+                        };
+                    });
+                    const revisions = await Promise.all(model.repositories.map(repository => snapshot(repository)));
+                    histories = groupWorkspaceHistories(revisions.filter(revision => revision !== undefined));
+                }
+                const repositories = new Map(model.repositories.map(repository => [repository.root, repository]));
+                const instances = (active: ReadonlyMap<string, AbstractRepository>): Map<string, string> =>
+                    new Map([...active].map(([root, repository]) => [root, repositoryInstance(repository)]));
+                validateWorkspaceRepositories(histories, instances(repositories));
+                const repositoryAt = (root: string): AbstractRepository => {
+                    const repository = repositories.get(root);
+                    if (!repository) throw new Error("Workspace Timeline repository was closed; refresh the history");
+                    return repository;
+                };
+                const { page, histories: next } = await readWorkspaceTimelinePage(
+                    histories,
+                    limit,
+                    async (history, maxEntries) => {
+                        signal.throwIfAborted();
+                        const root = history.repositories[0]?.root;
+                        if (!root) throw new Error("Workspace Timeline history has no repository");
+                        return unwrapOk(
+                            await logWithSources(contextFor(git, "log"), repositoryAt(root).root, {
+                                hashes: [...new Set(history.repositories.map(({ tip }) => tip))],
+                                maxEntries,
+                                skip: history.skip || undefined,
+                                signal,
+                            }),
+                        );
+                    },
+                    (commit, history) => timestamp(commit, repositoryAt(workspaceRepository(history, commit))),
+                );
+                const current = new Map(model.repositories.map(repository => [repository.root, repository]));
+                validateWorkspaceRepositories(histories, instances(current));
+                const items: GitTimelineItem[] = [];
+                let before = cursor?.before;
+                for (const { history, commit } of page) {
+                    const repository = repositoryAt(workspaceRepository(history, commit));
+                    const date = timestamp(commit, repository);
+                    const orderDate = orderedTimestamp(date, before);
+                    const entry = await item(
+                        repository,
+                        commit,
+                        "gitm:workspace:commit",
+                        commit.parents[0] ?? await tree(repository, signal),
+                        undefined,
+                        date,
+                        orderDate,
+                        repositories.size > 1,
+                    );
+                    entry.id = JSON.stringify([
+                        history.commonDir,
+                        history.objectsDir,
+                        history.isolationRoot,
+                        commit.hash,
+                    ]);
+                    entry.command = {
+                        command: makeCommandId("timelineViewCommit"),
+                        title: i18n.Translations.openCommit(),
+                        arguments: [entry, undefined, PROVIDER_ID],
+                    };
+                    items.push(entry);
+                    before = orderDate;
+                }
+                return {
+                    items,
+                    cursor: next && before !== undefined ? JSON.stringify({ histories: next, before }) : undefined,
+                };
+            }),
     };
 
     function register(): void {
         if (registered) return;
-        disposables.push(workspace.registerTimelineProvider(
+        const files = workspace.registerTimelineProvider(
             PROVIDER_ID,
             i18n.Translations.timelineSource(),
             ["file", "gitm", "vscode-remote", "vscode-local-history"],
             provider,
-        ));
-        registered = true;
+        );
+        try {
+            const workspaceHistory = workspace.registerWorkspaceTimelineProvider(
+                PROVIDER_ID,
+                i18n.Translations.timelineSource(),
+                provider,
+            );
+            disposables.push(files, workspaceHistory);
+            registered = true;
+        } catch (ex) {
+            files.dispose();
+            throw ex;
+        }
     }
 
     function subscribe(repository: AbstractRepository): void {
         if (subscriptions.has(repository)) return;
+        repositoryInstances.set(repository, randomUUID());
         register();
         operationDates.set(repository, Date.now());
+        repositoryTips.set(repository, repository.HEAD?.commit);
         subscriptions.set(
             repository,
             Disposable.from(
-                repository.onDidChangeStatus(() => fireChanged()),
+                repository.onDidChangeStatus(() => {
+                    fireChanged();
+                    const tip = repository.HEAD?.commit;
+                    if (repositoryTips.get(repository) !== tip) {
+                        repositoryTips.set(repository, tip);
+                        fireWorkspaceChanged();
+                    }
+                }),
                 repository.onDidRunOperation(result => {
                     if (!result.error && !isReadOnly(result.operation)) {
                         operationDates.set(repository, Date.now());
                         fireChanged();
+                        fireWorkspaceChanged();
                     }
                 }),
             ),
@@ -357,23 +522,30 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         model.onDidOpenRepository(repository => {
             subscribe(repository);
             fireChanged();
+            fireWorkspaceChanged();
         }),
         model.onDidCloseRepository(repository => {
             subscriptions.get(repository)?.dispose();
             subscriptions.delete(repository);
             operationDates.delete(repository);
+            repositoryTips.delete(repository);
             emptyTrees.delete(repository.root);
             const selectedRoot = compareSelection()?.item.rootUri.fsPath;
             if (selectedRoot && pathEquals(selectedRoot, repository.root)) clearCompareSelection();
             fireChanged();
+            fireWorkspaceChanged();
         }),
-        model.onDidChangeRepository(() => fireChanged()),
+        model.onDidChangeRepository(() => {
+            fireChanged();
+            fireWorkspaceChanged();
+        }),
         workspace.onDidChangeConfiguration(event => {
             if (
                 config.timelineDate.affected(event) || config.timelineShowAuthor.affected(event)
                 || config.timelineShowUncommitted.affected(event)
             ) {
                 fireChanged();
+                fireWorkspaceChanged();
             }
         }),
     );
@@ -382,6 +554,7 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         for (const subscription of subscriptions.values()) subscription.dispose();
         subscriptions.clear();
         operationDates.clear();
+        repositoryTips.clear();
         emptyTrees.clear();
         Disposable.from(...disposables).dispose();
     });
