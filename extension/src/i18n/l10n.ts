@@ -22,6 +22,14 @@ export function openComparison(): string {
     return l10n.t("Open Comparison");
 }
 
+export function timelineYou(): string {
+    return l10n.t("You");
+}
+
+export function timelineUncommittedChanges(): string {
+    return l10n.t("Uncommitted Changes");
+}
+
 export function timelineStats(files: number, insertions: number, deletions: number): string {
     return l10n.t("{0} file(s) changed, {1} insertion(s), {2} deletion(s)", files, insertions, deletions);
 }
@@ -39,6 +47,13 @@ export function timelineDateOrderExplanation(author: string, committed: string):
         "Relative date adjusted to preserve Git history order. Author date: {0}. Commit date: {1}. Rebases, cherry-picks, merges, and differing clocks can cause dates to differ from history order.",
         author,
         committed,
+    );
+}
+
+export function timelineLiveDateOrderExplanation(date: string): string {
+    return l10n.t(
+        "Relative date adjusted to keep working and staged changes before committed history. Status time: {0}. Live timestamps reflect status refreshes and operations rather than when changes were made.",
+        date,
     );
 }
 

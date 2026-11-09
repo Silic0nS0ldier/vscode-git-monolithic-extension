@@ -58,6 +58,7 @@ export function affected(e: ConfigurationChangeEvent, scope?: ConfigurationScope
 export const enabled = createConfigOption<boolean>("enabled", true);
 export const timelineDate = createConfigOption<"committed" | "authored">("timeline.date", "committed");
 export const timelineShowAuthor = createConfigOption<boolean>("timeline.showAuthor", true);
+export const timelineShowUncommitted = createConfigOption<boolean>("timeline.showUncommitted", false);
 export const autoRepositoryDetection = createConfigOption<boolean | "subFolders" | "openEditors">(
     "autoRepositoryDetection",
     true,

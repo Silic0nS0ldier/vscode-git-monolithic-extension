@@ -33,6 +33,11 @@ sorts by the timestamp it displays, so an entry whose timestamp was adjusted to 
 Its hover shows the actual author and commit dates; rebases, cherry-picks, merges, or different clocks can cause
 dates to diverge from history order.
 
+Staged entries are always shown. `git_monolithic.timeline.showUncommitted` defaults to `false`; enabling it adds
+working-tree entries from the Tracked and Untracked status groups. Live entries reflect the current SCM status
+view, including its large-repository display limits. Their timestamps are refresh/operation times, not an
+audit trail of when changes were made. Live entries and commits share the requested page limit.
+
 Ported from VSCode's Git extension at 1.145.0, with cancellable, output-bounded Git queries and fork-specific
 commands and `gitm` content URIs.
 The fork does not expose the builtin Git extension's history-details provider API, so hovers show local commit

@@ -21,6 +21,7 @@ import {
     Uri,
     workspace,
 } from "vscode";
+import { Status } from "../api/git.js";
 import type { Git } from "../git.js";
 import { sanitizePath } from "../git/helpers.js";
 import * as i18n from "../i18n/mod.js";
@@ -31,11 +32,11 @@ import type { AbstractRepository } from "../repository/repository-class/Abstract
 import { error } from "../tracing.js";
 import { fromGitUri, toGitUri } from "../uri.js";
 import * as config from "../util/config.js";
-import { isDescendant } from "../util/paths.js";
+import { isDescendant, pathEquals } from "../util/paths.js";
 import { createEmojifier } from "./emoji.js";
 import { contextFor } from "./git-context.js";
 import { GitTimelineItem, resolveOpenDiff } from "./item.js";
-import { orderedTimestamp, parseFileCursor } from "./paging.js";
+import { getFileTimelinePage, orderedTimestamp, parseFileCursor, remainingLiveOffset } from "./paging.js";
 
 const PROVIDER_ID = "gitm-history";
 const PAGE_SIZE = 50;
@@ -44,6 +45,7 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
     const fileChanged = new EventEmitter<Uri | Uri[] | undefined>();
     const shutdown = new AbortController();
     const subscriptions = new Map<AbstractRepository, Disposable>();
+    const operationDates = new Map<AbstractRepository, number>();
     const emptyTrees = new Map<string, string>();
     const disposables: Disposable[] = [fileChanged];
     const emojify = createEmojifier(extensionUri);
@@ -159,7 +161,21 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                 }
                 const limit = limitFor(options);
                 const cursor = options.cursor ? parseFileCursor(options.cursor) : undefined;
-                const logPath = cursor ? path.resolve(repository.root, cursor.path) : fileUri.fsPath;
+                const live = !cursor || cursor.liveOffset !== undefined;
+                // Rendered groups can lag status while their layout settles.
+                const groups = repository.sourceControlUI;
+                const staged = live
+                    ? groups.stagedGroup.latestResourceStates().find(resource =>
+                        pathEquals(resource.resourceUri.fsPath, fileUri.fsPath)
+                    )
+                    : undefined;
+                const working = live
+                    ? [...groups.trackedGroup.latestResourceStates(), ...groups.untrackedGroup.latestResourceStates()]
+                        .find(resource => pathEquals(resource.resourceUri.fsPath, fileUri.fsPath))
+                    : undefined;
+                // A staged rename has no committed history under its new name.
+                const logPath = cursor ? path.resolve(repository.root, cursor.path) : staged?.state.original.fsPath
+                    ?? fileUri.fsPath;
                 if (!isDescendant(repository.root, logPath)) {
                     throw new Error("Timeline cursor is outside its repository");
                 }
@@ -181,9 +197,66 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                         signal,
                     }),
                 );
+                const liveItems: GitTimelineItem[] = [];
+                if (live) {
+                    const head = repository.HEAD?.commit ? "HEAD" : await tree(repository, signal);
+                    if (staged) {
+                        const entry = new GitTimelineItem(
+                            "~",
+                            head,
+                            i18n.Translations.stagedChanges(),
+                            operationDates.get(repository) ?? Date.now(),
+                            "index",
+                            "gitm:file:index",
+                            Uri.file(repository.root),
+                            toGitUri(staged.state.original, head),
+                        );
+                        entry.iconPath = new ThemeIcon("git-commit");
+                        entry.tooltip = `${i18n.Translations.timelineYou()}\n${staged.decorations.tooltip ?? ""}`;
+                        // Unlike "~", an empty ref reads the index without consulting rendered resource groups.
+                        entry.resourceUri = toGitUri(fileUri, "");
+                        entry.command = resolveOpenDiff(entry, fileUri);
+                        liveItems.unshift(entry);
+                    }
+                    if (working && config.timelineShowUncommitted(Uri.file(repository.root))) {
+                        const previousRef = staged ? "~" : head;
+                        const resourceUri = working.state.type === Status.DELETED
+                            ? toGitUri(fileUri, await tree(repository, signal))
+                            : fileUri;
+                        const entry = new GitTimelineItem(
+                            "",
+                            previousRef,
+                            i18n.Translations.timelineUncommittedChanges(),
+                            Date.now(),
+                            "working",
+                            "gitm:file:working",
+                            Uri.file(repository.root),
+                            toGitUri(staged ? fileUri : working.state.original, staged ? "" : head),
+                        );
+                        entry.iconPath = new ThemeIcon("circle-outline");
+                        entry.tooltip = `${i18n.Translations.timelineYou()}\n${working.decorations.tooltip ?? ""}`;
+                        entry.resourceUri = resourceUri;
+                        entry.command = resolveOpenDiff(entry, fileUri);
+                        liveItems.unshift(entry);
+                    }
+                }
+                const liveOffset = remainingLiveOffset(liveItems, cursor?.liveOffset);
+                const page = getFileTimelinePage(commits, limit, liveItems.length, liveOffset);
+                const items = liveItems.slice(liveOffset, liveOffset + page.liveCount);
                 let before = cursor?.before;
-                const items: GitTimelineItem[] = [];
-                for (const [index, commit] of commits.slice(0, limit).entries()) {
+                for (const entry of items) {
+                    const date = entry.timestamp;
+                    const orderDate = orderedTimestamp(date, before);
+                    if (date !== orderDate) {
+                        entry.description = i18n.Translations.timelineDateAdjusted();
+                        entry.tooltip = `${entry.tooltip ?? ""}\n\n${
+                            i18n.Translations.timelineLiveDateOrderExplanation(new Date(date).toLocaleString())
+                        }`;
+                    }
+                    entry.timestamp = orderDate;
+                    before = orderDate;
+                }
+                for (const [index, commit] of commits.slice(0, page.commitCount).entries()) {
                     const next = commits[index + 1];
                     const previousRef = next?.hash ?? await tree(repository, signal);
                     const previousPath = next?.filePath ? Uri.file(path.join(repository.root, next.filePath)) : fileUri;
@@ -207,8 +280,14 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                 }
                 return {
                     items,
-                    cursor: commits[limit] && before !== undefined
-                        ? JSON.stringify({ hash: tip, path: logPath, skip: skip + items.length, before })
+                    cursor: (commits[page.commitCount] || page.nextLiveOffset !== undefined) && before !== undefined
+                        ? JSON.stringify({
+                            hash: tip,
+                            path: logPath,
+                            skip: skip + page.commitCount,
+                            before,
+                            liveOffset: page.nextLiveOffset,
+                        })
                         : undefined,
                 };
             }),
@@ -228,12 +307,16 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
     function subscribe(repository: AbstractRepository): void {
         if (subscriptions.has(repository)) return;
         register();
+        operationDates.set(repository, Date.now());
         subscriptions.set(
             repository,
             Disposable.from(
                 repository.onDidChangeStatus(() => fireChanged()),
                 repository.onDidRunOperation(result => {
-                    if (!result.error && !isReadOnly(result.operation)) fireChanged();
+                    if (!result.error && !isReadOnly(result.operation)) {
+                        operationDates.set(repository, Date.now());
+                        fireChanged();
+                    }
                 }),
             ),
         );
@@ -247,18 +330,25 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
         model.onDidCloseRepository(repository => {
             subscriptions.get(repository)?.dispose();
             subscriptions.delete(repository);
+            operationDates.delete(repository);
             emptyTrees.delete(repository.root);
             fireChanged();
         }),
         model.onDidChangeRepository(() => fireChanged()),
         workspace.onDidChangeConfiguration(event => {
-            if (config.timelineDate.affected(event) || config.timelineShowAuthor.affected(event)) fireChanged();
+            if (
+                config.timelineDate.affected(event) || config.timelineShowAuthor.affected(event)
+                || config.timelineShowUncommitted.affected(event)
+            ) {
+                fireChanged();
+            }
         }),
     );
     return new Disposable(() => {
         shutdown.abort();
         for (const subscription of subscriptions.values()) subscription.dispose();
         subscriptions.clear();
+        operationDates.clear();
         emptyTrees.clear();
         Disposable.from(...disposables).dispose();
     });

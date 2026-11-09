@@ -3,6 +3,26 @@
 const HASH = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const DATE_LIMIT = 8_640_000_000_000_000;
 
+export function remainingLiveOffset(live: readonly { ref: string }[], shown?: number): number {
+    // The only resumable live entry is the working version; status may have removed it since the last page.
+    return shown === 1 && live[0]?.ref === "" ? 1 : 0;
+}
+
+export function getFileTimelinePage(
+    commits: readonly unknown[],
+    limit: number,
+    liveCount: number,
+    liveOffset = 0,
+): { liveCount: number; commitCount: number; nextLiveOffset: number | undefined } {
+    const remainingLive = Math.max(0, liveCount - liveOffset);
+    const pageLive = Math.min(limit, remainingLive);
+    return {
+        liveCount: pageLive,
+        commitCount: Math.min(commits.length, limit - pageLive),
+        nextLiveOffset: remainingLive > pageLive ? liveOffset + pageLive : undefined,
+    };
+}
+
 function isTimestamp(value: unknown): value is number {
     return typeof value === "number" && Number.isSafeInteger(value) && Math.abs(value) <= DATE_LIMIT;
 }
@@ -22,6 +42,7 @@ export type FileCursor = {
     path: string;
     skip: number;
     before: number;
+    liveOffset?: number;
 };
 
 export function parseFileCursor(cursor: string): FileCursor {
@@ -35,8 +56,18 @@ export function parseFileCursor(cursor: string): FileCursor {
         throw new Error("Invalid file Timeline cursor");
     }
     const hash = "hash" in parsed ? parsed.hash : undefined;
-    if (hash !== undefined && (typeof hash !== "string" || !HASH.test(hash))) {
+    const liveOffset = "liveOffset" in parsed ? parsed.liveOffset : undefined;
+    if (
+        (hash !== undefined && (typeof hash !== "string" || !HASH.test(hash)))
+        || (liveOffset !== undefined && liveOffset !== 1)
+    ) {
         throw new Error("Invalid file Timeline cursor");
     }
-    return { hash, path: parsed.path, skip: parsed.skip, before: parsed.before };
+    return {
+        hash,
+        path: parsed.path,
+        skip: parsed.skip,
+        before: parsed.before,
+        ...(liveOffset === undefined ? {} : { liveOffset }),
+    };
 }
