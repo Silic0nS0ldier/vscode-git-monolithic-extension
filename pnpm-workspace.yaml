@@ -45,7 +45,7 @@ overrides:
   "tiny-readdir>promise-make-counter": "-"
   # @vercel/nft, cacache, Renovate, and rimraf still resolve vulnerable glob 13/10 releases.
   # Keep until those consumers request the fixed glob 14 line.
-  "glob@>=9.0.0 <=14.0.1": "14.0.3"
+  "glob@>=9.0.0 <=14.0.1": "14.0.4"
   # ESLint, TypeScript ESLint, @actions/glob, and vsce still request vulnerable minimatch 10.
   # Stop before minimatch 3 to preserve legacy glob 6 compatibility; widen when consumers update.
   "minimatch@>=9.0.0 <11.0.1": "11.0.5"
