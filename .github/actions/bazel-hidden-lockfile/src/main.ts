@@ -5,7 +5,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { deriveKeys, moduleGraphDigest, sha256 } from "./keys.js";
+import { deriveKeys, moduleGraphDigest, sha256 } from "./keys.ts";
 
 const execFileAsync = promisify(execFile);
 

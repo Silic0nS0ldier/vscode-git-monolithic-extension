@@ -59,6 +59,15 @@ runs:
         cache-save: ${{ inputs.cache-save }}
         bazelisk-cache: true
         repository-cache: false
+    - uses: pnpm/setup@v3.1.2
+      if: inputs.hidden-lockfile == 'true'
+      with:
+        install: false
+    - name: Install hidden lockfile action dependencies
+      if: inputs.hidden-lockfile == 'true'
+      shell: bash
+      # Without pruning, pnpm also installs the workspace root's dependencies.
+      run: pnpm install --frozen-lockfile --prod --filter bazel-hidden-lockfile --config.pruneDirectDependencies=true
     - uses: ./.github/actions/bazel-hidden-lockfile
       if: inputs.hidden-lockfile == 'true'
       with:

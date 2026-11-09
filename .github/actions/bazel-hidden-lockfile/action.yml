@@ -10,5 +10,5 @@ outputs:
     description: "Whether the hidden lockfile was restored from the primary key"
 runs:
   using: node24
-  main: dist/main.mjs
-  post: dist/main.mjs
+  main: main.mjs
+  post: main.mjs
