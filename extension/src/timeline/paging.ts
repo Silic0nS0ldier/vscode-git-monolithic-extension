@@ -3,6 +3,18 @@
 const HASH = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u;
 const DATE_LIMIT = 8_640_000_000_000_000;
 
+export async function readStableHistory<T>(
+    tip: string | undefined,
+    read: (tip: string | undefined) => Promise<T[]>,
+    resolveHead: () => Promise<string | undefined>,
+): Promise<{ tip: string | undefined; commits: T[] }> {
+    const commits = await read(tip);
+    if (tip !== undefined || commits.length === 0) return { tip, commits };
+    const resolved = await resolveHead();
+    if (!resolved || !HASH.test(resolved)) throw new Error("Cannot resolve a stable Timeline traversal tip");
+    return { tip: resolved, commits: await read(resolved) };
+}
+
 export function remainingLiveOffset(live: readonly { ref: string }[], shown?: number): number {
     // The only resumable live entry is the working version; status may have removed it since the last page.
     return shown === 1 && live[0]?.ref === "" ? 1 : 0;

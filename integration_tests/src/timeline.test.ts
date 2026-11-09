@@ -56,6 +56,18 @@ async function openTimeline(file = "history/renamed.txt", firstRow = "Revision 7
     await row(firstRow).waitFor({ state: "visible" });
 }
 
+async function openFolderTimeline(name: string, firstRow: string): Promise<void> {
+    await page.keyboard.press("Escape");
+    await runCommand(page, "View: Show Explorer");
+    const folder = page.locator(".explorer-folders-view .monaco-list-row").filter({
+        hasText: new RegExp(`^${name}$`, "u"),
+    });
+    await folder.click({ button: "right" });
+    await selectMenuItem(page, "Open Timeline");
+    await page.locator(".pane-header.timeline-view").filter({ hasText: name }).waitFor({ state: "visible" });
+    await row(firstRow).waitFor({ state: "visible" });
+}
+
 async function action(label: string, command: string): Promise<void> {
     await page.keyboard.press("Escape");
     await row(label).click({ button: "right" });
@@ -254,8 +266,46 @@ scenario("a file Timeline can open a historical submodule update", async () => {
     );
 });
 
+scenario("opening a folder Timeline entry shows the entire commit", async () => {
+    await openFolderTimeline("history", "Revision 7");
+    await row("Revision 7").click();
+    await pollUntil(
+        "the folder commit to show changes inside and outside the folder",
+        async () => (await page.locator(".part.editor").innerText()).replaceAll(/\s+/gu, " "),
+        text => text.includes("line 7") && text.includes("another changed file"),
+    );
+    assert.equal(await headSubject(), "Revision 7");
+});
+
+scenario("folder history pages through a merge in Git order and explains adjusted dates", async () => {
+    await openFolderTimeline("merged", "Merge side");
+    for (let attempt = 0; attempt < 3; attempt++) {
+        if (!await loadTimelinePage(page)) break;
+    }
+    await pollUntil(
+        "both sides of the folder merge to be listed",
+        () => tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"),
+        size => size === "10",
+    );
+    await tree().locator(".monaco-list").press("End");
+    await row("Main 1").waitFor({ state: "attached" });
+    const base = row("Create merged folder");
+    await base.scrollIntoViewIfNeeded();
+    await base.waitFor({ state: "visible" });
+    assert.match(await base.innerText(), /Date adjusted for Git order/u);
+    const hover = page.locator(".monaco-hover")
+        .filter({ hasText: "Relative date adjusted to preserve Git history order" })
+        .filter({ hasText: new Date("2003-01-01T00:00:00Z").toLocaleString() });
+    await showHover("Create merged folder", hover);
+});
+
 scenario("file history pages through both sides of a merge", async () => {
     await openTimeline("merged/shared.txt", "Side 4");
+    await pollUntil(
+        "the file's initial merge-history page to replace the folder history",
+        () => tree().locator(".monaco-list-row").first().getAttribute("aria-setsize"),
+        size => size === "6",
+    );
     for (let attempt = 0; attempt < 3; attempt++) {
         if (!await loadTimelinePage(page)) break;
     }
