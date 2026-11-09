@@ -82,10 +82,19 @@ async function assertNoComparisonSelection(label: string): Promise<void> {
     await page.keyboard.press("Escape");
 }
 
+let settingsRevision = 0;
+
+/**
+ * Writes a workspace setting and waits for the workbench to apply it. Settings such as
+ * `timeline.pageSize` show no effect until the next Timeline request, so each write also
+ * carries a unique `window.title`, which the workbench applies from the same read of the file.
+ */
 async function setting(name: string, value: unknown): Promise<void> {
     const file = join(workspaceDir(), ".vscode/settings.json");
     const settings = JSON.parse(await readFile(file, "utf-8")) as Record<string, unknown>;
-    await writeFile(file, JSON.stringify({ ...settings, [name]: value }));
+    const title = `timeline settings ${++settingsRevision}`;
+    await writeFile(file, JSON.stringify({ ...settings, [name]: value, "window.title": title }));
+    await pollUntil("the workbench to apply the workspace settings", () => page.title(), text => text === title);
 }
 
 async function showHover(label: string, hover: Locator): Promise<void> {
