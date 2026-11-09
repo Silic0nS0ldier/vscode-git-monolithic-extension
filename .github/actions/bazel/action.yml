@@ -22,7 +22,7 @@ runs:
   steps:
     - id: remote_cache
       continue-on-error: true
-      uses: silic0ns0ldier/bazel-github-actions-cache-v2@960a66a18563a42f17d5f4a6f9146af42a4cb97b
+      uses: silic0ns0ldier/bazel-github-actions-cache-v2@0791cce72abea0ef4a94f8819247ff8e457c2d7a
       with:
         pack-size-mb: 32
         # Applies to initial manifest discovery and individual operations thereafter.
