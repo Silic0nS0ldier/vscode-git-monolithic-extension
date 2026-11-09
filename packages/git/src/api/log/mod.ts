@@ -20,6 +20,8 @@ export type LogOptions = {
      */
     discard?: number;
     hash?: string;
+    /** Visit each commit before its parents, even when timestamps disagree. */
+    topoOrder?: boolean;
     follow?: boolean;
     filePaths?: boolean;
     shortStats?: boolean;
@@ -28,7 +30,7 @@ export type LogOptions = {
 
 /**
  * Returns a list of commits from the repository log.
- * Wraps `git -c i18n.logOutputEncoding=UTF-8 log -n<N+discard> --format=<fmt> -z [--skip=N] [ref] [--shortstat] [--numstat] [--follow] -- [path]`.
+ * Wraps `git -c i18n.logOutputEncoding=UTF-8 log -n<N+discard> --format=<fmt> -z [--topo-order] [--skip=N] [ref] [--shortstat] [--numstat] [--follow] -- [path]`.
  */
 export async function log(
     git: GitContext,
@@ -53,6 +55,7 @@ export async function log(
         `--format=${COMMIT_FORMAT}`,
         "-z",
     ];
+    if (opts?.topoOrder) args.push("--topo-order");
     if (opts?.skip !== undefined) args.push(`--skip=${opts.skip}`);
     if (opts?.hash) args.push(opts.hash);
     if (opts?.shortStats) args.push("--shortstat");

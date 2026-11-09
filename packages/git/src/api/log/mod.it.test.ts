@@ -51,6 +51,28 @@ test(log.name + " - maxEntries limits results", async () => {
     assert.strictEqual(entries.length, 3);
 });
 
+test(log.name + " - topological order keeps both sides of a merge before their newer-dated parent", async () => {
+    await using repo = await tempGitRepo();
+    const date = (value: string): Record<string, string> => ({
+        GIT_AUTHOR_DATE: value,
+        GIT_COMMITTER_DATE: value,
+    });
+    await run(repo.path, ["commit", "--allow-empty", "-m", "Root"], date("2030-01-01T00:00:00Z"));
+    await run(repo.path, ["switch", "-c", "side"]);
+    await run(repo.path, ["commit", "--allow-empty", "-m", "Side"], date("2020-01-01T00:00:00Z"));
+    await run(repo.path, ["switch", "-"]);
+    await run(repo.path, ["commit", "--allow-empty", "-m", "Main"], date("2020-01-02T00:00:00Z"));
+    await run(repo.path, ["merge", "--no-ff", "side", "-m", "Merge"], date("2020-01-03T00:00:00Z"));
+
+    const normal = unwrapOk(await log(gitCtx, repo.path, { maxEntries: 10 })).map(commit => commit.message);
+    assert.ok(normal.indexOf("Root") < normal.indexOf("Side"), "the fixture must expose timestamp ordering");
+    const topological = unwrapOk(await log(gitCtx, repo.path, { maxEntries: 10, topoOrder: true }))
+        .map(commit => commit.message);
+    assert.strictEqual(topological[0], "Merge");
+    assert.strictEqual(topological.at(-1), "Root");
+    assert.deepStrictEqual(new Set(topological.slice(1, -1)), new Set(["Main", "Side"]));
+});
+
 test(log.name + " - path filter", async () => {
     await using repo = await tempGitRepo(true);
 

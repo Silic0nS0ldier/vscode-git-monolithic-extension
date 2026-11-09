@@ -28,6 +28,7 @@ import * as i18n from "../i18n/mod.js";
 import { Model } from "../model.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
 import { registerTerminalEnvironmentManager } from "../terminal.js";
+import { createTimelineProvider } from "../timeline/provider.js";
 import { error, info, setCallsiteFilter, setOutputChannel, unsetOutputChannel, warn } from "../tracing.js";
 import { createInlayHintsProvider } from "../ui/inlay-hints-provider.js";
 import * as config from "../util/config.js";
@@ -237,6 +238,7 @@ async function createModel(
         new GitFileSystemProvider(model),
         addDecorations(model),
         new GitProtocolHandler(),
+        createTimelineProvider(model, git, context.extensionUri),
     );
 
     checkGitVersion(gitInfo);

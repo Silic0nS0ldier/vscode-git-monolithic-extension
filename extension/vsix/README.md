@@ -19,6 +19,25 @@ Staging of selected source is supported, but limited vs. the builtin implemenati
 
 This extension has undergone significant refactoring. While it may be a fork, it does not "follow" the builtin implementation.
 
+## Timeline
+
+Requires VSCode 1.145.0 or later. **Git Monolithic History** contributes committed file history to the Explorer's
+Timeline view, using the stable API without proposed-API permissions. History follows renames, loads in pages, and
+opens comparisons against the preceding file revision. VSCode's **Compare Selected** can also compare file versions
+from other sources, and **Pin Current Timeline** keeps the file's history in view while selecting versions.
+
+`git_monolithic.timeline.date` selects the committed date (default) or authored date; `git_monolithic.timeline.showAuthor`
+defaults to `true`. Topological Git traversal puts descendants before their ancestors when timestamps disagree. VSCode
+sorts by the timestamp it displays, so an entry whose timestamp was adjusted to preserve that order is marked
+**Date adjusted for Git order**.
+Its hover shows the actual author and commit dates; rebases, cherry-picks, merges, or different clocks can cause
+dates to diverge from history order.
+
+Ported from VSCode's Git extension at 1.145.0, with cancellable, output-bounded Git queries and fork-specific
+commands and `gitm` content URIs.
+The fork does not expose the builtin Git extension's history-details provider API, so hovers show local commit
+metadata and statistics, but not third-party avatars, remote action buttons or message-link providers.
+
 ## IMPORTANT
 
 ### `vscode.git`

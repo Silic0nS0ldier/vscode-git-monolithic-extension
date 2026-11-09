@@ -14,6 +14,34 @@ export function yes(): string {
     return l10n.t("Yes");
 }
 
+export function timelineSource(): string {
+    return l10n.t("Git Monolithic History");
+}
+
+export function openComparison(): string {
+    return l10n.t("Open Comparison");
+}
+
+export function timelineStats(files: number, insertions: number, deletions: number): string {
+    return l10n.t("{0} file(s) changed, {1} insertion(s), {2} deletion(s)", files, insertions, deletions);
+}
+
+export function timelineDiffTitle(name: string, previous: string, current: string): string {
+    return l10n.t("{0} ({1}) ↔ {0} ({2})", name, previous, current);
+}
+
+export function timelineDateAdjusted(): string {
+    return l10n.t("Date adjusted for Git order");
+}
+
+export function timelineDateOrderExplanation(author: string, committed: string): string {
+    return l10n.t(
+        "Relative date adjusted to preserve Git history order. Author date: {0}. Commit date: {1}. Rebases, cherry-picks, merges, and differing clocks can cause dates to differ from history order.",
+        author,
+        committed,
+    );
+}
+
 export function no(): string {
     return l10n.t("No");
 }
