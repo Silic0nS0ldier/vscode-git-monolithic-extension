@@ -10,6 +10,7 @@ import {
     diffEditorSides,
     LOAD_TIMEOUT_MS,
     loadTimelinePage,
+    notification,
     openFile,
     openWorkbench,
     pollUntil,
@@ -35,13 +36,21 @@ const row = (label: string): Locator => tree().locator(".monaco-list-row").filte
 
 async function openTimeline(file = "history/renamed.txt", firstRow = "Revision 7"): Promise<void> {
     await page.keyboard.press("Escape");
-    const unpin = page.getByRole("button", { name: "Unpin Current Timeline", exact: true });
-    if (await unpin.count()) await unpin.click();
     await openFile(page, file);
     await runCommand(page, "View: Show Explorer");
     if (!await tree().isVisible()) {
         await page.locator(".pane-header.timeline-view").click();
     }
+    const header = page.locator(".pane-header.timeline-view");
+    await header.hover();
+    const unpin = header.getByRole("button", { name: "Unpin Current Timeline", exact: true });
+    if (await unpin.count()) await unpin.click();
+    const name = file.split("/").at(-1);
+    await pollUntil(
+        "the Timeline to follow the requested file",
+        () => header.innerText(),
+        text => name !== undefined && text.includes(name) && !text.includes("(pinned)"),
+    );
     await tree().locator(".monaco-list").focus();
     await page.keyboard.press("Home");
     await row(firstRow).waitFor({ state: "visible" });
@@ -51,6 +60,14 @@ async function action(label: string, command: string): Promise<void> {
     await page.keyboard.press("Escape");
     await row(label).click({ button: "right" });
     await selectMenuItem(page, command);
+}
+
+async function assertNoComparisonSelection(label: string): Promise<void> {
+    await page.keyboard.press("Escape");
+    await row(label).click({ button: "right" });
+    await page.getByRole("menuitem", { name: "Select for Compare", exact: true }).waitFor({ state: "visible" });
+    assert.equal(await page.getByRole("menuitem", { name: "Compare with Selected", exact: true }).count(), 0);
+    await page.keyboard.press("Escape");
 }
 
 async function setting(name: string, value: unknown): Promise<void> {
@@ -111,6 +128,20 @@ scenario("native Timeline multi-selection compares the historical resource URIs"
     );
 });
 
+scenario("selected Timeline versions compare, and different files explain the mismatch", async () => {
+    await openTimeline();
+    await action("Revision 7", "Select for Compare");
+    await action("Revision 6", "Compare with Selected");
+    await pollUntil(
+        "the selected Timeline versions to be compared",
+        () => diffEditorSides(page),
+        sides => sides.original.includes("line 7") && !sides.modified.includes("line 7"),
+    );
+    await openTimeline("other.txt");
+    await action("Revision 7", "Compare with Selected");
+    await notification(page, /selected Timeline entry is for a different file/u).waitFor({ state: "visible" });
+});
+
 scenario("committed entries copy their ID and message and open all changed files", async () => {
     await openTimeline();
     await action("Revision 7", "Copy Commit ID");
@@ -127,7 +158,11 @@ scenario("committed entries copy their ID and message and open all changed files
         text => text === "Revision 7",
     );
     await action("Revision 7", "Open Commit");
-    await page.locator(".part.editor").getByText("other.txt", { exact: true }).first().waitFor({ state: "visible" });
+    await pollUntil(
+        "both files in the commit to load",
+        async () => (await page.locator(".part.editor").innerText()).replaceAll(/\s+/gu, " "),
+        text => text.includes("line 7") && text.includes("another changed file"),
+    );
 });
 
 scenario("author and date settings refresh labels and complete local commit metadata", async () => {
@@ -376,4 +411,31 @@ scenario("a deleted file's working version compares as empty", async () => {
         () => diffEditorSides(page),
         sides => sides.original.includes("another changed file") && sides.modified === "",
     );
+});
+
+scenario("closing the owning repository clears the comparison selection", async () => {
+    await openTimeline("clock.txt", "Clock child");
+    await action("Clock child", "Select for Compare");
+    await runCommand(page, "Git: Close Repository");
+    // A Git configuration change makes the model rediscover the closed workspace repository.
+    await setting("git_monolithic.timeline.showAuthor", false);
+    try {
+        await openTimeline("clock.txt", "Clock child");
+        await assertNoComparisonSelection("Clock child");
+    } finally {
+        await setting("git_monolithic.timeline.showAuthor", true);
+    }
+});
+
+scenario("disposing the Timeline provider clears the comparison selection", async () => {
+    await openTimeline("clock.txt", "Clock child");
+    await action("Clock child", "Select for Compare");
+    await setting("git_monolithic.enabled", false);
+    try {
+        await row("Clock child").waitFor({ state: "hidden" });
+    } finally {
+        await setting("git_monolithic.enabled", true);
+    }
+    await openTimeline("clock.txt", "Clock child");
+    await assertNoComparisonSelection("Clock child");
 });

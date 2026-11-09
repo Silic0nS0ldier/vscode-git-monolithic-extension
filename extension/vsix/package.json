@@ -51,6 +51,16 @@
                 "category": "Git Monolithic"
             },
             {
+                "command": "git_monolithic.timelineSelectForCompare",
+                "title": "%command.timelineSelectForCompare%",
+                "category": "Git Monolithic"
+            },
+            {
+                "command": "git_monolithic.timelineCompareWithSelected",
+                "title": "%command.timelineCompareWithSelected%",
+                "category": "Git Monolithic"
+            },
+            {
                 "command": "git_monolithic.stageSelectedRanges",
                 "title": "%command.stageSelectedRanges%",
                 "category": "Git",
@@ -571,6 +581,16 @@
                     "when": "config.git_monolithic.enabled && timelineItem =~ /^gitm:.*:commit$/ && !listMultiSelection"
                 },
                 {
+                    "command": "git_monolithic.timelineCompareWithSelected",
+                    "group": "3_compare@1",
+                    "when": "config.git_monolithic.enabled && git_monolithic.timeline.selectedForCompare && timelineItem =~ /gitm:file\\b/ && !listMultiSelection"
+                },
+                {
+                    "command": "git_monolithic.timelineSelectForCompare",
+                    "group": "3_compare@2",
+                    "when": "config.git_monolithic.enabled && timelineItem =~ /gitm:file\\b/ && !listMultiSelection"
+                },
+                {
                     "command": "git_monolithic.timelineCopyCommitId",
                     "group": "5_copy@1",
                     "when": "config.git_monolithic.enabled && timelineItem =~ /^gitm:.*:commit$/ && !listMultiSelection"
@@ -586,6 +606,8 @@
                 { "command": "git_monolithic.timelineViewCommit", "when": "false" },
                 { "command": "git_monolithic.timelineCopyCommitId", "when": "false" },
                 { "command": "git_monolithic.timelineCopyCommitMessage", "when": "false" },
+                { "command": "git_monolithic.timelineSelectForCompare", "when": "false" },
+                { "command": "git_monolithic.timelineCompareWithSelected", "when": "false" },
                 {
                     "command": "git_monolithic.stageSelectedRanges",
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"

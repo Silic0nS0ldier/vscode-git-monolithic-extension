@@ -28,6 +28,8 @@ from other sources, and **Pin Current Timeline** keeps the file's history in vie
 
 **Open Commit** shows all files changed by a commit, including additions, deletions, renames, and submodules.
 **Copy Commit ID** and **Copy Commit Message** are available on committed Timeline entries.
+**Select for Compare** and **Compare with Selected** compare two versions of the same file. Selecting an entry from
+another file prompts you to select a version of that file instead.
 
 `git_monolithic.timeline.date` selects the committed date (default) or authored date; `git_monolithic.timeline.showAuthor`
 defaults to `true`. Topological Git traversal puts descendants before their ancestors when timestamps disagree. VSCode
