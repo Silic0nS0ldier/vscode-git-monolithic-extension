@@ -486,7 +486,7 @@ _CODE_SERVER_URL_PREFIX = "https://github.com/coder/code-server/releases/downloa
 http_archive(
     name = "code_server_linux_x64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "771bf6038658034d7caf509fcc44af50f0b8bdac5e738177b6cf9c4181dd3382",
+    sha256 = "2f6db6c3e8b733dd6b3aeee83532e148b2bae2e392353ba85452d03572348962",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-amd64",
     url = _CODE_SERVER_URL_PREFIX + "linux-amd64.tar.gz",
 )
@@ -494,7 +494,7 @@ http_archive(
 http_archive(
     name = "code_server_linux_arm64",
     build_file_content = _CODE_SERVER_BUILD_FILE,
-    sha256 = "425d3bc5167c85dc070427d2aa93760083b02aec852ea9ce75c2906c99138f45",
+    sha256 = "e867a34416e2da4a83496b09580001893e7a4e5bb58a0624c4fcd22819e7d53d",
     strip_prefix = "code-server-" + _CODE_SERVER_RELEASE + "-linux-arm64",
     url = _CODE_SERVER_URL_PREFIX + "linux-arm64.tar.gz",
 )
