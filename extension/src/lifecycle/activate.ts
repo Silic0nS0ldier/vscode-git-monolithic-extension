@@ -24,6 +24,7 @@ import { addDecorations } from "../decorationProvider.js";
 import { GitFileSystemProvider } from "../fileSystemProvider.js";
 import { Git } from "../git.js";
 import { findGit, type IGit } from "../git/find.js";
+import { optionalLocksDisabled } from "../git/optional-locks.js";
 import * as i18n from "../i18n/mod.js";
 import { Model } from "../model.js";
 import { GitProtocolHandler } from "../protocolHandler.js";
@@ -180,6 +181,9 @@ async function createModel(
     });
     const gitInfo = await findGit(pathHints, persistentContext());
     info(i18n.Translations.usingGit(gitInfo.version, gitInfo.path));
+    if (optionalLocksDisabled(process.env)) {
+        info(i18n.Translations.optionalLocksDisabled());
+    }
 
     const askpass = await Askpass.create();
     disposables.push(askpass);

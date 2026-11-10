@@ -439,6 +439,15 @@ export async function filteredOutputPanelText(page: Page, text: string): Promise
     );
 }
 
+/** Shows the extension's trace-level lines, which include each git invocation, from then on. */
+export async function traceGitOutput(page: Page): Promise<void> {
+    const picker = await openPicker(page, "Developer: Set Log Level...", "Set Log Level");
+    await pickerRow(picker, "Git Monolithic").click();
+    await picker.locator(`input[placeholder=" Git Monolithic: Select log level"]`).waitFor({ state: "visible" });
+    await pickerRow(picker, "Trace").click();
+    await picker.waitFor({ state: "hidden" });
+}
+
 export async function closeOutputPanel(page: Page): Promise<void> {
     await page.getByRole("button", { name: "Hide Panel" }).click();
     await page.locator(OUTPUT_PANEL).waitFor({ state: "hidden" });

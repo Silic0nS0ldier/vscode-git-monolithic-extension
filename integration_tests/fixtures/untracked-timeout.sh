@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-# Repository state for `src/untracked-timeout.test.ts`: listing untracked files hangs past
-# the git command timeout, while every other status lookup still answers.
+# Repository state for `src/untracked-timeout.test.ts`: tracked, staged and untracked changes, and an ignore file
+# the suite swaps for a FIFO to make the untracked walk, and so `git status`, hang past the git command timeout.
 set -euo pipefail
 
 git_bin="$1"
@@ -34,6 +34,5 @@ cat >"$workspace/.vscode/settings.json" <<'JSON'
 }
 JSON
 
-# Only the untracked walk reads per-directory ignore files, and opening a FIFO with no
-# writer blocks, so `ls-files --others --exclude-standard` hangs until it is killed.
-mkfifo "$workspace/sub/.gitignore"
+# Starts readable, so the repository opens; only the untracked walk reads it.
+: >"$workspace/sub/.gitignore"

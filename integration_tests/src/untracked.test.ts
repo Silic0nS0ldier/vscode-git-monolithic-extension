@@ -1,12 +1,15 @@
 import assert from "node:assert";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { after, before } from "node:test";
+import { setTimeout as delay } from "node:timers/promises";
 import type { Locator, Page } from "playwright-core";
-import { status } from "./git.js";
+import { setLocalConfig, status } from "./git.js";
 import {
+    closeOutputPanel,
     connect,
     createScenario,
+    filteredOutputPanelText,
     groupCount,
     invokeRowAction,
     LOAD_TIMEOUT_MS,
@@ -16,8 +19,14 @@ import {
     resourceRow,
     runCommand,
     scmView,
+    showGitOutput,
+    traceGitOutput,
     workspaceDir,
 } from "./harness.js";
+
+/** The extension's defaults for `git_monolithic.autorefreshDebounce` and `git_monolithic.watcherDebounce`. */
+const AUTOREFRESH_DEBOUNCE_MS = 1_000;
+const WATCHER_DEBOUNCE_MS = 500;
 
 /** Row labels of the untracked files `fixtures/untracked.sh` writes. `lib` is the nested repository `vendor/lib`. */
 const INITIAL = [
@@ -134,4 +143,57 @@ scenario("staging a file from a wholly untracked folder stages only that file", 
     assert.strictEqual(current["new/late.txt"], "??");
     await groupCount(view, "Staged").filter({ hasText: /^1$/u }).waitFor({ state: "visible" });
     await untrackedCount(view, INITIAL.length - 1);
+});
+
+/** The latest git invocation the output panel shows a line mentioning `text` for, by its sequence number. */
+async function latestInvocation(text: string): Promise<number> {
+    const rendered = await filteredOutputPanelText(page, text);
+    return Math.max(...[...rendered.matchAll(/CMD_0_(\d+) > git/gu)].map(([, id]) => parseId(id)));
+}
+
+function parseId(id: string | undefined): number {
+    assert.ok(id !== undefined && /^\d+$/u.test(id), `unexpected invocation id ${id}`);
+    return [...id].reduce((value, digit) => value * 10 + digit.charCodeAt(0) - 48, 0);
+}
+
+scenario("a refresh reads the status git's untracked cache serves, and lists only collapsed folders", async () => {
+    await traceGitOutput(page);
+    await write("traced/traced.txt", "traced\n");
+    await resourceRow(scmView(page), "traced.txt").waitFor({ state: "visible" });
+    await showGitOutput(page);
+
+    await filteredOutputPanelText(
+        page,
+        "> git -c diff.ignoreSubmodules=untracked status -z --porcelain=v2 --branch --untracked-files=normal",
+    );
+    await filteredOutputPanelText(page, "> git --literal-pathspecs ls-files -z --others --exclude-standard --");
+});
+
+scenario("once nothing changes, refreshes stop, even as git saves its untracked cache", async () => {
+    // Saving the cache changes the index, which schedules one more refresh; that one changes nothing. Waiting past
+    // both debounces with no new status read shows the refreshes have settled rather than looping.
+    const before = await latestInvocation("--untracked-files=normal");
+    await setLocalConfig("core.untrackedCache", "true");
+    await write("cached/cached.txt", "cached\n");
+    await resourceRow(scmView(page), "cached.txt").waitFor({ state: "visible" });
+    assert.ok(await latestInvocation("--untracked-files=normal") > before, "the change was not refreshed");
+    await pollUntil(
+        "git to save its untracked cache",
+        () => readFile(join(workspaceDir(), ".git", "index")),
+        index => index.includes("UNTR"),
+    );
+
+    const quiet = AUTOREFRESH_DEBOUNCE_MS + WATCHER_DEBOUNCE_MS + 2_000;
+    await pollUntil(
+        "refreshes to stop",
+        async () => {
+            const before = await latestInvocation("--untracked-files=normal");
+            await delay(quiet);
+            return before === await latestInvocation("--untracked-files=normal");
+        },
+        settled => settled,
+        30_000,
+    );
+
+    await closeOutputPanel(page);
 });

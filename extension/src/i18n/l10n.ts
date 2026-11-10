@@ -241,6 +241,27 @@ export function untrackedRefreshTimedOut(repoName: string, timeoutSeconds: numbe
     );
 }
 
+export function statusRefreshFailed(repoName: string): string {
+    return l10n.t(
+        "Could not read the status of '{0}'. Source Control shows its last known changes until a refresh succeeds.",
+        repoName,
+    );
+}
+
+export function statusRefreshTimedOut(repoName: string, timeoutSeconds: number): string {
+    return l10n.t(
+        "Reading the status of '{0}' took longer than the git command timeout ({1}s). Source Control shows its last known changes until a refresh succeeds.",
+        repoName,
+        timeoutSeconds,
+    );
+}
+
+export function optionalLocksDisabled(): string {
+    return l10n.t(
+        "GIT_OPTIONAL_LOCKS turns off git's optional index writes, so git cannot save its untracked cache and every refresh rescans the work tree for untracked files.",
+    );
+}
+
 export function rebasing(): string {
     return l10n.t("Rebasing");
 }

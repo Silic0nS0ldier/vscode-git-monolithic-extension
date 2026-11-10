@@ -11,7 +11,7 @@ import * as config from "../../util/config.js";
 import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType, type ResourceGroupTypeOptions } from "../ResourceGroupType.js";
 import { getRebaseCommit } from "./get-rebase-commit.js";
-import type { UntrackedFailureReporter } from "./untracked-failure.js";
+import type { RefreshFailureReporter } from "./refresh-failure.js";
 import { pigeonholeFileStatus } from "./update-model-state/pigeonhole-file-status.js";
 
 function arraysEqualBy<T>(a: readonly T[], b: readonly T[], eq: (x: T, y: T) => boolean): boolean {
@@ -90,7 +90,8 @@ export async function updateModelState(
     sourceControlUI: SourceControlUIGroup,
     getInputTemplate: () => Promise<string>,
     getRemotes: () => Promise<Remote[]>,
-    untrackedFailure: UntrackedFailureReporter,
+    statusFailure: RefreshFailureReporter,
+    untrackedFailure: RefreshFailureReporter,
 ): Promise<void> {
     const ignoreSubmodules = config.ignoreSubmodules(Uri.file(repository.root));
 
@@ -110,29 +111,37 @@ export async function updateModelState(
     // TODO Account for potential missing items when limit is hit
     // Could use placeholder like "(empty)"
     // UI currently handles this using a heuristic
-    const pendingTracked = repository.getStatusTrackedAndHEAD({ ignoreSubmodules });
-    // A failure is reported rather than thrown, so it cannot hold back the rest of the refresh.
-    const pendingUntrackedStatus = repository.getStatusUntracked().then(
-        files => ({ files }),
+    // A failure is reported rather than thrown: every operation refreshes afterwards, and would otherwise fail too.
+    const pendingStatus = repository.getWorkingTreeStatus({ ignoreSubmodules }).then(
+        value => ({ value }),
         (reason: unknown) => ({ reason }),
     );
     const useIcons = !config.decorationsEnabled();
 
     // Only a detached HEAD is labelled with a tag, and only the first one matters, so the
     // whole ref list is never worth listing here.
-    const pendingHeadTag = pendingTracked.then(({ head }) =>
-        head && !head.name
+    const pendingHeadTag = pendingStatus.then(outcome =>
+        "value" in outcome && outcome.value.head && !outcome.value.head.name
             ? repository.getRefs({ count: 1, namespace: RefType.Tag, pointsAt: "HEAD" })
             : []
     );
 
-    const [{ status, head: newHEAD }, headTags, newRemotes, newSubmodules, newRebaseCommit] = await Promise.all([
-        pendingTracked,
+    const [statusOutcome, headTags, newRemotes, newSubmodules, newRebaseCommit] = await Promise.all([
+        pendingStatus,
         pendingHeadTag,
         getRemotes(),
         repository.getSubmodules(),
         getRebaseCommit(repository),
     ]);
+
+    if ("reason" in statusOutcome) {
+        // Everything stays as last refreshed, flagged as failed.
+        statusFailure.failed(statusOutcome.reason);
+        return;
+    }
+    statusFailure.succeeded();
+
+    const { status, head: newHEAD, untracked: pendingUntrackedStatus } = statusOutcome.value;
     const newHeadTagName = headTags[0]?.name;
 
     HEAD.set(newHEAD);

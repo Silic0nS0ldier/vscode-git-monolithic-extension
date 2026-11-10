@@ -11,6 +11,7 @@ It brings the following improvements;
 - In the extension log, command logging (started and output) includes the PID to enable correlation.
 - The `too many active changes` warning does not block refreshing the source control view.
 - When a section of the source control panel approaches the display limit (5000, triggers at 500 in a given section), `(too many files)` will appear in that section to indicate that files may be missing.
+- Each refresh reads the working tree with a single `git status`, which Git can answer from its untracked cache (`git config core.untrackedCache true`, or `feature.manyFiles true`). Only folders holding nothing but new files are listed further, file by file. Setting `status.showUntrackedFiles` to `all` lets Git's cache list those too, but changes what `git status` prints in a terminal. If that `git status` fails or times out, every section of the source control panel is marked `(refresh failed)` and keeps its last known changes until a refresh succeeds.
 
 Staging of selected source is supported, but limited vs. the builtin implemenation as the API surface has not been marked as stable. That means;
 
