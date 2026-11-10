@@ -90,8 +90,24 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
     let refreshFailed = false;
     const baseLabel = group.label;
 
-    function emptyAnnotation(): string {
-        return refreshFailed ? i18n.Translations.refreshFailedAnnotation() : "(empty)";
+    /** A failed refresh is flagged whether or not the group still lists its last known resources. */
+    function annotate(count: number, tooMany: string): string {
+        const annotations: string[] = [];
+        if (refreshFailed) {
+            annotations.push(i18n.Translations.refreshFailedAnnotation());
+        } else if (count === 0) {
+            annotations.push("(empty)");
+        }
+        if (count >= 500) {
+            // Only the first 5000 changes are shown in the UI (to prevent performance issues)
+            // so we need to indicate a potentially incomplete view.
+            // From this scope we cannot determine if there were 5000+ changes in total (e.g.
+            // split across tracked and untracked groups) so we conservatively indicate too
+            // many files on hitting 500.
+            // TODO Thread through the actual answer.
+            annotations.push(tooMany);
+        }
+        return baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
     }
 
     function apply(): void {
@@ -100,23 +116,8 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
         resources = latest;
         resourceStrings = new Set<string>(latest.map(r => r.resourceUri.toString()));
 
-        const annotations: string[] = [];
-        if (latest.length > 0) {
-            if (latest.length >= 500) {
-                // Only the first 5000 changes are shown in the UI (to prevent performance issues)
-                // so we need to indicate a potentially incomplete view.
-                // From this scope we cannot determine if there were 5000+ changes in total (e.g.
-                // split across tracked and untracked groups) so we conservatively indicate too
-                // many files on hitting 500.
-                // TODO Thread through the actual answer.
-                annotations.push("(too many files)");
-            }
-        } else {
-            annotations.push(emptyAnnotation());
-        }
-
         group.resourceStates = [...resources];
-        group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
+        group.label = annotate(latest.length, "(too many files)");
     }
 
     const resourceStates: Box<readonly Resource[]> = {
@@ -150,29 +151,14 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
                 return;
             }
 
-            const annotations: string[] = [];
             const fadedResources: SourceControlResourceState[] = resources.map<SourceControlResourceState>(old => ({
                 // Command carried over to allow viewing
                 command: old.command,
                 decorations: { faded: true },
                 resourceUri: old.resourceUri,
             }));
-            if (fadedResources.length > 0) {
-                if (fadedResources.length >= 500) {
-                    // Only the first 5000 changes are shown in the UI (to prevent performance issues)
-                    // so we need to indicate a potentially incomplete view.
-                    // From this scope we cannot determine if there were 5000+ changes in total (e.g.
-                    // split across tracked and untracked groups) so we conservatively indicate too
-                    // many files on hitting 500.
-                    // TODO Thread through the actual answer.
-                    annotations.push("(too many changes)");
-                }
-            } else {
-                annotations.push(emptyAnnotation());
-            }
-
             group.resourceStates = fadedResources;
-            group.label = baseLabel + (annotations.length > 0 ? ` ${annotations.join(" ")}` : "");
+            group.label = annotate(fadedResources.length, "(too many changes)");
 
             pendingApply = setTimeout(apply, layoutShiftDelay);
         },
@@ -181,7 +167,14 @@ function withUX(group: SourceControlResourceGroup): SourceControlResourceGroupUI
         latestResourceStates: () => latest,
         resourceStates,
         setRefreshFailed(failed): void {
+            if (refreshFailed === failed) {
+                return;
+            }
             refreshFailed = failed;
+            // A pending change applies the flag along with itself.
+            if (pendingApply === undefined) {
+                group.label = annotate(resources.length, "(too many files)");
+            }
         },
     };
 }
@@ -191,6 +184,9 @@ export type SourceControlResourceGroupUI = {
     readonly resourceStates: Box<readonly Resource[]>;
     /** The latest refresh, which `resourceStates` holds back while a layout shift is pending. */
     readonly latestResourceStates: () => readonly Resource[];
-    /** Labels an empty group as having failed to refresh. Takes effect with the next `resourceStates.set`. */
+    /**
+     * Labels the group as having failed to refresh, alongside whatever it still lists. Takes effect at once, or with a
+     * pending change of resources.
+     */
     readonly setRefreshFailed: (failed: boolean) => void;
 };

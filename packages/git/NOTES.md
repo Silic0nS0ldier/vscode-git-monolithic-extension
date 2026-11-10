@@ -14,8 +14,10 @@ GIT_TERMINAL_PROMPT=0
 
 # Untracked cache, allows untracked optimisations by checking parent dir which on supported OS will update parent dir
 # Only `git status` uses it, and only with no pathspec and a `-u<mode>` matching `status.showUntrackedFiles`
-# (`-unormal` by default). `ls-files --others` (our untracked listing) never does, so it has no effect here yet.
-# The cache is saved to the index opportunistically, so `GIT_OPTIONAL_LOCKS=0` stops it ever being saved.
+# (`-unormal` by default). `api/status/mod` makes that call; `ls-files --others` never uses the cache, so
+# `api/status/untracked` with `paths` only lists the folders `-unormal` collapses.
+# The cache is saved to the index opportunistically, so `GIT_OPTIONAL_LOCKS=0` stops it ever being saved, and two
+# `git status` at once can each overwrite the other's update. Run one at a time.
 git update-index --test-untracked-cache
 git config --global core.untrackedCache true
 

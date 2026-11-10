@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { setTimeout as timeout } from "node:timers/promises";
+import { inspect } from "node:util";
 import { Disposable, EventEmitter, type Memento, type QuickDiffProvider, Uri, window, workspace } from "vscode";
 import { type Branch, GitErrorCodes, type Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
@@ -8,6 +9,7 @@ import { GitError } from "../../git/error.js";
 import type { Submodule } from "../../git/Submodule.js";
 import * as i18n from "../../i18n/mod.js";
 import { StatusBarCommands } from "../../statusbar.js";
+import { warn } from "../../tracing.js";
 import { create as createSourceControlUI } from "../../ui/source-control.js";
 import { toGitUri } from "../../uri.js";
 import { createBox } from "../../util/box.js";
@@ -45,12 +47,12 @@ import { pullWithRebase as pullWithRebaseImpl } from "./pull-with-rebase.js";
 import { pull as pullImpl } from "./pull.js";
 import { pushInternal } from "./push-internal.js";
 import { push as pushImpl } from "./push.js";
+import { createRefreshFailureReporter, STATUS_FAILURE, UNTRACKED_FAILURE } from "./refresh-failure.js";
 import { stage as stageImpl } from "./stage.js";
 import { syncInternal } from "./sync-internal.js";
 import { syncLabel as syncLabelImpl } from "./sync-label.js";
 import { syncTooltip as syncTooltipImpl } from "./sync-tooltip.js";
 import { withSyncCancellation } from "./sync.js";
-import { createUntrackedFailureReporter } from "./untracked-failure.js";
 import { updateModelState as updateModelStateImpl } from "./update-model-state.js";
 
 export function createRepository(
@@ -122,7 +124,21 @@ export function createRepository(
 
     const sourceControlUI = createSourceControlUI(repoRoot, quickDiffProvider);
     disposables.push(sourceControlUI);
-    const untrackedFailure = createUntrackedFailureReporter(repoRoot, sourceControlUI.untrackedGroup);
+    const untrackedFailure = createRefreshFailureReporter(
+        repoRoot,
+        [sourceControlUI.untrackedGroup],
+        UNTRACKED_FAILURE,
+    );
+    const statusFailure = createRefreshFailureReporter(
+        repoRoot,
+        [
+            sourceControlUI.mergeGroup,
+            sourceControlUI.stagedGroup,
+            sourceControlUI.trackedGroup,
+            sourceControlUI.untrackedGroup,
+        ],
+        STATUS_FAILURE,
+    );
 
     const state = createStateBox(
         onDidChangeStateEmitter,
@@ -188,6 +204,7 @@ export function createRepository(
             sourceControlUI,
             inputTemplate.get,
             remotesLookup.get,
+            statusFailure,
             untrackedFailure,
         );
     });
@@ -249,7 +266,12 @@ export function createRepository(
 
     const autoRefreshWhenIdle = coalesce(async () => {
         await whenIdleAndFocused();
-        await runRefresh();
+        try {
+            await runRefresh();
+        } catch (err) {
+            // Nothing awaits an automatic refresh, so its failure would otherwise go unreported.
+            warn(`Refreshing '${repoRoot}' automatically failed; ex=${inspect(err)}`);
+        }
         const cooldown = config.autoRefreshCooldown();
         if (cooldown > 0) {
             await timeout(cooldown);

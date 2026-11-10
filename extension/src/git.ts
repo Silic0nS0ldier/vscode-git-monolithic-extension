@@ -27,6 +27,7 @@ import { rmCached } from "monolithic-git-interop/api/rm/cached";
 import { rm as gitRm } from "monolithic-git-interop/api/rm/mod";
 import { commit as showCommit, show } from "monolithic-git-interop/api/show";
 import { list as listStashes } from "monolithic-git-interop/api/stash/list";
+import { status, type StatusOptions, supportsStatus } from "monolithic-git-interop/api/status/mod";
 import { type IFileStatus, tracked } from "monolithic-git-interop/api/status/tracked";
 import {
     type HeadStatus,
@@ -69,6 +70,12 @@ import { sanitizePath } from "./git/helpers.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
 import { upstreamFetchTargets, type UpstreamScope } from "./git/repository-class/fetch-targets.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
+import {
+    readWorkingTreeStatus,
+    STATUS_CONFIG_KEYS,
+    type UntrackedOutcome,
+    type WorkingTreeStatus,
+} from "./git/repository-class/working-tree-status.js";
 import type { SpawnOptions } from "./git/SpawnOptions.js";
 import type { Stash } from "./git/Stash.js";
 import type { Submodule } from "./git/Submodule.js";
@@ -975,7 +982,32 @@ export class Repository {
         }
     }
 
-    async getStatusTrackedAndMerge(
+    /**
+     * Tracked changes and HEAD with its upstream (undefined when HEAD cannot be read), then every untracked file.
+     * Where git supports it, one `git status` its untracked cache can serve reads them all; folders it collapses
+     * because they hold only untracked files are then listed file by file.
+     */
+    async getWorkingTreeStatus(
+        opts: { ignoreSubmodules: boolean },
+    ): Promise<WorkingTreeStatus<Branch | undefined>> {
+        if (!supportsStatus(this.#git._context)) {
+            // Handled from the start, so it cannot go unhandled when the tracked lookup fails first.
+            const untrackedFiles: UntrackedOutcome = this.#listUntracked().then(
+                files => ({ files }),
+                (reason: unknown) => ({ reason }),
+            );
+            const { head, status: files } = await this.#getStatusTrackedAndHEAD(opts);
+            return { head, status: files, untracked: untrackedFiles };
+        }
+
+        return readWorkingTreeStatus({
+            config: () => this.#readConfig(STATUS_CONFIG_KEYS),
+            expand: folders => this.#listUntracked(folders),
+            status: statusOpts => this.#readStatus(statusOpts),
+        }, opts.ignoreSubmodules);
+    }
+
+    async #getStatusTrackedAndMerge(
         opts?: { ignoreSubmodules?: boolean },
     ): Promise<IFileStatus[]> {
         const result = await tracked(this.#git._context, this.#repositoryRoot, "relative", opts);
@@ -986,11 +1018,11 @@ export class Repository {
     }
 
     /** Tracked changes, and HEAD with its upstream, which is undefined when HEAD cannot be read. */
-    async getStatusTrackedAndHEAD(
+    async #getStatusTrackedAndHEAD(
         opts?: { ignoreSubmodules?: boolean },
     ): Promise<{ status: IFileStatus[]; head: Branch | undefined }> {
         if (!supportsTrackedWithBranch(this.#git._context)) {
-            const [status, head] = await Promise.all([this.getStatusTrackedAndMerge(opts), this.#readHEAD()]);
+            const [status, head] = await Promise.all([this.#getStatusTrackedAndMerge(opts), this.#readHEAD()]);
             return { head, status };
         }
 
@@ -1022,12 +1054,39 @@ export class Repository {
         }
     }
 
-    async getStatusUntracked(): Promise<string[]> {
-        const result = await untracked(this.#git._context, this.#repositoryRoot, "relative");
+    /** Every untracked file, or with `folders` (which must not overlap) only those under them. */
+    async #listUntracked(folders?: readonly string[]): Promise<string[]> {
+        const result = await untracked(
+            this.#git._context,
+            this.#repositoryRoot,
+            "relative",
+            folders === undefined ? undefined : { paths: folders },
+        );
         if (isOk(result)) {
             return unwrap(result);
         }
         throw new Error("Could not find untracked files", { cause: unwrap(result) });
+    }
+
+    /** Untracked entries are as `git status` lists them: `normal` collapses a wholly untracked folder to `dir/`. */
+    async #readStatus(
+        opts: StatusOptions,
+    ): Promise<{ status: IFileStatus[]; head: Branch | undefined; untracked: string[] }> {
+        const result = await status(this.#git._context, this.#repositoryRoot, opts);
+        if (isErr(result)) {
+            throw new Error("Could not read status", { cause: unwrap(result) });
+        }
+
+        const { files, head, untracked: untrackedEntries } = unwrap(result);
+        return { head: headStatusToBranch(head), status: files, untracked: untrackedEntries };
+    }
+
+    /** The effective value of each config key, undefined where unset. */
+    async #readConfig<K extends string>(keys: readonly K[]): Promise<Record<K, string | undefined>> {
+        const values = await Promise.all(
+            keys.map(async key => unwrapOk(await readConfigEffective(this.#git._context, this.#repositoryRoot, key))),
+        );
+        return Object.fromEntries(keys.map((key, i) => [key, values[i]])) as Record<K, string | undefined>;
     }
 
     async getHEAD(): Promise<Ref> {
