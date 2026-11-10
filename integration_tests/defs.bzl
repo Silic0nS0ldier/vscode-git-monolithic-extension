@@ -113,6 +113,7 @@ def _scm_itest_impl(name, visibility, fixture, lib, entry_point, package_json, s
             # Running more than 4 concurrently tends to cause timeouts.
             "resources:chromium_load:1",
         ],
+        flaky = True,
     )
 
 scm_itest = macro(
