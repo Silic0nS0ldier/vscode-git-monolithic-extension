@@ -69,6 +69,69 @@ export async function writeUntrackedPastCliLimit(repoPath: string): Promise<stri
     return paths;
 }
 
+/** Folders whose names a pathspec would read as magic, a glob or an option, each holding one file. */
+const AWKWARD_UNTRACKED_FOLDERS: [folder: string, file: string][] = [
+    [":colon", "colon.txt"],
+    [":(icase)magic", "magic.txt"],
+    ["*star", "star.txt"],
+    ["[ab]", "brackets.txt"],
+    ["-dash", "dash.txt"],
+    ["sp ace", "space.txt"],
+    ["ünï", "unicode.txt"],
+    // Only a pattern match for the names above would reach these.
+    ["ab", "ab.txt"],
+    ["A", "upper.txt"],
+];
+
+/**
+ * Lays out every shape of untracked file in a repository from `tempGitRepo`, committing what has to be tracked, and
+ * returns the
+ * repo-relative paths `git ls-files --others --exclude-standard` lists for it, sorted. Wholly untracked folders,
+ * which `git status` collapses to one `dir/` entry, are listed file by file. An untracked nested repository is
+ * listed as one `dir/` entry. Ignored-only and empty folders are not listed.
+ */
+export async function writeUntrackedLayout(repoPath: string): Promise<string[]> {
+    const write = async (file: string, content = "x"): Promise<void> => {
+        await fs.mkdir(path.dirname(path.join(repoPath, file)), { recursive: true });
+        await fs.writeFile(path.join(repoPath, file), content);
+    };
+
+    await write(".gitignore", "*.log\n");
+    await write("partial/kept.txt");
+    await run(repoPath, ["add", ".gitignore", "partial/kept.txt"]);
+    await run(repoPath, ["commit", "--message", "Track the ignore rules and a partly tracked folder"]);
+
+    await write("root.txt");
+    await write("partial/beside.txt");
+    await write("new/a.txt");
+    await write("new/deep/b.txt");
+    await write("new/.gitignore", "");
+
+    await write("vendor/lib/lib.txt");
+    await run(path.join(repoPath, "vendor/lib"), ["init"]);
+    // Not a repository, so git walks it like any other folder.
+    await write("bad/.git", "gitdir: does-not-exist\n");
+    await write("bad/bad.txt");
+
+    await write("logs/only.log");
+    await fs.mkdir(path.join(repoPath, "empty"));
+
+    for (const [folder, file] of AWKWARD_UNTRACKED_FOLDERS) {
+        await write(`${folder}/${file}`);
+    }
+
+    return [
+        "root.txt",
+        "partial/beside.txt",
+        "new/.gitignore",
+        "new/a.txt",
+        "new/deep/b.txt",
+        "vendor/lib/",
+        "bad/bad.txt",
+        ...AWKWARD_UNTRACKED_FOLDERS.map(([folder, file]) => `${folder}/${file}`),
+    ].sort();
+}
+
 /**
  * Makes listing untracked files hang: the walk opens `sub/.gitignore`, a FIFO with no writer.
  * Other status lookups never read it. Disposing releases any git still blocked on it.
