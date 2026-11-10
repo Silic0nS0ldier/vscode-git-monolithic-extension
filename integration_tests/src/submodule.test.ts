@@ -1,4 +1,6 @@
 import assert from "node:assert";
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { after, before } from "node:test";
 import { isDeepStrictEqual } from "node:util";
 import type { Page } from "playwright-core";
@@ -12,6 +14,8 @@ import {
     openScmView,
     openWorkbench,
     pollUntil,
+    resourceRow,
+    workspaceDir,
 } from "./harness.js";
 
 let browser: Awaited<ReturnType<typeof connect>>;
@@ -57,4 +61,20 @@ scenario("discarding a nested submodule's changes checks out its recorded commit
         c => c === recorded,
     );
     await pollUntil("the work tree to be clean", status, s => isDeepStrictEqual(s, {}));
+});
+
+scenario("a file created inside a submodule does not list the submodule as changed", async () => {
+    const view = await openScmView(page);
+
+    await writeFile(join(workspaceDir(), "sub", "untracked-in-sub.txt"), "untracked\n");
+    // Written second, so the refresh that lists it has seen the submodule's new file too.
+    await writeFile(join(workspaceDir(), "marker.txt"), "marker\n");
+
+    // Plain `git status` counts untracked content as a change to the submodule; the extension does not.
+    assert.deepStrictEqual(await pollUntil("git to see both files", status, s => "marker.txt" in s), {
+        "marker.txt": "??",
+        "sub": " M",
+    });
+    await resourceRow(view, "marker.txt").waitFor({ state: "visible" });
+    assert.strictEqual(await resourceRow(view, "sub").count(), 0);
 });

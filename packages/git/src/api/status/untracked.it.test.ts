@@ -6,7 +6,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import type { GitContext } from "../../cli/context.js";
 import { ERROR_GENERIC, ERROR_TIMEOUT, type ErrorShape, unwrapOk } from "../../errors.js";
 import { isErr, unwrap } from "../../func-result.js";
-import { blockUntrackedListing, gitCtx, tempGitRepo } from "../helpers.it.stub.js";
+import { blockUntrackedListing, gitCtx, tempGitRepo, writeUntrackedLayout } from "../helpers.it.stub.js";
 import { untracked } from "./untracked.js";
 
 test(untracked.name + " - relative - empty", async () => {
@@ -43,6 +43,17 @@ test(untracked.name + " - relative - many files", async () => {
     const statuses = unwrapOk(await untracked(gitCtx, repo.path, "relative"));
     assert.deepStrictEqual(statuses.sort(), fileNames.sort());
 });
+
+test(
+    untracked.name + " - relative - lists wholly untracked folders file by file, and nested repositories whole",
+    async () => {
+        await using repo = await tempGitRepo();
+        const expected = await writeUntrackedLayout(repo.path);
+
+        const statuses = unwrapOk(await untracked(gitCtx, repo.path, "relative"));
+        assert.deepStrictEqual(statuses.sort(), expected);
+    },
+);
 
 test(untracked.name + " - fails once git times out, rather than when git eventually exits", async () => {
     await using repo = await tempGitRepo();
