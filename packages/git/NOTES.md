@@ -13,6 +13,9 @@ GIT_TERMINAL_PROMPT=0
 # Split Index, designed fir very large indexes
 
 # Untracked cache, allows untracked optimisations by checking parent dir which on supported OS will update parent dir
+# Only `git status` uses it, and only with no pathspec and a `-u<mode>` matching `status.showUntrackedFiles`
+# (`-unormal` by default). `ls-files --others` (our untracked listing) never does, so it has no effect here yet.
+# The cache is saved to the index opportunistically, so `GIT_OPTIONAL_LOCKS=0` stops it ever being saved.
 git update-index --test-untracked-cache
 git config --global core.untrackedCache true
 
