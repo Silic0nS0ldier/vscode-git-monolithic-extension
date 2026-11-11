@@ -168,8 +168,8 @@ catalogs:
       specifier: 26.6.6
       version: 26.6.6
     ava:
-      specifier: 8.3.0
-      version: 8.3.0
+      specifier: 8.4.0
+      version: 8.4.0
     cleye:
       specifier: 2.7.0
       version: 2.7.0
@@ -234,7 +234,7 @@ importers:
         version: 26.6.6
       ava:
         specifier: 'catalog:'
-        version: 8.3.0(rollup@4.68.0)(supports-color@7.2.0)
+        version: 8.4.0(rollup@4.68.0)(supports-color@7.2.0)
 
   build_defs/rollup_bundle:
     dependencies:
@@ -324,7 +324,7 @@ importers:
         version: 8.19.0
       ava:
         specifier: 'catalog:'
-        version: 8.3.0(rollup@4.68.0)(supports-color@7.2.0)
+        version: 8.4.0(rollup@4.68.0)(supports-color@7.2.0)
       monolithic-vscode-manifest:
         specifier: workspace:^
         version: link:../packages/vscode-manifest
@@ -380,7 +380,7 @@ importers:
         version: 6.5.0
       ava:
         specifier: 'catalog:'
-        version: 8.3.0(rollup@4.68.0)(supports-color@7.2.0)
+        version: 8.4.0(rollup@4.68.0)(supports-color@7.2.0)
       into-stream:
         specifier: 9.1.0
         version: 9.1.0
@@ -396,7 +396,7 @@ importers:
         version: 26.6.6
       ava:
         specifier: 'catalog:'
-        version: 8.3.0(rollup@4.68.0)(supports-color@7.2.0)
+        version: 8.4.0(rollup@4.68.0)(supports-color@7.2.0)
 
   packages/wasm:
     devDependencies:
@@ -2198,8 +2198,8 @@ packages:
   async-sema@3.1.1:
     resolution: {integrity: sha512-tLRNUXati5MFePdAk8dw7Qt7DpxPB60ofAgn8WRhW6a2rcimZnYBP9oxHiv0OHy+Wz7kPMG+t4LGdt31+4EmGg==}
 
-  ava@8.3.0:
-    resolution: {integrity: sha512-Tr/p0fmC+oCJo5+m1oJdpmBxC1OO57xtVKlJfbN0gkz31yofpk08jl4Hzx654RdKq1FPc0XYiHF4ZzdqR+87gg==}
+  ava@8.4.0:
+    resolution: {integrity: sha512-thHHhRJa6al6+45y9L8ei7u1QYHFKpt5S3jy2A2t/bd9EoJ9wIEJgLuyXuRg5tEnwryqWxLuu4ig+QSPx6yfUA==}
     engines: {node: ^22.20 || ^24.12 || >=26}
     hasBin: true
     peerDependencies:
@@ -6534,7 +6534,7 @@ snapshots:
 
   async-sema@3.1.1: {}
 
-  ava@8.3.0(rollup@4.68.0)(supports-color@7.2.0):
+  ava@8.4.0(rollup@4.68.0)(supports-color@7.2.0):
     dependencies:
       '@vercel/nft': 1.11.0(rollup@4.68.0)(supports-color@7.2.0)
       acorn: 8.19.0
