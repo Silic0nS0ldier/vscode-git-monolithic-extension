@@ -2,6 +2,13 @@ import intoStream from "into-stream";
 import { PassThrough, Readable, type Writable } from "node:stream";
 import type { ChildProcess, SpawnFn } from "./create.js";
 
+/** Parameters of each `once` overload, as a union `listener` can be narrowed by `event` from. */
+type OnceArgs = ChildProcess["once"] extends {
+    (...args: infer A): ChildProcess;
+    (...args: infer B): ChildProcess;
+} ? A | B
+    : never;
+
 export function createSpawn(endWith: "error" | "exit", options: {
     out?: string;
     err?: string;
@@ -21,20 +28,18 @@ export function createSpawn(endWith: "error" | "exit", options: {
                 running = false;
                 return wasRunning;
             },
-            once: (event, listener) => {
-                let fn: (() => Promise<void>) | null = null;
+            once: (...[event, listener]: OnceArgs) => {
+                let fn: (() => void) | null = null;
                 if (event === "error" && endWith === "error") {
-                    fn = async (): Promise<void> => {
+                    fn = (): void => {
                         if (running) {
-                            // @ts-expect-error `event` does not narrow `listener` to the matching `once` overload.
                             listener(new Error());
                         }
                     };
                 } else if (event === "exit" && endWith === "exit") {
-                    fn = async (): Promise<void> => {
+                    fn = (): void => {
                         if (running) {
                             running = false;
-                            // @ts-expect-error `event` does not narrow `listener` to the matching `once` overload.
                             listener(options.code ?? 0, "SIGQUIT");
                         }
                     };

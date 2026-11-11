@@ -6,7 +6,7 @@ import { tracked } from "./tracked.js";
 test("Basic case", async t => {
     const res = await tracked(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 if (context.stdout) {
                     intoStream(
                         [
@@ -19,7 +19,7 @@ test("Basic case", async t => {
                         ].join("\0") + "\0",
                     ).pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "PATH",
             version: "VERSION",

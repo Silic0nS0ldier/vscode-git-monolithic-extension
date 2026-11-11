@@ -15,12 +15,12 @@ function contextStreaming(chunks: string[], version = "2.53.0"): { git: GitConte
     return {
         calls,
         git: {
-            cli: async (context, args) => {
+            cli: (context, args) => {
                 calls.push(args);
                 if (context.stdout) {
                     intoStream(chunks).pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "PATH",
             version,

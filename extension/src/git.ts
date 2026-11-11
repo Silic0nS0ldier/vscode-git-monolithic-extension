@@ -47,6 +47,7 @@ import type * as cp from "node:child_process";
 import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { inspect } from "node:util";
 import type { Progress } from "vscode";
 import {
     type Branch,
@@ -370,7 +371,7 @@ export class Repository {
                 message: "Could not show object.",
                 stderr: details?.stderr,
             });
-            error(`Failed to get object ${object}: ${err}`);
+            error(`Failed to get object ${object}: ${inspect(err)}`);
             throw gitError;
         }
 
@@ -1105,7 +1106,7 @@ export class Repository {
         return result.trim().split("\n")
             .map(line => line.trim().split("\0"))
             .filter(([_, upstream]) => upstream === upstreamBranch)
-            .map(([ref]) => ({ name: ref, type: RefType.Head } as Branch));
+            .map(([ref]) => ({ name: ref, type: RefType.Head }));
     }
 
     async getRefs(

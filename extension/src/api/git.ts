@@ -45,7 +45,6 @@ export type StatusOptions =
     | "DELETED_BY_THEM"
     | "DELETED_BY_US"
     | "DELETED"
-    | "DELETED"
     | "IGNORED"
     | "INDEX_ADDED"
     | "INDEX_COPIED"

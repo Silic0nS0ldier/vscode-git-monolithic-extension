@@ -3,7 +3,7 @@ import { createCachedLookup } from "../../util/cached-lookup.js";
 
 export type InputTemplate = {
     /** A merge or squash in progress supplies its own message; otherwise the cached commit template. */
-    get(): Promise<string>;
+    get(this: void): Promise<string>;
     /** Drops the cached commit template, so the next `get()` resolves it again. */
     invalidate(): void;
 };

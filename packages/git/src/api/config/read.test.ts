@@ -10,12 +10,12 @@ function contextReturning(value: string): { git: GitContext; calls: string[][] }
     return {
         calls,
         git: {
-            cli: async (context, args) => {
+            cli: (context, args) => {
                 calls.push(args);
                 if (context.stdout) {
                     intoStream(value).pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "",
             version: "UNSET",
@@ -27,9 +27,9 @@ function nonZeroExit(exitCode: number, stderr = ""): GitContext {
     return {
         // The stream backing `context.stdout` must still be ended, or `readToBuffer`'s
         // reader hangs waiting for it regardless of the CLI result.
-        cli: async (context) => {
+        cli: (context) => {
             context.stdout?.end();
-            return err(createNonZeroExitError({
+            return Promise.resolve(err(createNonZeroExitError({
                 args: [],
                 cwd: "/fake",
                 executablePath: "git",
@@ -37,7 +37,7 @@ function nonZeroExit(exitCode: number, stderr = ""): GitContext {
                 signal: null,
                 stderr,
                 stdout: "",
-            }));
+            })));
         },
         path: "",
         version: "UNSET",
@@ -82,9 +82,9 @@ test("Rejects a key with no section, despite the exit code matching 'unset'", as
 
 test("Propagates errors unrelated to exit code", async t => {
     const git: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             context.stdout?.end();
-            return err(createError(ERROR_GENERIC, "boom"));
+            return Promise.resolve(err(createError(ERROR_GENERIC, "boom")));
         },
         path: "",
         version: "UNSET",

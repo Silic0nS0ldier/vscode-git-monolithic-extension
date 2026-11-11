@@ -11,7 +11,7 @@ export function isGitUri(uri: Uri): boolean {
 }
 
 export function fromGitUri(uri: Uri): GitUriParams {
-    return JSON.parse(uri.query);
+    return JSON.parse(uri.query) as GitUriParams;
 }
 
 interface GitUriOptions {

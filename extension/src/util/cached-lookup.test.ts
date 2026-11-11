@@ -10,7 +10,7 @@ function countingLookup<T>(results: (() => Promise<T>)[]): { calls: () => number
 }
 
 test("Loads once until invalidated", async t => {
-    const { calls, load } = countingLookup([async () => "first", async () => "second"]);
+    const { calls, load } = countingLookup([() => Promise.resolve("first"), () => Promise.resolve("second")]);
     const lookup = createCachedLookup(load);
 
     t.is(await lookup.get(), "first");
@@ -23,7 +23,7 @@ test("Loads once until invalidated", async t => {
 });
 
 test("Concurrent callers share one load", async t => {
-    const { calls, load } = countingLookup([async () => "only"]);
+    const { calls, load } = countingLookup([() => Promise.resolve("only")]);
     const lookup = createCachedLookup(load);
 
     t.deepEqual(await Promise.all([lookup.get(), lookup.get()]), ["only", "only"]);
@@ -31,7 +31,10 @@ test("Concurrent callers share one load", async t => {
 });
 
 test("A failed load is retried by the next caller", async t => {
-    const { calls, load } = countingLookup([async () => Promise.reject(new Error("unavailable")), async () => "ok"]);
+    const { calls, load } = countingLookup([
+        () => Promise.reject(new Error("unavailable")),
+        () => Promise.resolve("ok"),
+    ]);
     const lookup = createCachedLookup(load);
 
     await t.throwsAsync(lookup.get(), { message: "unavailable" });
@@ -41,7 +44,7 @@ test("A failed load is retried by the next caller", async t => {
 
 test("A failed load does not evict one started after invalidating", async t => {
     const failure = Promise.withResolvers<string>();
-    const { calls, load } = countingLookup([() => failure.promise, async () => "fresh"]);
+    const { calls, load } = countingLookup([() => failure.promise, () => Promise.resolve("fresh")]);
     const lookup = createCachedLookup(load);
 
     const stale = lookup.get();

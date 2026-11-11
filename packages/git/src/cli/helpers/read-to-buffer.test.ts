@@ -7,11 +7,11 @@ import { readToBuffer } from "./read-to-buffer.js";
 test("Reads output into a buffer", async t => {
     const res = await readToBuffer(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 if (context.stdout) {
                     intoStream("content").pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             cwd: "/",
         },
@@ -27,11 +27,11 @@ test("Reads output into a buffer", async t => {
 test("Reports a buffer overflow", async t => {
     const res = await readToBuffer(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 if (context.stdout) {
                     intoStream("a".repeat(1025)).pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             cwd: "/",
         },
@@ -57,9 +57,9 @@ test("Preserves the CLI's own error type rather than wrapping it as generic", as
 
     const res = await readToBuffer(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 context.stdout?.end();
-                return err(createNonZeroExitError(details));
+                return Promise.resolve(err(createNonZeroExitError(details)));
             },
             cwd: "/",
         },
@@ -78,11 +78,11 @@ test("Preserves the CLI's own error type rather than wrapping it as generic", as
 test("Only filtered output counts toward the buffer limit", async t => {
     const res = await readToBuffer(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 if (context.stdout) {
                     intoStream(["a".repeat(1024), "a".repeat(1024), "kept"]).pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             cwd: "/",
             filter: chunk => chunk.toString() === "kept" ? chunk : undefined,

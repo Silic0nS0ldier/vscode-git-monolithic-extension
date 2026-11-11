@@ -116,7 +116,7 @@ test("A failing status fails the whole read", async t => {
     const failure = new Error("timed out");
     const deps: WorkingTreeStatusDeps<string> = {
         config: async () => UNSET,
-        expand: async () => t.fail("nothing to expand") as never,
+        expand: async () => t.fail("nothing to expand"),
         status: async () => {
             throw failure;
         },

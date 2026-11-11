@@ -1,4 +1,5 @@
 import { from_str_radix } from "monolithic-git-wasm";
+import { inspect } from "node:util";
 import type { GitContext } from "../../cli/context.js";
 import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
 import { createError, ERROR_GENERIC } from "../../errors.js";
@@ -27,6 +28,6 @@ export async function size(
     try {
         return ok(from_str_radix(raw, 10));
     } catch (e) {
-        return err(createError(ERROR_GENERIC, `Could not parse the size of "${object}" from "${raw}": ${e}`));
+        return err(createError(ERROR_GENERIC, `Could not parse the size of "${object}" from "${raw}": ${inspect(e)}`));
     }
 }

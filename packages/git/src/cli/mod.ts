@@ -7,7 +7,7 @@ export type {
     GitContext,
     PersistentCLIContext,
 } from "./context.js";
-export { fromEnvironment } from "./from-environmnet.js";
-export type { FromEnvironmentServices } from "./from-environmnet.js";
+export { fromEnvironment } from "./from-environment.js";
+export type { FromEnvironmentServices } from "./from-environment.js";
 export { fromPath } from "./from-path.js";
 export type { FromPathServices } from "./from-path.js";

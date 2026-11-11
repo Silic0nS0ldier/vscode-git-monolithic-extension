@@ -15,12 +15,12 @@ function createContext(
     return {
         calls,
         git: {
-            cli: async (context, args) => {
+            cli: (context, args) => {
                 calls.push(args);
                 if (context.stdout) {
                     intoStream(stdout).pipe(context.stdout);
                 }
-                return result;
+                return Promise.resolve(result);
             },
             path: "",
             version: "UNSET",

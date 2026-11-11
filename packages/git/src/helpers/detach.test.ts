@@ -66,7 +66,7 @@ function measure(body: string): Measurement {
     if (r.status !== 0) {
         throw new Error(`subprocess exited ${r.status}: ${r.stderr}`);
     }
-    return JSON.parse(r.stdout.trim());
+    return JSON.parse(r.stdout.trim()) as Measurement;
 }
 
 const RETAINED_MB = 50; // Comfortable midpoint between ~4 MiB baseline and ~105 MiB leak.

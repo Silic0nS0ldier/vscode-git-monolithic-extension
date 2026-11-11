@@ -19,13 +19,13 @@ function contextStreaming(
         calls,
         envs,
         git: {
-            cli: async (context, args) => {
+            cli: (context, args) => {
                 calls.push(args);
                 envs.push(context.env);
                 if (context.stdout) {
                     intoStream(chunks).pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "PATH",
             version,

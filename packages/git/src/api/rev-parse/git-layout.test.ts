@@ -11,12 +11,12 @@ test("Requests absolute common and object directories without trimming directory
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async (context, args) => {
+        cli: (context, args) => {
             calls.push(args);
             t.is(context.cwd, "/repo");
             t.false(context.signal?.aborted);
             intoStream(args.includes("--git-common-dir") ? "/repo/.git  \n" : "/objects  \n").pipe(context.stdout!);
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     t.deepEqual(unwrapOk(await gitLayout(git, "/repo", signal)), {
@@ -33,9 +33,9 @@ test("Preserves Git failures", async t => {
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async context => {
+        cli: context => {
             intoStream("").pipe(context.stdout!);
-            return err(createError(ERROR_GENERIC, "failed"));
+            return Promise.resolve(err(createError(ERROR_GENERIC, "failed")));
         },
     };
     t.true(isErr(await gitLayout(git, "/repo")));
@@ -45,9 +45,9 @@ test("Preserves a newline at the end of a Git directory name", async t => {
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async (context, args) => {
+        cli: (context, args) => {
             intoStream(args.includes("--git-common-dir") ? "/repo/.git\n\n" : "/objects\n\n").pipe(context.stdout!);
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     t.deepEqual(unwrapOk(await gitLayout(git, "/repo")), { commonDir: "/repo/.git\n", objectsDir: "/objects\n" });
@@ -58,9 +58,9 @@ test("Rejects missing or relative common and object directories", async t => {
         const git: GitContext = {
             path: "",
             version: "",
-            cli: async (context, args) => {
+            cli: (context, args) => {
                 intoStream(args.includes("--git-common-dir") ? common! : objects!).pipe(context.stdout!);
-                return ok(undefined);
+                return Promise.resolve(ok(undefined));
             },
         };
         t.true(isErr(await gitLayout(git, "/repo")));

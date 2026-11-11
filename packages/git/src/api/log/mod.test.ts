@@ -12,11 +12,11 @@ test("Single commit, no parents", async t => {
     const raw = `${HASH}\nAlice\nalice@example.com\n1000000000\n1000000001\n\nInitial commit\n\0`;
 
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream(raw).pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",
@@ -46,11 +46,11 @@ test("Commit with parent", async t => {
     const raw = `${HASH}\nBob\nbob@example.com\n1000000002\n1000000003\n${PARENT}\nSecond commit\n\0`;
 
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream(raw).pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",
@@ -76,11 +76,11 @@ test("Two commits", async t => {
         + `${HASH2}\nBob\nbob@example.com\n1000000002\n1000000003\n${HASH}\nSecond\n\0`;
 
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream(raw).pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",
@@ -96,11 +96,11 @@ test("Two commits", async t => {
 
 test("Empty output returns empty array", async t => {
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("").pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",
@@ -117,7 +117,7 @@ test("Builds a bounded, UTF-8, rename-aware history query", async t => {
     const git: GitContext = {
         path: "",
         version: "2.50.0",
-        cli: async (context, args) => {
+        cli: (context, args) => {
             t.deepEqual(args, [
                 "-c",
                 "i18n.logOutputEncoding=UTF-8",
@@ -135,7 +135,7 @@ test("Builds a bounded, UTF-8, rename-aware history query", async t => {
                 "renamed.txt",
             ]);
             intoStream("").pipe(context.stdout!);
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     t.deepEqual(
@@ -159,9 +159,9 @@ test("Rejects invalid paging inputs without executing git", async t => {
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async () => {
+        cli: () => {
             t.fail("Invalid pagination must not run git");
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     t.true(isErr(await log(git, "/repo", { maxEntries: -1 })));
@@ -214,11 +214,11 @@ test("Rejects invalid sourced-log tips and unexpected sources", async t => {
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async context => {
+        cli: context => {
             calls++;
             intoStream(`${HASH}\nAlice\nalice@example.com\n1000000000\n1000000001\n\n${HASH}\nSubject\n\0`)
                 .pipe(context.stdout!);
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     t.true(isErr(await logWithSources(git, "/repo", { hashes: [] })));
@@ -233,10 +233,10 @@ test("Sourced logs preserve empty messages and SHA-256 source hashes", async t =
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async context => {
+        cli: context => {
             intoStream(`${tip}\nAlice\nalice@example.com\n1000000000\n1000000001\n\n${tip}\n\0`)
                 .pipe(context.stdout!);
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     const commits = unwrapOk(await logWithSources(git, "/repo", { hashes: [tip] }));

@@ -66,6 +66,7 @@ export function unwrapOk<TOk, TErr>(value: Result<TOk, TErr>): TOk {
         if (error != null && typeof error === "object" && "_error" in error) {
             throw error._error;
         }
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
         throw error;
     }
     return unwrap(value);

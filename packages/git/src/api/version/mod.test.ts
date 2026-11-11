@@ -5,11 +5,11 @@ import { trySemverCheck, version } from "./mod.js";
 
 test("Basic case", async t => {
     const res = await version({
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("git version foobar").pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "PENDING",
@@ -24,7 +24,7 @@ const semverCheckMacro = test.macro({
     exec(t, gitVersion: string, range: string, expected: boolean) {
         t.is(trySemverCheck(gitVersion, range), expected);
     },
-    title(_, gitVersion, range, expected) {
+    title(_, gitVersion: string, range: string, expected: boolean) {
         return `Version check of "${gitVersion}" against "${range}" is ${expected}`;
     },
 });
