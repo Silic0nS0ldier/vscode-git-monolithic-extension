@@ -5,7 +5,8 @@
         "vscode": {
             "extensions": [
                 "bazelbuild.vscode-bazel",
-                "github.vscode-github-actions"
+                "github.vscode-github-actions",
+                "TypeScriptTeam.native-preview"
             ],
             "settings": {
                 "bazel.codeLens.enable": true,

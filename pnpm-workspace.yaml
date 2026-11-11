@@ -53,3 +53,7 @@ overrides:
 patchedDependencies:
   "tiny-readdir@3.1.1": "patches/tiny-readdir@3.1.1.patch"
   "watcher@2.3.1": "patches/watcher@2.3.1.patch"
+
+permissions:
+  cleye:
+    skills: false
