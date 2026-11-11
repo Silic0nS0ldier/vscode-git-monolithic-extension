@@ -296,9 +296,17 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                     const orderDate = orderedTimestamp(date, before);
                     if (date !== orderDate) {
                         entry.description = i18n.Translations.timelineDateAdjusted();
-                        entry.tooltip = `${entry.tooltip ?? ""}\n\n${
-                            i18n.Translations.timelineLiveDateOrderExplanation(new Date(date).toLocaleString())
-                        }`;
+                        const origTooltip = entry.tooltip;
+                        const orderExplanation = i18n.Translations.timelineLiveDateOrderExplanation(new Date(date).toLocaleString());
+                        if (origTooltip == null) {
+                            entry.tooltip = orderExplanation;
+                        }
+                        else if (origTooltip instanceof MarkdownString) {
+                            entry.tooltip = origTooltip.appendMarkdown(`\n\n${orderExplanation}`);
+                        }
+                        else {
+                            entry.tooltip = `${origTooltip ?? ""}\n\n${orderExplanation}`;
+                        }
                     }
                     entry.timestamp = orderDate;
                     before = orderDate;

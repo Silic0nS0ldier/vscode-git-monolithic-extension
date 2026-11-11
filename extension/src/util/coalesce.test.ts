@@ -18,7 +18,7 @@ function gatedCalls(): { calls: number[]; gates: PromiseWithResolvers<void>[]; f
 }
 
 test("Runs immediately when idle", async t => {
-    const coalesced = coalesce(async (x: number) => x * 2);
+    const coalesced = coalesce((x: number) => Promise.resolve(x * 2));
     t.is(await coalesced(2), 4);
     t.is(await coalesced(3), 6);
 });
@@ -99,8 +99,8 @@ test("Keeps state per wrapper", async t => {
 test("Preserves the this binding of the wrapper", async t => {
     const obj = {
         value: 42,
-        get: coalesce(async function(this: { value: number }) {
-            return this.value;
+        get: coalesce(function(this: { value: number }) {
+            return Promise.resolve(this.value);
         }),
     };
     t.is(await obj.get(), 42);

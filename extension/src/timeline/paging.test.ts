@@ -12,21 +12,21 @@ test("History resolves and rereads a stable tip when repository status has not s
     const reads: (string | undefined)[] = [];
     const result = await readStableHistory(
         undefined,
-        async tip => {
+        tip => {
             reads.push(tip);
-            return tip ? ["stable"] : ["possibly stale"];
+            return Promise.resolve(tip ? ["stable"] : ["possibly stale"]);
         },
-        async () => head,
+        () => Promise.resolve(head),
     );
     t.deepEqual(result, { tip: head, commits: ["stable"] });
     t.deepEqual(reads, [undefined, head]);
 
-    const empty = await readStableHistory(undefined, async () => [], async () => {
+    const empty = await readStableHistory(undefined, () => Promise.resolve([]), () => {
         t.fail("An empty history does not need its unborn HEAD resolved");
-        return undefined;
+        return Promise.resolve(undefined);
     });
     t.deepEqual(empty, { tip: undefined, commits: [] });
-    await t.throwsAsync(readStableHistory(undefined, async () => ["commit"], async () => "--all"));
+    await t.throwsAsync(readStableHistory(undefined, () => Promise.resolve(["commit"]), () => Promise.resolve("--all")));
 });
 
 test("Live entries and commits share the file Timeline page budget", t => {

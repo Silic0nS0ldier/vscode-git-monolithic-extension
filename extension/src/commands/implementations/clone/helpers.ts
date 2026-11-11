@@ -78,8 +78,8 @@ export async function cloneRepository(
             opts,
             (progress, token) =>
                 git.clone(
-                    normalisedUrl!,
-                    { parentPath: normalisedParentPath!, progress, recursive: options.recursive },
+                    normalisedUrl,
+                    { parentPath: normalisedParentPath, progress, recursive: options.recursive },
                     fromCancellationToken(token),
                 ),
         );

@@ -1,4 +1,5 @@
 import { from_str_radix } from "monolithic-git-wasm";
+import { inspect } from "node:util";
 import type { GitContext } from "../../cli/context.js";
 import type { ReadToErrors } from "../../cli/helpers/read-to-buffer.js";
 import { readToString } from "../../cli/helpers/read-to-string.js";
@@ -46,7 +47,7 @@ export async function list(
             // TODO Descriptions are currently returned with a leading space, it should be removed.
             entries.push({ description, index: from_str_radix(index, 10) });
         } catch (e) {
-            return err(createError(ERROR_GENERIC, `Could not parse stash index "${index}": ${e}`));
+            return err(createError(ERROR_GENERIC, `Could not parse stash index "${index}": ${inspect(e)}`));
         }
     }
 

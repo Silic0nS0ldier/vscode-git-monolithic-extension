@@ -10,9 +10,9 @@ type Invocation = { context: CLIContext; args: string[] };
 function createContext(result: Result<void, CLIErrors> = ok(void 0)): { git: GitContext; calls: Invocation[] } {
     const calls: Invocation[] = [];
     const git: GitContext = {
-        cli: async (context, args) => {
+        cli: (context, args) => {
             calls.push({ args, context });
-            return result;
+            return Promise.resolve(result);
         },
         path: "",
         version: "UNSET",

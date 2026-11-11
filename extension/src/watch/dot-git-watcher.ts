@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { inspect } from "node:util";
 import { Disposable, type Event, EventEmitter, Uri } from "vscode";
-import { trace } from "../tracing.js";
+import { error, trace } from "../tracing.js";
 import { transientGitLocks } from "./lock-gate.js";
 import { type SuspendHandle, watch } from "./watch.js";
 
@@ -17,7 +18,7 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
 
     override fire(data: Uri): void {
         if (data.fsPath === this.#gitIndexPath) {
-            this.#maybeFireIndexChange(data);
+            this.#maybeFireIndexChange(data).catch((e) => error(`Failure while handling index change: ${inspect(e)}`));
             return;
         }
         super.fire(data);
@@ -83,7 +84,7 @@ export function createDotGitWatcher(
     rootWatcher.event((uri) => emitter.fire(uri));
 
     return {
-        dispose: () => disposable.dispose(),
+        dispose: () => void disposable.dispose(),
         event: emitter.event,
         suspend: () => rootWatcher.suspend(),
     };

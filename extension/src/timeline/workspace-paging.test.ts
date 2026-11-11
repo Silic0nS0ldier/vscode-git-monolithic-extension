@@ -130,10 +130,10 @@ test("A 5000-commit shared worktree history needs one bounded read per page", as
         } = await readWorkspaceTimelinePage(
             remaining,
             50,
-            async (history, maxEntries) => {
+            (history, maxEntries) => {
                 reads++;
                 t.is(maxEntries, 51);
-                return commits.slice(history.skip, history.skip + maxEntries);
+                return Promise.resolve(commits.slice(history.skip, history.skip + maxEntries));
             },
             commit => commit.date,
         );
@@ -160,8 +160,12 @@ test("Merging preserves each store's traversal order and retains shared hashes f
         { hash: "clone", date: 30 },
         { hash: "same", date: 20 },
     ];
-    const read = async (history: WorkspaceHistory, maxEntries: number) =>
-        (history.commonDir === "/shared/.git" ? shared : independent).slice(history.skip, history.skip + maxEntries);
+    const read = (history: WorkspaceHistory, maxEntries: number) => {
+        if (history.commonDir === "/shared/.git") {
+            return Promise.resolve(shared.slice(history.skip, history.skip + maxEntries));
+        }
+        return Promise.resolve(independent.slice(history.skip, history.skip + maxEntries));
+    };
     const first = await readWorkspaceTimelinePage(groups, 2, read, commit => commit.date);
     t.deepEqual(first.page.map(({ commit }) => commit.hash), ["clone", "same"]);
     t.truthy(first.histories);
@@ -175,7 +179,8 @@ test("Merging preserves each store's traversal order and retains shared hashes f
 
 test("A cursor can be replayed after other requests without an evictable deduplication session", async t => {
     const commits = [{ date: 3 }, { date: 2 }, { date: 1 }];
-    const read = async (history: WorkspaceHistory, limit: number) => commits.slice(history.skip, history.skip + limit);
+    const read = (history: WorkspaceHistory, limit: number) =>
+        Promise.resolve(commits.slice(history.skip, history.skip + limit));
     const first = await readWorkspaceTimelinePage(histories().slice(0, 1), 1, read, commit => commit.date);
     const cursor = JSON.stringify({ histories: first.histories, before: 3 });
     const saved = parseWorkspaceCursor(cursor);
@@ -234,11 +239,11 @@ test("Workspace reads propagate cancellation and limit concurrent Git queries", 
     const controller = new AbortController();
     let started = 0;
     await t.throwsAsync(
-        readWorkspaceTimelinePage(groups, 1, async () => {
+        readWorkspaceTimelinePage(groups, 1, () => {
             controller.signal.throwIfAborted();
             started++;
             controller.abort(cancelled);
-            throw cancelled;
+            return Promise.reject(cancelled);
         }, () => 0),
         { is: cancelled },
     );

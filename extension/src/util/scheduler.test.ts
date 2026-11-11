@@ -105,7 +105,7 @@ test("Moves on to the next task after one rejects or throws synchronously", asyn
         scheduler.schedule({}, (): Promise<void> => {
             throw new Error("sync");
         }),
-        scheduler.schedule({}, async () => "ok"),
+        scheduler.schedule({}, () => Promise.resolve("ok")),
     ];
 
     await t.throwsAsync(results[0]!, { message: "async" });

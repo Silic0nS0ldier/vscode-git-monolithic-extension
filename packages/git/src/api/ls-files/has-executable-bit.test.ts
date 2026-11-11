@@ -6,11 +6,11 @@ import { hasExecutableBitInIndex } from "./has-executable-bit.js";
 
 test("Non-executable file", async t => {
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("100644 db4eff851028003f9df7747b2ad58622b307bb6a 0    MODULE.bazel").pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",
@@ -28,11 +28,11 @@ test("Non-executable file", async t => {
 
 test("Executable file", async t => {
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("100755 db4eff851028003f9df7747b2ad58622b307bb6a 0    MODULE.bazel").pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",

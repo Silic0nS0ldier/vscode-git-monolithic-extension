@@ -14,12 +14,12 @@ function createContext(stdout: string): { git: GitContext; calls: string[][] } {
     return {
         calls,
         git: {
-            cli: async (context, args) => {
+            cli: (context, args) => {
                 calls.push(args);
                 if (context.stdout) {
                     intoStream(stdout).pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "",
             version: "UNSET",
@@ -30,11 +30,11 @@ function createContext(stdout: string): { git: GitContext; calls: string[][] } {
 /** Delivers output in pieces, which is how a real ref listing arrives. */
 function createChunkedContext(chunks: string[]): GitContext {
     return {
-        cli: async context => {
+        cli: context => {
             if (context.stdout) {
                 intoStream(chunks).pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",

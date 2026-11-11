@@ -9,14 +9,14 @@ test("Parses NUL-delimited changes and rename paths", async t => {
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async (context, args) => {
+        cli: (context, args) => {
             t.deepEqual(args, ["diff", "--raw", "-z", "--find-renames", "HEAD^", "HEAD", "--"]);
             intoStream(
                 ":100644 100644 aaaaaaa bbbbbbb M\0file.txt\0"
                     + ":100644 100755 aaaaaaa bbbbbbb R100\0old\tfile\0new\nfile\0"
                     + ":160000 000000 aaaaaaa 0000000 D\0deleted\0",
             ).pipe(context.stdout!);
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     t.deepEqual(unwrapOk(await changes(git, "/repo", "HEAD^", "HEAD")), [
@@ -30,9 +30,9 @@ test("Reports truncated changes", async t => {
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async context => {
+        cli: context => {
             intoStream(":100644 100644 aaaaaaa bbbbbbb R100\0old\0").pipe(context.stdout!);
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     t.true(isErr(await changes(git, "/repo", "HEAD^", "HEAD")));
@@ -42,9 +42,9 @@ test("Rejects changes without a raw header", async t => {
     const git: GitContext = {
         path: "",
         version: "",
-        cli: async context => {
+        cli: context => {
             intoStream("M\0file.txt\0").pipe(context.stdout!);
-            return ok(undefined);
+            return Promise.resolve(ok(undefined));
         },
     };
     t.true(isErr(await changes(git, "/repo", "HEAD^", "HEAD")));

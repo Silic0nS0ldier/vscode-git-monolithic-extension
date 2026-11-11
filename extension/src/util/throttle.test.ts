@@ -60,8 +60,8 @@ test("Releases the slot when a call rejects or throws synchronously", async t =>
 test("Preserves the this binding of the wrapper", async t => {
     const obj = {
         value: 42,
-        get: throttle(1, async function(this: { value: number }) {
-            return this.value;
+        get: throttle(1, function(this: { value: number }) {
+            return Promise.resolve(this.value);
         }),
     };
     t.is(await obj.get(), 42);

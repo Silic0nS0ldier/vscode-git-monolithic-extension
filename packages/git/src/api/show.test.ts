@@ -7,11 +7,11 @@ import { commit, show } from "./show.js";
 test("Basic case", async t => {
     const res = await show(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 if (context.stdout) {
                     intoStream("content").pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "PATH",
             version: "VERSION",
@@ -28,14 +28,14 @@ test("Basic case", async t => {
 test("Reads a single commit", async t => {
     const calls: string[][] = [];
     const git: GitContext = {
-        cli: async (context, args) => {
+        cli: (context, args) => {
             calls.push(args);
             if (context.stdout) {
                 intoStream(
                     "4b825dc642cb6eb9a060e54bf8d69288fbee4904\nAlice\nalice@example.com\n1\n2\n\nSubject\n\0",
                 ).pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "PATH",
         version: "VERSION",
@@ -61,11 +61,11 @@ test("Reads a single commit", async t => {
 test("Resolves to nothing when the output does not parse", async t => {
     const res = await commit(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 if (context.stdout) {
                     intoStream("").pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "PATH",
             version: "VERSION",

@@ -10,12 +10,12 @@ function contextAnswering(outputs: string[]): { git: GitContext; calls: { args: 
     return {
         calls,
         git: {
-            cli: async (context, args) => {
+            cli: (context, args) => {
                 calls.push({ args, env: context.env });
                 if (context.stdout) {
                     intoStream(outputs[calls.length - 1] ?? "").pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "PATH",
             version: "VERSION",
@@ -26,7 +26,7 @@ function contextAnswering(outputs: string[]): { git: GitContext; calls: { args: 
 test("Basic case", async t => {
     const res = await untracked(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 if (context.stdout) {
                     intoStream(
                         [
@@ -35,7 +35,7 @@ test("Basic case", async t => {
                         ].join("\0") + "\0",
                     ).pipe(context.stdout);
                 }
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "PATH",
             version: "VERSION",

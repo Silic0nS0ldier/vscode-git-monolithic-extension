@@ -94,7 +94,7 @@ export function createScheduler(): Scheduler {
     return {
         schedule<T>({ key, signal }: ScheduleOptions, task: (signal: AbortSignal) => Promise<T>): Promise<T> {
             if (signal?.aborted) {
-                return Promise.reject(signal.reason);
+                return Promise.reject(new Error("Scheduler aborted", { cause: signal.reason }));
             }
 
             let entry = key === undefined ? undefined : queuedByKey.get(key);

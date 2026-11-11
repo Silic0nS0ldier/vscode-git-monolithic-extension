@@ -61,7 +61,7 @@ export function callsitePlugin(loggerModule: string, functions: readonly string[
                         node.start,
                     );
                 }
-                calls.push(parent as Node);
+                calls.push(parent);
             });
             if (calls.length === 0) return null;
 

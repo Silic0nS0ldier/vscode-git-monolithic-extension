@@ -6,13 +6,13 @@ import { lsTree } from "./list.js";
 
 test("Single file entry", async t => {
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("100644 blob db4eff851028003f9df7747b2ad58622b307bb6a      42    README.md").pipe(
                     context.stdout,
                 );
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",
@@ -37,11 +37,11 @@ test("Single file entry", async t => {
 
 test("Empty output when path not in tree", async t => {
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("").pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",
@@ -56,13 +56,13 @@ test("Empty output when path not in tree", async t => {
 
 test("Executable file entry", async t => {
     const gitContext: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("100755 blob abc123def456abc123def456abc123def456abc1234       0    script.sh").pipe(
                     context.stdout,
                 );
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "",
         version: "UNSET",

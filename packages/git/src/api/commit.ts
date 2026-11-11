@@ -1,4 +1,5 @@
 import { from_str_radix } from "monolithic-git-wasm";
+import { inspect } from "node:util";
 import { createError, ERROR_GENERIC, type GenericError } from "../errors.js";
 import { err, ok, type Result } from "../func-result.js";
 import { detach } from "../helpers/detach.js";
@@ -91,7 +92,7 @@ export function parseCommits(data: string): Result<Commit[], GenericError> {
             }
             commits.push(commit);
         } catch (e) {
-            return err(createError(ERROR_GENERIC, `Could not parse commit dates for "${hash}": ${e}`));
+            return err(createError(ERROR_GENERIC, `Could not parse commit dates for "${hash}": ${inspect(e)}`));
         }
     }
 

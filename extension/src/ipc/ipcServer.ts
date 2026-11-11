@@ -13,7 +13,7 @@ function getIPCHandlePath(id: string): string {
     }
 
     if (process.env["XDG_RUNTIME_DIR"]) {
-        return path.join(process.env["XDG_RUNTIME_DIR"] as string, `vscode-git-${id}.sock`);
+        return path.join(process.env["XDG_RUNTIME_DIR"], `vscode-git-${id}.sock`);
     }
 
     return path.join(os.tmpdir(), `vscode-git-${id}.sock`);

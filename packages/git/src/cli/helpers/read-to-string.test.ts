@@ -6,11 +6,11 @@ import { readToString } from "./read-to-string.js";
 
 test("Basic case", async t => {
     const res = await readToString({
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("foobar").pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         cwd: "/",
     }, []);
@@ -23,11 +23,11 @@ test("Basic case", async t => {
 test("Reads output up to the limit", async t => {
     const output = "a".repeat(1024 * 1024 - 1);
     const res = await readToString({
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream(output).pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         cwd: "/",
     }, []);
@@ -39,11 +39,11 @@ test("Reads output up to the limit", async t => {
 
 test("Buffer overflow", async t => {
     const res = await readToString({
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("a".repeat(1024 * 1024 + 1)).pipe(context.stdout);
             }
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         cwd: "/",
     }, []);
@@ -55,11 +55,11 @@ test("Buffer overflow", async t => {
 
 test("Generic error", async t => {
     const res = await readToString({
-        cli: async (context) => {
+        cli: (context) => {
             if (context.stdout) {
                 intoStream("foobar").pipe(context.stdout);
             }
-            return err(createError(ERROR_GENERIC));
+            return Promise.resolve(err(createError(ERROR_GENERIC)));
         },
         cwd: "/",
     }, []);

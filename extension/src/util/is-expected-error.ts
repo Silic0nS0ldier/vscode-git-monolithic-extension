@@ -6,7 +6,7 @@ export function isExpectedError<TErr extends Error>(
     condition: (err: TErr) => boolean,
 ): err is TErr {
     if (err instanceof type) {
-        return condition(err as unknown as TErr);
+        return condition(err);
     }
     return false;
 }

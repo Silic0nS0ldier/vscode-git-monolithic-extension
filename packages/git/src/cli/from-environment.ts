@@ -41,7 +41,7 @@ export async function fromEnvironment(
 
     if (!gitPath) {
         // Last chance, try common locations
-        gitPath = await findGitFromCommonLocations(services);
+        gitPath = findGitFromCommonLocations(services);
     }
 
     if (gitPath) {
@@ -60,7 +60,7 @@ type FindGitFromCommonLocationsServices =
 /**
  * Searches for git in common locations.
  */
-async function findGitFromCommonLocations(services: FindGitFromCommonLocationsServices): Promise<string | false> {
+function findGitFromCommonLocations(services: FindGitFromCommonLocationsServices): string | false {
     if (isMacOS(services.os.platform) && services.fs.exists(darwinBuiltinGitPath)) {
         return darwinBuiltinGitPath;
     }

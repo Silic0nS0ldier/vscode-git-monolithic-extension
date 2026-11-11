@@ -15,10 +15,11 @@ function createContext(
     return {
         calls,
         git: {
-            cli: async (context, args) => {
+            cli: (context, args) => {
                 calls.push({ args, context });
                 context.stdout?.end();
-                return typeof result === "function" ? result(args) : result;
+                // TODO This is a highly unusual call pattern.
+                return Promise.resolve(typeof result === "function" ? result(args) : result);
             },
             path: "",
             version: "UNSET",

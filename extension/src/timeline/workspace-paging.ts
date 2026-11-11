@@ -110,6 +110,9 @@ export async function readWorkspaceTimelinePage<T>(
 }
 
 export function parseWorkspaceCursor(cursor: string): WorkspaceCursor {
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+    /* eslint-disable @typescript-eslint/no-unsafe-argument */
     const parsed: unknown = JSON.parse(cursor);
     if (
         !parsed || typeof parsed !== "object" || !("histories" in parsed) || !Array.isArray(parsed.histories)

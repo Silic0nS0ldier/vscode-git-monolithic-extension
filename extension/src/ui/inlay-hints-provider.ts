@@ -1,4 +1,5 @@
 import * as fs from "node:fs/promises";
+import { inspect } from "node:util";
 import { EventEmitter, type InlayHintsProvider, Position, Range, workspace } from "vscode";
 import type { Model } from "../model.js";
 import { error, trace } from "../tracing.js";
@@ -54,7 +55,7 @@ export function createInlayHintsProvider(model: Model): InlayHintsProvider {
                     if (err instanceof Error && /ENOENT/.test(err.message)) {
                         error(`File ${filePath} does not exist on disk.`);
                     } else {
-                        error(`Failed checking file permissions for ${filePath}: ${err}`);
+                        error(`Failed checking file permissions for ${filePath}: ${inspect(err)}`);
                     }
                     return false;
                 }
