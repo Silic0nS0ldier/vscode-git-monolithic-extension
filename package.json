@@ -5,11 +5,10 @@
         "@eslint/js": "10.0.1",
         "eslint": "10.14.0",
         "knip": "6.44.2",
-        "typescript": "npm:@typescript/typescript6@6.0.2",
         "typescript-eslint": "8.72.2"
     },
     "devDependencies": {
-        "@typescript/native": "npm:typescript@7.1.0-beta",
+        "typescript": "7.1.0-beta",
         "renovate": "44.198.2"
     }
 }
