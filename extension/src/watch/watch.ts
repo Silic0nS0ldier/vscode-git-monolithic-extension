@@ -1,9 +1,9 @@
-import * as fs from "node:fs";
 import { inspect } from "node:util";
 import { Disposable, type Event, EventEmitter, Uri } from "vscode";
 import BaseWatcher from "watcher";
 import { error, trace, warn } from "../tracing.js";
 import * as config from "../util/config.js";
+import { createLockGate } from "./lock-gate.js";
 
 type TargetEvent = Parameters<BaseWatcher["event"]>[0];
 
@@ -34,9 +34,15 @@ export function watch(
     let disposed = false;
 
     function createWatcher() {
-        const lockEvents = new Map<string, TargetEvent>();
-        const watcher = new BaseWatcher(
-            [...locations, ...locks],
+        const lockGate = createLockGate<TargetEvent>(locks, important, recalled => {
+            trace(`${id} watcher releasing ${recalled.size} important events`);
+            for (const [recallPath, recallEt] of recalled) {
+                trace(`${id} watcher recalled event "${recallEt}" "${recallPath}"`);
+                onFileChangeEmitter.fire(Uri.file(recallPath));
+            }
+        });
+        const baseWatcher = new BaseWatcher(
+            [...locations],
             {
                 // TODO Check that file limit is not exceeded (10_000_000)
                 //      Use `git ls-files | wc -l` (or similar) to check
@@ -47,41 +53,34 @@ export function watch(
                 ignore: ignoreFn,
             },
             (et, path) => {
-                if (locks.some(fs.existsSync)) {
-                    // Lock exists, don't propagate changes
-                    if (lockEvents.size === 0 && isWatchableEvent(et)) {
-                        lockEvents.set(path, et);
-                    } else if (important.includes(path) && isWatchableEvent(et)) {
-                        // Important file changed while lock present, remember it
-                        lockEvents.set(path, et);
-                    }
+                const watchable = isWatchableEvent(et);
+                if (lockGate.handle(et, path, watchable)) {
                     return;
-                }
-
-                if (lockEvents.size > 0) {
-                    // Locks gone, fire remembered events
-                    trace(`${id} watcher releasing ${lockEvents.size} important events`);
-                    for (const [recallPath, recallEt] of lockEvents) {
-                        trace(`${id} watcher recalled event "${recallEt}" "${recallPath}"`);
-                        onFileChangeEmitter.fire(Uri.file(recallPath));
-                    }
-                    lockEvents.clear();
                 }
 
                 // Filter directory events, only files are of interest
                 // TODO Do the individual files also get updated?
-                if (isWatchableEvent(et)) {
+                if (watchable) {
                     trace(`${id} watcher event "${et}" "${path}"`);
                     onFileChangeEmitter.fire(Uri.file(path));
                 }
             },
         );
 
-        watcher.on("error", err => {
+        baseWatcher.on("error", err => {
             error(`${id} watcher failed: ${inspect(err)}`);
         });
 
-        return watcher;
+        return {
+            baseWatcher,
+            close(): void {
+                lockGate.dispose();
+                if (!baseWatcher.isClosed()) {
+                    baseWatcher.close();
+                }
+            },
+            isClosed: () => baseWatcher.isClosed(),
+        };
     }
 
     let watcher = createWatcher();
@@ -102,16 +101,14 @@ export function watch(
 
         trace(`${id} watcher resuming, re-creating underlying watcher`);
         watcher = createWatcher();
-        await whenReady(watcher);
+        await whenReady(watcher.baseWatcher);
     }
 
     return {
         dispose(): void {
             disposed = true;
             onFileChangeEmitter.dispose();
-            if (!watcher.isClosed()) {
-                watcher.close();
-            }
+            watcher.close();
         },
         event: onFileChangeEmitter.event,
         refresh() {
@@ -146,9 +143,7 @@ export function watch(
             suspendCount++;
             if (suspendCount === 1) {
                 trace(`${id} watcher suspending, closing underlying watcher`);
-                if (!watcher.isClosed()) {
-                    watcher.close();
-                }
+                watcher.close();
             }
             let released = false;
             return {

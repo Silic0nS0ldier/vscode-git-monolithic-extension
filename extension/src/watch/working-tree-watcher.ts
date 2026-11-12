@@ -4,6 +4,7 @@ import path from "node:path";
 import { inspect } from "node:util";
 import { Disposable, type Event, Uri } from "vscode";
 import { error, trace } from "../tracing.js";
+import { transientGitLocks } from "./lock-gate.js";
 import { createIgnoreFnFromList, type SuspendHandle, watch } from "./watch.js";
 
 export function createWorkingTreeWatcher(
@@ -42,17 +43,7 @@ export function createWorkingTreeWatcher(
         [
             repoRoot,
         ],
-        [
-            // Don't propagate events if index being modified
-            path.join(dotGit, "index.lock"),
-            // Or (merge|revert|cherrypick) is in progress
-            // TODO Refreshing during a merge/revert/cherrypick produces a lot of noise and puts
-            //      extra stress on the system. Not ideal but better for large repos.
-            //      Eventually this should be made smarter.
-            path.join(dotGit, "MERGE_HEAD"),
-            path.join(dotGit, "REVERT_HEAD"),
-            path.join(dotGit, "CHERRY_PICK_HEAD"),
-        ],
+        transientGitLocks(dotGit),
         combinedIgnoreFn,
         [
             // Ensure .gitignore changes are always reported

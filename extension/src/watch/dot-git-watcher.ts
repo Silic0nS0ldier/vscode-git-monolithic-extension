@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { Disposable, type Event, EventEmitter, Uri } from "vscode";
 import { trace } from "../tracing.js";
+import { transientGitLocks } from "./lock-gate.js";
 import { type SuspendHandle, watch } from "./watch.js";
 
 class DotGitEventEmitter extends EventEmitter<Uri> {
@@ -23,7 +24,16 @@ class DotGitEventEmitter extends EventEmitter<Uri> {
     }
 
     async #maybeFireIndexChange(data: Uri): Promise<void> {
-        const currentIndexBuffer = await fs.readFile(this.#gitIndexPath);
+        let currentIndexBuffer: Buffer;
+        try {
+            currentIndexBuffer = await fs.readFile(this.#gitIndexPath);
+        } catch {
+            if (this.#lastGitIndexDigest !== null) {
+                this.#lastGitIndexDigest = null;
+                super.fire(data);
+            }
+            return;
+        }
         const currentIndexDigest = crypto.hash("SHA-1", currentIndexBuffer);
 
         if (currentIndexDigest === this.#lastGitIndexDigest) {
@@ -61,17 +71,7 @@ export function createDotGitWatcher(
             // How we do things
             path.join(dotGitDir, "config"),
         ],
-        [
-            // Don't propagate events if index being modified
-            path.join(dotGitDir, "index.lock"),
-            // Or (merge|revert|cherrypick) is in progress
-            // TODO Refreshing during a merge/revert/cherrypick produces a lot of noise and puts
-            //      extra stress on the system. Not ideal but better for large repos.
-            //      Eventually this should be made smarter.
-            path.join(dotGitDir, "MERGE_HEAD"),
-            path.join(dotGitDir, "REVERT_HEAD"),
-            path.join(dotGitDir, "CHERRY_PICK_HEAD"),
-        ],
+        transientGitLocks(dotGitDir),
         () => false,
         [],
         "dot-git",
