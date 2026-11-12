@@ -6,8 +6,10 @@ import { after, before } from "node:test";
 import type { Page } from "playwright-core";
 import { headSubject, setLocalConfig, symbolicHead, userGit } from "./git.js";
 import {
+    closeOutputPanel,
     connect,
     createScenario,
+    filteredOutputPanelText,
     groupCount,
     LOAD_TIMEOUT_MS,
     openScmView,
@@ -16,6 +18,8 @@ import {
     resourceRow,
     runCommand,
     scmView,
+    showGitOutput,
+    traceGitOutput,
     workspaceDir,
 } from "./harness.js";
 
@@ -118,4 +122,35 @@ scenario("once no operation is in progress, refreshes save the untracked cache a
         () => readFile(join(workspaceDir(), ".git", "index")),
         index => index.includes("UNTR"),
     );
+});
+
+function countStatusInvocations(rendered: string): number {
+    return new Set([...rendered.matchAll(/CMD_0_(\d+) > git/gu)].map(([, id]) => id)).size;
+}
+
+scenario("rapid rebase steps coalesce into a trailing refresh instead of firing per commit", async () => {
+    const view = scmView(page);
+    await applySettings({
+        "git_monolithic.autorefreshCooldown": 2_000,
+        "git_monolithic.autorefreshDebounce": 1_000,
+    });
+    await traceGitOutput(page);
+
+    // Seed one traced status so the output filter has a baseline line to match.
+    await writeFile(join(workspaceDir(), "after-rebase", "seed.txt"), "seed\n");
+    await resourceRow(view, "seed.txt").waitFor({ state: "visible" });
+    await showGitOutput(page);
+    const baseline = countStatusInvocations(await filteredOutputPanelText(page, "--untracked-files=normal"));
+
+    // Replay all 10 commits of `main` onto `conflicting`'s base (`HEAD` on `conflicting` has 1 commit over `base`).
+    await userGit("switch", "main");
+    await userGit("rebase", "--onto", "conflicting", "base");
+    await writeFile(join(workspaceDir(), "after-rebase", "settled.txt"), "settled\n");
+    await resourceRow(view, "settled.txt").waitFor({ state: "visible" });
+
+    const after = countStatusInvocations(await filteredOutputPanelText(page, "--untracked-files=normal"));
+    // 10 commits + switch + settled file write coalesce into at most a couple of status reads, never one per commit.
+    assert.ok(after - baseline <= 3, `expected coalesced refreshes, saw ${after - baseline} status calls`);
+
+    await closeOutputPanel(page);
 });
