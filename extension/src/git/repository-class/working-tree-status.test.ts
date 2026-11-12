@@ -13,12 +13,12 @@ const UNSET: StatusConfig = { "diff.ignoreSubmodules": undefined, "status.showUn
 function recordingDeps(
     untracked: string[],
     config: StatusConfig = UNSET,
-    expand: (folders: string[]) => Promise<string[]> = async folders => folders.map(f => `${f}file.txt`),
+    expand: (folders: string[]) => Promise<string[]> = folders => Promise.resolve(folders.map(f => `${f}file.txt`)),
 ) {
     const calls: (["status", StatusOptions] | ["expand", string[]])[] = [];
     let statusSettled = false;
     const deps: WorkingTreeStatusDeps<string> = {
-        config: async () => config,
+        config: () => Promise.resolve(config),
         expand: async folders => {
             calls.push(["expand", folders]);
             if (!statusSettled) {
@@ -102,7 +102,7 @@ test("In all mode, a dir/ entry is a nested repository and is listed as it is", 
 
 test("A failure to list a folder's files only fails the untracked files", async t => {
     const failure = new Error("timed out");
-    const { deps } = recordingDeps(["new/"], UNSET, async () => {
+    const { deps } = recordingDeps(["new/"], UNSET, () => {
         throw failure;
     });
 
@@ -115,9 +115,9 @@ test("A failure to list a folder's files only fails the untracked files", async 
 test("A failing status fails the whole read", async t => {
     const failure = new Error("timed out");
     const deps: WorkingTreeStatusDeps<string> = {
-        config: async () => UNSET,
-        expand: async () => t.fail("nothing to expand"),
-        status: async () => {
+        config: () => Promise.resolve(UNSET),
+        expand: () => t.fail("nothing to expand"),
+        status: () => {
             throw failure;
         },
     };
@@ -127,7 +127,7 @@ test("A failing status fails the whole read", async t => {
 
 test("Turns off optional locks when optionalLocks reports false", async t => {
     const { calls, deps } = recordingDeps([]);
-    await readWorkingTreeStatus({ ...deps, optionalLocks: async () => false }, false);
+    await readWorkingTreeStatus({ ...deps, optionalLocks: () => Promise.resolve(false) }, false);
 
     t.deepEqual(calls, [[
         "status",

@@ -1,4 +1,5 @@
 import { setTimeout } from "node:timers/promises";
+import { inspect } from "util";
 import {
     type ConfigurationChangeEvent,
     ConfigurationTarget,
@@ -17,6 +18,7 @@ import type { UpstreamScope } from "./git/repository-class/fetch-targets.js";
 import * as i18n from "./i18n/mod.js";
 import { Operation, type OperationOptions } from "./repository/Operations.js";
 import type { AbstractRepository } from "./repository/repository-class/AbstractRepository.js";
+import { error } from "./tracing.js";
 import * as config from "./util/config.js";
 import { eventToPromise, filterEvent, onceEvent } from "./util/events.js";
 
@@ -132,7 +134,7 @@ export class AutoFetcher {
         }
 
         this.enabled = true;
-        this.#run();
+        this.#run().catch(err => error(`Failure running auto-fetch on enablement: ${inspect(err)}`));
     }
 
     disable(): void {
@@ -178,6 +180,6 @@ export class AutoFetcher {
 
     dispose(): void {
         this.disable();
-        this.#disposables.forEach(d => d.dispose());
+        this.#disposables.forEach(d => void d.dispose());
     }
 }

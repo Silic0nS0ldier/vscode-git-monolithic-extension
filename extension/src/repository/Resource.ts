@@ -265,7 +265,18 @@ export class Resource implements SourceControlResourceState {
         return this.#normalisedResourceUri();
     }
 
-    get command(): Command {
+    get command():
+        & Command
+        & ({
+            arguments: [
+                Uri | undefined,
+                Uri | {
+                    override?: boolean;
+                } | undefined,
+                string,
+            ];
+        } | { arguments: [Uri] })
+    {
         return resolveDefaultCommand(this, this.#repoRoot);
     }
 
@@ -306,11 +317,11 @@ export class Resource implements SourceControlResourceState {
             },
             open: async (): Promise<void> => {
                 const command = this.command;
-                await commands.executeCommand<void>(command.command, ...(command.arguments || []));
+                await commands.executeCommand<void>(command.command, ...command.arguments);
             },
             openChange: async (): Promise<void> => {
                 const command = resolveChangeCommand(this);
-                await commands.executeCommand<void>(command.command, ...(command.arguments || []));
+                await commands.executeCommand<void>(command.command, ...command.arguments);
             },
             get original(): Uri {
                 return originalResourceUri;

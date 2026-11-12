@@ -15,7 +15,7 @@ export function createCommand(): ScmCommand<"timelineOpenDiff"> {
                 preview: true,
                 viewColumn: ViewColumn.Active,
             });
-            await commands.executeCommand(command.command, ...(command.arguments ?? []));
+            await commands.executeCommand(command.command, ...command.arguments);
         },
     };
 }

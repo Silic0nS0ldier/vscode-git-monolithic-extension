@@ -36,7 +36,7 @@ function createFakeClock() {
         flushMicrotasks,
         now: () => current,
         pendingTimers: () => timers.size,
-        scheduleTimer(callback: () => void, delayMs: number): () => void {
+        scheduleTimer(this: void, callback: () => void, delayMs: number): () => void {
             const id = nextId++;
             timers.set(id, { callback, due: current + delayMs });
             return () => {
@@ -56,8 +56,9 @@ function createHarness(cooldownMs = 5_000, debounceMs = 1_000) {
         onError: err => {
             throw err;
         },
-        refresh: async () => {
+        refresh: () => {
             runs.push(clock.now());
+            return Promise.resolve();
         },
         scheduleTimer: clock.scheduleTimer,
         whenReady: async () => {},
@@ -176,8 +177,9 @@ test("Re-checks trailing quiet if new requests arrive while waiting for whenRead
         debounceMs: () => 1_000,
         now: clock.now,
         onError: err => t.fail(String(err)),
-        refresh: async () => {
+        refresh: () => {
             runs.push(clock.now());
+            return Promise.resolve();
         },
         scheduleTimer: clock.scheduleTimer,
         whenReady: async () => {
@@ -219,7 +221,7 @@ test("Reports refresh errors via onError and cancels pending work on dispose", a
         debounceMs: () => 500,
         now: clock.now,
         onError: err => errors.push(err),
-        refresh: async () => {
+        refresh: () => {
             throw boom;
         },
         scheduleTimer: clock.scheduleTimer,

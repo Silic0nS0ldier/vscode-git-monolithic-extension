@@ -22,7 +22,7 @@ export function createCommand(model: Model): ScmCommand<"clean"> {
             s instanceof Resource
             && (s.state.resourceGroupType === ResourceGroupType.WorkingTree
                 || s.state.resourceGroupType === ResourceGroupType.Untracked)
-        ) as Resource[];
+        );
 
         if (scmResources.length === 0) {
             return;

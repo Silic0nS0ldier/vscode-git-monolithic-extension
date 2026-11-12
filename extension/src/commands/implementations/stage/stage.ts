@@ -32,7 +32,7 @@ export function createCommand(
             normalisedResourceStates = [resource];
         }
 
-        const selection = normalisedResourceStates.filter(s => s instanceof Resource) as Resource[];
+        const selection = normalisedResourceStates;
         const { resolved, unresolved, deletionConflicts } = await categorizeResourceByResolution(selection);
 
         const proceed = await stageConflicts(unresolved, () =>

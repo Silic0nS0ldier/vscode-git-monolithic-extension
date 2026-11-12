@@ -35,15 +35,11 @@ export async function createIPCServer(): Promise<IIPCServer> {
         }
     }
 
-    return new Promise((c, e) => {
-        try {
-            server.on("error", err => e(err));
-            server.listen(ipcHandlePath);
-            c(new IPCServer(server, ipcHandlePath));
-        } catch (err) {
-            e(err);
-        }
-    });
+    const { promise, resolve, reject } = Promise.withResolvers<IPCServer>();
+    server.on("error", err => reject(err));
+    server.listen(ipcHandlePath);
+    resolve(new IPCServer(server, ipcHandlePath));
+    return promise;
 }
 
 export interface IIPCServer extends Disposable {

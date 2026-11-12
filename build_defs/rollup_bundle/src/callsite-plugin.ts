@@ -156,10 +156,10 @@ function walk(
 ): void {
     visit(node, parent, scope);
     const innerScope = node[SCOPE] ?? scope;
-    for (const [key, value] of Object.entries(node)) {
+    for (const [key, value] of Object.entries(node) as [string, unknown][]) {
         if (key === SCOPE) continue;
-        for (const child of Array.isArray(value) ? value : [value]) {
-            if (typeof child === "object" && child !== null && typeof child.type === "string") {
+        for (const child of Array.isArray(value) ? value as unknown[] : [value]) {
+            if (typeof child === "object" && child !== null && "type" in child && typeof child.type === "string") {
                 walk(child as Node, node, innerScope, visit);
             }
         }

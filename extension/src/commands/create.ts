@@ -102,7 +102,7 @@ async function handleError(
 
         if (err.stderr) {
             const showCommandOutputChoice = i18n.Translations.showCommandOutput();
-            choices.set(showCommandOutputChoice, async () => {
+            choices.set(showCommandOutputChoice, () => {
                 const timestamp = new Date().getTime();
                 // TODO Hard coded URL may break in the future
                 const uri = Uri.parse(`gitm-output:/git-error-${timestamp}`);
@@ -117,12 +117,14 @@ async function handleError(
 
                 commandErrors.set(uri, `> ${command}\n${err.stderr}`);
 
-                try {
-                    const doc = await workspace.openTextDocument(uri);
-                    await window.showTextDocument(doc);
-                } finally {
-                    commandErrors.delete(uri);
-                }
+                (async () => {
+                    try {
+                        const doc = await workspace.openTextDocument(uri);
+                        await window.showTextDocument(doc);
+                    } finally {
+                        commandErrors.delete(uri);
+                    }
+                })().catch(err => error(`Failure showing command output: ${inspect(err)}`));
             });
         }
 
@@ -154,7 +156,7 @@ async function handleError(
                 choices.set(
                     i18n.Translations.learnMore(),
                     () =>
-                        commands.executeCommand(
+                        void commands.executeCommand(
                             "vscode.open",
                             Uri.parse("https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup"),
                         ),

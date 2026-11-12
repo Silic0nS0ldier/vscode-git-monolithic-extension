@@ -11,7 +11,7 @@ export function createCommand(
         const normalisedResourceStates = normaliseResourceStates(model, resourceStates);
 
         const scmResources = normalisedResourceStates
-            .filter(s => s instanceof Resource && s.state.resourceGroupType === ResourceGroupType.Index) as Resource[];
+            .filter(s => s.state.resourceGroupType === ResourceGroupType.Index);
 
         if (!scmResources.length) {
             return;

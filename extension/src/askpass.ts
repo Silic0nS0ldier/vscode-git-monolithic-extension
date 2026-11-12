@@ -1,5 +1,6 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+import { inspect } from "node:util";
 import { type InputBoxOptions, window } from "vscode";
 import { createIPCServer, type IIPCHandler, type IIPCServer } from "./ipc/ipcServer.js";
 import { error } from "./tracing.js";
@@ -17,7 +18,7 @@ export class Askpass implements IIPCHandler {
         try {
             return new Askpass(await createIPCServer());
         } catch (err) {
-            error(`Failed to create git askpass IPC: ${err}`);
+            error(`Failed to create git askpass IPC: ${inspect(err)}`);
             return new Askpass();
         }
     }

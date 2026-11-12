@@ -101,7 +101,9 @@ function getRightResource(resourceState: ResourceState, indexGroup: SourceContro
     return undefined;
 }
 
-export function resolveChangeCommand(resource: Resource): Command {
+export function resolveChangeCommand(
+    resource: Resource,
+): Command & { arguments: [Uri | undefined, Uri | { override?: boolean } | undefined, string] } {
     const title = getTitleFromResource(resource);
 
     if (!resource.state.leftUri) {
@@ -129,7 +131,7 @@ export function resolveChangeCommand(resource: Resource): Command {
     }
 }
 
-function resolveFileCommand(resource: Resource): Command {
+function resolveFileCommand(resource: Resource): Command & { arguments: [Uri] } {
     return {
         arguments: [resource.state.resourceUri],
         command: "vscode.open",
@@ -137,7 +139,18 @@ function resolveFileCommand(resource: Resource): Command {
     };
 }
 
-export function resolveDefaultCommand(resource: Resource, repoRoot: string): Command {
+export function resolveDefaultCommand(resource: Resource, repoRoot: string):
+    & Command
+    & ({
+        arguments: [
+            Uri | undefined,
+            Uri | {
+                override?: boolean;
+            } | undefined,
+            string,
+        ];
+    } | { arguments: [Uri] })
+{
     const openDiffOnClick = config.openDiffOnClick(Uri.file(repoRoot));
     return openDiffOnClick ? resolveChangeCommand(resource) : resolveFileCommand(resource);
 }

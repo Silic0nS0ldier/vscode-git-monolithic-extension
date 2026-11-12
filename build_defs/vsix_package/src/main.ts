@@ -53,7 +53,11 @@ const outFile = (() => {
 })();
 
 const version = (() => {
-    const pkg = JSON.parse(fs.readFileSync(path.join(inDir, "package.json"), "utf-8"));
+    const pkg = JSON.parse(fs.readFileSync(path.join(inDir, "package.json"), "utf-8")) as unknown;
+    if (typeof pkg !== "object" || pkg === null || !("version" in pkg) || typeof pkg.version !== "string") {
+        console.error("Invalid package.json: missing or invalid version field.");
+        process.exit(1);
+    }
     if (process.env.BAZEL_VOLATILE_STATUS_FILE) {
         const volatileStatusContent = fs.readFileSync(
             path.join(execroot, process.env.BAZEL_VOLATILE_STATUS_FILE),
@@ -67,13 +71,15 @@ const version = (() => {
             return `${pkg.version}-dev.${match[1]}`;
         }
     } else {
-        return pkg.version as string;
+        return pkg.version;
     }
 })();
 
 function createOutputCapture() {
     const captured: Buffer[] = [];
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Intentionally capturing the original write methods to restore them later.
     const origStdoutWrite = process.stdout.write;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const origStderrWrite = process.stderr.write;
     process.stdout.write = (chunk: string | Uint8Array) => {
         captured.push(Buffer.from(chunk));
