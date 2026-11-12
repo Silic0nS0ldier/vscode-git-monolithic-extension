@@ -126,7 +126,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
 
     deactivateTasks.push(() => telemetryReporter.dispose());
-    deactivateTasks.push(async () => disableExtension());
+    deactivateTasks.push(() => {
+        disableExtension();
+        return Promise.resolve();
+    });
 }
 
 let extensionDisposable: Disposable | undefined;
@@ -150,7 +153,7 @@ async function enableExtension(
         warn(inspect(err));
 
         commands.executeCommand("setContext", "git_monolithic.context.missing", true);
-        warnAboutMissingGit();
+        warnAboutMissingGit().catch(err => warn(`Failure warning about missing Git; ex=${inspect(err)}`));
     }
 }
 
@@ -224,12 +227,12 @@ async function createModel(
     const model = new Model(git, context.globalState);
     disposables.push(model);
 
-    const onRepository = async (): Promise<void> =>
-        void await commands.executeCommand<unknown>(
+    const onRepository = (): void =>
+        void Promise.resolve(commands.executeCommand<unknown>(
             "setContext",
             "git_monolithic.context.openRepositoryCount",
             `${model.repositories.length}`,
-        );
+        )).catch(err => warn(`Failure setting repository context; ex=${inspect(err)}`));
     model.onDidOpenRepository(onRepository, null, disposables);
     model.onDidCloseRepository(onRepository, null, disposables);
     onRepository();
@@ -245,7 +248,7 @@ async function createModel(
         createTimelineProvider(model, git, context.extensionUri),
     );
 
-    checkGitVersion(gitInfo);
+    checkGitVersion(gitInfo).catch(err => warn(`Failed to check Git version; ex=${inspect(err)}`));
 
     return [model, Disposable.from(...disposables)];
 }

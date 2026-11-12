@@ -493,7 +493,7 @@ export class Repository {
     async checkout(
         treeish: string,
         paths: string[],
-        opts: { track?: boolean; detached?: boolean } = Object.create(null),
+        opts: { track?: boolean; detached?: boolean } = {},
     ): Promise<void> {
         const result = await gitCheckout(this.#git._context, this.#repositoryRoot, treeish, paths, {
             detach: opts.detached,
@@ -513,7 +513,7 @@ export class Repository {
         }
     }
 
-    async commit(message: string | undefined, opts: CommitOptions = Object.create(null)): Promise<void> {
+    async commit(message: string | undefined, opts: CommitOptions = {}): Promise<void> {
         const args = ["commit", "--quiet", "--allow-empty-message"];
 
         if (opts.all) {
@@ -1250,6 +1250,7 @@ export class Repository {
             // https://github.com/git/git/blob/3a0f269e7c82aa3a87323cb7ae04ac5f129f036b/path.c#L612
             const homedir = os.homedir();
             let templatePath = templateSetting
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- `user` is typed as `any` by TypeScript, need to refactor (with tests)
                 .replace(/^~([^/]*)\//, (_, user) => `${user ? path.join(path.dirname(homedir), user) : homedir}/`);
 
             if (!path.isAbsolute(templatePath)) {
@@ -1289,7 +1290,7 @@ export class Repository {
         const commit = unwrapOk(await showCommit(this.#git._context, this.#repositoryRoot, ref));
 
         if (!commit) {
-            return Promise.reject<Commit>("bad commit format");
+            return Promise.reject<Commit>(new Error(`bad commit format for ref "${ref}"`));
         }
 
         return commit;

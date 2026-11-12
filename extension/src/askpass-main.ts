@@ -1,4 +1,5 @@
 import * as fs from "node:fs";
+import { inspect } from "node:util";
 import { missOrInvalid } from "./i18n/strings.js";
 import { IPCClient } from "./ipc/ipcClient.js";
 
@@ -32,7 +33,7 @@ function main(argv: string[]): void {
         }
         fs.writeFileSync(output, res + "\n");
         setTimeout(() => process.exit(0), 0);
-    }).catch(err => fatal(err));
+    }).catch(err => fatal(`Failed to call IPC: ${inspect(err)}`));
 }
 
 main(process.argv);

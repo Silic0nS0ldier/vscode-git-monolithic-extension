@@ -26,7 +26,9 @@ test("History resolves and rereads a stable tip when repository status has not s
         return Promise.resolve(undefined);
     });
     t.deepEqual(empty, { tip: undefined, commits: [] });
-    await t.throwsAsync(readStableHistory(undefined, () => Promise.resolve(["commit"]), () => Promise.resolve("--all")));
+    await t.throwsAsync(
+        readStableHistory(undefined, () => Promise.resolve(["commit"]), () => Promise.resolve("--all")),
+    );
 });
 
 test("Live entries and commits share the file Timeline page budget", t => {

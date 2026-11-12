@@ -4,7 +4,7 @@ import type { AbstractRepository } from "../../../../repository/repository-class
 import { makeCommandId, type ScmCommand } from "../../../helpers.js";
 
 export function createCommand(): ScmCommand<"openAllChanges"> {
-    async function openAllChanges(repository: AbstractRepository): Promise<void> {
+    function openAllChanges(repository: AbstractRepository): void {
         for (
             const resource of [
                 ...repository.sourceControlUI.trackedGroup.resourceStates.get(),

@@ -1,7 +1,7 @@
 /** A lookup kept until invalidated. A failed lookup is not kept, so the next `get()` retries it. */
 export type CachedLookup<T> = {
     get(this: void): Promise<T>;
-    invalidate(): void;
+    invalidate(this: void): void;
 };
 
 export function createCachedLookup<T>(load: () => Promise<T>): CachedLookup<T> {

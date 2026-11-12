@@ -5,6 +5,7 @@ import { computeLineChanges, type LineChange } from "../../../line-changes.js";
 import type { Model } from "../../../model.js";
 import { intersectDiffWithRange, toLineRanges } from "../../../staging.js";
 import { trace } from "../../../tracing.js";
+import { UnreachableError } from "../../../util/unreachable-error.js";
 import { makeCommandId, type ScmCommand } from "../../helpers.js";
 import { stageChanges } from "./helpers.js";
 
@@ -15,7 +16,7 @@ function getEOLChar(eol: EndOfLine): string {
         case EndOfLine.CRLF:
             return "\r\n";
         default:
-            throw new Error(`Unknown EOL option ${eol}`);
+            throw new UnreachableError(eol);
     }
 }
 
@@ -83,7 +84,7 @@ export function createCommand(model: Model): ScmCommand<"stageSelectedRanges"> {
                     null,
                 )
             )
-            .filter(d => !!d) as LineChange[];
+            .filter(d => !!d);
 
         // Stage
         await stageChanges(model, base, current, selectedChanges);

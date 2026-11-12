@@ -42,7 +42,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
             this.#model.onDidOpenRepository,
             this.#model.onDidCloseRepository,
         );
-        this.onDidChangeFileDecorations = fireEvent(listener => sources(() => listener(undefined)));
+        this.onDidChangeFileDecorations = fireEvent(listener => sources(() => void listener(undefined)));
 
         this.#disposables.push(window.registerFileDecorationProvider(this));
     }
@@ -97,7 +97,7 @@ class GitIgnoreDecorationProvider implements FileDecorationProvider {
     }, 500);
 
     dispose(): void {
-        this.#disposables.forEach(d => d.dispose());
+        this.#disposables.forEach(d => void d.dispose());
         this.#queue.clear();
     }
 }
@@ -188,7 +188,7 @@ class GitDecorationProvider implements FileDecorationProvider {
     }
 
     dispose(): void {
-        this.#disposables.forEach(d => d.dispose());
+        this.#disposables.forEach(d => void d.dispose());
     }
 }
 
@@ -227,7 +227,7 @@ export function addDecorations(model: Model): Disposable {
     function disable(): void {
         disposeHelper(modelDisposables);
         modelDisposables.length = 0;
-        providers.forEach(value => value.dispose());
+        providers.forEach(value => void value.dispose());
         providers.clear();
     }
 

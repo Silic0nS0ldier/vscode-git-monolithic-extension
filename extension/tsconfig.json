@@ -3,6 +3,12 @@
     "compilerOptions": {
         // Self-contained source maps let coverage of the bundle be mapped back to the sources.
         "inlineSources": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "lib": [
+            "DOM",
+            "ES2025",
+            // Export types for `Iterator.zip` ponyfill
+            "ESNext.Iterator"
+        ]
     }
 }

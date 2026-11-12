@@ -23,6 +23,7 @@ function arraysEqualBy<T>(a: readonly T[], b: readonly T[], eq: (x: T, y: T) => 
     }
 
     for (const [x, y] of zip([a, b], { mode: "strict" })) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- typescript-eslint uses TypeScript v6 which lacks `Iterator.zip` type support, leading to `any` arguments
         if (!eq(x, y)) {
             return false;
         }

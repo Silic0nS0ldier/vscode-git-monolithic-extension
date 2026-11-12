@@ -37,7 +37,7 @@ export function resolveOpenDiff(
     item: GitTimelineItem,
     uri: Uri,
     options?: TextDocumentShowOptions,
-): Command {
+): Command & { arguments: [Uri | undefined, Uri | undefined, string, TextDocumentShowOptions?] } {
     if (!item.previousUri || !item.resourceUri) throw new Error("Timeline item has no comparable file versions");
     const title = item.ref === "" || item.ref === "~"
         ? itemTitle(item, uri)

@@ -23,11 +23,8 @@ export async function getHEAD(context: GitContext, repoRoot: string): Promise<Re
         }
     }
 
-    throw {
-        attempts: [
-            isErr(symbolicRefHeadResult) && unwrap(symbolicRefHeadResult),
-            isErr(revParseHeadResult) && unwrap(revParseHeadResult),
-        ],
-        message: "Could not get head",
-    };
+    throw new AggregateError([
+        isErr(symbolicRefHeadResult) && unwrap(symbolicRefHeadResult),
+        isErr(revParseHeadResult) && unwrap(revParseHeadResult),
+    ], "Could not get head");
 }

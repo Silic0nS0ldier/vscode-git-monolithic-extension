@@ -138,7 +138,9 @@ export class Model {
         onGitIndexEvent(this.#onPossibleGitRepositoryChange, this, this.#disposables);
 
         this.setState("uninitialized");
-        this.#doInitialScan().finally(() => this.setState("initialized"));
+        this.#doInitialScan().finally(() => this.setState("initialized")).catch(err =>
+            error(`Failed to perform initial scan: ${inspect(err)}`)
+        );
     }
 
     async #doInitialScan(): Promise<void> {
@@ -208,7 +210,9 @@ export class Model {
 
     #eventuallyScanPossibleGitRepositories = debounce(() => {
         for (const path of this.#possibleGitRepositoryPaths) {
-            this.openRepository(path);
+            this.openRepository(path).catch(err =>
+                error(`Failed to open repository at path '${path}': ${inspect(err)}`)
+            );
         }
 
         this.#possibleGitRepositoryPaths.clear();
@@ -220,18 +224,16 @@ export class Model {
 
         const activeRepositoriesList = window.visibleTextEditors
             .map(editor => this.getRepository(editor.document.uri))
-            .filter(repository => !!repository) as AbstractRepository[];
+            .filter(repository => !!repository);
 
         const activeRepositories = new Set<AbstractRepository>(activeRepositoriesList);
         const openRepositoriesToDispose = removed
             .map(folder => this.#getOpenRepository(folder.uri))
             .filter<OpenRepository>((r => !!r) as (v: OpenRepository | undefined) => v is OpenRepository)
             .filter(r => !activeRepositories.has(r.repository))
-            .filter(r =>
-                !(workspace.workspaceFolders || []).some(f => isDescendant(f.uri.fsPath, r.repository.root))
-            ) as OpenRepository[];
+            .filter(r => !(workspace.workspaceFolders || []).some(f => isDescendant(f.uri.fsPath, r.repository.root)));
 
-        openRepositoriesToDispose.forEach(r => r.dispose());
+        openRepositoriesToDispose.forEach(r => void r.dispose());
         await Promise.all(possibleRepositoryFolders.map(p => this.openRepository(p.uri.fsPath)));
     }
 
@@ -255,8 +257,8 @@ export class Model {
             .filter(({ root }) => !config.enabled(root))
             .map(({ repository }) => repository);
 
-        possibleRepositoryFolders.forEach(p => this.openRepository(p.uri.fsPath));
-        openRepositoriesToDispose.forEach(r => r.dispose());
+        possibleRepositoryFolders.forEach(p => void this.openRepository(p.uri.fsPath));
+        openRepositoriesToDispose.forEach(r => void r.dispose());
     }
 
     async #onDidChangeVisibleTextEditors(editors: readonly TextEditor[]): Promise<void> {
@@ -537,7 +539,7 @@ export class Model {
 
     dispose(): void {
         const openRepositories = [...this.#openRepositories];
-        openRepositories.forEach(r => r.dispose());
+        openRepositories.forEach(r => void r.dispose());
         this.#openRepositories = [];
 
         this.#possibleGitRepositoryPaths.clear();

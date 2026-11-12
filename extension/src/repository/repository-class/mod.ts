@@ -300,7 +300,7 @@ export function createRepository(
     const onDidChangeRepository = onDidChangeRepositoryEmitter.event;
 
     // Relevate repository changes should trigger virtual document change events
-    onDotGitFileChange(onDidChangeRepositoryEmitter.fire, onDidChangeRepositoryEmitter, disposables);
+    onDotGitFileChange((uri) => onDidChangeRepositoryEmitter.fire(uri), onDidChangeRepositoryEmitter, disposables);
 
     disposables.push(new FileEventLogger(onWorkingTreeFileChange, onDotGitFileChange));
 

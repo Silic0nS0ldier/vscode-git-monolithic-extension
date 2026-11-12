@@ -178,10 +178,10 @@ test("Needs git 2.11 or later", t => {
 test("Forwards optionalLocks: false as GIT_OPTIONAL_LOCKS=0", async t => {
     let seenEnv: Record<string, string | undefined> | undefined;
     const git: GitContext = {
-        cli: async (context) => {
+        cli: (context) => {
             seenEnv = context.env;
             context.stdout?.end();
-            return ok(void 0);
+            return Promise.resolve(ok(void 0));
         },
         path: "PATH",
         version: "2.53.0",

@@ -74,10 +74,10 @@ test("Disables optional locks when optionalLocks is false", async t => {
     let seenEnv: Record<string, string | undefined> | undefined;
     const res = await tracked(
         {
-            cli: async (context) => {
+            cli: (context) => {
                 seenEnv = context.env;
                 context.stdout?.end();
-                return ok(void 0);
+                return Promise.resolve(ok(void 0));
             },
             path: "PATH",
             version: "VERSION",

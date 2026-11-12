@@ -16,7 +16,7 @@ export async function createCheckoutItems(repository: AbstractRepository): Promi
     }
 
     const processors = checkoutTypes.map(getCheckoutProcessor)
-        .filter(p => !!p) as CheckoutProcessor[];
+        .filter(p => !!p);
 
     for (const ref of await repository.getRefs()) {
         for (const processor of processors) {

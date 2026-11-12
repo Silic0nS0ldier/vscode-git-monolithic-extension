@@ -18,7 +18,11 @@ class CheckoutStatusBar {
 
     constructor(repository: AbstractRepository) {
         this.#repository = repository;
-        this.#repository.onDidChangeStatus(() => this.#onDidChangeEmitter.fire(), this.#onDidChangeEmitter, this.#disposables);
+        this.#repository.onDidChangeStatus(
+            () => this.#onDidChangeEmitter.fire(),
+            this.#onDidChangeEmitter,
+            this.#disposables,
+        );
     }
 
     get command(): Command | undefined {

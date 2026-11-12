@@ -25,7 +25,7 @@ async function waitFor(predicate: () => boolean, timeoutMs = 3_000): Promise<voi
 }
 
 test("Passes events straight through when no lock file exists", async t => {
-    await withTempDir(async dotGit => {
+    await withTempDir(dotGit => {
         const recalled: [string, string][] = [];
         const gate = createLockGate<string>(transientGitLocks(dotGit), [], entries => {
             recalled.push(...entries.entries());
@@ -36,6 +36,7 @@ test("Passes events straight through when no lock file exists", async t => {
         } finally {
             gate.dispose();
         }
+        return Promise.resolve();
     });
 });
 

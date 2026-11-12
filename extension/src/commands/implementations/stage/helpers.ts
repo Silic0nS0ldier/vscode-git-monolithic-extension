@@ -21,20 +21,24 @@ function isAnyDeleted(s: Resource): boolean {
 }
 
 export async function categorizeResourceByResolution(
-    resources: Resource[],
+    resources: readonly Resource[],
 ): Promise<{ resolved: Resource[]; unresolved: Resource[]; deletionConflicts: Resource[] }> {
     const merge = resources.filter(s => s.state.resourceGroupType === ResourceGroupType.Merge);
     const possibleUnresolved = merge.filter(isBothAddedOrModified);
     const hasMarkers = await Promise.all(
         possibleUnresolved.map(s => grep(s.state.resourceUri.fsPath, /^<{7}|^={7}|^>{7}/)),
     );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Remove once typescript-eslint using typescript v7
     const checked = [...zip([possibleUnresolved, hasMarkers])];
 
     return {
         deletionConflicts: merge.filter(isAnyDeleted),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return -- Remove once typescript-eslint using typescript v7
         resolved: checked.filter(([, marked]) => !marked).map(([s]) => s),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Remove once typescript-eslint using typescript v7
         unresolved: [
             ...merge.filter(s => !isBothAddedOrModified(s) && !isAnyDeleted(s)),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return -- Remove once typescript-eslint using typescript v7
             ...checked.filter(([, marked]) => marked).map(([s]) => s),
         ],
     };

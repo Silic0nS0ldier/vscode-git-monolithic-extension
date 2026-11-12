@@ -297,14 +297,14 @@ export function createTimelineProvider(model: Model, git: Git, extensionUri: Uri
                     if (date !== orderDate) {
                         entry.description = i18n.Translations.timelineDateAdjusted();
                         const origTooltip = entry.tooltip;
-                        const orderExplanation = i18n.Translations.timelineLiveDateOrderExplanation(new Date(date).toLocaleString());
+                        const orderExplanation = i18n.Translations.timelineLiveDateOrderExplanation(
+                            new Date(date).toLocaleString(),
+                        );
                         if (origTooltip == null) {
                             entry.tooltip = orderExplanation;
-                        }
-                        else if (origTooltip instanceof MarkdownString) {
+                        } else if (origTooltip instanceof MarkdownString) {
                             entry.tooltip = origTooltip.appendMarkdown(`\n\n${orderExplanation}`);
-                        }
-                        else {
+                        } else {
                             entry.tooltip = `${origTooltip ?? ""}\n\n${orderExplanation}`;
                         }
                     }
