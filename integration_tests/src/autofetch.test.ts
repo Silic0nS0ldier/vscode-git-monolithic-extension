@@ -2,8 +2,9 @@ import assert from "node:assert";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { after, before } from "node:test";
+import { setTimeout as delay } from "node:timers/promises";
 import type { Page } from "playwright-core";
-import { subjectOf } from "./git.js";
+import { subjectOf, userGit } from "./git.js";
 import {
     connect,
     createScenario,
@@ -60,4 +61,43 @@ scenario("autofetch of tracked branches advances every tracked branch, past one 
     assert.strictEqual(await trackingSubject("untracked"), "Base");
     // Nothing asked for a prune, so the ref the remote dropped is left as it was.
     assert.strictEqual(await trackingSubject("retired"), "Base");
+});
+
+scenario("autofetch skips ticks while a rebase is in progress and resumes once it completes", async () => {
+    await userGit("commit", "--all", "--message", "Save tracked autofetch settings");
+
+    await userGit("switch", "--create", "rebase-onto");
+    await writeFile(join(workspaceDir(), "tracked.txt"), "onto\n");
+    await userGit("commit", "--all", "--message", "Onto change");
+
+    await userGit("switch", "feature");
+    await writeFile(join(workspaceDir(), "tracked.txt"), "feature\n");
+    await userGit("commit", "--all", "--message", "Feature change");
+
+    await assert.rejects(userGit("rebase", "rebase-onto"), /CONFLICT|Could not apply/u);
+
+    const title = "autofetch during rebase";
+    await writeFile(
+        join(workspaceDir(), ".vscode", "settings.json"),
+        JSON.stringify({
+            "git_monolithic.autofetch": "all",
+            "git_monolithic.autofetchPeriod": 1,
+            "window.title": title,
+        }),
+    );
+    await pollUntil("the workbench to apply autofetch=all", () => page.title(), text => text === title);
+
+    // Give autofetch multiple 1s ticks while `.git/rebase-merge` is present.
+    await delay(2_500);
+    assert.strictEqual(await trackingSubject("untracked"), "Base");
+
+    await writeFile(join(workspaceDir(), "tracked.txt"), "resolved\n");
+    await userGit("add", "--", "tracked.txt", ".vscode/settings.json");
+    await userGit("rebase", "--continue");
+
+    await pollUntil(
+        "origin/untracked to be fetched once rebase finishes",
+        () => trackingSubject("untracked"),
+        subject => subject === "Upstream untracked",
+    );
 });
