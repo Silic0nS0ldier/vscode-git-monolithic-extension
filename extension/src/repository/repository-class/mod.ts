@@ -688,11 +688,11 @@ export function createRepository(
 
     // Don't allow auto-fetch in untrusted workspaces
     if (workspace.isTrusted) {
-        disposables.push(new AutoFetcher(finalRepository, globalState));
+        disposables.push(new AutoFetcher(finalRepository, globalState, dotGit));
     } else {
         const trustDisposable = workspace.onDidGrantWorkspaceTrust(() => {
             trustDisposable.dispose();
-            disposables.push(new AutoFetcher(finalRepository, globalState));
+            disposables.push(new AutoFetcher(finalRepository, globalState, dotGit));
         });
         disposables.push(trustDisposable);
     }

@@ -12,6 +12,7 @@ import {
 } from "vscode";
 import { GitErrorCodes } from "./api/git.js";
 import { GitError } from "./git/error.js";
+import { hasInProgressOperation } from "./git/in-progress.js";
 import type { UpstreamScope } from "./git/repository-class/fetch-targets.js";
 import * as i18n from "./i18n/mod.js";
 import { Operation, type OperationOptions } from "./repository/Operations.js";
@@ -44,10 +45,12 @@ export class AutoFetcher {
 
     #repository: AbstractRepository;
     #globalState: Memento;
+    #dotGit: string;
 
-    constructor(repository: AbstractRepository, globalState: Memento) {
+    constructor(repository: AbstractRepository, globalState: Memento, dotGit: string) {
         this.#repository = repository;
         this.#globalState = globalState;
+        this.#dotGit = dotGit;
         workspace.onDidChangeConfiguration(this.#onConfiguration, this, this.#disposables);
         this.#onConfiguration();
 
@@ -144,17 +147,19 @@ export class AutoFetcher {
                 return;
             }
 
-            try {
-                if (this.#scope === "all") {
-                    await this.#repository.fetchAll();
-                } else if (this.#scope === "default") {
-                    await this.#repository.fetchDefault({ silent: true });
-                } else {
-                    await this.#repository.fetchUpstreams(this.#scope, { silent: true });
-                }
-            } catch (err) {
-                if (err instanceof GitError && err.gitErrorCode === GitErrorCodes.AuthenticationFailed) {
-                    this.disable();
+            if (!(await hasInProgressOperation(this.#dotGit))) {
+                try {
+                    if (this.#scope === "all") {
+                        await this.#repository.fetchAll();
+                    } else if (this.#scope === "default") {
+                        await this.#repository.fetchDefault({ silent: true });
+                    } else {
+                        await this.#repository.fetchUpstreams(this.#scope, { silent: true });
+                    }
+                } catch (err) {
+                    if (err instanceof GitError && err.gitErrorCode === GitErrorCodes.AuthenticationFailed) {
+                        this.disable();
+                    }
                 }
             }
 
