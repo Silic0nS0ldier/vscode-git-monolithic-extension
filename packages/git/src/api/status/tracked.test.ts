@@ -69,3 +69,23 @@ test("Basic case", async t => {
         ]);
     }
 });
+
+test("Disables optional locks when optionalLocks is false", async t => {
+    let seenEnv: Record<string, string | undefined> | undefined;
+    const res = await tracked(
+        {
+            cli: async (context) => {
+                seenEnv = context.env;
+                context.stdout?.end();
+                return ok(void 0);
+            },
+            path: "PATH",
+            version: "VERSION",
+        },
+        "/cwd",
+        "relative",
+        { optionalLocks: false },
+    );
+    t.true(isOk(res));
+    t.deepEqual(seenEnv, { GIT_OPTIONAL_LOCKS: "0" });
+});

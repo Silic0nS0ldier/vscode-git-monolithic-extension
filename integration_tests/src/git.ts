@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import { testTmpDir, workspaceDir } from "./harness.js";
 
@@ -28,6 +28,26 @@ async function git(...args: string[]): Promise<string> {
             GIT_OPTIONAL_LOCKS: "0",
         },
         timeout: GIT_TIMEOUT_MS,
+    });
+    return stdout;
+}
+
+/**
+ * Runs git in the workspace the way a user's terminal does: with optional locks enabled and
+ * no retry on `index.lock`, so any lock contention with the extension surfaces immediately.
+ */
+export async function userGit(...args: string[]): Promise<string> {
+    const bin = await gitBin();
+    const { stdout } = await execFileAsync(bin, ["-C", workspaceDir(), ...args], {
+        env: {
+            ...process.env,
+            GIT_CONFIG_GLOBAL: "/dev/null",
+            GIT_CONFIG_SYSTEM: "/dev/null",
+            GIT_EDITOR: "true",
+            GIT_EXEC_PATH: join(dirname(bin), "..", "libexec", "git-core"),
+            GIT_OPTIONAL_LOCKS: undefined,
+        },
+        timeout: 30_000,
     });
     return stdout;
 }

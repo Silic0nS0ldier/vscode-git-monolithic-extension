@@ -86,3 +86,26 @@ test("a path git does not know about yields an empty diff rather than an error",
 
     assert.strictEqual(unwrapOk(await unstaged(gitCtx, repo.path, "absent.txt")), "");
 });
+
+test(unstaged.name + " - does not rewrite .git/index when a tracked file's stat entry is dirty", async () => {
+    await using repo = await tempGitRepo(true);
+    const filePath = path.join(repo.path, "file.txt");
+    const indexPath = path.join(repo.path, ".git", "index");
+
+    await fs.writeFile(filePath, "committed\n");
+    await run(repo.path, ["add", "."]);
+    await run(repo.path, ["commit", "-m", "Add file.txt"]);
+
+    const future = new Date(Date.now() + 60_000);
+    await fs.utimes(filePath, future, future);
+    const beforeIno = (await fs.stat(indexPath)).ino;
+
+    const withOptionalLocksEnabled = {
+        ...gitCtx,
+        cli: (context: Parameters<typeof gitCtx.cli>[0], args: string[]) =>
+            gitCtx.cli({ ...context, env: { GIT_OPTIONAL_LOCKS: undefined, ...context.env } }, args),
+    };
+
+    assert.strictEqual(unwrapOk(await unstaged(withOptionalLocksEnabled, repo.path, "file.txt")), "");
+    assert.strictEqual((await fs.stat(indexPath)).ino, beforeIno);
+});

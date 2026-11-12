@@ -247,3 +247,32 @@ test(
         }
     },
 );
+
+test(status.name + " - optionalLocks: false leaves .git/index untouched even with dirty stat entries", async () => {
+    await using repo = await tempGitRepo(true);
+    const trackedPath = path.join(repo.path, "tracked.txt");
+    const indexPath = path.join(repo.path, ".git", "index");
+
+    await fs.writeFile(trackedPath, "v1\n");
+    await run(repo.path, ["add", "tracked.txt"]);
+    await run(repo.path, ["commit", "-m", "Add tracked.txt"]);
+
+    const future = new Date(Date.now() + 60_000);
+    await fs.utimes(trackedPath, future, future);
+    const beforeIno = (await fs.stat(indexPath)).ino;
+
+    const withOptionalLocksEnabled: GitContext = {
+        ...gitCtx,
+        cli: (context, args) =>
+            gitCtx.cli({ ...context, env: { GIT_OPTIONAL_LOCKS: undefined, ...context.env } }, args),
+    };
+
+    const lockedResult = unwrapOk(
+        await status(withOptionalLocksEnabled, repo.path, { optionalLocks: false, untracked: "normal" }),
+    );
+    assert.deepStrictEqual(lockedResult.files, []);
+    assert.strictEqual((await fs.stat(indexPath)).ino, beforeIno, "optionalLocks: false must not rewrite .git/index");
+
+    unwrapOk(await status(withOptionalLocksEnabled, repo.path, { untracked: "normal" }));
+    assert.notStrictEqual((await fs.stat(indexPath)).ino, beforeIno, "default status refreshes dirty stat entries");
+});

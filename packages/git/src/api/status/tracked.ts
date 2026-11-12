@@ -9,7 +9,7 @@ export async function tracked(
     git: GitContext,
     cwd: string,
     pathFormat: "relative" | "absolute",
-    opts?: { ignoreSubmodules?: boolean },
+    opts?: { ignoreSubmodules?: boolean; optionalLocks?: boolean },
 ): Promise<Result<IFileStatus[], TrackedErrors>> {
     if (pathFormat === "absolute") {
         throw new Error("Not implemented");
@@ -21,7 +21,8 @@ export async function tracked(
     if (opts?.ignoreSubmodules) {
         args.push("--ignore-submodules");
     }
-    const cliResult = await streamToParser(git, cwd, args, parser);
+    const env = opts?.optionalLocks === false ? { GIT_OPTIONAL_LOCKS: "0" } : undefined;
+    const cliResult = await streamToParser(git, cwd, args, parser, env);
 
     if (isErr(cliResult)) {
         return err(unwrap(cliResult));

@@ -67,6 +67,7 @@ import { cliEnv } from "./git/git-class/cli-env.js";
 import { internalExec } from "./git/git-class/internal-exec.js";
 import { internalSpawn } from "./git/git-class/internal-spawn.js";
 import { sanitizePath } from "./git/helpers.js";
+import { hasInProgressOperation } from "./git/in-progress.js";
 import { parseGitmodules } from "./git/parseGitmodules.js";
 import { upstreamFetchTargets, type UpstreamScope } from "./git/repository-class/fetch-targets.js";
 import { getHEAD } from "./git/repository-class/get-head.js";
@@ -996,19 +997,24 @@ export class Repository {
                 files => ({ files }),
                 (reason: unknown) => ({ reason }),
             );
-            const { head, status: files } = await this.#getStatusTrackedAndHEAD(opts);
+            const optionalLocks = !(await hasInProgressOperation(this.dotGit));
+            const { head, status: files } = await this.#getStatusTrackedAndHEAD({
+                ...opts,
+                ...(optionalLocks ? {} : { optionalLocks: false }),
+            });
             return { head, status: files, untracked: untrackedFiles };
         }
 
         return readWorkingTreeStatus({
             config: () => this.#readConfig(STATUS_CONFIG_KEYS),
             expand: folders => this.#listUntracked(folders),
+            optionalLocks: async () => !(await hasInProgressOperation(this.dotGit)),
             status: statusOpts => this.#readStatus(statusOpts),
         }, opts.ignoreSubmodules);
     }
 
     async #getStatusTrackedAndMerge(
-        opts?: { ignoreSubmodules?: boolean },
+        opts?: { ignoreSubmodules?: boolean; optionalLocks?: boolean },
     ): Promise<IFileStatus[]> {
         const result = await tracked(this.#git._context, this.#repositoryRoot, "relative", opts);
         if (isOk(result)) {
@@ -1019,7 +1025,7 @@ export class Repository {
 
     /** Tracked changes, and HEAD with its upstream, which is undefined when HEAD cannot be read. */
     async #getStatusTrackedAndHEAD(
-        opts?: { ignoreSubmodules?: boolean },
+        opts?: { ignoreSubmodules?: boolean; optionalLocks?: boolean },
     ): Promise<{ status: IFileStatus[]; head: Branch | undefined }> {
         if (!supportsTrackedWithBranch(this.#git._context)) {
             const [status, head] = await Promise.all([this.#getStatusTrackedAndMerge(opts), this.#readHEAD()]);

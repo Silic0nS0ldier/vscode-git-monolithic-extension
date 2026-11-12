@@ -9,9 +9,10 @@ archive="$(realpath "$2")"
 port="$3"
 trust="$4"
 
-# The VS Code integrated terminal exports these. code-server's CLI treats them as a
-# request to open in the *developer's* editor and exits instead of serving.
-unset VSCODE_IPC_HOOK_CLI VSCODE_PID VSCODE_GIT_IPC_HANDLE
+# The VS Code integrated terminal exports these. code-server's CLI treats the IPC/PID
+# ones as a request to open in the *developer's* editor and exits instead of serving;
+# GIT_OPTIONAL_LOCKS=0 would mask index.lock contention from the extension's git calls.
+unset VSCODE_IPC_HOOK_CLI VSCODE_PID VSCODE_GIT_IPC_HANDLE GIT_OPTIONAL_LOCKS
 
 state="${TEST_TMPDIR:-/tmp}/code-server"
 rm -rf "$state"

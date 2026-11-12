@@ -17,6 +17,7 @@ export type WorkingTreeStatus<THead> = {
 
 export type WorkingTreeStatusDeps<THead> = {
     readonly config: () => Promise<StatusConfig>;
+    readonly optionalLocks?: () => Promise<boolean>;
     readonly status: (opts: StatusOptions) => Promise<{ status: IFileStatus[]; head: THead; untracked: string[] }>;
     readonly expand: (folders: string[]) => Promise<string[]>;
 };
@@ -25,7 +26,7 @@ export type WorkingTreeStatusDeps<THead> = {
  * Picks the `git status` call git's untracked cache can serve, which matches the tracked changes `-uno` lists.
  * Both values are compared exactly, as git compares them.
  */
-export function statusOptions(config: StatusConfig, ignoreSubmodules: boolean): StatusOptions {
+export function statusOptions(config: StatusConfig, ignoreSubmodules: boolean, optionalLocks = true): StatusOptions {
     const diffIgnoreSubmodules = config["diff.ignoreSubmodules"];
     return {
         // The cache only serves `all` when it is the configured mode.
@@ -33,6 +34,7 @@ export function statusOptions(config: StatusConfig, ignoreSubmodules: boolean): 
         ignoreSubmodules,
         // A user's own `untracked`, `dirty` or `all` already hides at least what `-uno` did.
         hideUntrackedInSubmodules: diffIgnoreSubmodules === undefined || diffIgnoreSubmodules === "none",
+        ...(optionalLocks ? {} : { optionalLocks: false }),
     };
 }
 
@@ -46,7 +48,11 @@ export async function readWorkingTreeStatus<THead>(
     deps: WorkingTreeStatusDeps<THead>,
     ignoreSubmodules: boolean,
 ): Promise<WorkingTreeStatus<THead>> {
-    const opts = statusOptions(await deps.config(), ignoreSubmodules);
+    const [config, optionalLocks] = await Promise.all([
+        deps.config(),
+        deps.optionalLocks?.() ?? true,
+    ]);
+    const opts = statusOptions(config, ignoreSubmodules, optionalLocks);
     const { head, status, untracked } = await deps.status(opts);
 
     const files: string[] = [];
