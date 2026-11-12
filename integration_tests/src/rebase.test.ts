@@ -16,7 +16,6 @@ import {
     openWorkbench,
     pollUntil,
     resourceRow,
-    runCommand,
     scmView,
     showGitOutput,
     traceGitOutput,
@@ -85,14 +84,12 @@ scenario("refreshing during a rebase never creates index.lock or rewrites .git/i
         }
     });
     try {
-        await runCommand(page, "Git: Refresh");
-
         await groupCount(view, "Merge").filter({ hasText: /^1$/u }).waitFor({ state: "visible" });
         await resourceRow(view, "conflict.txt").waitFor({ state: "visible" });
 
         const afterIno = (await stat(indexPath)).ino;
-        assert.deepStrictEqual(lockEvents, [], "refresh created index.lock while rebase was in progress");
-        assert.strictEqual(afterIno, beforeIno, "refresh rewrote .git/index while rebase was in progress");
+        assert.deepStrictEqual(lockEvents, [], "auto-refresh created index.lock while rebase was in progress");
+        assert.strictEqual(afterIno, beforeIno, "auto-refresh rewrote .git/index while rebase was in progress");
     } finally {
         dotGitMonitor.close();
     }
@@ -154,3 +151,48 @@ scenario("rapid rebase steps coalesce into a trailing refresh instead of firing 
 
     await closeOutputPanel(page);
 });
+
+scenario(
+    "a terminal merge conflict auto-refreshes SCM while MERGE_HEAD is present without taking index.lock",
+    async () => {
+        const view = scmView(page);
+        await applySettings({
+            "git_monolithic.autorefreshCooldown": 0,
+            "git_monolithic.autorefreshDebounce": 100,
+        });
+
+        await userGit("switch", "--create", "merge-side", "base");
+        await writeFile(join(workspaceDir(), "base-only.txt"), "merge-side\n");
+        await userGit("commit", "--all", "--message", "Merge-side change");
+
+        await userGit("switch", "main");
+        await writeFile(join(workspaceDir(), "base-only.txt"), "main-side\n");
+        await userGit("commit", "--all", "--message", "Main-side change");
+
+        await assert.rejects(
+            userGit("merge", "merge-side"),
+            (err: { stdout?: string }) => typeof err.stdout === "string" && err.stdout.includes("CONFLICT"),
+        );
+
+        const lockEvents: string[] = [];
+        const dotGitMonitor = watch(join(workspaceDir(), ".git"), (_event, filename) => {
+            if (filename === "index.lock") {
+                lockEvents.push(filename);
+            }
+        });
+        try {
+            await groupCount(view, "Merge").filter({ hasText: /^1$/u }).waitFor({ state: "visible" });
+            await resourceRow(view, "base-only.txt").waitFor({ state: "visible" });
+            assert.deepStrictEqual(lockEvents, [], "auto-refresh created index.lock while MERGE_HEAD was present");
+        } finally {
+            dotGitMonitor.close();
+        }
+
+        await writeFile(join(workspaceDir(), "base-only.txt"), "merged\n");
+        await userGit("add", "--", "base-only.txt");
+        await groupCount(view, "Staged").filter({ hasText: /^1$/u }).waitFor({ state: "visible" });
+
+        await userGit("commit", "--no-edit");
+        await resourceRow(view, "base-only.txt").waitFor({ state: "detached" });
+    },
+);
