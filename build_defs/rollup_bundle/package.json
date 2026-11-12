@@ -9,7 +9,7 @@
         "@rollup/pluginutils": "5.5.1",
         "cleye": "catalog:",
         "magic-string": "1.4.5",
-        "rollup": "4.68.0",
+        "rollup": "4.68.1",
         "rollup-plugin-sourcemaps2": "0.5.10"
     },
     "devDependencies": {
