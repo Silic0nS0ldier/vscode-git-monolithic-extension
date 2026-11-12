@@ -25,12 +25,12 @@ function createContext(stdout: string): { git: GitContext; calls: string[][] } {
     };
 }
 
-test("Asks git for the unstaged changes to the named path", async t => {
+test("Asks git for the unstaged changes to the named path via plumbing diff-files", async t => {
     const { calls, git } = createContext(DIFF);
 
     await unstaged(git, "/fake", "file.txt");
 
-    t.deepEqual(calls, [["diff", "--", "file.txt"]]);
+    t.deepEqual(calls, [["diff-files", "-p", "--", "file.txt"]]);
 });
 
 test("Asks git for the staged changes to the named path", async t => {
@@ -46,7 +46,7 @@ test("Uppercases a Windows drive letter before handing the path to git", async t
 
     await unstaged(git, "/fake", String.raw`c:\repo\file.txt`);
 
-    t.deepEqual(calls, [["diff", "--", String.raw`C:\repo\file.txt`]]);
+    t.deepEqual(calls, [["diff-files", "-p", "--", String.raw`C:\repo\file.txt`]]);
 });
 
 test("Reports what git printed, verbatim", async t => {

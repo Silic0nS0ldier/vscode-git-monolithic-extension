@@ -5,10 +5,11 @@ import { sanitizePath } from "../../helpers/sanitize-path.js";
 
 /**
  * Changes to `path` that have not been staged, as a unified diff.
- * Wraps `git diff -- <path>`.
+ * Wraps `git diff-files -p -- <path>` rather than porcelain `git diff`, which takes `index.lock` to refresh stat
+ * entries even when `GIT_OPTIONAL_LOCKS=0` is set.
  */
 export async function unstaged(git: GitContext, cwd: string, path: string): Promise<Result<string, ReadToErrors>> {
-    return await readToString({ cli: git.cli, cwd }, ["diff", "--", sanitizePath(path)]);
+    return await readToString({ cli: git.cli, cwd }, ["diff-files", "-p", "--", sanitizePath(path)]);
 }
 
 /**

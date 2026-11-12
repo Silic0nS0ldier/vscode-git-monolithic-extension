@@ -41,6 +41,11 @@ export type StatusOptions = {
      * that is unset or `none`. Has no effect alongside `ignoreSubmodules`.
      */
     readonly hideUntrackedInSubmodules?: boolean;
+    /**
+     * When `false`, sets `GIT_OPTIONAL_LOCKS=0` so git does not take `index.lock` to refresh stat entries or save
+     * the untracked cache. Leave unset or `true` when at rest so git can maintain its caches.
+     */
+    readonly optionalLocks?: boolean;
 };
 
 export type Status = {
@@ -75,7 +80,8 @@ export async function status(
     if (opts.ignoreSubmodules) {
         args.push("--ignore-submodules");
     }
-    const cliResult = await streamToParser(git, cwd, args, parser);
+    const env = opts.optionalLocks === false ? { GIT_OPTIONAL_LOCKS: "0" } : undefined;
+    const cliResult = await streamToParser(git, cwd, args, parser, env);
 
     if (isErr(cliResult)) {
         return err(unwrap(cliResult));

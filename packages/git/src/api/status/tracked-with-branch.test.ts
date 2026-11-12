@@ -174,3 +174,19 @@ test("Needs git 2.11 or later", t => {
     t.false(supportsTrackedWithBranch(contextStreaming([], "2.10.5").git));
     t.true(supportsTrackedWithBranch(contextStreaming([], "2.11.0").git));
 });
+
+test("Forwards optionalLocks: false as GIT_OPTIONAL_LOCKS=0", async t => {
+    let seenEnv: Record<string, string | undefined> | undefined;
+    const git: GitContext = {
+        cli: async (context) => {
+            seenEnv = context.env;
+            context.stdout?.end();
+            return ok(void 0);
+        },
+        path: "PATH",
+        version: "2.53.0",
+    };
+
+    await trackedWithBranch(git, "/cwd", { optionalLocks: false });
+    t.deepEqual(seenEnv, { GIT_OPTIONAL_LOCKS: "0" });
+});

@@ -24,9 +24,13 @@ export function supportsTrackedWithBranch(git: GitContext): boolean {
 export async function trackedWithBranch(
     git: GitContext,
     cwd: string,
-    opts?: { ignoreSubmodules?: boolean },
+    opts?: { ignoreSubmodules?: boolean; optionalLocks?: boolean },
 ): Promise<Result<TrackedWithBranch, TrackedWithBranchErrors>> {
-    const result = await status(git, cwd, { ignoreSubmodules: opts?.ignoreSubmodules, untracked: "no" });
+    const result = await status(git, cwd, {
+        ignoreSubmodules: opts?.ignoreSubmodules,
+        optionalLocks: opts?.optionalLocks,
+        untracked: "no",
+    });
     if (isErr(result)) {
         return result;
     }

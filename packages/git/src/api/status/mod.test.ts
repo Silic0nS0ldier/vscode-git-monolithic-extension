@@ -9,13 +9,19 @@ const MODES =
     "N... 100644 100644 100644 78981922613b2afb6025042ff6bd878ac1994e85 9ddeb5c4846e8d831655fbafc24f9fe331753a77";
 
 /** Feeds `chunks` to stdout as separate writes, so records can straddle them. */
-function contextStreaming(chunks: string[], version = "2.53.0"): { git: GitContext; calls: string[][] } {
+function contextStreaming(
+    chunks: string[],
+    version = "2.53.0",
+): { calls: string[][]; envs: (Record<string, string | undefined> | undefined)[]; git: GitContext } {
     const calls: string[][] = [];
+    const envs: (Record<string, string | undefined> | undefined)[] = [];
     return {
         calls,
+        envs,
         git: {
             cli: async (context, args) => {
                 calls.push(args);
+                envs.push(context.env);
                 if (context.stdout) {
                     intoStream(chunks).pipe(context.stdout);
                 }
@@ -119,4 +125,16 @@ test("Ignoring submodules entirely leaves no default to set", async t => {
 test("Needs git 2.11 or later", t => {
     t.false(supportsStatus(contextStreaming([], "2.10.5").git));
     t.true(supportsStatus(contextStreaming([], "2.11.0").git));
+});
+
+test("Disables optional locks via GIT_OPTIONAL_LOCKS=0 only when optionalLocks is false", async t => {
+    const disabled = contextStreaming([""]);
+    await status(disabled.git, "/cwd", { optionalLocks: false, untracked: "normal" });
+    t.deepEqual(disabled.envs, [{ GIT_OPTIONAL_LOCKS: "0" }]);
+
+    for (const optionalLocks of [undefined, true] as const) {
+        const enabled = contextStreaming([""]);
+        await status(enabled.git, "/cwd", { optionalLocks, untracked: "normal" });
+        t.deepEqual(enabled.envs, [undefined]);
+    }
 });

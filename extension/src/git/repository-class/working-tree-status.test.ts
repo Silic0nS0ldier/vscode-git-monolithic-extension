@@ -124,3 +124,13 @@ test("A failing status fails the whole read", async t => {
 
     await t.throwsAsync(readWorkingTreeStatus(deps, false), { is: failure });
 });
+
+test("Turns off optional locks when optionalLocks reports false", async t => {
+    const { calls, deps } = recordingDeps([]);
+    await readWorkingTreeStatus({ ...deps, optionalLocks: async () => false }, false);
+
+    t.deepEqual(calls, [[
+        "status",
+        { hideUntrackedInSubmodules: true, ignoreSubmodules: false, optionalLocks: false, untracked: "normal" },
+    ]]);
+});
