@@ -1,5 +1,4 @@
 import { join } from "node:path";
-import { setTimeout as timeout } from "node:timers/promises";
 import { inspect } from "node:util";
 import { Disposable, EventEmitter, type Memento, type QuickDiffProvider, Uri, window, workspace } from "vscode";
 import { type Branch, GitErrorCodes, type Remote } from "../../api/git.js";
@@ -30,6 +29,7 @@ import { ProgressManager } from "../ProgressManager.js";
 import { RepositoryState, type RepositoryStateOptions } from "../RepositoryState.js";
 import { retryRun } from "../retryRun.js";
 import type { AbstractRepository } from "./AbstractRepository.js";
+import { createAutoRefresher } from "./auto-refresh.js";
 import { buffer as bufferImpl } from "./buffer.js";
 import { checkIfMaybeRebased } from "./check-if-maybe-rebased.js";
 import { checkIgnore as checkIgnoreImpl } from "./check-ignore.js";
@@ -264,24 +264,17 @@ export function createRepository(
 
     const runRefresh = coalesce(() => run(Operation.Refresh, async () => {}));
 
-    const autoRefreshWhenIdle = coalesce(async () => {
-        await whenIdleAndFocused();
-        try {
-            await runRefresh();
-        } catch (err) {
+    const autoRefresher = createAutoRefresher({
+        cooldownMs: config.autoRefreshCooldown,
+        debounceMs: config.autoRefreshDebounce,
+        onError: err => {
             // Nothing awaits an automatic refresh, so its failure would otherwise go unreported.
             warn(`Refreshing '${repoRoot}' automatically failed; ex=${inspect(err)}`);
-        }
-        const cooldown = config.autoRefreshCooldown();
-        if (cooldown > 0) {
-            await timeout(cooldown);
-        }
+        },
+        refresh: runRefresh,
+        whenReady: whenIdleAndFocused,
     });
-    let pendingAutoRefresh: ReturnType<typeof setTimeout> | undefined;
-    function scheduleAutoRefresh(): void {
-        clearTimeout(pendingAutoRefresh);
-        pendingAutoRefresh = setTimeout(autoRefreshWhenIdle, config.autoRefreshDebounce());
-    }
+    disposables.push(autoRefresher);
 
     function requestAutoRefresh(): void {
         const autorefresh = config.autoRefresh();
@@ -298,7 +291,7 @@ export function createRepository(
             return;
         }
 
-        scheduleAutoRefresh();
+        autoRefresher.request();
     }
 
     onFileChange(requestAutoRefresh, null, disposables);
