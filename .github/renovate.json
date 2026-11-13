@@ -185,7 +185,6 @@
                 "npm"
             ],
             "matchDepNames": [
-                "@typescript/native",
                 "typescript"
             ],
             "allowedVersions": "!/-dev\\./",
