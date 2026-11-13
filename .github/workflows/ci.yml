@@ -132,6 +132,12 @@ jobs:
         if: ${{ !cancelled() && steps.pnpm_install.outcome == 'success' }}
       - run: pnpm exec knip
         if: ${{ !cancelled() && steps.wasm_prepare.outcome == 'success' }}
+      - name: bazelbuild/bazel#32644 resolved detector
+        run: |
+          if bazel cquery //build_defs/node_bin:node --experimental_starlark_static_type_checking; then
+            echo "bazelbuild/bazel#32644 resolved, workaround no longer needed"
+            exit 1
+          fi
   publish_devcontainer:
     # `renovate_tasks` is skipped on most runs, and a skip propagates down the whole `needs` chain
     # unless a status function is used, so `build_and_test` is checked explicitly.

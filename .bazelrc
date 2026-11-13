@@ -4,6 +4,13 @@ common --test_summary=short_uncached
 common --remote_download_outputs=minimal
 common --experimental_repository_downloader_retries=5
 
+# Checks `.bzl` files against their type annotations at load time.
+common --experimental_starlark_static_type_checking
+
+# Bazel 10 RC3 crashes while constructing cquery's Starlark formatter with type checking enabled.
+# https://github.com/bazelbuild/bazel/issues/32644
+cquery --noexperimental_starlark_static_type_checking
+
 # Build runfile links only when required
 common --nobuild_runfile_links
 
