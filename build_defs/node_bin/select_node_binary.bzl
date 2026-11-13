@@ -5,10 +5,12 @@ Exposes the Node.js binary as a regular Bazel target.
 load("@rules_nodejs//nodejs:toolchain.bzl", _NodeInfo = "NodeInfo")
 
 # Workaround for "local symbol 'NodeInfo' cannot be used as a type"
+# https://github.com/bazelbuild/bazel/issues/32444
 type NodeInfo = _NodeInfo
 
 def _select_node_binary_impl(ctx: Ctx) -> list[struct]:
     # The type checker does not yet know that `ToolchainContext` is indexable.
+    # https://github.com/bazelbuild/bazel/issues/32443
     toolchains: Any = ctx.toolchains
     nodeinfo: NodeInfo = toolchains["@rules_nodejs//nodejs:toolchain_type"].nodeinfo
     node_binary = nodeinfo.node

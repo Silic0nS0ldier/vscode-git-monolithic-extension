@@ -19,6 +19,7 @@ def _vsix_package_impl(ctx: Ctx):
     inputs_dir = ctx.actions.declare_directory(ctx.label.name + "_inputs_dir")
 
     # The type checker does not yet know that `ToolchainContext` is indexable.
+    # # https://github.com/bazelbuild/bazel/issues/32443
     toolchains: Any = ctx.toolchains
     copy_to_directory_bin = toolchains["@aspect_bazel_lib//lib:copy_to_directory_toolchain_type"].copy_to_directory_info.bin
     copy_to_directory_bin_action(
