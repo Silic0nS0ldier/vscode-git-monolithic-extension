@@ -63,3 +63,5 @@ common --@llvm//config:experimental_stub_libgcc_s=True
 coverage --instrumentation_filter=^//(extension|packages)[/:]
 
 build:release --compilation_mode=opt
+
+common --repo_env=DO_NOT_TRACK=1

@@ -24,10 +24,14 @@ export GIT_COMMITTER_DATE="$GIT_AUTHOR_DATE"
 
 mkdir -p "$workspace"
 git() { "$git_bin" -C "$workspace" "$@"; }
-git init --initial-branch=main
+template_dir="$(dirname "$git_bin")/../share/git-core/templates"
+git -c init.templatedir="$template_dir" init --initial-branch=main --quiet
 git config user.email "itest@example.invalid"
 git config user.name "Integration Test"
 
 # Relative workspace paths keep sibling remote URLs relocatable.
-"$shape" "$git_bin" "$workspace"
+if ! shape_output="$("$shape" "$git_bin" "$workspace" 2>&1)"; then
+    echo "$shape_output"
+    exit 1
+fi
 "$tar_bin" --create --file "$archive" .
