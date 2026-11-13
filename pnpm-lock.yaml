@@ -213,8 +213,8 @@ importers:
         version: 8.72.2(eslint@10.14.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
     devDependencies:
       '@suzuki-shunsuke/renovate-config-validator':
-        specifier: 44.226.0
-        version: 44.226.0
+        specifier: 44.227.3
+        version: 44.227.3
       typescript:
         specifier: 7.1.0-beta
         version: 7.1.0-beta
@@ -1207,8 +1207,8 @@ packages:
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
 
-  '@suzuki-shunsuke/renovate-config-validator@44.226.0':
-    resolution: {integrity: sha512-O/54QNTE18wONK5XgF3lbPx8T4iridgG41wjlD0glAMalOlyPoH8Pv98RdMEO09G0m1LSepUSudyV3saPjGfEw==}
+  '@suzuki-shunsuke/renovate-config-validator@44.227.3':
+    resolution: {integrity: sha512-33ZLt7p/k3XUY9ey9HXmXFzXkv1HG+X50WMVpYIHodDjO4hr56F3R+V4r1tusWCgdY1C/lD3H3d+BNwoeNKNAw==}
     engines: {node: ^24.11.0 || ^26.13.0}
     hasBin: true
 
@@ -3572,7 +3572,7 @@ snapshots:
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
-  '@suzuki-shunsuke/renovate-config-validator@44.226.0':
+  '@suzuki-shunsuke/renovate-config-validator@44.227.3':
     optionalDependencies:
       re2: 1.27.0
 
