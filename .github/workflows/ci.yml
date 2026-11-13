@@ -60,6 +60,7 @@ jobs:
     concurrency:
       group: build-and-test
       cancel-in-progress: false
+      queue: max
     if: ${{ !cancelled() }}
     needs: renovate_tasks
     permissions:
