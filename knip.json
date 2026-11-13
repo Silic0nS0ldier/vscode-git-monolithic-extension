@@ -56,14 +56,12 @@
         },
         ".github/actions/bazel-hidden-lockfile": {
             "entry": [
-                "main.mjs",
                 "src/main.ts"
             ],
             "ignoreBinaries": [
                 "bazel"
             ],
             "project": [
-                "main.mjs",
                 "src/**/*.ts"
             ]
         },
