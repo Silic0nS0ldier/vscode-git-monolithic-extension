@@ -10,8 +10,7 @@
                 "bazel"
             ],
             "ignoreDependencies": [
-                "@typescript/native",
-                "renovate"
+                "@suzuki-shunsuke/renovate-config-validator"
             ]
         },
         "extension": {

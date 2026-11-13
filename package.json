@@ -8,7 +8,7 @@
         "typescript-eslint": "8.72.2"
     },
     "devDependencies": {
-        "typescript": "7.1.0-beta",
-        "renovate": "44.198.2"
+        "@suzuki-shunsuke/renovate-config-validator": "44.226.0",
+        "typescript": "7.1.0-beta"
     }
 }

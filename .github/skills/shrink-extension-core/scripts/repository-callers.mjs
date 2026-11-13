@@ -57,7 +57,7 @@ function parse() {
     }
 }
 
-// The build type-checks with TypeScript 7 (`@typescript/native`); the workspace's `typescript` package, the only one
+// The build type-checks with TypeScript 7; the workspace's `typescript` package, the only one
 // with this API, is 6, whose lib lacks what the extension uses from newer ones.
 const LIB_SHIM = `interface IteratorConstructor {
     zip(iterables: any, options?: any): IteratorObject<any[]>;

@@ -43,7 +43,7 @@ overrides:
   "watcher>tiny-readdir": "3.1.1"
   # Promise.withResolvers ponyfill, inlined by the tiny-readdir patch.
   "tiny-readdir>promise-make-counter": "-"
-  # @vercel/nft, cacache, Renovate, and rimraf still resolve vulnerable glob 13/10 releases.
+  # @vercel/nft, cacache, and rimraf still resolve vulnerable glob 13/10 releases.
   # Keep until those consumers request the fixed glob 14 line.
   "glob@>=9.0.0 <=14.0.1": "14.0.4"
   # ESLint, TypeScript ESLint, @actions/glob, and vsce still request vulnerable minimatch 10.
