@@ -94,7 +94,8 @@ export function createScheduler(): Scheduler {
     return {
         schedule<T>({ key, signal }: ScheduleOptions, task: (signal: AbortSignal) => Promise<T>): Promise<T> {
             if (signal?.aborted) {
-                return Promise.reject(new Error("Scheduler aborted", { cause: signal.reason }));
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- Aborting _must_ reject with the signal's reason.
+                return Promise.reject(signal.reason);
             }
 
             let entry = key === undefined ? undefined : queuedByKey.get(key);
