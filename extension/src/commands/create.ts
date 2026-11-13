@@ -33,6 +33,7 @@ export function createCommand(
         let result: Promise<unknown>;
 
         if (!options.repository) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             result = Promise.resolve(method(...args));
         } else {
             // try to guess the repository based on the first argument
@@ -52,6 +53,7 @@ export function createCommand(
                     return Promise.resolve();
                 }
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 return Promise.resolve(method(repository, ...args.slice(1)));
             });
         }
