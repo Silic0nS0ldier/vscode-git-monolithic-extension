@@ -48,9 +48,12 @@ JSON
 
 export HOME="$state"
 export EXTENSIONS_GALLERY='{}'
-"$code_server" \
+if ! code_server_output="$("$code_server" \
     --config "$state/config.yaml" \
     --user-data-dir "$state/user" \
     --extensions-dir "$state/extensions" \
-    --install-extension "$vsix"
+    --install-extension "$vsix" 2>&1)"; then
+    echo "$code_server_output"
+    exit 1
+fi
 "$tar_bin" --create --file "$archive" --directory "$state" .
