@@ -66,7 +66,7 @@ export const tools = {
     },
     gh: {
         // renovate: datasource=github-releases depName=cli/cli
-        version: "v2.103.3",
+        version: "v2.104.0",
         platforms: {
             "linux-x86_64": {
                 url: "https://github.com/cli/cli/releases/download/{version}/gh_{versionNoV}_linux_amd64.tar.gz",
@@ -98,7 +98,7 @@ export const tools = {
     },
     node: {
         // renovate: datasource=github-tags depName=nodejs/node
-        version: "v26.13.0",
+        version: "v26.13.1",
         platforms: {
             "linux-x86_64": {
                 url: "https://nodejs.org/dist/{version}/node-{version}-linux-x64.tar.xz",
@@ -114,7 +114,7 @@ export const tools = {
     },
     pnpm: {
         // renovate: datasource=npm depName=pnpm
-        version: "12.18.0",
+        version: "12.20.0",
         platforms: {
             "linux-x86_64": {
                 url: "https://github.com/pnpm/pnpm/releases/download/v{version}/pnpm-linux-x64.tar.gz",
