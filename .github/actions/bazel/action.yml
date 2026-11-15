@@ -59,7 +59,7 @@ runs:
         cache-save: ${{ inputs.cache-save }}
         bazelisk-cache: true
         repository-cache: false
-    - uses: pnpm/setup@v3.1.2
+    - uses: pnpm/setup@v3.2.0
       if: inputs.hidden-lockfile == 'true'
       with:
         install: false
