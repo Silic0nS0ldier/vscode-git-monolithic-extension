@@ -3,13 +3,13 @@ import { Status } from "../../../api/git.js";
 import * as i18n from "../../../i18n/mod.js";
 import type { LineChange } from "../../../line-changes.js";
 import type { Model } from "../../../model.js";
-import { zip } from "../../../package-patches/iterator-zip.js";
 import type { AbstractRepository } from "../../../repository/repository-class/AbstractRepository.js";
 import type { Resource } from "../../../repository/Resource.js";
 import { ResourceGroupType } from "../../../repository/ResourceGroupType.js";
 import { applyLineChanges } from "../../../staging.js";
 import { grep } from "../../../util/grep.js";
 import { isCancelledError } from "../../../util/is-cancelled-error.js";
+import { zip } from "../../../util/iterator-zip.js";
 import { runByRepository } from "../../helpers.js";
 
 function isBothAddedOrModified(s: Resource): boolean {
@@ -28,17 +28,13 @@ export async function categorizeResourceByResolution(
     const hasMarkers = await Promise.all(
         possibleUnresolved.map(s => grep(s.state.resourceUri.fsPath, /^<{7}|^={7}|^>{7}/)),
     );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Remove once typescript-eslint using typescript v7
     const checked = [...zip([possibleUnresolved, hasMarkers])];
 
     return {
         deletionConflicts: merge.filter(isAnyDeleted),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return -- Remove once typescript-eslint using typescript v7
         resolved: checked.filter(([, marked]) => !marked).map(([s]) => s),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Remove once typescript-eslint using typescript v7
         unresolved: [
             ...merge.filter(s => !isBothAddedOrModified(s) && !isAnyDeleted(s)),
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return -- Remove once typescript-eslint using typescript v7
             ...checked.filter(([, marked]) => marked).map(([s]) => s),
         ],
     };

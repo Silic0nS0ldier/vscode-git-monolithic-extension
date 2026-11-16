@@ -6,9 +6,7 @@
         "sourceMap": true,
         "lib": [
             "DOM",
-            "ES2025",
-            // Export types for `Iterator.zip` ponyfill
-            "ESNext.Iterator"
+            "ES2025"
         ]
     }
 }

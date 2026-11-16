@@ -4,10 +4,10 @@ import { type Branch, RefType, type Remote, Status, type StatusOptions } from ".
 import type { Repository } from "../../git.js";
 import type { Commit } from "../../git/Commit.js";
 import type { Submodule } from "../../git/Submodule.js";
-import { zip } from "../../package-patches/iterator-zip.js";
 import type { SourceControlUIGroup } from "../../ui/source-control.js";
 import type { Box } from "../../util/box.js";
 import * as config from "../../util/config.js";
+import { zip } from "../../util/iterator-zip.js";
 import { createResource as createBaseResource, Resource } from "../Resource.js";
 import { ResourceGroupType, type ResourceGroupTypeOptions } from "../ResourceGroupType.js";
 import { getRebaseCommit } from "./get-rebase-commit.js";
@@ -23,7 +23,6 @@ function arraysEqualBy<T>(a: readonly T[], b: readonly T[], eq: (x: T, y: T) => 
     }
 
     for (const [x, y] of zip([a, b], { mode: "strict" })) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- typescript-eslint uses TypeScript v6 which lacks `Iterator.zip` type support, leading to `any` arguments
         if (!eq(x, y)) {
             return false;
         }

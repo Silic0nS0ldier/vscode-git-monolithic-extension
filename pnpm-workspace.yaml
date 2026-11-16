@@ -12,7 +12,6 @@ saveExact: true
 
 allowBuilds: 
   '@vscode/vsce-sign': false
-  core-js-pure: false
   dtrace-provider: false
   keytar: false
   protobufjs: false
