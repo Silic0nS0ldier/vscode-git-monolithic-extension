@@ -84,7 +84,6 @@ npm_package(
 ts_config(
     name = "tsconfig",
     src = "tsconfig.json",
-    visibility = [":__pkg__"],
     deps = ["//:tsconfig"],
 )
 
