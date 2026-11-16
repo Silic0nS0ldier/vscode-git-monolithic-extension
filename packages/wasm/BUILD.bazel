@@ -40,7 +40,7 @@ rust_wasm_bindgen(
         "--remove-producers-section",
     ],
     out_name = "wasm",
-    target = "web",
+    target = "module",
     wasm_file = ":wasm_lib",
 )
 

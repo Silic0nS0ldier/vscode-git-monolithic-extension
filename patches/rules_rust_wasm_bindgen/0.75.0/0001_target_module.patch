@@ -1,0 +1,27 @@
+Support `--target module` in `rust_wasm_bindgen`.
+
+`wasm-bindgen` supports `--target module`, which emits an ES module using source-phase
+imports (`import source wasmModule from "./<name>_bg.wasm"`) and omits browser-legacy
+workarounds such as `MAX_SAFARI_DECODE_BYTES` and `initSync`. `rules_rust_wasm_bindgen`
+0.75.0 does not yet list `"module"` in `WASM_BINDGEN_ATTR["target"].values`.
+
+--- a/private/wasm_bindgen.bzl
++++ b/private/wasm_bindgen.bzl
+@@ -66,7 +66,7 @@ def rust_wasm_bindgen_action(*, ctx, toolchain, wasm_file, target_output, flags
+         if not "--no-typescript" in flags:
+             ts_out.append(ctx.actions.declare_file("{}/{}_bg.wasm.d.ts".format(ctx.label.name, out_name)))
+ 
+-    elif target_output == "web":
++    elif target_output in ["web", "module"]:
+         if not "--no-typescript" in flags:
+             ts_out.append(ctx.actions.declare_file("{}/{}_bg.wasm.d.ts".format(ctx.label.name, out_name)))
+ 
+@@ -152,7 +152,7 @@ WASM_BINDGEN_ATTR = {
+     "target": attr.string(
+         doc = "The type of output to generate. See https://rustwasm.github.io/wasm-bindgen/reference/deployment.html for details.",
+         default = "bundler",
+-        values = ["web", "bundler", "nodejs", "no-modules", "deno"],
++        values = ["web", "bundler", "nodejs", "no-modules", "deno", "module"],
+     ),
+     "target_arch": attr.string(
+         doc = "The target architecture to use for the wasm-bindgen command line option.",
