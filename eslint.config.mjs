@@ -1,7 +1,7 @@
 // @ts-check
 
 import eslint from "@eslint/js";
-import { defineConfig, globalIgnores } from "eslint/config";
+import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 import logging from "./build_defs/lint/eslint-plugin-logging.mjs";
 
@@ -10,8 +10,6 @@ import logging from "./build_defs/lint/eslint-plugin-logging.mjs";
 export default defineConfig({
     files: ["**/*.{js,ts}"],
     extends: [
-        // TODO: Lint again once typescript-eslint can parse source phase imports (`import source`).
-        globalIgnores(["packages/wasm/src/mod.ts"]),
         eslint.configs.recommended,
         tseslint.configs.recommended,
         tseslint.configs.recommendedTypeChecked,

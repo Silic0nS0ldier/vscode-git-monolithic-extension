@@ -171,6 +171,13 @@ single_version_override(
     version = "1.11.1",
 )
 
+single_version_override(
+    module_name = "rules_rust_wasm_bindgen",
+    patch_strip = 1,
+    patches = ["//:patches/rules_rust_wasm_bindgen/0.75.0/0001_target_module.patch"],
+    version = "0.75.0",
+)
+
 # Reached via `aspect_rules_js -> protobuf -> rules_apple`. Its autoconfigured toolchain is
 # registered transitively, which makes toolchain resolution fetch a repo that shells out looking
 # for `swiftc`.
