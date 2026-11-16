@@ -25,7 +25,6 @@ ts_project(
     out_dir = "dist",
     root_dir = "src",
     tsconfig = ":tsconfig",
-    visibility = [":__pkg__"],
     deps = [
         ":node_modules/@jridgewell/trace-mapping",
         ":node_modules/@rollup/plugin-commonjs",
@@ -44,7 +43,6 @@ ts_project(
 ts_config(
     name = "tsconfig",
     src = "tsconfig.json",
-    visibility = [":__pkg__"],
     deps = ["//:tsconfig"],
 )
 
