@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import * as assert from "node:assert";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { after, before } from "node:test";

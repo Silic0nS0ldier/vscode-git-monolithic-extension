@@ -1,5 +1,5 @@
-import assert from "node:assert";
-import test from "node:test";
+import * as assert from "node:assert";
+import { test } from "node:test";
 import { unwrapOk } from "../../errors.js";
 import { gitCtx, run, tempGitRepo, tempOrigin } from "../helpers.it.stub.js";
 import { upstreams } from "./upstreams.js";

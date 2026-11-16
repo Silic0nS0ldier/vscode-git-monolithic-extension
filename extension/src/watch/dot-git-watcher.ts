@@ -1,6 +1,6 @@
-import crypto from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
+import * as crypto from "node:crypto";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { inspect } from "node:util";
 import { Disposable, type Event, EventEmitter, Uri } from "vscode";
 import { error, trace } from "../tracing.js";

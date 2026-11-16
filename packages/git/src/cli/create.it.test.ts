@@ -1,7 +1,7 @@
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import path from "node:path";
-import test from "node:test";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { blockUntrackedListing, gitCtx, tempGitRepo } from "../api/helpers.it.stub.js";
 import { ERROR_CANCELLED, ERROR_NON_ZERO_EXIT, ERROR_TIMEOUT } from "../errors.js";

@@ -1,7 +1,7 @@
 import { changes } from "monolithic-git-interop/api/diff/changes";
 import { emptyTree } from "monolithic-git-interop/api/hash-object/empty-tree";
 import { unwrapOk } from "monolithic-git-interop/errors";
-import path from "node:path";
+import * as path from "node:path";
 import { commands, Uri } from "vscode";
 import type { Git } from "../git.js";
 import type { Model } from "../model.js";

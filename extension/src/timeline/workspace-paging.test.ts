@@ -1,5 +1,5 @@
 import test from "ava";
-import path from "node:path";
+import * as path from "node:path";
 import {
     groupWorkspaceHistories,
     parseWorkspaceCursor,

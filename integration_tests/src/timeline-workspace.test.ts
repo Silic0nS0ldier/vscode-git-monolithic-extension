@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+import * as assert from "node:assert/strict";
 import { appendFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { after, before } from "node:test";

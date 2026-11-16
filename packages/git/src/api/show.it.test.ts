@@ -1,7 +1,7 @@
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import path from "node:path";
-import test from "node:test";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { test } from "node:test";
 import { unwrapOk } from "../errors.js";
 import { isErr } from "../func-result.js";
 import { gitCtx, read, run, tempGitRepo } from "./helpers.it.stub.js";
@@ -33,7 +33,7 @@ test(show.name, async () => {
 
     // Test non-existent file
     const nonExistentResult = await show(gitCtx, repo.path, "HEAD:nonexistent.txt");
-    assert(isErr(nonExistentResult), "Expected an error for non-existent file");
+    assert.ok(isErr(nonExistentResult), "Expected an error for non-existent file");
 });
 
 test(commit.name, async () => {

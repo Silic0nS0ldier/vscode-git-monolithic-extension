@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import * as assert from "node:assert";
 import { after, before } from "node:test";
 import type { Page } from "playwright-core";
 import {

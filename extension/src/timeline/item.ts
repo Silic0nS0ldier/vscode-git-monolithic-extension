@@ -1,6 +1,6 @@
 /* Copyright (c) Microsoft Corporation. Licensed under the MIT License. */
 
-import path from "node:path";
+import * as path from "node:path";
 import { type Command, type TextDocumentShowOptions, TimelineItem, type Uri } from "vscode";
 import * as i18n from "../i18n/mod.js";
 

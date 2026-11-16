@@ -1,7 +1,7 @@
 import { createVSIX } from "@vscode/vsce";
 import { cli } from "cleye";
-import fs from "node:fs";
-import path from "node:path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 const argv = cli({
     flags: {

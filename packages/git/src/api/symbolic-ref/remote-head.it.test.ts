@@ -1,6 +1,6 @@
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import test from "node:test";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import { test } from "node:test";
 import { unwrapOk } from "../../errors.js";
 import { gitCtx, run, tempGitRepo } from "../helpers.it.stub.js";
 import { remoteHead } from "./remote-head.js";

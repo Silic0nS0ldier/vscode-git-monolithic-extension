@@ -1,5 +1,5 @@
-import assert from "node:assert";
-import test from "node:test";
+import * as assert from "node:assert";
+import { test } from "node:test";
 import { unwrapOk } from "../../errors.js";
 import { gitCtx, tempGitRepo, writeExecutableBitFixture } from "../helpers.it.stub.js";
 import { hasExecutableBitInIndex } from "./has-executable-bit.js";

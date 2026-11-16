@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import { l10n, type TextDocument, type Uri } from "vscode";
 import type { Resource } from "../repository/Resource.js";
 

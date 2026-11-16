@@ -1,8 +1,8 @@
-import assert from "node:assert/strict";
+import * as assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
-import test from "node:test";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { test } from "node:test";
 import { unwrapOk } from "../../errors.js";
 import { gitCtx, run, tempGitRepo } from "../helpers.it.stub.js";
 import { emptyTree } from "./empty-tree.js";

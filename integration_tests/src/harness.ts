@@ -1,7 +1,7 @@
-import assert from "node:assert";
+import * as assert from "node:assert";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import test, { after } from "node:test";
+import { after, test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { type Browser, chromium, errors, type Locator, type Page, type Request, type Response } from "playwright-core";
 import { COVERAGE_DIR, hasExtensionHostDump, rawCoverageDir, readExtensionDumps, writeCoverage } from "./coverage.js";

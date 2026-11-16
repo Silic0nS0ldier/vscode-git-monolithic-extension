@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import * as assert from "node:assert";
 import { after, before } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import type { Page } from "playwright-core";

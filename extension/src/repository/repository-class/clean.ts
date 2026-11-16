@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import type { Uri } from "vscode";
 import { Status } from "../../api/git.js";
 import type { Repository } from "../../git.js";
