@@ -34,6 +34,10 @@ rust_test(
 # named for the position the glue needs to occupy under `dist`.
 rust_wasm_bindgen(
     name = "dist/wasm",
+    bindgen_flags = [
+        "--remove-name-section",
+        "--remove-producers-section",
+    ],
     out_name = "wasm",
     target = "web",
     wasm_file = ":wasm_lib",
