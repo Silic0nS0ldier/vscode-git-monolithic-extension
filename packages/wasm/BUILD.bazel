@@ -35,6 +35,7 @@ rust_test(
 rust_wasm_bindgen(
     name = "dist/wasm",
     bindgen_flags = [
+        "--encode-into=always",
         "--remove-name-section",
         "--remove-producers-section",
     ],
