@@ -195,12 +195,14 @@
                 "npm"
             ],
             "matchDepNames": [
-                "renovate"
+                "@suzuki-shunsuke/renovate-config-validator"
             ],
+            "groupName": "renovate",
             "schedule": [
-                "* * 1-7,15-21 * 1"
+                "* 0-3 * * 1"
             ],
-            "description": "Reduce update rate of packages with high-frequency publishes to 1st and 3rd Monday of each month."
+            "updateNotScheduled": false,
+            "description": "Throttle Renovate packages to once a week (early Monday UTC)."
         }
     ]
 }
