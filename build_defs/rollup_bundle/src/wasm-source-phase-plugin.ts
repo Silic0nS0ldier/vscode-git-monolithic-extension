@@ -1,4 +1,4 @@
-import { promises as fs } from "node:fs";
+import { readFile } from "node:fs/promises";
 import * as path from "node:path";
 import type { Plugin } from "rollup";
 
@@ -91,7 +91,7 @@ export function wasmSourcePhasePlugin(): Plugin {
 
             if (normalizedId.startsWith(LOADER_PREFIX)) {
                 const wasmPath = normalizedId.slice(LOADER_PREFIX.length);
-                const buf = await fs.readFile(wasmPath);
+                const buf = await readFile(wasmPath);
                 const refId = this.emitFile({
                     type: "asset",
                     name: path.basename(wasmPath),
@@ -106,9 +106,9 @@ export function wasmSourcePhasePlugin(): Plugin {
                     `    ({ default: _wasmModule } = await import(${JSON.stringify(helperId)}));`,
                     `} catch {`,
                     `    const { readFile } = await import("node:fs/promises");`,
-                    // `ROLLUP_FILE_URL_*` expands to a URL *string*, and `readFile` treats a
-                    // string as a filesystem path, so it must be wrapped back into a `URL`.
-                    `    const _bytes = await readFile(new URL(import.meta.ROLLUP_FILE_URL_${refId}));`,
+                    `    const _bytes = await readFile(new URL(${
+                        JSON.stringify(buildPlaceholder(refId))
+                    }, import.meta.url));`,
                     `    _wasmModule = await WebAssembly.compile(_bytes);`,
                     `}`,
                     `export default _wasmModule;`,
@@ -137,9 +137,7 @@ export function wasmSourcePhasePlugin(): Plugin {
             const out = code.replace(PLACEHOLDER_RE, (_full, refId: string) => {
                 matched = true;
                 const assetFileName = this.getFileName(refId);
-                let rel = path.relative(path.dirname(chunk.fileName), assetFileName);
-                if (!rel.startsWith(".")) rel = "./" + rel;
-                return rel;
+                return path.relative(path.dirname(chunk.fileName), assetFileName);
             });
             return matched ? { code: out, map: null } : null;
         },

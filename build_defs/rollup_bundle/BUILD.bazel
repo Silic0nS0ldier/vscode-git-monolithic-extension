@@ -116,6 +116,17 @@ js_test(
     entry_point = "dist/command-pruning-plugin.test.js",
 )
 
+js_test(
+    name = "wasm_source_phase_plugin_test",
+    size = "small",
+    args = ["--test"],
+    data = [
+        "package.json",
+        ":lib_tests",
+    ],
+    entry_point = "dist/wasm-source-phase-plugin.test.js",
+)
+
 eslint_test(
     name = "eslint",
     size = "small",
