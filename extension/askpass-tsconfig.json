@@ -1,0 +1,11 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "declaration": false,
+        "noEmit": true,
+        "outDir": null,
+        "rootDir": null,
+        "types": ["node"]
+    },
+    "include": ["src/askpass-main.ts"]
+}

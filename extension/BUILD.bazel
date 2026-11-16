@@ -82,6 +82,27 @@ ts_config(
     deps = ["//:tsconfig"],
 )
 
+ts_project(
+    name = "askpass",
+    srcs = [
+        "package.json",
+        "src/askpass-main.ts",
+        "src/i18n/strings.ts",
+        "src/ipc/ipcClient.ts",
+    ],
+    declaration = False,
+    no_emit = True,
+    tsconfig = ":askpass_tsconfig",
+    deps = [":node_modules/@types/node"],
+)
+
+ts_config(
+    name = "askpass_tsconfig",
+    src = "askpass-tsconfig.json",
+    visibility = [":__pkg__"],
+    deps = ["//:tsconfig"],
+)
+
 rollup_bundle(
     name = "bundle",
     srcs = [":lib"],
