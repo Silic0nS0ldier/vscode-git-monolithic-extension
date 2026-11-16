@@ -201,6 +201,7 @@ packageExtensionsChecksum: sha256-n0rMu2+bERVk1SXnPicpMiA3+A3BWl3xBLEFXdV9zpk=
 pnpmfileChecksum: sha256-SWd48IlSItqOlr/G4M990S2FIfxelArumdEF4aD1QAI=
 
 patchedDependencies:
+  rollup@4.68.3: 529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e
   tiny-readdir@3.1.1: 8fe5818c58dcbdddfd8de909471730072cb0d115e22b974b3fe907e8ad0eee02
   watcher@2.3.1: aa7937374fa215a4c53d3c965a60db1da36cac88fabf716f76bb672746fc4983
 
@@ -242,7 +243,7 @@ importers:
         version: 26.6.6
       ava:
         specifier: 'catalog:'
-        version: 8.4.0(rollup@4.68.3)(supports-color@7.2.0)
+        version: 8.4.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))(supports-color@7.2.0)
 
   build_defs/rollup_bundle:
     dependencies:
@@ -251,16 +252,16 @@ importers:
         version: 0.3.31
       '@rollup/plugin-commonjs':
         specifier: 29.0.3
-        version: 29.0.3(rollup@4.68.3)
+        version: 29.0.3(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
       '@rollup/plugin-json':
         specifier: 6.1.0
-        version: 6.1.0(rollup@4.68.3)
+        version: 6.1.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
       '@rollup/plugin-node-resolve':
         specifier: 16.0.3
-        version: 16.0.3(rollup@4.68.3)
+        version: 16.0.3(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
       '@rollup/pluginutils':
         specifier: 5.5.1
-        version: 5.5.1(rollup@4.68.3)
+        version: 5.5.1(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
       cleye:
         specifier: 'catalog:'
         version: 2.7.0
@@ -269,10 +270,10 @@ importers:
         version: 1.4.5
       rollup:
         specifier: 4.68.3
-        version: 4.68.3
+        version: 4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e)
       rollup-plugin-sourcemaps2:
         specifier: 0.5.10
-        version: 0.5.10(@types/node@26.6.6)(rollup@4.68.3)
+        version: 0.5.10(@types/node@26.6.6)(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
     devDependencies:
       '@types/estree':
         specifier: 1.0.10
@@ -332,7 +333,7 @@ importers:
         version: 8.19.0
       ava:
         specifier: 'catalog:'
-        version: 8.4.0(rollup@4.68.3)(supports-color@7.2.0)
+        version: 8.4.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))(supports-color@7.2.0)
       monolithic-vscode-manifest:
         specifier: workspace:^
         version: link:../packages/vscode-manifest
@@ -388,7 +389,7 @@ importers:
         version: 6.5.0
       ava:
         specifier: 'catalog:'
-        version: 8.4.0(rollup@4.68.3)(supports-color@7.2.0)
+        version: 8.4.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))(supports-color@7.2.0)
       into-stream:
         specifier: 9.1.0
         version: 9.1.0
@@ -404,7 +405,7 @@ importers:
         version: 26.6.6
       ava:
         specifier: 'catalog:'
-        version: 8.4.0(rollup@4.68.3)(supports-color@7.2.0)
+        version: 8.4.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))(supports-color@7.2.0)
 
   packages/wasm:
     devDependencies:
@@ -3432,9 +3433,9 @@ snapshots:
 
   '@protobuf-ts/runtime@2.11.1': {}
 
-  '@rollup/plugin-commonjs@29.0.3(rollup@4.68.3)':
+  '@rollup/plugin-commonjs@29.0.3(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))':
     dependencies:
-      '@rollup/pluginutils': 5.5.1(rollup@4.68.3)
+      '@rollup/pluginutils': 5.5.1(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
       commondir: 1.0.1
       estree-walker: 2.0.2
       fdir: 6.5.0(picomatch@4.0.7)
@@ -3442,39 +3443,39 @@ snapshots:
       magic-string: 0.30.21
       picomatch: 4.0.7
     optionalDependencies:
-      rollup: 4.68.3
+      rollup: 4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e)
 
-  '@rollup/plugin-json@6.1.0(rollup@4.68.3)':
+  '@rollup/plugin-json@6.1.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))':
     dependencies:
-      '@rollup/pluginutils': 5.5.1(rollup@4.68.3)
+      '@rollup/pluginutils': 5.5.1(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
     optionalDependencies:
-      rollup: 4.68.3
+      rollup: 4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e)
 
-  '@rollup/plugin-node-resolve@16.0.3(rollup@4.68.3)':
+  '@rollup/plugin-node-resolve@16.0.3(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))':
     dependencies:
-      '@rollup/pluginutils': 5.5.1(rollup@4.68.3)
+      '@rollup/pluginutils': 5.5.1(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
       '@types/resolve': 1.20.2
       deepmerge: 4.3.1
       is-module: 1.0.0
       resolve: 1.22.14
     optionalDependencies:
-      rollup: 4.68.3
+      rollup: 4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e)
 
-  '@rollup/pluginutils@5.4.0(rollup@4.68.3)':
+  '@rollup/pluginutils@5.4.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))':
     dependencies:
       '@types/estree': 1.0.10
       estree-walker: 2.0.2
       picomatch: 4.0.7
     optionalDependencies:
-      rollup: 4.68.3
+      rollup: 4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e)
 
-  '@rollup/pluginutils@5.5.1(rollup@4.68.3)':
+  '@rollup/pluginutils@5.5.1(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))':
     dependencies:
       '@types/estree': 1.0.10
       estree-walker: 2.0.2
       picomatch: 4.0.7
     optionalDependencies:
-      rollup: 4.68.3
+      rollup: 4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e)
 
   '@rollup/rollup-android-arm-eabi@4.68.3':
     optional: true
@@ -3782,10 +3783,10 @@ snapshots:
       - kerberos
       - supports-color
 
-  '@vercel/nft@1.11.1(rollup@4.68.3)(supports-color@7.2.0)':
+  '@vercel/nft@1.11.1(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))(supports-color@7.2.0)':
     dependencies:
       '@mapbox/node-pre-gyp': 2.0.3(supports-color@7.2.0)
-      '@rollup/pluginutils': 5.5.1(rollup@4.68.3)
+      '@rollup/pluginutils': 5.5.1(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
       acorn: 8.19.0
       acorn-import-attributes: 1.9.5(acorn@8.19.0)
       async-sema: 3.1.1
@@ -3940,9 +3941,9 @@ snapshots:
 
   async-sema@3.1.1: {}
 
-  ava@8.4.0(rollup@4.68.3)(supports-color@7.2.0):
+  ava@8.4.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))(supports-color@7.2.0):
     dependencies:
-      '@vercel/nft': 1.11.1(rollup@4.68.3)(supports-color@7.2.0)
+      '@vercel/nft': 1.11.1(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))(supports-color@7.2.0)
       acorn: 8.19.0
       acorn-walk: 8.3.5
       ansi-styles: 7.0.0
@@ -4891,14 +4892,14 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  rollup-plugin-sourcemaps2@0.5.10(@types/node@26.6.6)(rollup@4.68.3):
+  rollup-plugin-sourcemaps2@0.5.10(@types/node@26.6.6)(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e)):
     dependencies:
-      '@rollup/pluginutils': 5.4.0(rollup@4.68.3)
-      rollup: 4.68.3
+      '@rollup/pluginutils': 5.4.0(rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e))
+      rollup: 4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e)
     optionalDependencies:
       '@types/node': 26.6.6
 
-  rollup@4.68.3:
+  rollup@4.68.3(patch_hash=529d4f6545be38a292d5850775f2cf1716c7a8ef4328a6f0c02c5f502127118e):
     dependencies:
       '@types/estree': 1.0.10
     optionalDependencies:

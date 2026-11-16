@@ -51,6 +51,7 @@ jobs:
       - uses: pnpm/setup@v3.2.0
         with:
           install: false
+      - run: node ./.github/workflows/update_rollup_patch.mjs
       - run: pnpm install --lockfile-only
       - uses: stefanzweifel/git-auto-commit-action@v7
       - id: get_commit

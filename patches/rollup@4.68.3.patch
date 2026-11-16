@@ -1,0 +1,742 @@
+diff --git a/dist/es/shared/node-entry.js b/dist/es/shared/node-entry.js
+index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933fa844813 100644
+--- a/dist/es/shared/node-entry.js
++++ b/dist/es/shared/node-entry.js
+@@ -2939,7 +2939,10 @@ class Variable extends ExpressionEntity {
+         return this.renderedLikeHoisted;
+     }
+     getNamingVariable() {
+-        return this.renderedLikeHoisted?.renderBaseName === null ? this.renderedLikeHoisted : undefined;
++        return this.renderedLikeHoisted?.renderBaseName === null ||
++            this.renderedLikeHoisted?.module?.info.isExternal
++            ? this.renderedLikeHoisted
++            : undefined;
+     }
+     markCalledFromTryStatement() { }
+     addReassignedValue(_value) { }
+@@ -5579,6 +5582,7 @@ class LocalVariable extends Variable {
+         this.initPath = initPath;
+         this.kind = kind;
+         this.calledFromTryStatement = false;
++        this.references = [];
+         this.additionalInitializers = null;
+         // A possibly incomplete list of functions assigned to this variable; only used
+         // to retain call arguments of assigned try-catch helpers, never for value queries
+@@ -5593,6 +5597,9 @@ class LocalVariable extends Variable {
+         this.declarations.push(identifier);
+         this.markInitializersForDeoptimization().push(init);
+     }
++    addReference(identifier) {
++        this.references.push(identifier);
++    }
+     consolidateInitializers() {
+         if (this.additionalInitializers) {
+             for (const initializer of this.additionalInitializers) {
+@@ -6198,7 +6205,7 @@ class ChildScope extends Scope {
+             }
+         }
+         for (const [name, variable] of this.variables) {
+-            if (variable.included || variable.alwaysRendered) {
++            if ((variable.included || variable.alwaysRendered) && !variable.getHoistedVariable()) {
+                 variable.setRenderNames(null, getSafeName(name, usedNames, variable.forbiddenNames));
+             }
+         }
+@@ -8965,7 +8972,8 @@ class ObjectPattern extends NodeBase {
+             const separatedNodes = getCommaSeparatedNodesWithBoundaries(this.properties, code, this.start + 1, this.end - 1);
+             let lastSeparatorPos = null;
+             for (const { node, separator, start, end } of separatedNodes) {
+-                if (!node.included) {
++                if (!node.included ||
++                    (node.type === Property$1 && node.isFoldedDynamicImportProperty)) {
+                     treeshakeNode(node, code, start, end);
+                     continue;
+                 }
+@@ -9138,7 +9146,7 @@ class VariableDeclaration extends NodeBase {
+         const singleSystemExport = gatherSystemExportsAndGetSingleExport(separatedNodes, options, aggregatedSystemExports);
+         const { exportNamesByVariable } = options;
+         for (const { node, start, separator, contentEnd, end } of separatedNodes) {
+-            if (!node.included) {
++            if (!node.included || node.isFoldedDynamicImportDeclarator) {
+                 treeshakeNode(node, code, start, end);
+                 continue;
+             }
+@@ -9183,6 +9191,26 @@ class VariableDeclaration extends NodeBase {
+             lastSeparatorPos = separator;
+             separatorString = nextSeparatorString;
+         }
++        if (!hasRenderedContent) {
++            if (code.original.charCodeAt(this.end - 1) === 59 /*";"*/) {
++                code.remove(this.end - 1, this.end);
++            }
++            const nextLineBreak = findFirstLineBreakOutsideComment(code.original.slice(this.end))[1];
++            if (nextLineBreak > 0) {
++                let lineStart = this.start;
++                while (lineStart > 0 &&
++                    (code.original.charCodeAt(lineStart - 1) === 32 /*" "*/ ||
++                        code.original.charCodeAt(lineStart - 1) === 9 /*"\t"*/)) {
++                    lineStart--;
++                }
++                if (lineStart === 0 ||
++                    code.original.charCodeAt(lineStart - 1) === 10 /*"\n"*/ ||
++                    code.original.charCodeAt(lineStart - 1) === 13 /*"\r"*/) {
++                    code.remove(lineStart, this.end + nextLineBreak);
++                }
++            }
++            return;
++        }
+         this.renderDeclarationEnd(code, separatorString, lastSeparatorPos, actualContentEnd, renderedContentEnd, aggregatedSystemExports, options, omitTrailingSemicolon);
+     }
+     renderSingleStatementDeclaration(code, options, omitTrailingSemicolon) {
+@@ -9197,7 +9225,7 @@ class VariableDeclaration extends NodeBase {
+         const trailingSystemExports = [];
+         const { exportNamesByVariable, snippets: { _, getPropertyAccess } } = options;
+         for (const { node, start, separator, contentEnd, end } of separatedNodes) {
+-            if (!node.included) {
++            if (!node.included || node.isFoldedDynamicImportDeclarator) {
+                 treeshakeNode(node, code, start, end);
+                 continue;
+             }
+@@ -9232,6 +9260,15 @@ class VariableDeclaration extends NodeBase {
+             const name = trailingSystemExports[0].getName(getPropertyAccess);
+             code.appendLeft(lastRenderedContentEnd, `,${_}${name}${_}=${_}(${getSystemExportStatement(trailingSystemExports, options)},${_}${name})`);
+         }
++        if (!hasRenderedContent) {
++            if (code.original.charCodeAt(this.end - 1) === 59 /*";"*/) {
++                code.remove(this.end - 1, this.end);
++            }
++            if (!omitTrailingSemicolon) {
++                code.appendLeft(renderedContentEnd, ';');
++            }
++            return;
++        }
+         this.renderDeclarationEnd(code, separatorString, lastSeparatorPos, actualContentEnd, renderedContentEnd, [], options, omitTrailingSemicolon);
+     }
+     renderSingleStatementSystemExports(node, separator, contentEnd, code, options, trailingSystemExports) {
+@@ -9258,7 +9295,7 @@ class VariableDeclaration extends NodeBase {
+             return true;
+         }
+         for (const declarator of this.declarations) {
+-            if (!declarator.id.included)
++            if (!declarator.id.included || declarator.isFoldedDynamicImportDeclarator)
+                 return false;
+             if (declarator.id.type === Identifier$1) {
+                 if (exportNamesByVariable.has(declarator.id.variable) ||
+@@ -9314,6 +9351,10 @@ class ClassExpression extends ClassNode {
+ }
+ 
+ class VariableDeclarator extends NodeBase {
++    constructor() {
++        super(...arguments);
++        this.isFoldedDynamicImportDeclarator = false;
++    }
+     declareDeclarator(kind) {
+         this.isUsingDeclaration = kind === 'using';
+         this.isAsyncUsingDeclaration = kind === 'await using';
+@@ -16301,6 +16342,10 @@ Program.prototype.includeNode = onlyIncludeSelfNoDeoptimize;
+ Program.prototype.applyDeoptimizations = doNotDeoptimize;
+ 
+ class Property extends MethodBase {
++    constructor() {
++        super(...arguments);
++        this.isFoldedDynamicImportProperty = false;
++    }
+     //declare method: boolean;
+     get method() {
+         return isFlagSet(this.flags, 262144 /* Flag.method */);
+@@ -19507,6 +19552,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
+         module.info.safeVariableNames ||= {};
+         for (const variable of module.scope.variables.values()) {
+             if (variable.included &&
++                !variable.getHoistedVariable() &&
+                 // this will only happen for exports in some formats
+                 !(variable.renderBaseName ||
+                     (variable instanceof ExportDefaultVariable && variable.getOriginalVariable() !== variable))) {
+@@ -19800,6 +19846,9 @@ class Chunk {
+         this.exports = new Set();
+         this.exportsByName = new Map();
+         this.fileName = null;
++        this.foldedDynamicImportSetup = new Array();
++        this.foldedDynamicImportCleanups = new Array();
++        this.fullyFoldedDynamicImports = new Set();
+         this.implicitEntryModules = [];
+         this.implicitlyLoadedBefore = new Set();
+         this.imports = new Set();
+@@ -20425,6 +20474,7 @@ class Chunk {
+     }
+     getDynamicDependencies() {
+         return this.getIncludedDynamicImports()
++            .filter(({ node }) => !this.fullyFoldedDynamicImports.has(node))
+             .map(resolvedDynamicImport => resolvedDynamicImport.facadeChunk ||
+             resolvedDynamicImport.chunk ||
+             resolvedDynamicImport.externalChunk ||
+@@ -20695,6 +20745,9 @@ class Chunk {
+         const { accessedGlobalsByScope, dependencies, exportNamesByVariable, includedNamespaces, inputOptions: { onLog }, isEmpty, orderedModules, outputOptions, pluginDriver, renderedModules, snippets } = this;
+         const { compact, format, freeze, generatedCode: { symbols }, importAttributesKey } = outputOptions;
+         const { _, cnst, n } = snippets;
++        for (const setup of this.foldedDynamicImportSetup) {
++            setup();
++        }
+         this.setDynamicImportResolutions(fileName);
+         this.setImportMetaResolutions(fileName);
+         this.setIdentifierRenderResolutions();
+@@ -20773,11 +20826,153 @@ class Chunk {
+         if (isEmpty && this.getExportNames().length === 0 && dependencies.size === 0) {
+             onLog(LOGLEVEL_WARN, logEmptyChunk(this.getChunkName()));
+         }
++        for (const cleanup of this.foldedDynamicImportCleanups) {
++            cleanup();
++        }
++        this.foldedDynamicImportCleanups.length = 0;
+         return { accessedGlobals, indent, magicString, renderedSource, usedModules, usesTopLevelAwait };
+     }
++    foldExternalDynamicImports() {
++        const { foldExternalDynamicImports } = this.outputOptions;
++        if (!foldExternalDynamicImports)
++            return;
++        const staticExternalVariablesByModule = new Map();
++        for (const variable of this.imports) {
++            if (variable.module instanceof ExternalModule) {
++                let variablesByName = staticExternalVariablesByModule.get(variable.module);
++                if (!variablesByName) {
++                    variablesByName = new Map();
++                    staticExternalVariablesByModule.set(variable.module, variablesByName);
++                }
++                variablesByName.set(variable.name, variable);
++            }
++        }
++        if (staticExternalVariablesByModule.size === 0)
++            return;
++        for (const resolvedDynamicImport of this.getIncludedDynamicImports()) {
++            const { node, resolution } = resolvedDynamicImport;
++            if (!(resolution instanceof ExternalModule) ||
++                node.phase ||
++                doAttributesDiffer(resolution.info.attributes, getAttributesFromImportExpression(node))) {
++                continue;
++            }
++            const variablesByName = staticExternalVariablesByModule.get(resolution);
++            if (!variablesByName)
++                continue;
++            if (!isAwaitExpressionNode(node.parent))
++                continue;
++            const declarator = node.parent.parent;
++            if (!(declarator instanceof VariableDeclarator) ||
++                declarator.init !== node.parent ||
++                declarator.id.type !== ObjectPattern$1 ||
++                declarator.isUsingDeclaration ||
++                declarator.isAsyncUsingDeclaration) {
++                continue;
++            }
++            const declaration = declarator.parent;
++            if (!(declaration instanceof VariableDeclaration) ||
++                declaration.kind === 'using' ||
++                declaration.kind === 'await using') {
++                continue;
++            }
++            const { properties } = declarator.id;
++            if (properties.length === 0)
++                continue;
++            let hasFoldedProperty = false;
++            let allPropertiesRemoved = true;
++            for (const property of properties) {
++                if (!property.included)
++                    continue;
++                if (property.type !== Property$1 ||
++                    property.computed ||
++                    property.value.type !== Identifier$1) {
++                    allPropertiesRemoved = false;
++                    continue;
++                }
++                const typedProperty = property;
++                const localVariable = typedProperty.value.variable;
++                if (!localVariable ||
++                    localVariable.isReassigned ||
++                    localVariable.isTargetOfAssignment ||
++                    localVariable.declarations.length !== 1 ||
++                    this.exportNamesByVariable.has(localVariable) ||
++                    this.exports.has(localVariable)) {
++                    allPropertiesRemoved = false;
++                    continue;
++                }
++                const exportedName = typedProperty.key instanceof Identifier
++                    ? typedProperty.key.name
++                    : String(typedProperty.key.value);
++                let externalVariable = variablesByName.get(exportedName);
++                if (!externalVariable && foldExternalDynamicImports === 'all') {
++                    [externalVariable] = resolution.getVariableForExportName(exportedName, {
++                        importChain: [node.scope.context.module.id]
++                    });
++                    externalVariable.included = true;
++                    resolution.used = true;
++                    this.imports.add(externalVariable);
++                    variablesByName.set(exportedName, externalVariable);
++                }
++                if (!externalVariable) {
++                    allPropertiesRemoved = false;
++                    continue;
++                }
++                hasFoldedProperty = true;
++                const targetExternalVariable = externalVariable;
++                this.foldedDynamicImportSetup.push(() => {
++                    typedProperty.isFoldedDynamicImportProperty = true;
++                    localVariable.renderLikeHoisted(targetExternalVariable);
++                    const addedScopeEntries = [];
++                    const scopesToMark = [
++                        typedProperty.value.scope,
++                        ...localVariable.references.map(reference => reference.scope)
++                    ];
++                    for (const startScope of scopesToMark) {
++                        let scope = startScope;
++                        while (scope &&
++                            'accessedOutsideVariables' in scope &&
++                            scope.parent &&
++                            'accessedOutsideVariables' in scope.parent) {
++                            let key = targetExternalVariable.name;
++                            let existing = scope.accessedOutsideVariables.get(key);
++                            let suffix = 0;
++                            while (existing && existing !== targetExternalVariable) {
++                                key = `${targetExternalVariable.name}\0${++suffix}`;
++                                existing = scope.accessedOutsideVariables.get(key);
++                            }
++                            if (!existing) {
++                                scope.accessedOutsideVariables.set(key, targetExternalVariable);
++                                addedScopeEntries.push([scope, key]);
++                            }
++                            scope = scope.parent;
++                        }
++                    }
++                    this.foldedDynamicImportCleanups.push(() => {
++                        typedProperty.isFoldedDynamicImportProperty = false;
++                        localVariable.renderLikeHoisted(undefined);
++                        for (const [scope, key] of addedScopeEntries) {
++                            scope.accessedOutsideVariables.delete(key);
++                        }
++                    });
++                });
++            }
++            if (hasFoldedProperty && allPropertiesRemoved) {
++                this.fullyFoldedDynamicImports.add(node);
++                this.foldedDynamicImportSetup.push(() => {
++                    declarator.isFoldedDynamicImportDeclarator = true;
++                    this.foldedDynamicImportCleanups.push(() => {
++                        declarator.isFoldedDynamicImportDeclarator = false;
++                    });
++                });
++            }
++        }
++    }
+     setDynamicImportResolutions(fileName) {
+         const { accessedGlobalsByScope, outputOptions, pluginDriver, snippets } = this;
+         for (const resolvedDynamicImport of this.getIncludedDynamicImports()) {
++            if (this.fullyFoldedDynamicImports.has(resolvedDynamicImport.node)) {
++                continue;
++            }
+             if (resolvedDynamicImport.chunk) {
+                 const { chunk, facadeChunk, node, resolution } = resolvedDynamicImport;
+                 if (chunk === this) {
+@@ -22398,6 +22593,9 @@ class Bundle {
+                 chunk.generateExports();
+                 chunk.inlineTransitiveImports();
+             }
++            for (const chunk of chunks) {
++                chunk.foldExternalDynamicImports();
++            }
+             timeEnd('generate chunks', 2);
+             await renderChunks(chunks, outputBundle, this.pluginDriver, this.outputOptions, this.inputOptions.onLog);
+         }
+@@ -24983,6 +25181,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
+         externalImportAttributes,
+         externalLiveBindings: config.externalLiveBindings ?? true,
+         file,
++        foldExternalDynamicImports: config.foldExternalDynamicImports ?? true,
+         footer: getAddon(config, 'footer'),
+         format,
+         freeze: config.freeze ?? true,
+@@ -25702,6 +25901,7 @@ async function mergeOutputOptions(config, overrides, log) {
+         externalImportAttributes: getOption('externalImportAttributes'),
+         externalLiveBindings: getOption('externalLiveBindings'),
+         file: getOption('file'),
++        foldExternalDynamicImports: getOption('foldExternalDynamicImports'),
+         footer: getOption('footer'),
+         format: getOption('format'),
+         freeze: getOption('freeze'),
+diff --git a/dist/rollup.d.ts b/dist/rollup.d.ts
+index 20dd55d584e7009e3172af8743ecc64979ff4698..9821a73c5d552690e72b01ad3d95a3637a77434c 100644
+--- a/dist/rollup.d.ts
++++ b/dist/rollup.d.ts
+@@ -846,6 +846,7 @@ export interface OutputOptions {
+ 	externalImportAssertions?: boolean | undefined;
+ 	externalImportAttributes?: boolean | undefined;
+ 	externalLiveBindings?: boolean | undefined;
++	foldExternalDynamicImports?: boolean | 'all' | undefined;
+ 	// only required for bundle.write
+ 	file?: string | undefined;
+ 	footer?: string | AddonFunction | undefined;
+@@ -904,6 +905,7 @@ export interface NormalizedOutputOptions {
+ 	externalImportAssertions: boolean;
+ 	externalImportAttributes: boolean;
+ 	externalLiveBindings: boolean;
++	foldExternalDynamicImports: boolean | 'all';
+ 	file: string | undefined;
+ 	footer: AddonFunction;
+ 	format: InternalModuleFormat;
+diff --git a/dist/shared/rollup.js b/dist/shared/rollup.js
+index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6adddbe59b0 100644
+--- a/dist/shared/rollup.js
++++ b/dist/shared/rollup.js
+@@ -4046,6 +4046,7 @@ async function mergeOutputOptions(config, overrides, log) {
+         externalImportAttributes: getOption('externalImportAttributes'),
+         externalLiveBindings: getOption('externalLiveBindings'),
+         file: getOption('file'),
++        foldExternalDynamicImports: getOption('foldExternalDynamicImports'),
+         footer: getOption('footer'),
+         format: getOption('format'),
+         freeze: getOption('freeze'),
+@@ -7101,7 +7102,10 @@ class Variable extends ExpressionEntity {
+         return this.renderedLikeHoisted;
+     }
+     getNamingVariable() {
+-        return this.renderedLikeHoisted?.renderBaseName === null ? this.renderedLikeHoisted : undefined;
++        return this.renderedLikeHoisted?.renderBaseName === null ||
++            this.renderedLikeHoisted?.module?.info.isExternal
++            ? this.renderedLikeHoisted
++            : undefined;
+     }
+     markCalledFromTryStatement() { }
+     addReassignedValue(_value) { }
+@@ -9739,6 +9743,7 @@ class LocalVariable extends Variable {
+         this.initPath = initPath;
+         this.kind = kind;
+         this.calledFromTryStatement = false;
++        this.references = [];
+         this.additionalInitializers = null;
+         // A possibly incomplete list of functions assigned to this variable; only used
+         // to retain call arguments of assigned try-catch helpers, never for value queries
+@@ -9753,6 +9758,9 @@ class LocalVariable extends Variable {
+         this.declarations.push(identifier);
+         this.markInitializersForDeoptimization().push(init);
+     }
++    addReference(identifier) {
++        this.references.push(identifier);
++    }
+     consolidateInitializers() {
+         if (this.additionalInitializers) {
+             for (const initializer of this.additionalInitializers) {
+@@ -10358,7 +10366,7 @@ class ChildScope extends Scope {
+             }
+         }
+         for (const [name, variable] of this.variables) {
+-            if (variable.included || variable.alwaysRendered) {
++            if ((variable.included || variable.alwaysRendered) && !variable.getHoistedVariable()) {
+                 variable.setRenderNames(null, getSafeName(name, usedNames, variable.forbiddenNames));
+             }
+         }
+@@ -13125,7 +13133,8 @@ class ObjectPattern extends NodeBase {
+             const separatedNodes = getCommaSeparatedNodesWithBoundaries(this.properties, code, this.start + 1, this.end - 1);
+             let lastSeparatorPos = null;
+             for (const { node, separator, start, end } of separatedNodes) {
+-                if (!node.included) {
++                if (!node.included ||
++                    (node.type === parseAst_js.Property && node.isFoldedDynamicImportProperty)) {
+                     treeshakeNode(node, code, start, end);
+                     continue;
+                 }
+@@ -13298,7 +13307,7 @@ class VariableDeclaration extends NodeBase {
+         const singleSystemExport = gatherSystemExportsAndGetSingleExport(separatedNodes, options, aggregatedSystemExports);
+         const { exportNamesByVariable } = options;
+         for (const { node, start, separator, contentEnd, end } of separatedNodes) {
+-            if (!node.included) {
++            if (!node.included || node.isFoldedDynamicImportDeclarator) {
+                 treeshakeNode(node, code, start, end);
+                 continue;
+             }
+@@ -13343,6 +13352,26 @@ class VariableDeclaration extends NodeBase {
+             lastSeparatorPos = separator;
+             separatorString = nextSeparatorString;
+         }
++        if (!hasRenderedContent) {
++            if (code.original.charCodeAt(this.end - 1) === 59 /*";"*/) {
++                code.remove(this.end - 1, this.end);
++            }
++            const nextLineBreak = findFirstLineBreakOutsideComment(code.original.slice(this.end))[1];
++            if (nextLineBreak > 0) {
++                let lineStart = this.start;
++                while (lineStart > 0 &&
++                    (code.original.charCodeAt(lineStart - 1) === 32 /*" "*/ ||
++                        code.original.charCodeAt(lineStart - 1) === 9 /*"\t"*/)) {
++                    lineStart--;
++                }
++                if (lineStart === 0 ||
++                    code.original.charCodeAt(lineStart - 1) === 10 /*"\n"*/ ||
++                    code.original.charCodeAt(lineStart - 1) === 13 /*"\r"*/) {
++                    code.remove(lineStart, this.end + nextLineBreak);
++                }
++            }
++            return;
++        }
+         this.renderDeclarationEnd(code, separatorString, lastSeparatorPos, actualContentEnd, renderedContentEnd, aggregatedSystemExports, options, omitTrailingSemicolon);
+     }
+     renderSingleStatementDeclaration(code, options, omitTrailingSemicolon) {
+@@ -13357,7 +13386,7 @@ class VariableDeclaration extends NodeBase {
+         const trailingSystemExports = [];
+         const { exportNamesByVariable, snippets: { _, getPropertyAccess } } = options;
+         for (const { node, start, separator, contentEnd, end } of separatedNodes) {
+-            if (!node.included) {
++            if (!node.included || node.isFoldedDynamicImportDeclarator) {
+                 treeshakeNode(node, code, start, end);
+                 continue;
+             }
+@@ -13392,6 +13421,15 @@ class VariableDeclaration extends NodeBase {
+             const name = trailingSystemExports[0].getName(getPropertyAccess);
+             code.appendLeft(lastRenderedContentEnd, `,${_}${name}${_}=${_}(${getSystemExportStatement(trailingSystemExports, options)},${_}${name})`);
+         }
++        if (!hasRenderedContent) {
++            if (code.original.charCodeAt(this.end - 1) === 59 /*";"*/) {
++                code.remove(this.end - 1, this.end);
++            }
++            if (!omitTrailingSemicolon) {
++                code.appendLeft(renderedContentEnd, ';');
++            }
++            return;
++        }
+         this.renderDeclarationEnd(code, separatorString, lastSeparatorPos, actualContentEnd, renderedContentEnd, [], options, omitTrailingSemicolon);
+     }
+     renderSingleStatementSystemExports(node, separator, contentEnd, code, options, trailingSystemExports) {
+@@ -13418,7 +13456,7 @@ class VariableDeclaration extends NodeBase {
+             return true;
+         }
+         for (const declarator of this.declarations) {
+-            if (!declarator.id.included)
++            if (!declarator.id.included || declarator.isFoldedDynamicImportDeclarator)
+                 return false;
+             if (declarator.id.type === parseAst_js.Identifier) {
+                 if (exportNamesByVariable.has(declarator.id.variable) ||
+@@ -13474,6 +13512,10 @@ class ClassExpression extends ClassNode {
+ }
+ 
+ class VariableDeclarator extends NodeBase {
++    constructor() {
++        super(...arguments);
++        this.isFoldedDynamicImportDeclarator = false;
++    }
+     declareDeclarator(kind) {
+         this.isUsingDeclaration = kind === 'using';
+         this.isAsyncUsingDeclaration = kind === 'await using';
+@@ -17918,6 +17960,10 @@ Program.prototype.includeNode = onlyIncludeSelfNoDeoptimize;
+ Program.prototype.applyDeoptimizations = doNotDeoptimize;
+ 
+ class Property extends MethodBase {
++    constructor() {
++        super(...arguments);
++        this.isFoldedDynamicImportProperty = false;
++    }
+     //declare method: boolean;
+     get method() {
+         return isFlagSet(this.flags, 262144 /* Flag.method */);
+@@ -21117,6 +21163,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
+         module.info.safeVariableNames ||= {};
+         for (const variable of module.scope.variables.values()) {
+             if (variable.included &&
++                !variable.getHoistedVariable() &&
+                 // this will only happen for exports in some formats
+                 !(variable.renderBaseName ||
+                     (variable instanceof ExportDefaultVariable && variable.getOriginalVariable() !== variable))) {
+@@ -21296,6 +21343,9 @@ class Chunk {
+         this.exports = new Set();
+         this.exportsByName = new Map();
+         this.fileName = null;
++        this.foldedDynamicImportSetup = new Array();
++        this.foldedDynamicImportCleanups = new Array();
++        this.fullyFoldedDynamicImports = new Set();
+         this.implicitEntryModules = [];
+         this.implicitlyLoadedBefore = new Set();
+         this.imports = new Set();
+@@ -21921,6 +21971,7 @@ class Chunk {
+     }
+     getDynamicDependencies() {
+         return this.getIncludedDynamicImports()
++            .filter(({ node }) => !this.fullyFoldedDynamicImports.has(node))
+             .map(resolvedDynamicImport => resolvedDynamicImport.facadeChunk ||
+             resolvedDynamicImport.chunk ||
+             resolvedDynamicImport.externalChunk ||
+@@ -22191,6 +22242,9 @@ class Chunk {
+         const { accessedGlobalsByScope, dependencies, exportNamesByVariable, includedNamespaces, inputOptions: { onLog }, isEmpty, orderedModules, outputOptions, pluginDriver, renderedModules, snippets } = this;
+         const { compact, format, freeze, generatedCode: { symbols }, importAttributesKey } = outputOptions;
+         const { _, cnst, n } = snippets;
++        for (const setup of this.foldedDynamicImportSetup) {
++            setup();
++        }
+         this.setDynamicImportResolutions(fileName);
+         this.setImportMetaResolutions(fileName);
+         this.setIdentifierRenderResolutions();
+@@ -22269,11 +22323,153 @@ class Chunk {
+         if (isEmpty && this.getExportNames().length === 0 && dependencies.size === 0) {
+             onLog(parseAst_js.LOGLEVEL_WARN, parseAst_js.logEmptyChunk(this.getChunkName()));
+         }
++        for (const cleanup of this.foldedDynamicImportCleanups) {
++            cleanup();
++        }
++        this.foldedDynamicImportCleanups.length = 0;
+         return { accessedGlobals, indent, magicString, renderedSource, usedModules, usesTopLevelAwait };
+     }
++    foldExternalDynamicImports() {
++        const { foldExternalDynamicImports } = this.outputOptions;
++        if (!foldExternalDynamicImports)
++            return;
++        const staticExternalVariablesByModule = new Map();
++        for (const variable of this.imports) {
++            if (variable.module instanceof ExternalModule) {
++                let variablesByName = staticExternalVariablesByModule.get(variable.module);
++                if (!variablesByName) {
++                    variablesByName = new Map();
++                    staticExternalVariablesByModule.set(variable.module, variablesByName);
++                }
++                variablesByName.set(variable.name, variable);
++            }
++        }
++        if (staticExternalVariablesByModule.size === 0)
++            return;
++        for (const resolvedDynamicImport of this.getIncludedDynamicImports()) {
++            const { node, resolution } = resolvedDynamicImport;
++            if (!(resolution instanceof ExternalModule) ||
++                node.phase ||
++                doAttributesDiffer(resolution.info.attributes, getAttributesFromImportExpression(node))) {
++                continue;
++            }
++            const variablesByName = staticExternalVariablesByModule.get(resolution);
++            if (!variablesByName)
++                continue;
++            if (!isAwaitExpressionNode(node.parent))
++                continue;
++            const declarator = node.parent.parent;
++            if (!(declarator instanceof VariableDeclarator) ||
++                declarator.init !== node.parent ||
++                declarator.id.type !== parseAst_js.ObjectPattern ||
++                declarator.isUsingDeclaration ||
++                declarator.isAsyncUsingDeclaration) {
++                continue;
++            }
++            const declaration = declarator.parent;
++            if (!(declaration instanceof VariableDeclaration) ||
++                declaration.kind === 'using' ||
++                declaration.kind === 'await using') {
++                continue;
++            }
++            const { properties } = declarator.id;
++            if (properties.length === 0)
++                continue;
++            let hasFoldedProperty = false;
++            let allPropertiesRemoved = true;
++            for (const property of properties) {
++                if (!property.included)
++                    continue;
++                if (property.type !== parseAst_js.Property ||
++                    property.computed ||
++                    property.value.type !== parseAst_js.Identifier) {
++                    allPropertiesRemoved = false;
++                    continue;
++                }
++                const typedProperty = property;
++                const localVariable = typedProperty.value.variable;
++                if (!localVariable ||
++                    localVariable.isReassigned ||
++                    localVariable.isTargetOfAssignment ||
++                    localVariable.declarations.length !== 1 ||
++                    this.exportNamesByVariable.has(localVariable) ||
++                    this.exports.has(localVariable)) {
++                    allPropertiesRemoved = false;
++                    continue;
++                }
++                const exportedName = typedProperty.key instanceof Identifier
++                    ? typedProperty.key.name
++                    : String(typedProperty.key.value);
++                let externalVariable = variablesByName.get(exportedName);
++                if (!externalVariable && foldExternalDynamicImports === 'all') {
++                    [externalVariable] = resolution.getVariableForExportName(exportedName, {
++                        importChain: [node.scope.context.module.id]
++                    });
++                    externalVariable.included = true;
++                    resolution.used = true;
++                    this.imports.add(externalVariable);
++                    variablesByName.set(exportedName, externalVariable);
++                }
++                if (!externalVariable) {
++                    allPropertiesRemoved = false;
++                    continue;
++                }
++                hasFoldedProperty = true;
++                const targetExternalVariable = externalVariable;
++                this.foldedDynamicImportSetup.push(() => {
++                    typedProperty.isFoldedDynamicImportProperty = true;
++                    localVariable.renderLikeHoisted(targetExternalVariable);
++                    const addedScopeEntries = [];
++                    const scopesToMark = [
++                        typedProperty.value.scope,
++                        ...localVariable.references.map(reference => reference.scope)
++                    ];
++                    for (const startScope of scopesToMark) {
++                        let scope = startScope;
++                        while (scope &&
++                            'accessedOutsideVariables' in scope &&
++                            scope.parent &&
++                            'accessedOutsideVariables' in scope.parent) {
++                            let key = targetExternalVariable.name;
++                            let existing = scope.accessedOutsideVariables.get(key);
++                            let suffix = 0;
++                            while (existing && existing !== targetExternalVariable) {
++                                key = `${targetExternalVariable.name}\0${++suffix}`;
++                                existing = scope.accessedOutsideVariables.get(key);
++                            }
++                            if (!existing) {
++                                scope.accessedOutsideVariables.set(key, targetExternalVariable);
++                                addedScopeEntries.push([scope, key]);
++                            }
++                            scope = scope.parent;
++                        }
++                    }
++                    this.foldedDynamicImportCleanups.push(() => {
++                        typedProperty.isFoldedDynamicImportProperty = false;
++                        localVariable.renderLikeHoisted(undefined);
++                        for (const [scope, key] of addedScopeEntries) {
++                            scope.accessedOutsideVariables.delete(key);
++                        }
++                    });
++                });
++            }
++            if (hasFoldedProperty && allPropertiesRemoved) {
++                this.fullyFoldedDynamicImports.add(node);
++                this.foldedDynamicImportSetup.push(() => {
++                    declarator.isFoldedDynamicImportDeclarator = true;
++                    this.foldedDynamicImportCleanups.push(() => {
++                        declarator.isFoldedDynamicImportDeclarator = false;
++                    });
++                });
++            }
++        }
++    }
+     setDynamicImportResolutions(fileName) {
+         const { accessedGlobalsByScope, outputOptions, pluginDriver, snippets } = this;
+         for (const resolvedDynamicImport of this.getIncludedDynamicImports()) {
++            if (this.fullyFoldedDynamicImports.has(resolvedDynamicImport.node)) {
++                continue;
++            }
+             if (resolvedDynamicImport.chunk) {
+                 const { chunk, facadeChunk, node, resolution } = resolvedDynamicImport;
+                 if (chunk === this) {
+@@ -23874,6 +24070,9 @@ class Bundle {
+                 chunk.generateExports();
+                 chunk.inlineTransitiveImports();
+             }
++            for (const chunk of chunks) {
++                chunk.foldExternalDynamicImports();
++            }
+             timeEnd('generate chunks', 2);
+             await renderChunks(chunks, outputBundle, this.pluginDriver, this.outputOptions, this.inputOptions.onLog);
+         }
+@@ -25320,6 +25519,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
+         externalImportAttributes,
+         externalLiveBindings: config.externalLiveBindings ?? true,
+         file,
++        foldExternalDynamicImports: config.foldExternalDynamicImports ?? true,
+         footer: getAddon(config, 'footer'),
+         format,
+         freeze: config.freeze ?? true,
