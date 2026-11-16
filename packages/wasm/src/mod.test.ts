@@ -24,3 +24,10 @@ test("surfaces parse errors as exceptions", () => {
         thrown => thrown === "from_str_radix_int: must lie in the range `[2, 36]`",
     );
 });
+
+test("reuses allocator across repeated calls and errors", () => {
+    for (let i = 0; i < 500; i++) {
+        assert.strictEqual(from_str_radix(String(i), 10), i);
+        assert.throws(() => from_str_radix("xyz", 10), thrown => thrown === "invalid digit found in string");
+    }
+});
