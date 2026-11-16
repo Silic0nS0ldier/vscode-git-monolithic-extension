@@ -7,4 +7,5 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
+lol_alloc = { workspace = true }
 wasm-bindgen = { workspace = true }

@@ -1,4 +1,9 @@
+#![cfg_attr(target_arch = "wasm32", no_std)]
+
 use wasm_bindgen::prelude::*;
+
+#[cfg(target_arch = "wasm32")]
+mod wasm_runtime;
 
 fn parse_error_message(kind: &core::num::IntErrorKind) -> &'static str {
     use core::num::IntErrorKind::*;
