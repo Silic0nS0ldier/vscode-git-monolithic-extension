@@ -163,6 +163,7 @@ try {
         assetFileNames: "assets/[name][extname]",
         // All modules are considered pure, transitive import order does not need to be maintained.
         hoistTransitiveImports: false,
+        foldExternalDynamicImports: "all",
     });
     await bundle.close();
 } catch (e) {
