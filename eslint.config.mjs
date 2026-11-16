@@ -31,6 +31,10 @@ export default defineConfig({
                         package: "node:test",
                     }],
                 }],
+                "no-restricted-syntax": ["error", {
+                    message: "Do not import default from node:*. Use a namespace import (* as) instead.",
+                    selector: "ImportDeclaration[source.value=/^node:.*$/] ImportDefaultSpecifier",
+                }],
             },
         },
         {
