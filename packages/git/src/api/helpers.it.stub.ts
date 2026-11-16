@@ -1,10 +1,10 @@
 import { runfiles } from "@bazel/runfiles";
-import assert from "node:assert";
+import * as assert from "node:assert";
 import { execFileSync } from "node:child_process";
 import { constants as fsConstants } from "node:fs";
-import fs from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
 import { fromPath } from "../cli/from-path.js";
 import { readToString } from "../cli/helpers/read-to-string.js";
 import type { PersistentCLIContext } from "../cli/mod.js";

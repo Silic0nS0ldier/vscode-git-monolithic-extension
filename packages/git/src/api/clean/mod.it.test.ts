@@ -1,7 +1,7 @@
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import path from "node:path";
-import test from "node:test";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { test } from "node:test";
 import { unwrapOk } from "../../errors.js";
 import { gitCtx, tempGitRepo, writeUntrackedPastCliLimit } from "../helpers.it.stub.js";
 import { clean } from "./mod.js";

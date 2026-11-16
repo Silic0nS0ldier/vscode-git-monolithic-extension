@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+import * as assert from "node:assert/strict";
 import { test } from "node:test";
 import { rollup, type RollupLog } from "rollup";
 import { typescriptHelperWarningsPlugin } from "./typescript-helper-warnings-plugin.js";

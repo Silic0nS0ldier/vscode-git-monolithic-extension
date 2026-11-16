@@ -1,5 +1,5 @@
 import { access } from "node:fs/promises";
-import path from "node:path";
+import * as path from "node:path";
 import { Uri, window, workspace, WorkspaceEdit } from "vscode";
 import type { Repository } from "../../git.js";
 import { Operation } from "../Operations.js";

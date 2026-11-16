@@ -1,5 +1,5 @@
 import type { IFileStatus } from "monolithic-git-interop/api/status/tracked";
-import path from "node:path";
+import * as path from "node:path";
 import { Uri } from "vscode";
 import { Status, type StatusOptions } from "../../../api/git.js";
 import type { Resource } from "../../Resource.js";

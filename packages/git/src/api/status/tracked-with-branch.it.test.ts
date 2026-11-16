@@ -1,7 +1,7 @@
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import path from "node:path";
-import test from "node:test";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { test } from "node:test";
 import { unwrapOk } from "../../errors.js";
 import { gitCtx, read, run, tempGitRepo, tempOrigin } from "../helpers.it.stub.js";
 import { trackedWithBranch } from "./tracked-with-branch.js";

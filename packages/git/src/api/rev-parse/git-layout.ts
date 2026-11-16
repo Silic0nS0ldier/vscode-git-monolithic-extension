@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import type { GitContext } from "../../cli/context.js";
 import { type ReadToErrors, readToString } from "../../cli/helpers/read-to-string.js";
 import { createError, ERROR_GENERIC } from "../../errors.js";

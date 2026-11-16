@@ -1,7 +1,7 @@
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import path from "node:path";
-import test from "node:test";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+import { test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import type { GitContext } from "../../cli/context.js";
 import { ERROR_GENERIC, ERROR_TIMEOUT, type ErrorShape, unwrapOk } from "../../errors.js";

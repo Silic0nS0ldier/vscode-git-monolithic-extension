@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import type { EventEmitter, Uri } from "vscode";
 import type { Repository } from "../../git.js";
 import { Operation } from "../Operations.js";

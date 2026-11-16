@@ -1,5 +1,5 @@
 import * as gitErrors from "monolithic-git-interop/errors";
-import path from "node:path";
+import * as path from "node:path";
 import { inspect } from "node:util";
 import { commands, window } from "vscode";
 import { makeCommandId } from "../../commands/helpers.js";

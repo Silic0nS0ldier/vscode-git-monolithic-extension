@@ -8,7 +8,7 @@ import { head } from "monolithic-git-interop/api/rev-parse/head";
 import { unwrapOk } from "monolithic-git-interop/errors";
 import { randomUUID } from "node:crypto";
 import { realpath } from "node:fs/promises";
-import path from "node:path";
+import * as path from "node:path";
 import { inspect } from "node:util";
 import {
     CancellationError,

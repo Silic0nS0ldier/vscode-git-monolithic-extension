@@ -1,8 +1,8 @@
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import path from "node:path";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { Readable } from "node:stream";
-import test from "node:test";
+import { test } from "node:test";
 import type { GitContext } from "../../cli/context.js";
 import { readToString } from "../../cli/helpers/read-to-string.js";
 import { unwrapOk } from "../../errors.js";

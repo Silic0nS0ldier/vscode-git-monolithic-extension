@@ -1,8 +1,8 @@
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
-import test from "node:test";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
+import { test } from "node:test";
 import { ERROR_NON_ZERO_EXIT, unwrapOk } from "../../errors.js";
 import { isErr, unwrap } from "../../func-result.js";
 import { gitCtx, run, tempGitRepo } from "../helpers.it.stub.js";

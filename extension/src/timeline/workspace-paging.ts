@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import { throttle } from "../util/throttle.js";
 import { orderedTimestamp } from "./paging.js";
 

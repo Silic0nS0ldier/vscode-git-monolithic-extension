@@ -1,5 +1,5 @@
-import assert from "node:assert";
-import test from "node:test";
+import * as assert from "node:assert";
+import { test } from "node:test";
 import { from_str_radix } from "./mod.js";
 
 test("parses in the given radix", () => {

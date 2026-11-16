@@ -1,4 +1,4 @@
-import path from "node:path";
+import * as path from "node:path";
 import { commands, EventEmitter, Uri } from "vscode";
 import { type Branch, RefType, type Remote, Status, type StatusOptions } from "../../api/git.js";
 import type { Repository } from "../../git.js";

@@ -1,5 +1,5 @@
-import assert from "node:assert";
-import test from "node:test";
+import * as assert from "node:assert";
+import { test } from "node:test";
 import { ERROR_GENERIC, unwrapOk } from "../../errors.js";
 import { isErr, unwrap } from "../../func-result.js";
 import { gitCtx, run, tempGitRepo } from "../helpers.it.stub.js";

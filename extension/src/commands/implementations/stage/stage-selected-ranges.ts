@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import * as assert from "node:assert";
 import { inspect } from "node:util";
 import { EndOfLine, Uri, window } from "vscode";
 import { computeLineChanges, type LineChange } from "../../../line-changes.js";
@@ -26,7 +26,7 @@ function getEOLChar(eol: EndOfLine): string {
 // API surface that will be removed in favour of something different.
 export function createCommand(model: Model): ScmCommand<"stageSelectedRanges"> {
     async function stageSelectedRanges(fileUri: unknown, ..._rest: unknown[]): Promise<void> {
-        assert(fileUri instanceof Uri, "API has changed");
+        assert.ok(fileUri instanceof Uri, "API has changed");
 
         const activeEditor = window.activeTextEditor;
         const visibleEditors = window.visibleTextEditors;

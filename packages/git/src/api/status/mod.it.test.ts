@@ -1,9 +1,9 @@
 import { from_str_radix } from "monolithic-git-wasm";
-import assert from "node:assert";
-import fs from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
-import test, { type TestContext } from "node:test";
+import * as assert from "node:assert";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
+import { test, type TestContext } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import type { GitContext } from "../../cli/context.js";
 import { fromPath } from "../../cli/from-path.js";
