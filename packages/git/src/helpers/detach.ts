@@ -8,7 +8,7 @@
  * outputs into small per-commit fields, this pins the whole buffer for as
  * long as any resulting object is reachable.
  *
- * See https://issues.chromium.org/issues/41480525 — open in V8 since 2015 and
+ * See https://issues.chromium.org/issues/41480525 — open in V8 since 2013 and
  * still reproducible in Node.js v26.x (production reports as of 2026-07).
  *
  * The `` ` ${x}`.slice(1) `` idiom is one of the very few operations that
