@@ -186,7 +186,9 @@ class PorcelainV2Parser {
     }
 
     #parseHeader(header: string): void {
-        const [key, value = ""] = header.split(" ", 2).map(detach) as [string, string?];
+        const space = header.indexOf(" ");
+        const key = header.substring(0, space);
+        const value = detach(header.substring(space + 1));
 
         switch (key) {
             case "branch.oid":
