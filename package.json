@@ -3,7 +3,7 @@
     "packageManager": "pnpm@12.20.0",
     "dependencies": {
         "@eslint/js": "10.0.1",
-        "eslint": "10.14.0",
+        "eslint": "10.15.0",
         "knip": "6.45.1",
         "typescript-eslint": "8.72.2"
     },
