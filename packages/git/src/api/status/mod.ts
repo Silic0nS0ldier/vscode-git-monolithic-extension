@@ -186,9 +186,7 @@ class PorcelainV2Parser {
     }
 
     #parseHeader(header: string): void {
-        const space = header.indexOf(" ");
-        const key = header.substring(0, space);
-        const value = header.substring(space + 1);
+        const [key, value = ""] = header.split(" ", 2).map(detach) as [string, string?];
 
         switch (key) {
             case "branch.oid":
@@ -222,7 +220,7 @@ class PorcelainV2Parser {
             }
         }
 
-        const path = record.substring(pathStart);
+        const path = detach(record.substring(pathStart));
 
         // A path ending in a slash is a nested repository, which `tracked` also leaves out.
         if (path.at(-1) === "/") {
@@ -236,7 +234,7 @@ class PorcelainV2Parser {
         this.#files.push(
             origPath === undefined
                 ? { path, rename: undefined, x, y }
-                : { path: origPath, rename: path, x, y },
+                : { path: detach(origPath), rename: path, x, y },
         );
     }
 }
