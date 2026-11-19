@@ -1,5 +1,7 @@
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
 const repoRoot = new URL("../../", import.meta.url);
 const cargoTomlPath = new URL("Cargo.toml", repoRoot);
@@ -14,16 +16,32 @@ const TARGETS = [
     { os: "macos", cpu: "x86_64", triple: "x86_64-apple-darwin" },
 ];
 
-const cargoTomlContent = await fs.readFile(cargoTomlPath, "utf-8");
-const versionMatch = cargoTomlContent.match(/^\s*wasm-bindgen\s*=\s*"=?([^"]*)"/m);
-if (!versionMatch) {
-    throw new Error("Could not find a `wasm-bindgen` entry in Cargo.toml");
+const metadata = JSON.parse(
+    execFileSync(
+        "cargo",
+        ["metadata", "--format-version", "1", "--locked", "--manifest-path", fileURLToPath(cargoTomlPath)],
+        { encoding: "utf-8" },
+    ),
+);
+const directDependencyIds = new Set(
+    metadata.workspace_members.flatMap(member =>
+        metadata.resolve.nodes.find(node => node.id === member)?.dependencies ?? []
+    ),
+);
+const versions = [
+    ...new Set(
+        metadata.packages
+            .filter(pkg => pkg.name === "wasm-bindgen" && directDependencyIds.has(pkg.id))
+            .map(pkg => pkg.version),
+    ),
+];
+if (versions.length === 0) {
+    throw new Error("Could not resolve a direct `wasm-bindgen` dependency from the Cargo workspace");
 }
-const version = versionMatch[1];
-if (!/^\d+\.\d+\.\d+$/.test(version)) {
-    // The CLI has to match the crate exactly, so a range cannot be resolved to one release.
-    throw new Error(`Cargo.toml must pin an exact wasm-bindgen version, got "${version}"`);
+if (versions.length > 1) {
+    throw new Error(`Cargo workspace resolves multiple wasm-bindgen versions: ${versions.join(", ")}`);
 }
+const version = versions[0];
 
 const binaries = [];
 for (const { os, cpu, triple } of TARGETS) {
