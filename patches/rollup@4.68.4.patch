@@ -1,5 +1,5 @@
 diff --git a/dist/es/shared/node-entry.js b/dist/es/shared/node-entry.js
-index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933fa844813 100644
+index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3c4281e4f 100644
 --- a/dist/es/shared/node-entry.js
 +++ b/dist/es/shared/node-entry.js
 @@ -2939,7 +2939,10 @@ class Variable extends ExpressionEntity {
@@ -14,7 +14,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
      }
      markCalledFromTryStatement() { }
      addReassignedValue(_value) { }
-@@ -5579,6 +5582,7 @@ class LocalVariable extends Variable {
+@@ -5662,6 +5665,7 @@ class LocalVariable extends Variable {
          this.initPath = initPath;
          this.kind = kind;
          this.calledFromTryStatement = false;
@@ -22,7 +22,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
          this.additionalInitializers = null;
          // A possibly incomplete list of functions assigned to this variable; only used
          // to retain call arguments of assigned try-catch helpers, never for value queries
-@@ -5593,6 +5597,9 @@ class LocalVariable extends Variable {
+@@ -5676,6 +5680,9 @@ class LocalVariable extends Variable {
          this.declarations.push(identifier);
          this.markInitializersForDeoptimization().push(init);
      }
@@ -32,7 +32,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
      consolidateInitializers() {
          if (this.additionalInitializers) {
              for (const initializer of this.additionalInitializers) {
-@@ -6198,7 +6205,7 @@ class ChildScope extends Scope {
+@@ -6281,7 +6288,7 @@ class ChildScope extends Scope {
              }
          }
          for (const [name, variable] of this.variables) {
@@ -41,7 +41,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
                  variable.setRenderNames(null, getSafeName(name, usedNames, variable.forbiddenNames));
              }
          }
-@@ -8965,7 +8972,8 @@ class ObjectPattern extends NodeBase {
+@@ -9048,7 +9055,8 @@ class ObjectPattern extends NodeBase {
              const separatedNodes = getCommaSeparatedNodesWithBoundaries(this.properties, code, this.start + 1, this.end - 1);
              let lastSeparatorPos = null;
              for (const { node, separator, start, end } of separatedNodes) {
@@ -51,7 +51,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
                      treeshakeNode(node, code, start, end);
                      continue;
                  }
-@@ -9138,7 +9146,7 @@ class VariableDeclaration extends NodeBase {
+@@ -9221,7 +9229,7 @@ class VariableDeclaration extends NodeBase {
          const singleSystemExport = gatherSystemExportsAndGetSingleExport(separatedNodes, options, aggregatedSystemExports);
          const { exportNamesByVariable } = options;
          for (const { node, start, separator, contentEnd, end } of separatedNodes) {
@@ -60,7 +60,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
                  treeshakeNode(node, code, start, end);
                  continue;
              }
-@@ -9183,6 +9191,26 @@ class VariableDeclaration extends NodeBase {
+@@ -9266,6 +9274,26 @@ class VariableDeclaration extends NodeBase {
              lastSeparatorPos = separator;
              separatorString = nextSeparatorString;
          }
@@ -87,7 +87,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
          this.renderDeclarationEnd(code, separatorString, lastSeparatorPos, actualContentEnd, renderedContentEnd, aggregatedSystemExports, options, omitTrailingSemicolon);
      }
      renderSingleStatementDeclaration(code, options, omitTrailingSemicolon) {
-@@ -9197,7 +9225,7 @@ class VariableDeclaration extends NodeBase {
+@@ -9280,7 +9308,7 @@ class VariableDeclaration extends NodeBase {
          const trailingSystemExports = [];
          const { exportNamesByVariable, snippets: { _, getPropertyAccess } } = options;
          for (const { node, start, separator, contentEnd, end } of separatedNodes) {
@@ -96,7 +96,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
                  treeshakeNode(node, code, start, end);
                  continue;
              }
-@@ -9232,6 +9260,15 @@ class VariableDeclaration extends NodeBase {
+@@ -9315,6 +9343,15 @@ class VariableDeclaration extends NodeBase {
              const name = trailingSystemExports[0].getName(getPropertyAccess);
              code.appendLeft(lastRenderedContentEnd, `,${_}${name}${_}=${_}(${getSystemExportStatement(trailingSystemExports, options)},${_}${name})`);
          }
@@ -112,7 +112,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
          this.renderDeclarationEnd(code, separatorString, lastSeparatorPos, actualContentEnd, renderedContentEnd, [], options, omitTrailingSemicolon);
      }
      renderSingleStatementSystemExports(node, separator, contentEnd, code, options, trailingSystemExports) {
-@@ -9258,7 +9295,7 @@ class VariableDeclaration extends NodeBase {
+@@ -9341,7 +9378,7 @@ class VariableDeclaration extends NodeBase {
              return true;
          }
          for (const declarator of this.declarations) {
@@ -121,7 +121,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
                  return false;
              if (declarator.id.type === Identifier$1) {
                  if (exportNamesByVariable.has(declarator.id.variable) ||
-@@ -9314,6 +9351,10 @@ class ClassExpression extends ClassNode {
+@@ -9397,6 +9434,10 @@ class ClassExpression extends ClassNode {
  }
  
  class VariableDeclarator extends NodeBase {
@@ -132,7 +132,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
      declareDeclarator(kind) {
          this.isUsingDeclaration = kind === 'using';
          this.isAsyncUsingDeclaration = kind === 'await using';
-@@ -16301,6 +16342,10 @@ Program.prototype.includeNode = onlyIncludeSelfNoDeoptimize;
+@@ -16384,6 +16425,10 @@ Program.prototype.includeNode = onlyIncludeSelfNoDeoptimize;
  Program.prototype.applyDeoptimizations = doNotDeoptimize;
  
  class Property extends MethodBase {
@@ -143,7 +143,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
      //declare method: boolean;
      get method() {
          return isFlagSet(this.flags, 262144 /* Flag.method */);
-@@ -19507,6 +19552,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
+@@ -19592,6 +19637,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
          module.info.safeVariableNames ||= {};
          for (const variable of module.scope.variables.values()) {
              if (variable.included &&
@@ -151,7 +151,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
                  // this will only happen for exports in some formats
                  !(variable.renderBaseName ||
                      (variable instanceof ExportDefaultVariable && variable.getOriginalVariable() !== variable))) {
-@@ -19800,6 +19846,9 @@ class Chunk {
+@@ -19885,6 +19931,9 @@ class Chunk {
          this.exports = new Set();
          this.exportsByName = new Map();
          this.fileName = null;
@@ -161,7 +161,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
          this.implicitEntryModules = [];
          this.implicitlyLoadedBefore = new Set();
          this.imports = new Set();
-@@ -20425,6 +20474,7 @@ class Chunk {
+@@ -20510,6 +20559,7 @@ class Chunk {
      }
      getDynamicDependencies() {
          return this.getIncludedDynamicImports()
@@ -169,7 +169,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
              .map(resolvedDynamicImport => resolvedDynamicImport.facadeChunk ||
              resolvedDynamicImport.chunk ||
              resolvedDynamicImport.externalChunk ||
-@@ -20695,6 +20745,9 @@ class Chunk {
+@@ -20780,6 +20830,9 @@ class Chunk {
          const { accessedGlobalsByScope, dependencies, exportNamesByVariable, includedNamespaces, inputOptions: { onLog }, isEmpty, orderedModules, outputOptions, pluginDriver, renderedModules, snippets } = this;
          const { compact, format, freeze, generatedCode: { symbols }, importAttributesKey } = outputOptions;
          const { _, cnst, n } = snippets;
@@ -179,7 +179,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
          this.setDynamicImportResolutions(fileName);
          this.setImportMetaResolutions(fileName);
          this.setIdentifierRenderResolutions();
-@@ -20773,11 +20826,153 @@ class Chunk {
+@@ -20858,11 +20911,153 @@ class Chunk {
          if (isEmpty && this.getExportNames().length === 0 && dependencies.size === 0) {
              onLog(LOGLEVEL_WARN, logEmptyChunk(this.getChunkName()));
          }
@@ -333,7 +333,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
              if (resolvedDynamicImport.chunk) {
                  const { chunk, facadeChunk, node, resolution } = resolvedDynamicImport;
                  if (chunk === this) {
-@@ -22398,6 +22593,9 @@ class Bundle {
+@@ -22483,6 +22678,9 @@ class Bundle {
                  chunk.generateExports();
                  chunk.inlineTransitiveImports();
              }
@@ -343,7 +343,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
              timeEnd('generate chunks', 2);
              await renderChunks(chunks, outputBundle, this.pluginDriver, this.outputOptions, this.inputOptions.onLog);
          }
-@@ -24983,6 +25181,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
+@@ -25069,6 +25267,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
          externalImportAttributes,
          externalLiveBindings: config.externalLiveBindings ?? true,
          file,
@@ -351,7 +351,7 @@ index b6c741c80590a201c071521f5c7f3cb598a5f285..97502a84673b40ec07be3716648b7933
          footer: getAddon(config, 'footer'),
          format,
          freeze: config.freeze ?? true,
-@@ -25702,6 +25901,7 @@ async function mergeOutputOptions(config, overrides, log) {
+@@ -25788,6 +25987,7 @@ async function mergeOutputOptions(config, overrides, log) {
          externalImportAttributes: getOption('externalImportAttributes'),
          externalLiveBindings: getOption('externalLiveBindings'),
          file: getOption('file'),
@@ -380,7 +380,7 @@ index 20dd55d584e7009e3172af8743ecc64979ff4698..9821a73c5d552690e72b01ad3d95a363
  	footer: AddonFunction;
  	format: InternalModuleFormat;
 diff --git a/dist/shared/rollup.js b/dist/shared/rollup.js
-index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6adddbe59b0 100644
+index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb26f46e98 100644
 --- a/dist/shared/rollup.js
 +++ b/dist/shared/rollup.js
 @@ -4046,6 +4046,7 @@ async function mergeOutputOptions(config, overrides, log) {
@@ -403,7 +403,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
      }
      markCalledFromTryStatement() { }
      addReassignedValue(_value) { }
-@@ -9739,6 +9743,7 @@ class LocalVariable extends Variable {
+@@ -9822,6 +9826,7 @@ class LocalVariable extends Variable {
          this.initPath = initPath;
          this.kind = kind;
          this.calledFromTryStatement = false;
@@ -411,7 +411,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
          this.additionalInitializers = null;
          // A possibly incomplete list of functions assigned to this variable; only used
          // to retain call arguments of assigned try-catch helpers, never for value queries
-@@ -9753,6 +9758,9 @@ class LocalVariable extends Variable {
+@@ -9836,6 +9841,9 @@ class LocalVariable extends Variable {
          this.declarations.push(identifier);
          this.markInitializersForDeoptimization().push(init);
      }
@@ -421,7 +421,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
      consolidateInitializers() {
          if (this.additionalInitializers) {
              for (const initializer of this.additionalInitializers) {
-@@ -10358,7 +10366,7 @@ class ChildScope extends Scope {
+@@ -10441,7 +10449,7 @@ class ChildScope extends Scope {
              }
          }
          for (const [name, variable] of this.variables) {
@@ -430,7 +430,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
                  variable.setRenderNames(null, getSafeName(name, usedNames, variable.forbiddenNames));
              }
          }
-@@ -13125,7 +13133,8 @@ class ObjectPattern extends NodeBase {
+@@ -13208,7 +13216,8 @@ class ObjectPattern extends NodeBase {
              const separatedNodes = getCommaSeparatedNodesWithBoundaries(this.properties, code, this.start + 1, this.end - 1);
              let lastSeparatorPos = null;
              for (const { node, separator, start, end } of separatedNodes) {
@@ -440,7 +440,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
                      treeshakeNode(node, code, start, end);
                      continue;
                  }
-@@ -13298,7 +13307,7 @@ class VariableDeclaration extends NodeBase {
+@@ -13381,7 +13390,7 @@ class VariableDeclaration extends NodeBase {
          const singleSystemExport = gatherSystemExportsAndGetSingleExport(separatedNodes, options, aggregatedSystemExports);
          const { exportNamesByVariable } = options;
          for (const { node, start, separator, contentEnd, end } of separatedNodes) {
@@ -449,7 +449,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
                  treeshakeNode(node, code, start, end);
                  continue;
              }
-@@ -13343,6 +13352,26 @@ class VariableDeclaration extends NodeBase {
+@@ -13426,6 +13435,26 @@ class VariableDeclaration extends NodeBase {
              lastSeparatorPos = separator;
              separatorString = nextSeparatorString;
          }
@@ -476,7 +476,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
          this.renderDeclarationEnd(code, separatorString, lastSeparatorPos, actualContentEnd, renderedContentEnd, aggregatedSystemExports, options, omitTrailingSemicolon);
      }
      renderSingleStatementDeclaration(code, options, omitTrailingSemicolon) {
-@@ -13357,7 +13386,7 @@ class VariableDeclaration extends NodeBase {
+@@ -13440,7 +13469,7 @@ class VariableDeclaration extends NodeBase {
          const trailingSystemExports = [];
          const { exportNamesByVariable, snippets: { _, getPropertyAccess } } = options;
          for (const { node, start, separator, contentEnd, end } of separatedNodes) {
@@ -485,7 +485,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
                  treeshakeNode(node, code, start, end);
                  continue;
              }
-@@ -13392,6 +13421,15 @@ class VariableDeclaration extends NodeBase {
+@@ -13475,6 +13504,15 @@ class VariableDeclaration extends NodeBase {
              const name = trailingSystemExports[0].getName(getPropertyAccess);
              code.appendLeft(lastRenderedContentEnd, `,${_}${name}${_}=${_}(${getSystemExportStatement(trailingSystemExports, options)},${_}${name})`);
          }
@@ -501,7 +501,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
          this.renderDeclarationEnd(code, separatorString, lastSeparatorPos, actualContentEnd, renderedContentEnd, [], options, omitTrailingSemicolon);
      }
      renderSingleStatementSystemExports(node, separator, contentEnd, code, options, trailingSystemExports) {
-@@ -13418,7 +13456,7 @@ class VariableDeclaration extends NodeBase {
+@@ -13501,7 +13539,7 @@ class VariableDeclaration extends NodeBase {
              return true;
          }
          for (const declarator of this.declarations) {
@@ -510,7 +510,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
                  return false;
              if (declarator.id.type === parseAst_js.Identifier) {
                  if (exportNamesByVariable.has(declarator.id.variable) ||
-@@ -13474,6 +13512,10 @@ class ClassExpression extends ClassNode {
+@@ -13557,6 +13595,10 @@ class ClassExpression extends ClassNode {
  }
  
  class VariableDeclarator extends NodeBase {
@@ -521,7 +521,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
      declareDeclarator(kind) {
          this.isUsingDeclaration = kind === 'using';
          this.isAsyncUsingDeclaration = kind === 'await using';
-@@ -17918,6 +17960,10 @@ Program.prototype.includeNode = onlyIncludeSelfNoDeoptimize;
+@@ -18001,6 +18043,10 @@ Program.prototype.includeNode = onlyIncludeSelfNoDeoptimize;
  Program.prototype.applyDeoptimizations = doNotDeoptimize;
  
  class Property extends MethodBase {
@@ -532,7 +532,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
      //declare method: boolean;
      get method() {
          return isFlagSet(this.flags, 262144 /* Flag.method */);
-@@ -21117,6 +21163,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
+@@ -21202,6 +21248,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
          module.info.safeVariableNames ||= {};
          for (const variable of module.scope.variables.values()) {
              if (variable.included &&
@@ -540,7 +540,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
                  // this will only happen for exports in some formats
                  !(variable.renderBaseName ||
                      (variable instanceof ExportDefaultVariable && variable.getOriginalVariable() !== variable))) {
-@@ -21296,6 +21343,9 @@ class Chunk {
+@@ -21381,6 +21428,9 @@ class Chunk {
          this.exports = new Set();
          this.exportsByName = new Map();
          this.fileName = null;
@@ -550,7 +550,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
          this.implicitEntryModules = [];
          this.implicitlyLoadedBefore = new Set();
          this.imports = new Set();
-@@ -21921,6 +21971,7 @@ class Chunk {
+@@ -22006,6 +22056,7 @@ class Chunk {
      }
      getDynamicDependencies() {
          return this.getIncludedDynamicImports()
@@ -558,7 +558,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
              .map(resolvedDynamicImport => resolvedDynamicImport.facadeChunk ||
              resolvedDynamicImport.chunk ||
              resolvedDynamicImport.externalChunk ||
-@@ -22191,6 +22242,9 @@ class Chunk {
+@@ -22276,6 +22327,9 @@ class Chunk {
          const { accessedGlobalsByScope, dependencies, exportNamesByVariable, includedNamespaces, inputOptions: { onLog }, isEmpty, orderedModules, outputOptions, pluginDriver, renderedModules, snippets } = this;
          const { compact, format, freeze, generatedCode: { symbols }, importAttributesKey } = outputOptions;
          const { _, cnst, n } = snippets;
@@ -568,7 +568,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
          this.setDynamicImportResolutions(fileName);
          this.setImportMetaResolutions(fileName);
          this.setIdentifierRenderResolutions();
-@@ -22269,11 +22323,153 @@ class Chunk {
+@@ -22354,11 +22408,153 @@ class Chunk {
          if (isEmpty && this.getExportNames().length === 0 && dependencies.size === 0) {
              onLog(parseAst_js.LOGLEVEL_WARN, parseAst_js.logEmptyChunk(this.getChunkName()));
          }
@@ -722,7 +722,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
              if (resolvedDynamicImport.chunk) {
                  const { chunk, facadeChunk, node, resolution } = resolvedDynamicImport;
                  if (chunk === this) {
-@@ -23874,6 +24070,9 @@ class Bundle {
+@@ -23959,6 +24155,9 @@ class Bundle {
                  chunk.generateExports();
                  chunk.inlineTransitiveImports();
              }
@@ -732,7 +732,7 @@ index ba5c4791b6d28198463b104b7d6c0c616bd3cbc0..a914fbb14de1adc40c135953bdc8b6ad
              timeEnd('generate chunks', 2);
              await renderChunks(chunks, outputBundle, this.pluginDriver, this.outputOptions, this.inputOptions.onLog);
          }
-@@ -25320,6 +25519,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
+@@ -25406,6 +25605,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
          externalImportAttributes,
          externalLiveBindings: config.externalLiveBindings ?? true,
          file,
