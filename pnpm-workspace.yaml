@@ -39,7 +39,7 @@ packageExtensions:
 
 overrides:
   # Leaner 3.x (drops the per-name maps watcher never reads); types fixed up by the watcher patch.
-  "watcher>tiny-readdir": "3.1.1"
+  "watcher>tiny-readdir": "3.1.2"
   # Promise.withResolvers ponyfill, inlined by the tiny-readdir patch.
   "tiny-readdir>promise-make-counter": "-"
   # @vercel/nft, cacache, and rimraf still resolve vulnerable glob 13/10 releases.
