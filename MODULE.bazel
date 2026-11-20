@@ -559,7 +559,7 @@ apt.sources_list(
         "resolute-updates",
     ],
     types = ["deb"],
-    uris = ["https://snapshot.ubuntu.com/ubuntu/20261113T103207Z"],
+    uris = ["https://snapshot.ubuntu.com/ubuntu/20261120T154612Z"],
 )
 apt.install(
     dependency_set = "devcontainer_apt",
