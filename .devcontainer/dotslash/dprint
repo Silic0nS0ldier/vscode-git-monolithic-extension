@@ -3,26 +3,26 @@
   "name": "dprint",
   "platforms": {
     "linux-x86_64": {
-      "size": 10370258,
+      "size": 11427722,
       "hash": "sha256",
-      "digest": "f71cb7e22d6776439eba168d5cb296092d6413fea7148fe4d70684a2702a4fee",
+      "digest": "d1aaf0c6d015931b860804eda5bf7fac9d29e2253351b7d6b0177e6b03a8776d",
       "format": "zip",
       "path": "dprint",
       "providers": [
         {
-          "url": "https://github.com/dprint/dprint/releases/download/0.64.3/dprint-x86_64-unknown-linux-gnu.zip"
+          "url": "https://github.com/dprint/dprint/releases/download/0.65.0/dprint-x86_64-unknown-linux-gnu.zip"
         }
       ]
     },
     "linux-aarch64": {
-      "size": 9166620,
+      "size": 10129064,
       "hash": "sha256",
-      "digest": "c820bfc67b0cd6f5f0fa4d00ecdcb056944c86030859f5e50151c88d9164b30d",
+      "digest": "804535e54f431674f5481725ba5d4718de0a7398d6abd33b899fd734f6d98062",
       "format": "zip",
       "path": "dprint",
       "providers": [
         {
-          "url": "https://github.com/dprint/dprint/releases/download/0.64.3/dprint-aarch64-unknown-linux-gnu.zip"
+          "url": "https://github.com/dprint/dprint/releases/download/0.65.0/dprint-aarch64-unknown-linux-gnu.zip"
         }
       ]
     }
