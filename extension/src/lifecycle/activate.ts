@@ -237,7 +237,7 @@ async function createModel(
     model.onDidCloseRepository(onRepository, null, disposables);
     onRepository();
 
-    const disposeCommands = registerCommands(model, git, outputChannel, telemetryReporter);
+    const disposeCommands = registerCommands(context, model, git, outputChannel, telemetryReporter);
     disposables.push(
         disposeCommands,
         // TODO This is a really funky pattern that relies on side effects

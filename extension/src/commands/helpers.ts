@@ -1,4 +1,4 @@
-import { type TextDocument, type TextDocumentContentProvider, Uri, window, workspace } from "vscode";
+import { type Disposable, type TextDocument, type TextDocumentContentProvider, Uri, window, workspace } from "vscode";
 import { Status } from "../api/git.js";
 import type { Model } from "../model.js";
 import type { AbstractRepository } from "../repository/repository-class/AbstractRepository.js";
@@ -132,6 +132,7 @@ export interface ScmCommandOptions {
 
 export interface ScmCommand<N extends CommandName> {
     commandId: CommandId<N>;
+    disposable?: Disposable;
     // TODO Commands receive untyped arguments from VS Code, yet most declare typed parameters. Validate them (as
     // `stage-selected-ranges.ts` does) so this can become a real function type.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type

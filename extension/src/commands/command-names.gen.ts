@@ -15,6 +15,7 @@ export type CommandName =
     | "clone"
     | "cloneRecursive"
     | "close"
+    | "collectDiagnostics"
     | "commit"
     | "commitAll"
     | "commitAllAmend"

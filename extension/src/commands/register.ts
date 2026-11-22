@@ -1,4 +1,4 @@
-import { commands, Disposable, type OutputChannel, workspace } from "vscode";
+import { commands, Disposable, type ExtensionContext, type OutputChannel, workspace } from "vscode";
 import type { Git } from "../git.js";
 import type { Model } from "../model.js";
 import type { CommandName } from "./command-names.gen.js";
@@ -12,6 +12,7 @@ import * as cherryPick from "./implementations/cherry-pick.js";
 import * as clean from "./implementations/clean/mod.js";
 import * as clone from "./implementations/clone/mod.js";
 import * as close from "./implementations/close.js";
+import * as collectDiagnostics from "./implementations/collect-diagnostics.js";
 import * as commit from "./implementations/commit/mod.js";
 import * as fetch from "./implementations/fetch/mod.js";
 import * as ignore from "./implementations/ignore.js";
@@ -57,6 +58,7 @@ function allCommands<C extends ScmCommand<CommandName>>(
 }
 
 export function registerCommands(
+    context: ExtensionContext,
     model: Model,
     git: Git,
     outputChannel: OutputChannel,
@@ -69,6 +71,7 @@ export function registerCommands(
         ...clean.createCommands(model),
         ...clone.createCommands(telemetryReporter, git),
         close.createCommand(model),
+        collectDiagnostics.createCommand(context, model, git),
         ...commit.createCommands(),
         ...fetch.createCommands(),
         ignore.createCommand(model),
@@ -97,7 +100,8 @@ export function registerCommands(
     const disposables: Disposable[] = [];
 
     try {
-        for (const { commandId, method, options } of cmds) {
+        for (const { commandId, disposable, method, options } of cmds) {
+            if (disposable) disposables.push(disposable);
             const command = createCommand(
                 model,
                 telemetryReporter,

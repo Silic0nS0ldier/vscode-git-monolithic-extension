@@ -18,6 +18,62 @@ export function timelineSource(): string {
     return l10n.t("Git Monolithic History");
 }
 
+export function diagnosticsPlaceholder(): string {
+    return l10n.t("Collect performance diagnostics");
+}
+
+export function diagnosticsSnapshot(): string {
+    return l10n.t("Save current snapshot");
+}
+
+export function diagnosticsSnapshotDescription(): string {
+    return l10n.t("Include runtime state and recent extension activity");
+}
+
+export function diagnosticsStartProfile(): string {
+    return l10n.t("Start CPU profile");
+}
+
+export function diagnosticsProfileDescription(): string {
+    return l10n.t("Record extension host activity, then run this command again to save it");
+}
+
+export function diagnosticsProfilingStatus(): string {
+    return l10n.t("$(record) Git profile");
+}
+
+export function diagnosticsProfilingTooltip(): string {
+    return l10n.t("Git Monolithic is recording a CPU profile. Run Collect Performance Diagnostics again to stop.");
+}
+
+export function diagnosticsProfileStarted(): string {
+    return l10n.t("CPU profiling started. Reproduce the slowdown, then run Collect Performance Diagnostics again.");
+}
+
+export function diagnosticsCopyReport(): string {
+    return l10n.t("Copy Report");
+}
+
+export function diagnosticsRevealFiles(): string {
+    return l10n.t("Reveal Files");
+}
+
+export function diagnosticsReportSaved(): string {
+    return l10n.t("Performance diagnostics were saved and opened. Review them before attaching to a bug report.");
+}
+
+export function diagnosticsAutoSaveFailed(): string {
+    return l10n.t("Git Monolithic could not finish saving its CPU profile.");
+}
+
+export function diagnosticsPrivacyNote(): string {
+    return l10n.t("Repository paths, file names, Git arguments, output, and credentials are omitted.");
+}
+
+export function diagnosticsProfilePrivacyNote(): string {
+    return l10n.t("CPU profiles contain runtime script paths; review a profile before sharing it.");
+}
+
 export function openComparison(): string {
     return l10n.t("Open Comparison");
 }

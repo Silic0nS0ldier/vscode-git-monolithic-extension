@@ -2,6 +2,7 @@ import { fromEnvironment, fromPath, type GitContext, type PersistentCLIContext }
 import { createServices } from "monolithic-git-interop/services/nodejs";
 import { isErr, isOk, unwrap } from "monolithic-git-interop/util/result";
 import * as path from "node:path";
+import { diagnosticActivity, diagnosticGitCommand } from "../diagnostics/activity.js";
 import { trace } from "../tracing.js";
 import { snoopOnStream, SnoopStream } from "../util/snoop-stream.js";
 
@@ -27,6 +28,11 @@ export async function findGit(hints: string[], persistentContext: PersistentCLIC
             ...context,
             cli: async (cliContext, args) => {
                 const invocId = `CMD_0_${runCounter++}`;
+                const activity = diagnosticActivity.beginGitInvocation(
+                    cliContext.cwd,
+                    invocId,
+                    diagnosticGitCommand(args),
+                );
 
                 // Log input
                 trace(`${invocId} > git ${args.join(" ")}`);
@@ -44,19 +50,27 @@ export async function findGit(hints: string[], persistentContext: PersistentCLIC
                 let pid: number = -1;
                 const onSpawn = (spawnPid: number): void => {
                     pid = spawnPid;
+                    activity.setPid(spawnPid);
                     cliContext.onSpawn?.(spawnPid);
                 };
 
                 const start = Date.now();
-                const result = await context.cli(
-                    {
-                        ...cliContext,
-                        stderr,
-                        stdout,
-                        onSpawn,
-                    },
-                    args,
-                );
+                let result;
+                try {
+                    result = await context.cli(
+                        {
+                            ...cliContext,
+                            stderr,
+                            stdout,
+                            onSpawn,
+                        },
+                        args,
+                    );
+                } catch (error) {
+                    activity.finish("failed");
+                    throw error;
+                }
+                activity.finish(isOk(result) ? "succeeded" : "failed");
 
                 const durationStr = new Intl.DurationFormat("en", { style: "narrow" }).format({
                     milliseconds: Date.now() - start,
@@ -77,8 +91,8 @@ export async function findGit(hints: string[], persistentContext: PersistentCLIC
         };
     }
 
-    function found(context: GitContext, wrap: (context: GitContext) => GitContext): IGit {
-        const wrapped = wrap(context);
+    function found(context: GitContext): IGit {
+        const wrapped = monitor(context);
         return {
             context: wrapped,
             path: wrapped.path,
@@ -88,7 +102,7 @@ export async function findGit(hints: string[], persistentContext: PersistentCLIC
                 if (isErr(result)) {
                     throw new Error(`Could not recreate the context for ${context.path}`, { cause: unwrap(result) });
                 }
-                return wrap(unwrap(result));
+                return monitor(unwrap(result));
             },
         };
     }
@@ -97,14 +111,14 @@ export async function findGit(hints: string[], persistentContext: PersistentCLIC
         const result = await fromPath(path.resolve(hint), persistentContext, services);
 
         if (isOk(result)) {
-            return found(unwrap(result), context => context);
+            return found(unwrap(result));
         }
     }
 
     const result = await fromEnvironment(persistentContext, services);
 
     if (isOk(result)) {
-        return found(unwrap(result), monitor);
+        return found(unwrap(result));
     }
 
     throw new Error("Git installation not found.");
