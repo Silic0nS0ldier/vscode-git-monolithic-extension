@@ -32,6 +32,9 @@ jobs:
           fail-on-cache-error: "false"
           # Rewrites module inputs below, so a restored hidden lockfile would be stale.
           hidden-lockfile: "false"
+      - uses: pnpm/setup@v3.2.0
+        with:
+          install: false
       - run: node ./.github/workflows/update_dotslash_stubs.mjs
       - run: node ./.github/workflows/update_bazel_nodejs.mjs ./MODULE.bazel
       - run: node ./.github/workflows/update_bazel_code_server.mjs
@@ -47,11 +50,6 @@ jobs:
         with:
           path: ${{ runner.temp }}/mod.profile.gz
           archive: false
-      # update_bazel_code_server.mjs can rewrite extension/package.json, which leaves
-      # pnpm-lock.yaml stale for the `require-lockfile` install in build_and_test.
-      - uses: pnpm/setup@v3.2.0
-        with:
-          install: false
       - run: pnpm install --lockfile-only
       - uses: stefanzweifel/git-auto-commit-action@v7
       - id: get_commit
