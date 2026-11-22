@@ -21,7 +21,8 @@ def _scm_itest_impl(
         entry_point: select[Label],
         package_json: Label,
         size: str,
-        untrusted: bool) -> None:
+        untrusted: bool,
+        watchman: bool) -> None:
     workspace_subdir = "git-monolithic-itest-" + name
 
     eslint_test(
@@ -98,6 +99,15 @@ def _scm_itest_impl(
         target_compatible_with = LINUX_ONLY,
     )
 
+    coder_service_label = ":code_server_service"
+    if untrusted:
+        coder_service_label = ":untrusted_code_server_service"
+    elif watchman:
+        coder_service_label = ":watchman_code_server_service"
+
+    if untrusted and watchman:
+        fail("A suite cannot be both untrusted and use the Watchman backend.")
+
     service_test(
         name = name + "_test",
         size = size,
@@ -110,7 +120,7 @@ def _scm_itest_impl(
         },
         services = [
             ":browserless_chromium_service",
-            ":untrusted_code_server_service" if untrusted else ":code_server_service",
+            coder_service_label,
             ":" + name + "_fixture_task",
         ],
         target_compatible_with = LINUX_ONLY,
@@ -174,6 +184,10 @@ scm_itest = macro(
                 Opens the workspace in Restricted Mode, for suites covering the
                 discovery path the extension takes when `workspace.isTrusted` is false.
             """,
+        ),
+        "watchman": attr.bool(
+            configurable = False,
+            doc = "Opens the workspace with the pinned Watchman binary on PATH.",
         ),
     },
 )

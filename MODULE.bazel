@@ -357,6 +357,8 @@ use_repo(
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
 _ELECTRON_LINUX_BUILD_FILE = """\
 exports_files(["electron"])
 
@@ -464,6 +466,27 @@ http_archive(
     build_file_content = _DUGITE_BUILD_FILE,
     sha256 = "1110de343de11cc6f469b782b60f36217b9199b5e06875dd65baa26dd60563c7",
     url = _DUGITE_URL_PREFIX + "macOS-arm64.tar.gz",
+)
+
+# Using perplexityai/watchman for standalone Watchman builds as official releases are incomplete.
+_WATCHMAN_RELEASE = "0.3.5"
+
+_WATCHMAN_URL_PREFIX = "https://github.com/perplexityai/watchman/releases/download/v" + _WATCHMAN_RELEASE + "/watchman-"
+
+http_file(
+    name = "watchman_linux_x64",
+    downloaded_file_path = "watchman",
+    executable = True,
+    sha256 = "3086e67b1aada2b5591e95e52578e8fdfefeaea4b605ae79131e495d1a4dba62",
+    url = _WATCHMAN_URL_PREFIX + "x86_64-linux-gnu",
+)
+
+http_file(
+    name = "watchman_linux_arm64",
+    downloaded_file_path = "watchman",
+    executable = True,
+    sha256 = "e6735c619fc79f3a45edc0db3ee0246a6fddb6e2036d7278ce93c13451b5a8e3",
+    url = _WATCHMAN_URL_PREFIX + "aarch64-linux-gnu",
 )
 
 # code-server hosts the extension for `//integration_tests`. Upstream VS Code cannot run

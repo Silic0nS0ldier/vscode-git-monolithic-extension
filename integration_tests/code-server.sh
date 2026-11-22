@@ -35,6 +35,17 @@ fi
 
 export HOME="$state"
 
+if [[ -n "${5:-}" ]]; then
+    watchman_bin="$(realpath "$5")"
+    XDG_STATE_HOME="$(mktemp -d /tmp/git-monolithic-watchman.XXXXXX)"
+    export XDG_STATE_HOME
+    printf '%s' "$watchman_bin" >"${TEST_TMPDIR:-/tmp}/watchman-bin"
+    printf '%s' "$XDG_STATE_HOME" >"${TEST_TMPDIR:-/tmp}/watchman-state-dir"
+    watchman_dir="$(dirname "$watchman_bin")"
+    PATH="$watchman_dir:$PATH"
+    export PATH
+fi
+
 # Without a serviceUrl the workbench skips the gallery entirely; otherwise it spends a
 # second or so querying open-vsx.org for extensions it will never install.
 export EXTENSIONS_GALLERY='{}'

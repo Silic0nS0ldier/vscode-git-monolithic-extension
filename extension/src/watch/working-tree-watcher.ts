@@ -41,7 +41,10 @@ export function createWorkingTreeWatcher(
 
     const workingTreeWatcher = watch(
         [
-            repoRoot,
+            {
+                path: repoRoot,
+                recursive: true,
+            },
         ],
         transientGitLocks(dotGit),
         combinedIgnoreFn,

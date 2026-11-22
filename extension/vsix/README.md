@@ -4,7 +4,8 @@ A fork of VSCode's integrated Git support (from 2021-09-08) designed to work bet
 
 It brings the following improvements;
 
-- Greatly optimised watcher implementation.
+- A selectable, greatly optimised watcher implementation: the bundled Node.js watcher, VS Code's native watcher, or
+  Watchman (when installed).
   - When there is a flood of changes (e.g. pulling in new changes, changing branches) it will wait for idle before triggering a refresh.
   - Basic `.gitignore` support. ([`Microsoft/vscode#62725`](https://github.com/Microsoft/vscode/issues/62725))
 - Souce control panel has a "grace period" where when files change it will turn gray for a time before actually changing, to prevent misclicks (e.g. due to refresh slowness).
