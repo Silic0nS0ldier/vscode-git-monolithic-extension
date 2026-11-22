@@ -56,21 +56,42 @@ export function createDotGitWatcher(
     const rootWatcher = watch(
         [
             // Where we are
-            path.join(dotGitDir, "HEAD"),
+            {
+                path: path.join(dotGitDir, "HEAD"),
+                recursive: false,
+            },
             // What we are tracking
             // `sharedindex.*` stores the whole index, with `index` a subset of recent changes. As
             // such `sharedindex.*` does not needed to be watched. Any changes are just `index`
             // being pruned.
-            path.join(dotGitDir, "index"),
+            {
+                path: path.join(dotGitDir, "index"),
+                recursive: false,
+            },
             // Graph of what we know
             // NOTE: Directories are listed individually so ".git/refs/prefetch" (from `git maintenance`) is ignored.
-            path.join(dotGitDir, "refs/heads"),
-            path.join(dotGitDir, "refs/remotes"),
-            path.join(dotGitDir, "refs/tags"),
+            {
+                path: path.join(dotGitDir, "refs/heads"),
+                recursive: true,
+            },
+            {
+                path: path.join(dotGitDir, "refs/remotes"),
+                recursive: true,
+            },
+            {
+                path: path.join(dotGitDir, "refs/tags"),
+                recursive: true,
+            },
             // Current commit message
-            path.join(dotGitDir, "COMMIT_EDITMSG"),
+            {
+                path: path.join(dotGitDir, "COMMIT_EDITMSG"),
+                recursive: false,
+            },
             // How we do things
-            path.join(dotGitDir, "config"),
+            {
+                path: path.join(dotGitDir, "config"),
+                recursive: false,
+            },
         ],
         transientGitLocks(dotGitDir),
         () => false,

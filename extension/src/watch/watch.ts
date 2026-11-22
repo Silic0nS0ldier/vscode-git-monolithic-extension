@@ -1,11 +1,13 @@
-import { inspect } from "node:util";
 import { Disposable, type Event, EventEmitter, Uri } from "vscode";
-import BaseWatcher from "watcher";
-import { error, trace, warn } from "../tracing.js";
+import { trace, warn } from "../tracing.js";
 import * as config from "../util/config.js";
+import { UnreachableError } from "../util/unreachable-error.js";
+import type { WatchBackend, WatchBackendOptions, WatchTarget } from "./backend.js";
+import { createEventBatcher } from "./event-batcher.js";
 import { createLockGate } from "./lock-gate.js";
-
-type TargetEvent = Parameters<BaseWatcher["event"]>[0];
+import { createPackageWatcher } from "./package-watcher.js";
+import { createVSCodeWatcher } from "./vscode-watcher.js";
+import { createWatchmanWatcher } from "./watchman-watcher.js";
 
 type Watcher = {
     event: Event<Uri>;
@@ -23,7 +25,7 @@ export type SuspendHandle = {
  * Excess events (such as those occurring while locks are present) are suppressed.
  */
 export function watch(
-    locations: [string, ...string[]],
+    targets: readonly [WatchTarget, ...WatchTarget[]],
     locks: string[],
     ignoreFn: (path: string) => boolean,
     important: string[],
@@ -32,54 +34,51 @@ export function watch(
     const onFileChangeEmitter = new EventEmitter<Uri>();
     let suspendCount = 0;
     let disposed = false;
+    const backend = config.watcherBackend();
+    trace(`${id} watcher selecting ${backend} backend`);
 
     function createWatcher() {
-        const lockGate = createLockGate<TargetEvent>(locks, important, recalled => {
+        const lockGate = createLockGate<WatchBackendEvent>(locks, important, recalled => {
             trace(`${id} watcher releasing ${recalled.size} important events`);
-            for (const [recallPath, recallEt] of recalled) {
-                trace(`${id} watcher recalled event "${recallEt}" "${recallPath}"`);
+            for (const [recallPath, event] of recalled) {
+                trace(`${id} watcher recalled event "${event.event}" "${recallPath}"`);
                 onFileChangeEmitter.fire(Uri.file(recallPath));
             }
         });
-        const baseWatcher = new BaseWatcher(
-            [...locations],
-            {
-                // TODO Check that file limit is not exceeded (10_000_000)
-                //      Use `git ls-files | wc -l` (or similar) to check
-                debounce: config.watcherDebounce(),
-                ignoreInitial: true,
-                renameDetection: false,
-                recursive: true,
-                ignore: ignoreFn,
-            },
-            (et, path) => {
-                const watchable = isWatchableEvent(et);
-                if (lockGate.handle(et, path, watchable)) {
-                    return;
-                }
-
-                // Filter directory events, only files are of interest
-                // TODO Do the individual files also get updated?
-                if (watchable) {
-                    trace(`${id} watcher event "${et}" "${path}"`);
-                    onFileChangeEmitter.fire(Uri.file(path));
-                }
-            },
-        );
-
-        baseWatcher.on("error", err => {
-            error(`${id} watcher failed: ${inspect(err)}`);
+        const debounceMs = config.watcherDebounce();
+        const sharedDebounceMs = backend === "vscode" || backend === "watchman" ? debounceMs : 0;
+        const eventBatcher = createEventBatcher(sharedDebounceMs, event => {
+            if (ignoreFn(event.path)) {
+                return;
+            }
+            if (lockGate.handle(event, event.path, event.watchable)) {
+                return;
+            }
+            if (event.watchable) {
+                trace(`${id} watcher event "${event.event}" "${event.path}"`);
+                onFileChangeEmitter.fire(Uri.file(event.path));
+            }
         });
+        const backendOptions: WatchBackendOptions = {
+            debounceMs,
+            id,
+            ignore: ignoreFn,
+            onEvent: event => {
+                if (!ignoreFn(event.path)) {
+                    eventBatcher.push(event);
+                }
+            },
+            targets,
+        };
+        const rawWatcher = createBackend(backend, backendOptions);
 
         return {
-            baseWatcher,
+            rawWatcher,
             close(): void {
+                eventBatcher.dispose();
                 lockGate.dispose();
-                if (!baseWatcher.isClosed()) {
-                    baseWatcher.close();
-                }
+                rawWatcher.dispose();
             },
-            isClosed: () => baseWatcher.isClosed(),
         };
     }
 
@@ -101,7 +100,7 @@ export function watch(
 
         trace(`${id} watcher resuming, re-creating underlying watcher`);
         watcher = createWatcher();
-        await whenReady(watcher.baseWatcher);
+        await watcher.rawWatcher.ready;
     }
 
     return {
@@ -122,12 +121,6 @@ export function watch(
                 // here would be redundant and wasteful.
                 trace(
                     `${id} watcher refresh requested while suspended; will be applied by resume`,
-                );
-                return;
-            }
-            if (watcher.isClosed()) {
-                trace(
-                    `${id} watcher refresh requested but watcher is closed, skipping refresh\n${new Error().stack}`,
                 );
                 return;
             }
@@ -159,20 +152,22 @@ export function watch(
     };
 }
 
-function isWatchableEvent(event: TargetEvent): boolean {
-    return event !== "addDir" && event !== "unlinkDir" && event !== "renameDir";
-}
+type WatchBackendEvent = Parameters<WatchBackendOptions["onEvent"]>[0];
 
-/** Changes made before this settles may go unreported; changes made after will not. */
-function whenReady(watcher: BaseWatcher): Promise<void> {
-    if (watcher.isReady() || watcher.isClosed()) {
-        return Promise.resolve();
+function createBackend(
+    backend: config.WatcherBackend,
+    options: WatchBackendOptions,
+): WatchBackend {
+    switch (backend) {
+        case "npm:watcher":
+            return createPackageWatcher(options);
+        case "vscode":
+            return createVSCodeWatcher(options);
+        case "watchman":
+            return createWatchmanWatcher(options);
+        default:
+            throw new UnreachableError(backend);
     }
-    return new Promise(resolve => {
-        watcher.once("ready", resolve);
-        // A watcher closed during setup never becomes ready.
-        watcher.once("close", resolve);
-    });
 }
 
 export function createIgnoreFnFromList(ignoreList: string[]): (path: string) => boolean {

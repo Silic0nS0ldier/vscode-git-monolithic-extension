@@ -1672,6 +1672,21 @@
                     "markdownDescription": "%config.layoutShiftDelay%",
                     "default": 900
                 },
+                "git_monolithic.watcherBackend": {
+                    "type": "string",
+                    "enum": [
+                        "npm:watcher",
+                        "vscode",
+                        "watchman"
+                    ],
+                    "enumDescriptions": [
+                        "%config.watcherBackend.npm_watcher%",
+                        "%config.watcherBackend.vscode%",
+                        "%config.watcherBackend.watchman%"
+                    ],
+                    "markdownDescription": "%config.watcherBackend%",
+                    "default": "npm:watcher"
+                },
                 "git_monolithic.watcherDebounce": {
                     "type": "number",
                     "minimum": 0,

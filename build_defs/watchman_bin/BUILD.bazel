@@ -1,0 +1,31 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(name = "unsupported")
+
+selects.config_setting_group(
+    name = "linux_x86_64",
+    match_all = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "linux_arm64",
+    match_all = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+)
+
+alias(
+    name = "watchman",
+    actual = select({
+        ":linux_x86_64": "@watchman_linux_x64//:watchman",
+        ":linux_arm64": "@watchman_linux_arm64//:watchman",
+        "//conditions:default": ":unsupported",
+    }),
+    target_compatible_with = ["@platforms//os:linux"],
+)

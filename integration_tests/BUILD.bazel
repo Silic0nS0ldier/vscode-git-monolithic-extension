@@ -131,8 +131,8 @@ service_test(
     test = "@rules_itest//:exit0",
 )
 
-# The editor opens the suite's workspace from the page URL, so only workspace trust varies.
-# The state is built ahead of time, installing the shipped VSIX so every suite tests the real package.
+# The editor opens the suite's workspace from the page URL, so the state only varies by workspace trust.
+# Each state is built ahead of time, installing the shipped VSIX so every suite tests the real package.
 [
     [
         genrule(
@@ -187,6 +187,37 @@ service_test(
     ]
 ]
 
+# Watchman shares the trusted state but gets its pinned binary on PATH and a short,
+# writable XDG state directory for its Unix socket.
+itest_service(
+    name = "watchman_code_server_service",
+    args = [
+        "$(rootpath :code_server_binary)",
+        "$(rootpath :code_server_state)",
+        "$${PORT}",
+        "trusted",
+        "$(rootpath //build_defs/watchman_bin:watchman)",
+    ],
+    autoassign_port = True,
+    data = [
+        ":code_server_binary",
+        ":code_server_state",
+        "//build_defs/watchman_bin:watchman",
+    ],
+    exe = ":code_server",
+    expected_start_duration = "5s",
+    http_health_check_address = "http://127.0.0.1:$${PORT}/healthz",
+    hygienic = False,
+    target_compatible_with = LINUX_ONLY,
+)
+
+service_test(
+    name = "watchman_code_server_service_hygiene_test",
+    size = "small",
+    services = [":watchman_code_server_service"],
+    test = "@rules_itest//:exit0",
+)
+
 ts_config(
     name = "tsconfig",
     src = "tsconfig.json",
@@ -231,6 +262,9 @@ ITEST_SUITES = [(
 # Suites whose workspace opens in Restricted Mode.
 UNTRUSTED_SUITES = ["untrusted"]
 
+# Suites whose extension selects the real Watchman backend.
+WATCHMAN_SUITES = ["watcher_watchman"]
+
 # Each suite compiles only its own test file, so suites do not invalidate each other.
 [
     ts_project(
@@ -259,6 +293,7 @@ UNTRUSTED_SUITES = ["untrusted"]
         fixture = "fixtures/%s.sh" % basename,
         lib = ":%s_lib" % name,
         untrusted = name in UNTRUSTED_SUITES,
+        watchman = name in WATCHMAN_SUITES,
     )
     for (name, basename) in ITEST_SUITES
 ]
