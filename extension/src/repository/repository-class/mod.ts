@@ -3,6 +3,7 @@ import { inspect } from "node:util";
 import { Disposable, EventEmitter, type Memento, type QuickDiffProvider, Uri, window, workspace } from "vscode";
 import { type Branch, GitErrorCodes, type Remote } from "../../api/git.js";
 import { AutoFetcher } from "../../autofetch.js";
+import { diagnosticActivity } from "../../diagnostics/activity.js";
 import type { Repository as BaseRepository } from "../../git.js";
 import { GitError } from "../../git/error.js";
 import type { Submodule } from "../../git/Submodule.js";
@@ -218,6 +219,7 @@ export function createRepository(
         }
 
         let error: unknown = null;
+        const activity = diagnosticActivity.beginOperation(repoRoot, operation);
 
         operations.start(operation);
         onRunOperationEmitter.fire(operation);
@@ -252,6 +254,7 @@ export function createRepository(
 
             throw err;
         } finally {
+            activity.finish(error === null ? "succeeded" : "failed");
             operations.end(operation);
             onDidRunOperationEmitter.fire({ error, operation });
 

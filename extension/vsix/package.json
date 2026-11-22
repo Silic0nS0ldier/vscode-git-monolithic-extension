@@ -105,6 +105,13 @@
                 "icon": "$(refresh)"
             },
             {
+                "command": "git_monolithic.collectDiagnostics",
+                "title": "%command.collectDiagnostics%",
+                "category": "Git",
+                "enablement": "config.git_monolithic.enabled",
+                "icon": "$(pulse)"
+            },
+            {
                 "command": "git_monolithic.openChange",
                 "title": "%command.openChange%",
                 "category": "Git",
@@ -637,6 +644,10 @@
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"
                 },
                 {
+                    "command": "git_monolithic.collectDiagnostics",
+                    "when": "config.git_monolithic.enabled && !git_monolithic.context.missing"
+                },
+                {
                     "command": "git_monolithic.openFile",
                     "when": "config.git_monolithic.enabled && !git_monolithic.context.missing && git_monolithic.context.openRepositoryCount != 0"
                 },
@@ -930,6 +941,11 @@
                 {
                     "command": "git_monolithic.refresh",
                     "group": "navigation",
+                    "when": "scmProvider == gitm"
+                },
+                {
+                    "command": "git_monolithic.collectDiagnostics",
+                    "group": "3_footer",
                     "when": "scmProvider == gitm"
                 },
                 {
