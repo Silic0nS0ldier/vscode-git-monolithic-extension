@@ -223,8 +223,8 @@ importers:
         version: 8.73.0(eslint@10.15.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
     devDependencies:
       '@suzuki-shunsuke/renovate-config-validator':
-        specifier: 44.227.3
-        version: 44.227.3
+        specifier: 44.255.1
+        version: 44.255.1
       typescript:
         specifier: 7.1.0-beta
         version: 7.1.0-beta
@@ -1221,8 +1221,8 @@ packages:
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
 
-  '@suzuki-shunsuke/renovate-config-validator@44.227.3':
-    resolution: {integrity: sha512-33ZLt7p/k3XUY9ey9HXmXFzXkv1HG+X50WMVpYIHodDjO4hr56F3R+V4r1tusWCgdY1C/lD3H3d+BNwoeNKNAw==}
+  '@suzuki-shunsuke/renovate-config-validator@44.255.1':
+    resolution: {integrity: sha512-FG1Xla01wANEvqJw2SoZGeNRvLwt8APhRjQND8IPJy3SIS+CSOIUWfRY9nUUZ4Ra8y/jg0k5AtHA2uD4wozVnQ==}
     engines: {node: ^24.11.0 || ^26.13.0}
     hasBin: true
 
@@ -2498,8 +2498,8 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  re2@1.27.0:
-    resolution: {integrity: sha512-z5Vascmj7lQbU3YdfYJUDkBGGTnoAObcVW/CSbpI3WbVb1vZQsSzSWcGkfKU0JKrrGfPZwPr8EVHwYXKQKLVXw==}
+  re2@1.27.1:
+    resolution: {integrity: sha512-J0RHubiwH/isNWD2Z+TX+hpVZCkaS/X30KPtYwckK5sjEaW8BRhnd15EPIjBB5GxD174iEVtJmmCoqfErH1qDQ==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
   read@1.0.7:
@@ -3605,9 +3605,9 @@ snapshots:
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
-  '@suzuki-shunsuke/renovate-config-validator@44.227.3':
+  '@suzuki-shunsuke/renovate-config-validator@44.255.1':
     optionalDependencies:
-      re2: 1.27.0
+      re2: 1.27.1
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
@@ -4905,7 +4905,7 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
-  re2@1.27.0:
+  re2@1.27.1:
     dependencies:
       install-artifact-from-github: 1.8.1
       nan: 2.30.0
