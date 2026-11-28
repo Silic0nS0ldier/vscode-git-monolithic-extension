@@ -1,5 +1,5 @@
 diff --git a/dist/index.js b/dist/index.js
-index 1b2a253d66f198bfbbbb4b87b3b876bc57b0801c..5017ccc410ac2eafa769a4b8614c753df7fb6c05 100644
+index 877fdfa..d5f6954 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -1,7 +1,6 @@
@@ -29,10 +29,10 @@ index 1b2a253d66f198bfbbbb4b87b3b876bc57b0801c..5017ccc410ac2eafa769a4b8614c753d
 +    increment();
 +    queueMicrotask(decrement);
      let foundPaths = 0;
-     const handleDirectory = (subPath, depth) => {
-         if (visited.has(subPath))
+     let failed = false;
+     let failure;
 diff --git a/package.json b/package.json
-index 9e613ee0595d86fc637b79d8ef19b22bd0a1f457..79aa6ab7a8772bdbd36c7a49842d75dd05e29207 100755
+index 4bb49a2..bec5b53 100755
 --- a/package.json
 +++ b/package.json
 @@ -26,9 +26,6 @@
