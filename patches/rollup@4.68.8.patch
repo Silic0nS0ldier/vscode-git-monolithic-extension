@@ -1,5 +1,5 @@
 diff --git a/dist/es/shared/node-entry.js b/dist/es/shared/node-entry.js
-index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3c4281e4f 100644
+index 73491c3cbc902ba9dacb117e97afc50566409318..6e8e7201025c363a22278a35a679267190e6d673 100644
 --- a/dist/es/shared/node-entry.js
 +++ b/dist/es/shared/node-entry.js
 @@ -2939,7 +2939,10 @@ class Variable extends ExpressionEntity {
@@ -132,8 +132,8 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
      declareDeclarator(kind) {
          this.isUsingDeclaration = kind === 'using';
          this.isAsyncUsingDeclaration = kind === 'await using';
-@@ -16384,6 +16425,10 @@ Program.prototype.includeNode = onlyIncludeSelfNoDeoptimize;
- Program.prototype.applyDeoptimizations = doNotDeoptimize;
+@@ -15481,6 +15522,10 @@ class ObjectExpression extends NodeBase {
+ ObjectExpression.prototype.applyDeoptimizations = doNotDeoptimize;
  
  class Property extends MethodBase {
 +    constructor() {
@@ -143,7 +143,7 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
      //declare method: boolean;
      get method() {
          return isFlagSet(this.flags, 262144 /* Flag.method */);
-@@ -19592,6 +19637,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
+@@ -19634,6 +19679,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
          module.info.safeVariableNames ||= {};
          for (const variable of module.scope.variables.values()) {
              if (variable.included &&
@@ -151,7 +151,7 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
                  // this will only happen for exports in some formats
                  !(variable.renderBaseName ||
                      (variable instanceof ExportDefaultVariable && variable.getOriginalVariable() !== variable))) {
-@@ -19885,6 +19931,9 @@ class Chunk {
+@@ -19927,6 +19973,9 @@ class Chunk {
          this.exports = new Set();
          this.exportsByName = new Map();
          this.fileName = null;
@@ -161,7 +161,7 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
          this.implicitEntryModules = [];
          this.implicitlyLoadedBefore = new Set();
          this.imports = new Set();
-@@ -20510,6 +20559,7 @@ class Chunk {
+@@ -20552,6 +20601,7 @@ class Chunk {
      }
      getDynamicDependencies() {
          return this.getIncludedDynamicImports()
@@ -169,7 +169,7 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
              .map(resolvedDynamicImport => resolvedDynamicImport.facadeChunk ||
              resolvedDynamicImport.chunk ||
              resolvedDynamicImport.externalChunk ||
-@@ -20780,6 +20830,9 @@ class Chunk {
+@@ -20871,6 +20921,9 @@ class Chunk {
          const { accessedGlobalsByScope, dependencies, exportNamesByVariable, includedNamespaces, inputOptions: { onLog }, isEmpty, orderedModules, outputOptions, pluginDriver, renderedModules, snippets } = this;
          const { compact, format, freeze, generatedCode: { symbols }, importAttributesKey } = outputOptions;
          const { _, cnst, n } = snippets;
@@ -179,7 +179,7 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
          this.setDynamicImportResolutions(fileName);
          this.setImportMetaResolutions(fileName);
          this.setIdentifierRenderResolutions();
-@@ -20858,11 +20911,153 @@ class Chunk {
+@@ -20951,11 +21004,153 @@ class Chunk {
          if (isEmpty && this.getExportNames().length === 0 && dependencies.size === 0) {
              onLog(LOGLEVEL_WARN, logEmptyChunk(this.getChunkName()));
          }
@@ -333,7 +333,7 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
              if (resolvedDynamicImport.chunk) {
                  const { chunk, facadeChunk, node, resolution } = resolvedDynamicImport;
                  if (chunk === this) {
-@@ -22483,6 +22678,9 @@ class Bundle {
+@@ -22580,6 +22775,9 @@ class Bundle {
                  chunk.generateExports();
                  chunk.inlineTransitiveImports();
              }
@@ -343,7 +343,7 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
              timeEnd('generate chunks', 2);
              await renderChunks(chunks, outputBundle, this.pluginDriver, this.outputOptions, this.inputOptions.onLog);
          }
-@@ -25069,6 +25267,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
+@@ -25166,6 +25364,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
          externalImportAttributes,
          externalLiveBindings: config.externalLiveBindings ?? true,
          file,
@@ -351,7 +351,7 @@ index 4758f902fbfb4632bb4026da976275936889ecf7..379b06f4a5dae1b3c359bbdc0d8df0e3
          footer: getAddon(config, 'footer'),
          format,
          freeze: config.freeze ?? true,
-@@ -25788,6 +25987,7 @@ async function mergeOutputOptions(config, overrides, log) {
+@@ -25885,6 +26084,7 @@ async function mergeOutputOptions(config, overrides, log) {
          externalImportAttributes: getOption('externalImportAttributes'),
          externalLiveBindings: getOption('externalLiveBindings'),
          file: getOption('file'),
@@ -380,7 +380,7 @@ index 20dd55d584e7009e3172af8743ecc64979ff4698..9821a73c5d552690e72b01ad3d95a363
  	footer: AddonFunction;
  	format: InternalModuleFormat;
 diff --git a/dist/shared/rollup.js b/dist/shared/rollup.js
-index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb26f46e98 100644
+index f68625b66e2d49ac62606d23a20c910b0c2c8f52..d6548193b7ff88860d4ab47e7d8f3537b3cdf09a 100644
 --- a/dist/shared/rollup.js
 +++ b/dist/shared/rollup.js
 @@ -4046,6 +4046,7 @@ async function mergeOutputOptions(config, overrides, log) {
@@ -521,8 +521,8 @@ index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb
      declareDeclarator(kind) {
          this.isUsingDeclaration = kind === 'using';
          this.isAsyncUsingDeclaration = kind === 'await using';
-@@ -18001,6 +18043,10 @@ Program.prototype.includeNode = onlyIncludeSelfNoDeoptimize;
- Program.prototype.applyDeoptimizations = doNotDeoptimize;
+@@ -17098,6 +17140,10 @@ class ObjectExpression extends NodeBase {
+ ObjectExpression.prototype.applyDeoptimizations = doNotDeoptimize;
  
  class Property extends MethodBase {
 +    constructor() {
@@ -532,7 +532,7 @@ index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb
      //declare method: boolean;
      get method() {
          return isFlagSet(this.flags, 262144 /* Flag.method */);
-@@ -21202,6 +21248,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
+@@ -21244,6 +21290,7 @@ function deconflictTopLevelVariables(usedNames, modules, includedNamespaces) {
          module.info.safeVariableNames ||= {};
          for (const variable of module.scope.variables.values()) {
              if (variable.included &&
@@ -540,7 +540,7 @@ index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb
                  // this will only happen for exports in some formats
                  !(variable.renderBaseName ||
                      (variable instanceof ExportDefaultVariable && variable.getOriginalVariable() !== variable))) {
-@@ -21381,6 +21428,9 @@ class Chunk {
+@@ -21423,6 +21470,9 @@ class Chunk {
          this.exports = new Set();
          this.exportsByName = new Map();
          this.fileName = null;
@@ -550,7 +550,7 @@ index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb
          this.implicitEntryModules = [];
          this.implicitlyLoadedBefore = new Set();
          this.imports = new Set();
-@@ -22006,6 +22056,7 @@ class Chunk {
+@@ -22048,6 +22098,7 @@ class Chunk {
      }
      getDynamicDependencies() {
          return this.getIncludedDynamicImports()
@@ -558,7 +558,7 @@ index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb
              .map(resolvedDynamicImport => resolvedDynamicImport.facadeChunk ||
              resolvedDynamicImport.chunk ||
              resolvedDynamicImport.externalChunk ||
-@@ -22276,6 +22327,9 @@ class Chunk {
+@@ -22367,6 +22418,9 @@ class Chunk {
          const { accessedGlobalsByScope, dependencies, exportNamesByVariable, includedNamespaces, inputOptions: { onLog }, isEmpty, orderedModules, outputOptions, pluginDriver, renderedModules, snippets } = this;
          const { compact, format, freeze, generatedCode: { symbols }, importAttributesKey } = outputOptions;
          const { _, cnst, n } = snippets;
@@ -568,7 +568,7 @@ index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb
          this.setDynamicImportResolutions(fileName);
          this.setImportMetaResolutions(fileName);
          this.setIdentifierRenderResolutions();
-@@ -22354,11 +22408,153 @@ class Chunk {
+@@ -22447,11 +22501,153 @@ class Chunk {
          if (isEmpty && this.getExportNames().length === 0 && dependencies.size === 0) {
              onLog(parseAst_js.LOGLEVEL_WARN, parseAst_js.logEmptyChunk(this.getChunkName()));
          }
@@ -722,7 +722,7 @@ index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb
              if (resolvedDynamicImport.chunk) {
                  const { chunk, facadeChunk, node, resolution } = resolvedDynamicImport;
                  if (chunk === this) {
-@@ -23959,6 +24155,9 @@ class Bundle {
+@@ -24056,6 +24252,9 @@ class Bundle {
                  chunk.generateExports();
                  chunk.inlineTransitiveImports();
              }
@@ -732,7 +732,7 @@ index e915e372078e25f9df5097823b76e31ee25a9ee6..d6cd73da6367b73d61fb42f1c20798eb
              timeEnd('generate chunks', 2);
              await renderChunks(chunks, outputBundle, this.pluginDriver, this.outputOptions, this.inputOptions.onLog);
          }
-@@ -25406,6 +25605,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
+@@ -25503,6 +25702,7 @@ async function normalizeOutputOptions(config, inputOptions, unsetInputOptions) {
          externalImportAttributes,
          externalLiveBindings: config.externalLiveBindings ?? true,
          file,

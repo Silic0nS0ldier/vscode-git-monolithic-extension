@@ -13,7 +13,7 @@ index 509cd938..4164dc5e 100644
  			timeEnd('generate chunks', 2);
  
 diff --git a/src/Chunk.ts b/src/Chunk.ts
-index f104171e..645b07f2 100644
+index dc1c3446..c4b80e2a 100644
 --- a/src/Chunk.ts
 +++ b/src/Chunk.ts
 @@ -4,10 +4,15 @@ import ExportDefaultDeclaration from './ast/nodes/ExportDefaultDeclaration';
@@ -62,7 +62,7 @@ index f104171e..645b07f2 100644
  			.map(
  				resolvedDynamicImport =>
  					resolvedDynamicImport.facadeChunk ||
-@@ -1363,6 +1375,9 @@ export default class Chunk {
+@@ -1416,6 +1428,9 @@ export default class Chunk {
  			importAttributesKey
  		} = outputOptions;
  		const { _, cnst, n } = snippets;
@@ -72,7 +72,7 @@ index f104171e..645b07f2 100644
  		this.setDynamicImportResolutions(fileName);
  		this.setImportMetaResolutions(fileName);
  		this.setIdentifierRenderResolutions();
-@@ -1445,12 +1460,174 @@ export default class Chunk {
+@@ -1500,12 +1515,174 @@ export default class Chunk {
  		if (isEmpty && this.getExportNames().length === 0 && dependencies.size === 0) {
  			onLog(LOGLEVEL_WARN, logEmptyChunk(this.getChunkName()));
  		}
