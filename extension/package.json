@@ -5,7 +5,7 @@
         "@vscode/diff": "0.0.2-128",
         "@vscode/extension-telemetry": "1.5.2",
         "fb-watchman": "2.0.4",
-        "ignore": "7.0.16",
+        "ignore": "7.0.17",
         "just-debounce": "1.1.0",
         "monolithic-git-interop": "workspace:^",
         "onetime": "8.0.0",
