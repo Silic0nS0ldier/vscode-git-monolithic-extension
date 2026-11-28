@@ -20,23 +20,26 @@ if (currentPin.vscodeVersion === vscodeVersion) {
 }
 
 // VS Code never depends on `electron` as a package; it builds native modules against the
-// runtime instead, so the version it ships is the node-gyp `target` declared in `.npmrc`.
-const npmrcRes = await fetch(`https://raw.githubusercontent.com/microsoft/vscode/${vscodeVersion}/.npmrc`);
-if (!npmrcRes.ok) {
-    throw new Error(`Failed to fetch VS Code ${vscodeVersion} .npmrc: ${npmrcRes.status}`);
+// runtime instead. Newer releases declare that runtime's version in `nativeBuild.target`.
+const vscodePackageRes = await fetch(
+    `https://raw.githubusercontent.com/microsoft/vscode/${vscodeVersion}/package.json`,
+);
+if (!vscodePackageRes.ok) {
+    throw new Error(`Failed to fetch VS Code ${vscodeVersion} package.json: ${vscodePackageRes.status}`);
 }
-const npmrc = await npmrcRes.text();
+const vscodePackage = await vscodePackageRes.json();
+const nativeBuild = vscodePackage.nativeBuild;
 
-// `target` only names an Electron release while `runtime` selects Electron; were VS Code to
-// switch runtimes the same key would yield a Node version, and the pin would be nonsense.
-if (!/^\s*runtime\s*=\s*"?electron"?\s*$/m.test(npmrc)) {
-    throw new Error(`microsoft/vscode@${vscodeVersion} .npmrc does not set runtime=electron`);
+if (!nativeBuild) {
+    throw new Error(`microsoft/vscode@${vscodeVersion} package.json has no nativeBuild configuration`);
 }
-const targetMatch = npmrc.match(/^\s*target\s*=\s*"?(?<version>\d+\.\d+\.\d+)"?\s*$/m);
-if (!targetMatch) {
-    throw new Error(`microsoft/vscode@${vscodeVersion} .npmrc has no target Electron version`);
+if (nativeBuild.runtime !== "electron") {
+    throw new Error(`microsoft/vscode@${vscodeVersion} nativeBuild runtime is not electron`);
 }
-const electronVersion = targetMatch.groups.version;
+if (typeof nativeBuild.target !== "string" || !/^\d+\.\d+\.\d+$/.test(nativeBuild.target)) {
+    throw new Error(`microsoft/vscode@${vscodeVersion} nativeBuild has no target Electron version`);
+}
+const electronVersion = nativeBuild.target;
 
 const shasumsRes = await fetch(
     `https://github.com/electron/electron/releases/download/v${electronVersion}/SHASUMS256.txt`,
