@@ -220,9 +220,10 @@ if (currentPatchedVersion && currentPatchedVersion !== targetVersion) {
     await fs.rm(oldPatchPath, { force: true });
 }
 
-// Ensure lockfile and local node_modules reflect the target rollup version so `pnpm patch` can
-// extract the unpatched upstream package tarball.
-run("pnpm", ["install", "--ignore-scripts"], { cwd: repoRoot });
+// Regenerate the lockfile and local node_modules for the target rollup version so `pnpm patch`
+// can extract the unpatched upstream package tarball. The old patch mapping was removed above, so
+// this install must not use pnpm's CI-default frozen-lockfile mode.
+run("pnpm", ["install", "--ignore-scripts", "--no-frozen-lockfile"], { cwd: repoRoot });
 
 const patchEditDir = path.join(os.tmpdir(), `rollup-patch-edit-${targetVersion}-${process.pid}`);
 await fs.rm(patchEditDir, { recursive: true, force: true });
