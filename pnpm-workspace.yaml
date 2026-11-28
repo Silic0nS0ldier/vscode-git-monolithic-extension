@@ -18,7 +18,7 @@ allowBuilds:
   re2: false
 
 catalog:
-  '@types/node': 26.6.6
+  '@types/node': 26.6.7
   ava: 8.4.0
   cleye: 2.7.0
   get-stream: 9.0.1
