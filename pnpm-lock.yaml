@@ -201,7 +201,7 @@ catalogs:
       version: 24.13.3
 
 overrides:
-  watcher>tiny-readdir: 3.1.1
+  watcher>tiny-readdir: 3.1.2
   tiny-readdir>promise-make-counter: '-'
   glob@>=9.0.0 <=14.0.1: 14.0.6
   minimatch@>=9.0.0 <11.0.1: 11.0.9
@@ -212,7 +212,7 @@ pnpmfileChecksum: sha256-SWd48IlSItqOlr/G4M990S2FIfxelArumdEF4aD1QAI=
 
 patchedDependencies:
   rollup@4.68.8: 2274834d52bd939806b1a7f8fe8d93ef37f4aaa73c32218ea5acea4630b40da8
-  tiny-readdir@3.1.1: 8fe5818c58dcbdddfd8de909471730072cb0d115e22b974b3fe907e8ad0eee02
+  tiny-readdir@3.1.2: f8baabecc5407824eac0b0660b8c05727a61487abb03288348fc418105621cc3
   watcher@2.3.1: aa7937374fa215a4c53d3c965a60db1da36cac88fabf716f76bb672746fc4983
 
 importers:
@@ -308,8 +308,8 @@ importers:
   extension:
     dependencies:
       '@vscode/diff':
-        specifier: 0.0.2-7
-        version: 0.0.2-7
+        specifier: 0.0.2-128
+        version: 0.0.2-128
       '@vscode/extension-telemetry':
         specifier: 1.5.2
         version: 1.5.2(tslib@2.9.1)
@@ -339,8 +339,8 @@ importers:
         specifier: catalog:vscode
         version: 24.13.3
       '@types/vscode':
-        specifier: 1.145.0
-        version: 1.145.0
+        specifier: 1.146.0
+        version: 1.146.0
       acorn:
         specifier: 8.19.0
         version: 8.19.0
@@ -1269,8 +1269,8 @@ packages:
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
 
-  '@types/vscode@1.145.0':
-    resolution: {integrity: sha512-mADZK4SF/j1n0+Qk4bH8NT1qTQGYDAsbhb5hStbzuB3hKP3mRH7xja5yUaIm7ExCh65Ff+C9XGwxcBvSlTCvkQ==}
+  '@types/vscode@1.146.0':
+    resolution: {integrity: sha512-OtU25faeM997QQsW+D07FN9cX06j+EEI4aQaPw/UO3HWlCM39N1W7fG8ewhdZKluut31KffyMsmDzJzgMu6t8Q==}
 
   '@typescript-eslint/eslint-plugin@8.74.0':
     resolution: {integrity: sha512-z3KXk1+Vm+d82ZRplOoC89ho4Rf1da5ju6sx8//92GnN532U62DGPjECXkkVqtYzIv0zoJlpO39SX2Z9tk6LVw==}
@@ -1462,8 +1462,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@vscode/diff@0.0.2-7':
-    resolution: {integrity: sha512-zGPIPeUAmQs79u7g6FTLmhlXFIocUTtuHYmCV5lRZf6vlDk7SWEOpBlYY6SsShC3TB/lm2KxXMj9tP32YOPrhg==}
+  '@vscode/diff@0.0.2-128':
+    resolution: {integrity: sha512-8Dk0Co0mU6gph7ZgthkeDCbHFuWLvMsS8RItCGL13hAGNVnd01KMCBVAYQDLhxFUh/VJ+as5arOMwtqL8YvKGA==}
 
   '@vscode/extension-telemetry@1.5.2':
     resolution: {integrity: sha512-fO4huHz5apb5RtddC8DuUeSbBqYQw1EiBaOOGngq57nGbsDgcvm0jAibTY/kigJyjY0fQ4Vx7owQcCJRUrkT4g==}
@@ -2684,8 +2684,8 @@ packages:
     resolution: {integrity: sha512-TIsDdtKo6+XrPtiTm1ssmMngN1sAhyKnTO2kunQWqNPWIVvCm15Wmw4SWInwTVgJ5u/Tr04+8Ei9TNcw4x4ONA==}
     engines: {node: '>=4'}
 
-  tiny-readdir@3.1.1:
-    resolution: {integrity: sha512-SiNW3Kp5xshlA3McA2C/tjU7K8+VJc9ZNe09foB8ut8lMY7bR9NKPo5ARHDOj24mV69/utNy8gqDjF93FcFlFg==}
+  tiny-readdir@3.1.2:
+    resolution: {integrity: sha512-apr6UA3g4tBVWTu8KyUCFiNKSyh+810KQKcCdg9ZTt2cXW5B7GLQEvKn0ld57QbpCcxN6CjmcLiOnIlt6ytFBA==}
 
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
@@ -3654,7 +3654,7 @@ snapshots:
 
   '@types/resolve@1.20.2': {}
 
-  '@types/vscode@1.145.0': {}
+  '@types/vscode@1.146.0': {}
 
   '@typescript-eslint/eslint-plugin@8.74.0(@typescript-eslint/parser@8.74.0(eslint@10.15.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0))(eslint@10.15.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)':
     dependencies:
@@ -3842,7 +3842,7 @@ snapshots:
       - rollup
       - supports-color
 
-  '@vscode/diff@0.0.2-7': {}
+  '@vscode/diff@0.0.2-128': {}
 
   '@vscode/extension-telemetry@1.5.2(tslib@2.9.1)':
     dependencies:
@@ -5111,7 +5111,7 @@ snapshots:
 
   time-zone@1.0.0: {}
 
-  tiny-readdir@3.1.1(patch_hash=8fe5818c58dcbdddfd8de909471730072cb0d115e22b974b3fe907e8ad0eee02): {}
+  tiny-readdir@3.1.2(patch_hash=f8baabecc5407824eac0b0660b8c05727a61487abb03288348fc418105621cc3): {}
 
   tinyglobby@0.2.17:
     dependencies:
@@ -5219,7 +5219,7 @@ snapshots:
     dependencies:
       dettle: 1.0.5
       stubborn-fs: 1.2.5
-      tiny-readdir: 3.1.1(patch_hash=8fe5818c58dcbdddfd8de909471730072cb0d115e22b974b3fe907e8ad0eee02)
+      tiny-readdir: 3.1.2(patch_hash=f8baabecc5407824eac0b0660b8c05727a61487abb03288348fc418105621cc3)
 
   webidl-conversions@3.0.1: {}
 

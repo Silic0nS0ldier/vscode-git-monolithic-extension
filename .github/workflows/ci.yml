@@ -43,14 +43,16 @@ jobs:
       - run: node ./.github/workflows/update_bazel_rust.mjs
       - run: node ./.github/workflows/update_multitool_wasm_bindgen.mjs
       - run: node ./.github/workflows/update_devcontainer_apt_snapshot.mjs
+      - run: node ./.github/workflows/update_pnpm_patches.mjs
       - run: node ./.github/workflows/update_rollup_patch.mjs
+      # Latter automations can affect `pnpm i` inputs, ensure `pnpm-lock.yaml` is up to date.
+      - run: pnpm install
       - run: bazel mod deps --lockfile_mode=update
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           path: ${{ runner.temp }}/mod.profile.gz
           archive: false
-      - run: pnpm install --lockfile-only
       - uses: stefanzweifel/git-auto-commit-action@v7
       - id: get_commit
         run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
